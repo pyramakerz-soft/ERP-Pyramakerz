@@ -84,7 +84,7 @@ export class AccountingStatementReportComponent implements OnInit {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.DomainName = this.ApiServ.GetHeader();
     this.loadLinkFiles();
-    this.loadAccounts();
+    // this.loadAccounts();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -102,6 +102,7 @@ export class AccountingStatementReportComponent implements OnInit {
     this.isLinkFilesLoading = true;
     this.linkFileService.Get(this.DomainName).subscribe({
       next: (linkFiles) => {
+        console.log('Loaded link files:', linkFiles);
         this.linkFileOptions = linkFiles;
         this.isLinkFilesLoading = false;
       },
@@ -112,19 +113,20 @@ export class AccountingStatementReportComponent implements OnInit {
     });
   }
 
-  loadAccounts() {
-    this.isLoading = true;
-    this.accountingTreeChartService.Get(this.DomainName).subscribe({
-      next: (accounts) => {
-        this.accounts = accounts;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading accounts:', error);
-        this.isLoading = false;
-      }
-    });
-  }
+  // loadAccounts() {
+  //   this.isLoading = true;
+  //   this.accountingTreeChartService.Get(this.DomainName).subscribe({
+  //     next: (accounts) => {
+  //       console.log('Loaded accounts:', accounts);
+  //       this.accounts = accounts;
+  //       this.isLoading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading accounts:', error);
+  //       this.isLoading = false;
+  //     }
+  //   });
+  // }
 
   onLinkFileChange() {
     this.subAccountID = 0; // Reset account selection
@@ -141,7 +143,10 @@ export class AccountingStatementReportComponent implements OnInit {
     this.isAccountsLoading = true;
     this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
       next: (accounts) => {
-        this.accountOptions = accounts;
+        this.accountOptions = accounts.map(account => ({
+          ...account,
+          name: this.isRtl && account.ar_name ? account.ar_name : (account.en_name || account.user_Name || 'Unknown')
+        }));
         this.isAccountsLoading = false;
       },
       error: (error) => {

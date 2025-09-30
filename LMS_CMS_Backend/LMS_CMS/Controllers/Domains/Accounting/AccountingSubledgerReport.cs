@@ -149,7 +149,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     FirstPeriodTotals = new { Balance = firstPeriodBalance, Total = firstPeriodTotals },
                     TransactionsPeriodTotals = new { Balance = results, Total = resultsTotals },
-                    LastPeriodTotals = new { Bakance = lastPeriodBalance, Total = lastPeriodTotals },
+                    LastPeriodTotals = new { Balance = lastPeriodBalance, Total = lastPeriodTotals },
                     Pagination = paginationMetadata
                 });
             }
@@ -266,7 +266,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     FirstPeriodTotals = new { Balance = firstPeriodBalance, Total = firstPeriodTotals },
                     TransactionsPeriodTotals = new { Balance = results, Total = resultsTotals },
-                    LastPeriodTotals = new { Bakance = lastPeriodBalance, Total = lastPeriodTotals },
+                    LastPeriodTotals = new { Balance = lastPeriodBalance, Total = lastPeriodTotals },
                     Pagination = paginationMetadata
                 });
             }
