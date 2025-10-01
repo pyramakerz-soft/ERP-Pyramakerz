@@ -184,7 +184,7 @@ export class FeesActivationReportComponent {
         filename: "Fees Activation Report.xlsx",
         tables: [
           {
-            title: "Fees Activation",
+            // title: "Fees Activation",
             headers,
             data: dataRows
           }

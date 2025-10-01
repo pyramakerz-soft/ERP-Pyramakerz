@@ -21,7 +21,7 @@ export interface AccountSubledgerResponse {
     total: PeriodTotals;
   };
   lastPeriodTotals: {
-    bakance: AccountSubledgerReport[];
+    balance: AccountSubledgerReport[];
     total: PeriodTotals;
   };
   pagination: {

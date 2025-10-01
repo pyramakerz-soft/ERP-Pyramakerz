@@ -186,11 +186,19 @@ export class StudentInformationComponent {
       });
   }
 
-  async ViewReport() {
-    await this.GetData();
-    this.showTable = true;
-    this.GetStudentById();
+async ViewReport() {
+  await this.GetData();
+  this.showTable = true;
+  this.GetStudentById(); // Keep this for the basic table if needed
+  
+  this.displayDetailedData();
+}
+
+displayDetailedData() {
+  if (this.DataToPrint && this.DataToPrint.length > 0) {
+    console.log('Detailed Data:', this.DataToPrint);
   }
+}
 
   Print() {
     this.showPDF = true;
@@ -322,40 +330,40 @@ export class StudentInformationComponent {
               data: [
                 {
                   key: 'Student Full Name',
-                  value: d.student?.en_name || 'N/A',
+                  value: d.student?.en_name || '-',
                 },
-                { key: 'Arabic Name', value: d.student?.ar_name || 'N/A' },
+                { key: 'Arabic Name', value: d.student?.ar_name || '-' },
                 {
                   key: 'Admission Date',
-                  value: d.student?.insertedAt || 'N/A',
+                  value: d.student?.insertedAt || '-',
                 },
-                { key: 'Mobile', value: d.student?.mobile || 'N/A' },
-                { key: 'Alternative Mobile', value: d.student?.phone || 'N/A' },
+                { key: 'Mobile', value: d.student?.mobile || '-' },
+                { key: 'Alternative Mobile', value: d.student?.phone || '-' },
                 {
                   key: 'Date of Birth',
-                  value: d.student?.dateOfBirth || 'N/A',
+                  value: d.student?.dateOfBirth || '-',
                 },
-                { key: 'Gender', value: d.student?.genderName || 'N/A' },
+                { key: 'Gender', value: d.student?.genderName || '-' },
                 {
                   key: 'Nationality',
-                  value: d.student?.nationalityEnName || 'N/A',
+                  value: d.student?.nationalityEnName || '-',
                 },
                 {
                   key: "Student' Passport Number",
-                  value: d.student?.passportNo || 'N/A',
+                  value: d.student?.passportNo || '-',
                 },
                 {
                   key: "Student's Id Number",
-                  value: d.student?.idNumber || 'N/A',
+                  value: d.student?.idNumber || '-',
                 },
-                { key: 'Religion', value: d.student?.religion || 'N/A' },
+                { key: 'Religion', value: d.student?.religion || '-' },
                 {
                   key: 'Place To Birth',
-                  value: d.student?.placeOfBirth || 'N/A',
+                  value: d.student?.placeOfBirth || '-',
                 },
                 {
                   key: 'Pre-School',
-                  value: d.student?.previousSchool || 'N/A',
+                  value: d.student?.previousSchool || '-',
                 },
               ],
             };
@@ -363,7 +371,7 @@ export class StudentInformationComponent {
 
             const classInfo = {
               header: 'Class Information',
-              data: [{ key: 'Class', value: d.class?.name || 'N/A' }],
+              data: [{ key: 'Class', value: d.class?.name || '-' }],
             };
             this.DataToPrint.push(classInfo);
 
@@ -372,43 +380,43 @@ export class StudentInformationComponent {
               data: [
                 {
                   key: "Guardian's Name",
-                  value: d.student?.guardianName || 'N/A',
+                  value: d.student?.guardianName || '-',
                 },
                 {
                   key: 'Relationship',
-                  value: d.student?.guardianRelation || 'N/A',
+                  value: d.student?.guardianRelation || '-',
                 },
                 {
                   key: 'Passport',
-                  value: d.student?.guardianPassportNo || 'N/A',
+                  value: d.student?.guardianPassportNo || '-',
                 },
                 {
                   key: 'Identity',
-                  value: d.student?.guardianNationalID || 'N/A',
+                  value: d.student?.guardianNationalID || '-',
                 },
                 {
                   key: 'Qualification',
-                  value: d.student?.guardianQualification || 'N/A',
+                  value: d.student?.guardianQualification || '-',
                 },
                 {
                   key: 'Profession',
-                  value: d.student?.guardianProfession || 'N/A',
+                  value: d.student?.guardianProfession || '-',
                 },
                 {
                   key: 'WorkPlace',
-                  value: d.student?.guardianWorkPlace || 'N/A',
+                  value: d.student?.guardianWorkPlace || '-',
                 },
                 {
                   key: 'E-mail Address',
-                  value: d.student?.guardianEmail || 'N/A',
+                  value: d.student?.guardianEmail || '-',
                 },
                 {
                   key: 'Identity Expiration',
-                  value: d.student?.guardianNationalIDExpiredDate || 'N/A',
+                  value: d.student?.guardianNationalIDExpiredDate || '-',
                 },
                 {
                   key: 'Passport Expiration',
-                  value: d.student?.guardianPassportExpireDate || 'N/A',
+                  value: d.student?.guardianPassportExpireDate || '-',
                 },
               ],
             };
@@ -417,38 +425,38 @@ export class StudentInformationComponent {
             const MotherInformation = {
               header: 'Mother Information',
               data: [
-                { key: "Mother's Name", value: d.student?.motherName || 'N/A' },
+                { key: "Mother's Name", value: d.student?.motherName || '-' },
                 {
                   key: 'Passport',
-                  value: d.student?.motherPassportNo || 'N/A',
+                  value: d.student?.motherPassportNo || '-',
                 },
                 {
                   key: 'Identity',
-                  value: d.student?.motherNationalID || 'N/A',
+                  value: d.student?.motherNationalID || '-',
                 },
                 {
                   key: 'Passport Expiration',
-                  value: d.student?.motherPassportExpireDate || 'N/A',
+                  value: d.student?.motherPassportExpireDate || '-',
                 },
                 {
                   key: 'Qualification',
-                  value: d.student?.motherQualification || 'N/A',
+                  value: d.student?.motherQualification || '-',
                 },
                 {
                   key: 'Profession',
-                  value: d.student?.motherProfession || 'N/A',
+                  value: d.student?.motherProfession || '-',
                 },
                 {
                   key: 'WorkPlace',
-                  value: d.student?.motherWorkPlace || 'N/A',
+                  value: d.student?.motherWorkPlace || '-',
                 },
                 {
                   key: 'E-mail Address',
-                  value: d.student?.motherEmail || 'N/A',
+                  value: d.student?.motherEmail || '-',
                 },
                 {
                   key: 'Experiences',
-                  value: d.student?.motherExperiences || 'N/A',
+                  value: d.student?.motherExperiences || '-',
                 },
               ],
             };
@@ -459,15 +467,15 @@ export class StudentInformationComponent {
               data: [
                 {
                   key: 'Name',
-                  value: d.student?.emergencyContactName || 'N/A',
+                  value: d.student?.emergencyContactName || '-',
                 },
                 {
                   key: 'RelationShip',
-                  value: d.student?.emergencyContactRelation || 'N/A',
+                  value: d.student?.emergencyContactRelation || '-',
                 },
                 {
                   key: 'Mobile',
-                  value: d.student?.emergencyContactMobile || 'N/A',
+                  value: d.student?.emergencyContactMobile || '-',
                 },
               ],
             };
@@ -475,7 +483,7 @@ export class StudentInformationComponent {
 
             const AddressInformation = {
               header: 'Address Information',
-              data: [{ key: 'Address', value: d.student?.address || 'N/A' }],
+              data: [{ key: 'Address', value: d.student?.address || '-' }],
             };
             this.DataToPrint.push(AddressInformation);
 
@@ -484,15 +492,15 @@ export class StudentInformationComponent {
               data: [
                 {
                   key: 'Pick_name',
-                  value: d.student?.pickUpContactName || 'N/A',
+                  value: d.student?.pickUpContactName || '-',
                 },
                 {
                   key: 'Pick_Relation',
-                  value: d.student?.pickUpContactRelation || 'N/A',
+                  value: d.student?.pickUpContactRelation || '-',
                 },
                 {
                   key: 'Pick_mobile',
-                  value: d.student?.pickUpContactMobile || 'N/A',
+                  value: d.student?.pickUpContactMobile || '-',
                 },
               ],
             };

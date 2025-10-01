@@ -17,6 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { ReportsService } from '../../../../../../Services/shared/reports.service';
 @Component({
   selector: 'app-store-balance-report',
   standalone: true,
@@ -66,7 +67,8 @@ export class StoreBalanceReportComponent implements OnInit {
     private categoryService: InventoryCategoryService,
     private route: ActivatedRoute,    
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+      private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -89,27 +91,45 @@ export class StoreBalanceReportComponent implements OnInit {
     }
   } 
 
-  private setPageTitle() {
-    switch (this.reportType) {
-      case 'QuantityOnly':
-        this.pageTitle = 'Store Items Balance';
-        break;
-      case 'PurchasePrice':
-        this.pageTitle = 'Purchase Price Report';
-        break;
-      case 'SalesPrice':
-        this.pageTitle = 'Sales Price Report';
-        break;
-      case 'Cost':
-        this.pageTitle = 'Cost Report';
-        break;
-      case 'ItemsUnderLimit':
-        this.pageTitle = 'Items Under Limit Report';
-        break;
-    }  
-    this.school.reportHeaderOneEn = this.pageTitle;
-    this.school.reportHeaderOneAr = this.pageTitle;
-  }
+private setPageTitle() {
+  switch (this.reportType) {
+    case 'QuantityOnly':
+      this.pageTitle = 'Store Items Balance';
+      this.school.reportHeaderOneEn = 'Store Items Balance';
+      this.school.reportHeaderTwoEn = '';
+      this.school.reportHeaderOneAr = 'تقرير أرصدة مخزون المستودع';
+      this.school.reportHeaderTwoAr = ''; 
+      break;
+    case 'PurchasePrice':
+      this.pageTitle = 'Store Items Balance with Purchase';
+      this.school.reportHeaderOneEn = 'Store Items Balance with Purchase';
+      this.school.reportHeaderTwoEn = '';
+      this.school.reportHeaderOneAr = 'تقرير أسعار الشراء';
+      this.school.reportHeaderTwoAr = '';
+      break;
+    case 'SalesPrice':
+      this.pageTitle = 'Store Items Balance with Sales';
+      this.school.reportHeaderOneEn = 'Store Items Balance with Sales';
+      this.school.reportHeaderTwoEn = '';
+      this.school.reportHeaderOneAr = 'تقرير أسعار البيع';
+      this.school.reportHeaderTwoAr = '';
+      break;
+    case 'Cost':
+      this.pageTitle = 'Store Items Balance with Average Cost';
+      this.school.reportHeaderOneEn = 'Store Items Balance with Average Cost';
+      this.school.reportHeaderTwoEn = '';
+      this.school.reportHeaderOneAr = 'تقرير التكاليف';
+      this.school.reportHeaderTwoAr = '';
+      break;
+    case 'ItemsUnderLimit':
+      this.pageTitle = 'Store Limited Items';
+      this.school.reportHeaderOneEn = 'Store Limited Items';
+      this.school.reportHeaderTwoEn = '';
+      this.school.reportHeaderOneAr = 'تقرير الأصناف تحت الحد الأدنى';
+      this.school.reportHeaderTwoAr = '';
+      break;
+  }  
+}
 
   private getReportFlagType(): number {
     switch (this.reportType) {
@@ -379,18 +399,49 @@ getBalanceFiltersInfo(): string {
     }, 500);
   }
 
-  // exportExcel() {
-  //   if (!this.reportForExport.length) {
-  //     Swal.fire('Warning', 'No data to export!', 'warning');
-  //     return;
-  //   }
-  //   const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
-  //   const dateStr = new Date().toISOString().slice(0, 10);
-  //   XLSX.writeFile(
-  //     workbook,
-  //     `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
-  //   );
-  // }
+async exportExcel() {
+  if (!this.reportForExport.length) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
+  }
+
+  await this.reportsService.generateExcelReport({
+    mainHeader: {
+      en: this.school.reportHeaderOneEn,
+      ar: this.school.reportHeaderTwoEn // Using the Arabic text from headerTwo
+    },
+    subHeaders: [
+      { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
+    ],
+    infoRows: [
+      { key: 'Report Type', value: this.pageTitle },
+      { key: 'To Date', value: this.dateTo },
+      { key: 'Store', value: this.getStoreName() },
+      { key: 'Category', value: this.getCategoryName() },
+      { key: 'Balance Filters', value: this.getBalanceFiltersInfo() }
+    ],
+    reportImage: '',
+    filename: `${this.pageTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`,
+    tables: [{
+      headers: this.getExcelHeaders(),
+      data: this.reportForExport.map(item => Object.values(item))
+    }]
+  });
+}
+
+// Helper method to get Excel headers based on report type
+private getExcelHeaders(): string[] {
+  switch (this.reportType) {
+    case 'PurchasePrice':
+      return ['Item Code', 'Item Name', 'Quantity', 'Purchase Price', 'Total Purchase'];
+    case 'SalesPrice':
+      return ['Item Code', 'Item Name', 'Quantity', 'Sales Price', 'Total Sales'];
+    case 'Cost':
+      return ['Item Code', 'Item Name', 'Quantity', 'Average Cost', 'Total Cost'];
+    case 'ItemsUnderLimit':
+      return ['Item Code', 'Item Name', 'Quantity', 'Limit'];
+    default: // QuantityOnly
+      return ['Item Code', 'Item Name', 'Quantity'];
+  }
+}
 }

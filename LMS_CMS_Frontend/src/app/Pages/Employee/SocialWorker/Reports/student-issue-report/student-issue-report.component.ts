@@ -403,7 +403,7 @@ export class StudentIssueReportComponent  implements OnInit {
         ],
         tables: [
           {
-            title: 'Student Issue Report Data',
+            // title: 'Student Issue Report Data',
             headers: ['Date', 'Student Name', 'Issue Type', 'Details'],
             data: this.reportsForExcel
           }

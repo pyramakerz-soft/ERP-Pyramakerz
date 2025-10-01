@@ -13,5 +13,7 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public long ID { get; set; }
         public int StartDay { get; set; }
         public bool FromPreviousMonth { get; set; }
+        public int OvertimeStartAfterMinutes { get; set; }
+
     }
 }

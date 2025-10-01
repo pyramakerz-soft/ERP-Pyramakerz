@@ -13,8 +13,8 @@
     <div class="flex flex-col w-[49%]">
         <label class="mb-2 primaryTxt" for="startDay"> {{ 'Start Day' | translate }}</label>
         <input id="startDay" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event,'startDay')" placeholder="{{ 'Enter User startDay' | translate }}"
-            [(ngModel)]="salaryConfiguration.startDay"
+            (input)="validateNumber($event,'startDay')" placeholder="{{ 'Enter startDay' | translate }}"
+            [(ngModel)]="salaryConfiguration.startDay" 
             (ngModelChange)="onInputValueChange({ field: 'startDay', value: $event })" />
         <span *ngIf="validationErrors['startDay']" class="text-red-500 ml-3 font-normal">{{
             validationErrors['startDay']}}</span>
@@ -28,4 +28,14 @@
             {{ 'From Previous Month' | translate }}
         </label>
     </div>
+</div>
+
+<div class="flex flex-col w-[49%]">
+        <label class="mb-2 primaryTxt" for="overtimeStartAfterMinutes"> {{ 'Overtime is only counted after this many minutes' | translate }}</label>
+        <input id="overtimeStartAfterMinutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event,'overtimeStartAfterMinutes')" placeholder="{{ 'Enter Mnutes' | translate }}"
+            [(ngModel)]="salaryConfiguration.overtimeStartAfterMinutes" 
+            (ngModelChange)="onInputValueChange({ field: 'overtimeStartAfterMinutes', value: $event })" />
+        <span *ngIf="validationErrors['overtimeStartAfterMinutes']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors['overtimeStartAfterMinutes']}}</span>
 </div>

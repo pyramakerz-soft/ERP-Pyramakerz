@@ -378,7 +378,7 @@ async exportExcel() {
       infoRows: infoRows,
       tables: [
         {
-          title: 'Maintenance Report Data',
+          // title: 'Maintenance Report Data',
           headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
           data: this.reportsForExcel
         }

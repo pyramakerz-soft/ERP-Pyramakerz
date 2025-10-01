@@ -80,46 +80,47 @@
         <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="printTable()" title="Print Report">
     </div>
 
-    <!-- Table -->
-    <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-                <tr>
-                    <th *ngFor="let header of getCurrentHeaders()"
-                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ header }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngIf="tableData.length === 0 && showTable">
-                    <td [attr.colspan]="getCurrentHeaders().length"
-                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        <div class="flex flex-col items-center justify-center py-4">
-                            <span class="mt-2 text-gray-500"> {{ 'No data available' | translate }}</span>
-                        </div>
-                    </td>
-                </tr>
+<!-- Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th *ngFor="let header of getCurrentHeaders()"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ header }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="tableData.length === 0 && showTable">
+                <td [attr.colspan]="getCurrentHeaders().length"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    <div class="flex flex-col items-center justify-center py-4">
+                        <span class="mt-2 text-gray-500"> {{ 'No data available' | translate }}</span>
+                    </div>
+                </td>
+            </tr>
 
-                <tr *ngFor="let row of tableData; let i = index" [ngClass]="{ 
+            <tr *ngFor="let row of tableData; let i = index" [ngClass]="{ 
         'bg-[#F7F7F7]': i % 2 === 1, 
         'bg-white': i % 2 !== 1
     }" class="border-t border-gray-300 text-xs md:text-sm">
-    <td *ngFor="let header of getCurrentHeaders()"
-        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-        {{ getCellValue(row, header) }}
-    </td>
-    <!-- Action column - only for medical history tabs -->
-    <td *ngIf="selectedTab === 'MH By Parent' || selectedTab === 'MH By Doctor'" 
-        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-        <button (click)="viewDetails(row.id)">
-            <i class="fa-regular fa-eye"></i>
-        </button>
-    </td>
-</tr>
-            </tbody>
-        </table>
-    </div>
+                <td *ngFor="let header of getCurrentHeaders()"
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- Use the new method to display check/X for hygiene types -->
+                    <span [innerHTML]="getCellDisplay(row, header)"></span>
+                </td>
+                <!-- Action column - only for medical history tabs -->
+                <td *ngIf="selectedTab === 'MH By Parent' || selectedTab === 'MH By Doctor'" 
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <button (click)="viewDetails(row.id)">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
     <!-- Hidden PDF container -->
     <div class="absolute -top-[9999px] -left-[9999px]">

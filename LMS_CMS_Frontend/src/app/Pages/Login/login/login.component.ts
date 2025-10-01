@@ -106,8 +106,7 @@ export class LoginComponent {
     if (this.isFormValid()) {
       this.isLoading = true
       this.accountService.Login(this.userInfo).subscribe(
-        (d: any) => {  
-          console.log(d)
+        (d: any) => {   
           localStorage.removeItem("GoToLogin");
           localStorage.setItem("GoToLogin", "false");
           localStorage.removeItem("current_token");

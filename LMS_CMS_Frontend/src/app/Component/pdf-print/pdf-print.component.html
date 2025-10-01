@@ -91,39 +91,40 @@
         </div>
     </div>
     
-    <div *ngFor="let chunk of tableChunks" 
-         class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
-         [ngClass]="{
-           'small-table-section': isSmallTable(chunk.data),
-           'large-table-section': isLargeTable(chunk.data),
-           'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
-         }">
-        <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
-            <colgroup>
-                <col *ngFor="let header of chunk.headers" 
-                     [ngStyle]="getColumnWidth(header, chunk.headers.length)">
-            </colgroup>
-            <thead>
-                <tr class="bg-gray-200 text-sm pdf-table-row">
-                    <th *ngFor="let header of chunk.headers" 
-                        class="p-2 break-words">{{ header }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngIf="chunk.data.length === 0" class="pdf-table-row">
-                    <td [attr.colspan]="chunk.headers.length" class="text-center p-4">No Data Found</td>
-                </tr>
-                <tr *ngFor="let row of chunk.data; let i = index" 
-                    [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
-                    class="pdf-table-row">
-                    <td *ngFor="let header of chunk.headers" 
-                        class="p-2 border break-words whitespace-normal align-top">
-                        {{ row[header] }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<div *ngFor="let chunk of tableChunks" 
+     class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
+     [ngClass]="{
+       'small-table-section': isSmallTable(chunk.data),
+       'large-table-section': isLargeTable(chunk.data),
+       'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
+     }">
+    <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
+        <colgroup>
+            <col *ngFor="let header of chunk.headers" 
+                 [ngStyle]="getColumnWidth(header, chunk.headers.length)">
+        </colgroup>
+        <thead>
+            <tr class="bg-gray-200 text-sm pdf-table-row">
+                <th *ngFor="let header of chunk.headers" 
+                    class="p-2 break-words">{{ header }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="chunk.data.length === 0" class="pdf-table-row">
+                <td [attr.colspan]="chunk.headers.length" class="text-center p-4">No Data Found</td>
+            </tr>
+            <tr *ngFor="let row of chunk.data; let i = index" 
+                [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
+                class="pdf-table-row">
+                <td *ngFor="let header of chunk.headers" 
+                    class="p-2 border break-words whitespace-normal align-top"
+                    [ngClass]="{'details-cell': header.toLowerCase() === 'details'}">
+                    {{ row[header] }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
     <div *ngIf="tableDataWithHeader">
         <div *ngFor="let section of tableDataWithHeader" class="mb-4">

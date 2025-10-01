@@ -208,6 +208,7 @@ export class RegistrationFormComponent {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     );
+     
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
@@ -327,14 +328,27 @@ export class RegistrationFormComponent {
     let option: number | null = null;
 
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
-      (fieldTypeId == 7 &&(fieldId == 3 ||fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
+      (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
       answer = selectedValue;
       option = null;
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
-      answer = null;
-      console.log(option)
+      answer = null; 
     }
+
+    // if (fieldId == 3 || fieldId == 5) {
+    //   option = parseInt(selectedValue);
+    //   answer = null;
+    // } else if (fieldId == 6 || fieldId == 14) {
+    //   answer = selectedValue;
+    //   option = null;
+    // } else if (fieldTypeId == 5 || fieldTypeId == 7) {
+    //   option = parseInt(selectedValue);
+    //   answer = null;
+    // } else {
+    //   answer = selectedValue;
+    //   option = null;
+    // }
 
     const existingElement =
       this.registrationForm.registerationFormSubmittions.find(
@@ -349,7 +363,7 @@ export class RegistrationFormComponent {
         existingElement.selectedFieldOptionID = option;
         existingElement.textAnswer = null;
       }
-      if (this.path == 'Edit Student') {
+      if (this.path == 'Edit Student') { 
         this.registrationFormSubmissionEdited.push({
           id: existingElement.id,
           registerationFormParentID: this.RegistrationParentID,
@@ -375,7 +389,7 @@ export class RegistrationFormComponent {
           textAnswer: answer,
         });
       }
-    }
+    } 
   }
 
   MultiOptionDataPush(
@@ -633,16 +647,35 @@ export class RegistrationFormComponent {
               }
             );
           } else if (this.mode == 'Edit') {
-            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe((s) => {
-              this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
+            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe(
+              (s) => {
+                this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Student updated successfully',
+                    confirmButtonText: 'Okay'
+                  });
+                  this.router.navigateByUrl(`Employee/Student`);
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: error.error,
+                    confirmButtonColor: '#089B41',
+                  });
+                })
+              },
+              (error) => {
+                this.isLoading = false;
                 Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Student updated successfully',
-                  confirmButtonText: 'Okay'
+                  icon: 'error',
+                  title: 'Error!',
+                  text: error.error,
+                  confirmButtonColor: '#089B41',
                 });
-                this.router.navigateByUrl(`Employee/Student`);
-              })
             })
           }
         }

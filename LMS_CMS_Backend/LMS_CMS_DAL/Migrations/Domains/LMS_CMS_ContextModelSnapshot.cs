@@ -5338,6 +5338,74 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("EmployeeClocks");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.EmployeeLoans", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("EmployeeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.Property<long>("loanId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("loanId");
+
+                    b.ToTable("EmployeeLoans");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.EmployeeLocation", b =>
                 {
                     b.Property<long>("ID")
@@ -5625,6 +5693,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("DayStatusId")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("DeductionHours")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DeductionMinutes")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -5649,12 +5723,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LateHours")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LateMinutes")
-                        .HasColumnType("int");
-
                     b.Property<int>("LeaveRequestHours")
                         .HasColumnType("int");
 
@@ -5676,8 +5744,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<double>("WorkingHours")
-                        .HasColumnType("float");
+                    b.Property<int>("WorkingHours")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkingMinutes")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -5762,6 +5833,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("FromPreviousMonth")
                         .HasColumnType("bit");
 
+                    b.Property<int>("OvertimeStartAfterMinutes")
+                        .HasColumnType("int");
+
                     b.Property<int>("StartDay")
                         .HasColumnType("int");
 
@@ -5809,9 +5883,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("int");
 
                     b.Property<decimal>("NetSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalAbsencePenalty")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalBonus")
@@ -17291,6 +17362,44 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.EmployeeLoans", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("EmployeeLoans")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.HR.Loans", "Loans")
+                        .WithMany("EmployeeLoans")
+                        .HasForeignKey("loanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("Loans");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.EmployeeLocation", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
@@ -22258,6 +22367,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("EmployeeDays");
 
+                    b.Navigation("EmployeeLoans");
+
                     b.Navigation("EmployeeLocation");
 
                     b.Navigation("EmployeeStudents");
@@ -22326,6 +22437,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.DeductionType", b =>
                 {
                     b.Navigation("Deduction");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Loans", b =>
+                {
+                    b.Navigation("EmployeeLoans");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Location", b =>

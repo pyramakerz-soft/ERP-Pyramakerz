@@ -287,7 +287,7 @@ export class EmployeeJobReportComponent  implements OnInit {
         ],
         tables: [
           {
-            title: 'Job Report Data',
+            // title: 'Job Report Data',
             headers: ['ID', 'Employee Name'],
             data: this.reportsForExcel
           }

@@ -118,7 +118,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("There is no grades in this school");
 
             List<long> gradesIds = Grades.Select(g => g.ID).ToList();
-            List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(c => gradesIds.Contains(c.GradeID) && c.AcademicYearID == academicYear.ID);
+            List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(c => gradesIds.Contains(c.GradeID) && c.AcademicYearID == academicYear.ID && c.IsDeleted != true);
 
             // Determine valid days based on start/end
             List<Days> allDays = Unit_Of_Work.days_Repository.Select_All().OrderBy(d => d.ID).ToList();

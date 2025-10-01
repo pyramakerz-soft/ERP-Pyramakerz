@@ -96,6 +96,38 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(classroomsDTO);
         }
+        
+        [HttpGet("GetByLessonID/{lessonID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
+            pages: new[] { "Classroom" }
+        )]
+        public async Task<IActionResult> GetByLessonIDAsync(long lessonID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Lesson lesson = await Unit_Of_Work.lesson_Repository.FindByIncludesAsync(
+                t => t.IsDeleted != true && t.ID == lessonID,
+                query => query.Include(d => d.SemesterWorkingWeek).ThenInclude(dd => dd.Semester)
+                );
+            if(lesson == null)
+            {
+                return NotFound("No Lesson with this ID");
+            }
+
+            List<Classroom> classrooms = Unit_Of_Work.classroom_Repository.FindBy(
+                    f => f.IsDeleted != true && f.AcademicYearID == lesson.SemesterWorkingWeek.Semester.AcademicYearID
+                    );
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+
+            return Ok(classroomsDTO);
+        }
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
@@ -271,7 +303,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId,
+                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId && f.Grade.IsDeleted != true && f.AcademicYear.IsDeleted != true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),

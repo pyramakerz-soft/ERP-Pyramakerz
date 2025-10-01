@@ -566,7 +566,7 @@ export class AccountingEntriesDetailsComponent {
       filename: "Accounting_Entries_Report.xlsx",
       tables: [
         {
-          title: "Accounting Entries Details",
+          // title: "Accounting Entries Details",
           headers: ['id', 'debitAmount', 'creditAmount', 'accountingTreeChartName', 'subAccountingName', 'note'],
           data: this.accountingEntriesDetailsData.map((row) => [
             row.id || 0,

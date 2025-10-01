@@ -140,6 +140,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
             Dto.Used = allHours + (allMinutes / 60.0m);
 
+            Dto.Remains = (decimal)(Dto.MonthlyLeaveRequestBalance - Dto.Used);
+
             return Ok(Dto);
         }
 

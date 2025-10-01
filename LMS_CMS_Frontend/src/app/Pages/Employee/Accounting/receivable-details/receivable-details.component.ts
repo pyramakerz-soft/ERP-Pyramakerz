@@ -585,7 +585,7 @@ export class ReceivableDetailsComponent {
       filename: "Receivable_Report.xlsx",
       tables: [
         {
-          title: "Receivable Details",
+          // title: "Receivable Details",
           headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
           data: this.receivableDetailsData.map((row) => [
             row.id || 0,

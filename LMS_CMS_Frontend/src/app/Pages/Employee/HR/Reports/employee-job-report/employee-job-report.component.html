@@ -91,7 +91,10 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Job Report'"
-            [infoRows]="getInfoRows()"
+            [infoRows]="[
+      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
+      { keyEn: 'Job: ' + this.getJobName() }
+    ]"
             [tableHeaders]="['ID', 'Employee']"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>

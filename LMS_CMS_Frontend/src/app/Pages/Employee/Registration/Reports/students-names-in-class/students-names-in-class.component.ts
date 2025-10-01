@@ -281,7 +281,7 @@ export class StudentsNamesInClassComponent {
         { key: 'Class', value: this.class.name },
         { key: 'Number of Students', value: this.studentsCount },
         { key: 'Date', value: this.date },
-        { key: 'Session', value: '2024/2025' },
+        // { key: 'Session', value: '2024/2025' },
         { key: 'School', value: this.school.name },
         { key: 'Year', value: this.AcademicYearName },
         { key: 'Grade', value: this.GradeName }
@@ -291,8 +291,8 @@ export class StudentsNamesInClassComponent {
       filename: "List of students' names in class.xlsx",
       tables: [
         {
-          title: "Students List",
-          headers: ['id', 'en_name', 'mobile', 'nationalityName', 'genderName'],
+          // title: "Students List",
+          headers: ['id', 'en_name', 'mobile', 'nationality', 'genderName'],
           data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
         }
       ]

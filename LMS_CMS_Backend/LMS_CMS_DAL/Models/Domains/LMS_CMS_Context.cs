@@ -268,6 +268,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<DayStatus> DayStatus { get; set; }
         public DbSet<MonthlyAttendance> MonthlyAttendance { get; set; }
         public DbSet<SalaryHistory> SalaryHistory { get; set; }
+        public DbSet<EmployeeLoans> EmployeeLoans { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -2403,6 +2404,19 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(m => m.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Loans)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.loanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -2593,6 +2607,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SalaryHistory>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

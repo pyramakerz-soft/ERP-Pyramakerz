@@ -29,6 +29,8 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         [ForeignKey("Safe")]
         public long SafeID { get; set; }
         public Save Save { get; set; }
+        public ICollection<EmployeeLoans> EmployeeLoans { get; set; } = new HashSet<EmployeeLoans>();
+
 
     }
 }
