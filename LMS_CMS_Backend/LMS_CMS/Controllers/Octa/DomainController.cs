@@ -23,8 +23,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using MimeKit;
-using System.Linq;
-using LMS_CMS_PL.Services.DomainSetUp;
+using System.Linq; 
 
 namespace LMS_CMS_PL.Controllers.Octa
 {

@@ -605,6 +605,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
                  query => query.IsDeleted != true && query.ID == stuId,
                  query => query.Include(stu => stu.Gender),
+                 query => query.Include(stu => stu.RegistrationFormParent),
                  query => query.Include(stu => stu.Parent));
 
             if (student == null)
