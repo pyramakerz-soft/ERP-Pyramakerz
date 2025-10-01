@@ -46,8 +46,7 @@ using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using LMS_CMS_PL.Services.FileValidations;
-using Microsoft.AspNetCore.HttpOverrides;
-using LMS_CMS_PL.Services.DomainSetUp;
+using Microsoft.AspNetCore.HttpOverrides; 
 
 namespace LMS_CMS
 {
