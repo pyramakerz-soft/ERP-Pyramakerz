@@ -84,8 +84,8 @@ export class StudentInformationComponent {
     this.DomainName = this.ApiServ.GetHeader();
   this.activeRoute.url.subscribe((url) => {
     this.path = url[0].path;
-    this.showTable = false; // Hide table initially
-    this.showViewReportBtn = false; // Disable view report initially
+    this.showTable = false;
+    this.showViewReportBtn = false;
   });
     this.direction = document.dir || 'ltr';
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -189,8 +189,7 @@ export class StudentInformationComponent {
 async ViewReport() {
   await this.GetData();
   this.showTable = true;
-  this.GetStudentById(); // Keep this for the basic table if needed
-  
+  this.GetStudentById();
   this.displayDetailedData();
 }
 
@@ -272,247 +271,276 @@ displayDetailedData() {
     });
   }
 
-  async DownloadAsExcel() {
-    // Transform DataToPrint into Excel tables
-    const tables = this.DataToPrint.map(
-      (section: { header: any; data: any[] }) => ({
-        title: section.header,
-        headers: ['Field', 'Value'],
-        data: section.data.map((item: { key: any; value: any }) => [
-          item.key,
-          item.value,
-        ]),
-      })
-    );
+async DownloadAsExcel() {
+  // Helper function to format dates for Excel
+  const formatDateForExcel = (dateString: string): string => {
+    if (!dateString || dateString === '-') return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
+    } catch {
+      return dateString;
+    }
+  };
 
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: this.school.reportHeaderOneEn,
-        ar: this.school.reportHeaderOneAr,
+  // Transform DataToPrint into Excel tables with formatted dates
+  const tables = this.DataToPrint.map(
+    (section: { header: any; data: any[] }) => ({
+      title: section.header,
+      headers: ['Field', 'Value'],
+      data: section.data.map((item: { key: any; value: any }) => [
+        item.key,
+        // Format date values
+        (item.key.includes('Date') || item.key.includes('Expiration')) 
+          ? formatDateForExcel(item.value) 
+          : item.value,
+      ]),
+    })
+  );
+
+  await this.reportsService.generateExcelReport({
+    mainHeader: {
+      en: this.school.reportHeaderOneEn,
+      ar: this.school.reportHeaderOneAr,
+    },
+    subHeaders: [
+      {
+        en: this.school.reportHeaderTwoEn,
+        ar: this.school.reportHeaderTwoAr,
       },
-      subHeaders: [
-        {
-          en: this.school.reportHeaderTwoEn,
-          ar: this.school.reportHeaderTwoAr,
+    ],
+    infoRows: [
+      { key: 'Date', value: this.CurrentDate },
+      { key: 'Student', value: this.SelectedStudent.user_Name },
+      { key: 'School', value: this.school.name },
+    ],
+    reportImage: this.school.reportImage,
+    filename: 'Student Information Report.xlsx',
+    tables: tables,
+  });
+}
+
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.studentServ
+      .GetByYear(
+        this.SelectedYearId,
+        this.SelectedStudentId,
+        this.SelectedSchoolId,
+        this.DomainName
+      )
+      .subscribe({
+        next: (d) => {
+          this.DataToPrint = []; // Clear existing data
+          this.school = d.school;
+          this.CurrentDate = d.date;
+          this.CurrentDate = this.formatDate(
+            this.CurrentDate,
+            this.direction
+          );
+          
+          // Helper function to format dates
+          const formatDateString = (dateString: string): string => {
+            if (!dateString || dateString === '-') return '-';
+            try {
+              const date = new Date(dateString);
+return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+              // For other formats, you can use:
+              // return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+              // return date.toISOString().split('T')[0]; // YYYY-MM-DD
+            } catch {
+              return dateString;
+            }
+          };
+
+          const generalInfo = {
+            header: 'General Information',
+            data: [
+              {
+                key: 'Student Full Name',
+                value: d.student?.en_name || '-',
+              },
+              { key: 'Arabic Name', value: d.student?.ar_name || '-' },
+              {
+                key: 'Admission Date',
+                value: formatDateString(d.student?.insertedAt) || '-',
+              },
+              { key: 'Mobile', value: d.student?.mobile || '-' },
+              { key: 'Alternative Mobile', value: d.student?.phone || '-' },
+              {
+                key: 'Date of Birth',
+                value: formatDateString(d.student?.dateOfBirth) || '-',
+              },
+              { key: 'Gender', value: d.student?.genderName || '-' },
+              {
+                key: 'Nationality',
+                value: d.student?.nationalityEnName || '-',
+              },
+              {
+                key: "Student' Passport Number",
+                value: d.student?.passportNo || '-',
+              },
+              {
+                key: "Student's Id Number",
+                value: d.student?.idNumber || '-',
+              },
+              { key: 'Religion', value: d.student?.religion || '-' },
+              {
+                key: 'Place To Birth',
+                value: d.student?.placeOfBirth || '-',
+              },
+              {
+                key: 'Pre-School',
+                value: d.student?.previousSchool || '-',
+              },
+            ],
+          };
+          this.DataToPrint.push(generalInfo);
+
+          const classInfo = {
+            header: 'Class Information',
+            data: [{ key: 'Class', value: d.class?.name || '-' }],
+          };
+          this.DataToPrint.push(classInfo);
+
+          const GuardianInformation = {
+            header: 'Guardian Information',
+            data: [
+              {
+                key: "Guardian's Name",
+                value: d.student?.guardianName || '-',
+              },
+              {
+                key: 'Relationship',
+                value: d.student?.guardianRelation || '-',
+              },
+              {
+                key: 'Passport',
+                value: d.student?.guardianPassportNo || '-',
+              },
+              {
+                key: 'Identity',
+                value: d.student?.guardianNationalID || '-',
+              },
+              {
+                key: 'Qualification',
+                value: d.student?.guardianQualification || '-',
+              },
+              {
+                key: 'Profession',
+                value: d.student?.guardianProfession || '-',
+              },
+              {
+                key: 'WorkPlace',
+                value: d.student?.guardianWorkPlace || '-',
+              },
+              {
+                key: 'E-mail Address',
+                value: d.student?.guardianEmail || '-',
+              },
+              {
+                key: 'Identity Expiration',
+                value: formatDateString(d.student?.guardianNationalIDExpiredDate) || '-',
+              },
+              {
+                key: 'Passport Expiration',
+                value: formatDateString(d.student?.guardianPassportExpireDate) || '-',
+              },
+            ],
+          };
+          this.DataToPrint.push(GuardianInformation);
+
+          const MotherInformation = {
+            header: 'Mother Information',
+            data: [
+              { key: "Mother's Name", value: d.student?.motherName || '-' },
+              {
+                key: 'Passport',
+                value: d.student?.motherPassportNo || '-',
+              },
+              {
+                key: 'Identity',
+                value: d.student?.motherNationalID || '-',
+              },
+              {
+                key: 'Passport Expiration',
+                value: formatDateString(d.student?.motherPassportExpireDate) || '-',
+              },
+              {
+                key: 'Qualification',
+                value: d.student?.motherQualification || '-',
+              },
+              {
+                key: 'Profession',
+                value: d.student?.motherProfession || '-',
+              },
+              {
+                key: 'WorkPlace',
+                value: d.student?.motherWorkPlace || '-',
+              },
+              {
+                key: 'E-mail Address',
+                value: d.student?.motherEmail || '-',
+              },
+              {
+                key: 'Experiences',
+                value: d.student?.motherExperiences || '-',
+              },
+            ],
+          };
+          this.DataToPrint.push(MotherInformation);
+
+          const EmergencyContactPerson = {
+            header: 'Emergency Contact Person',
+            data: [
+              {
+                key: 'Name',
+                value: d.student?.emergencyContactName || '-',
+              },
+              {
+                key: 'RelationShip',
+                value: d.student?.emergencyContactRelation || '-',
+              },
+              {
+                key: 'Mobile',
+                value: d.student?.emergencyContactMobile || '-',
+              },
+            ],
+          };
+          this.DataToPrint.push(EmergencyContactPerson);
+
+          const AddressInformation = {
+            header: 'Address Information',
+            data: [{ key: 'Address', value: d.student?.address || '-' }],
+          };
+          this.DataToPrint.push(AddressInformation);
+
+          const PersonResponsibleToPickUpAndReceiveTheStudent = {
+            header: 'Person Responsible To Pick Up And Receive The Student',
+            data: [
+              {
+                key: 'Pick_name',
+                value: d.student?.pickUpContactName || '-',
+              },
+              {
+                key: 'Pick_Relation',
+                value: d.student?.pickUpContactRelation || '-',
+              },
+              {
+                key: 'Pick_mobile',
+                value: d.student?.pickUpContactMobile || '-',
+              },
+            ],
+          };
+          this.DataToPrint.push(
+            PersonResponsibleToPickUpAndReceiveTheStudent
+          );
+          resolve();
         },
-      ],
-      infoRows: [
-        { key: 'Date', value: this.CurrentDate },
-        { key: 'Student', value: this.SelectedStudent.user_Name },
-        { key: 'School', value: this.school.name },
-      ],
-      reportImage: this.school.reportImage,
-      filename: 'Student Information Report.xlsx',
-      tables: tables, // ✅ dynamic table sections from your actual data
-    });
-  }
-
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ
-        .GetByYear(
-          this.SelectedYearId,
-          this.SelectedStudentId,
-          this.SelectedSchoolId,
-          this.DomainName
-        )
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = []; // Clear existing data
-            this.school = d.school;
-            this.CurrentDate = d.date;
-            this.CurrentDate = this.formatDate(
-              this.CurrentDate,
-              this.direction
-            );
-            const generalInfo = {
-              header: 'General Information',
-              data: [
-                {
-                  key: 'Student Full Name',
-                  value: d.student?.en_name || '-',
-                },
-                { key: 'Arabic Name', value: d.student?.ar_name || '-' },
-                {
-                  key: 'Admission Date',
-                  value: d.student?.insertedAt || '-',
-                },
-                { key: 'Mobile', value: d.student?.mobile || '-' },
-                { key: 'Alternative Mobile', value: d.student?.phone || '-' },
-                {
-                  key: 'Date of Birth',
-                  value: d.student?.dateOfBirth || '-',
-                },
-                { key: 'Gender', value: d.student?.genderName || '-' },
-                {
-                  key: 'Nationality',
-                  value: d.student?.nationalityEnName || '-',
-                },
-                {
-                  key: "Student' Passport Number",
-                  value: d.student?.passportNo || '-',
-                },
-                {
-                  key: "Student's Id Number",
-                  value: d.student?.idNumber || '-',
-                },
-                { key: 'Religion', value: d.student?.religion || '-' },
-                {
-                  key: 'Place To Birth',
-                  value: d.student?.placeOfBirth || '-',
-                },
-                {
-                  key: 'Pre-School',
-                  value: d.student?.previousSchool || '-',
-                },
-              ],
-            };
-            this.DataToPrint.push(generalInfo);
-
-            const classInfo = {
-              header: 'Class Information',
-              data: [{ key: 'Class', value: d.class?.name || '-' }],
-            };
-            this.DataToPrint.push(classInfo);
-
-            const GuardianInformation = {
-              header: 'Guardian Information',
-              data: [
-                {
-                  key: "Guardian's Name",
-                  value: d.student?.guardianName || '-',
-                },
-                {
-                  key: 'Relationship',
-                  value: d.student?.guardianRelation || '-',
-                },
-                {
-                  key: 'Passport',
-                  value: d.student?.guardianPassportNo || '-',
-                },
-                {
-                  key: 'Identity',
-                  value: d.student?.guardianNationalID || '-',
-                },
-                {
-                  key: 'Qualification',
-                  value: d.student?.guardianQualification || '-',
-                },
-                {
-                  key: 'Profession',
-                  value: d.student?.guardianProfession || '-',
-                },
-                {
-                  key: 'WorkPlace',
-                  value: d.student?.guardianWorkPlace || '-',
-                },
-                {
-                  key: 'E-mail Address',
-                  value: d.student?.guardianEmail || '-',
-                },
-                {
-                  key: 'Identity Expiration',
-                  value: d.student?.guardianNationalIDExpiredDate || '-',
-                },
-                {
-                  key: 'Passport Expiration',
-                  value: d.student?.guardianPassportExpireDate || '-',
-                },
-              ],
-            };
-            this.DataToPrint.push(GuardianInformation);
-
-            const MotherInformation = {
-              header: 'Mother Information',
-              data: [
-                { key: "Mother's Name", value: d.student?.motherName || '-' },
-                {
-                  key: 'Passport',
-                  value: d.student?.motherPassportNo || '-',
-                },
-                {
-                  key: 'Identity',
-                  value: d.student?.motherNationalID || '-',
-                },
-                {
-                  key: 'Passport Expiration',
-                  value: d.student?.motherPassportExpireDate || '-',
-                },
-                {
-                  key: 'Qualification',
-                  value: d.student?.motherQualification || '-',
-                },
-                {
-                  key: 'Profession',
-                  value: d.student?.motherProfession || '-',
-                },
-                {
-                  key: 'WorkPlace',
-                  value: d.student?.motherWorkPlace || '-',
-                },
-                {
-                  key: 'E-mail Address',
-                  value: d.student?.motherEmail || '-',
-                },
-                {
-                  key: 'Experiences',
-                  value: d.student?.motherExperiences || '-',
-                },
-              ],
-            };
-            this.DataToPrint.push(MotherInformation);
-
-            const EmergencyContactPerson = {
-              header: 'Emergency Contact Person',
-              data: [
-                {
-                  key: 'Name',
-                  value: d.student?.emergencyContactName || '-',
-                },
-                {
-                  key: 'RelationShip',
-                  value: d.student?.emergencyContactRelation || '-',
-                },
-                {
-                  key: 'Mobile',
-                  value: d.student?.emergencyContactMobile || '-',
-                },
-              ],
-            };
-            this.DataToPrint.push(EmergencyContactPerson);
-
-            const AddressInformation = {
-              header: 'Address Information',
-              data: [{ key: 'Address', value: d.student?.address || '-' }],
-            };
-            this.DataToPrint.push(AddressInformation);
-
-            const PersonResponsibleToPickUpAndReceiveTheStudent = {
-              header: 'Person Responsible To Pick Up And Receive The Student',
-              data: [
-                {
-                  key: 'Pick_name',
-                  value: d.student?.pickUpContactName || '-',
-                },
-                {
-                  key: 'Pick_Relation',
-                  value: d.student?.pickUpContactRelation || '-',
-                },
-                {
-                  key: 'Pick_mobile',
-                  value: d.student?.pickUpContactMobile || '-',
-                },
-              ],
-            };
-            this.DataToPrint.push(
-              PersonResponsibleToPickUpAndReceiveTheStudent
-            );
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          },
-        });
-    });
-  }
+        error: (err) => {
+          reject(err);
+        },
+      });
+  });
+}
 }

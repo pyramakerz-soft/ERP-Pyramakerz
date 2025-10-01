@@ -29,13 +29,49 @@ export class DomainService {
     return this.http.get<Domain>(`${this.baseUrl}/Domain/${id}`, { headers })
   }
 
-  Add(domain:Domain){
+  // Add(domain:Domain){
+  //   const token = localStorage.getItem("current_token");
+  //   const headers = new HttpHeaders()
+  //   .set('Authorization', `Bearer ${token}`)
+  //   .set('Content-Type', 'application/json');
+ 
+  //   return this.http.post(`${this.baseUrl}/Domain`, domain, { headers })
+  // }
+
+  CreateDomainDB(domainName:string){
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  
+    return this.http.post(`${this.baseUrl}/Domain/CreateDomainDB?domainName=${domainName}`, domainName, { headers })
+  }
+
+  RunDomainMigrations(domainName:string){
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
  
-    return this.http.post(`${this.baseUrl}/Domain`, domain, { headers })
+    return this.http.post(`${this.baseUrl}/Domain/RunDomainMigrations?domainName=${domainName}`, domainName, { headers })
+  }
+
+  SetupDomainData(domain:Domain){
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+ 
+    return this.http.post(`${this.baseUrl}/Domain/SetupDomainData`, domain, { headers })
+  }
+
+  AWSServerCreation(domainName:string){
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+ 
+    return this.http.post(`${this.baseUrl}/Domain/AWSServerCreation?domainName=${domainName}`, domainName, { headers })
   }
 
   Edit(domain:Domain){

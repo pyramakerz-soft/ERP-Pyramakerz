@@ -43,7 +43,7 @@ export class ViolationReportComponent {
 
   empTypes: EmployeeTypeGet[] = [];
   violationTypes: ViolationType[] = [];
-  tableDataForExport: any[] = []; // Added for PDF export 
+  tableDataForExport: any[] = []; 
            
   school = {
     reportHeaderOneEn: 'Violation Report',

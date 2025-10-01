@@ -52,7 +52,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? StoreToTransformName { get; set; }
         public string? StoreName { get; set; }
         public string? StudentName { get; set; }
-        public string? SupplierName { get; set; }
+        public string? SupplierName { get; set; }  //7
         public string? SaveName { get; set; }
         public string? BankName { get; set; }
         public long? InsertedByUserId { get; set; }

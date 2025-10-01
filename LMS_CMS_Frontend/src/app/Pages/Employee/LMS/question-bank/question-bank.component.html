@@ -12,10 +12,10 @@
 
   <div class="flex justify-start items-center gap-4">
     <div class="w-[49%]">
-      <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+      <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{'School' | translate}}</label>
       <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
         [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-        <option value=0 disabled selected hidden>Select a School</option>
+        <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
         <option *ngFor="let stu of schools" [value]="stu.id">
           {{ stu.name }}
         </option>
@@ -24,10 +24,10 @@
     </div>
 
     <div class="w-[49%]">
-      <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
+      <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">{{'Grade' | translate}}</label>
       <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
         [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
-        <option value=0 disabled selected hidden>Select a grade</option>
+        <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
         <option *ngFor="let ac of Grades" [value]="ac.id">
           {{ ac.name }}
         </option>
@@ -36,10 +36,10 @@
     </div>
 
     <div class="w-[49%]">
-      <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
+      <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">{{'Subjects' | translate}}</label>
       <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
         [(ngModel)]="SelectedSubjectId" [disabled]="!SelectedGradeId" (change)="SubjectChanged();">
-        <option value=0 disabled selected hidden>Select a subject</option>
+        <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
         <option *ngFor="let ac of subjects" [value]="ac.id">
           {{ ac.en_name }}
         </option>
@@ -50,8 +50,7 @@
     <div class="mt-7 ml-2">
       <button class="p-3 font-medium text-xl rounded-lg"
         [disabled]="!SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId " (click)="viewTable()"
-        [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId , 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && SelectedSubjectId  }">View
-      </button>
+        [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId , 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && SelectedSubjectId  }">{{'View' | translate}}</button>
     </div>
   </div>
 
