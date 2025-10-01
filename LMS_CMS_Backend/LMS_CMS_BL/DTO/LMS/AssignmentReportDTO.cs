@@ -15,5 +15,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public int AttendanceNumber { get; set; }
         public int NumberSuccessful { get; set; }
         public int NumberFailed { get; set; }
+        public int Assigned { get; set; } 
+        public int Absent { get; set; }  
     }
 }

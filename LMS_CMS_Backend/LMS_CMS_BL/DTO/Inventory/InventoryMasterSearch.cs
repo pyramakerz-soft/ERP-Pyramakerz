@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Inventory
 {
-    public class InventoryMasterSearch  //-77
+    public class InventoryMasterSearch  
     {
         public long? StoredId { get; set; }
         public DateOnly DateFrom { get; set; }
