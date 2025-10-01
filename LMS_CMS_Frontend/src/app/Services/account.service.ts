@@ -68,15 +68,17 @@ export class AccountService {
       if(User_Data_After_Login.type == 'employee'){
         if(isFromLogin){
           this.employeeService.GetMyData(this.header, { forceRefresh: true }).subscribe(data => { 
-            if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){ 
-              this.logOutService.logOut()  
+            if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){  
+              this.logOutService.logOut() 
+              this.router.navigateByUrl(""); 
             } 
           });
         }else{
           this.employeeService.GetMyData(this.header).subscribe(
             data => {  
-              if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){ 
-                this.logOutService.logOut()  
+              if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){  
+                this.logOutService.logOut() 
+                this.router.navigateByUrl(""); 
               } 
             }
           )
@@ -86,6 +88,7 @@ export class AccountService {
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut() 
+              this.router.navigateByUrl("");
             } 
           }
         )
@@ -93,7 +96,8 @@ export class AccountService {
         this.studentService.GetByID(User_Data_After_Login.id, this.header).subscribe(
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
-              this.logOutService.logOut() 
+              this.logOutService.logOut()
+              this.router.navigateByUrl(""); 
             } 
           }
         )
@@ -102,6 +106,7 @@ export class AccountService {
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut() 
+              this.router.navigateByUrl("");
             } 
           }
         )

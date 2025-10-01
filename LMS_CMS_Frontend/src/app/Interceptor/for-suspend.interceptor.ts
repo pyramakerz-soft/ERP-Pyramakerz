@@ -11,7 +11,7 @@ export const forSuspendInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError(err => {
-      if (err.status === 403 && err.error === 'User is suspended.') { 
+      if (err.status === 403 && err.error === 'User is suspended.') {  
         authService.logOut();
         router.navigateByUrl('') 
         Swal.fire({

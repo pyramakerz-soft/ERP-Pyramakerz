@@ -388,36 +388,7 @@ namespace LMS_CMS_PL.Controllers.Octa
         //[HttpPost]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa" }
-        //)]
-        //public async Task<IActionResult> AddDomain([FromBody] DomainAdd_DTO domain, [FromServices] DomainSetupService domainSetupService)
-        //{
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //    if (!long.TryParse(userIdClaim, out long userId))
-        //        return Unauthorized("User Id claim not found.");
-
-        //    if (string.IsNullOrWhiteSpace(domain.Name))
-        //        return BadRequest("Invalid domain name.");
-
-        //    var domainNameRegex = @"^[a-zA-Z_]+$";
-        //    if (!Regex.IsMatch(domain.Name, domainNameRegex))
-        //        return BadRequest("Domain name can only contain letters and underscores.");
-
-        //    var existingDomain = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domain.Name);
-        //    if (existingDomain != null)
-        //        return Conflict("Domain already exists.");
-
-        //    var result = await domainSetupService.RunDomainSetupAsync(domain, userId);
-
-        //    return Ok(new
-        //    {
-        //        message = "Domain and database setup successfully.",
-        //        userName = result.AdminUserName,
-        //        password = result.AdminPasswordPlain,
-        //        link = result.DomainLink,
-        //        notFoundPages = result.NotFoundPages,
-        //        notModulePages = result.NotModulePages
-        //    });
-        //}
+        //)] 
         //public async Task<IActionResult> AddDomain([FromBody] DomainAdd_DTO domain)
         //{
         //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
