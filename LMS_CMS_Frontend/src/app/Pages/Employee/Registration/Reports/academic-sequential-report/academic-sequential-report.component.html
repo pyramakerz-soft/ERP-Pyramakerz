@@ -11,6 +11,8 @@
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
         </select>
     </div>
     <div class="w-[49%]">
@@ -20,8 +22,10 @@
                 [(ngModel)]="SelectedStudentId"  [disabled]="!SelectedSchoolId">
                 <option value="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
                 <option *ngFor="let ac of filteredStudents" [value]="ac.id">
-                    {{ ac.user_Name }}
+                    {{ ac.en_name }}
                 </option>
+                <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
