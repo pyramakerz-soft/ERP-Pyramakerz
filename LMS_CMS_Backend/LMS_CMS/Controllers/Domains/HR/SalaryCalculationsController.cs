@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" } 
         )]
-        public async Task<IActionResult> AddAllMonthlyAttendence(int month , int year)
+        public async Task<IActionResult> AddAllMonthlyAttendence(int month , int year , long employeeId =0)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -75,10 +75,22 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
             }
 
-
             // Get all employee 
-            List<Employee> Allemployees = Unit_Of_Work.employee_Repository
-                .FindBy(e => e.IsDeleted != true);
+            List<Employee> Allemployees = new List<Employee>();
+
+            if (employeeId > 0)
+            {
+                var employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == employeeId && e.IsDeleted != true);
+                if (employee == null)
+                {
+                    return NotFound($"Employee with ID {employeeId} not found.");
+                }
+                Allemployees = new List<Employee> { employee };
+            }
+            else
+            {
+                Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true);
+            }
 
             // Validate each employee’s times
             foreach (var employee in Allemployees)
@@ -105,6 +117,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 if (AllSalaryHistory != null && AllSalaryHistory.Count > 0)
                 {
                     Unit_Of_Work.salaryHistory_Repository.DeleteListAsync(AllSalaryHistory);
+                    Unit_Of_Work.SaveChanges();
+
+                }
+
+                List<EmployeeLoans> AllEmployeeLoans = Unit_Of_Work.employeeLoans_Repository.FindBy(m => m.Month == month && m.Year == year && m.EmployeeId == employee.ID);
+                if (AllEmployeeLoans != null && AllEmployeeLoans.Count > 0)
+                {
+                    Unit_Of_Work.employeeLoans_Repository.DeleteListAsync(AllEmployeeLoans);
                     Unit_Of_Work.SaveChanges();
 
                 }
@@ -360,9 +380,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                             if (actualStart > allowedStart)
                                             {
                                                 // Employee came late
+
+
                                                 lateTime = actualStart - attendanceTime;
-                                                monthlyAttendance.DeductionHours = lateTime.Hours;
-                                                monthlyAttendance.DeductionMinutes = lateTime.Minutes;
+                                                if(lateTime.Hours==0 && lateTime.Minutes > 0)
+                                                {
+                                                    monthlyAttendance.DeductionHours = 1;
+                                                    monthlyAttendance.DeductionMinutes = 0;
+                                                }
+                                                else
+                                                {
+                                                    monthlyAttendance.DeductionHours = lateTime.Hours;
+                                                    monthlyAttendance.DeductionMinutes = lateTime.Minutes;
+                                                }
                                             }
                                             else if (actualStart < allowedStart && actualStart > attendanceTime)
                                             {
@@ -440,13 +470,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
             }
 
-            GenerateSalaryHistory(month, year);
+            GenerateSalaryHistory(month, year , Allemployees);
             return Ok();
         }
 
 
         ////////////////////////////////
-        private void GenerateSalaryHistory(int month, int year)
+        private void GenerateSalaryHistory(int month, int year , List<Employee> employees)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -475,9 +505,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
             }
 
-
-            // Get all employee 
-            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true );
 
             foreach (var employee in employees)
             {
@@ -582,5 +609,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
         }
 
+        ////////////////////////////////
     }
 }

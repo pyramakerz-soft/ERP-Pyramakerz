@@ -1516,6 +1516,15 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save.Name))
                 .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
+
+            CreateMap<SalaryHistory, SalaryHistoryGetDTO>()
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
+
+            CreateMap<MonthlyAttendance, MonthlyAttendanceGetDTO>()
+                .ForMember(dest => dest.DayStatusName, opt => opt.MapFrom(src => src.DayStatus.Name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
         }
     } 
 }
