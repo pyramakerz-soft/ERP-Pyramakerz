@@ -54,6 +54,8 @@
                         <option *ngFor="let item of maintenanceItems" [ngValue]="item.id">
                             {{ item.en_Name || item.ar_Name }}
                         </option>
+                        <option *ngIf="maintenanceItems.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+
                     </select>
                     <span *ngIf="validationErrors['itemID']" class="text-red-500 ml-3 font-normal">
                         {{ validationErrors['itemID'] }}
@@ -88,6 +90,8 @@
                         <option *ngFor="let company of maintenanceCompanies" [ngValue]="company.id">
                             {{ company.en_Name || company.ar_Name }}
                         </option>
+                        <option *ngIf="maintenanceCompanies.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+
                     </select>
                     <span *ngIf="validationErrors['companyID']" class="text-red-500 ml-3 font-normal">
                         {{ validationErrors['companyID'] }}
@@ -103,6 +107,8 @@
                         <option *ngFor="let employee of maintenanceEmployees" [ngValue]="employee.id">
                             {{ employee.en_Name || employee.ar_Name }}
                         </option>
+                        <option *ngIf="maintenanceEmployees.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+
                     </select>
                     <span *ngIf="validationErrors['maintenanceEmployeeID']" class="text-red-500 ml-3 font-normal">
                         {{ validationErrors['maintenanceEmployeeID'] }}
