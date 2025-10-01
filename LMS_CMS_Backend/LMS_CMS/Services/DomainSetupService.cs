@@ -40,7 +40,7 @@ namespace LMS_CMS_PL.Services.DomainSetUp
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             // Step 1: create DB + migrations
-            await _dynamicDatabaseService.AddDomainAndSetupDatabase(domain.Name, userId);
+            //await _dynamicDatabaseService.AddDomainAndSetupDatabase(domain.Name, userId);
 
             // Step 2: connect to domain DB 
             var domainEx = _unitOfWork.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domain.Name);
