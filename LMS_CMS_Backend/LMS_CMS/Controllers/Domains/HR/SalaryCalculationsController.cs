@@ -95,15 +95,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             // Validate each employee’s times
             foreach (var employee in Allemployees)
             {
-                if (!DateTime.TryParse(employee.AttendanceTime, out DateTime parsedAttendance))
-                {
-                    return BadRequest($"Invalid AttendanceTime for employee {employee.ID}: {employee.AttendanceTime}");
-                }
-
-                if (!DateTime.TryParse(employee.DepartureTime, out DateTime parsedDeparture))
-                {
-                    return BadRequest($"Invalid DepartureTime for employee {employee.ID}: {employee.DepartureTime}");
-                }
+               
 
                 List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(a => a.EmployeeId == employee.ID && a.Day >= periodStart && a.Day <= periodEnd);
                 if (monthlyAttendances != null && monthlyAttendances.Count > 0)
@@ -138,6 +130,15 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             foreach (var employee in employees)
             {
+                if (!DateTime.TryParse(employee.AttendanceTime, out DateTime parsedAttendance))
+                {
+                    return BadRequest($"Invalid AttendanceTime for employee {employee.ID}: {employee.AttendanceTime}");
+                }
+
+                if (!DateTime.TryParse(employee.DepartureTime, out DateTime parsedDeparture))
+                {
+                    return BadRequest($"Invalid DepartureTime for employee {employee.ID}: {employee.DepartureTime}");
+                }
 
                 List<EmployeeClocks> AllemployeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date.Month == month && c.Date.Year == year && c.IsDeleted != true);
                 if (AllemployeeClocks.Any(a => a.ClockOut == null))
@@ -380,19 +381,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                             if (actualStart > allowedStart)
                                             {
                                                 // Employee came late
-
-
                                                 lateTime = actualStart - attendanceTime;
-                                                if(lateTime.Hours==0 && lateTime.Minutes > 0)
-                                                {
-                                                    monthlyAttendance.DeductionHours = 1;
-                                                    monthlyAttendance.DeductionMinutes = 0;
-                                                }
-                                                else
-                                                {
-                                                    monthlyAttendance.DeductionHours = lateTime.Hours;
-                                                    monthlyAttendance.DeductionMinutes = lateTime.Minutes;
-                                                }
+                                                monthlyAttendance.DeductionHours = lateTime.Hours;
+                                                monthlyAttendance.DeductionMinutes = lateTime.Minutes;
+
                                             }
                                             else if (actualStart < allowedStart && actualStart > attendanceTime)
                                             {

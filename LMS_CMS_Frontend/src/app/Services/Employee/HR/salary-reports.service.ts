@@ -40,7 +40,7 @@ export class SalaryReportsService {
     return this.http.get<MonthlyAttendance[]>(`${this.baseUrl}/SalaryReports/GetAttendance/${month}/${year}/${empId}`, { headers });
   }
 
-  GetSalarySummary(DomainName: string, month: number, year: number, empId: number) {
+  GetSalarySummary(DomainName: string, month: number, year: number, empId: number ,jobId:number , JobCategoryId : number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -49,7 +49,8 @@ export class SalaryReportsService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<SalaryHistory[]>(`${this.baseUrl}/SalaryReports/GetSalarySummary/${month}/${year}/${empId}`, { headers });
+      console.log(`${this.baseUrl}/SalaryReports/GetSalarySummary/${month}/${year}/${empId}/${jobId}/${JobCategoryId}`)
+    return this.http.get<SalaryHistory[]>(`${this.baseUrl}/SalaryReports/GetSalarySummary/${month}/${year}/${empId}/${jobId}/${JobCategoryId}`, { headers });
   }
 
 }

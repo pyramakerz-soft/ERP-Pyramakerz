@@ -107,7 +107,7 @@ export class SalarySummaryComponent {
 
   GetAllData() {
     this.salaryHistory = []
-    this.SalaryReportsServ.GetSalarySummary(this.DomainName, this.month, this.year, this.SelectedEmpId).subscribe((d) => {
+    this.SalaryReportsServ.GetSalarySummary(this.DomainName, this.month, this.year, this.SelectedEmpId , this.SelectedJobId , this.SelectedJobCatId).subscribe((d) => {
       this.salaryHistory = d
     })
   }

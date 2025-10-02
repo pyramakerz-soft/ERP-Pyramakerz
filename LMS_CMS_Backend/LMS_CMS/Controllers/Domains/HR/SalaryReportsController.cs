@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -160,11 +161,11 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         ////////////////////////////////
 
-        [HttpGet("GetSalarySummary/{month}/{year}/{EmpId}")]
+        [HttpGet("GetSalarySummary/{month}/{year}/{EmpId}/{jobId}/{jobCatId}")]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" }
         )]
-        public async Task<IActionResult> GetSalarySummary(int month, int year, long EmpId=0)
+        public async Task<IActionResult> GetSalarySummary(int month, int year, long EmpId=0 , long jobId = 0 , long jobCatId = 0)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -216,7 +217,21 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             else
             {
-                Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true);
+                if(jobId > 0)
+                {
+                    Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true && e.JobID == jobId);
+                }
+                else if(jobCatId > 0)
+                {
+                    List<Job> jobs = Unit_Of_Work.job_Repository.FindBy(e => e.JobCategoryID== jobCatId);
+                    List<long> jobids = jobs.Select(s=>s.ID).ToList();
+                    Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true && jobids.Contains((long)e.JobID));
+                }
+                else
+                {
+                    Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true );
+
+                }
             }
 
             List<long> employeeIds = Allemployees.Select(e=>e.ID).ToList();
