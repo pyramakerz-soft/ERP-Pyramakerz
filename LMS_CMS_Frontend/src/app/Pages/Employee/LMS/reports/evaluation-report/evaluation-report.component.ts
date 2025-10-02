@@ -649,12 +649,12 @@ getGeneratedDate(): string {
           en: 'EVALUATION REPORT',
           ar: 'تقرير التقييم'
         },
-        subHeaders: [
-          {
-            en: 'Employee Performance Evaluation Summary',
-            ar: 'ملخص تقييم أداء الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Performance Evaluation Summary',
+        //     ar: 'ملخص تقييم أداء الموظفين'
+        //   }
+        // ],
         infoRows: infoRows,
         // reportImage: 'assets/images/logo.png',
         tables: tables,

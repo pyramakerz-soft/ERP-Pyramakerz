@@ -404,12 +404,12 @@ async viewReport() {
           en: 'Bonus Report',
           ar: 'تقرير المكافآت'
         },
-        subHeaders: [
-          {
-            en: 'Employee Bonus Records',
-            ar: 'سجلات مكافآت الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Bonus Records',
+        //     ar: 'سجلات مكافآت الموظفين'
+        //   }
+        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },

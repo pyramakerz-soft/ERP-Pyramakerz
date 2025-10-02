@@ -571,9 +571,9 @@ export class ReceivableDetailsComponent {
         en: "Receivable Report",
         ar: "تقرير المستحقات"
       },
-      subHeaders: [
-        { en: "Detailed receivable information", ar: "معلومات تفصيلية عن القبض" },
-      ],
+      // subHeaders: [
+      //   { en: "Detailed receivable information", ar: "معلومات تفصيلية عن القبض" },
+      // ],
       infoRows: [
         { key: 'Document Type', value: this.receivable.receivableDocTypesName || '' },
         { key: 'Document Number', value: this.receivable.docNumber || '' },
