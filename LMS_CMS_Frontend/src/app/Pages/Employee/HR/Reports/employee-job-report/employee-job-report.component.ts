@@ -275,12 +275,12 @@ export class EmployeeJobReportComponent  implements OnInit {
           en: 'Job Report',
           ar: 'تقرير الوظائف'
         },
-        subHeaders: [
-          {
-            en: 'Employee Job Records',
-            ar: 'سجلات موظفي الوظائف'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Job Records',
+        //     ar: 'سجلات موظفي الوظائف'
+        //   }
+        // ],
         infoRows: [
           { key: 'Job Category', value: this.getJobCategoryName() },
           { key: 'Job', value: this.getJobName() }

@@ -333,4 +333,9 @@ getArabicNationality(): string {
 getCurrentGrade(): string {
   return this.DataToPrint?.student?.currentGradeName || '';
 }
+// getnationalIDExpiredDate(): string {
+//   console.log('nationalIDExpiredDate' , this.DataToPrint.student.nationalIDExpiredDate);
+//   return this.DataToPrint?.student?.nationalIDExpiredDate || '';    
+// }
+
 }

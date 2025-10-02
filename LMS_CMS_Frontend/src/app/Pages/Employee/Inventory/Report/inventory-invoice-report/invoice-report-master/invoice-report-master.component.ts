@@ -133,18 +133,35 @@ ngOnInit() {
     
     this.setSchoolHeader();
   });
-    this.loadStores();
-    this.loadCategories();
-    this.selectedStoreId = null;
-    this.selectedCategoryId = null;
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
+  
+  this.loadStores();
+  this.selectedStoreId = null;
+  this.selectedCategoryId = null;
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+  });
+  this.isRtl = document.documentElement.dir === 'rtl';
+}
+
+onStoreSelected() {
+  this.selectedCategoryId = null;
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.categories = [];
+  this.subCategories = [];
+  this.items = [];
+  
+  if (this.selectedStoreId) {
+    this.loadCategories();
+  } else {
+    this.categories = [];
   }
+  
+  this.onFilterChange();
+}
 
   private setSchoolHeader(): void {
   switch (this.reportType) {
@@ -174,22 +191,33 @@ ngOnInit() {
   }
 
 
-  loadCategories() {
-    this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
-      .subscribe({
-        next: (categories) => {
-          this.categories = categories;
-        },
-        error: (error) => {
-          console.error('Error loading categories:', error);
-        },
-      });
+loadCategories() {
+  // Only load categories if a store is selected
+  if (!this.selectedStoreId) {
+    this.categories = [];
+    return;
   }
+
+  this.categoryService
+    .GetByStoreId(
+      this.categoryService.ApiServ.GetHeader(),
+            this.selectedStoreId, 
+    )
+    .subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.categories = [];
+      },
+    });
+}
 
 onCategorySelected() {
   this.selectedSubCategoryId = null;
   this.selectedItemId = null;
+  this.subCategories = [];
   this.items = [];
 
   if (this.selectedCategoryId) {
@@ -210,30 +238,48 @@ onCategorySelected() {
   } else {
     this.subCategories = [];
   }
+  
+  this.onFilterChange();
 }
 
-  onSubCategorySelected() {
-    this.selectedItemId = null;
-    this.items = [];
+onSubCategorySelected() {
+  this.selectedItemId = null;
+  this.items = [];
 
-    if (this.selectedSubCategoryId) {
-      this.shopItemService
-        .GetBySubCategory(
-          this.selectedSubCategoryId,
-          this.shopItemService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (items) => {
-            this.items = items;
-          },
-          error: (error) => {
-            console.error('Error loading items:', error);
-          },
-        });
-    } else {
-      this.items = [];
-    }
+  console.log('Subcategory selected:', this.selectedSubCategoryId); // Debug log
+
+  // Check if a specific subcategory is selected (not null)
+  if (this.selectedSubCategoryId) {
+    // Load items for the specific subcategory
+    this.shopItemService
+      .GetBySubCategory(
+        this.selectedSubCategoryId,
+        this.shopItemService.ApiServ.GetHeader()
+      )
+      .subscribe({
+        next: (items) => {
+          this.items = items;
+          console.log('Items loaded for subcategory:', items.length); // Debug log
+        },
+        error: (error) => {
+          console.error('Error loading items:', error);
+          this.items = [];
+        },
+      });
+  } else {
+    // "Select All" is chosen - reset items but keep dropdown enabled
+    this.items = [];
+    console.log('Select All chosen - items reset'); // Debug log
   }
+  
+  this.onFilterChange();
+}
+
+onFilterChange() {
+  this.showTable = false;
+  this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+  this.transactions = [];
+}
 
 onFlagSelected() {
   this.selectedFlagIds = [];
@@ -263,11 +309,6 @@ onFlagSelected() {
     return [];
   }
 
-  onFilterChange() {
-    this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
-    this.transactions = [];
-  }
 
   loadStores() {
     this.isLoading = true;
@@ -283,19 +324,25 @@ onFlagSelected() {
     });
   }
 
-  viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
-    this.isLoading = true;
-    this.showTable = false;
+  if (!this.selectedStoreId) {
+    this.selectedCategoryId = null;
+    this.selectedSubCategoryId = null;
+    this.selectedItemId = null;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
 
     this.inventoryMasterService
       .searchInvoice(
@@ -554,9 +601,9 @@ async exportExcel() {
       en: this.school.reportHeaderOneEn,
       ar: this.school.reportHeaderOneAr
     },
-    subHeaders: [
-      { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
-    ],
+    // subHeaders: [
+    //   { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
+    // ],
     infoRows: [
       { key: 'From Date', value: this.dateFrom },
       { key: 'To Date', value: this.dateTo },

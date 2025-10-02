@@ -18,14 +18,17 @@
         <h1 class="text-3xl font-bold tracking-wide ">{{ Title }}</h1>
     </div>
 
-    <div class="my-10 space-y-2">
-        <div *ngFor="let info of infoRows" class="flex justify-between text-xl">
-            <div class="w-full text-left mb-1">
-                <span class="font-semibold mr-2">{{ info.keyEn }} </span>
+    <!-- FIXED: Display both English and Arabic content side by side -->
+    <div class="my-10 space-y-4">
+        <div *ngFor="let info of infoRows" class="flex justify-between">
+            <!-- English content (left side) -->
+            <div class="w-1/2 text-left ltr">
+                <div [innerHTML]="info.keyEn" class="text-lg leading-8"></div>
             </div>
-            <!-- <div class="w-1/2 rtl text-right " *ngIf="info.keyAr ">
-                <span class="font-semibold ">{{ info.keyAr }} </span>
-            </div> -->
+            <!-- Arabic content (right side) -->
+            <div class="w-1/2 text-right rtl" *ngIf="info.keyAr">
+                <div [innerHTML]="info.keyAr" class="text-lg leading-8"></div>
+            </div>
         </div>
     </div>
 
@@ -91,40 +94,40 @@
         </div>
     </div>
     
-<div *ngFor="let chunk of tableChunks" 
-     class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
-     [ngClass]="{
-       'small-table-section': isSmallTable(chunk.data),
-       'large-table-section': isLargeTable(chunk.data),
-       'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
-     }">
-    <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
-        <colgroup>
-            <col *ngFor="let header of chunk.headers" 
-                 [ngStyle]="getColumnWidth(header, chunk.headers.length)">
-        </colgroup>
-        <thead>
-            <tr class="bg-gray-200 text-sm pdf-table-row">
-                <th *ngFor="let header of chunk.headers" 
-                    class="p-2 break-words">{{ header }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngIf="chunk.data.length === 0" class="pdf-table-row">
-                <td [attr.colspan]="chunk.headers.length" class="text-center p-4">No Data Found</td>
-            </tr>
-            <tr *ngFor="let row of chunk.data; let i = index" 
-                [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
-                class="pdf-table-row">
-                <td *ngFor="let header of chunk.headers" 
-                    class="p-2 border break-words whitespace-normal align-top"
-                    [ngClass]="{'details-cell': header.toLowerCase() === 'details'}">
-                    {{ row[header] }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+    <div *ngFor="let chunk of tableChunks" 
+         class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
+         [ngClass]="{
+           'small-table-section': isSmallTable(chunk.data),
+           'large-table-section': isLargeTable(chunk.data),
+           'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
+         }">
+        <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
+            <colgroup>
+                <col *ngFor="let header of chunk.headers" 
+                     [ngStyle]="getColumnWidth(header, chunk.headers.length)">
+            </colgroup>
+            <thead>
+                <tr class="bg-gray-200 text-sm pdf-table-row">
+                    <th *ngFor="let header of chunk.headers" 
+                        class="p-2 break-words">{{ header }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="chunk.data.length === 0" class="pdf-table-row">
+                    <td [attr.colspan]="chunk.headers.length" class="text-center p-4">No Data Found</td>
+                </tr>
+                <tr *ngFor="let row of chunk.data; let i = index" 
+                    [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
+                    class="pdf-table-row">
+                    <td *ngFor="let header of chunk.headers" 
+                        class="p-2 border break-words whitespace-normal align-top"
+                        [ngClass]="{'details-cell': header.toLowerCase() === 'details'}">
+                        {{ row[header] }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <div *ngIf="tableDataWithHeader">
         <div *ngFor="let section of tableDataWithHeader" class="mb-4">
@@ -148,13 +151,16 @@
         </div>
     </div>
 
-    <div class="my-6 space-y-2 ">
-        <div *ngFor="let info of PsNotes" class="flex justify-between text-xl">
-            <div class="w-1/2 text-left mb-1">
-                <span class="font-semibold mr-2">{{ info.EnNote }} </span>
+    <!-- FIXED: Display both English and Arabic notes side by side -->
+    <div class="my-6 space-y-4">
+        <div *ngFor="let info of PsNotes" class="flex justify-between">
+            <!-- English notes (left side) -->
+            <div class="w-1/2 text-left ltr">
+                <div [innerHTML]="info.EnNote" class="text-lg leading-8"></div>
             </div>
-            <div class="w-1/2 rtl text-right ">
-                <span class="font-semibold ">{{ info.ArNote }} </span>
+            <!-- Arabic notes (right side) -->
+            <div class="w-1/2 text-right rtl" *ngIf="info.ArNote">
+                <div [innerHTML]="info.ArNote" class="text-lg leading-8"></div>
             </div>
         </div>
     </div>

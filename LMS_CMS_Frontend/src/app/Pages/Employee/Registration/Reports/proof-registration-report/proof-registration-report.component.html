@@ -96,7 +96,7 @@
     
     <p>{{getNationality()}} Nationality</p>
     
-    <p>and identity no {{DataToPrint?.student?.nationalIDExpiredDate || 'N/A'}}</p>
+    <!-- <p>and identity no {{getnationalIDExpiredDate() || 'N/A'}}</p> -->
     
     <p>Is registered in this school this year {{getCurrentGrade()}}</p>
     
@@ -110,7 +110,7 @@
   </div>
 
   <!-- Arabic Version (for RTL support) -->
-  <!-- <div class="mt-12 border-t pt-8" [dir]="'rtl'">
+  <div class="mt-12 border-t pt-8" [dir]="'rtl'">
     <div class="space-y-4 text-lg leading-8">
       <div class="flex justify-between">
         <span><strong>التاريخ:</strong> {{ArabicCurrentDate}}</span>
@@ -122,7 +122,7 @@
       
       <p>تحمل الجنسية / {{getArabicNationality()}}</p>
       
-      <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p>
+      <!-- <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p> -->
       
       <p>مقيدة لدينا من للعام الدراسي الحالى {{getCurrentGrade()}}</p>
       
@@ -133,53 +133,47 @@
       <p><strong>وتقبلوا فائق التحية والاحترام</strong></p>
       <p><strong>ادارة المدرسة</strong></p>
     </div>
-  </div> -->
+  </div>
 </div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Latter'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Proof of Registration'" [Title]="'Identifier Letter'"
         [infoRows]="[
         {
-          keyEn: 'Date : ' + this.CurrentDate,
-          keyAr: 'التاريخ: ' + this.ArabicCurrentDate
+          keyEn: 'Date : ' + CurrentDate,
+          keyAr: 'التاريخ: ' + ArabicCurrentDate
         },
         {
           keyEn: 'Dear Sirs ,',
           keyAr: 'تحية طيبة وبعد'
         },
         {
-          keyEn: 'This to certify that Student / ' + this.DataToPrint.student.en_name,
-          keyAr: 'نفيدكم بأن الطالبة / ' + this.DataToPrint.student.en_name
+          keyEn: 'This to certify that Student / ' + getStudentName(),
+          keyAr: 'نفيدكم بأن الطالبة / ' + getStudentArabicName()
         },
         {
-          keyEn: this.DataToPrint.student.nationalityEnName + ' Nationality',
-          keyAr: 'تحمل الجنسية / ' + this.DataToPrint.student.nationalityArName
+          keyEn: getNationality() + ' Nationality',
+          keyAr: 'تحمل الجنسية / ' + getArabicNationality()
         },
         {
-            keyEn: ' and identity no ' + this.DataToPrint.student.nationalIDExpiredDate,
-            keyAr: 'وتحمل هوية مقيم / ' + this.DataToPrint.student.nationalIDExpiredDate
-          },
-        {
-          keyEn: 'Is registered in this school this year ' +this.DataToPrint.student.currentGradeName ,
-          keyAr: 'مقيدة لدينا من للعام الدراسي الحالى ' + this.DataToPrint.student.currentGradeName
+          keyEn: 'Is registered in this school this year ' + getCurrentGrade(),
+          keyAr: 'مقيدة لدينا من للعام الدراسي الحالى ' + getCurrentGrade()
         },
         {
           keyEn: 'And he was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
           keyAr: 'وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.'
         }
-      ]
-      " 
+      ]" 
       [PsNotes]="[
         {
             EnNote: 'Best Regards ,',
-            ArNote: 'وتقبلوا فائق التحيةوالاحترام '
+            ArNote: 'وتقبلوا فائق التحية والاحترام'
         },
         {
-            EnNote: 'Administration ',
+            EnNote: 'Administration',
             ArNote: 'ادارة المدرسة'
         }
-      ]
-      "  #pdfComponentRef></app-pdf-print>
+      ]" #pdfComponentRef></app-pdf-print>
     </div>
 </div>

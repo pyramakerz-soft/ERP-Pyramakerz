@@ -379,10 +379,10 @@ viewReport() {
           en: 'Account Balance Report',
           ar: 'تقرير أرصدة الحسابات'
         },
-        subHeaders: [{
-          en: 'Detailed Account Balance Summary',
-          ar: 'ملخص أرصدة الحسابات التفصيلي'
-        }],
+        // subHeaders: [{
+        //   en: 'Detailed Account Balance Summary',
+        //   ar: 'ملخص أرصدة الحسابات التفصيلي'
+        // }],
         infoRows: [
           { key: 'Date To', value: this.toDate },
           { key: 'Account Type', value: this.getLinkFileName(this.linkFileID) },

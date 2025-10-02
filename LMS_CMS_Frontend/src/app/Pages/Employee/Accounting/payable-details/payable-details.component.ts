@@ -589,9 +589,9 @@ export class PayableDetailsComponent {
         en: "Payable Report",
         ar: "تقرير الدفع"
       },
-      subHeaders: [
-        { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
-      ],
+      // subHeaders: [
+      //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
+      // ],
       infoRows: [
         { key: 'Document Type', value: this.payable.payableDocTypesName || '' },
         { key: 'Document Number', value: this.payable.docNumber || '' },

@@ -1,4 +1,3 @@
-// all-store-balance.component.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -83,17 +82,35 @@ cachedTableDataForPDF: any[] = [];
     }
   } 
 
-  private setPageTitle() {
-    const titles: Record<ReportType, string> = {
-      'QuantityOnly': 'All Stores Quantity Report',
-      'PurchasePrice': 'All Stores Purchase Price Report',
-      'SalesPrice': 'All Stores Sales Price Report',
-      'Cost': 'All Stores Cost Report'
-    };
-    this.pageTitle = titles[this.reportType];
-    this.school.reportHeaderOneEn = this.pageTitle;
-    this.school.reportHeaderOneAr = this.pageTitle;
-  }
+private setPageTitle() {
+  const titles: Record<ReportType, { en: string, ar: string }> = {
+    'QuantityOnly': { 
+      en: 'All Stores Quantity Report', 
+      ar: 'تقرير كمية جميع المخازن' 
+    },
+    'PurchasePrice': { 
+      en: 'All Stores Item Balance with Purchase', 
+      ar: 'رصيد الأصناف بجميع المخازن بسعر الشراء' 
+    },
+    'SalesPrice': { 
+      en: 'All Stores Item Balance with Sales', 
+      ar: 'رصيد الأصناف بجميع المخازن بسعر البيع' 
+    },
+    'Cost': { 
+      en: 'All Stores Item Balance with Average Cost', 
+      ar: 'رصيد الأصناف بجميع المخازن بالتكلفة المتوسطة' 
+    }
+  };
+  
+  const title = titles[this.reportType];
+  this.pageTitle = title.en;
+  this.school.reportHeaderOneEn = title.en;
+  this.school.reportHeaderOneAr = title.ar;
+  
+  // Set sub-header for detailed report
+  this.school.reportHeaderTwoEn = 'Detailed Report';
+  this.school.reportHeaderTwoAr = 'تقرير مفصل';
+}
 
   private getReportFlagType(): number {
     const flags: Record<ReportType, number> = {
@@ -548,9 +565,9 @@ async exportExcel() {
       en: this.pageTitle, 
       ar: this.pageTitle 
     },
-    subHeaders: [
-      { en: 'Detailed Report', ar: 'تقرير مفصل' }
-    ],
+    // subHeaders: [
+    //   { en: 'Detailed Report', ar: 'تقرير مفصل' }
+    // ],
     infoRows: infoRows,
     // reportImage: this.school.reportImage,
     tables: tables,

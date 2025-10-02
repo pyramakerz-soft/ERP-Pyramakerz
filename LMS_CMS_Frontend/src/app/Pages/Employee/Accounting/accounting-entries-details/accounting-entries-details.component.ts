@@ -551,9 +551,9 @@ export class AccountingEntriesDetailsComponent {
         en: "Accounting Entries Report",
         ar: "تقرير القيود المحاسبية"
       },
-      subHeaders: [
-        { en: "Detailed accounting entries information", ar: "معلومات تفصيلية عن القيود المحاسبية" },
-      ],
+      // subHeaders: [
+      //   { en: "Detailed accounting entries information", ar: "معلومات تفصيلية عن القيود المحاسبية" },
+      // ],
       infoRows: [
         { key: 'Document Type', value: this.accountingEntries.accountingEntriesDocTypeName || '' },
         { key: 'Document Number', value: this.accountingEntries.docNumber || '' },

@@ -522,10 +522,10 @@ viewReport() {
           en: 'Accounts Subledger Report',
           ar: 'تقرير دفتر الأستاذ المساعد'
         },
-        subHeaders: [{
-          en: 'Detailed Subledger Summary',
-          ar: 'ملخص دفتر الأستاذ المساعد التفصيلي'
-        }],
+        // subHeaders: [{
+        //   en: 'Detailed Subledger Summary',
+        //   ar: 'ملخص دفتر الأستاذ المساعد التفصيلي'
+        // }],
         infoRows: [
           { key: 'Date From', value: this.fromDate },
           { key: 'Date To', value: this.toDate },

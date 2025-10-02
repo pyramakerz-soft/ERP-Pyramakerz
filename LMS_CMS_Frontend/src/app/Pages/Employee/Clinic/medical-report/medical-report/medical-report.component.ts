@@ -608,12 +608,12 @@ async exportToExcel() {
         en: 'Medical Report',
         ar: 'التقرير الطبي'
       },
-      subHeaders: [
-        {
-          en: 'Detailed Medical Information',
-          ar: 'معلومات طبية مفصلة'
-        }
-      ],
+      // subHeaders: [
+      //   {
+      //     en: 'Detailed Medical Information',
+      //     ar: 'معلومات طبية مفصلة'
+      //   }
+      // ],
       infoRows: infoRows,
       tables: [
         {
