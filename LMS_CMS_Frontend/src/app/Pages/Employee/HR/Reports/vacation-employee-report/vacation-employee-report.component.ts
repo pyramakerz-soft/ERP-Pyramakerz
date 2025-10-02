@@ -353,12 +353,12 @@ async viewReport() {
           en: 'Vacation Employee Report',
           ar: 'تقرير اجازات الموظفين'
         },
-        subHeaders: [
-          {
-            en: 'Employee Vacation Records',
-            ar: 'سجلات اجازات الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Vacation Records',
+        //     ar: 'سجلات اجازات الموظفين'
+        //   }
+        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },

@@ -404,9 +404,9 @@ export class StoreBalanceReportComponent implements OnInit {
         en: this.school.reportHeaderOneEn,
         ar: this.school.reportHeaderOneAr
       },
-      subHeaders: [
-        { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
-      ],
+      // subHeaders: [
+      //   { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
+      // ],
       infoRows: [
         { key: 'Report Type', value: this.pageTitle },
         { key: 'To Date', value: this.dateTo },

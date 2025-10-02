@@ -209,19 +209,20 @@
     <app-pdf-print *ngIf="showPDF" [school]="school" 
                    [fileName]="'Account Balance Report'"
 [infoRows]="[
-{
-        keyEn: 'Date To: ' + this.toDate,
-        keyAr: 'التاريخ إلى: ' + this.toDate
-      },
-      {
-        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
-        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
-      },
-      {
-        keyEn: 'Account: ' + this.getAccountName(this.accountID),
-        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
-      },
-      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
+  {
+    keyEn: 'Date To: ' + this.toDate,
+    keyAr: this.toDate + ': التاريخ إلى'
+  },
+  {
+    keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+    keyAr: this.getLinkFileName(this.linkFileID) + ': نوع الحساب'
+  },
+  {
+    keyEn: 'Account: ' + this.getAccountName(this.accountID),
+    keyAr: this.getAccountName(this.accountID) + ': الحساب'
+  },
+]"
+                 [tableDataWithHeaderArray]="cachedTableDataForPDF"
                    #pdfComponentRef>
     </app-pdf-print>
   </div>

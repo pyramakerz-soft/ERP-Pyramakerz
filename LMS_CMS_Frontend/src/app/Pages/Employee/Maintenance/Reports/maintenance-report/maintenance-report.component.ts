@@ -369,12 +369,12 @@ async exportExcel() {
         en: 'Maintenance Report',
         ar: 'تقرير الصيانة'
       },
-      subHeaders: [
-        {
-          en: 'Maintenance Records',
-          ar: 'سجلات الصيانة'
-        }
-      ],
+      // subHeaders: [
+      //   {
+      //     en: 'Maintenance Records',
+      //     ar: 'سجلات الصيانة'
+      //   }
+      // ],
       infoRows: infoRows,
       tables: [
         {

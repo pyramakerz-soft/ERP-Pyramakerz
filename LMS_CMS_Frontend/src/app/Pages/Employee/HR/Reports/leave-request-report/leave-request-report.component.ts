@@ -404,12 +404,12 @@ async viewReport() {
           en: 'Leave Request Report',
           ar: 'تقرير طلبات الإجازة'
         },
-        subHeaders: [
-          {
-            en: 'Employee Leave Request Records',
-            ar: 'سجلات طلبات إجازة الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Leave Request Records',
+        //     ar: 'سجلات طلبات إجازة الموظفين'
+        //   }
+        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },

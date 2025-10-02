@@ -384,12 +384,12 @@ export class DeductionReportComponent  implements OnInit {
           en: 'Deduction Report',
           ar: 'تقرير الخصومات'
         },
-        subHeaders: [
-          {
-            en: 'Employee Deduction Records',
-            ar: 'سجلات خصومات الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Deduction Records',
+        //     ar: 'سجلات خصومات الموظفين'
+        //   }
+        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },

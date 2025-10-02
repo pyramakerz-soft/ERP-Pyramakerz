@@ -381,12 +381,12 @@ async viewReport() {
           en: 'Loans Report',
           ar: 'تقرير السلف'
         },
-        subHeaders: [
-          {
-            en: 'Employee Loans Records',
-            ar: 'سجلات سلف الموظفين'
-          }
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Employee Loans Records',
+        //     ar: 'سجلات سلف الموظفين'
+        //   }
+        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },

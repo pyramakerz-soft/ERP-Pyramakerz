@@ -301,38 +301,38 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     return student ? student.name : 'Undefined';
   }
 
-  getInfoRows(): any[] {
+getInfoRows(): any[] {
     const baseInfo = [
       {
         keyEn: 'School: ' + this.getSchoolName(),
-        keyAr: 'المدرسة: ' + this.getSchoolName(),
+        keyAr: this.getSchoolName() + ': المدرسة'
       },
       {
         keyEn: 'Grade: ' + this.getGradeName(),
-        keyAr: 'الصف: ' + this.getGradeName(),
+        keyAr: this.getGradeName() + ': الصف'
       },
       {
         keyEn: 'Classroom: ' + this.getClassroomName(),
-        keyAr: 'الفصل: ' + this.getClassroomName(),
+        keyAr: this.getClassroomName() + ': الفصل'
       },
       {
         keyEn: 'Start Date: ' + this.SelectedStartDate,
-        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+        keyAr: this.SelectedStartDate + ': تاريخ البدء'
       },
       {
         keyEn: 'End Date: ' + this.SelectedEndDate,
-        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+        keyAr: this.SelectedEndDate + ': تاريخ الانتهاء'
       },
       {
         keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
-        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
+        keyAr: new Date().toLocaleDateString() + ': تم الإنشاء في'
       },
     ];
 
-    if (this.reportType === 'student') {
+    if (this.reportType == 'student') {
       baseInfo.splice(3, 0, {
         keyEn: 'Student: ' + this.getStudentName(),
-        keyAr: 'الطالب: ' + this.getStudentName(),
+        keyAr: this.getStudentName() + ': الطالب'
       });
     }
 
@@ -527,12 +527,12 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             ? 'تقرير أداء الطالب اليومي'
             : 'تقرير أداء الفصل اليومي',
         },
-        subHeaders: [
-          {
-            en: 'Detailed Daily Performance Summary',
-            ar: 'ملخص الأداء اليومي التفصيلي',
-          },
-        ],
+        // subHeaders: [
+        //   {
+        //     en: 'Detailed Daily Performance Summary',
+        //     ar: 'ملخص الأداء اليومي التفصيلي',
+        //   },
+        // ],
         infoRows: infoRows,
         tables: [
           {

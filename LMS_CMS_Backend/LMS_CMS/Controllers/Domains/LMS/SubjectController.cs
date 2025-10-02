@@ -218,12 +218,22 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             SubjectGetDTO subjectDTO = mapper.Map<SubjectGetDTO>(subject);
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            
-            if (!string.IsNullOrEmpty(subjectDTO.IconLink))
+            if (isProduction)
             {
-                subjectDTO.IconLink = $"{serverUrl}{subjectDTO.IconLink.Replace("\\", "/")}";
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+                subjectDTO.IconLink = s3Service.GetFileUrl(subject.IconLink); 
+            }
+            else
+            { 
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            
+                if (!string.IsNullOrEmpty(subjectDTO.IconLink))
+                {
+                    subjectDTO.IconLink = $"{serverUrl}{subjectDTO.IconLink.Replace("\\", "/")}";
+                }
             }
 
             return Ok(subjectDTO);
@@ -426,38 +436,63 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return accessCheck;
                 }
             }
+             
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
 
             if (EditSubject.IconFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-                var subjFolder = Path.Combine(baseFolder, EditSubject.ID.ToString());
-
-                if (System.IO.File.Exists(subjFolder))
+                if (isProduction)
                 {
-                    System.IO.File.Delete(subjFolder); // Delete the old file
-                }
+                    var domain = _domainService.GetDomain(HttpContext);
+                    string subDomain = Request.Headers["Domain-Name"].ToString();
 
-                if (Directory.Exists(subjFolder))
-                {
-                    Directory.Delete(subjFolder, true);
-                }
+                    var s3Client = new AmazonS3Client();
+                    var s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
 
-                if (!Directory.Exists(subjFolder))
-                {
-                    Directory.CreateDirectory(subjFolder);
-                }
-
-                if (EditSubject.IconFile.Length > 0)
-                {
-                    var filePath = Path.Combine(subjFolder, EditSubject.IconFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    // Delete old file if exists
+                    if (!string.IsNullOrEmpty(SubjectExists.IconLink))
                     {
-                        await EditSubject.IconFile.CopyToAsync(stream);
+                        string oldKey = SubjectExists.IconLink;
+                        await s3Service.DeleteFileAsync($"LMS/Subject/{EditSubject.ID}", $"{domain}/{subDomain}", Path.GetFileName(oldKey));
                     }
-                }
 
-                EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.ID.ToString(), EditSubject.IconFile.FileName);
-            } 
+                    // Upload new file
+                    bool uploaded = await s3Service.UploadFileAsync(EditSubject.IconFile, $"LMS/Subject/{EditSubject.ID}", $"{domain}/{subDomain}");
+                    if (uploaded)
+                        SubjectExists.IconLink = $"{configuration["AWS:Folder"]}/{domain}/{subDomain}/LMS/Subject/{EditSubject.ID}/{EditSubject.IconFile.FileName}";
+                }
+                else
+                {
+                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
+                    var subjFolder = Path.Combine(baseFolder, EditSubject.ID.ToString());
+
+                    if (System.IO.File.Exists(subjFolder))
+                    {
+                        System.IO.File.Delete(subjFolder); // Delete the old file
+                    }
+
+                    if (Directory.Exists(subjFolder))
+                    {
+                        Directory.Delete(subjFolder, true);
+                    }
+
+                    if (!Directory.Exists(subjFolder))
+                    {
+                        Directory.CreateDirectory(subjFolder);
+                    }
+
+                    if (EditSubject.IconFile.Length > 0)
+                    {
+                        var filePath = Path.Combine(subjFolder, EditSubject.IconFile.FileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await EditSubject.IconFile.CopyToAsync(stream);
+                        }
+                    }
+
+                    EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.ID.ToString(), EditSubject.IconFile.FileName);
+                }
+            }
 
             mapper.Map(EditSubject, SubjectExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

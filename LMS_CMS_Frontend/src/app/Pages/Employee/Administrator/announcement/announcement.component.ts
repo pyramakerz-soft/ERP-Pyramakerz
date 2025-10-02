@@ -101,11 +101,19 @@ export class AnnouncementComponent {
 
   getAllData(){
     this.TableData = []
-    this.announcementService.Get(this.DomainName).subscribe(
-      data => {
-        this.TableData = data
-      }
-    )
+    if(this.selectedUserTypeId){
+      this.announcementService.GetByUserTypeID(this.selectedUserTypeId, this.DomainName).subscribe(
+        data => {
+          this.TableData = data
+        }
+      )
+    }else{
+      this.announcementService.Get(this.DomainName).subscribe(
+        data => {
+          this.TableData = data
+        }
+      )
+    }
   }
 
   getAnnouncementById(id: number){

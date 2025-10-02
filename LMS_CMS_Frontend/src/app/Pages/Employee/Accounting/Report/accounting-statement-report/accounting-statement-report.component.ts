@@ -139,22 +139,23 @@ export class AccountingStatementReportComponent implements OnInit {
     }
   }
 
-  loadAccountsByLinkFile() {
-    this.isAccountsLoading = true;
-    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
-      next: (accounts) => {
-        this.accountOptions = accounts.map(account => ({
-          ...account,
-          name: this.isRtl && account.ar_name ? account.ar_name : (account.en_name || account.user_Name || 'Unknown')
-        }));
-        this.isAccountsLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading accounts by link file:', error);
-        this.isAccountsLoading = false;
-      }
-    });
-  }
+loadAccountsByLinkFile() {
+  this.isAccountsLoading = true;
+  this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
+    next: (accounts) => {
+      console.log('Loaded accounts for link file:', accounts);
+      this.accountOptions = accounts.map(account => ({
+        ...account,
+        name: account.name || 'Unknown' // Use the actual name property from the response
+      }));
+      this.isAccountsLoading = false;
+    },
+    error: (error) => {
+      console.error('Error loading accounts by link file:', error);
+      this.isAccountsLoading = false;
+    }
+  });
+}
 
   onFilterChange() {
     this.showTable = false;
@@ -267,7 +268,7 @@ export class AccountingStatementReportComponent implements OnInit {
     // First check in accountOptions (link file specific accounts)
     const accountFromLinkFile = this.accountOptions.find(acc => acc.id === id);
     if (accountFromLinkFile) {
-      return accountFromLinkFile.name || accountFromLinkFile.en_name || 'Unknown';
+      return accountFromLinkFile.name || 'Unknown';
     }
     
     // Fallback to general accounts
@@ -443,10 +444,10 @@ export class AccountingStatementReportComponent implements OnInit {
           en: 'Account Statement Report',
           ar: 'تقرير كشف الحساب'
         },
-        subHeaders: [{
-          en: 'Detailed Account Statement Summary',
-          ar: 'ملخص كشف الحساب التفصيلي'
-        }],
+        // subHeaders: [{
+        //   en: 'Detailed Account Statement Summary',
+        //   ar: 'ملخص كشف الحساب التفصيلي'
+        // }],
         infoRows: [
           { key: 'Date From', value: this.fromDate },
           { key: 'Date To', value: this.toDate },
