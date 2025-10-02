@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
