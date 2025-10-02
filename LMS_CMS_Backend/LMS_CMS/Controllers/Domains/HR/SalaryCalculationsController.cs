@@ -500,15 +500,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             foreach (var employee in employees)
             {
-
-                TimeSpan attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
-                TimeSpan departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
-                TimeSpan fullDayHours = departureTime - attendanceTime;
-                double totalDayHours = fullDayHours.TotalHours;
-                double dailyRate = (double)employee.MonthSalary.Value / 30 ;
-                double hourlyRate = (double)employee.MonthSalary.Value / 30 / totalDayHours;
-                double minuteRate = hourlyRate / 60;
-
+                TimeSpan attendanceTime = new TimeSpan();
+                TimeSpan departureTime = new TimeSpan();
+                TimeSpan fullDayHours = new TimeSpan();
+                double totalDayHours = 0;
+                double dailyRate = 0;
+                double hourlyRate = 0;
+                double minuteRate = 0;
 
                 SalaryHistory salaryHistory = new SalaryHistory();
                 salaryHistory.EmployeeId = employee.ID;
@@ -518,6 +516,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 if (employee.HasAttendance == true)
                 {
+                     attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
+                     departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
+                     fullDayHours = departureTime - attendanceTime;
+                     totalDayHours = fullDayHours.TotalHours;
+                     dailyRate = (double)employee.MonthSalary.Value / 30 ;
+                     hourlyRate = (double)employee.MonthSalary.Value / 30 / totalDayHours;
+                     minuteRate = hourlyRate / 60;
+
                     List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(m => m.EmployeeId == employee.ID && m.Day >= periodStart && m.Day <= periodEnd);
                     int totalDeductionHours = monthlyAttendances.Select(m => m.DeductionHours).Sum();
                     int totalDeductionMinutes = monthlyAttendances.Select(m => m.DeductionMinutes).Sum();
