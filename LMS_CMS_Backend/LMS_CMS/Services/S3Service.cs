@@ -33,23 +33,38 @@ namespace LMS_CMS_PL.Services
             _folder = config[folder] ?? "";
         }
 
-        public async Task<bool> UploadAsync(string path, string subDirectory, string domain)
+        public async Task<bool> UploadFileAsync(string path, string subDirectory, string domain)
         {
             try
             {
                 if (File.Exists(path))
                 {
                     using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-                    return await UploadFileAsync(fileStream, Path.GetFileName(path), subDirectory, domain);
+                    return await UploadFile(fileStream, Path.GetFileName(path), subDirectory, domain);
                 }
-                else if (Directory.Exists(path))
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UploadFilesAsync(string path, string subDirectory, string domain)
+        {
+            try
+            {
+                if (Directory.Exists(path))
                 {
                     var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
                     foreach (var file in files)
                     {
                         var relativePath = Path.GetRelativePath(path, file).Replace("\\", "/");
                         using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                        await UploadFileAsync(fileStream, relativePath, subDirectory, domain);
+                        await UploadFile(fileStream, relativePath, subDirectory, domain);
                     }
 
                     return true;
@@ -65,7 +80,7 @@ namespace LMS_CMS_PL.Services
             }
         }
 
-        private async Task<bool> UploadFileAsync(FileStream fileStream, string fileName, string subDirectory, string domain)
+        private async Task<bool> UploadFile(FileStream fileStream, string fileName, string subDirectory, string domain)
         {
             var key = $"{domain}/{_folder}{subDirectory}{fileName}";
 

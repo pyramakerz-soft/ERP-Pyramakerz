@@ -402,7 +402,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 else if (master.FlagId == 12)
                     subDirectory = "Credits/";
 
-                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                bool uploaded = await s3Client.UploadFileAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                 if (!uploaded)
                     return BadRequest("Uploading Invoice failed!");
@@ -588,7 +588,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                             else if (master.FlagId == 12)
                                 subDirectory = "Credits/";
 
-                            bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                            bool uploaded = await s3Client.UploadFilesAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                             if (!uploaded)
                                 return BadRequest("Uploading Invoice failed!");
