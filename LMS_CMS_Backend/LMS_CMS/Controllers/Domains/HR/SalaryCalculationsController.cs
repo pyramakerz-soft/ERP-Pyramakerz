@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using LMS_CMS_PL.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -36,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" } 
         )]
-        public async Task<IActionResult> AddAllMonthlyAttendence(int month , int year)
+        public async Task<IActionResult> AddAllMonthlyAttendence(int month , int year , long employeeId =0)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -74,18 +75,75 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
             }
 
-
             // Get all employee 
-            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true && e.HasAttendance == true);
+            List<Employee> Allemployees = new List<Employee>();
 
-            foreach (var employee in employees)
+            if (employeeId > 0)
             {
-                List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(a=>a.EmployeeId == employee.ID && a.Day >= periodStart && a.Day <= periodEnd);
-                if(monthlyAttendances != null && monthlyAttendances.Count > 0)
+                var employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == employeeId && e.IsDeleted != true);
+                if (employee == null)
+                {
+                    return NotFound($"Employee with ID {employeeId} not found.");
+                }
+                Allemployees = new List<Employee> { employee };
+            }
+            else
+            {
+                Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true);
+            }
+
+            // Validate each employee’s times
+            foreach (var employee in Allemployees)
+            {
+               
+
+                List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(a => a.EmployeeId == employee.ID && a.Day >= periodStart && a.Day <= periodEnd);
+                if (monthlyAttendances != null && monthlyAttendances.Count > 0)
                 {
                     Unit_Of_Work.monthlyAttendance_Repository.DeleteListAsync(monthlyAttendances);
                     Unit_Of_Work.SaveChanges();
 
+                }
+
+                List<SalaryHistory> AllSalaryHistory = Unit_Of_Work.salaryHistory_Repository.FindBy(m => m.Month == month && m.Year == year && m.EmployeeId == employee.ID);
+                if (AllSalaryHistory != null && AllSalaryHistory.Count > 0)
+                {
+                    Unit_Of_Work.salaryHistory_Repository.DeleteListAsync(AllSalaryHistory);
+                    Unit_Of_Work.SaveChanges();
+
+                }
+
+                List<EmployeeLoans> AllEmployeeLoans = Unit_Of_Work.employeeLoans_Repository.FindBy(m => m.Month == month && m.Year == year && m.EmployeeId == employee.ID);
+                if (AllEmployeeLoans != null && AllEmployeeLoans.Count > 0)
+                {
+                    Unit_Of_Work.employeeLoans_Repository.DeleteListAsync(AllEmployeeLoans);
+                    Unit_Of_Work.SaveChanges();
+
+                }
+
+            }
+
+            // Filter employees with attendance enabled
+            List<Employee> employees = Allemployees
+                .Where(e => e.HasAttendance == true)
+                .ToList();
+
+            foreach (var employee in employees)
+            {
+                if (!DateTime.TryParse(employee.AttendanceTime, out DateTime parsedAttendance))
+                {
+                    return BadRequest($"Invalid AttendanceTime for employee {employee.ID}: {employee.AttendanceTime}");
+                }
+
+                if (!DateTime.TryParse(employee.DepartureTime, out DateTime parsedDeparture))
+                {
+                    return BadRequest($"Invalid DepartureTime for employee {employee.ID}: {employee.DepartureTime}");
+                }
+
+                List<EmployeeClocks> AllemployeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date.Month == month && c.Date.Year == year && c.IsDeleted != true);
+                if (AllemployeeClocks.Any(a => a.ClockOut == null))
+                {
+                    return BadRequest($"Employee {employee.ID} has days without clock out.");
                 }
 
                 TimeSpan attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
@@ -326,6 +384,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                                 lateTime = actualStart - attendanceTime;
                                                 monthlyAttendance.DeductionHours = lateTime.Hours;
                                                 monthlyAttendance.DeductionMinutes = lateTime.Minutes;
+
                                             }
                                             else if (actualStart < allowedStart && actualStart > attendanceTime)
                                             {
@@ -403,16 +462,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
             }
 
+            GenerateSalaryHistory(month, year , Allemployees);
             return Ok();
         }
 
 
         ////////////////////////////////
-        [HttpPost("AddAllSalaryHistory")]
-        [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-        )]
-        public async Task<IActionResult> AddAllSalaryHistory(int month, int year)
+        private void GenerateSalaryHistory(int month, int year , List<Employee> employees)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -421,27 +477,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
             SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
                 .First_Or_Default(s => s.ID == 1);
 
-            if (salaryConfigration == null)
-            {
-                return BadRequest("Salary configuration not found.");
-            }
 
             int startDay = salaryConfigration.StartDay;
+            TimeSpan OvertimeStartAfterMinutes = TimeSpan.FromMinutes(salaryConfigration.OvertimeStartAfterMinutes);
             DateOnly periodStart = new DateOnly();
             DateOnly periodEnd = new DateOnly();
 
             if (salaryConfigration.FromPreviousMonth == false)
             {
                 periodStart = new DateOnly(year, month, startDay);
-                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+                periodEnd = periodStart.AddMonths(1).AddDays(-1);
             }
             else
             {
@@ -450,12 +498,109 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
 
-            // Get all employee 
-            List<Employee> HasAttendanceEmployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true && e.HasAttendance == true);
+            foreach (var employee in employees)
+            {
+
+                TimeSpan attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
+                TimeSpan departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
+                TimeSpan fullDayHours = departureTime - attendanceTime;
+                double totalDayHours = fullDayHours.TotalHours;
+                double dailyRate = (double)employee.MonthSalary.Value / 30 ;
+                double hourlyRate = (double)employee.MonthSalary.Value / 30 / totalDayHours;
+                double minuteRate = hourlyRate / 60;
 
 
-            return Ok();
+                SalaryHistory salaryHistory = new SalaryHistory();
+                salaryHistory.EmployeeId = employee.ID;
+                salaryHistory.Month = month;
+                salaryHistory.Year = year;
+                salaryHistory.BasicSalary = employee.MonthSalary ??  0;
+
+                if (employee.HasAttendance == true)
+                {
+                    List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(m => m.EmployeeId == employee.ID && m.Day >= periodStart && m.Day <= periodEnd);
+                    int totalDeductionHours = monthlyAttendances.Select(m => m.DeductionHours).Sum();
+                    int totalDeductionMinutes = monthlyAttendances.Select(m => m.DeductionMinutes).Sum();
+                    TimeSpan sunDeduction = TimeSpan.FromHours(totalDeductionHours) + TimeSpan.FromMinutes(totalDeductionMinutes);
+                    salaryHistory.TotalDeductions =(decimal)((hourlyRate * sunDeduction.Hours) + (minuteRate * sunDeduction.Minutes));
+
+                    int totalOverTimeHours = monthlyAttendances.Select(m => m.OvertimeHours).Sum();
+                    int totalOverTimeMinutes = monthlyAttendances.Select(m => m.OvertimeMinutes).Sum();
+                    TimeSpan sunOverTime = TimeSpan.FromHours(totalOverTimeHours) + TimeSpan.FromMinutes(totalOverTimeMinutes);
+                    salaryHistory.TotalOvertime = (decimal)((hourlyRate * sunOverTime.Hours) + (minuteRate * sunOverTime.Minutes));
+
+                    int totalAbsentDays = monthlyAttendances.Count(m => m.DayStatusId == 2);
+                    salaryHistory.TotalDeductions += (decimal)(dailyRate * totalAbsentDays);
+
+                }
+
+                /// bouns
+                List<Bouns> Allbouns = Unit_Of_Work.bouns_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID);
+                foreach (var item in Allbouns)
+                {
+                    if(item.BounsTypeID == 1) // hours
+                    {
+                        salaryHistory.TotalBonus += (decimal)((hourlyRate * item.Hours) + (minuteRate * item.Minutes));
+
+                    }
+                    else if(item.BounsTypeID == 2) // day
+                    {
+                        salaryHistory.TotalBonus += (decimal)(dailyRate * item.NumberOfBounsDays);
+                    }
+                    else if (item.BounsTypeID == 3) // Amount
+                    {
+                        salaryHistory.TotalBonus += (decimal)(item.Amount);
+
+                    }
+                }
+
+                /// deduction
+                List<Deduction> Alldeductions = Unit_Of_Work.deduction_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID);
+                foreach (var item in Alldeductions)
+                {
+                    if (item.DeductionTypeID == 1) // hours
+                    {
+                        salaryHistory.TotalDeductions += (decimal)((hourlyRate * item.Hours) + (minuteRate * item.Minutes));
+                    }
+                    else if (item.DeductionTypeID == 2) // day
+                    {
+                        salaryHistory.TotalDeductions += (decimal)(dailyRate * item.NumberOfDeductionDays);
+                    }
+                    else if (item.DeductionTypeID == 3) // Amount
+                    {
+                        salaryHistory.TotalDeductions += (decimal)(item.Amount);
+                    }
+                }
+
+                /// Loans
+                DateTime targetDate = new DateTime(year, month, startDay);
+
+                List<Loans> Allloans = Unit_Of_Work.loans_Repository.FindBy(m => m.EmployeeID == employee.ID &&
+                    (m.DeductionStartYear < year ||
+                    (m.DeductionStartYear == year && m.DeductionStartMonth <= month)) &&
+                    (m.DeductionEndYear > year ||
+                    (m.DeductionEndYear == year && m.DeductionEndMonth >= month))
+                );
+
+                foreach (var item in Allloans)
+                {
+                   EmployeeLoans employeeLoans = new EmployeeLoans();
+                    employeeLoans.EmployeeId = employee.ID;
+                    employeeLoans.loanId = item.ID;
+                    employeeLoans.Year = year;
+                    employeeLoans.Month = month;
+                    employeeLoans.Amount = (decimal)(item.Amount / item.NumberOfDeduction);
+                    Unit_Of_Work.employeeLoans_Repository.Add(employeeLoans);
+                    Unit_Of_Work.SaveChanges();
+                    salaryHistory.TotalLoans += employeeLoans.Amount;
+                }
+
+                salaryHistory.NetSalary = salaryHistory.BasicSalary - (salaryHistory.TotalLoans+ salaryHistory.TotalDeductions) + (salaryHistory.TotalBonus + salaryHistory.TotalOvertime);
+                Unit_Of_Work.salaryHistory_Repository.Add(salaryHistory);
+                Unit_Of_Work.SaveChanges();
+            }
         }
 
+        ////////////////////////////////
     }
 }

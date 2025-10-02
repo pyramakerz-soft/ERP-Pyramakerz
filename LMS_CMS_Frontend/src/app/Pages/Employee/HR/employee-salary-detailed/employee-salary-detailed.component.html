@@ -1,0 +1,214 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Employee Salary Detailed' | translate }} </h1>
+    </div>
+</div>
+
+<div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
+    <div class="w-[20%]">
+        <label for="Month" class="block mb-2 text-sm font-medium text-gray-900">
+            {{ 'Month' | translate }}
+        </label>
+        <input id="Month" type="month" [(ngModel)]="selectedMonth" required
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            (change)="onDateChange(); IsShowTabls = false;">
+    </div>
+
+    <div class="w-[20%]">
+        <label for="SelectedJobCatId" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Job Category' | translate
+            }}</label>
+        <select id="SelectedJobCatId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedJobCatId" (change)="getJobsByCategory(); IsShowTabls = false; ">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Job Category' | translate }}
+            </option>
+            <option *ngFor="let stu of jobscat" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="jobscat.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[20%]">
+        <label for="SelectedJobId" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Job' | translate }}</label>
+        <select id="SelectedJobId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedJobId" [disabled]="!SelectedJobCatId"
+            (change)="getEmployeeByJops(); IsShowTabls = false;">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Job' | translate }}</option>
+            <option *ngFor="let stu of jobs" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="jobs.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[20%]">
+        <label for="SelectedEmpId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Employee' | translate
+            }}</label>
+        <select id="SelectedEmpId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId" (change)="IsShowTabls = false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+            <option *ngFor="let ac of employees" [value]="ac.id">
+                {{ ac.en_name }}
+            </option>
+            <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" [disabled]="!month || !year || !SelectedEmpId"
+            (click)="Apply()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300':!month || !year || !SelectedEmpId, 'secondaryBg text-white': month && year && SelectedEmpId}">
+            {{ 'View' | translate }}
+        </button>
+    </div>
+</div>
+
+<!-- <div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div> -->
+
+<div *ngIf="IsShowTabls" class="flex justify-between items-start space-x-2 rtl:space-x-reverse">
+    <div class="w-[80%]">
+        <div class="mt-5 rounded-2xl border border-[#BDBDBD]">
+            <!-- Fixed height + vertical scroll -->
+            <div class="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-2xl">
+                <table class="w-full inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead
+                        class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0 sticky top-0 z-10">
+                        <tr>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Day' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Day Status' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Total Working Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Leave Request in Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Overtime in Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Deduction in Hours' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- No Data Row -->
+                        <tr *ngIf="monthlyAttendenc.length === 0">
+                            <td colspan="6"
+                                class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
+
+                        <!-- Data Rows -->
+                        <tr *ngFor="let row of monthlyAttendenc; let i = index"
+                            [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.day }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.dayStatusName }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.workingHours }} : {{ row.workingMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.leaveRequestHours }} : {{ row.leaveRequestMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.overtimeHours }} : {{ row.overtimeMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.deductionHours }} : {{ row.deductionMinutes }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="w-[20%]">
+        <div class="w-full mt-5">
+            <!-- Salary Slip Container -->
+            <div class="border border-gray-400 rounded-lg shadow-md p-4 bg-white">
+
+                <!-- Header -->
+                <div class="text-center font-bold text-lg border-b pb-2 mb-3">
+                    Salary Slip
+                </div>
+
+                <!-- Earnings Section -->
+                <div class="bg-gray-200 text-center py-1 font-semibold mb-2">
+                    Earnings
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Basic Salary</span>
+                    <span>{{ salaryHistory.basicSalary | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Bonuses</span>
+                    <span>{{ salaryHistory.totalBonus | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Overtime</span>
+                    <span>{{ salaryHistory.totalOvertime | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 font-semibold">
+                    <span>Total Earnings</span>
+                    <span>{{ (salaryHistory.basicSalary + salaryHistory.totalBonus + salaryHistory.totalOvertime) |
+                        number:'1.2-2' }}</span>
+                </div>
+
+                <!-- Deductions Section -->
+                <div class="bg-gray-200 text-center py-1 font-semibold mt-3 mb-2">
+                    Deductions
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Loans</span>
+                    <span>{{ salaryHistory.totalLoans | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Deductions</span>
+                    <span>{{ salaryHistory.totalDeductions | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 font-semibold">
+                    <span>Total Deductions</span>
+                    <span>{{ (salaryHistory.totalLoans + salaryHistory.totalDeductions) | number:'1.2-2' }}</span>
+                </div>
+
+                <!-- Net Salary -->
+                <div class="bg-gray-100 text-center font-bold text-lg mt-4 py-2 border rounded">
+                    Net Salary: {{ salaryHistory.netSalary | number:'1.2-2' }}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'" [infoRows]="getInfoData()"
+            [tableHeaders]="tableHeadersForPDF" [tableData]="tableDataForPDF" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->

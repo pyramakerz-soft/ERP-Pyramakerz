@@ -89,7 +89,8 @@ export class VacationTypesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-   ngOnDestroy(): void {
+
+  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();

@@ -200,13 +200,19 @@ async generateExcelReport(options: {
     table.data.forEach((rowData) => {
       const dataRow = worksheet.addRow(rowData);
       
-      // Set LTR alignment for all data cells
-      dataRow.eachCell((cell) => {
+      // Set LTR alignment and proper formatting for all data cells
+      dataRow.eachCell((cell, colNumber) => {
         cell.alignment = { horizontal: 'left' }; // Force LTR for data
         
-        // Optional: Set number format for numeric cells
+        // Format numbers appropriately
         if (typeof cell.value === 'number') {
-          cell.numFmt = '#,##0.00'; // Format numbers with thousand separators
+          // Check if the number is a whole number (no decimal part)
+          if (Number.isInteger(cell.value) || cell.value % 1 === 0) {
+            cell.numFmt = '0'; // Integer format (no decimals)
+          } else {
+            cell.numFmt = '0.00'; // Decimal format with 2 decimal places
+          }
+          cell.value = Number(cell.value); // Ensure it's treated as number
         }
       });
     });

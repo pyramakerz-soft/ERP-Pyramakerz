@@ -301,7 +301,7 @@ viewReport() {
       }
 
       // Closing Balance Section
-      if (this.reportData.lastPeriodTotals.bakance.length > 0) {
+      if (this.reportData.lastPeriodTotals.balance.length > 0) {
         const closingSection = {
           header: 'Closing Balance',
           data: [
@@ -310,7 +310,7 @@ viewReport() {
             { key: 'Difference : ', value: this.reportData.lastPeriodTotals.total.difference },
           ],
           tableHeaders: ['ID', 'Name', 'Debit', 'Credit'],
-          tableData: this.reportData.lastPeriodTotals.bakance.map(item => ({
+          tableData: this.reportData.lastPeriodTotals.balance.map(item => ({
             ID: item.id,
             Name: item.name,
             Debit: item.debit,
@@ -480,8 +480,8 @@ viewReport() {
       }
 
       // Closing Balance
-      if (this.reportData.lastPeriodTotals.bakance.length > 0) {
-        const closingData = this.reportData.lastPeriodTotals.bakance.map(item => [
+      if (this.reportData.lastPeriodTotals.balance.length > 0) {
+        const closingData = this.reportData.lastPeriodTotals.balance.map(item => [
           item.id,
           item.name,
           item.debit,
@@ -595,4 +595,56 @@ get visiblePages(): number[] {
 
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
+
+  // New method to get all account IDs for the fixed column
+  getAllAccountIds(): number[] {
+    if (!this.reportData) return [];
+    
+    const allIds = new Set<number>();
+    
+    // Collect IDs from all periods
+    this.reportData.firstPeriodTotals.balance.forEach(item => allIds.add(item.id));
+    this.reportData.transactionsPeriodTotals.balance.forEach(item => allIds.add(item.id));
+    this.reportData.lastPeriodTotals.balance.forEach(item => allIds.add(item.id));
+    
+    return Array.from(allIds).sort((a, b) => a - b);
+  }
+
+  // Method to get account name by ID
+  getAccountNameById(accountId: number): string {
+    // Check in all data sources
+    const allAccounts = [
+      ...this.reportData?.firstPeriodTotals.balance || [],
+      ...this.reportData?.transactionsPeriodTotals.balance || [],
+      ...this.reportData?.lastPeriodTotals.balance || []
+    ];
+    
+    const account = allAccounts.find(acc => acc.id === accountId);
+    return account ? account.name : `Account ${accountId}`;
+  }
+
+  // Method to get account data for a specific period and account ID
+  getAccountDataForPeriod(period: string, accountId: number): any {
+    if (!this.reportData) return { debit: 0, credit: 0 };
+    
+    let periodData: any[] = [];
+    
+    switch(period) {
+      case 'opening':
+        periodData = this.reportData.firstPeriodTotals.balance;
+        break;
+      case 'transactions':
+        periodData = this.reportData.transactionsPeriodTotals.balance;
+        break;
+      case 'closing':
+        periodData = this.reportData.lastPeriodTotals.balance;
+        break;
+      default:
+        return { debit: 0, credit: 0 };
+    }
+    
+    const account = periodData.find(acc => acc.id === accountId);
+    return account ? { debit: account.debit, credit: account.credit } : { debit: 0, credit: 0 };
+  }
+
 }

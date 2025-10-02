@@ -98,7 +98,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("Search")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Inventory Transaction Report" , "Purchase Transaction Report" , "Sales Transaction Report" }
+         pages: new[] { "Inventory Transaction Detailed Report", "Sales Transaction Detailed Report", "Purchase Transaction Detailed Report"  }
          )]
         public async Task<IActionResult> GetSearch([FromQuery] InventoryMasterSearch obj)
         {
@@ -116,6 +116,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 query => query
                     .Include(x => x.Store)
                     .Include(x => x.Student)
+                    .Include(x => x.Supplier)
                     .Include(x => x.InventoryFlags)
                     .Include(x => x.InventoryDetails)
                         .ThenInclude(detail => detail.ShopItem)
@@ -162,12 +163,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             });
         }
 
-        /////////////////////////////////////////////////////////////////////////////-77
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-77
 
         [HttpGet("SearchInvoice")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Inventory Transaction Detailed Report" , "Sales Transaction Detailed Report" , "Purchase Transaction Detailed Report" }
+        pages: new[] { "Inventory Transaction Report", "Purchase Transaction Report", "Sales Transaction Report" }
         )]
         public async Task<IActionResult> GetSearchInvoice([FromQuery] InventoryMasterSearch obj)
         {
@@ -209,8 +210,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("No records found matching the search criteria.");
 
             var allTotal = filteredData.Sum(item => item.Total * (item.InventoryFlags?.FlagValue ?? 0));
-            var summaryDtos = filteredData.Select(f => new
-            {
+            var summaryDtos = 
+                filteredData.Select(f => new {
                 f.ID,
                 f.InvoiceNumber,
                 f.Date,
@@ -245,7 +246,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             });
         }
 
-        /////////////////////////////////////////////////////////////////////////-777
+        //////////////////////////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(

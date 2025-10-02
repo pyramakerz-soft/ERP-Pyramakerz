@@ -23,8 +23,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using MimeKit;
-using System.Linq;
-using LMS_CMS_PL.Services.DomainSetUp;
+using System.Linq; 
 
 namespace LMS_CMS_PL.Controllers.Octa
 {
@@ -198,39 +197,197 @@ namespace LMS_CMS_PL.Controllers.Octa
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpPost]
+        [HttpPost("CreateDomainDB")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa" }
         )]
-        public async Task<IActionResult> AddDomain([FromBody] DomainAdd_DTO domain, [FromServices] DomainSetupService domainSetupService)
+        public async Task<IActionResult> CreateDomainDB(string domainName)
         {
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            if (!long.TryParse(userIdClaim, out long userId))
-                return Unauthorized("User Id claim not found.");
+            if (userIdClaim == null) return Unauthorized("User Id claim not found.");
+            long.TryParse(userIdClaim, out long userId);
+
+            if (string.IsNullOrWhiteSpace(domainName))
+                return BadRequest("Invalid domain name.");
+
+            var domainNameRegex = @"^[a-zA-Z_]+$";
+            if (!Regex.IsMatch(domainName, domainNameRegex))
+                return BadRequest("Domain name can only contain letters and underscores.");
+
+            var existingDomain = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domainName);
+            if (existingDomain != null)
+                return Conflict("Domain already exists.");
+
+            // Create DB + run migrations
+            await _dynamicDatabaseService.CreateDomainDatabase(domainName, userId);
+
+            return Ok(new { message = "Domain created and database setup successfully. You can now call setup-domain to finish configuration." });
+        }
+        
+        [HttpPost("RunDomainMigrations")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa" }
+        )]
+        public async Task<IActionResult> RunDomainMigrations(string domainName)
+        {
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (userIdClaim == null) return Unauthorized("User Id claim not found.");
+            long.TryParse(userIdClaim, out long userId);
+
+            if (string.IsNullOrWhiteSpace(domainName))
+                return BadRequest("Invalid domain name.");
+
+            var domainNameRegex = @"^[a-zA-Z_]+$";
+            if (!Regex.IsMatch(domainName, domainNameRegex))
+                return BadRequest("Domain name can only contain letters and underscores.");
+             
+            // Create DB + run migrations
+            await _dynamicDatabaseService.RunDomainMigrations(domainName);
+
+            return Ok(new { message = "Domain created and database setup successfully. You can now call setup-domain to finish configuration." });
+        }
+
+        [HttpPost("SetupDomainData")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa" })]
+        public async Task<IActionResult> SetupDomainData([FromBody] DomainAdd_DTO domain)
+        {
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (userIdClaim == null) return Unauthorized("User Id claim not found.");
+            long.TryParse(userIdClaim, out long userId);
 
             if (string.IsNullOrWhiteSpace(domain.Name))
                 return BadRequest("Invalid domain name.");
 
-            var domainNameRegex = @"^[a-zA-Z_]+$";
-            if (!Regex.IsMatch(domain.Name, domainNameRegex))
-                return BadRequest("Domain name can only contain letters and underscores.");
+            // Get connection string for this domain
+            var domainEx = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domain.Name);
+            if (domainEx == null) return NotFound("Domain not found. Did you call create-domain first?");
 
-            var existingDomain = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domain.Name);
-            if (existingDomain != null)
-                return Conflict("Domain already exists.");
+            HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(domainEx.Name);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var result = await domainSetupService.RunDomainSetupAsync(domain, userId);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
+            // Create Admin role
+            Role role = new Role
+            {
+                Name = "Admin",
+                InsertedByOctaId = userId,
+                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
+            };
+            Unit_Of_Work.role_Repository.Add(role);
+            Unit_Of_Work.SaveChanges();
+
+            // Create Admin employee
+            string Pass = GenerateSecurePassword(12);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(Pass);
+
+            Employee emp = new Employee
+            {
+                User_Name = "Admin",
+                en_name = "Admin",
+                Password = hashedPassword,
+                Role_ID = role.ID,
+                EmployeeTypeID = 1,
+                InsertedByOctaId = userId,
+                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                ConnectionStatusID = 1
+            };
+            Unit_Of_Work.employee_Repository.Add(emp);
+            Unit_Of_Work.SaveChanges();
+
+            // Pages
+            if (domain.Pages == null || domain.Pages.Length == 0)
+                return BadRequest("Pages array cannot be null or empty.");
+
+            var notFoundPages = new List<long>();
+            var notModulePages = new List<long>();
+
+            foreach (var pageId in domain.Pages)
+            {
+                var page = _Unit_Of_Work.page_Octa_Repository.Select_By_Id_Octa(pageId);
+                if (page == null)
+                    notFoundPages.Add(pageId);
+                else if (page.Page_ID != null)
+                    notModulePages.Add(pageId);
+                else
+                    AddPageWithChildren(page, Unit_Of_Work);
+            }
+
+            foreach (var pageId in addedPageIds)
+            {
+                Role_Detailes roleDetail = new Role_Detailes
+                {
+                    Role_ID = role.ID,
+                    Page_ID = pageId,
+                    Allow_Edit = true,
+                    Allow_Delete = true,
+                    Allow_Edit_For_Others = true,
+                    Allow_Delete_For_Others = true,
+                    InsertedByOctaId = userId,
+                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
+                };
+                Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
+            }
+            Unit_Of_Work.SaveChanges();
+
+            // SchoolTypes
+            var SchoolTypes = _Unit_Of_Work.schoolType_Octa_Repository.Select_All_Octa();
+            foreach (var item in SchoolTypes)
+            {
+                var schoolType = new LMS_CMS_DAL.Models.Domains.LMS.SchoolType
+                {
+                    ID = item.ID,
+                    Name = item.Name
+                };
+                Unit_Of_Work.schoolType_Repository.Add(schoolType);
+            }
+            Unit_Of_Work.SaveChanges();
+             
             return Ok(new
             {
-                message = "Domain and database setup successfully.",
-                userName = result.AdminUserName,
-                password = result.AdminPasswordPlain,
-                link = result.DomainLink,
-                notFoundPages = result.NotFoundPages,
-                notModulePages = result.NotModulePages
+                message = "Domain setup completed successfully.",
+                userName = "Admin",
+                password = Pass, 
+                notFoundPages = notFoundPages.Any() ? notFoundPages : null,
+                notModulePages = notModulePages.Any() ? notModulePages : null
             });
         }
+
+        [HttpPost("AWSServerCreation")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa" })]
+        public async Task<IActionResult> AWSServerCreation(string domainName)
+        {
+            if (string.IsNullOrWhiteSpace(domainName))
+                return BadRequest("Invalid domain name.");
+
+            string domainLink = null;
+            using (HttpClient client = new HttpClient())
+            {
+                var requestBody = new { subdomain = domainName };
+                var json = JsonSerializer.Serialize(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("https://8b1r2kegpb.execute-api.us-east-1.amazonaws.com/CreateSubDomain", content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                var outerJson = JsonDocument.Parse(responseContent);
+                if (outerJson.RootElement.TryGetProperty("body", out JsonElement bodyElement))
+                {
+                    var innerJson = JsonDocument.Parse(bodyElement.GetString());
+                    if (innerJson.RootElement.TryGetProperty("message", out JsonElement messageElement))
+                    {
+                        var match = Regex.Match(messageElement.GetString(), @"Subdomain (\S+) created successfully\.");
+                        if (match.Success) domainLink = match.Groups[1].Value;
+                    }
+                }
+            }
+
+            return Ok(new { message = "AWS subdomain created successfully.", link = domainLink });
+        }
+
+        //[HttpPost]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa" }
+        //)] 
         //public async Task<IActionResult> AddDomain([FromBody] DomainAdd_DTO domain)
         //{
         //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -282,8 +439,8 @@ namespace LMS_CMS_PL.Controllers.Octa
         //    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(Pass);
 
         //    Employee emp = new Employee { User_Name = "Admin", en_name = "Admin", Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
-        //    emp.InsertedByOctaId= userId;
-        //    emp.InsertedAt= TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+        //    emp.InsertedByOctaId = userId;
+        //    emp.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
         //    emp.ConnectionStatusID = 1;
         //    Unit_Of_Work.employee_Repository.Add(emp);
         //    Unit_Of_Work.SaveChanges();
@@ -303,7 +460,7 @@ namespace LMS_CMS_PL.Controllers.Octa
         //        if (page == null)
         //        {
         //            notFoundPages.Add(domain.Pages[i]);
-        //        } 
+        //        }
         //        else if (page.Page_ID != null)
         //        {
         //            notModulePages.Add(domain.Pages[i]);
@@ -374,7 +531,7 @@ namespace LMS_CMS_PL.Controllers.Octa
         //                var match = Regex.Match(message, @"Subdomain (\S+) created successfully\.");
         //                if (match.Success)
         //                {
-        //                    domainLink = match.Groups[1].Value; 
+        //                    domainLink = match.Groups[1].Value;
         //                }
         //            }
         //        }

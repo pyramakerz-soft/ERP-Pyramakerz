@@ -279,6 +279,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MonthlyAttendance> MonthlyAttendance_Repository;
         GenericRepo<DayStatus> DayStatus_Repository;
         GenericRepo<SalaryHistory> SalaryHistory_Repository;
+        GenericRepo<EmployeeLoans> EmployeeLoans_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -3203,7 +3204,19 @@ namespace LMS_CMS_BL.UOW
                 return RefreshTokens_Repository;
             }
         }
-         
+
+        public GenericRepo<EmployeeLoans> employeeLoans_Repository
+        {
+            get
+            {
+                if (EmployeeLoans_Repository == null)
+                {
+                    EmployeeLoans_Repository = new GenericRepo<EmployeeLoans>(db);
+                }
+                return EmployeeLoans_Repository;
+            }
+        }
+
         public void SaveChanges()
         {
             db.SaveChanges();

@@ -155,11 +155,41 @@ export class ProofRegistrationReportComponent {
     })
   }
 
-  async ViewReport() {
-    await this.GetData()
-    this.showTable = true
-    this.GetStudentById()
-  }
+async ViewReport() {
+  await this.GetData()
+  this.showTable = true
+  // Remove GetStudentById() call since GetData() now handles everything
+}
+
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
+      .subscribe({
+        next: (d) => {
+          this.DataToPrint = d; 
+          this.school = d.school;
+          this.CurrentDate = d.date;
+          this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
+          this.ArabicCurrentDate = new Date(d.date).toLocaleDateString('ar-EG', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          
+          // Update SelectedStudent with complete data from API response
+          if (d.student) {
+            this.SelectedStudent = { ...this.SelectedStudent, ...d.student };
+          }
+          resolve();
+        },
+        error: (err) => {
+          console.error('Error fetching certificate data:', err);
+          reject(err);
+        }
+      });
+  });
+}
 
   Print() {
     this.showPDF = true;
@@ -259,28 +289,48 @@ export class ProofRegistrationReportComponent {
   }
   
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = d; 
-            this.school = d.school;
-            this.CurrentDate=d.date
-            this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
-            this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            });
+  // GetData(): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
+  //       .subscribe({
+  //         next: (d) => {
+  //           this.DataToPrint = d; 
+  //           this.school = d.school;
+  //           this.CurrentDate=d.date
+  //           this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
+  //           this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
+  //             weekday: 'long',
+  //             year: 'numeric',
+  //             month: 'long',
+  //             day: 'numeric'
+  //           });
 
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          }
-        });
-    });
-  }
+  //           resolve();
+  //         },
+  //         error: (err) => {
+  //           reject(err);
+  //         }
+  //       });
+  //   });
+  // }
+
+getStudentName(): string {
+  return this.DataToPrint?.student?.en_name || this.SelectedStudent.en_name || '';
+}
+
+getStudentArabicName(): string {
+  return this.DataToPrint?.student?.ar_name || this.SelectedStudent.ar_name || '';
+}
+
+getNationality(): string {
+  return this.DataToPrint?.student?.nationalityEnName || '';
+}
+
+getArabicNationality(): string {
+  return this.DataToPrint?.student?.nationalityArName || '';
+}
+
+getCurrentGrade(): string {
+  return this.DataToPrint?.student?.currentGradeName || '';
+}
 }
