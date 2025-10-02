@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.FileValidations;
@@ -10,8 +12,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Drawing;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -24,13 +28,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly FileImageValidationService _fileImageValidationService;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly IConfiguration configuration;
+        private readonly DomainService _domainService;
 
-        public SubjectController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService)
+        public SubjectController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, 
+            CheckPageAccessService checkPageAccessService, IConfiguration configuration, DomainService domainService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _fileImageValidationService = fileImageValidationService;
             _checkPageAccessService = checkPageAccessService;
+            this.configuration = configuration;
+            _domainService = domainService;
         }
 
         [HttpGet]
@@ -57,15 +66,29 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            foreach (var subject in subjectsDTO)
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
+             
+            if (isProduction)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+                foreach (var subject in subjectsDTO)
                 {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}"; 
-                }
+                    subject.IconLink = s3Service.GetFileUrl(subject.IconLink);
+                } 
             }
-
+            else
+            { 
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                foreach (var subject in subjectsDTO)
+                {
+                    if (!string.IsNullOrEmpty(subject.IconLink))
+                    {
+                        subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}"; 
+                    }
+                }
+            } 
+             
             return Ok(subjectsDTO);
         }
 
@@ -138,14 +161,28 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            foreach (var subject in subjectsDTO)
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
+
+            if (isProduction)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+                foreach (var subject in subjectsDTO)
                 {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}"; 
+                    subject.IconLink = s3Service.GetFileUrl(subject.IconLink);
                 }
             }
+            else
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                foreach (var subject in subjectsDTO)
+                {
+                    if (!string.IsNullOrEmpty(subject.IconLink))
+                    {
+                        subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
+                    }
+                }
+            } 
 
             return Ok(subjectsDTO);
         }
@@ -271,27 +308,43 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             Unit_Of_Work.subject_Repository.Add(subject);
             Unit_Of_Work.SaveChanges();
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-            var subjectFolder = Path.Combine(baseFolder, subject.ID.ToString());
-            if (!Directory.Exists(subjectFolder))
-            {
-                Directory.CreateDirectory(subjectFolder);
-            }
-
+             
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
             if (NewSubject.IconFile != null)
             {
-                if (NewSubject.IconFile.Length > 0)
+                bool uploaded = false; 
+                if (isProduction)
                 {
-                    var filePath = Path.Combine(subjectFolder, NewSubject.IconFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    var domain = _domainService.GetDomain(HttpContext); 
+                    string subDomain = Request.Headers["Domain-Name"].ToString();
+                    AmazonS3Client s3Client = new AmazonS3Client();
+                    S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+
+                    uploaded = await s3Service.UploadFileAsync(NewSubject.IconFile, $"LMS/Subject/{subject.ID}", $"{domain}/{subDomain}");
+                    if (uploaded)
+                        subject.IconLink = $"LMS/Subject/{subject.ID}/{NewSubject.IconFile.FileName}";
+                }
+                else
+                {
+                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
+                    var subjectFolder = Path.Combine(baseFolder, subject.ID.ToString());
+                    if (!Directory.Exists(subjectFolder))
                     {
-                        await NewSubject.IconFile.CopyToAsync(stream);
+                        Directory.CreateDirectory(subjectFolder);
                     }
+
+                    if (NewSubject.IconFile.Length > 0)
+                    {
+                        var filePath = Path.Combine(subjectFolder, NewSubject.IconFile.FileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await NewSubject.IconFile.CopyToAsync(stream);
+                        }
+                    }
+                    subject.IconLink = Path.Combine("Uploads", "SubjectIcon", subject.ID.ToString(), NewSubject.IconFile.FileName);
                 }
             }
 
-            subject.IconLink = Path.Combine("Uploads", "SubjectIcon", subject.ID.ToString(), NewSubject.IconFile.FileName);
             Unit_Of_Work.subject_Repository.Update(subject);
             Unit_Of_Work.SaveChanges();
 

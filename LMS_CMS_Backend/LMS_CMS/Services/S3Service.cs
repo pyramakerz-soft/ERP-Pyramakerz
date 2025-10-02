@@ -33,23 +33,58 @@ namespace LMS_CMS_PL.Services
             _folder = config[folder] ?? "";
         }
 
-        public async Task<bool> UploadAsync(string path, string subDirectory, string domain)
+        public async Task<bool> UploadFileAsync(string path, string subDirectory, string domain)
         {
             try
             {
                 if (File.Exists(path))
                 {
                     using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-                    return await UploadFileAsync(fileStream, Path.GetFileName(path), subDirectory, domain);
+                    return await UploadFile(fileStream, Path.GetFileName(path), subDirectory, domain);
                 }
-                else if (Directory.Exists(path))
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UploadFileAsync(IFormFile file, string subDirectory, string domain)
+        {
+            try
+            {
+                if (file != null)
+                {
+                    //using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    return await UploadFile(file, subDirectory, domain);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UploadFilesAsync(string path, string subDirectory, string domain)
+        {
+            try
+            {
+                if (Directory.Exists(path))
                 {
                     var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
                     foreach (var file in files)
                     {
                         var relativePath = Path.GetRelativePath(path, file).Replace("\\", "/");
                         using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                        await UploadFileAsync(fileStream, relativePath, subDirectory, domain);
+                        await UploadFile(fileStream, Path.GetFileName(file), subDirectory, domain);
                     }
 
                     return true;
@@ -65,9 +100,13 @@ namespace LMS_CMS_PL.Services
             }
         }
 
-        private async Task<bool> UploadFileAsync(FileStream fileStream, string fileName, string subDirectory, string domain)
+        private async Task<bool> UploadFile(FileStream fileStream, string filePath, string subDirectory, string domain)
         {
-            var key = $"{domain}/{_folder}{subDirectory}{fileName}";
+            if (fileStream == null || fileStream.Length == 0)
+            {
+            }
+
+            var key = $"{_folder}/{domain}/{subDirectory}";
 
             var request = new PutObjectRequest
             {
@@ -94,6 +133,103 @@ namespace LMS_CMS_PL.Services
                 return false;
             }
         }
+
+        private async Task<bool> UploadFile(IFormFile file, string subDirectory, string domain)
+        {
+            if (file == null || file.Length == 0)
+            {
+                Console.Error.WriteLine("Upload Error: File is null or empty.");
+                return false;
+            }
+
+            var key = $"{_folder}/{domain}/{subDirectory}".Replace("//", "/");
+
+            // Save to a temporary file first
+            var tempFilePath = Path.GetTempFileName();
+
+            try
+            {
+                // Copy IFormFile to disk
+                await using (var tempFileStream = new FileStream(tempFilePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(tempFileStream);
+                }
+
+                // Now use FileStream for S3 upload
+                await using var stream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read);
+
+                var request = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key,
+                    InputStream = stream,
+                    ContentType = GetContentType(stream)
+                };
+
+                var response = await _s3Client.PutObjectAsync(request);
+                return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                Console.Error.WriteLine($"S3 Error: {s3Ex.ErrorCode} - {s3Ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Upload Error: {ex.Message}");
+            }
+            finally
+            {
+                // Clean up the temp file
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+
+            return false;
+        }
+
+        public string GetFileUrl(string key, int expireMinutes = 120)
+        {
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = _bucketName,
+                Key = key,
+                Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
+            };
+
+            return _s3Client.GetPreSignedURL(request);
+        }
+
+        public async Task<bool> DeleteFileAsync(string subDirectory, string domain, string fileName)
+        {
+            var key = $"{_folder}/{domain}/{subDirectory}/{fileName}".Replace("//", "/");
+
+            try
+            {
+                var request = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key
+                };
+
+                var response = await _s3Client.DeleteObjectAsync(request);
+
+                // S3 usually returns NoContent (204) for successful delete
+                return response.HttpStatusCode == System.Net.HttpStatusCode.NoContent;
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                Console.Error.WriteLine($"S3 Delete Error: {s3Ex.ErrorCode} - {s3Ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Delete Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
 
         public async Task<bool> CreateOrUpdateSecretAsync(string secretName, string secretValue)
         {
