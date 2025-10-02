@@ -14,7 +14,7 @@ export class SalaryCalculationService {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  calcSalary(DomainName: string, month: number, year: number , EmpId : number) {
+  SalaryCalculation(DomainName: string, month: number, year: number , EmpId : number) {
     if (DomainName) {
       this.header = DomainName;
     }
@@ -27,6 +27,23 @@ export class SalaryCalculationService {
 
     return this.http.post(
       `${this.baseUrl}/SalaryCalculations?month=${month}&year=${year}&employeeId=${EmpId}`,{}, // body
+      { headers, responseType: 'text' } // options
+    );
+  }
+
+  SalaryCalculationSP(DomainName: string, month: number, year: number , EmpId : number) {
+    if (DomainName) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.post(
+      `${this.baseUrl}/SalaryCalculationSP?month=${month}&year=${year}&employeeId=${EmpId}`,{}, // body
       { headers, responseType: 'text' } // options
     );
   }

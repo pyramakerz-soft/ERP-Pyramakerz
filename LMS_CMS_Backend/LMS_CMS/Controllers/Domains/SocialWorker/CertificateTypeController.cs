@@ -247,7 +247,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (NewCertificate.NewFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SocialWorkerMedal");
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");
                 var oldMedalFolder = Path.Combine(baseFolder, NewCertificate.ID.ToString());
                 var medalFolder = Path.Combine(baseFolder, NewCertificate.ID.ToString());
 
@@ -273,7 +273,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 {
                     await NewCertificate.NewFile.CopyToAsync(stream);
                 }
-                medal.File = $"Uploads/SocialWorkerMedal/{medal.ID.ToString()}/{fileName}";
+                medal.File = $"Uploads/CertificateType/{medal.ID.ToString()}/{fileName}";
 
             }
 

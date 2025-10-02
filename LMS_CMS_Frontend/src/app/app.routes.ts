@@ -595,9 +595,9 @@ export const routes: Routes = [
             { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Salary Configuration", component: SalaryConfigurationComponent, title: "Salary Configuration", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Salary Calculation", component: SalaryCalculationComponent, title: "Salary Calculation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Salary Detailed", component: EmployeeSalaryDetailedComponent, title: "Employee Salary Detailed", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Employee Salary Detailed Report", component: EmployeeSalaryDetailedComponent, title: "Employee Salary Detailed", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "HR Attendance Report", component: HRAttendanceReportComponent, title: "HR Attendance Report", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Salary Summary", component: SalarySummaryComponent, title: "Salary Summary", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Salary Summary Report", component: SalarySummaryComponent, title: "Salary Summary", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

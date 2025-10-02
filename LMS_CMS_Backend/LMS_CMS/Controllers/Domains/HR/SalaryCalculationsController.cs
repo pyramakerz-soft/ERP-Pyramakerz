@@ -461,14 +461,20 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 }
             }
-
-            GenerateSalaryHistory(month, year , Allemployees);
+            if(employeeId == 0)
+            {
+               GenerateSalaryHistory(month, year , 0);
+            }
+            else
+            {
+               GenerateSalaryHistory(month, year, employeeId);
+            }
             return Ok();
         }
 
 
         ////////////////////////////////
-        private void GenerateSalaryHistory(int month, int year , List<Employee> employees)
+        private void GenerateSalaryHistory(int month, int year , long employeeId = 0)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -497,6 +503,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
             }
 
+            List<Employee> employees = new List<Employee>();
+
+            if (employeeId > 0)
+            {
+                var employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == employeeId && e.IsDeleted != true);
+                employees = new List<Employee> { employee };
+            }
+            else
+            {
+                employees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true);
+            }
 
             foreach (var employee in employees)
             {

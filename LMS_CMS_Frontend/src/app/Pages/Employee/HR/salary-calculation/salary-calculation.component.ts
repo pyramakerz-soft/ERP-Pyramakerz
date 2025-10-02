@@ -92,7 +92,7 @@ export class SalaryCalculationComponent {
       }
     }, 500);
 
-    this.SalaryCalculationServ.calcSalary(this.DomainName, this.month, this.year ,this.SelectedEmpId).subscribe({
+    this.SalaryCalculationServ.SalaryCalculationSP(this.DomainName, this.month, this.year ,this.SelectedEmpId).subscribe({
       next: (res) => {
         clearInterval(interval);
         this.progress = 100;
