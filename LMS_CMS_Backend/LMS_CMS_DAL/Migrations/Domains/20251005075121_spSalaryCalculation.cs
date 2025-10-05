@@ -227,7 +227,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 GO
             ");
 
-             migrationBuilder.Sql(@"
+            migrationBuilder.Sql(@"
                 SET ANSI_NULLS ON
                 GO
                 SET QUOTED_IDENTIFIER ON

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20251002133305_DeleteOTFromDayStatus")]
-    partial class DeleteOTFromDayStatus
+    [Migration("20251005075121_spSalaryCalculation")]
+    partial class spSalaryCalculation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
