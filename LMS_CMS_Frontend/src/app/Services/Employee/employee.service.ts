@@ -2,9 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Employee } from '../../Models/Employee/employee';
-import { EmployeeGet } from '../../Models/Employee/employee-get';
 import { EditPass } from '../../Models/Employee/edit-pass';
-import { AccountingEmployee } from '../../Models/Accounting/accounting-employee'; 
 import { Observable, shareReplay } from 'rxjs';
 
 @Injectable({
@@ -15,7 +13,7 @@ export class EmployeeService {
   baseUrl = ""
   header = ""
   private cachedDomainForMyData?: string;
-  private myData$?: Observable<EmployeeGet>;
+  private myData$?: Observable<Employee>;
  
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
@@ -60,7 +58,7 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByDepartmentId/${departmentID}`, { headers })
   }
 
-  Add(employee: EmployeeGet, DomainName?: string) {
+  Add(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -119,10 +117,10 @@ export class EmployeeService {
         formData.append(`subjectSelected[${index}]`, floor.toString());
       });
     }
-    return this.http.post<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
+    return this.http.post<Employee>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
-  Edit(employee: EmployeeGet, DomainName?: string) {
+  Edit(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -224,7 +222,7 @@ export class EmployeeService {
         uploadIndex++;
       });
     }
-    return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
+    return this.http.put<Employee>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
   Get_Employees(DomainName?: string) {
@@ -236,7 +234,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<EmployeeGet[]>(`${this.baseUrl}/Employee`, { headers });
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee`, { headers });
   }
 
   Get_Employee_By_ID(id: number, DomainName?: string) {
@@ -248,7 +246,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/${id}`, { headers });
+    return this.http.get<Employee>(`${this.baseUrl}/Employee/${id}`, { headers });
   }
  
   // GetMyData(DomainName?: string) {
@@ -260,10 +258,10 @@ export class EmployeeService {
   //     .set('domain-name', this.header)
   //     .set('Authorization', `Bearer ${token}`)
   //     .set('Content-Type', 'application/json');
-  //   return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/GetMyData`, { headers });
+  //   return this.http.get<Employee>(`${this.baseUrl}/Employee/GetMyData`, { headers });
   // }
 
-  GetMyData(DomainName?: string, options?: { forceRefresh?: boolean }): Observable<EmployeeGet> {
+  GetMyData(DomainName?: string, options?: { forceRefresh?: boolean }): Observable<Employee> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -279,7 +277,7 @@ export class EmployeeService {
         .set('Content-Type', 'application/json');
 
       this.cachedDomainForMyData = activeDomain;
-      this.myData$ = this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/GetMyData`, { headers })
+      this.myData$ = this.http.get<Employee>(`${this.baseUrl}/Employee/GetMyData`, { headers })
         .pipe(shareReplay({ bufferSize: 1, refCount: false }));
     }
 
@@ -327,7 +325,7 @@ export class EmployeeService {
     return this.http.delete(`${this.baseUrl}/Employee/Suspend/${id}`, { headers });
   }
 
-  EditAccountingEmployee(employee: AccountingEmployee, DomainName?: string) {
+  EditAccountingEmployee(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -348,7 +346,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<AccountingEmployee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
+    return this.http.get<Employee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
   }
 
   GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(departmentID: number, DomainName?: string) {

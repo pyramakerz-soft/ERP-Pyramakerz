@@ -4,7 +4,6 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';

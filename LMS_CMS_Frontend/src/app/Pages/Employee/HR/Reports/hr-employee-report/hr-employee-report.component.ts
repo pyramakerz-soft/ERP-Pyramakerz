@@ -57,6 +57,8 @@ export class HrEmployeeReportComponent {
   jobs: Job[] = [];
   SelectedJobId: number = 0
   SelectedJobCatId: number = 0
+  SelectedJobName: string = '';
+  SelectedJobCatName: string = '';
 
   constructor(
     private router: Router,
@@ -121,10 +123,102 @@ export class HrEmployeeReportComponent {
   getJobsByCategory() {
     this.jobs = []
     this.SelectedJobId = 0
+    this.SelectedJobName = ''
     this.employees = []
+    const selectedCategory = this.jobscat.find(c => c.id == this.SelectedJobCatId);
+    this.SelectedJobCatName = selectedCategory ? selectedCategory.name : '';
     this.JobServ.GetByCtegoty(this.SelectedJobCatId, this.DomainName).subscribe((d) => {
       this.jobs = d
     })
+  }
+
+  GetJobName() {
+    const selectedJob = this.jobs.find(c => c.id == this.SelectedJobId);
+    this.SelectedJobName = selectedJob ? selectedJob.name : '';
+    console.log(123,this.jobs , this.jobscat)
+  }
+
+  DownloadAsPDF() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => this.showPDF = false, 2000);
+    }, 500);
+  }
+
+  Print() {
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById("Data")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      document.body.appendChild(printContainer);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  async DownloadAsExcel() {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: "Employees Report",
+        ar: "تقرير الموظفين"
+      },
+      // subHeaders: [
+      //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
+      // ],
+      infoRows: [
+        { key: 'job Category', value: this.SelectedJobCatName || '' },
+        { key: 'job', value: this.SelectedJobName || '' }
+      ],
+      reportImage: '', // Add image URL if available
+      filename: "Employees_Report.xlsx",
+      tables: [
+        {
+          // title: "Payable Details",
+          headers: ['id', 'en_name', 'ar_name'],
+          data: this.employees.map((row) => [
+            row.id || 0,
+            row.en_name || 0,
+            row.ar_name || '',
+          ])
+        }
+      ]
+    });
   }
 
 }

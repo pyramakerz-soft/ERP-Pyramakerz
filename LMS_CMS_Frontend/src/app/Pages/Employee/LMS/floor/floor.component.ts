@@ -10,7 +10,6 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ActivatedRoute, Router } from '@angular/router';
 import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';

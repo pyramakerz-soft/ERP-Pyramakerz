@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../api.service';
-import { EmployeeGet } from '../../../Models/Employee/employee-get';
 import { MaintenanceEmployees } from '../../../Models/Maintenance/maintenance-employees';
+import { Employee } from '../../../Models/Employee/employee';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +49,7 @@ export class MaintenanceEmployeesService {
   }
 
 
-Edit(MaintenanceEmployee: EmployeeGet, DomainName: string): Observable<EmployeeGet> {
+Edit(MaintenanceEmployee: Employee, DomainName: string): Observable<Employee> {
   if (DomainName != null) {
     this.header = DomainName;
   }
@@ -60,7 +60,7 @@ Edit(MaintenanceEmployee: EmployeeGet, DomainName: string): Observable<EmployeeG
     .set('accept', '*/*')
     .set('Content-Type', 'application/json');
 
-  return this.http.put<EmployeeGet>(
+  return this.http.put<Employee>(
     `${this.baseUrl}/MaintenanceEmployee/${MaintenanceEmployee.id}`, // 👈 include ID
     MaintenanceEmployee,
     { headers }

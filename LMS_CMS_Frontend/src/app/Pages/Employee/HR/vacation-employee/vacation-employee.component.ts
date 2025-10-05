@@ -9,7 +9,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { LeaveRequest } from '../../../../Models/HR/leave-request';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -21,6 +20,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { VacationTypesService } from '../../../../Services/Employee/HR/vacation-types.service';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-vacation-employee',
@@ -57,9 +57,9 @@ export class VacationEmployeeComponent {
   validationErrors: { [key in keyof VacationEmployee]?: string } = {};
   isLoading = false;
 
-  employees: EmployeeGet[] = [];
+  employees: Employee[] = [];
   vacationTypes: VacationTypes[] = [];
-  selectedEmployee: EmployeeGet = new EmployeeGet();
+  selectedEmployee: Employee = new Employee();
   HireDateError: boolean = false;
 
   CurrentPage: number = 1

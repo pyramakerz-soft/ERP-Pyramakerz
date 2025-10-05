@@ -1,6 +1,9 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
+using LMS_CMS_BL.DTO.Administration;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -20,13 +23,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
-
-        public CertificateTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        private readonly IConfiguration configuration;
+        private readonly DomainService _domainService;
+        public CertificateTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, IConfiguration configuration, DomainService domainService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            this.configuration = configuration;
+            _domainService = domainService;
         }
 
         ////////////////////////////////
@@ -61,14 +67,28 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             List<CertificateTypeGetDTO> Dto = mapper.Map<List<CertificateTypeGetDTO>>(certificateType);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            foreach (var item in Dto)
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
+
+            if (isProduction)
             {
-                if (!string.IsNullOrEmpty(item.File))
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+                foreach (var item in Dto)
                 {
-                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
+                    item.File = s3Service.GetFileUrl(item.File);
                 }
             }
+            else
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                foreach (var item in Dto)
+                {
+                    if (!string.IsNullOrEmpty(item.File))
+                    {
+                        item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
+                    }
+                }
+            } 
 
             return Ok(Dto);
         }
@@ -103,12 +123,22 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             CertificateTypeGetDTO Dto = mapper.Map<CertificateTypeGetDTO>(certificateType);
+             
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(Dto.File))
+            if (isProduction)
             {
-                Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+                Dto.File = s3Service.GetFileUrl(Dto.File); 
+            }
+            else
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(Dto.File))
+                {
+                    Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
+                } 
             }
 
             return Ok(Dto);
@@ -164,25 +194,45 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.certificateType_Repository.Add(medal);
             Unit_Of_Work.SaveChanges();
 
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");
-            var medalFolder = Path.Combine(baseFolder, medal.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+            if (NewCertificate.NewFile != null)
             {
-                Directory.CreateDirectory(medalFolder);
-            }
-
-            if (NewCertificate.NewFile != null && NewCertificate.NewFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(NewCertificate.NewFile.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                bool uploaded = false;
+                if (isProduction)
                 {
-                    await NewCertificate.NewFile.CopyToAsync(stream);
+                    var domain = _domainService.GetDomain(HttpContext);
+                    string subDomain = Request.Headers["Domain-Name"].ToString();
+                    AmazonS3Client s3Client = new AmazonS3Client();
+                    S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+
+                    uploaded = await s3Service.UploadFileAsync(NewCertificate.NewFile, $"SocialWorker/CertificateType/{medal.ID}", $"{domain}/{subDomain}");
+                    if (uploaded)
+                        medal.File = $"SocialWorker/CertificateType/{medal.ID}/{NewCertificate.NewFile.FileName}";
                 }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.File = $"Uploads/CertificateType/{medal.ID.ToString()}/{fileName}";
-            }
+                else
+                {
+                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");
+                    var subjectFolder = Path.Combine(baseFolder, medal.ID.ToString());
+                    if (!Directory.Exists(subjectFolder))
+                    {
+                        Directory.CreateDirectory(subjectFolder);
+                    }
+
+                    if (NewCertificate.NewFile != null)
+                    {
+                        if (NewCertificate.NewFile.Length > 0)
+                        {
+                            var filePath = Path.Combine(subjectFolder, NewCertificate.NewFile.FileName);
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await NewCertificate.NewFile.CopyToAsync(stream);
+                            }
+                        }
+                    }
+                    medal.File = Path.Combine("Uploads", "CertificateType", medal.ID.ToString(), NewCertificate.NewFile.FileName);
+                }
+            } 
 
             Unit_Of_Work.certificateType_Repository.Update(medal);
             Unit_Of_Work.SaveChanges();
@@ -245,6 +295,63 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             mapper.Map(NewCertificate, medal);
 
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
+
+            //if (NewCertificate.NewFile != null)
+            //{
+            //    if (isProduction)
+            //    {
+            //        var domain = _domainService.GetDomain(HttpContext);
+            //        string subDomain = Request.Headers["Domain-Name"].ToString();
+
+            //        var s3Client = new AmazonS3Client();
+            //        var s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
+
+            //        // Delete old file if exists
+            //        if (!string.IsNullOrEmpty(announcementExists.ImageLink))
+            //        {
+            //            string oldKey = announcementExists.ImageLink;
+            //            await s3Service.DeleteFileAsync($"Administration/Announcement/{EditAnnouncement.ID}", $"{domain}/{subDomain}", Path.GetFileName(oldKey));
+            //        }
+
+            //        // Upload new file
+            //        bool uploaded = await s3Service.UploadFileAsync(EditAnnouncement.ImageFile, $"Administration/Announcement/{EditAnnouncement.ID}", $"{domain}/{subDomain}");
+            //        if (uploaded)
+            //            EditAnnouncement.ImageLink = $"{configuration["AWS:Folder"]}/{domain}/{subDomain}/Administration/Announcement/{EditAnnouncement.ID}/{EditAnnouncement.ImageFile.FileName}";
+            //    }
+            //    else
+            //    {
+            //        var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");
+            //        var oldMedalFolder = Path.Combine(baseFolder, NewCertificate.ID.ToString());
+
+            //        if (System.IO.File.Exists(oldMedalFolder))
+            //        {
+            //            System.IO.File.Delete(oldMedalFolder); // Delete the old file
+            //        }
+
+            //        if (Directory.Exists(oldMedalFolder))
+            //        {
+            //            Directory.Delete(oldMedalFolder, true);
+            //        }
+
+            //        if (!Directory.Exists(oldMedalFolder))
+            //        {
+            //            Directory.CreateDirectory(oldMedalFolder);
+            //        }
+
+            //        if (EditAnnouncement.ImageFile.Length > 0)
+            //        {
+            //            var filePath = Path.Combine(announcementFolder, EditAnnouncement.ImageFile.FileName);
+            //            using (var stream = new FileStream(filePath, FileMode.Create))
+            //            {
+            //                await NewCertificate.NewFile.CopyToAsync(stream);
+            //            }
+            //        }
+
+            //        medal.File = Path.Combine("Uploads", "CertificateType", medal.ID.ToString(), NewCertificate.NewFile.FileName);
+            //    }
+            //}
+             
             if (NewCertificate.NewFile != null)
             {
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");

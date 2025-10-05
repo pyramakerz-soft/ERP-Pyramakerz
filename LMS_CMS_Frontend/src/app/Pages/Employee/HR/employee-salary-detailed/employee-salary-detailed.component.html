@@ -48,7 +48,7 @@
             }}</label>
         <select id="SelectedEmpId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId" (change)="IsShowTabls = false">
+            [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId" (change)="GetEmployeeName(); IsShowTabls = false">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
             <option *ngFor="let ac of employees" [value]="ac.id">
                 {{ ac.en_name }}
@@ -66,11 +66,11 @@
     </div>
 </div>
 
-<!-- <div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
+<div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
-</div> -->
+</div>
 
 <div *ngIf="IsShowTabls" class="flex justify-between items-start space-x-2 rtl:space-x-reverse">
     <div class="w-[80%]">
@@ -205,10 +205,42 @@
 </div>
 
 
-<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+<div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'" [infoRows]="getInfoData()"
-            [tableHeaders]="tableHeadersForPDF" [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
+                    {
+                        keyEn: 'Month: ' + this.month + '/' +this.year,
+                    }, 
+                    {
+                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
+                    },
+                    {
+                        keyEn: 'Job: ' + this.SelectedJobName,
+                    },
+                    {
+                        keyEn: 'Employee: ' + this.SelectedEmpName,
+                    },
+                    {
+                        keyEn: 'Salary: ' + this.salaryHistory.basicSalary
+                    },
+                    {
+                        keyEn: 'Total Bonus: ' + this.salaryHistory.totalBonus,
+                    },
+                    {
+                        keyEn: 'Total Overtime: ' + this.salaryHistory.totalOvertime,
+                    },
+                    {
+                        keyEn: 'Total Loans: ' + this.salaryHistory.totalLoans,
+                    },
+                    {
+                        keyEn: 'Total Deduction: ' + this.salaryHistory.totalDeductions,
+                    },
+                    {
+                        keyEn: 'Final Salary: ' + this.salaryHistory.netSalary,
+                    }
+                    ]"
+            [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']"
+            [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
-</div> -->
+</div>

@@ -76,7 +76,6 @@ import { IncomesComponent } from './Pages/Employee/Accounting/incomes/incomes.co
 import { SavesComponent } from './Pages/Employee/Accounting/saves/saves.component';
 import { AccountingTreeComponent } from './Pages/Employee/Accounting/accounting-tree/accounting-tree.component';
 import { BankComponent } from './Pages/Employee/Accounting/bank/bank.component';
-import { AccountingEmployee } from './Models/Accounting/accounting-employee';
 import { AccountingEmployeeComponent } from './Pages/Employee/Accounting/accounting-employee/accounting-employee.component';
 import { AccountingEmployeeEditComponent } from './Pages/Employee/Accounting/accounting-employee-edit/accounting-employee-edit.component';
 import { AccountingStudentComponent } from './Pages/Employee/Accounting/accounting-student/accounting-student.component';
@@ -277,6 +276,7 @@ import { AttendanceReportComponent as HRAttendanceReportComponent} from './Pages
 import { SalaryCalculationComponent } from './Pages/Employee/HR/salary-calculation/salary-calculation.component';
 import { EmployeeSalaryDetailedComponent } from './Pages/Employee/HR/employee-salary-detailed/employee-salary-detailed.component';
 import { SalarySummaryComponent } from './Pages/Employee/HR/Reports/salary-summary/salary-summary.component';
+import { HrEmployeeReportComponent } from './Pages/Employee/HR/Reports/hr-employee-report/hr-employee-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -598,6 +598,7 @@ export const routes: Routes = [
             { path: "Employee Salary Detailed Report", component: EmployeeSalaryDetailedComponent, title: "Employee Salary Detailed", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "HR Attendance Report", component: HRAttendanceReportComponent, title: "HR Attendance Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Salary Summary Report", component: SalarySummaryComponent, title: "Salary Summary", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Hr Employees Report", component: HrEmployeeReportComponent, title: "Hr Employees Report", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

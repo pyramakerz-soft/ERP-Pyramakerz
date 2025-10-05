@@ -3,7 +3,6 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
 import { TokenData } from '../../../../Models/token-data';
@@ -19,6 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-subject-co-teacher',
   standalone: true,
@@ -41,7 +41,7 @@ export class SubjectCoTeacherComponent {
   subject: ClassroomSubject[] = []
   validationErrors: { [key in keyof ClassroomSubjectCoTeacher]?: string } = {};
   isLoading = false;
-  employee: EmployeeGet = new EmployeeGet()
+  employee: Employee = new Employee()
   SelectedClassId : number =0
   IsSelectedClassId : string =""
 

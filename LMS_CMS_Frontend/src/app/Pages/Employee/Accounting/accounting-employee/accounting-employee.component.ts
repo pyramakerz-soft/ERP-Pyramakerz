@@ -15,7 +15,6 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { Employee } from '../../../../Models/Employee/employee';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -35,7 +34,7 @@ export class AccountingEmployeeComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  TableData: EmployeeGet[] = [];
+  TableData: Employee[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
@@ -107,7 +106,7 @@ export class AccountingEmployeeComponent {
   }
 
 
-  Edit(row: EmployeeGet) {
+  Edit(row: Employee) {
     this.router.navigateByUrl(`Employee/Employee Edit Accounting/${row.id}`)
   }
 
@@ -115,7 +114,7 @@ export class AccountingEmployeeComponent {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: EmployeeGet[] = await firstValueFrom(
+      const data: Employee[] = await firstValueFrom(
         this.EmployeeServ.Get_Employees(this.DomainName)
       );
       this.TableData = data || [];
