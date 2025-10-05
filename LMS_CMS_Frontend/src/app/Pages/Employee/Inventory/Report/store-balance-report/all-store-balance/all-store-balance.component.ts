@@ -82,6 +82,11 @@ cachedTableDataForPDF: any[] = [];
     }
   } 
 
+  hasDecimal(value: number | null): boolean {
+  if (value === null || value === undefined) return false;
+  return value % 1 !== 0;
+}
+
 private setPageTitle() {
   const titles: Record<ReportType, { en: string, ar: string }> = {
     'QuantityOnly': { 
@@ -195,31 +200,45 @@ viewReport() {
     return Array.from(stores);
   }
 
-getStoreTotalQuantity(storeName: string): number {
-  if (!this.reportData?.data) return 0;
+getStoreTotalQuantity(storeName: string): { value: number, hasDecimal: boolean } {
+  if (!this.reportData?.data) return { value: 0, hasDecimal: false };
   
-  return this.reportData.data.reduce((total, item) => {
+  const total = this.reportData.data.reduce((total, item) => {
     const storeData = this.getStoreData(item, storeName);
     return total + (storeData.quantity ?? 0);
   }, 0);
+  
+  return { value: total, hasDecimal: this.hasDecimal(total) };
 }
 
-getStoreTotalValue(storeName: string): number {
-  if (!this.reportData?.data) return 0;
+getStoreTotalValue(storeName: string): { value: number, hasDecimal: boolean } {
+  if (!this.reportData?.data) return { value: 0, hasDecimal: false };
   
-  return this.reportData.data.reduce((total, item) => {
+  const total = this.reportData.data.reduce((total, item) => {
     const storeData = this.getStoreData(item, storeName);
     return total + (storeData.value ?? 0);
   }, 0);
+  
+  return { value: total, hasDecimal: this.hasDecimal(total) };
 }
 
 getStoreData(item: StoreBalanceItem, storeName: string): {
   quantity: number | null;
   price: number | null;
-  value: number | null
+  value: number | null;
+  hasDecimalQuantity: boolean;
+  hasDecimalPrice: boolean;
+  hasDecimalValue: boolean;
 } {
   const store = item.stores?.find(s => s.storeName === storeName);
-  if (!store) return { quantity: null, price: null, value: null };
+  if (!store) return { 
+    quantity: null, 
+    price: null, 
+    value: null,
+    hasDecimalQuantity: false,
+    hasDecimalPrice: false,
+    hasDecimalValue: false
+  };
 
   let price: number | null = null;
   
@@ -238,18 +257,32 @@ getStoreData(item: StoreBalanceItem, storeName: string): {
   return {
     quantity: store.quantity ?? null,
     price: price,
-    value: store.value ?? null
+    value: store.value ?? null,
+    hasDecimalQuantity: this.hasDecimal(store.quantity),
+    hasDecimalPrice: this.hasDecimal(price),
+    hasDecimalValue: this.hasDecimal(store.value)
   };
 }
 
-  getItemTotal(item: StoreBalanceItem): number {
-    switch(this.reportType) {
-      case 'PurchasePrice': return item.totalPurchaseValue || 0;
-      case 'SalesPrice': return item.totalSalesValue || 0;
-      case 'Cost': return item.totalCost || 0;
-      default: return item.quantity || 0;
-    }
+getItemTotal(item: StoreBalanceItem): { value: number, hasDecimal: boolean } {
+  let totalValue: number;
+  
+  switch(this.reportType) {
+    case 'PurchasePrice': 
+      totalValue = item.totalPurchaseValue || 0;
+      break;
+    case 'SalesPrice': 
+      totalValue = item.totalSalesValue || 0;
+      break;
+    case 'Cost': 
+      totalValue = item.totalCost || 0;
+      break;
+    default: 
+      totalValue = item.quantity || 0;
   }
+  
+  return { value: totalValue, hasDecimal: this.hasDecimal(totalValue) };
+}
 
   showPriceColumn(): boolean {
     return this.reportType !== 'QuantityOnly';

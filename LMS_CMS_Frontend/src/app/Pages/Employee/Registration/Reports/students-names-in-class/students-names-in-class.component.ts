@@ -260,13 +260,23 @@ export class StudentsNamesInClassComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => this.showPDF = false, 2000);
-    }, 500);
-  }
+  preparePDFData(): any[] {
+  return this.StudentData.map((student) => ({
+    'ID': student.id,
+    'Name': student.en_name,
+    'Mobile': student.mobile,
+    'Nationality': student.nationalityEnName,
+    'Gender': student.genderName
+  }));
+}
+
+DownloadAsPDF() {
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => this.showPDF = false, 2000);
+  }, 500);
+}
 
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
@@ -292,7 +302,7 @@ export class StudentsNamesInClassComponent {
       tables: [
         {
           // title: "Students List",
-          headers: ['id', 'en_name', 'mobile', 'nationality', 'genderName'],
+          headers: ['id', 'en_name', 'mobile', 'Nationality', 'genderName'],
           data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
         }
       ]

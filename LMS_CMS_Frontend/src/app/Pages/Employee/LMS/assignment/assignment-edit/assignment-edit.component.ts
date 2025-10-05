@@ -93,31 +93,42 @@ export class AssignmentEditComponent {
     private realTimeService: RealTimeNotificationServiceService
   ) { }
 
-  ngOnInit() {
-    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-    this.UserID = this.User_Data_After_Login.id;
-    this.DomainName = this.ApiServ.GetHeader();
-    this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
-    });
-    this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-    this.getAssignmentData();
-    this.getLessons();
-    this.getTypes();
-        this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+ngOnInit() {
+  this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+  this.UserID = this.User_Data_After_Login.id;
+  this.DomainName = this.ApiServ.GetHeader();
+  this.activeRoute.url.subscribe((url) => {
+    this.path = url[0].path;
+  });
+  this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+  this.getAssignmentData();
+  this.getLessons();
+  this.getTypes();
+  
+  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+  });
+  this.isRtl = document.documentElement.dir === 'rtl';
+  
+  document.addEventListener('click', this.handleClickOutside);
+}
+
+ngOnDestroy(): void {
+  this.realTimeService.stopConnection(); 
+  if (this.subscription) {
+    this.subscription.unsubscribe();
   }
+  document.removeEventListener('click', this.handleClickOutside);
+}
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+private handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  const tagsContainer = document.querySelector('.tags-container');
+  
+  if (tagsContainer && !tagsContainer.contains(target)) {
+    this.dropdownOpen = false;
   }
-
-
+}
 
   getAssignmentData() {
     this.AssigmentQuestionServ.GetById(
@@ -294,58 +305,76 @@ export class AssignmentEditComponent {
     this.IsQuestionsSelected = this.selectedQuestions.length > 0;
   }
 
-  toggleDropdown(): void {
-    this.dropdownOpen = !this.dropdownOpen;
+toggleDropdown(event?: Event): void {
+  if (event) {
+    event.stopPropagation();
   }
+  this.dropdownOpen = !this.dropdownOpen;
+}
 
-  selectType(Type: Tag): void {
-    if (!this.tagsSelected.some((e) => e.id === Type.id)) {
-      this.tagsSelected.push(Type);
-    }
-    if (!this.SelectedTagsIDs.some((e) => e === Type.id)) {
-      this.SelectedTagsIDs.push(Type.id);
-    }
-    this.dropdownOpen = false;
-    this.GetQuestionBank(this.CurrentPage, this.PageSize);
-    this.validationErrors['tag'] = ``;
+selectType(Type: Tag, event?: Event): void {
+  if (event) {
+    event.stopPropagation();
   }
+  if (!this.tagsSelected.some((e) => e.id === Type.id)) {
+    this.tagsSelected.push(Type);
+  }
+  if (!this.SelectedTagsIDs.some((e) => e === Type.id)) {
+    this.SelectedTagsIDs.push(Type.id);
+  }
+  this.dropdownOpen = false;
+  this.GetQuestionBank(this.CurrentPage, this.PageSize);
+  this.validationErrors['tag'] = ``;
+}
 
-  removeSelected(id: number): void {
-    this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
-    this.SelectedTagsIDs = this.SelectedTagsIDs.filter((e) => e !== id);
-    this.GetQuestionBank(this.CurrentPage, this.PageSize);
+
+removeSelected(id: number, event?: Event): void {
+  if (event) {
+    event.stopPropagation();
   }
+  this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
+  this.SelectedTagsIDs = this.SelectedTagsIDs.filter((e) => e !== id);
+  this.GetQuestionBank(this.CurrentPage, this.PageSize);
+}
 
   goBack() {
     this.router.navigateByUrl(`Employee/Assignment`);
   }
 
-  openModal() {
-    this.assignmentQuestion = new AssignmentQuestionAdd()
-    this.SelectedLessonID = 0
-    this.SelectedTypeID = 0
-    this.selectedTagsIds = []
-    this.tagsSelected = []
-    this.Questions = []
-    this.selectedQuestions = []
-    this.questionTypeCounts = {};
-    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
+openModal() {
+  this.assignmentQuestion = new AssignmentQuestionAdd()
+  this.SelectedLessonID = 0
+  this.SelectedTypeID = 0
+  this.selectedTagsIds = []
+  this.clearTags();
+  this.Questions = []
+  this.selectedQuestions = []
+  this.questionTypeCounts = {};
+  const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
   }
+}
 
-  closeModal() {
-    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
-    }
-    this.assignment.fileFile = null;
+closeModal() {
+  const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
   }
+  this.assignment.fileFile = null;
+  
+  this.clearTags();
+}
+
+clearTags(): void {
+  this.tagsSelected = [];
+  this.SelectedTagsIDs = [];
+  this.tags = [];
+}
 
   getFormattedQuestionTypes(): string {
     return Object.entries(this.questionTypeCounts)

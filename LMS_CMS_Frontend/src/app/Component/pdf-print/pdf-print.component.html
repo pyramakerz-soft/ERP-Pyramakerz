@@ -8,9 +8,9 @@
             <img *ngIf="school?.reportImage" [src]="school.reportImage"
                 style="max-width: 120px; max-height: 120px; width: auto; height: auto;" />
         </div>
-        <div class="rtl text-end w-[40%]">
-            <p class="text-base font-semibold mb-1">{{ school?.reportHeaderOneAr }}</p>
-            <p class="text-sm">{{ school?.reportHeaderTwoAr }}</p>
+        <div class="rtl text-end w-[40%]" style="direction: rtl; unicode-bidi: isolate;">
+            <p class="text-base font-semibold mb-1" style="direction: rtl; unicode-bidi: isolate;">{{ school?.reportHeaderOneAr }}</p>
+            <p class="text-sm" style="direction: rtl; unicode-bidi: isolate;">{{ school?.reportHeaderTwoAr }}</p>
         </div>
     </div>
 
