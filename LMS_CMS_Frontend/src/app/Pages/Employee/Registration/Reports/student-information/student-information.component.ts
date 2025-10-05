@@ -134,30 +134,33 @@ export class StudentInformationComponent {
     }
   }
 
-  getAllStudents() {
-    this.studentServ
-      .GetByAcademicYearID(this.SelectedYearId, this.DomainName)
-      .subscribe((d) => {
-        this.Students = d;
-        this.filteredStudents = d; // Set filtered students to all initially
-      });
-  }
+getAllStudents() {
+  this.studentServ
+    .GetByAcademicYearID(this.SelectedYearId, this.DomainName)
+    .subscribe((d) => {
+      this.Students = d || [];
+      this.filteredStudents = d || [];
+    });
+}
 
-  onSchoolChange() {
-    this.SelectedYearId = 0;
-    this.SelectedStudentId = 0;
-    this.showTable = false;
-    this.showViewReportBtn = this.SelectedSchoolId !== 0;
-    this.getAllYears();
-  }
+onSchoolChange() {
+  this.SelectedYearId = 0;
+  this.SelectedStudentId = 0;
+  this.Students = [];
+  this.filteredStudents = [];
+  this.showTable = false;
+  this.showViewReportBtn = this.SelectedSchoolId !== 0;
+  this.getAllYears();
+}
 
-  onYearChange() {
-    this.SelectedStudentId = 0;
-    this.showTable = false;
-    this.showViewReportBtn =
-      this.SelectedSchoolId !== 0 && this.SelectedYearId !== 0;
-    this.getAllStudents();
-  }
+onYearChange() {
+  this.SelectedStudentId = 0;
+  this.Students = [];
+  this.filteredStudents = [];
+  this.showTable = false;
+  this.showViewReportBtn = this.SelectedSchoolId !== 0 && this.SelectedYearId !== 0;
+  this.getAllStudents();
+}
 
   onStudentChange() {
     this.showTable = false;

@@ -131,12 +131,29 @@ export class ProofRegistrationReportComponent {
     }
   }
 
-  getAllStudents() {
-    this.studentServ.GetByAcademicYearID(this.SelectedYearId ,this.DomainName).subscribe((d) => {
-      this.Students = d;
-      this.filteredStudents = d; 
-    });
-  }
+getAllStudents() {
+  this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
+    this.Students = d || [];
+    this.filteredStudents = d || []; 
+  });
+}
+
+  onSchoolChange() {
+  this.SelectedYearId = 0;
+  this.SelectedStudentId = 0;
+  this.Students = []; // Clear students array
+  this.filteredStudents = []; // Clear filtered students array
+  this.showTable = false;
+  this.getAllYears();
+}
+onYearChange() {
+  this.SelectedStudentId = 0;
+  this.Students = []; // Clear students array
+  this.filteredStudents = []; // Clear filtered students array
+  this.showTable = false;
+  this.getAllStudents();
+}
+
 
   searchStudents() {
     if (this.searchQuery) {
