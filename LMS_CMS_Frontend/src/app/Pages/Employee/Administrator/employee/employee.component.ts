@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -17,6 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-employee',
@@ -39,7 +39,7 @@ export class EmployeeComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  TableData: EmployeeGet[] = []
+  TableData: Employee[] = []
 
   keysArray: string[] = ['id', 'user_Name', 'ar_name', 'en_name', 'mobile', 'phone', 'email', 'address', 'role_Name', 'employeeTypeName'];
   key: string = "id";
@@ -156,7 +156,7 @@ export class EmployeeComponent {
     this.router.navigateByUrl(`Employee/Employee Details/${id}`)
   }
 
-  suspend(emp: EmployeeGet) {
+  suspend(emp: Employee) {
     let message = ""
     let doneMessage = ""
     let doneTitle = ""
@@ -217,7 +217,7 @@ export class EmployeeComponent {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: EmployeeGet[] = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName));
+      const data: Employee[] = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName));
       this.TableData = data || [];
 
       if (this.value !== "") {

@@ -31,6 +31,7 @@ namespace LMS_CMS_BL.DTO
         public string? LicenseNumber { get; set; }
         public string? ExpireDate { get; set; }
         public DateOnly? HireDate { get; set; }
+        public bool? HasAttendance { get; set; }
         public string? Address { get; set; }
         public long Role_ID { get; set; }
         public string? Role_Name { get; set; }

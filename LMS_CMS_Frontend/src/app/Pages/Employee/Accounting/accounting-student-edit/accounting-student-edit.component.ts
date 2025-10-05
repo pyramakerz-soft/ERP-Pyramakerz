@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { StudentService } from '../../../../Services/student.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AccountingEmployee } from '../../../../Models/Accounting/accounting-employee';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { AcademicDegree } from '../../../../Models/Administrator/academic-degree';
 import { Department } from '../../../../Models/Administrator/department';

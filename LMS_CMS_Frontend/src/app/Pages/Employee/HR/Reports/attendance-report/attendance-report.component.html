@@ -44,7 +44,7 @@
         <label for="SelectedEmpId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Employee' | translate }}</label>
         <select id="SelectedEmpId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId"
-            (change)="IsShowTabls = false">
+            (change)="GetEmployeeName(); IsShowTabls = false">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
             <option *ngFor="let ac of employees" [value]="ac.id">
                 {{ ac.en_name }}
@@ -61,11 +61,11 @@
     </div>
 </div>
 
-<!-- <div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
+<div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
-</div> -->
+</div>
 
 <div *ngIf="IsShowTabls" >
     <div class="w-full">
@@ -138,10 +138,22 @@
 </div>
 
 
-<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+<div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'" [infoRows]="getInfoData()"
-            [tableHeaders]="tableHeadersForPDF" [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
+                    {
+                        keyEn: 'Month: ' + this.month + '/' +this.year,
+                    }, 
+                    {
+                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
+                    },
+                    {
+                        keyEn: 'Job: ' + this.SelectedJobName,
+                    },
+                    {
+                        keyEn: 'Employee: ' + this.SelectedEmpName,
+                    }
+                    ]" [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
-</div> -->
+</div>

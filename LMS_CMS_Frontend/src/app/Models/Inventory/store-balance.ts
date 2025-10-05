@@ -2,7 +2,7 @@ export class StoreBalanceReport {
   constructor(
     public reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit' = 'QuantityOnly',
     public data: StoreBalanceItem[] = [],
-    public grandTotals?: { TotalQuantity: number; TotalValue?: number }
+    public grandTotals: { TotalQuantity: number; TotalValue?: number }
   ) {}
 }
 
@@ -30,7 +30,7 @@ export class StoreBalanceDetail {
     public storeName: string = '',
     public quantity: number = 0,
     public PurchasePrice?: number,
-    public value?: number,
+    public value: number | null = null,
     public AverageCost?: number
   ) {}
 }

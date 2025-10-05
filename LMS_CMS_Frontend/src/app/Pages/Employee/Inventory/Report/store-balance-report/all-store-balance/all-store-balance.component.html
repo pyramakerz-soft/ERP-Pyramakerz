@@ -142,25 +142,25 @@
                             }" 
                             class="border-t border-gray-300 text-xs md:text-sm">
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                                {{ getStoreData(item, store).quantity ?? '0' }}
+                                {{ getStoreData(item, store).quantity ?? '0' | number:(getStoreData(item, store).hasDecimalQuantity ? '1.2-2' : '1.0-0') }}
                             </td>
                             <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 {{ (getStoreData(item, store).price | number:'1.2-2') ?? '0' }}
                             </td>
                             <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                                {{ (getStoreData(item, store).value | number:'1.2-2') ?? '0' }}
+                                {{ (getStoreData(item, store).value | number:(getStoreData(item, store).hasDecimalValue ? '1.2-2' : '1.0-0') ) ?? '0' }}
                             </td>
                         </tr>
                         <!-- Store Total Row -->
                         <tr *ngIf="reportData?.data?.length" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
                             <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
-                                {{ getStoreTotalQuantity(store) | number:'1.0-0' }}
+                                {{ getStoreTotalQuantity(store).value | number:(getStoreTotalQuantity(store).hasDecimal ? '1.2-2' : '1.0-0') }}
                             </td>
                             <td *ngIf="showPriceColumn()" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
                                 -
                             </td>
                             <td *ngIf="showPriceColumn()" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
-                                {{ getStoreTotalValue(store) | number:'1.2-2' }}
+                                {{ getStoreTotalValue(store).value | number:(getStoreTotalValue(store).hasDecimal ? '1.2-2' : '1.0-0') }}
                             </td>
                         </tr>
                     </tbody>
@@ -201,13 +201,16 @@
                             </td>
                         </tr>
                         <!-- Grand Total Summary Row -->
-                        <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
-                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
-                                {{ reportType === 'QuantityOnly' ? 
-                                   (reportData?.grandTotals?.TotalQuantity | number:'1.0-0') : 
-                                   (reportData?.grandTotals?.TotalValue | number:'1.2-2') }}
-                            </td>
-                        </tr>
+<tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+    <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+        <ng-container *ngIf="reportType === 'QuantityOnly'">
+            {{ reportData?.grandTotals?.TotalQuantity ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalQuantity ?? 0) ? '1.2-2' : '1.0-0') }}
+        </ng-container>
+        <ng-container *ngIf="reportType !== 'QuantityOnly'">
+            {{ reportData?.grandTotals?.TotalValue ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalValue ?? 0) ? '1.2-2' : '1.0-0') }}
+        </ng-container>
+    </td>
+</tr>
                     </tbody>
                 </table>
             </div>

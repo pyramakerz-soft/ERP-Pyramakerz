@@ -31,18 +31,7 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   styleUrl: './loans.component.css',
 })
 export class LoansComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -292,7 +281,7 @@ export class LoansComponent {
     this.validationErrors = {};
     this.isModalVisible = true;
     this.getAllEmployees();
-    // this.getAllSaves()
+    this.getAllSaves()
   }
 
   getAllEmployees() {
@@ -303,11 +292,7 @@ export class LoansComponent {
 
   getAllSaves() {
     this.safes = [];
-    this.loan.safeID = 0;
-    this.SafeEmployeeServ.GetByEmployeeId(
-      this.loan.employeeID,
-      this.DomainName
-    ).subscribe((d) => {
+    this.SafeEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
       this.safes = d;
       console.log(this.safes);
     });

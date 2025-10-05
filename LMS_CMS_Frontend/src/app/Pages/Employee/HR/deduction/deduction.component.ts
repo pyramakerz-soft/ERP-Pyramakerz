@@ -57,6 +57,7 @@ export class DeductionComponent {
   isLoading = false;
 
   employees: Employee[] = [];
+  SelectedEmployee: Employee= new Employee();
   deductionType: DeductionType[] = [];
   CurrentPage: number = 1
   PageSize: number = 10
@@ -155,7 +156,7 @@ export class DeductionComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Deduction') + this.translate.instant('?'),
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Deduction') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -288,14 +289,16 @@ export class DeductionComponent {
         this.deduction[field] = 0 as never;
       }
     }
-    if(field=='minutes'){
-      if(this.deduction.minutes>60){
-        this.deduction.minutes=0
+    if (field == 'minutes') {
+      if (this.deduction.minutes > 60) {
+        this.deduction.minutes = 0
       }
     }
   }
 
   isFormValid(): boolean {
+   this.SelectedEmployee = this.employees.find(e => e.id == this.deduction.employeeID) || new Employee();
+   
     let isValid = true;
     for (const key in this.deduction) {
       if (this.deduction.hasOwnProperty(key)) {
@@ -314,17 +317,21 @@ export class DeductionComponent {
         }
       }
     }
+    if (this.SelectedEmployee.hasAttendance != true && (this.deduction.deductionTypeID == 1 || this.deduction.deductionTypeID == 2)) {
+      isValid = false;
+      this.validationErrors['deductionTypeID'] = 'This Employee Has No Attendance so should take deduction by amount only'
+    }
     if (this.deduction.deductionTypeID == 3 && (this.deduction.amount == 0 || this.deduction.amount == null)) {
       isValid = false;
-      this.validationErrors['amount']='amount is required'
+      this.validationErrors['amount'] = 'amount is required'
     }
     if (this.deduction.deductionTypeID == 2 && (this.deduction.numberOfDeductionDays == 0 || this.deduction.numberOfDeductionDays == null)) {
       isValid = false;
-      this.validationErrors['numberOfDeductionDays']='Number Of Bouns Days is required'
+      this.validationErrors['numberOfDeductionDays'] = 'Number Of Bouns Days is required'
     }
     if (this.deduction.deductionTypeID == 1 && (this.deduction.hours == 0 || this.deduction.hours == null)) {
       isValid = false;
-      this.validationErrors['hours']='hours is required'
+      this.validationErrors['hours'] = 'hours is required'
     }
     return isValid;
   }

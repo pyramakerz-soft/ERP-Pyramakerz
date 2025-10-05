@@ -418,11 +418,6 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             for (int i = 0; i < classes.Count; i++)
             {
-                //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                //    query => query.IsDeleted != true && query.ClassID == classes[i].ID,
-                //    query => query.Include(stu => stu.Student)
-                //);
-
                 List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                     query => query.IsDeleted != true && query.ClassID == classes[i].ID,
                     query => query.Include(stu => stu.Student)
@@ -430,7 +425,10 @@ namespace LMS_CMS_PL.Controllers.Domains
 
                 for (int j = 0; j < studentClassrooms.Count; j++)
                 {
-                    if (!students.Contains(studentClassrooms[j].Student))
+                    // Add check to ensure student is not deleted and not already in the list
+                    if (studentClassrooms[j].Student != null &&
+                        studentClassrooms[j].Student.IsDeleted != true &&
+                        !students.Contains(studentClassrooms[j].Student))
                     {
                         students.Add(studentClassrooms[j].Student);
                     }
@@ -446,7 +444,6 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(studentDTOs);
         }
-
         //  /////
 
         [HttpGet("GetBySchoolGradeClassID")]

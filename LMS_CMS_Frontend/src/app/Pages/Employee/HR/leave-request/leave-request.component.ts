@@ -19,8 +19,6 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import { AccountingEmployee } from '../../../../Models/Accounting/accounting-employee';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 
 @Component({
   selector: 'app-leave-request',
@@ -57,8 +55,8 @@ export class LeaveRequestComponent {
   validationErrors: { [key in keyof LeaveRequest]?: string } = {};
   isLoading = false;
 
-  employees: EmployeeGet[] = [];
-  selectedEmployee: EmployeeGet = new EmployeeGet();
+  employees: Employee[] = [];
+  selectedEmployee: Employee = new Employee();
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -179,6 +177,7 @@ export class LeaveRequestComponent {
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.leaveRequest = { ...d };
       this.OldleaveRequest = { ...d };
+      console.log(123,this.leaveRequest)
       // this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
     });
     this.openModal();

@@ -81,6 +81,32 @@
 
 <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
     <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
+        <input type="checkbox" id="Data.isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" disabled>
+        <label class="mb-2" for="Data.isRestrictedForLoctaion">   {{ 'is Restricted For Loctaion' | translate }}</label>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="ac"> {{ 'Locations' | translate }}</label>
+        <div class="relative">
+            <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                tabindex="0">
+                <ng-container *ngIf="locationsSelected.length > 0; else placeholder">
+                    <div class="flex flex-wrap">
+                        <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                            *ngFor="let selected of locationsSelected">
+                            {{ selected.name }}
+                        </span>
+                    </div>
+                </ng-container>
+                <ng-template #placeholder>
+                    <span class="text-gray-400">   {{ 'No Location Selected' | translate }}</span>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
+    <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" disabled>
         <label class="mb-2" for="isFloorMonitor">   {{ 'Floor Monitor' | translate }}</label>
     </div>

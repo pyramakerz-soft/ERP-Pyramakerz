@@ -15,12 +15,12 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import Swal from 'sweetalert2';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-subject-teacher',
   standalone: true,
@@ -44,7 +44,7 @@ export class SubjectTeacherComponent {
   subject: ClassroomSubject[] = []
   validationErrors: { [key in keyof ClassroomSubject]?: string } = {};
   isLoading = false;
-  employee: EmployeeGet = new EmployeeGet()
+  employee: Employee = new Employee()
 
   constructor(
     private router: Router, 

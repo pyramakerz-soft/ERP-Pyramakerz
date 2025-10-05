@@ -62,6 +62,9 @@ export class SalarySummaryComponent {
   SelectedEmpId: number = 0
   SelectedJobId: number = 0
   SelectedJobCatId: number = 0
+  SelectedJobName: string = '';
+  SelectedJobCatName: string = '';
+  SelectedEmpName: string = '';
   selectedMonth: string = '';
 
   constructor(
@@ -107,7 +110,7 @@ export class SalarySummaryComponent {
 
   GetAllData() {
     this.salaryHistory = []
-    this.SalaryReportsServ.GetSalarySummary(this.DomainName, this.month, this.year, this.SelectedEmpId , this.SelectedJobId , this.SelectedJobCatId).subscribe((d) => {
+    this.SalaryReportsServ.GetSalarySummary(this.DomainName, this.month, this.year, this.SelectedEmpId, this.SelectedJobId, this.SelectedJobCatId).subscribe((d) => {
       this.salaryHistory = d
     })
   }
@@ -137,6 +140,8 @@ export class SalarySummaryComponent {
     this.SelectedJobId = 0
     this.employees = []
     this.SelectedEmpId = 0
+    const selectedCategory = this.jobscat.find(c => c.id == this.SelectedJobCatId);
+    this.SelectedJobCatName = selectedCategory ? selectedCategory.name : '';
     this.JobServ.GetByCtegoty(this.SelectedJobCatId, this.DomainName).subscribe((d) => {
       this.jobs = d
     })
@@ -145,8 +150,104 @@ export class SalarySummaryComponent {
   getEmployeeByJops() {
     this.employees = []
     this.SelectedEmpId = 0
+    const selectedJob = this.jobs.find(c => c.id == this.SelectedJobId);
+    this.SelectedJobName = selectedJob ? selectedJob.name : '';
     this.EmployeeServ.GetWithJobId(this.SelectedJobId, this.DomainName).subscribe((d) => {
       this.employees = d
     })
+  }
+
+  GetEmployeeName(){
+    const selectedEmp = this.employees.find(c => c.id == this.SelectedEmpId);
+    this.SelectedEmpName = selectedEmp ? selectedEmp.en_name : '';
+  }
+
+  DownloadAsPDF() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => this.showPDF = false, 2000);
+    }, 500);
+  }
+
+  Print() {
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById("Data")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      document.body.appendChild(printContainer);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  async DownloadAsExcel() {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: "Salary Summary Report",
+        ar: "تقرير الموظفين"
+      },
+      // subHeaders: [
+      //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
+      // ],
+      infoRows: [
+        { key: 'Month', value: this.month +"/" + this.year|| '' },
+        { key: 'job Category', value: this.SelectedJobCatName || 'All Job Categories' },
+        { key: 'job', value: this.SelectedJobName || 'All Jobs' },
+        { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
+      ],
+      reportImage: '', // Add image URL if available
+      filename: "Salary_Summary_Report.xlsx",
+      tables: [
+        {
+          // title: "Payable Details",
+          headers: ['employeeEnName', 'basicSalary', 'totalBonus', 'totalOvertime', 'totalDeductions', 'totalLoans', 'netSalary'],
+          data: this.salaryHistory.map((row) => [
+            row.employeeEnName || 0,
+            row.basicSalary || '',
+            row.totalBonus || '',
+            row.totalOvertime || '',
+            row.totalDeductions || '',
+            row.totalLoans || '',
+            row.netSalary || '',
+          ])
+        }
+      ]
+    });
   }
 }

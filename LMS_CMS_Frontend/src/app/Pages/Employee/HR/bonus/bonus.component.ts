@@ -55,6 +55,7 @@ export class BonusComponent {
   validationErrors: { [key in keyof Bonus]?: string } = {};
   isLoading = false;
 
+  SelectedEmployee: Employee = new Employee();
   employees: Employee[] = [];
   bounsType: BounsType[] = [];
   CurrentPage: number = 1
@@ -153,7 +154,7 @@ export class BonusComponent {
   }
 
   Delete(id: number) {
-     Swal.fire({
+    Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Bonus') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
@@ -269,6 +270,7 @@ export class BonusComponent {
   getAllEmployees() {
     this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
       this.employees = d
+      console.log(this.employees)
     })
   }
 
@@ -294,6 +296,8 @@ export class BonusComponent {
   }
 
   isFormValid(): boolean {
+    this.SelectedEmployee = this.employees.find(e => e.id == this.bouns.employeeID) || new Employee();
+    console.log(123,this.SelectedEmployee)
     let isValid = true;
     for (const key in this.bouns) {
       if (this.bouns.hasOwnProperty(key)) {
@@ -311,6 +315,10 @@ export class BonusComponent {
           }
         }
       }
+    }
+    if (this.SelectedEmployee.hasAttendance != true && (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)) {
+      isValid = false;
+      this.validationErrors['bounsTypeID'] = 'This Employee Has No Attendance so should take bouns by amount only'
     }
     if (this.bouns.bounsTypeID == 3 && (this.bouns.amount == 0 || this.bouns.amount == null)) {
       isValid = false;

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AccountingEmployee } from '../../../../Models/Accounting/accounting-employee';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -36,6 +35,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -51,7 +51,7 @@ export class AccountingEmployeeEditComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  Data: AccountingEmployee = new AccountingEmployee();
+  Data: Employee = new Employee();
 
   DomainName: string = '';
   UserID: number = 0;
@@ -98,7 +98,7 @@ export class AccountingEmployeeEditComponent {
     period: 'AM'
   };
 
-  validationErrors: { [key in keyof AccountingEmployee]?: string } = {};
+  validationErrors: { [key in keyof Employee]?: string } = {};
   IsNationalIsEmpty: string = ''
 
   constructor(
@@ -303,6 +303,14 @@ export class AccountingEmployeeEditComponent {
     }
   }
 
+  selectAllDay() {
+    this.Data.days = [];
+    this.selectedDays= [];;
+   
+    this.Data.days = this.days.map(d=>d.id);
+    this.selectedDays= this.days
+  }
+
   removeDay(dayId: number) {
     this.selectedDays = this.selectedDays.filter((day) => day.id !== dayId);
     this.Data.days = this.Data.days.filter((id) => id !== dayId);
@@ -440,7 +448,7 @@ export class AccountingEmployeeEditComponent {
     });
   }
 
-  validateNumber(event: any, field?: keyof AccountingEmployee): void {
+  validateNumber(event: any, field?: keyof Employee): void {
     let value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
@@ -452,7 +460,7 @@ export class AccountingEmployeeEditComponent {
     }
   }
 
-  validateNumberOnly(event: any, field?: keyof AccountingEmployee): void {
+  validateNumberOnly(event: any, field?: keyof Employee): void {
     let value = event.target.value;
     value = value.replace(/[^0-9]/g, '')
     event.target.value = value;
@@ -466,10 +474,10 @@ export class AccountingEmployeeEditComponent {
     }
   }
 
-  capitalizeField(field: keyof AccountingEmployee): string {
+  capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-  onInputValueChange(event: { field: keyof AccountingEmployee; value: any }) {
+  onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;
     if (value) {
@@ -481,7 +489,7 @@ export class AccountingEmployeeEditComponent {
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
-        const field = key as keyof AccountingEmployee;
+        const field = key as keyof Employee;
         if (!this.Data[field]) {
           if (
             field == 'user_Name') {

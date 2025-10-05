@@ -5,7 +5,8 @@
     </h1>
 </div>
 
-<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+<div
+    class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
     <!-- Date To -->
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'Date To' | translate }}</label>
@@ -15,10 +16,12 @@
 
     <!-- Account Type Selector -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate
+            }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
             [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
-            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}
+            </option>
             <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">
                 {{ isRtl && option.arName ? option.arName : option.name | translate }}
             </option>
@@ -51,23 +54,26 @@
         <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Filters' | translate }}</label>
         <div class="flex flex-wrap gap-4">
             <div class="flex items-center">
-                <input type="checkbox" id="zeroBalance" [(ngModel)]="zeroBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+                <input type="checkbox" id="zeroBalance" [(ngModel)]="zeroBalance" (ngModelChange)="onFilterChange()"
+                    class="mr-2 accent-secondaryBg">
                 <label for="zeroBalance" class="text-sm text-gray-700">{{ 'Zero Balance' | translate }}</label>
             </div>
             <div class="flex items-center">
-                <input type="checkbox" id="positiveBalance" [(ngModel)]="positiveBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+                <input type="checkbox" id="positiveBalance" [(ngModel)]="positiveBalance"
+                    (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
                 <label for="positiveBalance" class="text-sm text-gray-700">{{ 'Positive Balance' | translate }}</label>
             </div>
             <div class="flex items-center">
-                <input type="checkbox" id="negativeBalance" [(ngModel)]="negativeBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+                <input type="checkbox" id="negativeBalance" [(ngModel)]="negativeBalance"
+                    (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
                 <label for="negativeBalance" class="text-sm text-gray-700">{{ 'Negative Balance' | translate }}</label>
             </div>
         </div>
     </div>
 
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!toDate || !linkFileID" [ngClass]="{
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()" [disabled]="!toDate || !linkFileID"
+            [ngClass]="{
                 'bg-gray-100 text-gray-300': !toDate || !linkFileID,
                 'secondaryBg text-white': toDate && linkFileID
             }">
@@ -82,12 +88,14 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
-  <!-- Add export buttons -->
-  <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
-  </div>  
+    <!-- Add export buttons -->
+    <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()"
+            [title]="'Download Excel' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()"
+            [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+    </div>
     <!-- Data Table -->
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
@@ -109,7 +117,8 @@
             </thead>
             <tbody>
                 <tr *ngIf="reportData.data.length === 0">
-                    <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    <td colspan="4"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
@@ -120,12 +129,10 @@
                 </td>
             </tr> -->
 
-                <tr *ngFor="let item of reportData.data; let i = index" 
-                    [ngClass]="{ 
+                <tr *ngFor="let item of reportData.data; let i = index" [ngClass]="{ 
                         'bg-[#F7F7F7]': i % 2 === 1, 
                         'bg-white': i % 2 !== 1
-                    }" 
-                    class="border-t border-gray-300 text-xs md:text-sm">
+                    }" class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.id }}
                     </td>
@@ -143,97 +150,95 @@
         </table>
     </div>
 
-    
+
     <!-- Totals Summary -->
     <div class="bg-gray-50 p-4 rounded-lg mb-4">
         <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.totals.totalDebit | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.totals.totalDebit |
+                number:'1.2-2' }}
             </div>
             <div>
-                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.totals.totalCredit | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.totals.totalCredit |
+                number:'1.2-2' }}
             </div>
             <div>
-                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.totals.differences | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.totals.differences |
+                number:'1.2-2' }}
             </div>
         </div>
     </div>
 
 
-<!-- Pagination -->
-<div class="mt-8 flex justify-between items-center">
-    <div class="flex items-center space-x-4 rtl:space-x-reverse">
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
-            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !reportData.data.length"
-            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !reportData.data.length}">
-            <i class="fa-solid fa-arrow-left"></i>
-            <p>{{'Previous'| translate }}</p>
-        </button>
+    <!-- Pagination -->
+    <div class="mt-8 flex justify-between items-center">
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !reportData.data.length}">
+                <i class="fa-solid fa-arrow-left"></i>
+                <p>{{'Previous'| translate }}</p>
+            </button>
 
-        <div class="flex">
-            <div *ngFor="let page of visiblePages"
-                class="rounded-lg py-[10px] w-[40px]"
-                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
-                (click)="changeCurrentPage(page)">
-                <p class="cursor-pointer text-center">{{ page }}</p>
+            <div class="flex">
+                <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
+                    [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                    (click)="changeCurrentPage(page)">
+                    <p class="cursor-pointer text-center">{{ page }}</p>
+                </div>
             </div>
+
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage+1)"
+                [disabled]="CurrentPage === TotalPages || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !reportData.data.length}">
+                <p>{{'Next'| translate }}</p>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </div>
-        
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
-            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || !reportData.data.length"
-            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !reportData.data.length}">
-            <p>{{'Next'| translate }}</p>
-            <i class="fa-solid fa-arrow-right"></i>
-        </button>
+
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <input type="number" (input)="validateNumberForPagination($event)"
+                class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1"
+                (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+            <p>{{'items Per Page'| translate }}</p>
+        </div>
+
+        <div>
+            <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'|
+                translate }})</p>
+        </div>
     </div>
 
-    <div class="flex items-center space-x-2 rtl:space-x-reverse">
-<input type="number" (input)="validateNumberForPagination($event)" 
-       class="rounded-lg border py-3 px-4 w-[73px]" 
-       [(ngModel)]="PageSize" min="1" 
-       (input)="validatePageSize($event)" 
-       (ngModelChange)="changeCurrentPage(CurrentPage)">
-        <p>{{'items Per Page'| translate }}</p>
+
+    <!-- PDF container (keep at the bottom) -->
+    <div class="absolute -top-[9999px] -left-[9999px]">
+        <div id="accountBalanceData" class="hidden">
+            <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Account Balance Report'" [infoRows]="[
+                    {
+                        keyEn: 'Date To: ' + this.toDate,
+                        keyAr: this.toDate + ': التاريخ إلى'
+                    },
+                    {
+                        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+                        keyAr: this.getLinkFileName(this.linkFileID) + ': نوع الحساب'
+                    },
+                    {
+                        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+                        keyAr: this.getAccountName(this.accountID) + ': الحساب'
+                    },
+                    ]" [tableDataWithHeaderArray]="cachedTableDataForPDF" #pdfComponentRef>
+            </app-pdf-print>
+        </div>
     </div>
 
-    <div>
-        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
-    </div>
-</div>
-
-
-<!-- PDF container (keep at the bottom) -->
-<div class="absolute -top-[9999px] -left-[9999px]">
-  <div id="accountBalanceData" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [school]="school" 
-                   [fileName]="'Account Balance Report'"
-[infoRows]="[
-  {
-    keyEn: 'Date To: ' + this.toDate,
-    keyAr: this.toDate + ': التاريخ إلى'
-  },
-  {
-    keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
-    keyAr: this.getLinkFileName(this.linkFileID) + ': نوع الحساب'
-  },
-  {
-    keyEn: 'Account: ' + this.getAccountName(this.accountID),
-    keyAr: this.getAccountName(this.accountID) + ': الحساب'
-  },
-]"
-                 [tableDataWithHeaderArray]="cachedTableDataForPDF"
-                   #pdfComponentRef>
-    </app-pdf-print>
-  </div>
-</div>
-
-<!--                     { keyEn: 'Date To: ' + toDate, keyAr: 'التاريخ إلى: ' + toDate },
+    <!--                     { keyEn: 'Date To: ' + toDate, keyAr: 'التاريخ إلى: ' + toDate },
                     { keyEn: 'Account Type: ' + getLinkFileName(linkFileID), keyAr: 'نوع الحساب: ' + getLinkFileName(linkFileID) },
                     { keyEn: 'Account: ' + getAccountName(accountID), keyAr: 'الحساب: ' + getAccountName(accountID) },
                     { keyEn: 'Generated On: ' + new Date().toLocaleDateString(), keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString() } -->
 
-                    <!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <!-- <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
             [infoRows]="[

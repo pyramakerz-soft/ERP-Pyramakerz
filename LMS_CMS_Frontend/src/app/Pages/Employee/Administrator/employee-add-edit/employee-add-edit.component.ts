@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
@@ -29,6 +28,7 @@ import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LocationService } from '../../../../Services/Employee/HR/location.service';
 import { Location } from '../../../../Models/HR/location';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-employee-add-edit',
@@ -45,7 +45,7 @@ export class EmployeeAddEditComponent {
   path: string = '';
   isRtl: boolean = false;
   subscription!: Subscription;
-  Data: EmployeeGet = new EmployeeGet();
+  Data: Employee = new Employee();
   BusCompany: BusType[] = [];
   Roles: Role[] = [];
   empTypes: EmployeeTypeGet[] = [];
@@ -54,7 +54,7 @@ export class EmployeeAddEditComponent {
   RoleId: number = 0;
   EmpType: number = 0;
   EmpId: number = 0;
-  validationErrors: { [key in keyof EmployeeGet]?: string } = {};
+  validationErrors: { [key in keyof Employee]?: string } = {};
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   DeletedFiles: number[] = [];
   SelectedFiles: EmployeeAttachment[] = [];
@@ -283,7 +283,7 @@ export class EmployeeAddEditComponent {
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
-        const field = key as keyof EmployeeGet;
+        const field = key as keyof Employee;
         if (!this.Data[field]) {
           if (
             field == 'user_Name' ||
@@ -336,11 +336,11 @@ export class EmployeeAddEditComponent {
     return isValid;
   }
 
-  capitalizeField(field: keyof EmployeeGet): string {
+  capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  onInputValueChange(event: { field: keyof EmployeeGet; value: any }) {
+  onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;
     if (value) {
@@ -348,7 +348,7 @@ export class EmployeeAddEditComponent {
     }
   }
 
-  validateNumber(event: any, field: keyof EmployeeGet): void {
+  validateNumber(event: any, field: keyof Employee): void {
     let value = event.target.value;
     value = value.replace(/[^0-9]/g, '')
     event.target.value = value;

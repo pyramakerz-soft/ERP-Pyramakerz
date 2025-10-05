@@ -117,29 +117,71 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             leaveRequestsGetDTO Dto = mapper.Map<leaveRequestsGetDTO>(leaveRequest);
 
-            // Get current month and year
-            var currentDate = DateTime.UtcNow;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+                         .First_Or_Default(s => s.ID == 1);
 
-            // Filter leave requests for the current month only
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
+            var currentDate = Dto.Date;
+            var startDay = salaryConfigration.StartDay;
+            var fromPrevious = salaryConfigration.FromPreviousMonth;
+
+            DateOnly periodStart;
+            DateOnly periodEnd;
+
+            // Case 1: Salary cycle starts from current month
+            if (!fromPrevious)
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+            else
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-                .FindBy(l => l.EmployeeID == Dto.EmployeeID
-                          && l.IsDeleted != true
-                          && l.Date.Month == currentMonth
-                          && l.Date.Year == currentYear);
+                 .FindBy(l => l.EmployeeID == Dto.EmployeeID
+                           && l.IsDeleted != true
+                           && l.Date >= periodStart
+                           && l.Date <= periodEnd);
 
-            // Sum up hours and minutes
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);
 
-            // Convert total minutes into hours and remaining minutes
+            // Convert total minutes to hours and remaining minutes
             allHours += allMinutes / 60;
             allMinutes = allMinutes % 60;
 
-            // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
             Dto.Used = allHours + (allMinutes / 60.0m);
-
             Dto.Remains = (decimal)(Dto.MonthlyLeaveRequestBalance - Dto.Used);
 
             return Ok(Dto);
