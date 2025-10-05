@@ -25,17 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
-        private readonly IConfiguration configuration;
-        private readonly DomainService _domainService;
+        private readonly FileUploadsService _fileService;
 
-        public AnnouncementController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, IConfiguration configuration, DomainService domainService)
+        public AnnouncementController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
-            this.configuration = configuration;
-            _domainService = domainService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -60,27 +58,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
             List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcements);
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
-
-            if (isProduction)
+             
+            foreach (var announcement in announcementGetDTO)
             {
-                AmazonS3Client s3Client = new AmazonS3Client();
-                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
-                foreach (var announcement in announcementGetDTO)
-                {
-                    announcement.ImageLink = s3Service.GetFileUrl(announcement.ImageLink);
-                }
-            }
-            else
-            { 
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                foreach (var announcement in announcementGetDTO)
-                {
-                    if (!string.IsNullOrEmpty(announcement.ImageLink))
-                    {
-                        announcement.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
-                    }
-                }
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
             }
 
             return Ok(announcementGetDTO);
@@ -111,27 +92,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcements);
              
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
-
-            if (isProduction)
+            foreach (var announcement in announcementGetDTO)
             {
-                AmazonS3Client s3Client = new AmazonS3Client();
-                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
-                foreach (var announcement in announcementGetDTO)
-                {
-                    announcement.ImageLink = s3Service.GetFileUrl(announcement.ImageLink);
-                }
-            }
-            else
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                foreach (var announcement in announcementGetDTO)
-                {
-                    if (!string.IsNullOrEmpty(announcement.ImageLink))
-                    {
-                        announcement.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
-                    }
-                }
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
             }
 
             return Ok(announcementGetDTO);
@@ -159,22 +122,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
             AnnouncementGetDTO announcementGetDTO = mapper.Map<AnnouncementGetDTO>(announcement);
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
-
-            if (isProduction)
-            {
-                AmazonS3Client s3Client = new AmazonS3Client();
-                S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
-                announcementGetDTO.ImageLink = s3Service.GetFileUrl(announcement.ImageLink); 
-            }
-            else
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(announcement.ImageLink))
-                {
-                    announcementGetDTO.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
-                } 
-            } 
+            
+            announcementGetDTO.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
 
             return Ok(announcementGetDTO);
         }
@@ -226,48 +175,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             {
                 return BadRequest(returnFileInput);
             }
-             
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
 
             if (NewAnnouncement.ImageFile != null)
             {
-                bool uploaded = false;
-                if (isProduction)
-                {
-                    var domain = _domainService.GetDomain(HttpContext);
-                    string subDomain = Request.Headers["Domain-Name"].ToString();
-                    AmazonS3Client s3Client = new AmazonS3Client();
-                    S3Service s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
-
-                    uploaded = await s3Service.UploadFileAsync(NewAnnouncement.ImageFile, $"Administration/Announcement/{announcement.ID}", $"{domain}/{subDomain}");
-                    if (uploaded)
-                        announcement.ImageLink = $"Administration/Announcement/{announcement.ID}/{NewAnnouncement.ImageFile.FileName}";
-                }
-                else
-                {
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Announcement");
-                    var subjectFolder = Path.Combine(baseFolder, announcement.ID.ToString());
-                    if (!Directory.Exists(subjectFolder))
-                    {
-                        Directory.CreateDirectory(subjectFolder);
-                    }
-
-                    if (NewAnnouncement.ImageFile != null)
-                    {
-                        if (NewAnnouncement.ImageFile.Length > 0)
-                        {
-                            var filePath = Path.Combine(subjectFolder, NewAnnouncement.ImageFile.FileName);
-                            using (var stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await NewAnnouncement.ImageFile.CopyToAsync(stream);
-                            }
-                        }
-                    }
-                    announcement.ImageLink = Path.Combine("Uploads", "Announcement", announcement.ID.ToString(), NewAnnouncement.ImageFile.FileName);
-                }
-            }
-
-            Unit_Of_Work.announcement_Repository.Update(announcement);
+                announcement.ImageLink = await _fileService.UploadFileAsync(NewAnnouncement.ImageFile, "Administration/Announcement", announcement.ID, HttpContext);
+                Unit_Of_Work.announcement_Repository.Update(announcement);
+            } 
 
             foreach (long userTypeID in NewAnnouncement.UserTypeIDs)
             {
@@ -351,68 +264,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 }
             }
 
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
-
-            if (EditAnnouncement.ImageFile != null)
+            if(EditAnnouncement.ImageFile != null)
             {
-                if (isProduction)
-                {
-                    var domain = _domainService.GetDomain(HttpContext);
-                    string subDomain = Request.Headers["Domain-Name"].ToString();
-
-                    var s3Client = new AmazonS3Client();
-                    var s3Service = new S3Service(s3Client, configuration, "AWS:Bucket", "AWS:Folder");
-
-                    // Delete old file if exists
-                    if (!string.IsNullOrEmpty(announcementExists.ImageLink))
-                    {
-                        string oldKey = announcementExists.ImageLink; 
-                        await s3Service.DeleteFileAsync($"Administration/Announcement/{EditAnnouncement.ID}", $"{domain}/{subDomain}", Path.GetFileName(oldKey));
-                    }
-
-                    // Upload new file
-                    bool uploaded = await s3Service.UploadFileAsync(EditAnnouncement.ImageFile, $"Administration/Announcement/{EditAnnouncement.ID}", $"{domain}/{subDomain}");
-                    if (uploaded)
-                        EditAnnouncement.ImageLink = $"{configuration["AWS:Folder"]}/{domain}/{subDomain}/Administration/Announcement/{EditAnnouncement.ID}/{EditAnnouncement.ImageFile.FileName}";
-                }
-                else
-                {
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Announcement");
-                    var announcementFolder = Path.Combine(baseFolder, EditAnnouncement.ID.ToString());
-
-                    if (System.IO.File.Exists(announcementFolder))
-                    {
-                        System.IO.File.Delete(announcementFolder); // Delete the old file
-                    }
-
-                    if (Directory.Exists(announcementFolder))
-                    {
-                        Directory.Delete(announcementFolder, true);
-                    }
-
-                    if (!Directory.Exists(announcementFolder))
-                    {
-                        Directory.CreateDirectory(announcementFolder);
-                    }
-
-                    if (EditAnnouncement.ImageFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(announcementFolder, EditAnnouncement.ImageFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await EditAnnouncement.ImageFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    EditAnnouncement.ImageLink = Path.Combine("Uploads", "Announcement", EditAnnouncement.ID.ToString(), EditAnnouncement.ImageFile.FileName);
-                }
-            } 
+                EditAnnouncement.ImageLink = await _fileService.ReplaceFileAsync(
+                    EditAnnouncement.ImageFile,
+                    announcementExists.ImageLink,
+                    "Administration/Announcement",
+                    announcementExists.ID,
+                    HttpContext
+                );
+            }
             else
             {
-                EditAnnouncement.ImageLink = imageLinkExists;
+                EditAnnouncement.ImageLink = announcementExists.ImageLink;
             }
 
             mapper.Map(EditAnnouncement, announcementExists);
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             announcementExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

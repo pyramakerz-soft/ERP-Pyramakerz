@@ -24,13 +24,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public DiscussionRoomController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        public DiscussionRoomController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +66,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     discussionRoom.ImageLink = $"{serverUrl}{discussionRoom.ImageLink.Replace("\\", "/")}";
                 }
             }
+            foreach (var discussionRoom in discussionRoomGetDTO)
+            {
+                discussionRoom.ImageLink = _fileService.GetFileUrl(discussionRoom.ImageLink, Request);
+            }
 
             return Ok(discussionRoomGetDTO);
         }
@@ -90,12 +96,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             DiscussionRoomGetDTO discussionRoomGetDTO = mapper.Map<DiscussionRoomGetDTO>(discussionRoom);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(discussionRoom.ImageLink))
-            {
-                discussionRoomGetDTO.ImageLink = $"{serverUrl}{discussionRoomGetDTO.ImageLink.Replace("\\", "/")}";
-            }
+             
+            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request);
 
             return Ok(discussionRoomGetDTO);
         }
@@ -120,12 +122,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             DiscussionRoomGetDTO discussionRoomGetDTO = mapper.Map<DiscussionRoomGetDTO>(discussionRoom);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(discussionRoom.ImageLink))
-            {
-                discussionRoomGetDTO.ImageLink = $"{serverUrl}{discussionRoomGetDTO.ImageLink.Replace("\\", "/")}";
-            }
+             
+            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request);
 
             return Ok(discussionRoomGetDTO);
         }
@@ -180,36 +178,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             Unit_Of_Work.discussionRoom_Repository.Add(discussionRoom);
             Unit_Of_Work.SaveChanges();
-
-            if(NewDiscussionRoom.ImageFile != null)
+              
+            if (NewDiscussionRoom.ImageFile != null)
             {
-                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewDiscussionRoom.ImageFile);
-                if (returnFileInput != null)
-                {
-                    return BadRequest(returnFileInput);
-                }
-
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/DiscussionRoom"); 
-                var discussionRoomFolder = Path.Combine(baseFolder, discussionRoom.ID.ToString()); 
-                if (!Directory.Exists(discussionRoomFolder))
-                {
-                    Directory.CreateDirectory(discussionRoomFolder);
-                }
-
-                if (NewDiscussionRoom.ImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(discussionRoomFolder, NewDiscussionRoom.ImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewDiscussionRoom.ImageFile.CopyToAsync(stream);
-                    }
-                } 
-
-                discussionRoom.ImageLink = Path.Combine("Uploads", "DiscussionRoom", discussionRoom.ID.ToString(), NewDiscussionRoom.ImageFile.FileName);
+                discussionRoom.ImageLink = await _fileService.UploadFileAsync(NewDiscussionRoom.ImageFile, "LMS/DiscussionRoom", discussionRoom.ID, HttpContext);
                 Unit_Of_Work.discussionRoom_Repository.Update(discussionRoom);
             }
-
-
+             
             foreach (long studentClassID in NewDiscussionRoom.StudentClassrooms)
             {
                 StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(g => g.ID == studentClassID);
@@ -305,40 +280,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (EditDiscussionRoom.ImageFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/DiscussionRoom");
-                var discussionRoomFolder = Path.Combine(baseFolder, EditDiscussionRoom.ID.ToString());
-
-                if (System.IO.File.Exists(discussionRoomFolder))
-                {
-                    System.IO.File.Delete(discussionRoomFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(discussionRoomFolder))
-                {
-                    Directory.Delete(discussionRoomFolder, true);
-                }
-
-                if (!Directory.Exists(discussionRoomFolder))
-                {
-                    Directory.CreateDirectory(discussionRoomFolder);
-                }
-
-                if (EditDiscussionRoom.ImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(discussionRoomFolder, EditDiscussionRoom.ImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await EditDiscussionRoom.ImageFile.CopyToAsync(stream);
-                    }
-                }
-
-                EditDiscussionRoom.ImageLink = Path.Combine("Uploads", "DiscussionRoom", EditDiscussionRoom.ID.ToString(), EditDiscussionRoom.ImageFile.FileName);
+                EditDiscussionRoom.ImageLink = await _fileService.ReplaceFileAsync(
+                    EditDiscussionRoom.ImageFile,
+                    imageLinkExists,
+                    "LMS/DiscussionRoom",
+                    EditDiscussionRoom.ID,
+                    HttpContext
+                );
             }
             else
             {
                 EditDiscussionRoom.ImageLink = imageLinkExists;
             }
-
+              
             mapper.Map(EditDiscussionRoom, discussionRoomExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             discussionRoomExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

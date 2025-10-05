@@ -29,8 +29,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly UserTreeService _userTreeService;
         private readonly ValidTeachersForStudentService _validTeachersForStudentService;
         private readonly ChatMessageService _chatMessageService;
+        private readonly FileUploadsService _fileService;
 
-        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService, ValidTeachersForStudentService validTeachersForStudentService, ChatMessageService chatMessageService)
+        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService, ValidTeachersForStudentService validTeachersForStudentService, ChatMessageService chatMessageService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -39,6 +40,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             _userTreeService = userTreeService;
             _validTeachersForStudentService = validTeachersForStudentService;
             _chatMessageService = chatMessageService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -186,14 +188,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 };
                  
                 if (chatDto.ChatMessageAttachments != null && chatDto.ChatMessageAttachments.Count > 0)
-                {
-                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                { 
                     foreach (var item in chatDto.ChatMessageAttachments)
-                    {
-                        if (!string.IsNullOrEmpty(item.FileLink))
-                        {
-                            item.FileLink = $"{serverUrl}{item.FileLink.Replace("\\", "/")}";
-                        }
+                    { 
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
                     }
                 }
 
@@ -294,18 +292,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
                 result.Add(chatDto);
             } 
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var chatMessage in result)
             {
                 if (chatMessage.ChatMessageAttachments != null && chatMessage.ChatMessageAttachments.Count > 0)
                 {
                     foreach (var item in chatMessage.ChatMessageAttachments)
-                    {
-                        if (!string.IsNullOrEmpty(item.FileLink))
-                        {
-                            item.FileLink = $"{serverUrl}{item.FileLink.Replace("\\", "/")}";
-                        }
+                    { 
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
                     }
                 }
             }
@@ -365,14 +359,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             foreach (var chatMessage in chatMessagesGetDTO)
             {
                 if (chatMessage.ChatMessageAttachments != null && chatMessage.ChatMessageAttachments.Count > 0)
-                {
-                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                { 
                     foreach (var item in chatMessage.ChatMessageAttachments)
                     {
-                        if (!string.IsNullOrEmpty(item.FileLink))
-                        {
-                            item.FileLink = $"{serverUrl}{item.FileLink.Replace("\\", "/")}";
-                        }
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
                     }
                 }
 
@@ -588,26 +578,26 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
            
                 if (NewMessage.ChatMessageAttachmentFiles != null && NewMessage.ChatMessageAttachmentFiles.Count != 0)
                 {
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
-                    var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
-                    if (!Directory.Exists(chatFolder))
-                    {
-                        Directory.CreateDirectory(chatFolder);
-                    }
+                    //var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
+                    //var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
+                    //if (!Directory.Exists(chatFolder))
+                    //{
+                    //    Directory.CreateDirectory(chatFolder);
+                    //}
                     foreach (var file in NewMessage.ChatMessageAttachmentFiles)
                     {
                         ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
                         chatMessageAttachment.ChatMessageID = chat.ID;
 
-                        if (file.Length > 0)
-                        {
-                            var filePath = Path.Combine(chatFolder, file.FileName);
-                            using (var stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await file.CopyToAsync(stream);
-                            }
-                        }
-                        chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), file.FileName);
+                        //if (file.Length > 0)
+                        //{
+                        //    var filePath = Path.Combine(chatFolder, file.FileName);
+                        //    using (var stream = new FileStream(filePath, FileMode.Create))
+                        //    {
+                        //        await file.CopyToAsync(stream);
+                        //    }
+                        //} 
+                        chatMessageAttachment.FileLink = await _fileService.UploadFileAsync(file, "Communication/ChatMessage", chat.ID, HttpContext);
                         Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
                     }
                 }
@@ -781,26 +771,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
            
             if (NewMessage.ChatMessageAttachmentFiles != null && NewMessage.ChatMessageAttachmentFiles.Count != 0)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
-                var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
-                if (!Directory.Exists(chatFolder))
-                {
-                    Directory.CreateDirectory(chatFolder);
-                }
+                //var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
+                //var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
+                //if (!Directory.Exists(chatFolder))
+                //{
+                //    Directory.CreateDirectory(chatFolder);
+                //}
                 foreach (var file in NewMessage.ChatMessageAttachmentFiles)
                 {
                     ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
                     chatMessageAttachment.ChatMessageID = chat.ID;
 
-                    if (file.Length > 0)
-                    {
-                        var filePath = Path.Combine(chatFolder, file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-                    }
-                    chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), file.FileName);
+                    //if (file.Length > 0)
+                    //{
+                    //    var filePath = Path.Combine(chatFolder, file.FileName);
+                    //    using (var stream = new FileStream(filePath, FileMode.Create))
+                    //    {
+                    //        await file.CopyToAsync(stream);
+                    //    }
+                    //}
+                    //chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), file.FileName);
+                    chatMessageAttachment.FileLink = await _fileService.UploadFileAsync(file, "Communication/ChatMessage", chat.ID, HttpContext);
                     Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
                 }
             }

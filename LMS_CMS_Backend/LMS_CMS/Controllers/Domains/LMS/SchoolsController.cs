@@ -25,13 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public SchoolsController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService)
+        public SchoolsController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _fileImageValidationService = fileImageValidationService;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
 
@@ -65,16 +67,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<School_GetDTO>schoolDTO =mapper.Map<List<School_GetDTO>>(Schools);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var school in schoolDTO)
             {
-                if (!string.IsNullOrEmpty(school.ReportImage))
-                {
-                    school.ReportImage = $"{serverUrl}{school.ReportImage.Replace("\\", "/")}";
-                }
+                school.ReportImage = _fileService.GetFileUrl(school.ReportImage, Request);
             }
-
 
             return Ok(schoolDTO);
         }
@@ -108,13 +105,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             School_GetDTO schoolDTO = mapper.Map<School_GetDTO>(School);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(schoolDTO.ReportImage))
-            {
-                schoolDTO.ReportImage = $"{serverUrl}{schoolDTO.ReportImage.Replace("\\", "/")}";
-            }
              
+            schoolDTO.ReportImage = _fileService.GetFileUrl(schoolDTO.ReportImage, Request);
+
             return Ok(schoolDTO);
         }
 
@@ -241,72 +234,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return accessCheck;
                 }
             }
-
+             
             if (newSchool.ReportImageFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SchoolHeaderImages");
-                var oldSchoolFolder = Path.Combine(baseFolder, nameExists);
-                var SchoolFolder = Path.Combine(baseFolder, newSchool.Name);
-
-                string existingFilePath = Path.Combine(baseFolder, nameExists);
-
-                if (System.IO.File.Exists(existingFilePath))
-                {
-                    System.IO.File.Delete(existingFilePath); // Delete the old file
-                }
-
-                if (Directory.Exists(oldSchoolFolder))
-                {
-                    Directory.Delete(oldSchoolFolder, true);
-                }
-
-                if (!Directory.Exists(SchoolFolder))
-                {
-                    Directory.CreateDirectory(SchoolFolder);
-                }
-
-                if (newSchool.ReportImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(SchoolFolder, newSchool.ReportImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await newSchool.ReportImageFile.CopyToAsync(stream);
-                    }
-                }
-
-                newSchool.ReportImage = Path.Combine("Uploads", "SchoolHeaderImages", newSchool.Name, newSchool.ReportImageFile.FileName);
+                newSchool.ReportImage = await _fileService.ReplaceFileAsync(
+                    newSchool.ReportImageFile,
+                    iconLinkExists,
+                    "Administration/SchoolHeader",
+                    school.ID,
+                    HttpContext
+                );
             }
             else
             {
-                if(iconLinkExists != null)
-                {
-                    if (newSchool.Name != nameExists)
-                    {
-                        var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SchoolHeaderImages");
-                        var oldSubjectFolder = Path.Combine(baseFolder, nameExists);
-                        var newSubjectFolder = Path.Combine(baseFolder, newSchool.Name);
-
-                        // Rename the folder if it exists
-                        if (Directory.Exists(oldSubjectFolder))
-                        {
-                            if (!Directory.Exists(newSubjectFolder))
-                            {
-                                Directory.CreateDirectory(newSubjectFolder);
-                            }
-
-                            var files = Directory.GetFiles(oldSubjectFolder);
-                            foreach (var file in files)
-                            {
-                                var fileName = Path.GetFileName(file);
-                                var destFile = Path.Combine(newSubjectFolder, fileName);
-                                System.IO.File.Move(file, destFile);
-                            }
-
-                            Directory.Delete(oldSubjectFolder);
-                        }
-                    }
-                    newSchool.ReportImage = Path.Combine("Uploads", "SchoolHeaderImages", newSchool.Name, Path.GetFileName(iconLinkExists));
-                }
+                newSchool.ReportImage = iconLinkExists;
             }
 
             mapper.Map(newSchool, school);

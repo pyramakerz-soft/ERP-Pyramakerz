@@ -176,6 +176,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<SendNotificationService>();
             builder.Services.AddScoped<ValidTeachersForStudentService>(); 
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<FileUploadsService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {

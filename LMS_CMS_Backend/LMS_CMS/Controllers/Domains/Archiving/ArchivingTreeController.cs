@@ -27,17 +27,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public ArchivingTreeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
+        public ArchivingTreeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         private List<ArchivingTreeGetDTO> BuildHierarchy(List<ArchivingTree> allArchivingTrees, List<long> ArchivingTreeIDs, long? parentId = null)
         {
             string serverUrl = $"{Request.Scheme}://{Request.Host}/"; 
@@ -48,7 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     ID = ac.ID,
                     Name = ac.Name,
-                    FileLink = !string.IsNullOrEmpty(ac.FileLink) ? $"{serverUrl}{ac.FileLink.Replace("\\", "/")}" : "",
+                    FileLink = _fileService.GetFileUrl(ac.FileLink, Request), 
                     ArchivingTreeParentID = ac.ArchivingTreeParentID,
                     InsertedByUserId = ac.InsertedByUserId ?? 0, 
                     Children = BuildHierarchy(allArchivingTrees, ArchivingTreeIDs, ac.ID)
@@ -218,19 +220,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
 
             if(accountingTreeChartGetDTO.FileLink != null)
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                accountingTreeChartGetDTO.FileLink = $"{serverUrl}{accountingTreeChartGetDTO.FileLink.Replace("\\", "/")}";
+            { 
+                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request);
             }
 
-            if(accountingTreeChartGetDTO.Children.Count > 0)
+            if (accountingTreeChartGetDTO.Children.Count > 0)
             {
                 foreach(var child in accountingTreeChartGetDTO.Children)
                 {
                     if (child.FileLink != null)
-                    {
-                        string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                        child.FileLink = $"{serverUrl}{child.FileLink.Replace("\\", "/")}";
+                    { 
+                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request);
                     }
                 }
             }
@@ -305,9 +305,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
 
             if(accountingTreeChartGetDTO.FileLink != null)
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                accountingTreeChartGetDTO.FileLink = $"{serverUrl}{accountingTreeChartGetDTO.FileLink.Replace("\\", "/")}";
+            { 
+                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request);
             }
 
             if (accountingTreeChartGetDTO.Children.Count > 0)
@@ -315,9 +314,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 foreach (var child in accountingTreeChartGetDTO.Children)
                 {
                     if (child.FileLink != null)
-                    {
-                        string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                        child.FileLink = $"{serverUrl}{child.FileLink.Replace("\\", "/")}";
+                    { 
+                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request);
                     }
                 }
             }
@@ -441,26 +439,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if (NewArchiving.FileFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Archiving");
-                var archiveFolder = Path.Combine(baseFolder, archivingTree.ID.ToString());
-                if (!Directory.Exists(archiveFolder))
-                {
-                    Directory.CreateDirectory(archiveFolder);
-                }
-
-                if (NewArchiving.FileFile.Length > 0)
-                {
-                    var filePath = Path.Combine(archiveFolder, NewArchiving.FileFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewArchiving.FileFile.CopyToAsync(stream);
-                    }
-                }
-
-                archivingTree.FileLink = Path.Combine("Uploads", "Archiving", archivingTree.ID.ToString(), NewArchiving.FileFile.FileName);
+                archivingTree.FileLink = await _fileService.UploadFileAsync(NewArchiving.FileFile, "Archiving/Archiving", archivingTree.ID, HttpContext);
                 Unit_Of_Work.archivingTree_Repository.Update(archivingTree);
             }
-            Unit_Of_Work.SaveChanges();
 
             foreach (var permId in permissionGroupIDs)
             {

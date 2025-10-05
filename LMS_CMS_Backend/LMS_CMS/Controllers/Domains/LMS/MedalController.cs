@@ -25,13 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public MedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        public MedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         [HttpGet]
@@ -52,14 +54,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<MedalGetDTO> DTO = mapper.Map<List<MedalGetDTO>>(medals);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var item in DTO)
             {
-                if (!string.IsNullOrEmpty(item.ImageLink))
-                {
-                    item.ImageLink = $"{serverUrl}{item.ImageLink.Replace("\\", "/")}";
-                }
+                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request);
             }
 
             return Ok(DTO);
@@ -85,12 +83,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             MedalGetDTO DTO = mapper.Map<MedalGetDTO>(medals);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(DTO.ImageLink))
-            {
-                DTO.ImageLink = $"{serverUrl}{DTO.ImageLink.Replace("\\", "/")}";
-            }
+             
+            DTO.ImageLink = _fileService.GetFileUrl(DTO.ImageLink, Request);
 
             return Ok(DTO);
         }
@@ -136,8 +130,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest(returnFileInput);
                 }
             }
-
-
+             
             Medal medal = mapper.Map<Medal>(newMedal);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -153,30 +146,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             medal.ImageLink = "1";
             Unit_Of_Work.medal_Repository.Add(medal);
             Unit_Of_Work.SaveChanges();
-
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Medal");
-            var medalFolder = Path.Combine(baseFolder, medal.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+             
+            if (newMedal.ImageForm != null)
             {
-                Directory.CreateDirectory(medalFolder);
+                medal.ImageLink = await _fileService.UploadFileAsync(newMedal.ImageForm, "LMS/Medal", medal.ID, HttpContext);
+                Unit_Of_Work.medal_Repository.Update(medal);
+                Unit_Of_Work.SaveChanges();
             }
-
-            if (newMedal.ImageForm != null && newMedal.ImageForm.Length > 0)
-            {
-                var fileName = Path.GetFileName(newMedal.ImageForm.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newMedal.ImageForm.CopyToAsync(stream);
-                }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
-
-            }
-
-            Unit_Of_Work.medal_Repository.Update(medal);
-            Unit_Of_Work.SaveChanges();
             return Ok(newMedal);
         }
 
@@ -220,7 +196,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             Medal medal = Unit_Of_Work.medal_Repository.Select_By_Id(newModal.ID);
 
-            string imageLinkExists = newModal.ImageLink;
+            string imageLinkExists = medal.ImageLink;
+
             if (medal == null || medal.IsDeleted == true)
             {
                 return NotFound("No Medal with this ID");
@@ -238,36 +215,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newModal.ImageForm != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Medal");
-                var oldMedalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-                var medalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-
-
-                if (System.IO.File.Exists(oldMedalFolder))
-                {
-                    System.IO.File.Delete(oldMedalFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(oldMedalFolder))
-                {
-                    Directory.Delete(oldMedalFolder, true);
-                }
-
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                var fileName = Path.GetFileName(newModal.ImageForm.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newModal.ImageForm.CopyToAsync(stream);
-                }
-                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
-
+                medal.ImageLink = await _fileService.ReplaceFileAsync(
+                    newModal.ImageForm,
+                    imageLinkExists,
+                    "LMS/Medal",
+                    newModal.ID,
+                    HttpContext
+                );
             }
-
+            else
+            {
+                medal.ImageLink = imageLinkExists;
+            } 
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medal.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
