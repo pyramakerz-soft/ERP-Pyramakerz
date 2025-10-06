@@ -25,13 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileWordPdfValidationService _fileWordPdfValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public AssignmentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileWordPdfValidationService fileWordPdfValidationService)
+        public AssignmentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileWordPdfValidationService fileWordPdfValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileWordPdfValidationService = fileWordPdfValidationService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -85,15 +87,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AssignmentGetDTO> AssignmentGetDTOs = mapper.Map<List<AssignmentGetDTO>>(Assignment);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var AssignmentGetDTO in AssignmentGetDTOs)
             {
-                if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-                {
-                    AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-                }
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
             }
 
             var paginationMetadata = new
@@ -164,15 +161,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AssignmentGetDTO> AssignmentGetDTOs = mapper.Map<List<AssignmentGetDTO>>(Assignment);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var AssignmentGetDTO in AssignmentGetDTOs)
             {
-                if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-                {
-                    AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-                }
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
             }
 
             var paginationMetadata = new
@@ -235,13 +227,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-            {
-                AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-            }
+             
+            AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
 
             return Ok(AssignmentGetDTO);
         }
@@ -659,57 +646,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             // Add For The first Time
             if (assignmentExists.LinkFile == null && EditAssignment.FileFile != null)
-            {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Assignment");
-                var assignmentFolder = Path.Combine(baseFolder, assignmentExists.ID.ToString());
-                if (!Directory.Exists(assignmentFolder))
-                {
-                    Directory.CreateDirectory(assignmentFolder);
-                }
-
-                if (EditAssignment.FileFile != null)
-                {
-                    if (EditAssignment.FileFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(assignmentFolder, EditAssignment.FileFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await EditAssignment.FileFile.CopyToAsync(stream);
-                        }
-                    }
-                }
-
-                assignmentExists.LinkFile = Path.Combine("Uploads", "Assignment", assignmentExists.ID.ToString(), EditAssignment.FileFile.FileName);
+            { 
+                assignmentExists.LinkFile = await _fileService.UploadFileAsync(EditAssignment.FileFile, "LMS/Assignment", assignmentExists.ID, HttpContext); 
             }
 
             // Edit the existing
             if (assignmentExists.LinkFile != null && EditAssignment.FileFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Assignment");
-                var assignmentFolder = Path.Combine(baseFolder, assignmentExists.ID.ToString());
-
-                if (Directory.Exists(assignmentFolder))
-                {
-                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), assignmentExists.LinkFile);
-                    if (System.IO.File.Exists(oldFilePath))
-                    {
-                        System.IO.File.Delete(oldFilePath);
-                    }
-                }
-                else
-                {
-                    Directory.CreateDirectory(assignmentFolder);
-                }
-
-                if (EditAssignment.FileFile.Length > 0)
-                {
-                    var newFilePath = Path.Combine(assignmentFolder, EditAssignment.FileFile.FileName);
-                    using (var stream = new FileStream(newFilePath, FileMode.Create))
-                    {
-                        await EditAssignment.FileFile.CopyToAsync(stream);
-                    }
-                    assignmentExists.LinkFile = Path.Combine("Uploads", "Assignment", assignmentExists.ID.ToString(), EditAssignment.FileFile.FileName);
-                }
+                assignmentExists.LinkFile = await _fileService.ReplaceFileAsync(
+                    EditAssignment.FileFile,
+                    assignmentExists.LinkFile,
+                    "LMS/Assignment",
+                    assignmentExists.ID,
+                    HttpContext
+                ); 
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using LMS_CMS_PL.Services.FileValidations;
+using System;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -30,8 +31,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly SendNotificationService _sendNotificationService;
         private readonly RequestService _requestService;
         private readonly ValidTeachersForStudentService _validTeachersForStudentService;
+        private readonly FileUploadsService _fileService;
 
-        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, SendNotificationService sendNotificationService, RequestService requestService, ValidTeachersForStudentService validTeachersForStudentService)
+        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, SendNotificationService sendNotificationService, RequestService requestService, ValidTeachersForStudentService validTeachersForStudentService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -40,6 +42,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             _sendNotificationService = sendNotificationService;
             _requestService = requestService;
             _validTeachersForStudentService = validTeachersForStudentService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -132,12 +135,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
 
             foreach (var request in requestsGetDTO)
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(request.FileLink))
-                {
-                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
-                }
+            { 
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
                  
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -149,7 +148,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     (request.ForwardedToEnglishName, request.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedToID.Value, 1);
                 }
-            }
+            } 
 
             return Ok(requestsGetDTO);
         }
@@ -201,12 +200,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
 
             foreach (var request in requestsGetDTO)
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(request.FileLink))
-                {
-                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
-                }
+            { 
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
                  
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -271,12 +266,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
 
             foreach (var request in requestsGetDTO)
-            {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(request.FileLink))
-                {
-                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
-                }
+            { 
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
 
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -335,12 +326,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             RequestGetDTO requestGetDTO = mapper.Map<RequestGetDTO>(request);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(requestGetDTO.FileLink))
-            {
-                requestGetDTO.FileLink = $"{serverUrl}{requestGetDTO.FileLink.Replace("\\", "/")}";
-            }
+             
+            requestGetDTO.FileLink = _fileService.GetFileUrl(requestGetDTO.FileLink, Request);
 
             (requestGetDTO.SenderEnglishName, requestGetDTO.SenderArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.SenderID, requestGetDTO.SenderUserTypeID);
             (requestGetDTO.ReceiverEnglishName, requestGetDTO.ReceiverArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ReceiverID, requestGetDTO.ReceiverUserTypeID);
@@ -624,41 +611,32 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if (request.FileLink != null)
             {
-                var normalizedFileLink = request.FileLink.Replace('\\', Path.DirectorySeparatorChar);
-                 
-                var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedFileLink);
-
-                if (System.IO.File.Exists(originalFilePath))
+                try
                 {
-                    // Create new request folder
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Request");
-                    var newRequestFolder = Path.Combine(baseFolder, newRequest.ID.ToString());
+                    string newFilePath = await _fileService.CopyFileAsync(
+                        request.FileLink,
+                        "Communication/Request",
+                        newRequest.ID,
+                        HttpContext
+                    );
 
-                    if (!Directory.Exists(newRequestFolder))
+                    if (!string.IsNullOrEmpty(newFilePath))
                     {
-                        Directory.CreateDirectory(newRequestFolder);
+                        newRequest.FileLink = newFilePath;
+                        Unit_Of_Work.request_Repository.Update(newRequest);
+                        Unit_Of_Work.SaveChanges();
                     }
-
-                    // Get the filename from the original path
-                    var fileName = Path.GetFileName(request.FileLink);
-
-                    // Create new file path
-                    var newFilePath = Path.Combine(newRequestFolder, fileName);
-
-                    // Copy the file
-                    System.IO.File.Copy(originalFilePath, newFilePath, overwrite: true);
-                     
-                    newRequest.FileLink = Path.Combine("Uploads", "Request", newRequest.ID.ToString(), fileName);
-                    Unit_Of_Work.request_Repository.Update(newRequest); 
+                    else
+                    {
+                        return BadRequest("Failed to copy one or more files.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return BadRequest("File doesn't exists in this route");
-                } 
+                    return BadRequest($"Error copying file: {ex.Message}");
+                }
             }
-
-            Unit_Of_Work.SaveChanges();
-
+             
             var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
 
             await _requestService.NotifyNewRequest(newRequest.SenderID, newRequest.SenderUserTypeID, domainName);
@@ -806,30 +784,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Unit_Of_Work.request_Repository.Add(request);
             Unit_Of_Work.SaveChanges();
-
+             
             if (NewRequest.FileFile != null)
-            { 
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Request");
-                var requestFolder = Path.Combine(baseFolder,request.ID.ToString());
-                if (!Directory.Exists(requestFolder))
-                {
-                    Directory.CreateDirectory(requestFolder);
-                }
-
-                if (NewRequest.FileFile.Length > 0)
-                {
-                    var filePath = Path.Combine(requestFolder, NewRequest.FileFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewRequest.FileFile.CopyToAsync(stream);
-                    }
-                }
-
-                request.FileLink = Path.Combine("Uploads", "Request", request.ID.ToString(), NewRequest.FileFile.FileName);
+            {
+                request.FileLink = await _fileService.UploadFileAsync(NewRequest.FileFile, "Communication/Request", request.ID, HttpContext);
                 Unit_Of_Work.request_Repository.Update(request);
+                Unit_Of_Work.SaveChanges();
             } 
-
-            Unit_Of_Work.SaveChanges();
 
             await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
             await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);

@@ -23,13 +23,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public LessonActivityController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
+        public LessonActivityController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,14 +63,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<LessonActivityGetDTO> lessonActivitiesDTO = mapper.Map<List<LessonActivityGetDTO>>(lessonActivities);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var lessonActivity in lessonActivitiesDTO)
             {
                 if (!string.IsNullOrEmpty(lessonActivity.AttachmentLink) &&
-                    lessonActivity.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                    lessonActivity.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                 {
-                    lessonActivity.AttachmentLink = $"{serverUrl}{lessonActivity.AttachmentLink.Replace("\\", "/")}";
+                    lessonActivity.AttachmentLink = _fileService.GetFileUrl(lessonActivity.AttachmentLink, Request);
                 }
             }
 
@@ -113,16 +114,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var lessonActivityTypes = Unit_Of_Work.lessonActivityType_Repository
                 .FindBy(s => s.IsDeleted != true);
             if (lessonActivityTypes == null || lessonActivityTypes.Count == 0)
-                return NotFound("No LessonActivityType");
+                return NotFound("No LessonActivity Type");
 
             var lessonActivitiesDTO = mapper.Map<List<LessonActivityGetDTO>>(lessonActivities);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in lessonActivitiesDTO)
             {
                 if (!string.IsNullOrEmpty(item.AttachmentLink) &&
-                    item.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                    item.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                 {
-                    item.AttachmentLink = $"{serverUrl}{item.AttachmentLink.Replace("\\", "/")}";
+                    item.AttachmentLink = _fileService.GetFileUrl(item.AttachmentLink, Request);
                 }
             }
 
@@ -167,13 +168,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             LessonActivityGetDTO lessonActivitieDTO = mapper.Map<LessonActivityGetDTO>(lessonActivitie);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             if (!string.IsNullOrEmpty(lessonActivitieDTO.AttachmentLink) &&
-                lessonActivitieDTO.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                    lessonActivitieDTO.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
             {
-                lessonActivitieDTO.AttachmentLink = $"{serverUrl}{lessonActivitieDTO.AttachmentLink.Replace("\\", "/")}";
-            } 
+                lessonActivitieDTO.AttachmentLink = _fileService.GetFileUrl(lessonActivitieDTO.AttachmentLink, Request);
+            }
 
             return Ok(lessonActivitieDTO);
         }
@@ -239,27 +239,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             Unit_Of_Work.lessonActivity_Repository.Add(lessonActivity);
             Unit_Of_Work.SaveChanges();
-
+             
             if (NewLessonActivity.AttachmentFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                var lessFolder = Path.Combine(baseFolder, lessonActivity.ID.ToString());
-                if (!Directory.Exists(lessFolder))
-                {
-                    Directory.CreateDirectory(lessFolder);
-                }
-
-                if (NewLessonActivity.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessFolder, NewLessonActivity.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewLessonActivity.AttachmentFile.CopyToAsync(stream);
-                    }
-                }
-
-                lessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", lessonActivity.ID.ToString(), NewLessonActivity.AttachmentFile.FileName);
+                lessonActivity.AttachmentLink = await _fileService.UploadFileAsync(NewLessonActivity.AttachmentFile, "LMS/LessonActivity", lessonActivity.ID, HttpContext);
                 Unit_Of_Work.lessonActivity_Repository.Update(lessonActivity);
+
+                Unit_Of_Work.SaveChanges();
             }
             return Ok();
         }
@@ -329,56 +315,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             if (EditLessonActivity.AttachmentFile != null)
-            {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                var lessFolder = Path.Combine(baseFolder, EditLessonActivity.ID.ToString());
-
-                if (System.IO.File.Exists(lessFolder))
-                {
-                    System.IO.File.Delete(lessFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(lessFolder))
-                {
-                    Directory.Delete(lessFolder, true);
-                }
-
-                if (!Directory.Exists(lessFolder))
-                {
-                    Directory.CreateDirectory(lessFolder);
-                }
-
-                if (EditLessonActivity.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessFolder, EditLessonActivity.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await EditLessonActivity.AttachmentFile.CopyToAsync(stream);
-                    }
-                }
-
-                EditLessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", lessonActivityExists.ID.ToString(), EditLessonActivity.AttachmentFile.FileName);
+            { 
+                EditLessonActivity.AttachmentLink = await _fileService.ReplaceFileAsync(
+                    EditLessonActivity.AttachmentFile,
+                    lessonActivityExists.AttachmentLink,
+                    "LMS/LessonActivity",
+                    EditLessonActivity.ID,
+                    HttpContext
+                ); 
             }
             else
             {
                 if (!string.IsNullOrEmpty(lessonActivityExists.AttachmentLink))
                 {
-                    if (lessonActivityExists.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                    if (lessonActivityExists.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                     {
-                        var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                        var oldLessonResourceFolder = Path.Combine(baseFolder, lessonActivityExists.ID.ToString());
-
-                        string existingFilePath = Path.Combine(baseFolder, lessonActivityExists.ID.ToString());
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-
-                        if (Directory.Exists(oldLessonResourceFolder))
-                        {
-                            Directory.Delete(oldLessonResourceFolder, true);
-                        }
+                        await _fileService.DeleteFileAsync(
+                            lessonActivityExists.AttachmentLink,
+                            "LMS/LessonActivity",
+                            lessonActivityExists.ID,
+                            HttpContext
+                        ); 
                     }
                 }
             }

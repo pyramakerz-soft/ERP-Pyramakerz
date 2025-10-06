@@ -742,6 +742,12 @@ export class NavMenuComponent {
           this.requestService.notifyRequestOpened(); 
         },
         error => {
+          Swal.fire({
+            icon: 'error',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
           this.isLoading = false;
         }
       ); 
@@ -1075,8 +1081,7 @@ export class NavMenuComponent {
     } 
   }
 
-  SendTheRequest(){
-    console.log(this.requestToBeSend)
+  SendTheRequest(){ 
     this.isLoading = true; 
     this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
       (result: any) => { 
