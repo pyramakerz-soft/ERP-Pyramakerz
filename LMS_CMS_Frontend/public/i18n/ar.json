@@ -1216,10 +1216,11 @@
   "Student's Id Number": "رقم هوية الطالب",
   "Religion": "الديانة",
   "Place To Birth": "مكان الولادة",
-  "Pre-School": "مرحلة ما قبل المدرسة"
-
-
-
+  "Pre-School": "مرحلة ما قبل المدرسة",
+  "Inventory Transaction Report Detailed": "تقرير حركة المخزون مفصل",
+  "Opening Balances": "الأرصدة الافتتاحية",
+  "Total Price": "السعر الإجمالي",
+  "Item ID": "معرّف المادة"
 
 
 
