@@ -135,6 +135,19 @@ export class EmployeeSalaryDetailedComponent {
     }
   }
 
+  getTotal(fieldHours: keyof MonthlyAttendance, fieldMinutes: keyof MonthlyAttendance): string {
+    let totalMinutes = this.monthlyAttendenc.reduce((acc, row) => {
+      const hours = Number(row[fieldHours]) || 0;
+      const minutes = Number(row[fieldMinutes]) || 0;
+      return acc + (hours * 60 + minutes);
+    }, 0);
+
+    const totalHours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+
+    return `${totalHours} : ${remainingMinutes.toString().padStart(2, '0')}`;
+  }
+
   getJobsCategory() {
     this.JobCategoriesServ.Get(this.DomainName).subscribe((d) => {
       this.jobscat = d
@@ -168,7 +181,7 @@ export class EmployeeSalaryDetailedComponent {
     this.SelectedEmpName = selectedEmp ? selectedEmp.en_name : '';
   }
 
-    async DownloadAsPDF() {
+  async DownloadAsPDF() {
     await this.getPDFData();
     this.showPDF = true;
     setTimeout(() => {
@@ -184,8 +197,8 @@ export class EmployeeSalaryDetailedComponent {
       row['Day'] = d.day;
       row['Day Status'] = d.dayStatusName;
       row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
-      row['Leave Request in Hours'] =  d.leaveRequestHours + ':' + d.leaveRequestMinutes;
-      row['Overtime in Hours'] =   d.overtimeHours + ':' + d.overtimeMinutes ;
+      row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
+      row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
       row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
       return row;
     });

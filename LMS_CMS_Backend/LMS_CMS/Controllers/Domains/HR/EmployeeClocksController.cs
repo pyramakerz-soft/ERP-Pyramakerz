@@ -75,7 +75,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             var employeeClocks = Unit_Of_Work.employeeClocks_Repository
                 .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId )
-                .OrderByDescending(t => t.Date)
+                .OrderBy(t => t.Date)
                 .ToList();
 
             if (employeeClocks == null || employeeClocks.Count == 0)

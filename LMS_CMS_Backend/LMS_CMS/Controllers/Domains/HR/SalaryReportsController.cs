@@ -79,7 +79,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     a => a.EmployeeId == EmpId && a.Day >= periodStart && a.Day <= periodEnd,
                     query => query.Include(b => b.DayStatus));
 
-            monthlyAttendances= monthlyAttendances.OrderByDescending(b => b.Day).ToList();
+            monthlyAttendances= monthlyAttendances.OrderBy(b => b.Day).ToList();
 
             if (monthlyAttendances == null || monthlyAttendances.Count == 0)
             {
@@ -97,7 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             List<MonthlyAttendanceGetDTO> MonthlyAttendanceGetDTO = mapper.Map<List<MonthlyAttendanceGetDTO>>(monthlyAttendances);
             SalaryHistoryGetDTO SalaryHistoryGetDTO = mapper.Map<SalaryHistoryGetDTO>(AllSalaryHistory);
 
-            return Ok(new { MonthlyAttendance = MonthlyAttendanceGetDTO, SalaryHistory = SalaryHistoryGetDTO });
+            return Ok(new { MonthlyAttendance = MonthlyAttendanceGetDTO, SalaryHistory = SalaryHistoryGetDTO , });
         }
 
         ////////////////////////////////
@@ -149,7 +149,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     a => a.EmployeeId == EmpId && a.Day >= periodStart && a.Day <= periodEnd,
                     query => query.Include(b => b.DayStatus));
 
-            monthlyAttendances = monthlyAttendances.OrderByDescending(b => b.Day).ToList();
+            monthlyAttendances = monthlyAttendances.OrderBy(b => b.Day).ToList();
             if (monthlyAttendances == null || monthlyAttendances.Count == 0)
             {
                 return NotFound();
