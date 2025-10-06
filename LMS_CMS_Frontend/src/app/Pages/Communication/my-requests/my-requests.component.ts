@@ -617,6 +617,12 @@ export class MyRequestsComponent {
         this.isLocalNotification = false  
       },
       error => {
+        Swal.fire({
+          icon: 'error',
+          text: error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
         this.isLoading = false;
       }
     ); 

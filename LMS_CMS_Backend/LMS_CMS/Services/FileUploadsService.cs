@@ -130,5 +130,106 @@ namespace LMS_CMS_PL.Services
                 return Path.Combine("Uploads", basePath, entityId.ToString(), newFile.FileName);
             }
         }
+
+        public async Task<string> CopyFileAsync(string sourceFilePath, string basePath, long entityId, HttpContext httpContext)
+        {
+            if (string.IsNullOrEmpty(sourceFilePath))
+                return string.Empty;
+
+            bool isProduction = _configuration.GetValue<bool>("IsProduction");
+
+            if (isProduction)
+            { 
+                var domain = _domainService.GetDomain(httpContext);
+                string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
+
+                var s3Client = new AmazonS3Client();
+                var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
+
+                string fileName = Path.GetFileName(sourceFilePath);
+                string destinationKey = $"{basePath}/{entityId}/{fileName}";
+                 
+                string sourceKey = sourceFilePath.Replace("\\", "/");
+
+                bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, $"{domain}/{subDomain}");
+                if (copied)
+                {
+                    return destinationKey;
+                }
+
+                return string.Empty;
+            }
+            else
+            { 
+                var normalizedSource = sourceFilePath.Replace('\\', Path.DirectorySeparatorChar);
+                var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedSource);
+
+                if (!System.IO.File.Exists(originalFilePath))
+                    throw new FileNotFoundException("File not found.", originalFilePath);
+
+                var destinationFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", basePath, entityId.ToString());
+
+                if (!Directory.Exists(destinationFolder))
+                    Directory.CreateDirectory(destinationFolder);
+
+                var fileName = Path.GetFileName(sourceFilePath);
+                var destinationFilePath = Path.Combine(destinationFolder, fileName);
+
+                System.IO.File.Copy(originalFilePath, destinationFilePath, overwrite: true);
+
+                return Path.Combine("Uploads", basePath, entityId.ToString(), fileName);
+            }
+        }
+
+        public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long entityId, HttpContext httpContext)
+        {
+            if (string.IsNullOrEmpty(filePath))
+                return false;
+
+            bool isProduction = _configuration.GetValue<bool>("IsProduction");
+
+            try
+            {
+                if (isProduction)
+                {
+                    var domain = _domainService.GetDomain(httpContext);
+                    string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
+
+                    var s3Client = new AmazonS3Client();
+                    var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
+
+                    string fileName = Path.GetFileName(filePath);
+                    bool deleted = await s3Service.DeleteFileAsync($"{basePath}/{entityId}", $"{domain}/{subDomain}", fileName);
+
+                    return deleted;
+                }
+                else
+                {
+                    var normalizedPath = filePath.Replace('\\', Path.DirectorySeparatorChar);
+                    var fullFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedPath);
+
+                    if (System.IO.File.Exists(fullFilePath))
+                    {
+                        System.IO.File.Delete(fullFilePath);
+                    }
+
+                    var folderPath = Path.GetDirectoryName(fullFilePath);
+                    if (!string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath))
+                    {
+                        if (!Directory.EnumerateFileSystemEntries(folderPath).Any())
+                        {
+                            Directory.Delete(folderPath);
+                        }
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting file: {ex.Message}");
+                return false;
+            }
+        }
     }
 }
