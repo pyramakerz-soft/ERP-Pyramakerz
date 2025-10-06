@@ -329,4 +329,110 @@ isLargeTable(data: any[]): boolean {
   // Consider a table large if it has more than 10 rows
   return data && data.length > 10;
 }
+
+
+// @Input() certificateType: 'default' | 'kindergarten' = 'default';
+// @Input() studentData: any = null;
+
+// // Add this new ViewChild for the kindergarten certificate container
+// @ViewChild('kindergartenContainer') kindergartenContainer!: ElementRef;
+
+// // Add this new method for kindergarten certificate PDF download
+// downloadKindergartenPDF() {
+//   if (this.school?.reportImage?.startsWith('http')) {
+//     this.convertImgToBase64URL(this.school.reportImage).then((base64Img) => {
+//       this.school.reportImage = base64Img;
+//       setTimeout(() => this.printKindergartenPDF(), 100);
+//     });
+//   } else {
+//     setTimeout(() => this.printKindergartenPDF(), 100);
+//   }
+// }
+
+// // Add this new method for generating kindergarten certificate PDF
+// printKindergartenPDF() {
+//   const opt = {
+//     margin: [0.3, 0.3, 0.3, 0.3],
+//     filename: `${this.fileName}.pdf`,
+//     image: { 
+//       type: 'jpeg', 
+//       quality: 0.98 
+//     },
+//     html2canvas: { 
+//       scale: 2,
+//       useCORS: true,
+//       letterRendering: true,
+//       allowTaint: false
+//     },
+//     jsPDF: { 
+//       unit: 'in', 
+//       format: 'a4', 
+//       orientation: 'portrait',
+//       compress: true
+//     }
+//   };
+
+//   const container = this.kindergartenContainer.nativeElement;
+//   const originalStyle = container.style.cssText;
+  
+//   container.style.cssText += `
+//     font-size: 12px !important;
+//     line-height: 1.4 !important;
+//     color: #000 !important;
+//   `;
+
+//   html2pdf()
+//     .from(container)
+//     .set(opt)
+//     .save()
+//     .then(() => {
+//       container.style.cssText = originalStyle;
+//     })
+//     .catch((error: any) => {
+//       console.error('PDF generation failed:', error);
+//       container.style.cssText = originalStyle;
+//     });
+// }
+
+// // Add this new method for printing kindergarten certificate
+// printKindergartenCertificate() {
+//   const printContents = this.kindergartenContainer.nativeElement.innerHTML;
+
+//   const printStyle = `
+//     <style>
+//       @page { size: auto; margin: 0mm; }
+//       body { 
+//         margin: 0; 
+//       }
+
+//       @media print {
+//         body > *:not(#print-container) {
+//           display: none !important;
+//         }
+//         #print-container {
+//           display: block !important;
+//           position: static !important;
+//           top: auto !important;
+//           left: auto !important;
+//           width: 100% !important;
+//           height: auto !important;
+//           background: white !important;
+//           box-shadow: none !important;
+//           margin: 0 !important;
+//         }
+//       }
+//     </style>
+//   `;
+
+//   const printContainer = document.createElement('div');
+//   printContainer.id = 'print-container';
+//   printContainer.innerHTML = printStyle + printContents;
+
+//   document.body.appendChild(printContainer);
+//   window.print();
+  
+//   setTimeout(() => {
+//     document.body.removeChild(printContainer);
+//   }, 100);
+// }
 }

@@ -90,7 +90,7 @@
             'bg-gray-100 text-gray-300': !dateFrom || !dateTo || selectedStoreId === undefined || selectedFlagIds.length === 0, 
             'secondaryBg text-white': dateFrom && dateTo && selectedStoreId !== undefined && selectedFlagIds.length > 0
         }">
-{{'View Report'| translate }}
+            {{'View Report'| translate }}
         </button>
     </div>
 </div>
@@ -110,15 +110,16 @@
             <div class="mb-8">
                 <!-- Invoice Header -->
                 <div class="p-2 rounded-top mb-2 bg-primary-100">
-                    <h5 class="primaryTxt font-semibold text-xl leading-9">{{ section.header }}</h5>
+                    {{section.header}}
+                    <h5 class="primaryTxt font-semibold text-xl leading-9">{{ section.header | translate }}</h5>
                 </div>
 
                 <!-- Summary Information - Optimized -->
                 <div class="mb-4 p-3 border rounded-2xl shadow-sm bg-[#EBEBEB]">
                     <div class="grid grid-cols-2 gap-2">
                         <ng-container *ngFor="let item of section.summary; trackBy: trackBySummaryItem">
-                            <div class="font-semibold p-2">{{ item.key }}</div>
-                            <div class="p-2">{{ item.value }}</div>
+                            <div class="font-semibold p-2">{{ item.key | translate }}</div>
+                            <div class="p-2">{{ item.value | translate }}</div>
                         </ng-container>
                     </div>
                 </div>

@@ -231,7 +231,7 @@
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeFeesTypes">
                             <select [(ngModel)]="row.feeTypeID"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                                <option value=0 disabled selected hidden>Select a FeesTypes</option>
+                                <option value=0 disabled selected hidden>Select FeesTypes</option>
                                 <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
                                 <option *ngIf="FeesTypes.length === 0" disabled selected>No Data Found</option>
                             </select>

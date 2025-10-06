@@ -111,8 +111,8 @@
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' | translate }}</p>
             </label>
             <input id="firstReportUpload" type="file" class="hidden" 
-                   (change)="onFileUpload($event, 'firstReport')" 
-                   accept="image/jpeg, image/png, image/jpg" />
+                   (change)="onFirstReportFileSelected($event)" 
+                   accept="image/jpeg, image/png" />
         </div>
     </div>
     <span *ngIf="validationErrors['firstReport']" class="text-red-500 font-normal text-xs md:text-sm">
@@ -135,8 +135,8 @@
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' | translate }}</p>
             </label>
             <input id="secReportUpload" type="file" class="hidden" 
-                   (change)="onFileUpload($event, 'secReport')" 
-                   accept="image/jpeg, image/png, image/jpg" />
+                   (change)="onSecReportFileSelected($event)" 
+                   accept="image/jpeg, image/png" />
         </div>
     </div>
     <span *ngIf="validationErrors['secReport']" class="text-red-500 font-normal text-xs md:text-sm">

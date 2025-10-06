@@ -97,13 +97,23 @@ export class EmployeeClocksComponent {
   }
 
   formatTime(value: string | null): string {
-    if (!value) return '';
-    // Take only HH:mm:ss part
-    return value.split('.')[0];
+    if (!value || value === '00:00:00') {
+      return ''; // will show --:-- in input
+    }
+
+    // keep only HH:mm part
+    const [hour, minute] = value.split(':');
+    return `${hour}:${minute}`;
   }
 
   onTimeChange(row: any, field: 'clockIn' | 'clockOut', event: string) {
-    row[field] = event.length === 5 ? event + ':00' : event; // save as "HH:mm:ss"
+    if (!event) {
+      row[field] = '00:00:00'; // reset to default
+      return;
+    }
+
+    // ensure it's always saved in HH:mm:ss format
+    row[field] = event.length === 5 ? `${event}:00` : event;
   }
 
   GetAllData() {
@@ -112,7 +122,7 @@ export class EmployeeClocksComponent {
       this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
         (data) => {
           this.TableData = data;
-          console.log(this.TableData);
+          console.log(this.TableData ,data);
         },
         (error) => {
           Swal.fire({

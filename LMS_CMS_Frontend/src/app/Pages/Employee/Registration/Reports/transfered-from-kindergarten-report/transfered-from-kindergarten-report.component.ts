@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { AcademicYear } from '../../../../../Models/LMS/academic-year';
 import { School } from '../../../../../Models/school';
 import { Student } from '../../../../../Models/student';
@@ -17,18 +16,21 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import html2pdf from 'html2pdf.js';
+// import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
+
 @Component({
   selector: 'app-transfered-from-kindergarten-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './transfered-from-kindergarten-report.component.html',
   styleUrl: './transfered-from-kindergarten-report.component.css'
 })
 export class TransferedFromKindergartenReportComponent {
 
- User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   File: any;
   DomainName: string = '';
@@ -54,14 +56,15 @@ export class TransferedFromKindergartenReportComponent {
   showTable: boolean = false
   SelectedStudent: Student = new Student()
   searchQuery: string = '';
-  isSearching: boolean = false; // Track search mode
+  isSearching: boolean = false;
   filteredStudents: Student[] = [];
 
   DataToPrint: any = null
-  CurrentDate : any =new Date()
-  ArabicCurrentDate : any =new Date()
+  CurrentDate: any = new Date()
+  ArabicCurrentDate: any = new Date()
   direction: string = "";
-  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+
+  @ViewChild('kindergartenContainer') kindergartenContainer!: ElementRef;
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -97,17 +100,17 @@ export class TransferedFromKindergartenReportComponent {
     });
     this.getAllSchools()
     this.getAllYears()
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {
@@ -125,21 +128,19 @@ export class TransferedFromKindergartenReportComponent {
   toggleSearchMode() {
     this.isSearching = !this.isSearching;
     if (!this.isSearching) {
-      // Reset to the full list when exiting search mode
       this.filteredStudents = this.Students;
     }
   }
 
   getAllStudents() {
-    this.studentServ.GetByAcademicYearID(this.SelectedYearId ,this.DomainName).subscribe((d) => {
+    this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
       this.Students = d;
-      this.filteredStudents = d; 
+      this.filteredStudents = d;
     });
   }
 
   searchStudents() {
     if (this.searchQuery) {
-      // this.SelectedStudent=this.Students
       this.filteredStudents = this.Students.filter(student =>
         student.user_Name.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
@@ -160,65 +161,149 @@ export class TransferedFromKindergartenReportComponent {
     this.GetStudentById()
   }
 
-  Print() {
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-  
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-  
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-  
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-  
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
-  }
-
   DownloadAsPDF() {
     this.showPDF = true;
     setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => this.showPDF = false, 2000);
+      if (this.school?.reportImage?.startsWith('http')) {
+        this.convertImgToBase64URL(this.school.reportImage).then((base64Img) => {
+          this.school.reportImage = base64Img;
+          setTimeout(() => this.printKindergartenPDF(), 100);
+        });
+      } else {
+        setTimeout(() => this.printKindergartenPDF(), 100);
+      }
     }, 500);
+  }
+
+  Print() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.printKindergartenCertificate();
+      setTimeout(() => this.showPDF = false, 500);
+    }, 500);
+  }
+
+  // PDF Generation Methods
+  convertImgToBase64URL(url: string): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve('');
+        ctx.drawImage(img, 0, 0);
+        try {
+          const dataURL = canvas.toDataURL('image/png');
+          resolve(dataURL);
+        } catch (e) {
+          console.error('toDataURL failed:', e);
+          resolve('');
+        }
+      };
+      img.onerror = (e) => {
+        console.error('Failed to load image', e);
+        resolve('');
+      };
+      img.src = url;
+    });
+  }
+
+  printKindergartenPDF() {
+    const opt = {
+      margin: [0.3, 0.3, 0.3, 0.3],
+      filename: `Kindergarten-Transfer-Certificate-${this.SelectedStudent?.en_name || 'student'}.pdf`,
+      image: {
+        type: 'jpeg',
+        quality: 0.98
+      },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        allowTaint: false
+      },
+      jsPDF: {
+        unit: 'in',
+        format: 'a4',
+        orientation: 'portrait',
+        compress: true
+      }
+    };
+
+    const container = this.kindergartenContainer.nativeElement;
+    const originalStyle = container.style.cssText;
+
+    container.style.cssText += `
+      font-size: 12px !important;
+      line-height: 1.4 !important;
+      color: #000 !important;
+    `;
+
+    html2pdf()
+      .from(container)
+      .set(opt)
+      .save()
+      .then(() => {
+        container.style.cssText = originalStyle;
+        this.showPDF = false;
+      })
+      .catch((error: any) => {
+        console.error('PDF generation failed:', error);
+        container.style.cssText = originalStyle;
+        this.showPDF = false;
+      });
+  }
+
+  printKindergartenCertificate() {
+    const printContents = this.kindergartenContainer.nativeElement.innerHTML;
+
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { 
+          margin: 0; 
+          font-family: Arial, sans-serif;
+        }
+        .print-container {
+          padding: 40px;
+          background: white;
+          max-width: 210mm;
+          margin: 0 auto;
+        }
+        @media print {
+          body > *:not(.print-container) {
+            display: none !important;
+          }
+          .print-container {
+            display: block !important;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 40px !important;
+          }
+        }
+      </style>
+    `;
+
+    const printContainer = document.createElement('div');
+    printContainer.className = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+
+    document.body.appendChild(printContainer);
+    window.print();
+
+    setTimeout(() => {
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
+    }, 100);
   }
 
   formatDate(dateString: string, dir: string): string {
@@ -232,11 +317,11 @@ export class TransferedFromKindergartenReportComponent {
       this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
         .subscribe({
           next: (d) => {
-            this.DataToPrint = d; 
+            this.DataToPrint = d;
             this.school = d.school;
-            this.CurrentDate=d.date
+            this.CurrentDate = d.date;
             this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
-            this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
+            this.ArabicCurrentDate = new Date(d.date).toLocaleDateString('ar-EG', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -250,6 +335,33 @@ export class TransferedFromKindergartenReportComponent {
         });
     });
   }
+
+  // Helper methods for certificate data
+  getSchoolNameEn(): string {
+    return this.school?.name || this.school?.reportHeaderOneEn || '-';
+  }
+
+  getSchoolNameAr(): string {
+    return this.school?.name || this.school?.reportHeaderOneAr || '-';
+  }
+
+  // getCurriculumEn(): string {
+  //   return this.school?.curriculumEn || 'American Curriculum';
+  // }
+
+  // getCurriculumAr(): string {
+  //   return this.school?.curriculumAr || 'المنهج الأمريكي';
+  // }
+
+  // getLicenseNumber(): string {
+  //   return this.school?.licenseNumber || '620-1567';
+  // }
+
+  getPromotedToGrade(): string {
+    return this.DataToPrint?.student?.currentGradeName || '-';
+  }
+
+  getNextAcademicYear(): string {
+    return this.DataToPrint?.student?.startAcademicYearName || '-';
+  }
 }
-
-
