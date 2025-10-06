@@ -177,16 +177,9 @@ private handleClickOutside = (event: MouseEvent) => {
           this.TotalPages = data.pagination.totalPages;
           this.TotalRecords = data.pagination.totalRecords;
           this.Questions = data.data;
-        },
-        error: (err) => {
-          console.error('❌ Error loading questions:', err);
-        },
+        }
       });
-    } else {
-      console.warn(
-        '⚠️ SelectedLessonID and SelectedTypeID must be set before calling GetQuestionBank.'
-      );
-    }
+    } 
   }
 
   changeCurrentPage(currentPage: number) {
