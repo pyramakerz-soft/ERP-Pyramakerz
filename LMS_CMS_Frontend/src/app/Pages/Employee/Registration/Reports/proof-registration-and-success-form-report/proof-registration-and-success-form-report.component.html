@@ -99,13 +99,13 @@
     
     <p>{{DataToPrint?.student?.nationalityEnName}} Nationality</p>
     
-    <p>and identity no {{DataToPrint?.student?.nationalIDExpiredDate || 'N/A'}}</p>
+    <!-- <p>and identity no {{DataToPrint?.student?.nationalIDExpiredDate || 'N/A'}}</p> -->
     
     <p>Is registered in this school from {{DataToPrint?.classFrom?.gradeName}} Year {{DataToPrint?.classFrom?.academicYearName}} to {{DataToPrint?.classTo?.gradeName}}</p>
     
     <p>Until This Year {{DataToPrint?.classTo?.academicYearName}}</p>
     
-    <p>And he was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.</p>
+    <p>And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.</p>
   </div>
 
   <!-- Footer -->
@@ -115,7 +115,7 @@
   </div>
 
   <!-- Arabic Version (for RTL support) -->
-  <!-- <div class="mt-12 border-t pt-8" [dir]="'rtl'">
+  <div class="mt-12 border-t pt-8" [dir]="'rtl'">
     <div class="space-y-4 text-lg leading-8">
       <div class="flex justify-between">
         <span><strong>التاريخ:</strong> {{ArabicCurrentDate}}</span>
@@ -127,7 +127,7 @@
       
       <p>تحمل الجنسية / {{DataToPrint?.student?.nationalityArName}}</p>
       
-      <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p>
+      <!-- <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p> -->
       
       <p>مقيدة لدينا من الصف {{DataToPrint?.classFrom?.gradeName}} عام {{DataToPrint?.classFrom?.academicYearName}} إلى الصف {{DataToPrint?.classTo?.gradeName}}</p>
       
@@ -140,13 +140,13 @@
       <p><strong>وتقبلوا فائق التحية والاحترام</strong></p>
       <p><strong>ادارة المدرسة</strong></p>
     </div>
-  </div> -->
+  </div>
 </div>
 
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Latter'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Letter /  افاده'"
         [infoRows]="[
         {
           keyEn: 'Date : ' + this.CurrentDate,
@@ -184,7 +184,7 @@
           keyAr: 'وحتى عام ' + this.DataToPrint.classTo.academicYearName
         },
         {
-          keyEn: 'And he was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
+          keyEn: 'And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
           keyAr: 'وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.'
         }
       ]

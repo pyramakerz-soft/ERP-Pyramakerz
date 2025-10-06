@@ -953,44 +953,77 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
                 Unit_Of_Work.SaveChanges();
 
+                //if (chatMessageExists.ChatMessageAttachments != null && chatMessageExists.ChatMessageAttachments.Count != 0)
+                //{
+                //    foreach (var fileLink in chatMessageExists.ChatMessageAttachments)
+                //    {
+                //        var normalizedFileLink = fileLink.FileLink.Replace('\\', Path.DirectorySeparatorChar);
+                //        var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedFileLink);
+
+                //        if (System.IO.File.Exists(originalFilePath))
+                //        {
+                //            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
+                //            var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
+
+                //            if (!Directory.Exists(chatFolder))
+                //            {
+                //                Directory.CreateDirectory(chatFolder);
+                //            }
+
+                //            // Get the filename from the original path
+                //            var fileName = Path.GetFileName(fileLink.FileLink);
+
+                //            // Create new file path
+                //            var newFilePath = Path.Combine(chatFolder, fileName);
+
+                //            // Copy the file
+                //            System.IO.File.Copy(originalFilePath, newFilePath, overwrite: true);
+
+                //            ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
+                //            chatMessageAttachment.ChatMessageID = chat.ID;
+
+                //            chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), fileName);
+                //            Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
+                //        }
+                //        else
+                //        {
+                //            return BadRequest("File doesn't exists in this route");
+                //        }
+                //    }
+                //}
                 if (chatMessageExists.ChatMessageAttachments != null && chatMessageExists.ChatMessageAttachments.Count != 0)
-                {   
+                {
                     foreach (var fileLink in chatMessageExists.ChatMessageAttachments)
-                    { 
-                        var normalizedFileLink = fileLink.FileLink.Replace('\\', Path.DirectorySeparatorChar);
-                        var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedFileLink);
-
-                        if (System.IO.File.Exists(originalFilePath))
+                    {
+                        try
                         { 
-                            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
-                            var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
+                            string newFilePath = await _fileService.CopyFileAsync(
+                                fileLink.FileLink,
+                                "Communication/ChatMessage",
+                                chat.ID,
+                                HttpContext
+                            );
 
-                            if (!Directory.Exists(chatFolder))
+                            if (!string.IsNullOrEmpty(newFilePath))
                             {
-                                Directory.CreateDirectory(chatFolder);
+                                ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment
+                                {
+                                    ChatMessageID = chat.ID,
+                                    FileLink = newFilePath
+                                };
+                                Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
                             }
-
-                            // Get the filename from the original path
-                            var fileName = Path.GetFileName(fileLink.FileLink);
-
-                            // Create new file path
-                            var newFilePath = Path.Combine(chatFolder, fileName);
-
-                            // Copy the file
-                            System.IO.File.Copy(originalFilePath, newFilePath, overwrite: true);
-
-                            ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
-                            chatMessageAttachment.ChatMessageID = chat.ID;
-
-                            chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), fileName);
-                            Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
+                            else
+                            {
+                                return BadRequest("Failed to copy one or more files.");
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            return BadRequest("File doesn't exists in this route");
-                        } 
+                            return BadRequest($"Error copying file: {ex.Message}");
+                        }
                     }
-                } 
+                }
             }
 
             foreach (var userID in targetUserIds)

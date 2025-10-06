@@ -119,33 +119,33 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     }
   }
 
-  private resetForm() {
-    this.editMode = false;
-    this.medicalHistory = new DoctorMedicalHistory(
-      0,
-      0,
-      '',
-      0,
-      '',
-      0,
-      '',
-      0,
-      '',
-      '',
-      null,
-      '',
-      null,
-      null,
-      new Date().toISOString(),
-      0,
-      ''
-    );
-    this.firstReportPreview = null;
-    this.secReportPreview = null;
-    this.grades = [];
-    this.classes = [];
-    this.students = [];
-  }
+private resetForm() {
+  this.editMode = false;
+  this.medicalHistory = new DoctorMedicalHistory(
+    0,
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    '',
+    null,
+    '',
+    null,
+    null,
+    new Date().toISOString(),
+    0,
+    ''
+  );
+  this.firstReportPreview = null;
+  this.secReportPreview = null;
+  this.grades = [];
+  this.classes = [];
+  this.students = [];
+}
 
   async loadSchools() {
     try {
@@ -367,11 +367,73 @@ closeModal() {
   this.resetForm();
   this.validationErrors = {};
   
-  // Reset file inputs to ensure change events fire for same file selection
+  // Reset file inputs
   const firstReportInput = document.getElementById('firstReportUpload') as HTMLInputElement;
   const secReportInput = document.getElementById('secReportUpload') as HTMLInputElement;
   
   if (firstReportInput) firstReportInput.value = '';
   if (secReportInput) secReportInput.value = '';
+}
+
+onFirstReportFileSelected(event: any) {
+  const file: File = event.target.files[0];
+  const input = event.target as HTMLInputElement;
+  
+  if (file) {
+    if (file.size > 25 * 1024 * 1024) {
+      this.validationErrors['firstReport'] = 'The file size exceeds the maximum limit of 25 MB.';
+      this.medicalHistory.firstReport = null;
+      this.firstReportPreview = null;
+      return; 
+    }
+    if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      this.medicalHistory.firstReport = file; 
+      this.validationErrors['firstReport'] = ''; 
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.firstReportPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.validationErrors['firstReport'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+      this.medicalHistory.firstReport = null;
+      this.firstReportPreview = null;
+      return; 
+    }
+  }
+  
+  input.value = '';
+}
+
+onSecReportFileSelected(event: any) {
+  const file: File = event.target.files[0];
+  const input = event.target as HTMLInputElement;
+  
+  if (file) {
+    if (file.size > 25 * 1024 * 1024) {
+      this.validationErrors['secReport'] = 'The file size exceeds the maximum limit of 25 MB.';
+      this.medicalHistory.secReport = null;
+      this.secReportPreview = null;
+      return; 
+    }
+    if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      this.medicalHistory.secReport = file; 
+      this.validationErrors['secReport'] = ''; 
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.secReportPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.validationErrors['secReport'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+      this.medicalHistory.secReport = null;
+      this.secReportPreview = null;
+      return; 
+    }
+  }
+  
+  input.value = '';
 }
 }
