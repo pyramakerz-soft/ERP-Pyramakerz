@@ -12,7 +12,6 @@
                 {{ stu.name }}
             </option>
             <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
         </select>
     </div>
     <div class="w-[49%]">
@@ -25,7 +24,6 @@
                     {{ ac.en_name }}
                 </option>
                 <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
@@ -42,56 +40,144 @@
     </div>
 </div>
 
-<div class="flex justify-start items-center mt-2">
-   
-</div>
-
 <div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <tr>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'ID' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                   {{ 'Name' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Mobile' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Nationality' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Gender' | translate }}
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="border-t border-gray-300 text-xs md:text-sm bg-white">
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.id }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.en_name }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.mobile }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ this.DataToPrint.student.nationalityEnName }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.genderName }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Certificate Display on Main Page - Matching PDF/Print Layout -->
+<div *ngIf="showTable" class="mt-5 bg-white p-8 rounded-lg shadow-lg border border-gray-300">
+    <!-- School Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold">{{school.reportHeaderOneEn}}</h1>
+        <h2 class="text-xl">{{school.reportHeaderTwoEn}}</h2>
+        <div *ngIf="school.reportImage" class="mt-4">
+            <img [src]="school.reportImage" class="max-h-20 mx-auto" alt="School Logo">
+        </div>
+    </div>
+
+    <!-- Certificate Title -->
+    <h1 class="text-3xl font-bold text-center mb-8 primaryTxt">School Leaving Certificate</h1>
+
+    <!-- Certificate Content -->
+    <div class="space-y-4 text-lg leading-8">
+        <div class="flex justify-between">
+            <span><strong>Date:</strong> {{CurrentDate}}</span>
+        </div>
+        
+        <p><strong>Student's Name:</strong> {{DataToPrint?.student?.en_name || SelectedStudent.en_name}}</p>
+        
+        <p><strong>Date Of Birth:</strong> {{CurrentDate}}</p>
+        
+        <p><strong>Nationality:</strong> {{DataToPrint?.student?.nationalityEnName}}</p>
+        
+        <p><strong>Passport No:</strong> {{DataToPrint?.student?.passportNo || 'N/A'}}</p>
+        
+        <p><strong>Date of Admission:</strong> {{ formatDate(DataToPrint?.student?.insertedAt, 'ltr') || 'N/A'}}</p>
+        
+        <p><strong>Current Grade:</strong> {{DataToPrint?.student?.currentGradeName || 'N/A'}}</p>
+        
+        <p class="mt-4">{{ school.name }} School Certificates that the student mentioned above has been a student of the school and has completed the grade/s as shown below.</p>
+    </div>
+
+    <!-- Academic Progress Table -->
+    <div class="mt-8 overflow-x-auto">
+        <table class="w-full border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-3 px-4 border border-gray-300 font-semibold">School</th>
+                    <th class="py-3 px-4 border border-gray-300 font-semibold">Grade</th>
+                    <th class="py-3 px-4 border border-gray-300 font-semibold">Academic Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- School Row - Always only one row spanning multiple grades -->
+                <tr *ngIf="TableData.length > 0" class="border-t border-gray-300">
+                    <td class="py-3 px-4 border border-gray-300 text-center align-top" [attr.rowspan]="TableData.length">{{school.name}}</td>
+                    <td class="py-3 px-4 border border-gray-300 text-center">{{TableData[0].Grade}}</td>
+                    <td class="py-3 px-4 border border-gray-300 text-center">{{TableData[0].Academic_Year}}</td>
+                </tr>
+                <!-- Remaining grade rows (without school column) -->
+                <tr *ngFor="let grade of TableData | slice:1" class="border-t border-gray-300">
+                    <td class="py-3 px-4 border border-gray-300 text-center">{{grade.Grade}}</td>
+                    <td class="py-3 px-4 border border-gray-300 text-center">{{grade.Academic_Year}}</td>
+                </tr>
+                <tr *ngIf="TableData.length === 0">
+                    <td colspan="3" class="py-3 px-4 border border-gray-300 text-center">No academic records found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-12 space-y-4">
+        <p><strong>Best Regards,</strong></p>
+        <p><strong>Administration</strong></p>
+    </div>
+
+    <!-- Arabic Version (for RTL support) -->
+    <div class="mt-12 border-t pt-8" [dir]="'rtl'">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold">{{school.reportHeaderOneAr}}</h1>
+            <h2 class="text-xl">{{school.reportHeaderTwoAr}}</h2>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center mb-8 primaryTxt">شهادة مغادرة المدرسة</h1>
+
+        <div class="space-y-4 text-lg leading-8">
+            <div class="flex justify-between">
+                <span><strong>التاريخ:</strong> {{ArabicCurrentDate}}</span>
+            </div>
+            
+            <p><strong>اسم الطالب:</strong> {{DataToPrint?.student?.ar_name || SelectedStudent.ar_name}}</p>
+            
+            <p><strong>تاريخ الميلاد:</strong> {{ArabicCurrentDate}}</p>
+            
+            <p><strong>الجنسية:</strong> {{DataToPrint?.student?.nationalityArName}}</p>
+            
+            <p><strong>رقم جواز السفر:</strong> {{DataToPrint?.student?.passportNo || 'غير متوفر'}}</p>
+            
+            <p><strong>تاريخ الالتحاق بالمدرسة:</strong> {{formatDate(DataToPrint?.student?.insertedAt, 'rtl') || 'غير متوفر'}}</p>
+            
+            <p><strong>الصف الدراسي الحالي:</strong> {{DataToPrint?.student?.currentGradeName || 'غير متوفر'}}</p>
+            
+            <p class="mt-4">نشهد مدارس {{ school.name }} ان الطالب المذكور اعلاه هو احد الطلاب المنتظمين في المدرسة وقد انهي الصفوف الدراسية علي النحة الموضح ادناه</p>
+        </div>
+
+        <!-- Arabic Academic Progress Table -->
+        <div class="mt-8 overflow-x-auto">
+            <table class="w-full border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="py-3 px-4 border border-gray-300 font-semibold">المدرسة</th>
+                        <th class="py-3 px-4 border border-gray-300 font-semibold">الصف</th>
+                        <th class="py-3 px-4 border border-gray-300 font-semibold">العام الدراسي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- School Row - Always only one row spanning multiple grades -->
+                    <tr *ngIf="TableData.length > 0" class="border-t border-gray-300">
+                        <td class="py-3 px-4 border border-gray-300 text-center align-top" [attr.rowspan]="TableData.length">{{school.name}}</td>
+                        <td class="py-3 px-4 border border-gray-300 text-center">{{TableData[0].Grade}}</td>
+                        <td class="py-3 px-4 border border-gray-300 text-center">{{TableData[0].Academic_Year}}</td>
+                    </tr>
+                    <!-- Remaining grade rows (without school column) -->
+                    <tr *ngFor="let grade of TableData | slice:1" class="border-t border-gray-300">
+                        <td class="py-3 px-4 border border-gray-300 text-center">{{grade.Grade}}</td>
+                        <td class="py-3 px-4 border border-gray-300 text-center">{{grade.Academic_Year}}</td>
+                    </tr>
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="3" class="py-3 px-4 border border-gray-300 text-center">لا توجد سجلات أكاديمية</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-12 space-y-4">
+            <p><strong>وتقبلوا فائق التحية والاحترام</strong></p>
+            <p><strong>ادارة المدرسة</strong></p>
+        </div>
+    </div>
 </div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">
@@ -99,7 +185,7 @@
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'School Leaving Certificate'" [Title]="'School Leaving Certificate'"
         [infoRows]="[
         {
-          keyEn: 'Students`s Name : ' + this.DataToPrint.student.en_name,
+          keyEn: 'Student`s Name : ' + this.DataToPrint.student.en_name,
           keyAr: 'اسم الطالب : ' + this.DataToPrint.student.ar_name
         },
         {
@@ -111,34 +197,33 @@
           keyAr: ' الجنسية :' + this.DataToPrint.student.nationalityArName
         },
         {
-            keyEn: ' Passport No : ' + this.DataToPrint.student.passportNo,
-            keyAr: 'رقم جواز السفر : ' + this.DataToPrint.student.passportNo
+            keyEn: ' Passport No : ' + (this.DataToPrint.student.passportNo || '-'),
+            keyAr: 'رقم جواز السفر : ' + (this.DataToPrint.student.passportNo || '-')
           },
         {
-          keyEn: 'Date of Admission :  ' +this.DataToPrint.student.insertedAt ,
-          keyAr: ' تاريخ الالتحاق بالمدرسة  : ' + this.DataToPrint.student.insertedAt
+          keyEn: 'Date of Admission :  ' + this.formatDate(this.DataToPrint.student.insertedAt, 'ltr'),
+          keyAr: ' تاريخ الالتحاق بالمدرسة  : ' + this.formatDate(this.DataToPrint.student.insertedAt, 'rtl')
         },
         {
-            keyEn: 'Current Grade :  ' +this.DataToPrint.student.currentGradeName ,
-            keyAr: ' الصف الدراسي الحالى :  '     + this.DataToPrint.student.currentGradeName
+            keyEn: 'Current Grade :  ' + this.DataToPrint.student.currentGradeName,
+            keyAr: ' الصف الدراسي الحالى :  ' + this.DataToPrint.student.currentGradeName
           },
         {
-          keyEn: 'Learning Oasis international school Certificates that the student mentioned above has been a student of the school and has completed the grade/s as shown below.',
-          keyAr: 'نشهد مدارس واحة العلم العالمية ان الطالب المذكور اعلاه هو احد الطلاب المنتظمين في المدرسة وقد انهي الصفوف الدراسية علي النحة الموضح ادناه  '
+          keyEn: this.DataToPrint.school.name + ' school Certificates that the student mentioned above has been a student of the school and has completed the grade/s as shown below.',
+          keyAr: 'نشهد ' + this.DataToPrint.school.name + ' ان الطالب المذكور اعلاه هو احد الطلاب المنتظمين في المدرسة وقد انهي الصفوف الدراسية علي النحة الموضح ادناه'
         }
-      ]
-      " 
-      [tableHeaders]="['Grade', 'Academic_Year']"[tableData]="TableData"
+      ]" 
+      [tableHeaders]="['School', 'Grade', 'Academic_Year']" [tableData]="getTableDataForPDF()"
       [PsNotes]="[
         {
-            EnNote: 'Best Regards ,',
-            ArNote: 'وتقبلوا فائق التحيةوالاحترام '
+            EnNote: 'Best Regards,',
+            ArNote: 'وتقبلوا فائق التحية والاحترام'
         },
         {
-            EnNote: 'Administration ',
+            EnNote: 'Administration',
             ArNote: 'ادارة المدرسة'
         }
-      ]
-      " #pdfComponentRef></app-pdf-print>
+      ]" #pdfComponentRef>
+        </app-pdf-print>
     </div>
 </div>

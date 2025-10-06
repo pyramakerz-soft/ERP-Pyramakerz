@@ -282,5 +282,17 @@ export class AcademicSequentialReportComponent {
         });
     });
   }
+
+  getTableDataForPDF(): any[] {
+  if (this.TableData.length === 0) {
+    return [{ School: this.school.name, Grade: 'No records', Academic_Year: 'No records' }];
+  }
+  
+  return this.TableData.map(grade => ({
+    School: this.school.name,
+    Grade: grade.Grade,
+    Academic_Year: grade.Academic_Year
+  }));
+}
 }
 
