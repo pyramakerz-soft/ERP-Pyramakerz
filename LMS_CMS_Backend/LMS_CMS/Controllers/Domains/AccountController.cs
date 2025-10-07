@@ -291,11 +291,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return BadRequest(new { error = "User_Name Can't be null" });
             }
 
-            if (UserInfo.SerialNumber.Length == 0)
-            {
-                return BadRequest(new { error = "SerialNumber Can't be null" });
-            }
-
             if (UserInfo.Password.Length == 0)
             {
                 return BadRequest(new { error = "Password Can't be null" });

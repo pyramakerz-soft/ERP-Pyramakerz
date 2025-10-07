@@ -25,12 +25,12 @@ import Swal from 'sweetalert2';
 import { AssignmentService } from '../../../../../Services/Employee/LMS/assignment.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule ,TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
@@ -58,8 +58,8 @@ export class AssignmentEditComponent {
   SelectedTagsIDs: number[] = [];
   Lessons: Lesson[] = [];
   tags: Tag[] = [];
-   isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedTagsIds: number[] = []; // Array to store selected type IDs
   dropdownOpen = false;
   tagsSelected: Tag[] = [];
@@ -93,42 +93,41 @@ export class AssignmentEditComponent {
     private realTimeService: RealTimeNotificationServiceService
   ) { }
 
-ngOnInit() {
-  this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-  this.UserID = this.User_Data_After_Login.id;
-  this.DomainName = this.ApiServ.GetHeader();
-  this.activeRoute.url.subscribe((url) => {
-    this.path = url[0].path;
-  });
-  this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-  this.getAssignmentData();
-  this.getLessons();
-  this.getTypes();
-  
-  this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
-  });
-  this.isRtl = document.documentElement.dir === 'rtl';
-  
-  document.addEventListener('click', this.handleClickOutside);
-}
+  ngOnInit() {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+    });
+    this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.getAssignmentData();
+    this.getTypes();
 
-ngOnDestroy(): void {
-  this.realTimeService.stopConnection(); 
-  if (this.subscription) {
-    this.subscription.unsubscribe();
-  }
-  document.removeEventListener('click', this.handleClickOutside);
-}
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
 
-private handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  const tagsContainer = document.querySelector('.tags-container');
-  
-  if (tagsContainer && !tagsContainer.contains(target)) {
-    this.dropdownOpen = false;
+    document.addEventListener('click', this.handleClickOutside);
   }
-}
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  private handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const tagsContainer = document.querySelector('.tags-container');
+
+    if (tagsContainer && !tagsContainer.contains(target)) {
+      this.dropdownOpen = false;
+    }
+  }
 
   getAssignmentData() {
     this.AssigmentQuestionServ.GetById(
@@ -136,11 +135,13 @@ private handleClickOutside = (event: MouseEvent) => {
       this.DomainName
     ).subscribe((d) => {
       this.assignment = d;
+      this.getLessons();
+      console.log(this.assignment)
     });
   }
 
   getLessons() {
-    this.LessonServ.Get(this.DomainName).subscribe((d) => [(this.Lessons = d)]);
+    this.LessonServ.GetBySubjectID(this.assignment.subjectID, this.DomainName).subscribe((d) => [(this.Lessons = d)]);
   }
 
   getTags() {
@@ -179,7 +180,7 @@ private handleClickOutside = (event: MouseEvent) => {
           this.Questions = data.data;
         }
       });
-    } 
+    }
   }
 
   changeCurrentPage(currentPage: number) {
@@ -298,76 +299,76 @@ private handleClickOutside = (event: MouseEvent) => {
     this.IsQuestionsSelected = this.selectedQuestions.length > 0;
   }
 
-toggleDropdown(event?: Event): void {
-  if (event) {
-    event.stopPropagation();
+  toggleDropdown(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.dropdownOpen = !this.dropdownOpen;
   }
-  this.dropdownOpen = !this.dropdownOpen;
-}
 
-selectType(Type: Tag, event?: Event): void {
-  if (event) {
-    event.stopPropagation();
+  selectType(Type: Tag, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (!this.tagsSelected.some((e) => e.id === Type.id)) {
+      this.tagsSelected.push(Type);
+    }
+    if (!this.SelectedTagsIDs.some((e) => e === Type.id)) {
+      this.SelectedTagsIDs.push(Type.id);
+    }
+    this.dropdownOpen = false;
+    this.GetQuestionBank(this.CurrentPage, this.PageSize);
+    this.validationErrors['tag'] = ``;
   }
-  if (!this.tagsSelected.some((e) => e.id === Type.id)) {
-    this.tagsSelected.push(Type);
-  }
-  if (!this.SelectedTagsIDs.some((e) => e === Type.id)) {
-    this.SelectedTagsIDs.push(Type.id);
-  }
-  this.dropdownOpen = false;
-  this.GetQuestionBank(this.CurrentPage, this.PageSize);
-  this.validationErrors['tag'] = ``;
-}
 
 
-removeSelected(id: number, event?: Event): void {
-  if (event) {
-    event.stopPropagation();
+  removeSelected(id: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
+    this.SelectedTagsIDs = this.SelectedTagsIDs.filter((e) => e !== id);
+    this.GetQuestionBank(this.CurrentPage, this.PageSize);
   }
-  this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
-  this.SelectedTagsIDs = this.SelectedTagsIDs.filter((e) => e !== id);
-  this.GetQuestionBank(this.CurrentPage, this.PageSize);
-}
 
   goBack() {
     this.router.navigateByUrl(`Employee/Assignment`);
   }
 
-openModal() {
-  this.assignmentQuestion = new AssignmentQuestionAdd()
-  this.SelectedLessonID = 0
-  this.SelectedTypeID = 0
-  this.selectedTagsIds = []
-  this.clearTags();
-  this.Questions = []
-  this.selectedQuestions = []
-  this.questionTypeCounts = {};
-  const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+  openModal() {
+    this.assignmentQuestion = new AssignmentQuestionAdd()
+    this.SelectedLessonID = 0
+    this.SelectedTypeID = 0
+    this.selectedTagsIds = []
+    this.clearTags();
+    this.Questions = []
+    this.selectedQuestions = []
+    this.questionTypeCounts = {};
+    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
   }
-}
 
-closeModal() {
-  const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.remove('flex');
-    modal.classList.add('hidden');
+  closeModal() {
+    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+    this.assignment.fileFile = null;
+
+    this.clearTags();
   }
-  this.assignment.fileFile = null;
-  
-  this.clearTags();
-}
 
-clearTags(): void {
-  this.tagsSelected = [];
-  this.SelectedTagsIDs = [];
-  this.tags = [];
-}
+  clearTags(): void {
+    this.tagsSelected = [];
+    this.SelectedTagsIDs = [];
+    this.tags = [];
+  }
 
   getFormattedQuestionTypes(): string {
     return Object.entries(this.questionTypeCounts)

@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { Loans } from '../../../Models/HR/loans';
+import { LoanStatus } from '../../../Models/HR/loan-status';
 
 @Injectable({
   providedIn: 'root'
@@ -76,26 +77,38 @@ export class LoansService {
     return this.http.delete(`${this.baseUrl}/Loans/${id}`, { headers })
   }
 
-
-GetLoansReport(jobCategoryId: number, jobId: number, employeeId: number, dateFrom: string, dateTo: string, DomainName: string) {
-  if (DomainName != null) {
-    this.header = DomainName;
+  GetLoansStatus(EmpId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<LoanStatus[]>(`${this.baseUrl}/Loans/LoansStatus?EmpId=${EmpId}`, { headers })
   }
-  
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
-  
-  const requestBody = {
-    jobCategoryId: jobCategoryId,
-    jobId: jobId,
-    employeeId: employeeId,
-    dateFrom: dateFrom,
-    dateTo: dateTo
-  };
-  
-  return this.http.post<any[]>(`${this.baseUrl}/Loans/report`, requestBody , { headers });
-}
+
+
+  GetLoansReport(jobCategoryId: number, jobId: number, employeeId: number, dateFrom: string, dateTo: string, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    const requestBody = {
+      jobCategoryId: jobCategoryId,
+      jobId: jobId,
+      employeeId: employeeId,
+      dateFrom: dateFrom,
+      dateTo: dateTo
+    };
+
+    return this.http.post<any[]>(`${this.baseUrl}/Loans/report`, requestBody, { headers });
+  }
 }

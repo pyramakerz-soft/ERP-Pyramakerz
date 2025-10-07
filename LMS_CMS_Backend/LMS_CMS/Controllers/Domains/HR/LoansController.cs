@@ -3,6 +3,7 @@ using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing.Printing;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -322,6 +324,73 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ////////////////////////////////
+
+        [HttpGet("LoansStatus")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Loans" }
+          )]
+        public async Task<IActionResult> GetLoansStatus(long EmpId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            // Get all employee 
+            List<LoansStatusDetailsGetDTO> loansStatusDetailsGetDTO = new List<LoansStatusDetailsGetDTO>();
+            List<Employee> Allemployees = new List<Employee>();
+
+            if (EmpId > 0)
+            {
+                var employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == EmpId && e.IsDeleted != true);
+                if (employee == null)
+                {
+                    return NotFound($"Employee with ID {EmpId} not found.");
+                }
+                Allemployees = new List<Employee> { employee };
+            }
+            else
+            {
+                    Allemployees = Unit_Of_Work.employee_Repository.FindBy(e => e.IsDeleted != true);
+            }
+
+            foreach (var employee in Allemployees)
+            {
+                LoansStatusDetailsGetDTO loansStatusDetailsGetDTO1 = new LoansStatusDetailsGetDTO();
+                loansStatusDetailsGetDTO1.EmployeeId = employee.ID;
+                loansStatusDetailsGetDTO1.EmployeeEnName = employee.en_name;
+                loansStatusDetailsGetDTO1.EmployeeArName = employee.ar_name;
+
+                List<Loans> loans = Unit_Of_Work.loans_Repository.FindBy( sem => sem.IsDeleted != true && sem.EmployeeID == employee.ID);
+                List<EmployeeLoans> employeeLoans = Unit_Of_Work.employeeLoans_Repository.FindBy( sem => sem.IsDeleted != true && sem.EmployeeId == employee.ID && sem.Loans.IsDeleted!= true);
+
+                loansStatusDetailsGetDTO1.LoansDTO= mapper.Map<List<loansGetDTO>>(loans);
+                loansStatusDetailsGetDTO1.EmployeeLoansGetDTO = mapper.Map<List<EmployeeLoansGetDTO>>(employeeLoans);
+
+                loansStatusDetailsGetDTO1.TotalLoans = (decimal)loans.Select(a=>a.Amount).Sum();
+                loansStatusDetailsGetDTO1.TotalDeducted = employeeLoans.Select(a => a.Amount).Sum();
+                loansStatusDetailsGetDTO1.Remaining = loansStatusDetailsGetDTO1.TotalLoans - loansStatusDetailsGetDTO1.TotalDeducted;
+
+                if(loans != null && loans.Count > 0)
+                {
+                    loansStatusDetailsGetDTO.Add(loansStatusDetailsGetDTO1);
+                }
+            }
+
+            return Ok(loansStatusDetailsGetDTO);
+        }
+
+        ////////////////////////////////
+
 
         [HttpPost("report")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Loans Report" })]
