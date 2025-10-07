@@ -120,7 +120,7 @@ export class ConductComponent {
   }
 
   Create() {
-    this.router.navigateByUrl('Employee/Conduct Create');
+    this.router.navigateByUrl('Employee/Conducts/Create');
   }
 
   Delete(id: number) {

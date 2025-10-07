@@ -251,7 +251,7 @@ export class AssignmentStudentComponent {
           Swal.fire({
             icon: 'error',
             title: 'Failed',
-            text: 'Something went wrong while submitting the assignment.',
+            text: err.error,
             confirmButtonText: 'Close',
             customClass: { confirmButton: 'secondaryBg' },
           });
