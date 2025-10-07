@@ -1025,6 +1025,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentPutDTO, Assignment>(); 
 
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
+               .ForMember(dest => dest.IsVisibleToStudent, opt => opt.MapFrom(src => src.Assignment.IsVisibleToStudent))
                .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
                .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
                .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
@@ -1525,6 +1526,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.DayStatusName, opt => opt.MapFrom(src => src.DayStatus.Name))
                 .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
+
+            CreateMap<EmployeeLoans, EmployeeLoansGetDTO>();
         }
     } 
 }

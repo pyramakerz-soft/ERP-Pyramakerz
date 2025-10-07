@@ -277,6 +277,10 @@ import { SalaryCalculationComponent } from './Pages/Employee/HR/salary-calculati
 import { EmployeeSalaryDetailedComponent } from './Pages/Employee/HR/employee-salary-detailed/employee-salary-detailed.component';
 import { SalarySummaryComponent } from './Pages/Employee/HR/Reports/salary-summary/salary-summary.component';
 import { HrEmployeeReportComponent } from './Pages/Employee/HR/Reports/hr-employee-report/hr-employee-report.component';
+import { AttendanceReportByTokenComponent } from './Pages/Employee/HR/Reports/attendance-report-by-token/attendance-report-by-token.component';
+import { SalarySummaryTokenComponent } from './Pages/Employee/HR/Reports/salary-summary-token/salary-summary-token.component';
+import { EmployeeSalaryDetailedByTokenComponent } from './Pages/Employee/HR/employee-salary-detailed-by-token/employee-salary-detailed-by-token.component';
+import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/loans-status.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -595,10 +599,15 @@ export const routes: Routes = [
             { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Salary Configuration", component: SalaryConfigurationComponent, title: "Salary Configuration", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Salary Calculation", component: SalaryCalculationComponent, title: "Salary Calculation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Salary Detailed Report", component: EmployeeSalaryDetailedComponent, title: "Employee Salary Detailed", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "HR Attendance Report", component: HRAttendanceReportComponent, title: "HR Attendance Report", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Salary Summary Report", component: SalarySummaryComponent, title: "Salary Summary", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Hr Employees Report", component: HrEmployeeReportComponent, title: "Hr Employees Report", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Employee Salary Detailed Report", component: EmployeeSalaryDetailedComponent, title: "Employee Salary Detailed", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "HR Attendance Report", component: HRAttendanceReportComponent, title: "HR Attendance Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Salary Summary Report", component: SalarySummaryComponent, title: "Salary Summary", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Hr Employees Report", component: HrEmployeeReportComponent, title: "Hr Employees Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "My Attendance", component: AttendanceReportByTokenComponent, title: "My Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "My Salary Summary", component: SalarySummaryTokenComponent, title: "My Salary Summary", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "My Salary Detailed", component: EmployeeSalaryDetailedByTokenComponent, title: "My Salary Detailed", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Loans Status", component: LoansStatusComponent, title: "Loans Status", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+
         ]
     },
     {

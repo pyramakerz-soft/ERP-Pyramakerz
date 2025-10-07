@@ -80,6 +80,7 @@ export class StudentAssignmentViewComponent {
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
+      console.log(this.assignmentStudent)
       if (this.assignmentStudent.isVisibleToStudent != true) {
         this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignmentStudent.subjectId}`)
       }

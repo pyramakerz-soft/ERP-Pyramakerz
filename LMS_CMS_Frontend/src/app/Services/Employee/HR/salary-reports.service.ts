@@ -53,4 +53,40 @@ export class SalaryReportsService {
     return this.http.get<SalaryHistory[]>(`${this.baseUrl}/SalaryReports/GetSalarySummary/${month}/${year}/${empId}/${jobId}/${JobCategoryId}`, { headers });
   }
 
+  GetEmployeeSalaryDetailedByToken(DomainName: string, month: number, year: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ monthlyAttendance: MonthlyAttendance[], salaryHistory: SalaryHistory }>(`${this.baseUrl}/SalaryReports/GetEmployeeSalaryDetailedByToken/${month}/${year}`, { headers });
+  }
+
+  GetAttendanceByToken(DomainName: string, month: number, year: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<MonthlyAttendance[]>(`${this.baseUrl}/SalaryReports/GetAttendanceByToken/${month}/${year}`, { headers });
+  }
+
+  GetSalarySummaryByToken(DomainName: string, month: number, year: number ) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<SalaryHistory>(`${this.baseUrl}/SalaryReports/GetSalarySummaryByToken/${month}/${year}`, { headers });
+  }  
+
 }
