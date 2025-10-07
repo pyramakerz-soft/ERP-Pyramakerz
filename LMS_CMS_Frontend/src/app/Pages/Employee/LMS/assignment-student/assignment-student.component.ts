@@ -239,33 +239,66 @@ export class AssignmentStudentComponent {
   }
 
   saveDegree(row: AssignmentStudent): void {
+    const today = new Date(); // current date
+    const dueDate = new Date(row.dueDate);
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
+    console.log(343, today, dueDate)
     if (row.degree != null && row.degree <= row.assignmentDegree) {
-      Swal.fire({
-        title: 'Apply Late Submission Penalty?',
-        text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: 'Apply Penalty',
-        cancelButtonText: 'Forgive Delay',
-      }).then((result) => {
-        row.evaluationConsideringTheDelay = result.isConfirmed;
-        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
-          this.editDegreeId = null
-          this.GetAllData(this.CurrentPage, this.PageSize)
-        }, error => {
-          this.editDegreeId = null
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          this.GetAllData(this.CurrentPage, this.PageSize)
-        })
-      });
+      if (today > dueDate) {
+        Swal.fire({
+          title: 'Apply Late Submission Penalty?',
+          text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#089B41',
+          cancelButtonColor: '#17253E',
+          confirmButtonText: 'Apply Penalty',
+          cancelButtonText: 'Forgive Delay',
+        }).then((result) => {
+          row.evaluationConsideringTheDelay = result.isConfirmed;
+          this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+            this.editDegreeId = null
+            this.GetAllData(this.CurrentPage, this.PageSize)
+          }, error => {
+            this.editDegreeId = null
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+            this.GetAllData(this.CurrentPage, this.PageSize)
+          })
+        });
+      }
+      else {
+        row.evaluationConsideringTheDelay = false;
+        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updated Successfully',
+              confirmButtonColor: '#089B41',
+            });
+            this.editDegreeId = null
+            this.GetAllData(this.CurrentPage, this.PageSize)
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong, please try again.',
+              confirmButtonColor: '#d33',
+            });
+            this.editDegreeId = null
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            console.error('Edit error:', err);
+          }
+        });
+      }
     }
   }
 
