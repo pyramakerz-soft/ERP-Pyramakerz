@@ -15,6 +15,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { AccountService } from '../../../../Services/account.service';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -31,8 +32,8 @@ export class MaintenanceEmployeesComponent {
   validationErrors: { [key in keyof MaintenanceEmployees]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: any[] = [];       
-  employees: MaintenanceEmployees[] = []; 
+  TableData: MaintenanceEmployees[] = [];       
+  employees: Employee[] = []; 
   selectedEmployeeId: number=0;
   keysArray: string[] = ['id', 'en_Name'];
   key: string= "id";
@@ -52,11 +53,11 @@ export class MaintenanceEmployeesComponent {
       public mainServ: MaintenanceEmployeesService,
       private deleteEditPermissionServ: DeleteEditPermissionService,
       public account: AccountService,
-      public EmpServ: MaintenanceEmployeesService,
+      public EmpServ: EmployeeService,
       private activeRoute: ActivatedRoute,
       private realTimeService: RealTimeNotificationServiceService){}
 
-ngOnInit() {
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     if (this.User_Data_After_Login.type === "employee") {
@@ -82,14 +83,13 @@ ngOnInit() {
   }
 
   IsAllowDelete(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowDelete(
-    InsertedByID,
-    this.UserID,
-    this.AllowDeleteForOthers
-  );
-}
-
-
+    return this.deleteEditPermissionServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+  }
+ 
   async GetTableData() {
     this.TableData = [];
     try {
@@ -103,7 +103,7 @@ ngOnInit() {
   async GetSelectData() {
     this.employees = [];
     try {
-      const data = await firstValueFrom(this.EmpServ.Get(this.DomainName)); 
+      const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
       this.employees = data;
     } catch (error) {
       this.employees = [];

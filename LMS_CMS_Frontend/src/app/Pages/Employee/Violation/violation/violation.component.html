@@ -155,7 +155,7 @@
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
                         </label>
                         <input id="imageForm" type="file" class="hidden" (change)="onImageFileSelected($event)"
-                            accept=".pdf,.doc,.docx,image/jpeg,image/png" />
+                            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" />
                     </div>
                 </div>
                 <span *ngIf="validationErrors['attachFile']" class="text-red-500  font-normal text-xs md:text-sm">{{validationErrors['attachFile'] }}</span>

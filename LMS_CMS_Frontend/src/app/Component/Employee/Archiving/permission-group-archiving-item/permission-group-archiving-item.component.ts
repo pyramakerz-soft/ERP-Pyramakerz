@@ -92,6 +92,7 @@ export class PermissionGroupArchivingItemComponent {
  
       if (type === 'allowDelete' && !archiving.allow_Delete) {
         current.allow_Delete = false;
+        current.allow_Delete_For_Others = false;
       }
  
       if (type === 'allowDeleteForOthers' && !archiving.allow_Delete_For_Others) {

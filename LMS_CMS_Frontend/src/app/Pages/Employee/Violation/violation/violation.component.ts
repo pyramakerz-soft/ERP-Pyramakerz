@@ -59,7 +59,14 @@ export class ViolationComponent {
 
   validationErrors: { [key in keyof Violation]?: string } = {};
   isLoading = false;
-
+  
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -142,39 +149,29 @@ export class ViolationComponent {
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
-    this.violation.attach = '';
-    this.violation.attachFile = null;
-
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      'image/jpeg',
-      'image/png'
-    ];
 
     if (file) {
-      // Check size
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) { 
+        this.validationErrors['attachFile'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`;
+        this.violation.attachFile = null;
         return;
       }
 
-      // Check type
-      if (allowedMimeTypes.includes(file.type)) {
-        this.violation.attachFile = file;
-        this.validationErrors['attachFile'] = '';
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.violation.attachFile = null;
+        return; 
+      } else{
+        this.violation.attachFile = file;  
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['attachFile'] = 'Invalid file type. Only PDF, DOC, DOCX, JPEG, and PNG are allowed.';
-        return;
       }
     }
-
+    
     input.value = '';
-  }
+  }   
 
   Create() {
     this.mode = 'Create';

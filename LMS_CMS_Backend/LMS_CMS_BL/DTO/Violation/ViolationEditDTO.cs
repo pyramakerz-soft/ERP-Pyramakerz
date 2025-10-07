@@ -14,7 +14,6 @@ namespace LMS_CMS_BL.DTO.Violation
         public IFormFile? AttachFile { get; set; }
         public DateOnly Date { get; set; }
         public long ViolationTypeID { get; set; }
-        public long EmployeeID { get; set; }
-
+        public long EmployeeID { get; set; } 
     }
 }
