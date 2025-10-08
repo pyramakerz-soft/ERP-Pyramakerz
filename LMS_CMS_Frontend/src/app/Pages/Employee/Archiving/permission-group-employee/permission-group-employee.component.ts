@@ -15,13 +15,12 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Employee } from '../../../../Models/Employee/employee';
-import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { SearchComponent } from '../../../../Component/search/search.component';
+import { EmployeeService } from '../../../../Services/Employee/employee.service'; 
 
 @Component({
   selector: 'app-permission-group-employee',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './permission-group-employee.component.html',
   styleUrl: './permission-group-employee.component.css'
 })
@@ -38,10 +37,7 @@ export class PermissionGroupEmployeeComponent {
   DomainName: string = '';
   UserID: number = 0;
  
-  path: string = '';
-  key: string = 'id';
-  value: any = '';
-  keysArray: string[] = ['id', 'employeeEnglishName' ,'employeeArabicName'];
+  path: string = ''; 
    
   isLoading = false;
 
@@ -79,38 +75,9 @@ export class PermissionGroupEmployeeComponent {
 
     this.GetAllData() 
   }
-
-  async onSearchEvent(event: { key: string; value: any }) { 
-    this.key = event.key;
-    this.value = event.value;
-    try {
-      const data: any = await firstValueFrom(
-        this.permissionGroupEmployeeService.ByPermissionGroupID(this.permissionGroupID, this.DomainName)
-      );
-      this.TableData = data.data || [];
-
-      if (this.value !== '') {
-        const numericValue = isNaN(Number(this.value))
-          ? this.value
-          : parseInt(this.value, 10);
-
-        this.TableData = this.TableData.filter((t) => {
-          const fieldValue = t[this.key as keyof typeof t];
-          if (typeof fieldValue === 'string') {
-            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-          }
-          if (typeof fieldValue === 'number') { 
-            return fieldValue.toString().includes(numericValue.toString())
-          }
-          return fieldValue == this.value;
-        });
-      }
-    } catch (error) {
-      this.TableData = [];
-    }
-  }
-
+ 
   GetAllData(){
+    this.TableData = []
     this.permissionGroupEmployeeService.ByPermissionGroupID(this.permissionGroupID, this.DomainName).subscribe(
       (data) => { 
         this.TableData = data

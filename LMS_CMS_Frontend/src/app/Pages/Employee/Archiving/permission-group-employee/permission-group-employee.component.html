@@ -4,8 +4,7 @@
       <i class="fa-solid fa-chevron-left cursor-pointer" (click)="MoveToPermissionGroup()"></i>
       <h1 class="primaryTxt font-semibold text-2xl leading-9">Permission Group Employees</h1>
     </div>
-    <div class="flex justify-between items-center"> 
-      <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+    <div class="flex justify-between items-center">  
       <button (click)="openModal()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
         Add Employee

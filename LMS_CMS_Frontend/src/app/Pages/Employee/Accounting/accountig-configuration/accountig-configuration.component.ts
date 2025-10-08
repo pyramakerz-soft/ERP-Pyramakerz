@@ -83,8 +83,7 @@ export class AccountigConfigurationComponent {
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
   
-  closeModal() {
-    this.accountConfigDataToEdit = new AccountingConfiguration()
+  closeModal() { 
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
   }

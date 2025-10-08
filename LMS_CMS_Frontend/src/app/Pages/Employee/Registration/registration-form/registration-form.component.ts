@@ -93,6 +93,13 @@ export class RegistrationFormComponent {
   StudentId: number = 0;
   mode: string = 'Create'
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,
@@ -298,9 +305,31 @@ export class RegistrationFormComponent {
     return el.schoolID == this.selectedSchool;
   }
 
-  handleFileUpload(event: any, fieldId: number) {
+  handleFileUpload(event: any, fieldId: number) { 
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
 
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!this.allowedExtensions.includes(fileExtension)) {
+      Swal.fire({
+        title: 'Invalid file type',
+        html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: "OK"
+      }); 
+      input.value = '';
+      return;
+    }else if(file.size > 25 * 1024 * 1024) {
+      Swal.fire({
+        title: 'The file size exceeds the maximum limit of 25 MB.',
+        icon: 'warning', 
+        confirmButtonColor: '#089B41', 
+        confirmButtonText: "OK"
+      }) 
+      input.value = '';
+      return; 
+    } 
     const existingElement = this.registrationFormForFiles.find(
       (element) => element.categoryFieldID === fieldId
     );

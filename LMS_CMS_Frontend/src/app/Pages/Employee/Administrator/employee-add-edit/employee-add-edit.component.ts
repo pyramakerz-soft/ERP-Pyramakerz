@@ -77,6 +77,12 @@ export class EmployeeAddEditComponent {
   GradedropdownOpen = false;
   SubjectdropdownOpen = false;
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
 
   constructor(
     public RoleServ: RoleService,
@@ -230,19 +236,38 @@ export class EmployeeAddEditComponent {
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
-        const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
-        if (file.size > maxSizeInBytes) {
+        const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+        if (!this.allowedExtensions.includes(fileExtension)) {
+          Swal.fire({
+            title: 'Invalid file type',
+            html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+            icon: 'warning',
+            confirmButtonColor: '#089B41',
+            confirmButtonText: "OK"
+          }); 
+          input.value = '';
           continue;
-        }
-        this.NewFile = new EmployeeAttachment();
-        this.NewFile.file = file;
-        this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
-        this.NewFile.link = '';
-        this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
-        this.SelectedFiles.push(this.NewFile);
+        }else if(file.size > 25 * 1024 * 1024) {
+          Swal.fire({
+            title: 'The file size exceeds the maximum limit of 25 MB.',
+            icon: 'warning', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          }) 
+          input.value = '';
+          continue; 
+        }else{
+          this.NewFile = new EmployeeAttachment();
+          this.NewFile.file = file;
+          this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
+          this.NewFile.link = '';
+          this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
+          this.SelectedFiles.push(this.NewFile);
+        } 
       }
     }
     input.value = '';

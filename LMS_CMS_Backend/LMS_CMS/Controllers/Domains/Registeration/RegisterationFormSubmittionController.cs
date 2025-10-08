@@ -23,14 +23,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         IMapper mapper;
         private readonly UOW _Unit_Of_Work_Octa;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-
-        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService)
+        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _Unit_Of_Work_Octa = unit_Of_Work_Octa;
             _checkPageAccessService = checkPageAccessService;   
+            _fileService = fileService;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -64,15 +65,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 return NotFound();
             }
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var r in registerationFormSubmittions)
             {
                 if (!string.IsNullOrEmpty(r.TextAnswer) && r.CategoryField.FieldTypeID == 6)
-                {
-                    r.TextAnswer = $"{serverUrl}{r.TextAnswer.Replace("\\", "/")}";
+                { 
+                    r.TextAnswer = _fileService.GetFileUrl(r.TextAnswer, Request);
                 }
             }
+             
             List<RegisterationFormSubmittionGetDTO> registerationFormSubmittionDTO = mapper.Map<List<RegisterationFormSubmittionGetDTO>>(registerationFormSubmittions);
 
             foreach (var item in registerationFormSubmittionDTO)
@@ -140,10 +141,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          allowEdit: 1,
-          pages: new[] { "Registration Confirmation" , "Student"}
-         )]
+          allowedTypes: new[] { "octa", "employee" }, 
+          pages: new[] {"Student"}  
+        )]
         public IActionResult Add(List<RegisterationFormSubmittionGetDTO> newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -193,7 +193,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-          pages: new[] { "Registration Confirmation" , "Student" }
+          pages: new[] {"Student" }
          )]
         public IActionResult Edit(long StudentId ,List<RegisterationFormSubmittionGetDTO> newData)
         {
@@ -215,26 +215,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 return BadRequest("No Student with this ID");
             }
+
             RegisterationFormParent registerationFormParent = Unit_Of_Work.registerationFormParent_Repository.First_Or_Default(r => r.ID == student.RegistrationFormParentID);
             if (registerationFormParent == null)
             {
-                return BadRequest("No RegisterationFormParent with this ID");
+                return BadRequest("No Registration Form Parent with this ID");
             }
+            
+            if (userTypeClaim == "employee")
+            { 
+                IActionResult? accessCheckStudents = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, registerationFormParent);
+                if (accessCheckStudents != null)
+                {
+                    return accessCheckStudents;
+                }
+            }
+
             foreach (var item in newData)
             {
                 RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID);
                 if (registerationFormSubmittion == null)
                 {
-                    return NotFound("Registeration Form Submittion Test not found");
-                }
-                if (userTypeClaim == "employee")
-                {
-                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormSubmittion);
-                    IActionResult? accessCheckStudents = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, registerationFormSubmittion);
-                    if (accessCheck != null && accessCheckStudents != null)
-                    {
-                        return accessCheck;
-                    }
+                    return NotFound("Registration Form Submittion Test not found");
                 }
                 if (item.SelectedFieldOptionID == 0)
                 {

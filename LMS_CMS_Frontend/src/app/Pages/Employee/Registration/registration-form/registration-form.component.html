@@ -194,6 +194,7 @@
 
                             <input *ngSwitchCase="6" id="{{cat.enName}}_{{field.enName}}" type="file"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
                                 (change)="handleFileUpload($event, field.id)"
                                 [class.error-border]="isFieldInvalid(field)" />
                         </ng-container>

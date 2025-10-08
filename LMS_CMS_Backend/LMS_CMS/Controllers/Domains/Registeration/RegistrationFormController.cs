@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace LMS_CMS_PL.Controllers.Domains.Registeration
 {
@@ -23,13 +24,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CreateStudentService _createStudentService;
+        private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public RegistrationFormController(DbContextFactoryService dbContextFactory, IMapper mapper, CreateStudentService createStudentService)
+        public RegistrationFormController(DbContextFactoryService dbContextFactory, IMapper mapper, CreateStudentService createStudentService, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _createStudentService = createStudentService;
-
+            _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -281,6 +285,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 parentID = parent.ID;
             }
+
+            if (filesFieldCat != null)
+            {
+                foreach (var file in filesFieldCat)
+                {
+                    if (file.SelectedFile != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.SelectedFile);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        }
+                    }
+                }
+            }
+
             for (int i = 0; i < registerationFormParentAddDTO.RegisterationFormSubmittions.Count; i++)
             {
                 CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(s => s.ID == registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID && s.IsDeleted != true);
@@ -374,35 +394,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (filesFieldCat != null)
             {
                 for (int j = 0; j < filesFieldCat.Count; j++)
-                {
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/RegistrationForm");
-                    fileFolder = Path.Combine(baseFolder,
-                    registerationFormParentAddDTO.RegistrationFormID.ToString(),
-                    newRegisterationFormParentID.ToString(),
-                    filesFieldCat[j].CategoryFieldID.ToString());
-
+                {  
                     if (filesFieldCat[j].SelectedFile.Length > 0)
                     {
-                        if (!Directory.Exists(fileFolder))
-                        {
-                            Directory.CreateDirectory(fileFolder);
-                        }
-
-                        var filePath = Path.Combine(fileFolder, filesFieldCat[j].SelectedFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await filesFieldCat[j].SelectedFile.CopyToAsync(stream);
-                        }
+                        var fileLink = await _fileService.UploadFileAsync(filesFieldCat[j].SelectedFile,
+                            $"Registration/RegistrationForm/{registerationFormParentAddDTO.RegistrationFormID.ToString()}/{newRegisterationFormParentID.ToString()}",
+                            filesFieldCat[j].CategoryFieldID, HttpContext);
 
                         registerationFormSubmittion = new RegisterationFormSubmittion
                         {
                             RegisterationFormParentID = newRegisterationFormParentID,
                             CategoryFieldID = filesFieldCat[j].CategoryFieldID,
                             SelectedFieldOptionID = (long?)null,
-                            TextAnswer = Path.Combine("Uploads", "RegistrationForm", registerationFormParentAddDTO.RegistrationFormID.ToString(),
-                            newRegisterationFormParentID.ToString(),
-                            filesFieldCat[j].CategoryFieldID.ToString()
-                            , filesFieldCat[j].SelectedFile.FileName),
+                            TextAnswer = fileLink,
                             InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
                         };
                         if (userTypeClaim == "octa")
