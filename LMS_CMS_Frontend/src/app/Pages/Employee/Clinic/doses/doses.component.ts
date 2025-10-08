@@ -57,16 +57,8 @@ export class DosesComponent implements OnInit {
     try {
       const data = await firstValueFrom(this.doseService.Get(this.DomainName));
       this.doses = data.map((item) => {
-        const insertedAtDate = new Date(item.insertedAt);
-        const options: Intl.DateTimeFormatOptions = {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        };
-        const formattedDate: string = insertedAtDate.toLocaleDateString(undefined, options);
         return {
           ...item,
-          insertedAt: formattedDate,
           actions: { delete: true, edit: true },
         };
       });
@@ -187,19 +179,17 @@ saveDose() {
   }
 
 
-GetTableHeaders(){
-   
-if(!this.isRtl){
-  return ['ID', 'Doses', 'Date', 'Actions']
-}else{
-  return[
-  "المعرف",
-  "الجرعات",
-  "التاريخ",
-  "الإجراءات"
-]
-}
-}
+  GetTableHeaders(){
+    if(!this.isRtl){
+      return ['ID', 'Doses', 'Actions']
+    }else{
+      return[
+        "المعرف",
+        "الجرعات",
+        "الإجراءات"
+      ]
+    }
+  }
 
 
 

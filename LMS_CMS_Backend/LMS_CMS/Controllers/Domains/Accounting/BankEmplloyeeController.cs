@@ -29,6 +29,39 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByEmployeeID/{EmpId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Bank" }
+        )]
+        public async Task<IActionResult> GetByEmployeeID(long EmpId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EmpId);
+            if (employee == null)
+            {
+                return BadRequest("No employee With this ID");
+            }
+
+            List<BankEmployee> bankEmployees = await Unit_Of_Work.bankEmployee_Repository.Select_All_With_IncludesById<BankEmployee>(
+                               f => f.IsDeleted != true && f.EmployeeID == EmpId,
+                               query => query.Include(d => d.Bank),
+                               query => query.Include(d => d.Employee));
+
+            if (bankEmployees == null || bankEmployees.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<BankEmployeeGetDTO> bankEmployeesDTO = mapper.Map<List<BankEmployeeGetDTO>>(bankEmployees);
+
+            return Ok(bankEmployeesDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetByBankID/{bankID}")]
         [Authorize_Endpoint_(

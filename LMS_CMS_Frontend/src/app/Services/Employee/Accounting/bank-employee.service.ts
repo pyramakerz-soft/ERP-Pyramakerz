@@ -25,6 +25,18 @@ export class BankEmployeeService {
       .set('Content-Type', 'application/json');
     return this.http.get<BankEmployee[]>(`${this.baseUrl}/BankEmplloyee/GetByBankID/${id}`, { headers })
   }
+
+  GetByEmployeeId(EmpId:number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<BankEmployee[]>(`${this.baseUrl}/BankEmplloyee/GetByEmployeeID/${EmpId}`, { headers })
+  }
  
   Add(bankEmployee: BankEmployee, DomainName: string) {
     if (DomainName != null) {

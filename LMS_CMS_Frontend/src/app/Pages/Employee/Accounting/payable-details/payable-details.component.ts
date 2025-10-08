@@ -11,11 +11,8 @@ import { PayableDocTypeService } from '../../../../Services/Employee/Accounting/
 import { Router, ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
-import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
 import { DataAccordingToLinkFileService } from '../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import { LinkFileService } from '../../../../Services/Employee/Accounting/link-file.service';
-import { ReceivableDetailsService } from '../../../../Services/Employee/Accounting/receivable-details.service';
-import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
@@ -28,15 +25,32 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Bank } from '../../../../Models/Accounting/bank';
+import { Saves } from '../../../../Models/Accounting/saves';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
 @Component({
   selector: 'app-payable-details',
   standalone: true,
   imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './payable-details.component.html',
-  styleUrl: './payable-details.component.css'
+  styleUrl: './payable-details.component.css',
 })
 export class PayableDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -50,27 +64,30 @@ export class PayableDetailsComponent {
   path: string = '';
   PayableID: number = 0;
 
-  isCreate: boolean = false
-  isEdit: boolean = false
-  isView: boolean = false
+  isCreate: boolean = false;
+  isEdit: boolean = false;
+  isView: boolean = false;
 
-  payable: Payable = new Payable()
+  payable: Payable = new Payable();
   validationErrors: { [key in keyof Payable]?: string } = {};
   validationErrorsForDetails: { [key in keyof PayableDetails]?: string } = {};
 
-  dataTypesData: PayableDocType[] = []
-  bankOrSaveData: any[] = []
-  payableDetailsData: PayableDetails[] = []
-  newDetails: PayableDetails = new PayableDetails()
-  linkFilesData: LinkFile[] = []
-  linkFileTypesData: any[] = []
+  dataTypesData: PayableDocType[] = [];
+  // bankOrSaveData: any[] = []
+  banksData: BankEmployee[] = [];
+  safesData: SafeEmployee[] = [];
+  bankOrSafe: string = '';
+  payableDetailsData: PayableDetails[] = [];
+  newDetails: PayableDetails = new PayableDetails();
+  linkFilesData: LinkFile[] = [];
+  linkFileTypesData: any[] = [];
   totalAmount: number = 0;
 
-  isNewDetails: boolean = false
-  isDetailsValid: boolean = false
+  isNewDetails: boolean = false;
+  isDetailsValid: boolean = false;
 
   editingRowId: number | null = null;
-  editedRowData: PayableDetails = new PayableDetails()
+  editedRowData: PayableDetails = new PayableDetails();
 
   isLoading = false;
   isSaveLoading = false;
@@ -88,17 +105,16 @@ export class PayableDetailsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public payableService: PayableService,
-    public bankService: BankService,
     private translate: TranslateService,
-    public saveService: SaveService,
     public payableDetailsService: PayableDetailsService,
     public linkFileService: LinkFileService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
     public reportsService: ReportsService,
     private languageService: LanguageService,
+    private SafeEmployeeServ: SafeEmployeeService,
+    private BankEmployeeServ: BankEmployeeService,
     private realTimeService: RealTimeNotificationServiceService
-
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -106,22 +122,24 @@ export class PayableDetailsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
 
-    this.PayableID = Number(this.activeRoute.snapshot.paramMap.get('id'))
+    this.PayableID = Number(this.activeRoute.snapshot.paramMap.get('id'));
 
     if (!this.PayableID) {
-      this.isCreate = true
+      this.isCreate = true;
+      this.payable.linkFileID = 5;
+      this.getSaveData();
     } else {
-      this.GetPayableByID()
-      this.GetPayableDetails()
+      this.GetPayableByID();
+      this.GetPayableDetails();
     }
 
-    this.activeRoute.url.subscribe(url => {
-      this.path = url[0].path
-      if (url[1].path == "View") {
-        this.isView = true
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+      if (url[1].path == 'View') {
+        this.isView = true;
       } else {
         if (this.PayableID) {
-          this.isEdit = true
+          this.isEdit = true;
         }
       }
     });
@@ -131,19 +149,20 @@ export class PayableDetailsComponent {
       if (settingsPage) {
         this.AllowEdit = settingsPage.allow_Edit;
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
 
-    this.GetDocType()
+    this.GetDocType();
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
 
   ngOnDestroy(): void {
     this.realTimeService.stopConnection();
@@ -153,55 +172,59 @@ export class PayableDetailsComponent {
   }
 
   moveToPayable() {
-    this.router.navigateByUrl("Employee/Payable")
+    this.router.navigateByUrl('Employee/Payable');
   }
 
   GetDocType() {
-    this.payableDocTypeService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.dataTypesData = data
-      }
-    )
+    this.payableDocTypeService.Get(this.DomainName).subscribe((data) => {
+      this.dataTypesData = data;
+    });
   }
 
   GetPayableByID() {
-    this.payableService.GetByID(this.PayableID, this.DomainName).subscribe(
-      (data) => {
-        this.payable = data
+    this.payableService
+      .GetByID(this.PayableID, this.DomainName)
+      .subscribe((data) => {
+        this.payable = data;
         if (this.payable.linkFileID == 5) {
-          this.getSaveData()
+          this.getSaveData();
         } else if (this.payable.linkFileID == 6) {
-          this.getBankData()
+          this.getBankData();
         }
-      }
-    )
+      });
   }
 
   getBankData() {
-    this.bankOrSaveData = []
-    this.bankService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.bankOrSaveData = data
-      }
-    )
+    this.banksData = [];
+    this.bankOrSafe = 'bank';
+    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((data) => {
+      this.banksData = data;
+    });
   }
 
   getSaveData() {
-    this.bankOrSaveData = []
-    this.saveService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.bankOrSaveData = data
-      }
-    )
+    this.safesData = [];
+    this.bankOrSafe = 'safe';
+    this.SafeEmployeeServ.GetByEmployeeId( this.UserID,this.DomainName).subscribe((data) => {
+      this.safesData = data;
+    });
   }
 
   IsAllowDelete(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
     return IsAllow;
   }
 
   IsAllowEdit(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
     return IsAllow;
   }
 
@@ -219,15 +242,21 @@ export class PayableDetailsComponent {
       if (this.payable.hasOwnProperty(key)) {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
-          if (field == "payableDocTypeID" || field == "linkFileID" || field == "date" || field == "docNumber") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          if (
+            field == 'payableDocTypeID' ||
+            field == 'linkFileID' ||
+            field == 'date' ||
+            field == 'docNumber'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
             isValid = false;
           }
-          if (field == "bankOrSaveID") {
-            this.validationErrors[field] = `*Bank Or SaFe is required`
+          if (field == 'bankOrSaveID') {
+            this.validationErrors[field] = `*Bank Or SaFe is required`;
             isValid = false;
           }
-
         } else {
           this.validationErrors[field] = '';
         }
@@ -242,81 +271,94 @@ export class PayableDetailsComponent {
       if (this.hasOwnProperty(key)) {
         const field = key as keyof PayableDetails;
         if (!detail[field]) {
-          if (field == "amount" || field == "linkFileName") {
-
-            this.validationErrorsForDetails[field] = `*${this.DetailsCapitalizeField(field)} is required`
+          if (field == 'amount' || field == 'linkFileName') {
+            this.validationErrorsForDetails[
+              field
+            ] = `*${this.DetailsCapitalizeField(field)} is required`;
             isValid = false;
           }
-        }
-        else {
+        } else {
           this.validationErrorsForDetails[field] = '';
         }
       }
     }
     if (detail.linkFileID == 0) {
-      this.validationErrorsForDetails["linkFileID"] = 'link File is required'
+      this.validationErrorsForDetails['linkFileID'] = 'link File is required';
       isValid = false;
     }
     if (detail.linkFileTypeID == 0) {
-      this.validationErrorsForDetails["linkFileTypeID"] = 'Link File Data is required'
+      this.validationErrorsForDetails['linkFileTypeID'] =
+        'Link File Data is required';
       isValid = false;
     }
-    if (detail.amount == null || detail.amount == "") {
-      this.validationErrorsForDetails["amount"] = 'amount is required'
+    if (detail.amount == null || detail.amount == '') {
+      this.validationErrorsForDetails['amount'] = 'amount is required';
       isValid = false;
     }
     return isValid;
   }
 
-  onInputValueChange(event: { field: keyof Payable, value: any }) {
+  onInputValueChange(event: { field: keyof Payable; value: any }) {
     const { field, value } = event;
     (this.payable as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
     }
 
-    if (field == "linkFileID") {
-      this.payable.bankOrSaveID = 0
+    if (field == 'linkFileID') {
+      this.payable.bankOrSaveID = 0;
     }
   }
 
-  onInputValueChangeForDetails(event: { field: keyof PayableDetails, value: any }) {
+  onInputValueChangeForDetails(event: {
+    field: keyof PayableDetails;
+    value: any;
+  }) {
     const { field, value } = event;
     (this.newDetails as any)[field] = value;
     if (value) {
       this.validationErrorsForDetails[field] = '';
     }
-    if (field == "linkFileID") {
-      this.newDetails.linkFileTypeID = 0
+    if (field == 'linkFileID') {
+      this.newDetails.linkFileTypeID = 0;
     }
 
-    if ((this.newDetails.amount || this.editedRowData.amount) &&
-      (!isNaN(this.newDetails.amount ? this.newDetails.amount : 0) && !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0)) &&
+    if (
+      (this.newDetails.amount || this.editedRowData.amount) &&
+      !isNaN(this.newDetails.amount ? this.newDetails.amount : 0) &&
+      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
       (this.newDetails.linkFileID || this.editedRowData.linkFileID) &&
-      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)) {
-      this.isDetailsValid = true
+      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)
+    ) {
+      this.isDetailsValid = true;
     } else {
-      this.isDetailsValid = false
+      this.isDetailsValid = false;
     }
   }
 
-  onInputValueChangeForEditDetails(event: { field: keyof PayableDetails, value: any }) {
+  onInputValueChangeForEditDetails(event: {
+    field: keyof PayableDetails;
+    value: any;
+  }) {
     const { field, value } = event;
     (this.editedRowData as any)[field] = value;
     if (value) {
       this.validationErrorsForDetails[field] = '';
     }
-    if (field == "linkFileID") {
-      this.editedRowData.linkFileTypeID = 0
+    if (field == 'linkFileID') {
+      this.editedRowData.linkFileTypeID = 0;
     }
 
-    if ((this.editedRowData.amount || this.editedRowData.amount) &&
-      (!isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) && !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0)) &&
+    if (
+      (this.editedRowData.amount || this.editedRowData.amount) &&
+      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
+      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
       (this.editedRowData.linkFileID || this.editedRowData.linkFileID) &&
-      (this.editedRowData.linkFileTypeID || this.editedRowData.linkFileTypeID)) {
-      this.isDetailsValid = true
+      (this.editedRowData.linkFileTypeID || this.editedRowData.linkFileTypeID)
+    ) {
+      this.isDetailsValid = true;
     } else {
-      this.isDetailsValid = false
+      this.isDetailsValid = false;
     }
   }
 
@@ -393,97 +435,106 @@ export class PayableDetailsComponent {
   }
 
   GetPayableDetails() {
-    this.payableDetailsData = []
-    this.payableDetailsService.Get(this.DomainName, this.PayableID).subscribe(
-      (data) => {
-        this.payableDetailsData = data
-        let total = 0
-        this.payableDetailsData.forEach(element => {
-          total = total + (element.amount ? element.amount : 0)
+    this.payableDetailsData = [];
+    this.payableDetailsService
+      .Get(this.DomainName, this.PayableID)
+      .subscribe((data) => {
+        this.payableDetailsData = data;
+        let total = 0;
+        this.payableDetailsData.forEach((element) => {
+          total = total + (element.amount ? element.amount : 0);
         });
-        this.totalAmount = total
-      }
-    )
+        this.totalAmount = total;
+      });
   }
 
   GetLinkFiles() {
-    this.linkFileService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.linkFilesData = data
-      }
-    )
+    this.linkFileService.Get(this.DomainName).subscribe((data) => {
+      this.linkFilesData = data;
+    });
   }
 
   GetLinkFilesTypeData(id: number) {
-    this.linkFileTypesData = []
-    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, id).subscribe(
-      (data) => {
-        this.linkFileTypesData = data
-      }
-    )
+    this.linkFileTypesData = [];
+    this.dataAccordingToLinkFileService
+      .GetTableDataAccordingToLinkFile(this.DomainName, id)
+      .subscribe((data) => {
+        this.linkFileTypesData = data;
+      });
   }
 
   AddPayableDetails() {
-    this.isDetailsValid = false
+    this.isDetailsValid = false;
     this.editingRowId = null;
     this.editedRowData = new PayableDetails();
-    this.isNewDetails = true
-    this.GetLinkFiles()
+    this.isNewDetails = true;
+    this.GetLinkFiles();
   }
 
   SaveNewDetails() {
-    this.newDetails.payableMasterID = this.PayableID
+    this.newDetails.payableMasterID = this.PayableID;
     if (this.isDetailsFormValid(this.newDetails)) {
       this.isLoading = true;
-      this.payableDetailsService.Add(this.newDetails, this.DomainName).subscribe(
-        (data) => {
+      this.payableDetailsService
+        .Add(this.newDetails, this.DomainName)
+        .subscribe((data) => {
           this.isLoading = false;
-          this.isNewDetails = false
-          this.newDetails = new PayableDetails()
-          this.GetPayableDetails()
+          this.isNewDetails = false;
+          this.newDetails = new PayableDetails();
+          this.GetPayableDetails();
           this.editingRowId = null;
           this.editedRowData = new PayableDetails();
-          this.isDetailsValid = false
-        }
-      )
+          this.isDetailsValid = false;
+        });
     }
     this.isLoading = false;
   }
 
   EditDetail(row: PayableDetails) {
-    this.isNewDetails = false
-    this.isDetailsValid = true
-    this.newDetails = new PayableDetails()
-    this.GetLinkFiles()
-    this.editingRowId = row.id
-    this.editedRowData = { ...row }
+    this.isNewDetails = false;
+    this.isDetailsValid = true;
+    this.newDetails = new PayableDetails();
+    this.GetLinkFiles();
+    this.editingRowId = row.id;
+    this.editedRowData = { ...row };
     if (this.editedRowData.linkFileID) {
-      this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, +this.editedRowData.linkFileID).subscribe(
-        (data) => {
-          this.linkFileTypesData = data
-        }
-      )
+      this.dataAccordingToLinkFileService
+        .GetTableDataAccordingToLinkFile(
+          this.DomainName,
+          +this.editedRowData.linkFileID
+        )
+        .subscribe((data) => {
+          this.linkFileTypesData = data;
+        });
     }
   }
 
   SaveEditedDetail() {
     if (this.isDetailsFormValid(this.editedRowData)) {
-      this.payableDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-        (data) => {
+      this.payableDetailsService
+        .Edit(this.editedRowData, this.DomainName)
+        .subscribe((data) => {
           this.editingRowId = null;
           this.editedRowData = new PayableDetails();
-          this.isDetailsValid = false
-          this.isNewDetails = false
-          this.newDetails = new PayableDetails()
-          this.GetPayableDetails()
-        }
-      )
+          this.isDetailsValid = false;
+          this.isNewDetails = false;
+          this.newDetails = new PayableDetails();
+          this.GetPayableDetails();
+        });
     }
   }
 
   DeleteDetail(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Payable Detail') + this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Payable Detail') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -492,15 +543,14 @@ export class PayableDetailsComponent {
       cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.payableDetailsService.Delete(id, this.DomainName).subscribe(
-          (data) => {
-            this.GetPayableDetails()
-          }
-        )
+        this.payableDetailsService
+          .Delete(id, this.DomainName)
+          .subscribe((data) => {
+            this.GetPayableDetails();
+          });
       }
     });
   }
-
 
   // DownloadData() {
   //   let orderElement = document.getElementById('DataToDownload');
@@ -533,16 +583,16 @@ export class PayableDetailsComponent {
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
+      setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
 
   Print() {
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error("Element not found!");
+        console.error('Element not found!');
         return;
       }
 
@@ -586,8 +636,8 @@ export class PayableDetailsComponent {
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Payable Report",
-        ar: "تقرير الدفع"
+        en: 'Payable Report',
+        ar: 'تقرير الدفع',
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -596,24 +646,29 @@ export class PayableDetailsComponent {
         { key: 'Document Type', value: this.payable.payableDocTypesName || '' },
         { key: 'Document Number', value: this.payable.docNumber || '' },
         { key: 'Date', value: this.payable.date || '' },
-        { key: 'Total Amount', value: this.totalAmount || 0 }
+        { key: 'Total Amount', value: this.totalAmount || 0 },
       ],
       reportImage: '', // Add image URL if available
-      filename: "Payable_Report.xlsx",
+      filename: 'Payable_Report.xlsx',
       tables: [
         {
           // title: "Payable Details",
-          headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
+          headers: [
+            'id',
+            'amount',
+            'linkFileName',
+            'linkFileTypeName',
+            'notes',
+          ],
           data: this.payableDetailsData.map((row) => [
             row.id || 0,
             row.amount || 0,
             row.linkFileName || '',
             row.linkFileTypeName || '',
-            row.notes || ''
-          ])
-        }
-      ]
+            row.notes || '',
+          ]),
+        },
+      ],
     });
   }
-
 }

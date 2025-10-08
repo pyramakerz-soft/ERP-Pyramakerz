@@ -15,6 +15,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string EmployeeEnglishName { get; set; } 
         public string EmployeeArabicName { get; set; } 
         public long BankID { get; set; }
+        public string BankName { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }

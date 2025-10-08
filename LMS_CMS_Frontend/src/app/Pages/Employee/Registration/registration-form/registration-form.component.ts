@@ -174,28 +174,15 @@ export class RegistrationFormComponent {
   }
 
   getRegisterationFormSubmittion() {
-    this.RegisterationFormSubmittionServ.GetByRegistrationParentID(
-      this.RegistrationParentID,
-      this.DomainName
-    ).subscribe((data) => {
+    this.RegisterationFormSubmittionServ.GetByRegistrationParentID(this.RegistrationParentID, this.DomainName).subscribe((data) => {
       this.registrationForm.registerationFormSubmittions = data;
-      this.selectedSchool =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 7
-        )?.selectedFieldOptionID ?? 0;
+      this.selectedSchool =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 7)?.selectedFieldOptionID ?? 0;
       if (this.selectedSchool) {
         this.getAcademicYear();
         this.getSections();
       }
-      this.selectedAcademicYear =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 8
-        )?.selectedFieldOptionID ?? 0;
-      this.selectedGrade =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 9
-        )?.selectedFieldOptionID ?? 0;
-
+      this.selectedAcademicYear = this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 8)?.selectedFieldOptionID ?? 0;
+      this.selectedGrade =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 9 )?.selectedFieldOptionID ?? 0;
     });
   }
 

@@ -16,8 +16,6 @@ import { Student } from '../../../../Models/student';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
-import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
-import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
 import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
@@ -47,6 +45,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
@@ -82,8 +84,8 @@ export class InventoryDetailsComponent {
   OriginsSuppliers: Supplier[] = [];
   StoresForTitle: Store[] = [];
   Stores: Store[] = [];
-  Saves: Saves[] = [];
-  Banks: Bank[] = [];
+  Saves: SafeEmployee[] = [];
+  Banks: BankEmployee[] = [];
   Categories: Category[] = [];
   subCategories: SubCategory[] = [];
   ShopItems: ShopItem[] = [];
@@ -157,9 +159,9 @@ export class InventoryDetailsComponent {
     public salesItemServ: InventoryDetailsService,
     public salesServ: InventoryMasterService,
     public storeServ: StoresService,
-    public SaveServ: SaveService,
+    public SafeEmployeeServ: SafeEmployeeService,
     private translate: TranslateService,
-    public bankServ: BankService,
+    public BankEmployeeServ: BankEmployeeService,
     public CategoriesServ: InventoryCategoryService,
     public SubCategoriesServ: InventorySubCategoriesService,
     public shopitemServ: ShopItemService,
@@ -270,13 +272,13 @@ export class InventoryDetailsComponent {
   ////////////////////////////////////////////////////// Get Data
 
   GetAllSaves() {
-    this.SaveServ.Get(this.DomainName).subscribe((d) => {
+    this.SafeEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
       this.Saves = d;
     });
   }
 
   GetAllBanks() {
-    this.bankServ.Get(this.DomainName).subscribe((d) => {
+    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
       this.Banks = d;
     });
   }
@@ -355,6 +357,13 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      if(this.Data.isVisa == false){
+        this.Data.bankID=0
+      }
+      if(this.Data.isCash == false){
+        this.Data.saveID=0
+      }
+      console.log(this.Data)
       this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
         this.schoolPCs = d
       })
@@ -431,7 +440,7 @@ export class InventoryDetailsComponent {
   async selectShopItem(item: ShopItem) {
     this.SelectedSopItem = item;
     this.ShopItem = item;
-    this.Item.id = Date.now();
+     this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
     if (this.FlagId === 11 || this.FlagId === 12) {
       this.Item.price = item.salesPrice ?? 0;
     } else {
@@ -661,8 +670,8 @@ export class InventoryDetailsComponent {
       }
       this.NewDetailsWhenEdit.push(this.Item);
       this.TableData.push(this.Item);
-      await this.GetMasterInfo();
-      await firstValueFrom(this.salesServ.Edit(this.Data, this.DomainName));
+      // await this.GetMasterInfo();
+      // await firstValueFrom(this.salesServ.Edit(this.Data, this.DomainName));
     }
     this.TotalandRemainingCalculate();
     this.Item = new InventoryDetails();
@@ -772,22 +781,14 @@ export class InventoryDetailsComponent {
       if (this.mode == 'Create') {
         this.Data.cashAmount = this.Data.cashAmount || 0;
         this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.Data.inventoryDetails.reduce(
-          (sum, item) => sum + (item.totalPrice || 0),
-          0
-        );
-        this.Data.remaining =
-          +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
+        this.Data.total = this.Data.inventoryDetails.reduce( (sum, item) => sum + (item.totalPrice || 0),0);
+        this.Data.remaining = +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
       } else if (this.mode == 'Edit') {
         this.Data.cashAmount = this.Data.cashAmount || 0;
         this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.TableData.reduce(
-          (sum, item) => sum + (item.totalPrice || 0),
-          0
-        );
-        this.Data.remaining =
-          +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
-        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
+        this.Data.total = this.TableData.reduce((sum, item) => sum + (item.totalPrice || 0),0);
+        this.Data.remaining = +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
+        // this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
       }
       resolve();
     });

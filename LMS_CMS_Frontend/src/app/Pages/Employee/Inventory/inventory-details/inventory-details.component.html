@@ -143,8 +143,8 @@
       <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="save"
         (ngModelChange)=" onInputValueChange({ field: 'saveID', value: $event })" [(ngModel)]="Data.saveID">
         <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Safe'| translate }}</option>
-        <option *ngFor="let stu of Saves" [value]="stu.id">
-          {{ stu.name }}
+        <option *ngFor="let stu of Saves" [value]="stu.saveID">
+          {{ stu.saveName }}
         </option>
         <option *ngIf="Saves.length === 0" disabled selected>
           {{'No Data Found'| translate }}
@@ -170,8 +170,8 @@
       <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bank"
         (ngModelChange)=" onInputValueChange({ field: 'bankID', value: $event })" [(ngModel)]="Data.bankID">
         <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Bank'| translate }}</option>
-        <option *ngFor="let stu of Banks" [value]="stu.id">
-          {{ stu.name }}
+        <option *ngFor="let stu of Banks" [value]="stu.bankID">
+          {{ stu.bankName }}
         </option>
         <option *ngIf="Banks.length === 0" disabled selected>
           {{'No Data Found'| translate }}

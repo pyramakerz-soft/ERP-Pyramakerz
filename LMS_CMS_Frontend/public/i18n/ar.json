@@ -1220,9 +1220,15 @@
   "Inventory Transaction Report Detailed": "تقرير حركة المخزون مفصل",
   "Opening Balances": "الأرصدة الافتتاحية",
   "Total Price": "السعر الإجمالي",
-  "Item ID": "معرّف المادة"
-
-
+  "Item ID": "معرّف المادة",
+  "Loans Status": "حالة القروض",
+  "Total Loans": "إجمالي القروض",
+  "Total Deducted": "إجمالي المخصوم",
+  "Month": "الشهر",
+  "Deducted Value": "القيمة المخصومة",
+  "Deduction Start Month": "شهر بداية الخصم",
+  "Number Of Deduction": "عدد الخصومات",
+  "Deduction End Month": "شهر نهاية الخصم"
 
 
 }
