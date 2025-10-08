@@ -90,25 +90,39 @@ export class MaintenanceEmployeesComponent {
     );
   }
  
-  async GetTableData() {
+async GetTableData() {
+  this.TableData = [];
+  try {
+    const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+    this.TableData = data;
+    
+    // Refresh the employees list to exclude those already in maintenance
+    this.refreshFilteredEmployees();
+  } catch (error) {
     this.TableData = [];
-    try {
-      const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
-      this.TableData = data;
-    } catch (error) {
-      this.TableData = [];
-    }
   }
+}
 
-  async GetSelectData() {
-    this.employees = [];
-    try {
-      const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
-      this.employees = data;
-    } catch (error) {
-      this.employees = [];
-    }
+refreshFilteredEmployees() {
+  if (this.employees.length > 0) {
+    this.employees = this.employees.filter(emp => 
+      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+    );
   }
+}
+
+async GetSelectData() {
+  this.employees = [];
+  try {
+    const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
+    // Filter out employees that are already in maintenance
+    this.employees = data.filter(emp => 
+      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+    );
+  } catch (error) {
+    this.employees = [];
+  }
+}
 
 Delete(id: number) {
   Swal.fire({
@@ -150,21 +164,14 @@ Delete(id: number) {
 }
 
 
-  isFormValid(): boolean {
+ isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.selectedEmployee) { 
-      if (this.selectedEmployee.hasOwnProperty(key)) {
-        const field = key as keyof MaintenanceEmployees;
-        if (!this.selectedEmployee[field]) {
-          if (field == 'id') {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
-            isValid = false;
-          }
-        } else { 
-          this.validationErrors[field] = '';
-        }
-      }
-    } 
+    this.validationErrors = {};
+    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+      this.validationErrors['id'] = '*Employee is required';
+      isValid = false;
+    }
+
     return isValid;
   }
 
@@ -196,21 +203,24 @@ Delete(id: number) {
       }
     }
 
-
   onInputValueChange(event: { field: keyof MaintenanceEmployees; value: any }) {
     const { field, value } = event;
-    (this.selectedEmployee as any)[field] = value;
-    if (value) {
-      this.validationErrors[field] = '';
-    } 
-  }
-    capitalizeField(field: keyof MaintenanceEmployees): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    
+    if (field === 'id') {
+      this.selectedEmployeeId = value;
     }
-
-
-openModal() {
+    
+    if (value && value !== 0) {
+      this.validationErrors[field] = '';
+    }
+  }
+  capitalizeField(field: keyof MaintenanceEmployees): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+  
+  openModal() {
     this.selectedEmployeeId = 0; 
+    this.validationErrors = {};
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -222,8 +232,6 @@ openModal() {
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.validationErrors = {};
   }
-
-
 
 Save() {  
   if (this.isFormValid()) {
@@ -252,8 +260,6 @@ Save() {
     } 
   }
 }
-
-
 
 }
 

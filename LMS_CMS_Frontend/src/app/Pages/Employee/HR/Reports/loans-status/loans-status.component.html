@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center mb-5">
     <div class="flex justify-between items-center  rtl:space-x-reverse">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Loans Status' | translate }} </h1>
     </div>
 </div>
 
@@ -27,17 +27,18 @@
     </div>
 </div>
 
-<!-- <div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
-</div> -->
+<!-- Export Buttons -->
+<div *ngIf="IsShowTabls" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" [title]="'Download Excel' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+</div>
 
 <div *ngIf="IsShowTabls && LoanStatus.length != 0"
     class="flex flex-col justify-between items-start rtl:space-x-reverse mt-3 ">
     <div *ngFor="let row of LoanStatus; let i = index">
         <div class="flex justify-between items-center  rtl:space-x-reverse mt-3">
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Employee Name : {{row.employeeEnName}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Employee Name' | translate}} : {{row.employeeEnName}} </h1>
         </div>
 
         <div class="w-full">
@@ -97,7 +98,7 @@
                                     {{ row.numberOfDeduction }}
                                 </td>
                                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                                    {{ row.deductionEndMonth }} : {{ row.deductionEndYear }}
+                                    {{ row.deductionEndMonth }} / {{ row.deductionEndYear }}
                                 </td>
                             </tr>
                         </tbody>
@@ -151,20 +152,19 @@
         </div>
 
         <div class="flex justify-between items-center  rtl:space-x-reverse">
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Loans : {{row.totalLoans}} </h1>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Deducted : {{row.totalDeducted}} </h1>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Remaining : {{row.remaining}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Loans' | translate}} : {{row.totalLoans}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Deducted' | translate}} : {{row.totalDeducted}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{row.remaining}} </h1>
         </div>
         <div class="w-full h-1 bg-gray-500 my-5"></div>
     </div>
 
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Loans : {{totalLoansAll}} </h1>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Deducted : {{totalDeductedAll }} </h1>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Remaining : {{remainingAll }} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Loans' | translate}} : {{totalLoansAll}} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Deducted' | translate}} : {{totalDeductedAll }} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{remainingAll }} </h1>
     </div>
 </div>
-
 
 <div>
     <div *ngIf="IsShowTabls &&LoanStatus.length === 0">
@@ -174,23 +174,14 @@
     </div>
 </div>
 
-
-<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+<!-- PDF Section -->
+<div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
-                    {
-                        keyEn: 'Month: ' + this.month + '/' +this.year,
-                    }, 
-                    {
-                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
-                    },
-                    {
-                        keyEn: 'Job: ' + this.SelectedJobName,
-                    },
-                    {
-                        keyEn: 'Employee: ' + this.SelectedEmpName,
-                    }
-                    ]" [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" 
+                       [fileName]="'Loans Status Report'"
+                       [infoRows]="getInfoRows()"
+                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                       #pdfComponentRef>
         </app-pdf-print>
     </div>
-</div> -->
+</div>
