@@ -30,13 +30,23 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   standalone: true,
   imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-student.component.html',
-  styleUrl: './assignment-student.component.css'
+  styleUrl: './assignment-student.component.css',
 })
 export class AssignmentStudentComponent {
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
-
-  classes: Classroom[] = []
+  classes: Classroom[] = [];
   TableData: AssignmentStudent[] = [];
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -50,22 +60,24 @@ export class AssignmentStudentComponent {
   key: string = 'id';
   value: any = '';
 
-  CurrentPage: number = 1
-  PageSize: number = 10
-  TotalPages: number = 1
-  TotalRecords: number = 0
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
   isDeleting: boolean = false;
   AssignmentId: number = 0;
   ClassId: number = 0;
-  IsShowTabls: boolean = false
-  editDegreeId: number | null = null
-  assignment: Assignment = new Assignment()
+  IsShowTabls: boolean = false;
+  editDegreeId: number | null = null;
+  assignment: Assignment = new Assignment();
 
-  schools: School[] = []
-  Grades: Grade[] = []
+  schools: School[] = [];
+  Grades: Grade[] = [];
 
   SelectedSchoolId: number = 0;
   SelectedGradeId: number = 0;
+
+  DegreeError: string = '';
 
   constructor(
     private router: Router,
@@ -83,7 +95,7 @@ export class AssignmentStudentComponent {
     public assignmentServ: AssignmentService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  ) { }
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -92,13 +104,15 @@ export class AssignmentStudentComponent {
       this.path = url[0].path;
     });
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-    this.GetAssignment()
-    this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getAllSchools()
+    this.GetAssignment();
+    this.GetAllData(this.CurrentPage, this.PageSize);
+    this.getAllSchools();
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
@@ -109,71 +123,85 @@ export class AssignmentStudentComponent {
     }
   }
 
-
   GetAssignment() {
-    this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
-      this.assignment = d
-    })
+    this.assignmentServ
+      .GetByID(this.AssignmentId, this.DomainName)
+      .subscribe((d) => {
+        this.assignment = d;
+      });
   }
 
   getAllSchools() {
-    this.schools = []
+    this.schools = [];
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d
-    })
+      this.schools = d;
+    });
   }
 
   getAllGradesBySchoolId() {
-    this.Grades = []
-    this.IsShowTabls = false
-    this.SelectedGradeId = 0
-    this.ClassId = 0
-    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.Grades = d
-    })
+    this.Grades = [];
+    this.IsShowTabls = false;
+    this.SelectedGradeId = 0;
+    this.ClassId = 0;
+    this.GradeServ.GetBySchoolId(
+      this.SelectedSchoolId,
+      this.DomainName
+    ).subscribe((d) => {
+      this.Grades = d;
+    });
   }
 
   getAllClassByGradeId() {
-    this.classes = []
-    this.ClassId = 0
-    this.IsShowTabls = false
-    this.classServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      this.classes = d
-    })
+    this.classes = [];
+    this.ClassId = 0;
+    this.IsShowTabls = false;
+    this.classServ
+      .GetByGradeId(this.SelectedGradeId, this.DomainName)
+      .subscribe((d) => {
+        this.classes = d;
+      });
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
-    this.TableData = []
-    this.assignmentStudentServ.GetByAssignmentClass(this.AssignmentId, this.ClassId, this.DomainName, pageNumber, pageSize).subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage
-        this.PageSize = data.pagination.pageSize
-        this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords
-        this.TableData = data.data
-      },
-      (error) => {
-        if (error.status == 404) {
-          if (this.TotalRecords != 0) {
-            let lastPage = this.TotalRecords / this.PageSize
-            if (lastPage >= 1) {
-              if (this.isDeleting) {
-                this.CurrentPage = Math.floor(lastPage)
-                this.isDeleting = false
-              } else {
-                this.CurrentPage = Math.ceil(lastPage)
+    this.TableData = [];
+    this.assignmentStudentServ
+      .GetByAssignmentClass(
+        this.AssignmentId,
+        this.ClassId,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      )
+      .subscribe(
+        (data) => {
+          this.CurrentPage = data.pagination.currentPage;
+          this.PageSize = data.pagination.pageSize;
+          this.TotalPages = data.pagination.totalPages;
+          this.TotalRecords = data.pagination.totalRecords;
+          this.TableData = data.data;
+        },
+        (error) => {
+          if (error.status == 404) {
+            if (this.TotalRecords != 0) {
+              let lastPage = this.TotalRecords / this.PageSize;
+              if (lastPage >= 1) {
+                if (this.isDeleting) {
+                  this.CurrentPage = Math.floor(lastPage);
+                  this.isDeleting = false;
+                } else {
+                  this.CurrentPage = Math.ceil(lastPage);
+                }
+                this.GetAllData(this.CurrentPage, this.PageSize);
               }
-              this.GetAllData(this.CurrentPage, this.PageSize)
             }
           }
         }
-      }
-    )
+      );
   }
 
   changeCurrentPage(currentPage: number) {
-    this.CurrentPage = currentPage
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.CurrentPage, this.PageSize);
   }
 
   validatePageSize(event: any) {
@@ -185,7 +213,7 @@ export class AssignmentStudentComponent {
 
   validateNumber(event: any): void {
     const value = event.target.value;
-    this.PageSize = 0
+    this.PageSize = 0;
   }
 
   get visiblePages(): number[] {
@@ -213,21 +241,21 @@ export class AssignmentStudentComponent {
   }
 
   Apply() {
-    this.IsShowTabls = true
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    this.IsShowTabls = true;
+    this.GetAllData(this.CurrentPage, this.PageSize);
   }
 
   moveToAssignment() {
-    this.router.navigateByUrl(`Employee/Assignment/${this.AssignmentId}`)
+    this.router.navigateByUrl(`Employee/Assignment/${this.AssignmentId}`);
   }
 
   classChanged() {
-    this.IsShowTabls = false
-    this.TableData = []
+    this.IsShowTabls = false;
+    this.TableData = [];
   }
 
   moveToDetails(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`)
+    this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`);
   }
 
   openFile(link: string | null) {
@@ -242,9 +270,9 @@ export class AssignmentStudentComponent {
     const today = new Date(); // current date
     const dueDate = new Date(row.dueDate);
     today.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
-    console.log(343, today, dueDate)
-    if (row.degree != null && row.degree <= row.assignmentDegree) {
+    dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
+    console.log(343, today, dueDate);
+    if (this.IsFormValid(row)) {
       if (today > dueDate) {
         Swal.fire({
           title: 'Apply Late Submission Penalty?',
@@ -257,23 +285,25 @@ export class AssignmentStudentComponent {
           cancelButtonText: 'Forgive Delay',
         }).then((result) => {
           row.evaluationConsideringTheDelay = result.isConfirmed;
-          this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
-            this.editDegreeId = null
-            this.GetAllData(this.CurrentPage, this.PageSize)
-          }, error => {
-            this.editDegreeId = null
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-            this.GetAllData(this.CurrentPage, this.PageSize)
-          })
+          this.assignmentStudentServ.Edit(row, this.DomainName).subscribe(
+            (d) => {
+              this.editDegreeId = null;
+              this.GetAllData(this.CurrentPage, this.PageSize);
+            },
+            (error) => {
+              this.editDegreeId = null;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+              this.GetAllData(this.CurrentPage, this.PageSize);
+            }
+          );
         });
-      }
-      else {
+      } else {
         row.evaluationConsideringTheDelay = false;
         this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
           next: () => {
@@ -283,8 +313,8 @@ export class AssignmentStudentComponent {
               text: 'Updated Successfully',
               confirmButtonColor: '#089B41',
             });
-            this.editDegreeId = null
-            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.editDegreeId = null;
+            this.GetAllData(this.CurrentPage, this.PageSize);
           },
           error: (err) => {
             Swal.fire({
@@ -293,16 +323,20 @@ export class AssignmentStudentComponent {
               text: 'Something went wrong, please try again.',
               confirmButtonColor: '#d33',
             });
-            this.editDegreeId = null
-            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.editDegreeId = null;
+            this.GetAllData(this.CurrentPage, this.PageSize);
             console.error('Edit error:', err);
-          }
+          },
         });
       }
     }
   }
 
-  validateNumberAssignmentStudent(event: any, field: keyof AssignmentStudent, row: AssignmentStudent): void {
+  validateNumberAssignmentStudent(
+    event: any,
+    field: keyof AssignmentStudent,
+    row: AssignmentStudent
+  ): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
@@ -310,5 +344,22 @@ export class AssignmentStudentComponent {
         row[field] = '' as never;
       }
     }
+  }
+
+  IsFormValid(row: AssignmentStudent): boolean {
+    let isValid = true;
+    if (row.degree == null) {
+      isValid = false;
+      this.DegreeError = 'Degree Can not be empty';
+    }
+    if (row.degree != null && row.degree > row.assignmentDegree) {
+      isValid = false;
+      this.DegreeError = 'Degree cannot exceed ' + row.assignmentDegree;
+    }
+    return isValid;
+  }
+
+  onInputValueChange() {
+    this.DegreeError = '';
   }
 }

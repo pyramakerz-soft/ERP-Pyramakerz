@@ -91,7 +91,7 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID==1" >
                         <div class="flex items-center gap-2">
-                            <input *ngIf="row.id==editDegreeId" type="number" [(ngModel)]="row.degree"
+                            <input *ngIf="row.id==editDegreeId" type="number" [(ngModel)]="row.degree" (ngModelChange)="onInputValueChange()"
                                 [max]="row.assignmentDegree" min="0" (input)="validateNumberAssignmentStudent($event, 'degree',row)"
                                 class="w-20 px-2 py-1 border border-gray-300 rounded" />
                             <span *ngIf="row.id!=editDegreeId">{{ row.degree }}</span>
@@ -103,14 +103,10 @@
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                         </div>
-                        <div *ngIf="row.degree!= null && row.degree > row.assignmentDegree" class="text-red-500 text-sm mt-1">
-                               {{ 'Degree cannot exceed' | translate }} {{ row.assignmentDegree }}.
-                        </div>
-                        <div *ngIf="row.degree== null" class="text-red-500 text-sm mt-1">
-                               {{ 'Degree cannot be null' | translate }}
-                        </div>
+                        <span *ngIf="DegreeError" class="text-red-500 ml-3 font-normal">{{ DegreeError }}</span>
+
                     </td>
-                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID!=1" >
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID!=1" >
                         {{ row.degree }} / {{ row.assignmentDegree }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

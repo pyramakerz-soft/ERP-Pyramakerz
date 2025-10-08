@@ -65,14 +65,24 @@
                         <span *ngIf="validationErrors['linkFileID']" class="text-red-500 ml-3 font-normal">{{
                             validationErrors['linkFileID'] }}</span>
                     </div>
-                    <select (ngModelChange)="onInputValueChange({ field: 'bankOrSaveID', value: $event })"
+                    <select *ngIf="bankOrSafe == 'bank'" (ngModelChange)="onInputValueChange({ field: 'bankOrSaveID', value: $event })"
                         [disabled]="isView"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
                         id="bankOrSaveID" [(ngModel)]="payable.bankOrSaveID">
                         <option [value]="0" disabled selected hidden> {{ 'Choose Data' | translate }}</option>
-                        <option *ngFor="let bankOrSave of bankOrSaveData" [value]="bankOrSave.id">{{ bankOrSave.name }}
+                        <option *ngFor="let bankOrSave of banksData" [value]="bankOrSave.bankID">{{ bankOrSave.bankName }}
                         </option>
-                        <option *ngIf="bankOrSaveData.length === 0" disabled selected> {{ 'No Data Found' | translate }}
+                        <option *ngIf="banksData.length === 0" disabled selected> {{ 'No Data Found' | translate }}
+                        </option>
+                    </select>
+                     <select *ngIf="bankOrSafe == 'safe'" (ngModelChange)="onInputValueChange({ field: 'bankOrSaveID', value: $event })"
+                        [disabled]="isView"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
+                        id="bankOrSaveID" [(ngModel)]="payable.bankOrSaveID">
+                        <option [value]="0" disabled selected hidden> {{ 'Choose Data' | translate }}</option>
+                        <option *ngFor="let bankOrSave of safesData" [value]="bankOrSave.saveID">{{ bankOrSave.saveName }}
+                        </option>
+                        <option *ngIf="safesData.length === 0" disabled selected> {{ 'No Data Found' | translate }}
                         </option>
                     </select>
                     <span *ngIf="validationErrors['bankOrSaveID']" class="text-red-500 ml-3 font-normal">{{

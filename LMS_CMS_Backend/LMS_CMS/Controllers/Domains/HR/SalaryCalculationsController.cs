@@ -171,7 +171,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                     if (dayNames.Contains(currentDayName))
                     {
-                        OfficialHolidays officialHoliday = Unit_Of_Work.officialHolidays_Repository.First_Or_Default(o=>o.DateFrom <=  day && o.DateTo >= day); 
+                        OfficialHolidays officialHoliday = Unit_Of_Work.officialHolidays_Repository.First_Or_Default(o=>o.DateFrom <=  day && o.DateTo >= day && o.IsDeleted != true); 
                         if(officialHoliday != null) // OfficialHolidays
                         {
                             monthlyAttendance.DayStatusId = 4; ///////////////////////////////////////////////////////////////////////////////////// OfficialHolidays
@@ -198,8 +198,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                         else // vacation
                         {
                             VacationEmployee vacationEmployee = Unit_Of_Work.vacationEmployee_Repository
-                                .First_Or_Default(o =>(o.HalfDay == true && o.DateFrom == day) ||   // half-day vacation applies only on that exact day
-                                    (o.HalfDay == false && o.DateFrom <= day && o.DateTo >= day));
+                                .First_Or_Default(o =>((o.HalfDay == true && o.DateFrom == day) ||   // half-day vacation applies only on that exact day
+                                    (o.HalfDay == false && o.DateFrom <= day && o.DateTo >= day) )&& o.IsDeleted != true);
 
                             if (vacationEmployee != null && vacationEmployee.HalfDay == true) // half day vacation
                             {
@@ -542,6 +542,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                      minuteRate = hourlyRate / 60;
 
                     List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(m => m.EmployeeId == employee.ID && m.Day >= periodStart && m.Day <= periodEnd);
+                 
                     int totalDeductionHours = monthlyAttendances.Select(m => m.DeductionHours).Sum();
                     int totalDeductionMinutes = monthlyAttendances.Select(m => m.DeductionMinutes).Sum();
                     TimeSpan sunDeduction = TimeSpan.FromHours(totalDeductionHours) + TimeSpan.FromMinutes(totalDeductionMinutes);

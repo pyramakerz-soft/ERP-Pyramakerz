@@ -5,24 +5,20 @@ import { TokenData } from '../../../../Models/token-data';
 import { AccountingEntries } from '../../../../Models/Accounting/accounting-entries';
 import { AccountingEntriesDetails } from '../../../../Models/Accounting/accounting-entries-details';
 import { AccountingEntriesDocType } from '../../../../Models/Accounting/accounting-entries-doc-type';
-import { LinkFile } from '../../../../Models/Accounting/link-file';
 import { AccountingEntriesDocTypeService } from '../../../../Services/Employee/Accounting/accounting-entries-doc-type.service';
 import { AccountingEntriesService } from '../../../../Services/Employee/Accounting/accounting-entries.service';
 import { AccountingEntriesDetailsService } from '../../../../Services/Employee/Accounting/accounting-entries-details.service';
-import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { DataAccordingToLinkFileService } from '../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import { LinkFileService } from '../../../../Services/Employee/Accounting/link-file.service';
-import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import html2pdf from 'html2pdf.js';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -94,8 +90,6 @@ export class AccountingEntriesDetailsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public accountingEntriesService: AccountingEntriesService,
-    public bankService: BankService,
-    public saveService: SaveService,
     public accountingEntriesDetailsService: AccountingEntriesDetailsService,
     public linkFileService: LinkFileService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
