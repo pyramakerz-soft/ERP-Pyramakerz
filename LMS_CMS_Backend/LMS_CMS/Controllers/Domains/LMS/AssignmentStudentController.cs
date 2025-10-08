@@ -480,7 +480,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             assignmentStudent = new AssignmentStudent();
             assignmentStudent.AssignmentID = newData.AssignmentID;
             assignmentStudent.StudentClassroomID = studentClassroom.ID;
-             
+            //assignmentStudent.degree = 0;
+
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
                 assignmentStudent.InsertedByOctaId = userId;

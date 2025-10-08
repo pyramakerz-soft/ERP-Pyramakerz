@@ -19,13 +19,13 @@ import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-assignment-detail',
   standalone: true,
-  imports: [FormsModule, CommonModule , TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-detail.component.html',
   styleUrl: './assignment-detail.component.css'
 })
@@ -79,17 +79,17 @@ export class AssignmentDetailComponent {
     });
     this.AssignmentStudentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -148,7 +148,10 @@ export class AssignmentDetailComponent {
   save() {
     this.isLoading = true;
     const today = new Date(); // current date
-    const dueDate = new Date(this.assignmentStudent.dueDate); // ensure dueDate is a Date object
+    const dueDate = new Date(this.assignmentStudent.dueDate);
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
+    console.log(343, today, dueDate)
     if (today > dueDate) {
       Swal.fire({
         title: 'Apply Late Submission Penalty?',
