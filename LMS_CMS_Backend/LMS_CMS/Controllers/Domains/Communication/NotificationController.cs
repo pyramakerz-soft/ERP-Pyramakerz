@@ -692,11 +692,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 if (sharedTo != null)
                 {
                     var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(sharedTo);
-
-                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                     
                     if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
                     {
-                        notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
+                        notificationDTO.ImageLink = _fileService.GetFileUrl(notificationDTO.ImageLink, Request);
                     }
                      
                     await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 

@@ -15,6 +15,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { AccountService } from '../../../../Services/account.service';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -31,8 +32,8 @@ export class MaintenanceEmployeesComponent {
   validationErrors: { [key in keyof MaintenanceEmployees]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: any[] = [];       
-  employees: MaintenanceEmployees[] = []; 
+  TableData: MaintenanceEmployees[] = [];       
+  employees: Employee[] = []; 
   selectedEmployeeId: number=0;
   keysArray: string[] = ['id', 'en_Name'];
   key: string= "id";
@@ -52,11 +53,11 @@ export class MaintenanceEmployeesComponent {
       public mainServ: MaintenanceEmployeesService,
       private deleteEditPermissionServ: DeleteEditPermissionService,
       public account: AccountService,
-      public EmpServ: MaintenanceEmployeesService,
+      public EmpServ: EmployeeService,
       private activeRoute: ActivatedRoute,
       private realTimeService: RealTimeNotificationServiceService){}
 
-ngOnInit() {
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     if (this.User_Data_After_Login.type === "employee") {
@@ -82,40 +83,53 @@ ngOnInit() {
   }
 
   IsAllowDelete(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowDelete(
-    InsertedByID,
-    this.UserID,
-    this.AllowDeleteForOthers
-  );
+    return this.deleteEditPermissionServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+  }
+ 
+async GetTableData() {
+  this.TableData = [];
+  try {
+    const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+    this.TableData = data;
+    
+    // Refresh the employees list to exclude those already in maintenance
+    this.refreshFilteredEmployees();
+  } catch (error) {
+    this.TableData = [];
+  }
 }
 
-
-  async GetTableData() {
-    this.TableData = [];
-    try {
-      const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
-      this.TableData = data;
-    } catch (error) {
-      this.TableData = [];
-    }
+refreshFilteredEmployees() {
+  if (this.employees.length > 0) {
+    this.employees = this.employees.filter(emp => 
+      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+    );
   }
+}
 
-  async GetSelectData() {
+async GetSelectData() {
+  this.employees = [];
+  try {
+    const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
+    // Filter out employees that are already in maintenance
+    this.employees = data.filter(emp => 
+      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+    );
+  } catch (error) {
     this.employees = [];
-    try {
-      const data = await firstValueFrom(this.EmpServ.Get(this.DomainName)); 
-      this.employees = data;
-    } catch (error) {
-      this.employees = [];
-    }
   }
+}
 
 Delete(id: number) {
   Swal.fire({
-    title: 'Are you sure you want to delete this device?',
+    title: 'Are you sure you want to delete this employee?',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#FF7519',
+    confirmButtonColor: '#089B41',
     cancelButtonColor: '#17253E',
     confirmButtonText: 'Delete',
     cancelButtonText: 'Cancel'
@@ -129,7 +143,7 @@ Delete(id: number) {
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Device has been deleted.',
+            text: 'Employee has been deleted.',
             confirmButtonText: 'Okay'
           });
         },
@@ -139,7 +153,7 @@ Delete(id: number) {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: error.message || 'Failed to delete device',
+            text: error.message || 'Failed to delete employee',
             confirmButtonText: 'Okay'
           });
         }
@@ -150,21 +164,14 @@ Delete(id: number) {
 }
 
 
-  isFormValid(): boolean {
+ isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.selectedEmployee) { 
-      if (this.selectedEmployee.hasOwnProperty(key)) {
-        const field = key as keyof MaintenanceEmployees;
-        if (!this.selectedEmployee[field]) {
-          if (field == 'id') {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
-            isValid = false;
-          }
-        } else { 
-          this.validationErrors[field] = '';
-        }
-      }
-    } 
+    this.validationErrors = {};
+    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+      this.validationErrors['id'] = '*Employee is required';
+      isValid = false;
+    }
+
     return isValid;
   }
 
@@ -196,21 +203,24 @@ Delete(id: number) {
       }
     }
 
-
   onInputValueChange(event: { field: keyof MaintenanceEmployees; value: any }) {
     const { field, value } = event;
-    (this.selectedEmployee as any)[field] = value;
-    if (value) {
-      this.validationErrors[field] = '';
-    } 
-  }
-    capitalizeField(field: keyof MaintenanceEmployees): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    
+    if (field === 'id') {
+      this.selectedEmployeeId = value;
     }
-
-
-openModal() {
+    
+    if (value && value !== 0) {
+      this.validationErrors[field] = '';
+    }
+  }
+  capitalizeField(field: keyof MaintenanceEmployees): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+  
+  openModal() {
     this.selectedEmployeeId = 0; 
+    this.validationErrors = {};
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -222,8 +232,6 @@ openModal() {
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.validationErrors = {};
   }
-
-
 
 Save() {  
   if (this.isFormValid()) {
@@ -252,8 +260,6 @@ Save() {
     } 
   }
 }
-
-
 
 }
 

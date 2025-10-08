@@ -64,7 +64,7 @@ export class ConductAddEditComponent {
     '.xls', '.xlsx', '.csv',
     '.mp4', '.avi', '.mkv', '.mov'
   ];
-  
+
   constructor(
     public RoleServ: RoleService,
     public empTypeServ: EmployeeTypeService,
@@ -320,13 +320,13 @@ export class ConductAddEditComponent {
     if (file) {
       const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!this.allowedExtensions.includes(fileExtension)) { 
-        this.validationErrors['newFile'] = `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`;
+        this.validationErrors['newFile'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`;
         this.Data.newFile = null;
         return;
       }
 
       if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.validationErrors['newFile'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.Data.newFile = null;
         return; 
       } else{

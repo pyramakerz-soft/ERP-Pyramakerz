@@ -20,18 +20,18 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public CertificateStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public CertificateStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
-
-
+         
         ////////////////////////////
-
-
+         
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -63,13 +63,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<CertificateTypeStudentGet> Dto = mapper.Map<List<CertificateTypeStudentGet>>(types);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in Dto)
             {
-                if (!string.IsNullOrEmpty(item.CertificateTypeFile))
-                {
-                    item.CertificateTypeFile = $"{serverUrl}{item.CertificateTypeFile.Replace("\\", "/")}";
-                }
+                item.CertificateTypeFile = _fileService.GetFileUrl(item.CertificateTypeFile, Request);
             }
             return Ok(Dto);
         }

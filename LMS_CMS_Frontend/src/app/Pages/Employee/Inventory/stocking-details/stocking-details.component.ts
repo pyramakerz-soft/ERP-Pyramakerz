@@ -438,7 +438,7 @@ export class StockingDetailsComponent {
           theDifference: -1 * d.currentStock,
           shopItemID: d.id,
           stockingId: this.MasterId,
-          shopItemName: d.arName,
+          shopItemName: d.enName,
           barCode: d.barCode,
           ItemPrice: d.purchasePrice ?? 0,
         };

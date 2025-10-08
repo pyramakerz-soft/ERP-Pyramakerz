@@ -1210,10 +1210,15 @@
   "Inventory Transaction Report Detailed": "Inventory Transaction Report Detailed",
   "Opening Balances": "Opening Balances",
   "Total Price": "Total Price",
-  "Item ID": "Item ID"
-
-
-
+  "Item ID": "Item ID",
+  "Loans Status": "Loans Status",
+  "Total Loans": "Total Loans",
+  "Total Deducted": "Total Deducted",
+  "Month": "Month",
+  "Deducted Value": "Deducted Value",
+  "Deduction Start Month": "Deduction Start Month",
+  "Number Of Deduction": "Number Of Deduction",
+  "Deduction End Month": "Deduction End Month"
 
 
 }

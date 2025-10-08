@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,14 +27,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         public  InVoiceNumberCreate _InVoiceNumberCreate;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly IConfiguration _config;
+        private readonly FileUploadsService _fileService;
+        private readonly FileValidationService _fileValidationService;
 
-        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IConfiguration config)
+        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IConfiguration config, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             this._InVoiceNumberCreate = inVoiceNumberCreate;
             _checkPageAccessService = checkPageAccessService;
             _config = config;
+            _fileService = fileService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("ByFlagId/{id}")]
@@ -71,14 +76,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryFlagGetDTO Flagdto = mapper.Map<InventoryFlagGetDTO>(inventoryFlags);
 
             List<InventoryMasterGetDTO> DTO = mapper.Map<List<InventoryMasterGetDTO>>(Data);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var master in DTO)
             {
                 for (int i = 0; i < master.Attachments.Count; i++)
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = $"{serverUrl}{master.Attachments[i].Replace("\\", "/")}";
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
                     }
                 }
             }
@@ -144,14 +148,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
           
             var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var master in dto)
             {
                 for (int i = 0; i < master.Attachments.Count; i++)
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = $"{serverUrl}{master.Attachments[i].Replace("\\", "/")}";
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
                     }
                 }
             }
@@ -281,12 +284,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             InventoryMasterGetDTO DTO = mapper.Map<InventoryMasterGetDTO>(Data);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             for (int i = 0; i < DTO.Attachments.Count; i++)
             {
                 if (!string.IsNullOrEmpty(DTO.Attachments[i]))
                 {
-                DTO.Attachments[i] = $"{serverUrl}{DTO.Attachments[i].Replace("\\", "/")}";
+                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request); 
                 }
             }
             return Ok(DTO);
@@ -374,6 +376,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (newData == null)
             {
                 return BadRequest("Master cannot be null.");
+            }
+
+            if (newData.Attachment != null)
+            {
+                foreach (var item in newData.Attachment)
+                {
+                    if (item != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(item);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        } 
+                    }
+                }
             }
 
             Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newData.StoreID && b.IsDeleted != true);
@@ -524,9 +541,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 if (expectedRemaining != newData.Remaining)
                 {
                     return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
-                }
-
-
+                } 
             }
 
             List<ShopItem> existingShopItems = new List<ShopItem>();
@@ -609,14 +624,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             long SaleID = 0;
             SaleID = Master.ID;
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Master");
-            var saleFolder = Path.Combine(baseFolder, Master.ID.ToString());
-
-            if (!Directory.Exists(saleFolder))
-            {
-                Directory.CreateDirectory(saleFolder);
-            }
+             
 
             if (Master.Attachments == null)
             {
@@ -626,17 +634,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (newData.Attachment != null)
             {
                 foreach (var item in newData.Attachment)
-                {
+                { 
                     if (item != null)
                     {
-                        var filePath = Path.Combine(saleFolder, item.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await item.CopyToAsync(stream);
-                        }
-
-                        var fileUrl = $"Uploads/Master/{SaleID}/{item.FileName}";
-                        Master.Attachments.Add(fileUrl);
+                        var fileUrl = await _fileService.UploadFileAsync(item, "Inventory/InventoryMaster", SaleID, HttpContext);
+                        Master.Attachments.Add(fileUrl);  
                     }
                 }
             }
@@ -683,6 +685,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return Unauthorized("User ID, Type claim not found.");
             }
 
+            if (newSale.NewAttachments != null)
+            {
+                foreach (var item in newSale.NewAttachments)
+                {
+                    if (item != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(item);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        }
+                    }
+                }
+            }
 
             Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newSale.StoreID && b.IsDeleted != true);
             if (store == null)
@@ -822,16 +838,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     return accessCheck;
                 }
             }
-
-            mapper.Map(newSale, sale);
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Master");
-            var saleFolder = Path.Combine(baseFolder, sale.ID.ToString());
-
-            if (!Directory.Exists(saleFolder))
-            {
-                Directory.CreateDirectory(saleFolder);
-            }
-
+             
             if (sale.Attachments == null)
             {
                 sale.Attachments = new List<string>();
@@ -851,14 +858,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (item != null)
                     {
-                        var filePath = Path.Combine(saleFolder, item.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await item.CopyToAsync(stream);
-                        }
-
-                        var fileUrl = $"Uploads/Master/{newSale.ID}/{item.FileName}";
-                        sale.Attachments.Add(fileUrl);
+                        var fileUrl = await _fileService.UploadFileAsync(item, "Inventory/InventoryMaster", newSale.ID, HttpContext);
+                        sale.Attachments.Add(fileUrl); 
                     }
                 }
             }
@@ -867,15 +868,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 foreach (var fileUrl in newSale.DeletedAttachments)
                 {
-                    var fileName = Path.GetFileName(fileUrl); // Extract just the filename from the URL
-                    var filePath = Path.Combine(saleFolder, fileName);
-
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
-
-                    sale.Attachments.Remove(fileUrl);
+                    await _fileService.DeleteFileAsync(
+                        fileUrl,
+                        "Inventory/InventoryMaster",
+                        newSale.ID,
+                        HttpContext
+                    ); 
                 }
             }
 
