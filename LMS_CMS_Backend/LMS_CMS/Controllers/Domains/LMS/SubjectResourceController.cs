@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +20,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory; 
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
+        private readonly FileValidationService _fileValidationService;
 
-        public SubjectResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public SubjectResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper; 
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("GetBySubjectId/{id}")]
@@ -46,14 +51,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<SubjectResourceGetDTO> subjectResourcesDTO = mapper.Map<List<SubjectResourceGetDTO>>(subjectResources);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var subjectResource in subjectResourcesDTO)
             {
-                if (!string.IsNullOrEmpty(subjectResource.FileLink))
-                {
-                    subjectResource.FileLink = $"{serverUrl}{subjectResource.FileLink.Replace("\\", "/")}";
-                }
+                subjectResource.FileLink = _fileService.GetFileUrl(subjectResource.FileLink, Request);
             }
 
             return Ok(subjectResourcesDTO);
@@ -79,12 +80,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             SubjectResourceGetDTO subjectResourceDTO = mapper.Map<SubjectResourceGetDTO>(subjectResource);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(subjectResourceDTO.FileLink))
-            {
-                subjectResourceDTO.FileLink = $"{serverUrl}{subjectResourceDTO.FileLink.Replace("\\", "/")}";
-            } 
+             
+            subjectResourceDTO.FileLink = _fileService.GetFileUrl(subjectResourceDTO.FileLink, Request);
 
             return Ok(subjectResourceDTO);
         }
@@ -118,8 +115,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (subject == null)
             {
                 return BadRequest("No Subject with this ID");
-            } 
-             
+            }
+
+            if (NewSubjectResource.File != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewSubjectResource.File);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             SubjectResource subjectResource = mapper.Map<SubjectResource>(NewSubjectResource);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -136,29 +142,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.subjectResource_Repository.Add(subjectResource);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectResources");
-            var subjectResourceFolder = Path.Combine(baseFolder, $"{subjectResource.EnglishName}_{subjectResource.ID}");
-            if (!Directory.Exists(subjectResourceFolder))
-            {
-                Directory.CreateDirectory(subjectResourceFolder);
-            }
-
             if (NewSubjectResource.File != null)
             {
-                if (NewSubjectResource.File.Length > 0)
-                {
-                    var filePath = Path.Combine(subjectResourceFolder, NewSubjectResource.File.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewSubjectResource.File.CopyToAsync(stream);
-                    }
-                }
-            }
-
-
-            subjectResource.FileLink = Path.Combine("Uploads", "SubjectResources", $"{subjectResource.EnglishName}_{subjectResource.ID}", NewSubjectResource.File.FileName);
-            Unit_Of_Work.subjectResource_Repository.Update(subjectResource);
-            Unit_Of_Work.SaveChanges();
+                subjectResource.FileLink = await _fileService.UploadFileAsync(NewSubjectResource.File, "LMS/SubjectResource", subjectResource.ID, HttpContext);
+                Unit_Of_Work.subjectResource_Repository.Update(subjectResource);
+                Unit_Of_Work.SaveChanges();
+            } 
 
             return Ok(NewSubjectResource);
         }

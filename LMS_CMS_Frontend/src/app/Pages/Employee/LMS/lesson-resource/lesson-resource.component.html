@@ -232,7 +232,9 @@
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt"> {{ 'Click to' | translate }} {{ 'Upload' | translate }}</span></p>
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' | translate }}</p>
                         </label>
-                        <input id="attachmentFile" type="file" class="hidden" (change)="onFileSelected($event)" />
+                        <input id="attachmentFile" type="file" class="hidden" (change)="onFileSelected($event)" 
+                            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
+                        />
                     </div>
                 </div>
                 <span *ngIf="validationErrors['attachmentFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['attachmentFile'] }}</span>

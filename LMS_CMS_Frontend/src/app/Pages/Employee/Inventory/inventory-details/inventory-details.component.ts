@@ -136,7 +136,13 @@ export class InventoryDetailsComponent {
   SalesItem: InventoryDetails[] = []; // for sales return 
   SaleId: number = 0
 
-
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -696,6 +702,13 @@ export class InventoryDetailsComponent {
     const files: FileList = event.target.files;
     const input = event.target as HTMLInputElement;
     for (const file of Array.from(files)) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) { 
+        this.validationErrors['NewAttachments'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`
+        input.value = '';
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['NewAttachments'] =
           'One or more files exceed the maximum size of 25 MB.';

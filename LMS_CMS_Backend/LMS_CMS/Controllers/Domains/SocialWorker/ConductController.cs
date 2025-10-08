@@ -20,12 +20,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public ConductController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ConductController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
 
         ////////////////////////////////
@@ -62,13 +66,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<ConductGetDTO> Dto = mapper.Map<List<ConductGetDTO>>(conducts);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in Dto)
             {
-                if (!string.IsNullOrEmpty(item.File))
-                {
-                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
-                }
+                item.File = _fileService.GetFileUrl(item.File, Request);
             }
 
             return Ok(Dto);
@@ -110,11 +111,9 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             ConductGetDTO Dto = mapper.Map<ConductGetDTO>(conduct);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
             if (!string.IsNullOrEmpty(Dto.File))
             {
-                Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
+                Dto.File = _fileService.GetFileUrl(Dto.File, Request);
             }
 
             return Ok(Dto);
@@ -163,6 +162,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return BadRequest("There is no procedureType with this Id");
             }
 
+            if (NewConduct.NewFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewConduct.NewFile);
+
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             Conduct conduct = mapper.Map<Conduct>(NewConduct);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -178,25 +187,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             Unit_Of_Work.conduct_Repository.Add(conduct);
             Unit_Of_Work.SaveChanges();
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Conduct");
-            var ConductFolder = Path.Combine(baseFolder, conduct.ID.ToString());
-            if (!Directory.Exists(ConductFolder))
-            {
-                Directory.CreateDirectory(ConductFolder);
-            }
-
+             
             if (NewConduct.NewFile != null)
-            {
-                if (NewConduct.NewFile.Length > 0)
-                {
-                    var filePath = Path.Combine(ConductFolder, NewConduct.NewFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewConduct.NewFile.CopyToAsync(stream);
-                    }
-                }
-                conduct.File = Path.Combine("Uploads", "Conduct", conduct.ID.ToString(), NewConduct.NewFile.FileName);
+            { 
+                conduct.File = await _fileService.UploadFileAsync(NewConduct.NewFile, "SocialWorker/Conduct", conduct.ID, HttpContext);
                 Unit_Of_Work.conduct_Repository.Update(conduct);
                 Unit_Of_Work.SaveChanges();
             }
@@ -270,28 +264,32 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 }
             }
 
-            mapper.Map(NewConduct, conduct);
+            if (NewConduct.NewFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewConduct.NewFile);
+
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
 
             if (NewConduct.NewFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Conduct");
-                var ConductFolder = Path.Combine(baseFolder, conduct.ID.ToString());
-                if (!Directory.Exists(ConductFolder))
-                {
-                    Directory.CreateDirectory(ConductFolder);
-                }
-                if (NewConduct.NewFile.Length > 0)
-                {
-                    var filePath = Path.Combine(ConductFolder, NewConduct.NewFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewConduct.NewFile.CopyToAsync(stream);
-                    }
-                }
-                conduct.File = Path.Combine("Uploads", "Conduct", conduct.ID.ToString(), NewConduct.NewFile.FileName);
+                NewConduct.File = await _fileService.ReplaceFileAsync(
+                    NewConduct.NewFile,
+                    conduct.File,
+                    "SocialWorker/Conduct",
+                    NewConduct.ID,
+                    HttpContext
+                );
             }
-
-
+            else
+            {
+                NewConduct.File = conduct.File;
+            }
+            mapper.Map(NewConduct, conduct);
+             
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             conduct.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

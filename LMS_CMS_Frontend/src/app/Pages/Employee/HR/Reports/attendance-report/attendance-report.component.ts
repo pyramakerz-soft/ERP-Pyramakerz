@@ -269,4 +269,17 @@ export class AttendanceReportComponent {
       ]
     });
   }
+
+  getTotal(fieldHours: keyof MonthlyAttendance, fieldMinutes: keyof MonthlyAttendance): string {
+  let totalMinutes = this.monthlyAttendenc.reduce((acc, row) => {
+    const hours = Number(row[fieldHours]) || 0;
+    const minutes = Number(row[fieldMinutes]) || 0;
+    return acc + (hours * 60 + minutes);
+  }, 0);
+
+  const totalHours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+
+  return `${totalHours} : ${remainingMinutes.toString().padStart(2, '0')}`;
+ }
 }

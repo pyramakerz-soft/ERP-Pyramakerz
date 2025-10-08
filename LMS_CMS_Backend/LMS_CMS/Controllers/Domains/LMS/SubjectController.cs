@@ -505,13 +505,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<long> subjectIds = studentClassroomSubject.Select(s => s.SubjectID).Distinct().ToList();
             List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID)).ToList();
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var subject in subjectsDTO)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
-                {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
-                }
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request);
             }
 
             return Ok(subjectsDTO);

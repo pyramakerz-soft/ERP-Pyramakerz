@@ -7,6 +7,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +26,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
+        private readonly FileImageValidationService _fileImageValidationService;
 
-        public QuestionBankController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public QuestionBankController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService, FileImageValidationService fileImageValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService; 
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -306,6 +311,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 Dto.SubBankQuestionsDTO = mapper.Map<List<SubBankQuestionAddDTO>>(subBankQuestions);
             }
 
+            if (!string.IsNullOrEmpty(Dto.Image))
+            {
+                Dto.Image = _fileService.GetFileUrl(Dto.Image, Request);
+            }
+
             return Ok(Dto);
         }
 
@@ -331,11 +341,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
-            
-            if(NewData.DifficultyLevel>6 || NewData.DifficultyLevel < 0)
+            if (NewData.ImageForm != null)
             {
-                return BadRequest("DifficultyLevel Should be from 1 to 6");
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewData.ImageForm);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
+            //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
+
+            if (NewData.DifficultyLevel>6 || NewData.DifficultyLevel < 0)
+            {
+                return BadRequest("Difficulty Level Should be from 1 to 6");
             }
 
             if (NewData.LessonID != null)
@@ -356,7 +375,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 BloomLevel bloomLevel = Unit_Of_Work.bloomLevel_Repository.First_Or_Default(l => l.ID == NewData.BloomLevelID);
                 if (bloomLevel == null)
                 {
-                    return BadRequest("this bloomLevel doesn`t exist");
+                    return BadRequest("this bloom Level doesn`t exist");
                 }
             }
             else
@@ -369,7 +388,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 DokLevel dokLevel = Unit_Of_Work.dokLevel_Repository.First_Or_Default(l => l.ID == NewData.DokLevelID);
                 if (dokLevel == null)
                 {
-                    return BadRequest("this dokLevel doesn`t exist");
+                    return BadRequest("this dok Level doesn`t exist");
                 }
             }
             else
@@ -642,30 +661,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             ///////////// image Create
 
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/QuestonBank");
-            var medalFolder = Path.Combine(baseFolder, questionBank.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+            if (NewData.ImageForm != null)
             {
-                Directory.CreateDirectory(medalFolder);
-            }
-
-            if (NewData.ImageForm != null && NewData.ImageForm.Length > 0)
-            {
-                var fileName = Path.GetFileName(NewData.ImageForm.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await NewData.ImageForm.CopyToAsync(stream);
-                }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                questionBank.Image = $"{Request.Scheme}://{Request.Host}/Uploads/QuestonBank/{questionBank.ID.ToString()}/{fileName}";
-
-            }
-
-            Unit_Of_Work.questionBank_Repository.Update(questionBank);
-            Unit_Of_Work.SaveChanges();
-
+                questionBank.Image = await _fileService.UploadFileAsync(NewData.ImageForm, "LMS/QuestionBank", questionBank.ID, HttpContext);
+                Unit_Of_Work.questionBank_Repository.Update(questionBank);
+                Unit_Of_Work.SaveChanges();
+            } 
+              
             return Ok();
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +698,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Medal cannot be null");
             }
 
-            LMS_CMS_DAL.Models.Domains.LMS.QuestionBank questionBank = Unit_Of_Work.questionBank_Repository.First_Or_Default(q => q.ID == NewData.ID && q.IsDeleted!=true);
+            LMS_CMS_DAL.Models.Domains.LMS.QuestionBank questionBank = Unit_Of_Work.questionBank_Repository.First_Or_Default(q => q.ID == NewData.ID && q.IsDeleted != true);
             if (questionBank == null)
                 return NotFound("Question bank not found.");
 
@@ -706,6 +708,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (accessCheck != null)
                 {
                     return accessCheck;
+                }
+            }
+
+            if (NewData.ImageForm != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewData.ImageForm);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
                 }
             }
             //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
@@ -788,7 +799,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 1)
             {
-                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "False") 
+                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "False")
                 {
                     return BadRequest("Correct Answer should be True or Fales");
                 }
@@ -931,25 +942,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var IsTypeChanged = false;
             if (NewData.QuestionTypeID != questionBank.QuestionTypeID)
             {
-                 IsTypeChanged = true;
+                IsTypeChanged = true;
             }
-
-            mapper.Map(NewData, questionBank);
 
             if (NewData.ImageForm != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/QuestonBank", NewData.ID.ToString());
-                if (!Directory.Exists(baseFolder)) Directory.CreateDirectory(baseFolder);
-
-                var fileName = Path.GetFileName(NewData.ImageForm.FileName);
-                var filePath = Path.Combine(baseFolder, fileName);
-
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await NewData.ImageForm.CopyToAsync(stream);
-
-                questionBank.Image = $"{Request.Scheme}://{Request.Host}/Uploads/QuestonBank/{NewData.ID.ToString()}/{fileName}";
+                NewData.Image = await _fileService.ReplaceFileAsync(
+                    NewData.ImageForm,
+                    questionBank.Image,
+                    "LMS/QuestionBank",
+                    NewData.ID,
+                    HttpContext
+                );
+            }
+            else
+            {
+                NewData.Image = questionBank.Image;
             }
 
+            mapper.Map(NewData, questionBank);
+             
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             questionBank.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

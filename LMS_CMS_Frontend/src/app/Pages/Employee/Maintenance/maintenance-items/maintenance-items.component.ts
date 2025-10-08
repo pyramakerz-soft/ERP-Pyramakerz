@@ -130,10 +130,10 @@ constructor(
 
 Delete(id: number) {
   Swal.fire({
-    title: 'Are you sure you want to delete this device?',
+    title: 'Are you sure you want to delete this item?',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#FF7519',
+    confirmButtonColor: '#089B41',
     cancelButtonColor: '#17253E',
     confirmButtonText: 'Delete',
     cancelButtonText: 'Cancel'
@@ -147,7 +147,7 @@ Delete(id: number) {
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Device has been deleted.',
+            text: 'Item has been deleted.',
             confirmButtonText: 'Okay'
           });
         },
@@ -157,7 +157,7 @@ Delete(id: number) {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: error.message || 'Failed to delete device',
+            text: error.message || 'Failed to delete item',
             confirmButtonText: 'Okay'
           });
         }

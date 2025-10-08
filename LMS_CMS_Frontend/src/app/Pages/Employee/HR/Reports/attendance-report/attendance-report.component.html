@@ -67,72 +67,92 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="IsShowTabls" >
+<div *ngIf="IsShowTabls" class="flex justify-between items-start space-x-2 rtl:space-x-reverse">
     <div class="w-full">
-        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-                    <tr>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Day' | translate }}
-                        </th>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Day Status' | translate }}
-                        </th>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Total Working Hours' | translate }}
-                        </th>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Leave Request in Hours' | translate }}
-                        </th>  
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Overtime in Hours' | translate }}
-                        </th>  
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                             {{ 'Deduction in Hours' | translate }}
-                        </th>                                                                        
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- No Data Row -->
-                    <tr *ngIf="monthlyAttendenc.length === 0">
-                        <td colspan="6"
-                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                             {{ 'No Data Found' | translate }}
-                        </td>
-                    </tr>
+        <div class="mt-5 rounded-2xl border border-[#BDBDBD]">
+            <!-- Fixed height + vertical scroll -->
+            <div class="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-2xl">
+                <table class="w-full inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead
+                        class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0 sticky top-0 z-10">
+                        <tr>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Day' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Day Status' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Total Working Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Leave Request in Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Overtime in Hours' | translate }}
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Deduction in Hours' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- No Data Row -->
+                        <tr *ngIf="monthlyAttendenc.length === 0">
+                            <td colspan="6"
+                                class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
 
-                    <!-- Data Rows -->
-                    <tr *ngFor="let row of monthlyAttendenc; let i = index"
-                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-                        class="border-t border-gray-300 text-xs md:text-sm">
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.day }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.dayStatusName }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.workingHours }} : {{ row.workingMinutes }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.leaveRequestHours }} : {{ row.leaveRequestMinutes }}
-                        </td>   
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.overtimeHours }} : {{ row.overtimeMinutes }}
-                        </td>   
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.deductionHours }} : {{ row.deductionMinutes }}
-                        </td>                                                
-                    </tr>
-                </tbody>
-            </table>
+                        <!-- Data Rows -->
+                        <tr *ngFor="let row of monthlyAttendenc; let i = index"
+                            [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.day }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.dayStatusName }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.workingHours }} : {{ row.workingMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.leaveRequestHours }} : {{ row.leaveRequestMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.overtimeHours }} : {{ row.overtimeMinutes }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.deductionHours }} : {{ row.deductionMinutes }}
+                            </td>
+                        </tr>
+                        <!-- Total Row -->
+                        <tr *ngIf="monthlyAttendenc.length > 0" class="bg-gray-100 font-semibold text-sm">
+                            <td colspan="3" class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                                {{ 'Total' | translate }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('leaveRequestHours', 'leaveRequestMinutes') }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('overtimeHours', 'overtimeMinutes') }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('deductionHours', 'deductionMinutes') }}
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

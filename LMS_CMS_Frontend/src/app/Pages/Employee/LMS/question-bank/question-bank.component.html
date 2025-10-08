@@ -322,7 +322,7 @@
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="mark"> {{ 'Mark' | translate }}</label>
         <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-          (input)="validateNumber($event,'mark')" placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="questionBank.mark"
+          (input)="validateNumber($event,'mark')" placeholder="{{ 'Enter' | translate }} {{ 'Mark' | translate }}" [(ngModel)]="questionBank.mark"
           (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
         <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']}}</span>
       </div>
@@ -550,7 +550,7 @@
         </div>
       </div>
 
-      <div class="w-full mb-4">
+      <div class="w-full my-4">
         <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
           <div class="flex justify-center w-full">
             <label for="imageForm" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">

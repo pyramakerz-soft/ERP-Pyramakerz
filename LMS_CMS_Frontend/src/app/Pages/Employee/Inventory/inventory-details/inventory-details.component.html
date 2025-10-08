@@ -209,17 +209,16 @@
     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
       <div class="flex justify-center w-full">
         <label for="NewAttachments" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-          <img src="Images/FileAttached.png" class="w-1/4" />
+          <img src="Images/Icon frame.png" class="w-1/4" />
           <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-            <span class="secondaryTxt"> {{'Click to'| translate }} {{'Upload'| translate }} </span>
-            {{'Icons'| translate }}
+            <span class="secondaryTxt"> {{'Click to'| translate }} {{'Upload'| translate }} </span> 
           </p>
           <p class="font-normal text-xs md:text-sm text-[#8E8E93]">
             {{'(Max. File size: 25 MB)'| translate }}
           </p>
         </label>
         <input id="NewAttachments" type="file" class="hidden" (change)="onImageFileSelected($event)"
-          accept="image/jpeg, image/png" multiple />
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" multiple />
       </div>
     </div>
     <span *ngIf="validationErrors['NewAttachments']"

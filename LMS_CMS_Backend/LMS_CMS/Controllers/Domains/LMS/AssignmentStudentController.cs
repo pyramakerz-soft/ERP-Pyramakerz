@@ -7,6 +7,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +23,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileWordPdfValidationService _fileWordPdfValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public AssignmentStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AssignmentStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileWordPdfValidationService fileWordPdfValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileWordPdfValidationService = fileWordPdfValidationService;
+            _fileService = fileService;
         }
 
         /////////////////////////////////////////////
@@ -48,7 +53,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
+            {       
                 return Unauthorized("User ID or Type claim not found.");
             }
 
@@ -73,14 +78,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AssignmentStudentGetDTO> DTO = mapper.Map<List<AssignmentStudentGetDTO>>(assignmentStudents);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in DTO)
             {
                 if (item.AssignmentTypeID == 1)
                 {
                     if (!string.IsNullOrEmpty(item.LinkFile))
-                    {
-                        item.LinkFile = $"{serverUrl}{item.LinkFile.Replace("\\", "/")}";
+                    { 
+                        item.LinkFile = _fileService.GetFileUrl(item.LinkFile, Request);
                     }
                 }
             }
@@ -100,9 +105,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAssignmentId/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee" , "student" }
-         //,
-         //pages: new[] { "Assignment" }
+             allowedTypes: new[] { "octa" , "student" } 
          )]
         public async Task<IActionResult> GetByAssignmentId(long id)
         {
@@ -173,14 +176,22 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             AssignmentGetDTO DTO = mapper.Map<AssignmentGetDTO>(assignment);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             if (DTO.AssignmentTypeID == 1)
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
                 {
-                    DTO.LinkFile = $"{serverUrl}{DTO.LinkFile.Replace("\\", "/")}";
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request); 
+                }
+            }
+            else
+            {
+                foreach (var item in DTO.AssignmentQuestions)
+                {
+                    if (!string.IsNullOrEmpty(item.QuestionBank.Image))
+                    {
+                        item.QuestionBank.Image = _fileService.GetFileUrl(item.QuestionBank.Image, Request);
+                    }
                 }
             }
 
@@ -247,16 +258,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             AssignmentStudentGetDTO DTO = mapper.Map<AssignmentStudentGetDTO>(assignmentStudent);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             if (DTO.AssignmentTypeID == 1)
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
-                {
-                    DTO.LinkFile = $"{serverUrl}{DTO.LinkFile.Replace("\\", "/")}";
+                { 
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request);
                 }
             }
+            else
+            {
+                foreach (var item in DTO.AssignmentStudentQuestions)
+                {
+                    if (!string.IsNullOrEmpty(item.QuestionImage))
+                    {
+                        item.QuestionImage = _fileService.GetFileUrl(item.QuestionImage, Request);
+                    }
+                }
+            }
+
 
             return Ok(DTO);
         }
@@ -386,9 +406,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost("AddWhenTextBookAssignment")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee", "student" }
-          //,
-          //pages: new[] { "Book Correction" }
+          allowedTypes: new[] { "octa", "student" } 
       )]
         public async Task<IActionResult> AddWhenTextBookAssignment([FromForm]AssignmentStudentAddDTOFile newData)
         {
@@ -442,21 +460,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("File Is Required");
             }
-            var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
-            var allowedMimeTypes = new[] {
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            };
-            var maxFileSize = 25 * 1024 * 1024; // 25 MB
 
-            var fileExtension = Path.GetExtension(newData.File.FileName).ToLower();
-            var contentType = newData.File.ContentType;
-
-            if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(contentType))
+            if (newData.File != null)
             {
-                return BadRequest("Only PDF or Word (.doc/.docx) files are allowed.");
+                string returnFileInput = await _fileWordPdfValidationService.ValidateDocumentFileAsync(newData.File);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
             }
+             
+            var maxFileSize = 25 * 1024 * 1024; // 25 MB
+             
             if (newData.File.Length > maxFileSize)
             {
                 return BadRequest("File size exceeds the 25 MB limit.");
@@ -465,8 +480,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             assignmentStudent = new AssignmentStudent();
             assignmentStudent.AssignmentID = newData.AssignmentID;
             assignmentStudent.StudentClassroomID = studentClassroom.ID;
-            // Set inserted timestamps and user
-            //var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            //assignmentStudent.degree = 0;
+
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
                 assignmentStudent.InsertedByOctaId = userId;
@@ -476,26 +491,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.assignmentStudent_Repository.Add(assignmentStudent);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/AssignmentStudent");
-            var medalFolder = Path.Combine(baseFolder, assignmentStudent.ID.ToString());
-            if (!Directory.Exists(medalFolder))
-            {
-                Directory.CreateDirectory(medalFolder);
-            }
-
             if (newData.File != null && newData.File.Length > 0)
             {
-                var fileName = Path.GetFileName(newData.File.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newData.File.CopyToAsync(stream);
-                }
-                assignmentStudent.LinkFile = $"Uploads/AssignmentStudent/{assignmentStudent.ID.ToString()}/{fileName}";
-            }
-
-            Unit_Of_Work.assignmentStudent_Repository.Update(assignmentStudent);
-            Unit_Of_Work.SaveChanges();
+                assignmentStudent.LinkFile = await _fileService.UploadFileAsync(newData.File, "LMS/AssignmentStudent", assignmentStudent.ID, HttpContext);
+                Unit_Of_Work.assignmentStudent_Repository.Update(assignmentStudent);
+                Unit_Of_Work.SaveChanges();
+            } 
 
             return Ok();
         }

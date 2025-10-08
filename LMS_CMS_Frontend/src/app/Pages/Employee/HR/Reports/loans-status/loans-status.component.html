@@ -1,0 +1,196 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center  rtl:space-x-reverse">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }} </h1>
+    </div>
+</div>
+
+<div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
+
+    <div class="w-[90%]">
+        <label for="SelectedEmpId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Employee' | translate
+            }}</label>
+        <select id="SelectedEmpId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedEmpId" (change)=" IsShowTabls = false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+            <option *ngFor="let ac of employees" [value]="ac.id">
+                {{ ac.en_name }}
+            </option>
+            <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg secondaryBg text-white" (click)="Apply()">
+            {{ 'View' | translate }}
+        </button>
+    </div>
+</div>
+
+<!-- <div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div> -->
+
+<div *ngIf="IsShowTabls && LoanStatus.length != 0"
+    class="flex flex-col justify-between items-start rtl:space-x-reverse mt-3 ">
+    <div *ngFor="let row of LoanStatus; let i = index">
+        <div class="flex justify-between items-center  rtl:space-x-reverse mt-3">
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Employee Name : {{row.employeeEnName}} </h1>
+        </div>
+
+        <div class="w-full">
+            <div class="mt-5 rounded-2xl border border-[#BDBDBD] overflow-hidden">
+                <!-- Fixed height + vertical scroll -->
+                <div class="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-2xl">
+                    <table class="min-w-full inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                        <thead
+                            class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0 sticky top-0 z-10">
+                            <tr>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Date' | translate }}
+                                </th>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Amount' | translate }}
+                                </th>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Deduction Start Month' | translate }}
+                                </th>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Number Of Deduction' | translate }}
+                                </th>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Deduction End Month' | translate }}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- No Data Row -->
+                            <tr *ngIf="row.loansDTO.length === 0">
+                                <td colspan="5"
+                                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                    {{ 'No Data Found' | translate }}
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr *ngFor="let row of row.loansDTO; let i = index"
+                                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                                class="border-t border-gray-300 text-xs md:text-sm">
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.date }}
+                                </td>
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.amount }}
+                                </td>
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.deductionStartMonth }} / {{ row.deductionStartYear }}
+                                </td>
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.numberOfDeduction }}
+                                </td>
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.deductionEndMonth }} : {{ row.deductionEndYear }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full">
+            <div class="mt-5 rounded-2xl border border-[#BDBDBD]">
+                <!-- Fixed height + vertical scroll -->
+                <div class="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-2xl">
+                    <table class="w-full inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                        <thead
+                            class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0 sticky top-0 z-10">
+                            <tr>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Month' | translate }}
+                                </th>
+                                <th
+                                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ 'Deducted Value' | translate }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- No Data Row -->
+                            <tr *ngIf="row.employeeLoansGetDTO.length === 0">
+                                <td colspan="2"
+                                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                    {{ 'No Data Found' | translate }}
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr *ngFor="let row of row.employeeLoansGetDTO; let i = index"
+                                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                                class="border-t border-gray-300 text-xs md:text-sm">
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.month }} / {{ row.year }}
+                                </td>
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.amount }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center  rtl:space-x-reverse">
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Loans : {{row.totalLoans}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Deducted : {{row.totalDeducted}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Remaining : {{row.remaining}} </h1>
+        </div>
+        <div class="w-full h-1 bg-gray-500 my-5"></div>
+    </div>
+
+    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Loans : {{totalLoansAll}} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Total Deducted : {{totalDeductedAll }} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Remaining : {{remainingAll }} </h1>
+    </div>
+</div>
+
+
+<div>
+    <div *ngIf="IsShowTabls &&LoanStatus.length === 0">
+        <div class="flex justify-around items-center  rtl:space-x-reverse">
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'No Data Found' | translate }} </h1>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
+                    {
+                        keyEn: 'Month: ' + this.month + '/' +this.year,
+                    }, 
+                    {
+                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
+                    },
+                    {
+                        keyEn: 'Job: ' + this.SelectedJobName,
+                    },
+                    {
+                        keyEn: 'Employee: ' + this.SelectedEmpName,
+                    }
+                    ]" [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" [tableData]="tableDataForPDF" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->

@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.AssignmentQuestions)
                                    .ThenInclude(aq => aq.QuestionBank)
-                                     .ThenInclude(qb => qb.SubBankQuestions)
+                                     .ThenInclude(qb => qb.SubBankQuestions)        
                    );
 
             if (Assignment == null)
@@ -71,14 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Assignment.AssignmentQuestions = Assignment.AssignmentQuestions.Where(aq => aq.IsDeleted != true && aq.QuestionBank != null && aq.QuestionBank.IsDeleted != true).ToList(); 
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-            {
-                AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-            }
-
+             
             return Ok(AssignmentGetDTO);
         }
 
@@ -339,6 +332,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.assignmentQuestion_Repository.Update(assignmentQuestion);
             Unit_Of_Work.SaveChanges();
             return Ok();
-        }
+        }   
     }
 }

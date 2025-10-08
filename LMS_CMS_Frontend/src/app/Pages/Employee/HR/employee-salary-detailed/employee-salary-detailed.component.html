@@ -139,6 +139,20 @@
                                 {{ row.deductionHours }} : {{ row.deductionMinutes }}
                             </td>
                         </tr>
+                        <tr *ngIf="monthlyAttendenc.length > 0" class="bg-gray-100 font-semibold text-sm">
+                            <td colspan="3" class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                                {{ 'Total' | translate }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('leaveRequestHours', 'leaveRequestMinutes') }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('overtimeHours', 'overtimeMinutes') }}
+                            </td>
+                            <td class="py-4 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getTotal('deductionHours', 'deductionMinutes') }}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

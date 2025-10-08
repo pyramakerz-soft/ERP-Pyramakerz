@@ -57,15 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<DiscussionRoomGetDTO> discussionRoomGetDTO = mapper.Map<List<DiscussionRoomGetDTO>>(discussionRooms);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            foreach (var discussionRoom in discussionRoomGetDTO)
-            {
-                if (!string.IsNullOrEmpty(discussionRoom.ImageLink))
-                {
-                    discussionRoom.ImageLink = $"{serverUrl}{discussionRoom.ImageLink.Replace("\\", "/")}";
-                }
-            }
+             
             foreach (var discussionRoom in discussionRoomGetDTO)
             {
                 discussionRoom.ImageLink = _fileService.GetFileUrl(discussionRoom.ImageLink, Request);

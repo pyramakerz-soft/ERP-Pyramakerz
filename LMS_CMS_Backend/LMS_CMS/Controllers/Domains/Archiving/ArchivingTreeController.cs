@@ -455,6 +455,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                     permissionGroupDetailsNew.Allow_Delete_For_Others = permissionGroupDetail.Allow_Delete_For_Others;
                     permissionGroupDetailsNew.ArchivingTreeID = archivingTree.ID;
 
+                    permissionGroupDetailsNew.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        permissionGroupDetailsNew.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        permissionGroupDetailsNew.InsertedByUserId = userId;
+                    }
+
                     Unit_Of_Work.permissionGroupDetails_Repository.Add(permissionGroupDetailsNew);
                     Unit_Of_Work.SaveChanges();
                 }

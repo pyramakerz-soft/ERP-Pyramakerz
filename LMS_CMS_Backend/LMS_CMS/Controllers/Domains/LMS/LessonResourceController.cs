@@ -376,17 +376,30 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             else
             {
-                if (!string.IsNullOrEmpty(lessonResourceExists.AttachmentLink))
+                if (!string.IsNullOrEmpty(EditLessonResource.AttachmentLink) && !EditLessonResource.AttachmentLink.Contains("LMS/LessonResource", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (lessonResourceExists.AttachmentLink.Contains("LMS/LessonResource", StringComparison.OrdinalIgnoreCase))
+                    if (lessonResourceExists.AttachmentLink != null && lessonResourceExists.AttachmentLink.Contains("LMS/LessonResource", StringComparison.OrdinalIgnoreCase))
                     {
                         await _fileService.DeleteFileAsync(
                             lessonResourceExists.AttachmentLink,
                             "LMS/LessonResource",
                             EditLessonResource.ID,
                             HttpContext
-                        );
+                        ); 
                     }
+                }
+                else if(string.IsNullOrEmpty(EditLessonResource.AttachmentLink) && lessonResourceExists.AttachmentLink != null && lessonResourceExists.AttachmentLink.Contains("LMS/LessonResource", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _fileService.DeleteFileAsync(
+                        lessonResourceExists.AttachmentLink,
+                        "LMS/LessonResource",
+                        EditLessonResource.ID,
+                        HttpContext
+                    );
+                }
+                else if(!string.IsNullOrEmpty(EditLessonResource.AttachmentLink) && EditLessonResource.AttachmentLink.Contains("LMS/LessonResource", StringComparison.OrdinalIgnoreCase))
+                {
+                    EditLessonResource.AttachmentLink = lessonResourceExists.AttachmentLink;
                 }
             }
              

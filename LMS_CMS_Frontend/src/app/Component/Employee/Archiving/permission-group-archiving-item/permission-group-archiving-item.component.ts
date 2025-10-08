@@ -25,6 +25,10 @@ export class PermissionGroupArchivingItemComponent {
       archiving.allow_Delete = true;
       archiving.allow_Delete_For_Others = true;
     }
+    if (type === 'selected' && !archiving.selected) {
+      archiving.allow_Delete = false;
+      archiving.allow_Delete_For_Others = false;
+    }
 
     if(type == 'allowDeleteForOthers'){
       if(archiving.allow_Delete_For_Others){
@@ -88,6 +92,7 @@ export class PermissionGroupArchivingItemComponent {
  
       if (type === 'allowDelete' && !archiving.allow_Delete) {
         current.allow_Delete = false;
+        current.allow_Delete_For_Others = false;
       }
  
       if (type === 'allowDeleteForOthers' && !archiving.allow_Delete_For_Others) {

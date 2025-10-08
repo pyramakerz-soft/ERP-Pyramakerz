@@ -325,18 +325,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 ); 
             }
             else
-            {
-                if (!string.IsNullOrEmpty(lessonActivityExists.AttachmentLink))
+            { 
+                if (!string.IsNullOrEmpty(EditLessonActivity.AttachmentLink) && !EditLessonActivity.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (lessonActivityExists.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
+                    if (lessonActivityExists.AttachmentLink != null && lessonActivityExists.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                     {
                         await _fileService.DeleteFileAsync(
                             lessonActivityExists.AttachmentLink,
                             "LMS/LessonActivity",
-                            lessonActivityExists.ID,
+                            EditLessonActivity.ID,
                             HttpContext
-                        ); 
+                        );
                     }
+                }
+                else if (string.IsNullOrEmpty(EditLessonActivity.AttachmentLink) && lessonActivityExists.AttachmentLink != null && lessonActivityExists.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _fileService.DeleteFileAsync(
+                        lessonActivityExists.AttachmentLink,
+                        "LMS/LessonActivity",
+                        EditLessonActivity.ID,
+                        HttpContext
+                    );
+                }
+                else if (!string.IsNullOrEmpty(EditLessonActivity.AttachmentLink) && EditLessonActivity.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
+                {
+                    EditLessonActivity.AttachmentLink = lessonActivityExists.AttachmentLink;
                 }
             }
 

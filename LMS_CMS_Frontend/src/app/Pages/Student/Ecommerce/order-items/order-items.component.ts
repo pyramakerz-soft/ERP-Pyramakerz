@@ -20,6 +20,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 @Component({
   selector: 'app-order-items',
   standalone: true,
@@ -166,22 +168,22 @@ export class OrderItemsComponent {
       return;
     } 
 
-    // html2canvas(orderElement, { scale: 2 }).then(canvas => {
-    //   let imgData = canvas.toDataURL('image/png');
-    //   let pdf = new jsPDF('p', 'mm', 'a4');
-    //   let imgWidth = 210;
-    //   let imgHeight = (canvas.height * imgWidth) / canvas.width;
+    html2canvas(orderElement, { scale: 2 }).then(canvas => {
+      let imgData = canvas.toDataURL('image/png');
+      let pdf = new jsPDF('p', 'mm', 'a4');
+      let imgWidth = 210;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    //   pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    //   pdf.save(`Order_${this.orderID}.pdf`);
-    // }); 
-    // html2pdf().from(orderElement).set({
-    //   margin: 10,
-    //   filename: `Order_${this.orderID}.pdf`,
-    //   image: { type: 'jpeg', quality: 0.98 },
-    //   html2canvas: { scale: 3, useCORS: true, allowTaint: true },
-    //   jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-    // }).save();
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`Order_${this.orderID}.pdf`);
+    }); 
+    html2pdf().from(orderElement).set({
+      margin: 10,
+      filename: `Order_${this.orderID}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 3, useCORS: true, allowTaint: true },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    }).save();
   }
 
   async convertToDataURL(source: any) {
