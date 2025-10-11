@@ -137,6 +137,7 @@ export class DutyComponent {
     this.validationErrors = {};
     this.isModalVisible = true;
     this.duty = new Duty();
+    this.mode = 'Create'
     if (id) {
       this.mode = 'Edit'
       this.DutyServ.GetById(id, this.DomainName).subscribe((d) => {

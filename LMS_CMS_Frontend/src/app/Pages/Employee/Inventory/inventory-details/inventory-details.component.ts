@@ -647,6 +647,7 @@ export class InventoryDetailsComponent {
       this.Data.DeletedAttachments = [];
     }
     this.Data.DeletedAttachments.push(img);
+    console.log(123,this.Data.DeletedAttachments)
     this.Data.attachments = this.Data.attachments.filter((i) => i != img);
   }
 

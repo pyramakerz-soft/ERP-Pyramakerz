@@ -409,12 +409,15 @@ export class TimeTableViewComponent {
   }
 
   GetTypes() {
+    this.SelectedClassId=0
+    this.SelectedTeacherId=0
     if (this.PrintType == "Class") {
-      console.log("class")
+      this.classes = []
       this.TimeTableServ.GetAllClassesinThisTimetable(this.TimeTableId, this.DomainName).subscribe((d) => {
         this.classes = d
       })
     } else if (this.PrintType == "Teacher") {
+      this.Teachers = []
       this.TimeTableServ.GetAllTeachersinThisTimetable(this.TimeTableId, this.DomainName).subscribe((d) => {
         this.Teachers = d
       })

@@ -133,6 +133,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     && (dutiesteachersNotValid == null || !dutiesteachersNotValid.Contains(e.ID))
                     && (teachersNotValid == null || !teachersNotValid.Contains(e.ID)));
 
+
             List<Employee_GetDTO> EmployeesDTO = mapper.Map<List<Employee_GetDTO>>(validTeachers);
 
             return Ok(EmployeesDTO);

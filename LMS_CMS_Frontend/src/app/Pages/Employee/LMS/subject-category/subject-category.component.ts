@@ -259,7 +259,7 @@ export class SubjectCategoryComponent {
 
   deleteSubjectCategory(id:number){
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + " " +this.translate.instant('Subject Category') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

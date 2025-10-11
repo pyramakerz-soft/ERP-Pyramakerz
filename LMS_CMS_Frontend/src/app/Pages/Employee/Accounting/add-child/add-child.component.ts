@@ -54,6 +54,7 @@ export class AddChildComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
+  IsNationalIsEmpty: string = ''
 
   constructor(
     private router: Router,
@@ -148,6 +149,10 @@ export class AddChildComponent {
     return IsAllow;
   }
   CreateOREdit() {
+    if (this.NationalID == '') {
+      this.IsNationalIsEmpty = 'National Id Is Required'
+      return;
+    }
     if (this.emplyeeStudent.studentID != 0) {
       this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe(
         (d) => {
@@ -217,6 +222,8 @@ export class AddChildComponent {
   }
 
   SelectChild(nationalId: string) {
+      this.IsNationalIsEmpty = ''
+
     this.Student = new Student()
     this.emplyeeStudent = new EmplyeeStudent()
     this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {

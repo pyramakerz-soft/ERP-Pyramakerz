@@ -253,6 +253,12 @@ export class TemplateComponent {
 
   validateNumber(event: any, field: keyof Template): void {
     const value = event.target.value;
+      if (isNaN(value) || value === '') {
+        event.target.value = ''; 
+        if (typeof this.template[field] === 'string') {
+          this.template[field] = '' as never;  
+        }
+      }
     if (field === 'afterCount') { 
       const intValue = parseInt(value, 10);
       if (!/^\d+$/.test(value)) {

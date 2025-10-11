@@ -547,8 +547,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                 {
                                                     SubjectId = s.SubjectID,
                                                     SubjectName = s.SubjectName,
-                                                    TeacherId = dutyForSession != null ? dutyForSession.TeacherID : s.TeacherID,
-                                                    TeacherName = dutyForSession != null ? dutyForSession.Teacher.en_name : s.TeacherName
+                                                    TeacherId = s.TeacherID,
+                                                    TeacherName = s.TeacherName
                                                 }).ToList()
                                             };
                                         }).ToList()
