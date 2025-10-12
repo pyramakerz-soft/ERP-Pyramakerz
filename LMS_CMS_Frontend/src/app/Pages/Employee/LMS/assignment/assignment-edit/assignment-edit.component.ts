@@ -408,7 +408,7 @@ export class AssignmentEditComponent {
     this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
     this.assignmentQuestion.questionAssignmentTypeCountDTO.push({
       questionTypeId: 0,
-      numberOfQuestion: 0,
+      numberOfQuestion: null,
     });
   }
 

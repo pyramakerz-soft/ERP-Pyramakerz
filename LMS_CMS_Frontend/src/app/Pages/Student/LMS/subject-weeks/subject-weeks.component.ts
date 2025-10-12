@@ -14,6 +14,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-subject-weeks',
   standalone: true,
@@ -28,7 +29,7 @@ export class SubjectWeeksComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
-    isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
@@ -51,11 +52,12 @@ export class SubjectWeeksComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
   ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getRandomColor(index: number): string {
@@ -67,6 +69,16 @@ export class SubjectWeeksComponent {
       (data) => {
         this.WorkingWeekData = data.weeks;
         this.SubjectName = data.subjectName;
+      },error=>{
+        console.log(error)
+        this.SubjectName = error.error.subjectName;
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
       }
     )
   }

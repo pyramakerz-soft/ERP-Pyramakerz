@@ -456,9 +456,7 @@ export class PayableDetailsComponent {
 
   GetLinkFilesTypeData(id: number) {
     this.linkFileTypesData = [];
-    this.dataAccordingToLinkFileService
-      .GetTableDataAccordingToLinkFile(this.DomainName, id)
-      .subscribe((data) => {
+    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileForPyable(this.DomainName, id).subscribe((data) => {
         this.linkFileTypesData = data;
       });
   }
@@ -499,7 +497,7 @@ export class PayableDetailsComponent {
     this.editedRowData = { ...row };
     if (this.editedRowData.linkFileID) {
       this.dataAccordingToLinkFileService
-        .GetTableDataAccordingToLinkFile(
+        .GetTableDataAccordingToLinkFileForPyable(
           this.DomainName,
           +this.editedRowData.linkFileID
         )

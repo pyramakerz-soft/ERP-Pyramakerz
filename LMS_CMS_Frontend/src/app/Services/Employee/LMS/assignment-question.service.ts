@@ -62,8 +62,8 @@ export class AssignmentQuestionService {
 
     // Append questionAssignmentTypeCountDTO (array of objects)
     assignmentQuestion.questionAssignmentTypeCountDTO.forEach((item, index) => {
-      formData.append(`questionAssignmentTypeCountDTO[${index}][numberOfQuestion]`, item.numberOfQuestion.toString());
-      formData.append(`questionAssignmentTypeCountDTO[${index}][questionTypeId]`, item.questionTypeId.toString());
+    formData.append(`questionAssignmentTypeCountDTO[${index}][numberOfQuestion]`,(item.numberOfQuestion ?? 0).toString());     
+    formData.append(`questionAssignmentTypeCountDTO[${index}][questionTypeId]`, item.questionTypeId.toString());
     });
 
     return this.http.post(`${this.baseUrl}/AssignmentQuestion`, formData, {

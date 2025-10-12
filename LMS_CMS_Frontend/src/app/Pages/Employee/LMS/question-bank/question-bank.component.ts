@@ -245,7 +245,7 @@ export class QuestionBankComponent {
             preConfirm: () => {
               const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
               const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
-              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              if (!width || !height || isNaN(+width) || isNaN(+height) || Number(width) < 1 || Number(height) < 1) {
                 Swal.showValidationMessage('Please enter numeric values.');
                 return null;
               }
