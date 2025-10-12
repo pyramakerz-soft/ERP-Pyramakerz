@@ -78,82 +78,114 @@
 
 
 <!-- Modal -->
-<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}" class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-  <div class="relative bg-white w-[669px] rounded-2xl p-0 shadow-md flex flex-col max-h-[90vh]">
-    <!-- Fixed Header -->
-    <div class="flex justify-between items-center p-12 pb-6 sticky top-0 bg-white z-10">
-      <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">{{ 'Create Test' | translate }}</h1>
-      <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit Test' | translate }}</h1> 
-      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-900 transition duration-200">
-        <i class="fa-solid fa-xmark text-2xl"></i>
-      </button>
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}"
+    class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+    <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">{{ 'Create Test' | translate }}</h1>
+            <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit Test' | translate }}</h1> 
+            <!-- Close Icon -->
+            <button (click)="closeModal()"
+                class="text-gray-400 hover:text-gray-900 transition duration-200">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+        </div>
+
+        <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Title' | translate }}</h6>
+            <div class="flex justify-start  gap-2 items-start">
+                <div class="flex flex-col">
+                    <input type="text"
+                        class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
+                        [(ngModel)]="test.title" placeholder="{{ 'Enter' | translate }} {{ 'Title' | translate }}" (ngModelChange)="onInputValueChange({ field: 'title', value: $event })"/>
+                <span *ngIf="validationErrors['title']" class="text-red-500 ml-3 font-normal">{{ validationErrors['title'] }}</span>
+                </div>
+            </div>
+
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Total Mark' | translate }}</h6>
+            <div class="flex justify-start  gap-2 items-start">
+                <div class="flex flex-col">
+                    <input type="text" (input)="validateNumber($event, 'totalMark')"
+                        class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
+                        [(ngModel)]="test.totalMark" placeholder="{{ 'Enter' | translate }} {{ 'Total Mark' | translate }}"  (ngModelChange)="onInputValueChange({ field: 'totalMark', value: $event })"/>
+                <span *ngIf="validationErrors['totalMark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['totalMark'] }}</span>
+
+                </div>
+            </div>
+
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'School' | translate }}</h6>
+            <div class="flex flex-col mb-4">
+                <select (ngModelChange)="onSchoolChange($event)"
+                    class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3"
+                    id="schoolSelect" [(ngModel)]="SchoolId">
+                    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+                    <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
+                    <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                </select>
+            </div>
+
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Academic Year' | translate }}</h6>
+            <div class="flex flex-col mb-4">
+              <select
+                [disabled]="!SchoolId || SchoolId === 0"
+                (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })"
+                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3"
+                id="academicYearSelect"
+                [(ngModel)]="test.academicYearID">
+                <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
+                <option *ngFor="let type of AcadenicYears" [value]="type.id">{{ type.name }}</option>
+                <option *ngIf="AcadenicYears.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+              </select>
+              <span *ngIf="validationErrors['academicYearID']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['academicYearID'] }}
+              </span>
+            </div>
+            
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Grade' | translate }}</h6>
+            <div class="flex flex-col mb-4">
+              <select
+                [disabled]="!SchoolId || SchoolId === 0"
+                (ngModelChange)="onGradeChange($event); onInputValueChange({ field: 'gradeID', value: $event })"
+                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3"
+                id="gradeSelect"
+                [(ngModel)]="test.gradeID">
+                <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+                <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}</option>
+                <option *ngIf="Grades.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+              </select>
+              <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['gradeID'] }}
+              </span>
+            </div>
+            
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Subject' | translate }}</h6>
+            <div class="flex flex-col mb-4">
+              <select
+                [disabled]="!test.gradeID || test.gradeID === 0"
+                (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })"
+                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3"
+                id="subjectSelect"
+                [(ngModel)]="test.subjectID">
+                <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
+                <option *ngFor="let subject of Subjects" [value]="subject.id">{{ isRtl ? subject.ar_name : subject.en_name }}</option>
+                <option *ngIf="Subjects.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+              </select>
+              <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['subjectID'] }}
+              </span>
+            </div>
+            
+
+
+            <div class="flex justify-end">
+                <button  
+                [disabled]="isLoading" 
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2" 
+                (click)="CreateOREdit()">
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+              </button>
+            </div>
+        </div>
     </div>
-
-    <!-- Scrollable Body -->
-    <div class="overflow-y-auto px-12 pb-8">
-      <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Title' | translate }}</h6>
-        <div class="flex justify-start gap-2 items-start">
-          <div class="flex flex-col">
-            <input type="text" class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3" [(ngModel)]="test.title" placeholder="{{ 'Enter' | translate }} {{ 'Title' | translate }}" (ngModelChange)="onInputValueChange({ field: 'title', value: $event })"/>
-            <span *ngIf="validationErrors['title']" class="text-red-500 ml-3 font-normal">{{ validationErrors['title'] }}</span>
-          </div>
-        </div>
-
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Total Mark' | translate }}</h6>
-        <div class="flex justify-start gap-2 items-start">
-          <div class="flex flex-col">
-            <input type="text" (input)="validateNumber($event, 'totalMark')" class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3" [(ngModel)]="test.totalMark" placeholder="{{ 'Enter' | translate }} {{ 'Total Mark' | translate }}" (ngModelChange)="onInputValueChange({ field: 'totalMark', value: $event })"/>
-            <span *ngIf="validationErrors['totalMark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['totalMark'] }}</span>
-          </div>
-        </div>
-
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'School' | translate }}</h6>
-        <div class="flex flex-col mb-4">
-          <select (ngModelChange)="onSchoolChange($event)" class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3" id="schoolSelect" [(ngModel)]="SchoolId">
-            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
-            <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
-            <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-          </select>
-        </div>
-
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Academic Year' | translate }}</h6>
-        <div class="flex flex-col mb-4">
-          <select [disabled]="!SchoolId || SchoolId === 0" (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })" class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3" id="academicYearSelect" [(ngModel)]="test.academicYearID">
-            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
-            <option *ngFor="let type of AcadenicYears" [value]="type.id">{{ type.name }}</option>
-            <option *ngIf="AcadenicYears.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
-          </select>
-          <span *ngIf="validationErrors['academicYearID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['academicYearID'] }}</span>
-        </div>
-
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Grade' | translate }}</h6>
-        <div class="flex flex-col mb-4">
-          <select [disabled]="!SchoolId || SchoolId === 0" (ngModelChange)="onGradeChange($event); onInputValueChange({ field: 'gradeID', value: $event })" class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3" id="gradeSelect" [(ngModel)]="test.gradeID">
-            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
-            <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}</option>
-            <option *ngIf="Grades.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
-          </select>
-          <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['gradeID'] }}</span>
-        </div>
-
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Subject' | translate }}</h6>
-        <div class="flex flex-col mb-4">
-          <select [disabled]="!test.gradeID || test.gradeID === 0" (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })" class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3" id="subjectSelect" [(ngModel)]="test.subjectID">
-            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
-            <option *ngFor="let subject of Subjects" [value]="subject.id">{{ isRtl ? subject.ar_name : subject.en_name }}</option>
-            <option *ngIf="Subjects.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
-          </select>
-          <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['subjectID'] }}</span>
-        </div>
-
-        <div class="flex justify-end">
-          <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2" (click)="CreateOREdit()">
-            <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
-            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
