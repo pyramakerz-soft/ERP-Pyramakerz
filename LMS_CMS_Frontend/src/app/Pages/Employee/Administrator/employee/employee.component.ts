@@ -93,6 +93,41 @@ export class EmployeeComponent {
     }
   }
 
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showLoadingAlert(message: string) {
+  Swal.fire({
+    title: message,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+}
 
   GetEmployee() {
     this.EmpServ.Get_Employees(this.DomainName).subscribe((data) => {
@@ -109,99 +144,81 @@ export class EmployeeComponent {
 
   }
 
-  Delete(id: number) {
-    Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Employee') + this.translate.instant('?'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Deleting...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+Delete(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this employee?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.showLoadingAlert(this.translate.instant('Deleting...'));
 
-        this.EmpServ.Delete(id, this.DomainName).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Deleted!',
-              text: 'The Employee has been deleted successfully.',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetEmployee();
-          },
-          error: (error) => {
-            const errorMessage = error?.error || 'An unexpected error occurred.';
-            Swal.fire({
-              icon: 'error',
-              title: 'Error!',
-              text: errorMessage,
-              confirmButtonColor: '#089B41',
-            });
-          },
-        });
-      }
-    });
-  }
+      this.EmpServ.Delete(id, this.DomainName).subscribe({
+        next: () => {
+          this.showSuccessAlert(this.translate.instant('Employee deleted successfully'));
+          this.GetEmployee();
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete employee');
+          this.showErrorAlert(errorMessage);
+        },
+      });
+    }
+  });
+}
 
   view(id: number) {
     this.router.navigateByUrl(`Employee/Employee Details/${id}`)
   }
 
-  suspend(emp: Employee) {
-    let message = ""
-    let doneMessage = ""
-    let doneTitle = ""
-    if (emp.isSuspended == false) {
-      message = "Are you sure you want to Suspend this Employee?"
-      doneMessage = "The Employee has been Suspend successfully."
-      doneTitle = "Suspend!"
-    } else {
-      message = "Are you sure you want to UnSuspend this Employee?"
-      doneMessage = "The Employee has been UnSuspend successfully."
-      doneTitle = "UnSuspend!"
+suspend(emp: Employee) {
+  const isSuspending = !emp.isSuspended;
+  
+  const message = isSuspending 
+    ? this.translate.instant('Are you sure you want to suspend this employee?')
+    : this.translate.instant('Are you sure you want to unsuspend this employee?');
+  
+  const confirmButtonText = isSuspending 
+    ? this.translate.instant('Suspend')
+    : this.translate.instant('Unsuspend');
+  
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: message,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: confirmButtonText,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
+        next: () => {
+          const successMessage = isSuspending
+            ? this.translate.instant('Employee suspended successfully')
+            : this.translate.instant('Employee unsuspended successfully');
+          
+          this.showSuccessAlert(successMessage);
+          this.GetEmployee();
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update employee status');
+          this.showErrorAlert(errorMessage);
+        },
+      });
     }
-    Swal.fire({
-      title: message,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: doneTitle,
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: doneTitle,
-              text: doneMessage,
-              confirmButtonColor: '#089B41',
-            });
-            this.GetEmployee();
-          },
-          error: (error) => {
-            const errorMessage = error?.error || 'An unexpected error occurred.';
-            Swal.fire({
-              icon: 'error',
-              title: 'Error!',
-              text: errorMessage,
-              confirmButtonColor: '#089B41',
-            });
-          },
-        });
-      }
-    });
-  }
+  });
+}
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);

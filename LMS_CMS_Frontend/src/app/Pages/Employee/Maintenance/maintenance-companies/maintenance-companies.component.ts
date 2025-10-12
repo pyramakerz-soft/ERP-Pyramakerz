@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -57,7 +57,9 @@ constructor(
   private mainServ: MaintenanceCompaniesService,
   private deleteEditPermissionServ: DeleteEditPermissionService,
   private realTimeService: RealTimeNotificationServiceService,
-  private activeRoute: ActivatedRoute
+  private activeRoute: ActivatedRoute,
+  private translate: TranslateService
+
 ) {}
 
     ngOnInit() {
@@ -95,7 +97,31 @@ constructor(
     }
   }
 
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   IsAllowDelete(InsertedByID: number): boolean {
   return this.deleteEditPermissionServ.IsAllowDelete(
@@ -129,54 +155,50 @@ constructor(
 
 
 
-Delete(id: number) {
-  Swal.fire({
-    title: 'Are you sure you want to delete this company?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.isLoading = true;
-      this.mainServ.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.GetTableData();
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Company has been deleted.',
-            confirmButtonText: 'Okay'
-          });
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Delete error details:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to delete company',
-            confirmButtonText: 'Okay'
-          });
-        }
-      });
-    }
-  });
-}
+  Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this company?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+    
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.mainServ.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.GetTableData();
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Company deleted successfully'));
+          },
+          error: (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete company');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  }
 
 
 
   isFormValid(): boolean {
     let isValid = true;
+    this.validationErrors = {};
+    
     for (const key in this.selectedCompany) { 
       if (this.selectedCompany.hasOwnProperty(key)) {
         const field = key as keyof MaintenanceCompanies;
         if (!this.selectedCompany[field]) {
-          if (field == 'en_Name'||field == 'ar_Name' ) {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+          if (field == 'en_Name'|| field == 'ar_Name') {
+            this.validationErrors[field] = this.translate.instant('Field is required', { field: this.capitalizeField(field) });
             isValid = false;
           }
         } else { 
@@ -264,48 +286,40 @@ openModal(forNew: boolean = true) {
   }
 
 
-  Save() {  
-    if (this.isFormValid()) {
-      this.isLoading = true;    
-      if (this.selectedCompany?.id == 0) { 
-        this.mainServ.Add(this.selectedCompany!, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal();
-            this.GetTableData();
-            this.isLoading = false;
-          },
-          (error) => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      } else {
-        this.mainServ.Edit(this.selectedCompany!, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal();
-            this.GetTableData();
-            this.isLoading = false;
-          },
-          (error) => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }
+Save() {  
+  if (this.isFormValid()) {
+    this.isLoading = true;    
+    if (this.selectedCompany?.id == 0) { 
+      this.mainServ.Add(this.selectedCompany!, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.GetTableData();
+          this.isLoading = false;
+          this.showSuccessAlert(this.translate.instant('Company added successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to add company');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    } else {
+      this.mainServ.Edit(this.selectedCompany!, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.GetTableData();
+          this.isLoading = false;
+          this.showSuccessAlert(this.translate.instant('Company updated successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update company');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
   }
+}
 
 
 

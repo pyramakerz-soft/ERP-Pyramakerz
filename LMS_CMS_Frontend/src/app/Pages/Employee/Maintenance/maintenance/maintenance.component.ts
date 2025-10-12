@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -39,7 +39,6 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   keys: string[] = ['id', 'date', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'cost', 'note'];
   keysArray: string[] = ['id', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'note'];
   formattedCost: string = '';
-
 
   // Data
   maintenanceList: any[] = []; // Changed to any[] to include actions property
@@ -83,7 +82,8 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private menuService: MenuService,
     private editDeleteService: DeleteEditPermissionService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -144,45 +144,45 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
   }
 
-async loadMaintenance(): Promise<void> {
-  try {
-    const domainName = this.apiService.GetHeader();
-    const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
-    
-    this.maintenanceList = data.map(item => {
-      // Keep dates as strings for proper binding to HTML date input
-      const maintenanceItem: any = {
-        ...item,
-        // Remove Date object conversion - keep as strings
-        date: item.date, // Keep as string for proper date input binding
-        fromDate: item.fromDate,
-        toDate: item.toDate,
-        // Handle null values for display purposes
-        companyEnglishName: item.companyEnglishName || '-',
-        companyArabicName: item.companyArabicName || '-',
-        employeeEnglishName: item.employeeEnglishName || '-',
-        employeeArabicName: item.employeeArabicName || '-',
-        // Ensure numeric fields have proper values
-        cost: item.cost ?? null,
-        companyID: item.companyID ?? null,
-        maintenanceEmployeeID: item.maintenanceEmployeeID ?? null,
-        insertedByUserId: item.insertedByUserId ?? undefined,
-        // Add actions property for the table component
-        actions: {
-          edit: this.IsAllowEdit(item.insertedByUserId || 0),
-          delete: this.IsAllowDelete(item.insertedByUserId || 0),
-          view: false
-        }
-      };
+  async loadMaintenance(): Promise<void> {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
       
-      return maintenanceItem;
-    });
+      this.maintenanceList = data.map(item => {
+        // Keep dates as strings for proper binding to HTML date input
+        const maintenanceItem: any = {
+          ...item,
+          // Remove Date object conversion - keep as strings
+          date: item.date, // Keep as string for proper date input binding
+          fromDate: item.fromDate,
+          toDate: item.toDate,
+          // Handle null values for display purposes
+          companyEnglishName: item.companyEnglishName || '-',
+          companyArabicName: item.companyArabicName || '-',
+          employeeEnglishName: item.employeeEnglishName || '-',
+          employeeArabicName: item.employeeArabicName || '-',
+          // Ensure numeric fields have proper values
+          cost: item.cost ?? null,
+          companyID: item.companyID ?? null,
+          maintenanceEmployeeID: item.maintenanceEmployeeID ?? null,
+          insertedByUserId: item.insertedByUserId ?? undefined,
+          // Add actions property for the table component
+          actions: {
+            edit: this.IsAllowEdit(item.insertedByUserId || 0),
+            delete: this.IsAllowDelete(item.insertedByUserId || 0),
+            view: false
+          }
+        };
+        
+        return maintenanceItem;
+      });
 
-    this.applySearchFilter();
-  } catch (error) {
-     
+      this.applySearchFilter();
+    } catch (error) {
+       
+    }
   }
-}
 
   private applySearchFilter(): void {
     if (this.searchValue) {
@@ -199,47 +199,47 @@ async loadMaintenance(): Promise<void> {
     await this.loadMaintenance();
   }
 
-openModal(item?: any): void {
-  this.isModalVisible = true;
-  this.editMode = !!item;
-  this.validationErrors = {};
-  
-  if (item) {
-    this.selectedMaintenance = item;
-    this.maintenanceForm = {
-      id: item.id,
-      date: item.date,
-      fromDate: item.fromDate,
-      toDate: item.toDate,
-      itemID: item.itemID,
-      itemArabicName: item.itemArabicName,
-      itemEnglishName: item.itemEnglishName,
-      companyEnglishName: item.companyEnglishName,
-      companyArabicName: item.companyArabicName,
-      companyID: item.companyID && item.companyID > 0 ? item.companyID : null,
-      employeeEnglishName: item.employeeEnglishName,
-      employeeArabicName: item.employeeArabicName,
-      maintenanceEmployeeID: item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0 ? item.maintenanceEmployeeID : null,
-      cost: item.cost,
-      costRawString: item.cost ? item.cost.toString() : '', // Initialize costRawString
-      note: item.note,
-      en_Name: item.en_Name,
-      ar_Name: item.ar_Name,
-      insertedByUserId: item.insertedByUserId,
-    };
+  openModal(item?: any): void {
+    this.isModalVisible = true;
+    this.editMode = !!item;
+    this.validationErrors = {};
+    
+    if (item) {
+      this.selectedMaintenance = item;
+      this.maintenanceForm = {
+        id: item.id,
+        date: item.date,
+        fromDate: item.fromDate,
+        toDate: item.toDate,
+        itemID: item.itemID,
+        itemArabicName: item.itemArabicName,
+        itemEnglishName: item.itemEnglishName,
+        companyEnglishName: item.companyEnglishName,
+        companyArabicName: item.companyArabicName,
+        companyID: item.companyID && item.companyID > 0 ? item.companyID : null,
+        employeeEnglishName: item.employeeEnglishName,
+        employeeArabicName: item.employeeArabicName,
+        maintenanceEmployeeID: item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0 ? item.maintenanceEmployeeID : null,
+        cost: item.cost,
+        costRawString: item.cost ? item.cost.toString() : '', // Initialize costRawString
+        note: item.note,
+        en_Name: item.en_Name,
+        ar_Name: item.ar_Name,
+        insertedByUserId: item.insertedByUserId,
+      };
 
-    // Set maintenance type based on which ID is present
-    if (item.companyID && item.companyID > 0) {
-      this.maintenanceType = 'company';
-    } else if (item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0) {
-      this.maintenanceType = 'employee';
+      // Set maintenance type based on which ID is present
+      if (item.companyID && item.companyID > 0) {
+        this.maintenanceType = 'company';
+      } else if (item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0) {
+        this.maintenanceType = 'employee';
+      } else {
+        this.maintenanceType = 'company'; // default
+      }
     } else {
-      this.maintenanceType = 'company'; // default
+      this.resetForm();
     }
-  } else {
-    this.resetForm();
   }
-}
 
   closeModal(): void {
     this.isModalVisible = false;
@@ -282,157 +282,184 @@ openModal(item?: any): void {
     }
   }
 
-isFormValid(): boolean {
-  this.validationErrors = {};
-  let isValid = true;
+  isFormValid(): boolean {
+    this.validationErrors = {};
+    let isValid = true;
 
-  // Check if date is valid
-  if (!this.maintenanceForm.date) {
-    this.validationErrors['date'] = '*Date is required';
-    isValid = false;
-  }
-
-  if (!this.maintenanceForm.itemID || this.maintenanceForm.itemID <= 0) {
-    this.validationErrors['itemID'] = '*Item is required';
-    isValid = false;
-  }
-
-  if (this.maintenanceType === 'company' && (!this.maintenanceForm.companyID || this.maintenanceForm.companyID <= 0)) {
-    this.validationErrors['companyID'] = '*Company is required';
-    isValid = false;
-  }
-
-  if (this.maintenanceType === 'employee' && (!this.maintenanceForm.maintenanceEmployeeID || this.maintenanceForm.maintenanceEmployeeID <= 0)) {
-    this.validationErrors['maintenanceEmployeeID'] = '*Employee is required';
-    isValid = false;
-  }
-
-  // Updated cost validation for decimals
-  if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
-    this.validationErrors['cost'] = '*Cost is required';
-    isValid = false;
-  } else if (isNaN(this.maintenanceForm.cost)) {
-    this.validationErrors['cost'] = '*Cost must be a valid number';
-    isValid = false;
-  } else if (this.maintenanceForm.cost <= 0) {
-    this.validationErrors['cost'] = '*Cost must be greater than 0';
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-async saveMaintenance(): Promise<void> {
-  if (!this.isFormValid()) return;
-
-  try {
-    this.isSaving = true;
-    const domainName = this.apiService.GetHeader();
-
-    // Ensure date is properly formatted as YYYY-MM-DD
-    // Since date is always a string in the form, we can use it directly
-    const submitData: Maintenance = {
-      ...this.maintenanceForm,
-      companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
-      maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
-    };
-
-    if (this.editMode && this.maintenanceForm.id) {
-      await firstValueFrom(this.maintenanceService.update(submitData, domainName));
-      Swal.fire('Success', 'Maintenance record updated successfully!', 'success');
-    } else {
-      await firstValueFrom(this.maintenanceService.create(submitData, domainName));
-      Swal.fire('Success', 'Maintenance record created successfully!', 'success');
+    // Check if date is valid
+    if (!this.maintenanceForm.date) {
+      this.validationErrors['date'] = this.translate.instant('Date is required');
+      isValid = false;
     }
 
-    this.loadMaintenance();
-    this.closeModal();
-  } catch (error) {
-    console.error('Error saving maintenance record:', error);
-    Swal.fire('Error', String(error), 'error');
-  } finally {
-    this.isSaving = false;
-  }
-}
+    if (!this.maintenanceForm.itemID || this.maintenanceForm.itemID <= 0) {
+      this.validationErrors['itemID'] = this.translate.instant('Item is required');
+      isValid = false;
+    }
 
-validateDecimal(event: any, field: string): void {
-  const input = event.target as HTMLInputElement;
-  let value = input.value;
-  
-  // Store cursor position to restore it after manipulation
-  const cursorPosition = input.selectionStart;
-  
-  // Remove any characters that are not digits or decimal points
-  value = value.replace(/[^0-9.]/g, '');
-  
-  // Prevent multiple decimal points
-  const decimalCount = (value.match(/\./g) || []).length;
-  if (decimalCount > 1) {
-    // Remove extra decimal points by keeping only the first one
-    const parts = value.split('.');
-    value = parts[0] + '.' + parts.slice(1).join('');
+    if (this.maintenanceType === 'company' && (!this.maintenanceForm.companyID || this.maintenanceForm.companyID <= 0)) {
+      this.validationErrors['companyID'] = this.translate.instant('Company is required');
+      isValid = false;
+    }
+
+    if (this.maintenanceType === 'employee' && (!this.maintenanceForm.maintenanceEmployeeID || this.maintenanceForm.maintenanceEmployeeID <= 0)) {
+      this.validationErrors['maintenanceEmployeeID'] = this.translate.instant('Employee is required');
+      isValid = false;
+    }
+
+    // Updated cost validation for decimals
+    if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
+      this.validationErrors['cost'] = this.translate.instant('Cost is required');
+      isValid = false;
+    } else if (isNaN(this.maintenanceForm.cost)) {
+      this.validationErrors['cost'] = this.translate.instant('Cost must be a valid number');
+      isValid = false;
+    } else if (this.maintenanceForm.cost <= 0) {
+      this.validationErrors['cost'] = this.translate.instant('Cost must be greater than 0');
+      isValid = false;
+    }
+
+    return isValid;
   }
-  
-  // Remove scientific notation (e, E, e+, e-, E+, E-)
-  value = value.replace(/[eE][+-]?/g, '');
-  
-  // Update the input value
-  input.value = value;
-  
-  // Restore cursor position (adjust for any removed characters)
-  setTimeout(() => {
-    input.setSelectionRange(cursorPosition, cursorPosition);
-  }, 0);
-  
-  // Convert to number for the form model
-  if (field === 'cost') {
-    if (value === '' || value === '.') {
-      this.maintenanceForm.cost = null;
-      this.maintenanceForm.costRawString = '';
-    } else {
-      // Parse as float to maintain decimal precision
-      this.maintenanceForm.cost = parseFloat(value);
-      // Store the raw string to avoid scientific notation issues
-      this.maintenanceForm.costRawString = value;
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  async saveMaintenance(): Promise<void> {
+    if (!this.isFormValid()) return;
+
+    try {
+      this.isSaving = true;
+      const domainName = this.apiService.GetHeader();
+
+      // Ensure date is properly formatted as YYYY-MM-DD
+      // Since date is always a string in the form, we can use it directly
+      const submitData: Maintenance = {
+        ...this.maintenanceForm,
+        companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
+        maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
+      };
+
+      if (this.editMode && this.maintenanceForm.id) {
+        await firstValueFrom(this.maintenanceService.update(submitData, domainName));
+        this.showSuccessAlert(this.translate.instant('Maintenance record updated successfully'));
+      } else {
+        await firstValueFrom(this.maintenanceService.create(submitData, domainName));
+        this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
+      }
+
+      this.loadMaintenance();
+      this.closeModal();
+    } catch (error) {
+      console.error('Error saving maintenance record:', error);
+      const errorMessage = String(error) || this.translate.instant('Failed to save maintenance record');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSaving = false;
     }
   }
-  
-  this.clearValidationError(field);
-}
 
-// private formatDate(date: Date): string {
-//   const year = date.getFullYear();
-//   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-//   const day = date.getDate().toString().padStart(2, '0');
-//   return `${year}-${month}-${day}`;
-// }
+  validateDecimal(event: any, field: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Store cursor position to restore it after manipulation
+    const cursorPosition = input.selectionStart;
+    
+    // Remove any characters that are not digits or decimal points
+    value = value.replace(/[^0-9.]/g, '');
+    
+    // Prevent multiple decimal points
+    const decimalCount = (value.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      // Remove extra decimal points by keeping only the first one
+      const parts = value.split('.');
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Remove scientific notation (e, E, e+, e-, E+, E-)
+    value = value.replace(/[eE][+-]?/g, '');
+    
+    // Update the input value
+    input.value = value;
+    
+    // Restore cursor position (adjust for any removed characters)
+    setTimeout(() => {
+      input.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+    
+    // Convert to number for the form model
+    if (field === 'cost') {
+      if (value === '' || value === '.') {
+        this.maintenanceForm.cost = null;
+        this.maintenanceForm.costRawString = '';
+      } else {
+        // Parse as float to maintain decimal precision
+        this.maintenanceForm.cost = parseFloat(value);
+        // Store the raw string to avoid scientific notation issues
+        this.maintenanceForm.costRawString = value;
+      }
+    }
+    
+    this.clearValidationError(field);
+  }
 
   deleteMaintenance(row: any): void {
     if (!this.IsAllowDelete(row.insertedByUserId || 0)) {
-      Swal.fire('Error', 'You do not have permission to delete this record', 'error');
+      const errorMessage = this.translate.instant('You do not have permission to delete this record');
+      this.showErrorAlert(errorMessage);
       return;
     }
 
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this maintenance record?');
+    const deleteText = this.translate.instant('You will not be able to recover this maintenance record');
+    const confirmButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover this maintenance record!',
+      title: deleteTitle,
+      text: deleteText,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#2E3646',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: confirmButton,
+      cancelButtonText: cancelButton,
     }).then((result) => {
       if (result.isConfirmed) {
         const domainName = this.apiService.GetHeader();
         this.maintenanceService.delete(row.id, domainName).subscribe({
           next: () => {
             this.loadMaintenance();
-            Swal.fire('Deleted!', 'The maintenance record has been deleted.', 'success');
+            this.showSuccessAlert(this.translate.instant('Maintenance record deleted successfully'));
           },
           error: (error) => {
             console.error('Error deleting maintenance record:', error);
-            Swal.fire('Error', 'Failed to delete maintenance record', 'error');
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete maintenance record');
+            this.showErrorAlert(errorMessage);
           },
         });
       }
