@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Services
             {
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
-                string fullPath = $"{_configuration["AWS:Folder"]}/{domain}/{subDomain}/{filePath}";
+                string fullPath = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{filePath}";
 
                 AmazonS3Client s3Client = new AmazonS3Client();
                 S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
