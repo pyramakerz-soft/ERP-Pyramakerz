@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -55,7 +55,9 @@ export class MaintenanceEmployeesComponent {
       public account: AccountService,
       public EmpServ: EmployeeService,
       private activeRoute: ActivatedRoute,
-      private realTimeService: RealTimeNotificationServiceService){}
+      private realTimeService: RealTimeNotificationServiceService,
+        private translate: TranslateService
+){}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,6 +91,33 @@ export class MaintenanceEmployeesComponent {
       this.AllowDeleteForOthers
     );
   }
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
  
 async GetTableData() {
   this.TableData = [];
@@ -125,14 +154,18 @@ async GetSelectData() {
 }
 
 Delete(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this employee from maintenance?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
+  
   Swal.fire({
-    title: 'Are you sure you want to delete this employee?',
+    title: deleteTitle,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#089B41',
     cancelButtonColor: '#17253E',
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel'
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton
   }).then((result) => {
     if (result.isConfirmed) {
       this.isLoading = true;
@@ -140,40 +173,29 @@ Delete(id: number) {
         next: () => {
           this.GetTableData();
           this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Employee has been deleted.',
-            confirmButtonText: 'Okay'
-          });
+          this.showSuccessAlert(this.translate.instant('Employee removed from maintenance successfully'));
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Delete error details:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to delete employee',
-            confirmButtonText: 'Okay'
-          });
+          const errorMessage = error.error?.message || this.translate.instant('Failed to remove employee from maintenance');
+          this.showErrorAlert(errorMessage);
         }
       });
     }
   });
-
 }
 
 
- isFormValid(): boolean {
-    let isValid = true;
-    this.validationErrors = {};
-    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
-      this.validationErrors['id'] = '*Employee is required';
-      isValid = false;
-    }
-
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+    this.validationErrors['id'] = this.translate.instant('Employee is required');
+    isValid = false;
   }
+
+  return isValid;
+}
 
 
 
@@ -244,17 +266,12 @@ Save() {
           this.closeModal();
           this.GetTableData();
           this.isLoading = false;
-          Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
+          this.showSuccessAlert(this.translate.instant('Employee added to maintenance successfully'));
         },
         (error) => {
           this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error || error.error,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
+          const errorMessage = error.error?.message || this.translate.instant('Failed to add employee to maintenance');
+          this.showErrorAlert(errorMessage);
         }
       );
     } 

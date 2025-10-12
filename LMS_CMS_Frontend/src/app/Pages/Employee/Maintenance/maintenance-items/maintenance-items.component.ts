@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -19,12 +19,12 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-maintenance-items',
   standalone: true,
-  imports: [TranslateModule,SearchComponent,CommonModule, FormsModule ,],
+  imports: [TranslateModule, SearchComponent, CommonModule, FormsModule],
   templateUrl: './maintenance-items.component.html',
   styleUrl: './maintenance-items.component.css'
 })
 export class MaintenanceItemsComponent {
-User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   UserID: number = 0;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
@@ -35,31 +35,32 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   subscription!: Subscription;
   TableData: MaintenanceItem[] = [] 
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
-  key: string= "id";
+  key: string = "id";
   DomainName: string = '';
   value: any;
   IsChoosenDomain: boolean = false;
   selectedItem: MaintenanceItem | null = null;
   isLoading = false;
-  isModalOpen= false;
-  // validationErrors: { [key: string]: string } = {};
+  isModalOpen = false;
   validationErrors: { [key in keyof MaintenanceItem]?: string } = {}; 
   academicDegree: MaintenanceItem = new MaintenanceItem(0,'','');
   mode: string = "";
   isEditMode = false;
   path: string = "";
-constructor(    
-  private languageService: LanguageService,
-  private router: Router,
-  private apiService: ApiService,
-  public account: AccountService, 
-  private mainServ: MaintenanceItemService,
-  private deleteEditPermissionServ: DeleteEditPermissionService,
-  private realTimeService: RealTimeNotificationServiceService,
-  private activeRoute: ActivatedRoute
-) {}
 
-    ngOnInit() {
+  constructor(    
+    private languageService: LanguageService,
+    private router: Router,
+    private apiService: ApiService,
+    public account: AccountService, 
+    private mainServ: MaintenanceItemService,
+    private deleteEditPermissionServ: DeleteEditPermissionService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private activeRoute: ActivatedRoute,
+    private translate: TranslateService
+  ) {}
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     if (this.User_Data_After_Login.type === "employee") {
@@ -70,51 +71,70 @@ constructor(
         this.path = url[0].path;
       });
       this.mainServ.Get(this.DomainName).subscribe({
-      next: (data:any) => {
-        this.TableData = data;
-        console.log(this.TableData)
-      },
-      error: (err:any) => {
-        console.error('Error fetching companies:', err);
-      }
-    });}
+        next: (data:any) => {
+          this.TableData = data;
+          console.log(this.TableData)
+        },
+        error: (err:any) => {
+          console.error('Error fetching maintenance items:', err);
+        }
+      });
+    }
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-
-
   ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   IsAllowDelete(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowDelete(
-    InsertedByID,
-    this.UserID,
-    this.AllowDeleteForOthers
-  );
-}
-
+    return this.deleteEditPermissionServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+  }
 
   IsAllowEdit(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowEdit(
-    InsertedByID,
-    this.UserID,
-    this.AllowEditForOthers
-  );
-}
-
-
-
+    return this.deleteEditPermissionServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+  }
 
   async GetTableData() {
     this.TableData = [];
@@ -126,55 +146,50 @@ constructor(
     }
   }
 
-
-
-Delete(id: number) {
-  Swal.fire({
-    title: 'Are you sure you want to delete this item?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.isLoading = true;
-      this.mainServ.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.GetTableData();
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Item has been deleted.',
-            confirmButtonText: 'Okay'
-          });
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Delete error details:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to delete item',
-            confirmButtonText: 'Okay'
-          });
-        }
-      });
-    }
-  });
-}
-
+  Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this item?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+    
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.mainServ.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.GetTableData();
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Item deleted successfully'));
+          },
+          error: (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete item');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  }
 
   isFormValid(): boolean {
     let isValid = true;
+    this.validationErrors = {};
+    
     for (const key in this.selectedItem) { 
       if (this.selectedItem.hasOwnProperty(key)) {
         const field = key as keyof MaintenanceItem;
         if (!this.selectedItem[field]) {
-          if (field == 'en_Name'||field == 'ar_Name' ) {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+          if (field == 'en_Name' || field == 'ar_Name') {
+            this.validationErrors[field] = this.translate.instant('Field is required', { 
+              field: this.capitalizeField(field) 
+            });
             isValid = false;
           }
         } else { 
@@ -185,60 +200,54 @@ Delete(id: number) {
     return isValid;
   }
 
+  Edit(id: number) {
+    const Item = this.TableData.find((row: any) => row.id === id);
 
-
-Edit(id: number) {
-  const Item = this.TableData.find((row: any) => row.id === id);
-
-  if (Item) {
-    this.isEditMode = true;            
-    this.selectedItem = { ...Item }; 
-    this.openModal(false);              
-  } else {
-    console.error("Item not found with id:", id);
-  }
-}
-
-
-
- async onSearchEvent(event: { key: string, value: any }) {
-      this.key = event.key;
-      this.value = event.value;
-      try {
-        const data: MaintenanceItem[] = await firstValueFrom( this.mainServ.Get(this.DomainName));  
-        this.TableData = data || [];
-    
-        if (this.value !== "") {
-          const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-    
-          this.TableData = this.TableData.filter(t => {
-            const fieldValue = t[this.key as keyof typeof t];
-            if (typeof fieldValue === 'string') {
-              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-            }
-            if (typeof fieldValue === 'number') {
-              return fieldValue.toString().includes(numericValue.toString())
-            }
-            return fieldValue == this.value;
-          });
-        }
-      } catch (error) {
-        this.TableData = [];
-      }
+    if (Item) {
+      this.isEditMode = true;            
+      this.selectedItem = { ...Item }; 
+      this.openModal(false);              
+    } else {
+      console.error("Item not found with id:", id);
     }
-
-
-
-openModal(forNew: boolean = true) {
-  if (forNew) {
-    this.isEditMode = false;
-    this.selectedItem = new MaintenanceItem(0, '', '');
   }
-  this.isModalOpen = true;
 
-  document.getElementById('Add_Modal')?.classList.remove('hidden');
-  document.getElementById('Add_Modal')?.classList.add('flex');
-}
+  async onSearchEvent(event: { key: string, value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: MaintenanceItem[] = await firstValueFrom(this.mainServ.Get(this.DomainName));  
+      this.TableData = data || [];
+  
+      if (this.value !== "") {
+        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+  
+        this.TableData = this.TableData.filter(t => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.TableData = [];
+    }
+  }
+
+  openModal(forNew: boolean = true) {
+    if (forNew) {
+      this.isEditMode = false;
+      this.selectedItem = new MaintenanceItem(0, '', '');
+    }
+    this.isModalOpen = true;
+
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+  }
 
   onInputValueChange(event: { field: keyof MaintenanceItem; value: any }) {
     const { field, value } = event;
@@ -247,18 +256,16 @@ openModal(forNew: boolean = true) {
       this.validationErrors[field] = '';
     } 
   }
-    capitalizeField(field: keyof MaintenanceItem): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-    }
 
- closeModal() {
+  capitalizeField(field: keyof MaintenanceItem): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
     this.validationErrors = {};
   }
-
-
-
 
   Save() {  
     if (this.isFormValid()) {
@@ -269,16 +276,12 @@ openModal(forNew: boolean = true) {
             this.closeModal();
             this.GetTableData();
             this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Item added successfully'));
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            const errorMessage = error.error?.message || this.translate.instant('Failed to add item');
+            this.showErrorAlert(errorMessage);
           }
         );
       } else {
@@ -287,29 +290,15 @@ openModal(forNew: boolean = true) {
             this.closeModal();
             this.GetTableData();
             this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Item updated successfully'));
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update item');
+            this.showErrorAlert(errorMessage);
           }
         );
       }
     }
   }
-
-
-
-
 }
-
-
-
-
-
-
