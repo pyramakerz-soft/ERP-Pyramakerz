@@ -35,7 +35,7 @@
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <i class="fa-solid fa-folder-open"></i>
                     <button (click)="toggleCollapse(row.id)" class="w-full px-2 py-2 text-left">
-                        {{ row.en_name }}
+                        {{ row.en_name | translate }}
                     </button>
                 </div>
                 <!-- Recursively render children -->
@@ -54,7 +54,7 @@
             <input type="checkbox" [checked]="checkForPage(page.id, parentId)" (change)="onCheckboxChange($event, page.id, page.page_ID)"
                 class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
             <button (click)="toggleCollapse(page.id)" class="w-full px-2 py-2 text-left">
-                > {{ page.en_name }}
+                > {{ page.en_name | translate }}
             </button>
         </div>
         <div *ngIf="collapseStates[page.id]" class="flex flex-col space-y-2">
