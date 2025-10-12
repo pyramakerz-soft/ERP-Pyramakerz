@@ -33,18 +33,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './assignment-student.component.css',
 })
 export class AssignmentStudentComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   classes: Classroom[] = [];
   TableData: AssignmentStudent[] = [];
@@ -267,13 +256,13 @@ export class AssignmentStudentComponent {
   }
 
   saveDegree(row: AssignmentStudent): void {
-    const today = new Date(); // current date
+    const TheSubmittedDate = new Date(row.insertedAt); // current date
     const dueDate = new Date(row.dueDate);
-    today.setHours(0, 0, 0, 0);
+    TheSubmittedDate.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
-    console.log(343, today, dueDate);
+    console.log(343, TheSubmittedDate, dueDate);
     if (this.IsFormValid(row)) {
-      if (today > dueDate) {
+      if (TheSubmittedDate > dueDate) {
         Swal.fire({
           title: 'Apply Late Submission Penalty?',
           text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
