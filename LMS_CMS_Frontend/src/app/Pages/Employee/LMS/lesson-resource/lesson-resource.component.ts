@@ -164,7 +164,7 @@ export class LessonResourceComponent {
     this.lessonResourceService.GetByID(id, this.DomainName).subscribe((data) => {
       this.lessonResource = data;  
       if(this.lessonResource.attachmentLink != null && this.lessonResource.attachmentLink != ''){
-        if (this.lessonResource.attachmentLink?.includes('Uploads/')) {
+        if (this.lessonResource.attachmentLink?.includes('LMS/LessonResource')) {
           this.selectedAttachmentType = 'file'
         }else{
           this.selectedAttachmentType = 'text'
