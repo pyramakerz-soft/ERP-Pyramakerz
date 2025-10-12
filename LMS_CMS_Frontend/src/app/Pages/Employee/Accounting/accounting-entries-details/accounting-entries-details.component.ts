@@ -58,6 +58,7 @@ export class AccountingEntriesDetailsComponent {
   dataTypesData: AccountingEntriesDocType[] = []
   bankOrSaveData: any[] = []
   accountingEntriesDetailsData: AccountingEntriesDetails[] = []
+  accountingEntriesDetailsDataForPrint: any[] = []
   AccountingTreeChartData: AccountingTreeChart[] = []
   subAccountData: any[] = []
   newDetails: AccountingEntriesDetails = new AccountingEntriesDetails()
@@ -485,16 +486,29 @@ export class AccountingEntriesDetailsComponent {
   //   }, 500);
   // }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     this.showPDF = true;
+    await this.formatData();
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
       setTimeout(() => this.showPDF = false, 2000);
     }, 500);
   }
 
-  Print() {
+  formatData(){
+    this.accountingEntriesDetailsDataForPrint = this.accountingEntriesDetailsData.map(item => ({
+      id: item.id,
+      'Debit Amount': item.debitAmount,
+      'CreditAmount': item.creditAmount,
+      'Note': item.note,
+      'Account Name': item.accountingTreeChartName,
+      'sub Account': item.subAccountingName
+    }));
+  }
+
+  async Print() {
     this.showPDF = true;
+    await this.formatData();
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
       if (!printContents) {
@@ -561,7 +575,7 @@ export class AccountingEntriesDetailsComponent {
       tables: [
         {
           // title: "Accounting Entries Details",
-          headers: ['id', 'debitAmount', 'creditAmount', 'accountingTreeChartName', 'subAccountingName', 'note'],
+          headers: ['id', 'debitAmount', 'creditAmount', 'Account Name', 'sub Account', 'note'],
           data: this.accountingEntriesDetailsData.map((row) => [
             row.id || 0,
             row.debitAmount || 0,

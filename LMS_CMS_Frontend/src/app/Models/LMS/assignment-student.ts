@@ -31,7 +31,9 @@ export class AssignmentStudent {
         public insertedByUserName: string = '',
         public isVisibleToStudent: boolean = false,
         public evaluationConsideringTheDelay: boolean = false,
-        public assignmentStudentQuestions: AssignmentStudentQuestion[] = []
+        public assignmentStudentQuestions: AssignmentStudentQuestion[] = [],
+        public insertedAt :string ='',
+
     ) { }
 }
 
