@@ -29,7 +29,7 @@ namespace LMS_CMS_PL.Services
 
                 AmazonS3Client s3Client = new AmazonS3Client();
                 S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                return s3Service.GetFileUrl(filePath, _configuration);
+                return s3Service.GetFileUrl(fullPath, _configuration);
             }
             else
             {
