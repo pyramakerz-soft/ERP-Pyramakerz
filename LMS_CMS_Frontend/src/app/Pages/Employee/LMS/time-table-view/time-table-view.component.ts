@@ -318,14 +318,14 @@ export class TimeTableViewComponent {
       });
 
       // 🔹 Build headers dynamically
-      const tableHeaders = [ 'Class', ...Array.from({ length: maxSessionsForDay }, (_, i) => `Session ${i + 1}`)];
+      const tableHeaders = ['Grade', 'Class', ...Array.from({ length: maxSessionsForDay }, (_, i) => `Session ${i + 1}`)];
       const tableData: any[] = [];
 
       // 🔹 Build table data
       day.grades.forEach(grade => {
         grade.classrooms.forEach(classroom => {
           const row: any = {};
-          // row['Grade'] = grade.gradeName;
+          row['Grade'] = grade.gradeName;
           row['Class'] = classroom.classroomName;
 
           for (let i = 0; i < maxSessionsForDay; i++) {
