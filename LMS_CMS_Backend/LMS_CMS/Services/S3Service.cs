@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Services
                 return false;
             }
 
-            var key = $"{_folder}/{domain}/{subDirectory}".Replace("//", "/");
+            var key = $"{_folder}/{domain}/{subDirectory}/{file.FileName}".Replace("//", "/");
 
             // Save to a temporary file first
             var tempFilePath = Path.GetTempFileName();
