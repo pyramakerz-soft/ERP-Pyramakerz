@@ -26,6 +26,7 @@ import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { Observable, of } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-time-table-view',
@@ -120,11 +121,8 @@ export class TimeTableViewComponent {
     this.SelectedDay = 0
     this.SelectedGrade = 0
     this.date = ""
-    this.timetableServ
-      .GetByID(this.TimeTableId, this.DomainName)
-      .subscribe((d) => {
+    this.timetableServ.GetByID(this.TimeTableId, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
-        console.log(21, this.TimeTable)
         this.OriginTimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
@@ -218,17 +216,27 @@ export class TimeTableViewComponent {
     this.SelectedDay = 0
     this.SelectedGrade = 0
     this.timetableServ.GetDutyByDate(this.TimeTableId, this.date, this.DomainName).subscribe((d) => {
+      console.log(d)
       this.TimeTable = d.data;
       this.OriginTimeTable = d.data;
       this.TimeTableName = d.timeTableName;
       this.MaxPeriods = d.maxPeriods;
       this.ExtractDaysAndGrades();
+    },error=>{
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' }
+        });
+      console.log(123,error.error)
     });
   }
 
   async DownloadAsExcel() {
     const tables: any[] = [];
-
+    
     this.TimeTable.forEach(day => {
       const data: any[] = [];
 
@@ -258,7 +266,7 @@ export class TimeTableViewComponent {
           data.push(row);
         });
       });
-
+      
       tables.push({
         title: day.dayName,
         headers: ["Grade", "Class", ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)],
@@ -299,21 +307,35 @@ export class TimeTableViewComponent {
     const groupedByDay: any[] = [];
 
     this.TimeTable.forEach(day => {
-      const tableHeaders = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
+      // 🔹 Find the maximum number of sessions in this day (across all classes)
+      let maxSessionsForDay = 0;
+      day.grades.forEach(grade => {
+        grade.classrooms.forEach(classroom => {
+          if (classroom.sessions && classroom.sessions.length > maxSessionsForDay) {
+            maxSessionsForDay = classroom.sessions.length;
+          }
+        });
+      });
+
+      // 🔹 Build headers dynamically
+      const tableHeaders = ['Grade', 'Class', ...Array.from({ length: maxSessionsForDay }, (_, i) => `Session ${i + 1}`)];
       const tableData: any[] = [];
 
+      // 🔹 Build table data
       day.grades.forEach(grade => {
         grade.classrooms.forEach(classroom => {
           const row: any = {};
           row['Grade'] = grade.gradeName;
           row['Class'] = classroom.classroomName;
 
-          for (let i = 0; i < this.MaxPeriods; i++) {
+          for (let i = 0; i < maxSessionsForDay; i++) {
             const session = classroom.sessions[i];
             let sessionText = '';
 
             if (session?.subjects?.length) {
-              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName || 'N/A'})`).join(', ');
+              sessionText += session.subjects
+                .map(sub => `${sub.subjectName} (${sub.teacherName || 'N/A'})`)
+                .join(', ');
             }
 
             if (session?.dutyTeacherName) {
@@ -329,13 +351,13 @@ export class TimeTableViewComponent {
 
       groupedByDay.push({
         header: day.dayName,
-        data: [], // optional summary (e.g., grade totals)
+        data: [],
         tableHeaders,
         tableData
       });
     });
 
-    return of(groupedByDay); // ✅ Must import: import { of } from 'rxjs';
+    return of(groupedByDay);
   }
 
   async triggerPrint() {
