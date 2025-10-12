@@ -11,10 +11,11 @@ import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service'
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-electronic-invoice-detail',
   standalone: true,
@@ -83,6 +84,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     private zatcaService: ZatcaService,
     private etaService: EtaService,
     private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -93,17 +95,45 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.currentSystem = this.route.snapshot.data['system'] || 'zatca';
 
     this.loadInvoice();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  // Helper method to show translated error messages
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  // Helper method to show success messages
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   // Update the loadInvoice() method in electronic-invoice-detail.component.ts
@@ -149,12 +179,14 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
               error: (detailsError) => {
                 console.error('Error loading invoice details:', detailsError);
                 this.isLoading = false;
+                this.showErrorAlert(this.translate.instant('Failed to load invoice details'));
               },
             });
         },
         error: (masterError) => {
           console.error('Error loading invoice master data:', masterError);
           this.isLoading = false;
+          this.showErrorAlert(this.translate.instant('Failed to load invoice data'));
           this.goBack();
         },
       });
@@ -185,24 +217,20 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
 
       await firstValueFrom(serviceCall);
 
-      Swal.fire(
-        'Success',
-        `Invoice ${
-          this.currentSystem === 'zatca'
-            ? 'reported to ZATCA'
-            : 'submitted to ETA'
-        } successfully`,
-        'success'
-      );
+      const successMessage = this.currentSystem === 'zatca' 
+        ? this.translate.instant('Invoice reported to ZATCA successfully')
+        : this.translate.instant('Invoice submitted to ETA successfully');
+      
+      this.showSuccessAlert(successMessage);
       this.invoice.isValid = true;
-    } catch (error) {
-      Swal.fire(
-        'Error',
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
-        } invoice`,
-        'error'
-      );
+    } catch (error: any) {
+      const errorMessage = this.currentSystem === 'zatca'
+        ? this.translate.instant('Failed to report invoice to ZATCA')
+        : this.translate.instant('Failed to submit invoice to ETA');
+      
+      // Use server error message if available, otherwise use generic translated message
+      const finalErrorMessage = error?.error?.message || errorMessage;
+      this.showErrorAlert(finalErrorMessage);
       console.error('Error submitting invoice:', error);
     } finally {
       this.isSubmitting = false;
@@ -214,7 +242,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     setTimeout(() => {
       const printContents = document.getElementById('invoiceData')?.innerHTML;
       if (!printContents) {
-        Swal.fire('Error', 'Failed to prepare print content', 'error');
+        this.showErrorAlert(this.translate.instant('Failed to prepare print content'));
         this.showPDF = false;
         return;
       }

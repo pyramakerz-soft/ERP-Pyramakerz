@@ -49,7 +49,7 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="openPrintModal()">
 </div>
 
-<div class="overflow-x-auto">
+<div class="overflow-x-auto print:overflow-visible">
     <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
         <div class="bg-gray-300 text-center font-bold py-2">
             {{ day.dayName }}
@@ -59,32 +59,29 @@
             <div class="text-md font-semibold mb-1">
                 {{ 'Grade' | translate }}: {{ grade.gradeName }}
             </div>
-
+        <div class="print-table-container">
             <table class="table-auto w-full text-sm text-left rtl:text-right border-collapse border border-gray-300">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="border p-2">{{ 'Class Name' | translate }}</th>
-                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                        <th class="border p-2 min-w-[150px]">{{ 'Class Name' | translate }}</th>
+                        <th class="border p-2 min-w-[200px]" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
                             {{ 'Session' | translate }} {{ period + 1 }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let classroom of grade.classrooms">
-                        <td class="border p-2 font-medium">
+                        <td class="border p-2 font-medium min-w-[150px]">
                             {{ classroom.classroomName }}
                         </td>
-                        <td class="border p-2 " *ngFor="let session of classroom.sessions">
+                        <td class="border p-2 min-w-[200px]" *ngFor="let session of classroom.sessions">
                             <div
                                 class="rounded-lg border-l-8 border-blue-500 bg-blue-50 px-4 py-2 text-lg font-medium text-gray-800 shadow mb-2">
                                 <div *ngFor="let subject of session.subjects">
                                     <div class="text-gray-500 text-xs">{{ subject.subjectName }}</div>
                                     <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
                                 </div>
-                                <!-- <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
-                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div> -->
                             </div>
-                            <!-- Duty Teacher -->
                             <div *ngIf="session.dutyTeacherName"
                                 class="rounded-lg border-l-8 border-red-500 bg-red-100 px-4 py-2 text-lg font-medium text-gray-800 shadow">
                                 <div> {{ 'Duty' | translate }}</div>
@@ -95,6 +92,7 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 </div>
@@ -157,7 +155,7 @@
             <div class="bg-gray-300 text-center text-xl font-bold py-4 mb-4 print:mb-8 print:pb-4">
                 {{ ClassName }}
             </div>
-
+            <div class="print-table-container">
             <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
                 <thead class="bg-gray-100">
                     <tr>
@@ -191,6 +189,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </div>

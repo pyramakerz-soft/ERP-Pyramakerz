@@ -450,9 +450,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
-            int dayId = 0;
-
-            dayId = date.DayOfWeek switch
+            int dayId = date.DayOfWeek switch
             {
                 DayOfWeek.Monday => 1,
                 DayOfWeek.Tuesday => 2,
@@ -505,34 +503,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTable.AcademicYear.SchoolID && s.IsDeleted != true);
             if (school == null)
                 return BadRequest("No school with this ID");
-
-            // If this day is not within the school's working days
-            if (school.WeekStartDayID.HasValue && school.WeekEndDayID.HasValue)
-            {
-                int startDay = (int)school.WeekStartDayID.Value;
-                int endDay = (int)school.WeekEndDayID.Value;
-
-                bool isValidDay;
-
-                // Handle normal week range (e.g., Monday–Friday)
-                if (startDay <= endDay)
-                {
-                    isValidDay = dayId >= startDay && dayId <= endDay;
-                }
-                else
-                {
-                    // Handle week wrap-around (e.g., Friday–Tuesday)
-                    isValidDay = dayId >= startDay || dayId <= endDay;
-                }
-
-                if (!isValidDay)
-                    return BadRequest("This day is Holiday.");
-            }
-            else
-            {
-                return BadRequest("School week start or end day not configured.");
-            }
-
 
             // Map to DTO
             TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
