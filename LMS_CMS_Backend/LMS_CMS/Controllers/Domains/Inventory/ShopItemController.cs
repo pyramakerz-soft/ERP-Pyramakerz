@@ -70,8 +70,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var item in shopItemGetDTO)
             { 
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
-                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -160,8 +160,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             foreach (var item in shopItemGetDTO)
             {
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
-                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -292,8 +292,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             foreach (var item in shopItemGetDTO)
             {
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
-                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -355,8 +355,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var item in shopItemGetDTO)
             {
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
-                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -412,8 +412,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             ShopItemGetDTO shopItemDTO = mapper.Map<ShopItemGetDTO>(shopItem);
             
-            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request);
-            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request);
+            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request, HttpContext);
+            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request, HttpContext);
 
             List<ShopItemColor> shopItemColors = Unit_Of_Work.shopItemColor_Repository.FindBy(s => s.ShopItemID == shopItemDTO.ID && s.IsDeleted != true);
             List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
@@ -470,8 +470,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             ShopItemGetDTO shopItemDTO = mapper.Map<ShopItemGetDTO>(shopItem);
-            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request);
-            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request);
+            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request, HttpContext);
+            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request, HttpContext);
 
             List<ShopItemColor> shopItemColors = Unit_Of_Work.shopItemColor_Repository.FindBy(s => s.ShopItemID == shopItemDTO.ID && s.IsDeleted != true);
             List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);

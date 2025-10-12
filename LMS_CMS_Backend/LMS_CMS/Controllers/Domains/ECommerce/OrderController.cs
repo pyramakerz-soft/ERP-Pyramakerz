@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                 query => query.Include(c => c.ShopItem)
                 );
              
-            orderDTO.MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request);
+            orderDTO.MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext);
 
             return Ok(orderDTO);
         }
@@ -103,7 +103,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request);  
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext);  
             }
              
             return Ok(orderDTO);
@@ -147,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request); 
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext); 
             }
              
             return Ok(orderDTO);
@@ -182,7 +182,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request); 
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext); 
             }
              
             return Ok(orderDTO);

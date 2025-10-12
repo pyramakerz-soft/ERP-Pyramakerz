@@ -50,7 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     ID = ac.ID,
                     Name = ac.Name,
-                    FileLink = _fileService.GetFileUrl(ac.FileLink, Request), 
+                    FileLink = _fileService.GetFileUrl(ac.FileLink, Request, HttpContext), 
                     ArchivingTreeParentID = ac.ArchivingTreeParentID,
                     InsertedByUserId = ac.InsertedByUserId ?? 0, 
                     Children = BuildHierarchy(allArchivingTrees, ArchivingTreeIDs, ac.ID)
@@ -221,7 +221,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if(accountingTreeChartGetDTO.FileLink != null)
             { 
-                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request);
+                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request, HttpContext);
             }
 
             if (accountingTreeChartGetDTO.Children.Count > 0)
@@ -230,7 +230,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     if (child.FileLink != null)
                     { 
-                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request);
+                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request, HttpContext);
                     }
                 }
             }
@@ -306,7 +306,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if(accountingTreeChartGetDTO.FileLink != null)
             { 
-                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request);
+                accountingTreeChartGetDTO.FileLink = _fileService.GetFileUrl(accountingTreeChartGetDTO.FileLink, Request, HttpContext);
             }
 
             if (accountingTreeChartGetDTO.Children.Count > 0)
@@ -315,7 +315,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     if (child.FileLink != null)
                     { 
-                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request);
+                        child.FileLink = _fileService.GetFileUrl(child.FileLink, Request, HttpContext);
                     }
                 }
             }

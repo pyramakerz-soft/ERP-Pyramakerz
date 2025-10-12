@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
              
             foreach (var item in Dto)
             {
-                item.SocialWorkerMedalFile = _fileService.GetFileUrl(item.SocialWorkerMedalFile, Request);
+                item.SocialWorkerMedalFile = _fileService.GetFileUrl(item.SocialWorkerMedalFile, Request, HttpContext);
             }
 
             return Ok(Dto);

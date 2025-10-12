@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
@@ -42,7 +42,8 @@ export class LoginComponent {
   isLoading: boolean = false
  
   constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService,
-    private realTimeService: RealTimeNotificationServiceService, private employeeService:EmployeeService) { }
+    private realTimeService: RealTimeNotificationServiceService, private employeeService:EmployeeService ,   private translate: TranslateService
+) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate);
@@ -65,6 +66,33 @@ export class LoginComponent {
         this.subscription.unsubscribe();
       }
   }
+  // Helper method to show translated error messages
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+// Helper method to show warning messages
+private showWarningAlert(message: string) {
+  const translatedTitle = this.translate.instant('Warning');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'warning',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   checkLocalStorageOnNavigate(): void { 
     const current_tokenValue = localStorage.getItem('current_token'); 
@@ -85,22 +113,24 @@ export class LoginComponent {
     this.somthingError = ""
   }
 
-  isFormValid() {
-    let isValid = true
+isFormValid() {
+  let isValid = true
+  this.userNameError = "";
+  this.passwordError = "";
 
-    if (this.userInfo.user_Name.trim() === "" && this.userInfo.password.trim() === "") {
-      isValid = false;
-      this.userNameError = '*Username cannot be empty';
-      this.passwordError = '*Password cannot be empty';
-    } else if (this.userInfo.user_Name.trim() === "") {
-      isValid = false;
-      this.userNameError = '*Username cannot be empty';
-    } else if (this.userInfo.password.trim() === "") {
-      isValid = false;
-      this.passwordError = '*Password cannot be empty';
-    }
-    return isValid
+  if (this.userInfo.user_Name.trim() === "" && this.userInfo.password.trim() === "") {
+    isValid = false;
+    this.userNameError = this.translate.instant('Username cannot be empty');
+    this.passwordError = this.translate.instant('Password cannot be empty');
+  } else if (this.userInfo.user_Name.trim() === "") {
+    isValid = false;
+    this.userNameError = this.translate.instant('Username cannot be empty');
+  } else if (this.userInfo.password.trim() === "") {
+    isValid = false;
+    this.passwordError = this.translate.instant('Password cannot be empty');
   }
+  return isValid
+}
 
   SignIN() {
     if (this.isFormValid()) {
@@ -181,28 +211,26 @@ export class LoginComponent {
           } else if (this.User_Data_After_Login.type == "employee") {
             this.router.navigateByUrl("/Employee")
           }
-          this.isLoading = false
+        this.isLoading = false
 
-        }, (error) => {
-          this.isLoading = false
-          if (error.error === "UserName or Password is Invalid") {
-            this.somthingError = "UserName or Password is Invalid"
-          }else if (error.status == 400) {
-            this.somthingError = "Username, Password or Type maybe wrong"
-          }else if (error.status == 404) {
-            this.somthingError = "Username, Password or Type maybe wrong"
-          } else if (error.status === 403) {  
-            Swal.fire({
-              icon: 'warning',
-              title: 'Account suspended',
-              text: 'Your account has been suspended.',
-              confirmButtonText: 'OK'
-            })
-          } 
+        
+      }, (error) => {
+        this.isLoading = false
+        if (error.error === "UserName or Password is Invalid") {
+          this.somthingError = this.translate.instant('Username or password is invalid');
+        } else if (error.status == 400) {
+          this.somthingError = this.translate.instant('Username, password or type may be incorrect');
+        } else if (error.status == 404) {
+          this.somthingError = this.translate.instant('Username, password or type may be incorrect');
+        } else if (error.status === 403) {  
+          this.showWarningAlert(this.translate.instant('Your account has been suspended'));
+        } else {
+          this.somthingError = this.translate.instant('An unexpected error occurred');
         }
-      );
-    }
+      }
+    );
   }
+}
 
   getAllTokens(): void {
     let count = 0;

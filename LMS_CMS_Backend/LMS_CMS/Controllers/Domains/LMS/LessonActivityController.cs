@@ -69,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (!string.IsNullOrEmpty(lessonActivity.AttachmentLink) &&
                     lessonActivity.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                 {
-                    lessonActivity.AttachmentLink = _fileService.GetFileUrl(lessonActivity.AttachmentLink, Request);
+                    lessonActivity.AttachmentLink = _fileService.GetFileUrl(lessonActivity.AttachmentLink, Request, HttpContext);
                 }
             }
 
@@ -123,7 +123,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (!string.IsNullOrEmpty(item.AttachmentLink) &&
                     item.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
                 {
-                    item.AttachmentLink = _fileService.GetFileUrl(item.AttachmentLink, Request);
+                    item.AttachmentLink = _fileService.GetFileUrl(item.AttachmentLink, Request, HttpContext);
                 }
             }
 
@@ -172,7 +172,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (!string.IsNullOrEmpty(lessonActivitieDTO.AttachmentLink) &&
                     lessonActivitieDTO.AttachmentLink.Contains("LMS/LessonActivity", StringComparison.OrdinalIgnoreCase))
             {
-                lessonActivitieDTO.AttachmentLink = _fileService.GetFileUrl(lessonActivitieDTO.AttachmentLink, Request);
+                lessonActivitieDTO.AttachmentLink = _fileService.GetFileUrl(lessonActivitieDTO.AttachmentLink, Request, HttpContext);
             }
 
             return Ok(lessonActivitieDTO);

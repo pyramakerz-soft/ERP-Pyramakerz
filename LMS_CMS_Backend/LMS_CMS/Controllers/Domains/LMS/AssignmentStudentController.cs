@@ -85,7 +85,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.LinkFile))
                     { 
-                        item.LinkFile = _fileService.GetFileUrl(item.LinkFile, Request);
+                        item.LinkFile = _fileService.GetFileUrl(item.LinkFile, Request, HttpContext);
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
                 {
-                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request); 
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request, HttpContext); 
                 }
             }
             else
@@ -190,7 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.QuestionBank.Image))
                     {
-                        item.QuestionBank.Image = _fileService.GetFileUrl(item.QuestionBank.Image, Request);
+                        item.QuestionBank.Image = _fileService.GetFileUrl(item.QuestionBank.Image, Request, HttpContext);
                     }
                 }
             }
@@ -263,7 +263,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
                 { 
-                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request);
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request, HttpContext);
                 }
             }
             else
@@ -272,7 +272,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.QuestionImage))
                     {
-                        item.QuestionImage = _fileService.GetFileUrl(item.QuestionImage, Request);
+                        item.QuestionImage = _fileService.GetFileUrl(item.QuestionImage, Request, HttpContext);
                     }
                 }
             }

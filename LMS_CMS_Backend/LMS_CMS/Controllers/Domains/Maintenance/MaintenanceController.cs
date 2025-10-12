@@ -259,7 +259,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
 
         [HttpDelete("{id}")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowDelete: 1, pages: new[] { "Maintenance" })]
         public IActionResult SoftDelete(long id)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -278,7 +278,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             if (userTypeClaim == "employee")
             {
-                var accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(uow, "Maintenance", roleId, userId, entity);
+                var accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(uow, "Maintenance", roleId, userId, entity);
                 if (accessCheck != null) return accessCheck;
             }
             entity.IsDeleted = true;

@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
              
             foreach (var item in Dto)
             {
-                item.CertificateTypeFile = _fileService.GetFileUrl(item.CertificateTypeFile, Request);
+                item.CertificateTypeFile = _fileService.GetFileUrl(item.CertificateTypeFile, Request, HttpContext);
             }
             return Ok(Dto);
         }

@@ -82,7 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
                     }
                 }
             }
@@ -154,7 +154,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
                     }
                 }
             }
@@ -288,7 +288,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 if (!string.IsNullOrEmpty(DTO.Attachments[i]))
                 {
-                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request); 
+                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request, HttpContext); 
                 }
             }
             return Ok(DTO);

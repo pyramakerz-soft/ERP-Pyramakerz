@@ -17,7 +17,7 @@ namespace LMS_CMS_PL.Services
             this.mapper = mapper;
             _fileService = fileService;
         }
-        public School_GetDTO GetSchoolHeader(UOW Unit_Of_Work, long schoolId, HttpRequest Request)
+        public School_GetDTO GetSchoolHeader(UOW Unit_Of_Work, long schoolId, HttpRequest Request, HttpContext httpContext)
         {
 
             School school = Unit_Of_Work.school_Repository.First_Or_Default(
@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Services
              
             if (!string.IsNullOrEmpty(schoolDTO.ReportImage))
             { 
-                schoolDTO.ReportImage = _fileService.GetFileUrl(schoolDTO.ReportImage, Request);
+                schoolDTO.ReportImage = _fileService.GetFileUrl(schoolDTO.ReportImage, Request, httpContext);
             }
 
             return schoolDTO;
