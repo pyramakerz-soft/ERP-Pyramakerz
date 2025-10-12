@@ -12,10 +12,11 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-school-configuration',
   standalone: true,
@@ -42,10 +43,18 @@ export class SchoolConfigurationComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
   isLoading = false;
    
-  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,private menuService: MenuService, 
-    public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router,
+  constructor(
+    public account: AccountService, 
+    public ApiServ: ApiService, 
+    public EditDeleteServ: DeleteEditPermissionService,
+    private menuService: MenuService, 
+    public activeRoute: ActivatedRoute, 
+    public schoolService: SchoolService, 
+    private router: Router,
     private realTimeService: RealTimeNotificationServiceService,
-    private languageService: LanguageService,) {}
+    private languageService: LanguageService,
+    private translate: TranslateService
+  ) {}
 
   ngOnInit(): void { 
     const currentUrl = this.router.url;
@@ -73,17 +82,18 @@ export class SchoolConfigurationComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchoolData() {
@@ -103,9 +113,7 @@ export class SchoolConfigurationComponent {
 
   openModal(schoolId: number) {
     this.GetSchoolById(schoolId);
-
     this.getSchoolData(); 
-
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
@@ -113,7 +121,6 @@ export class SchoolConfigurationComponent {
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
-
     this.school = new School(); 
   }
 
@@ -147,42 +154,86 @@ export class SchoolConfigurationComponent {
     }
   }
 
+  // Helper method to show translated error messages
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  // Helper method to show success messages
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  // Validation method
+  private validateSchool(): boolean {
+    if (this.ETA_Zatca === 'Zatca') {
+      if (!this.school.vatNumber || !this.school.crn) {
+        this.showErrorAlert(this.translate.instant('VAT Number and CRN are required'));
+        return false;
+      }
+    } else if (this.ETA_Zatca === 'ETA') {
+      if (!this.school.clientID || !this.school.secretNumber1 || !this.school.secretNumber2) {
+        this.showErrorAlert(this.translate.instant('Client ID and Secret Numbers are required'));
+        return false;
+      }
+    }
+    return true;
+  }
+
   SaveSchool() {  
+    // Validate before saving
+    if (!this.validateSchool()) {
+      return;
+    }
+
     this.isLoading = true;
+    
     if(this.ETA_Zatca == "ETA"){
       this.schoolService.EditEta(this.school, this.DomainName).subscribe(
         (result: any) => {
           this.closeModal();
           this.isLoading = false;
           this.getSchoolData();
+          this.showSuccessAlert(this.translate.instant('School updated successfully'));
         },
         (error) => {
           this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
+          // Use translated error message or fallback to server error
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update school');
+          this.showErrorAlert(errorMessage);
         }
       ); 
-    }else if(this.ETA_Zatca == "Zatca"){
+    } else if(this.ETA_Zatca == "Zatca"){
       this.schoolService.EditZatca(this.school, this.DomainName).subscribe(
         (result: any) => {
           this.closeModal();
           this.isLoading = false;
           this.getSchoolData();
+          this.showSuccessAlert(this.translate.instant('School updated successfully'));
         },
         (error) => {
           this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
+          // Use translated error message or fallback to server error
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update school');
+          this.showErrorAlert(errorMessage);
         }
       ); 
     }

@@ -4,7 +4,7 @@ import { SalaryConfigurationService } from '../../../../Services/Employee/HR/sal
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
@@ -60,6 +60,8 @@ export class SalaryConfigurationComponent {
     public ApiServ: ApiService,
     public SalaryConfigurationServ: SalaryConfigurationService,
     private realTimeService: RealTimeNotificationServiceService,
+      private translate: TranslateService
+
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -101,14 +103,16 @@ export class SalaryConfigurationComponent {
     });
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    if (this.salaryConfiguration.startDay > 28 || this.salaryConfiguration.startDay < 1) {
-      isValid = false
-      this.validationErrors["startDay"] = " Start Day should be from 1 to 28"
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  if (this.salaryConfiguration.startDay > 28 || this.salaryConfiguration.startDay < 1) {
+    isValid = false;
+    this.validationErrors["startDay"] = this.translate.instant('Start day should be from 1 to 28');
   }
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof SalaryConfiguration; value: any }) {
     const { field, value } = event;
@@ -117,32 +121,51 @@ export class SalaryConfigurationComponent {
       this.validationErrors[field] = '';
     }
   }
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
-  save() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe((d) => {
+// Helper method to show success messages
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+save() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe(
+      (d) => {
         this.salaryConfiguration = d;
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Updatedd Successfully',
-          confirmButtonColor: '#089B41',
-        });
+        this.showSuccessAlert(this.translate.instant('Salary configuration updated successfully'));
         this.GetAllData();
         this.isLoading = false;
-      }, error => {
-        this.isLoading = false; // Hide spinner
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' }
-        });
-      });
-    }
+      }, 
+      error => {
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to update salary configuration');
+        this.showErrorAlert(errorMessage);
+      }
+    );
   }
+}
 
   validateNumber(event: any, field: keyof SalaryConfiguration): void {
     const value = event.target.value;

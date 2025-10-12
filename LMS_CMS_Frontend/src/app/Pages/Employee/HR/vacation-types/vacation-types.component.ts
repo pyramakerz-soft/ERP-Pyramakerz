@@ -97,6 +97,32 @@ export class VacationTypesComponent {
       }
   }
 
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
 
   GetAllData() {
     this.TableData = [];
@@ -112,23 +138,34 @@ export class VacationTypesComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
-   Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.VacationTypesServ.Delete(id, this.DomainName).subscribe((d) => {
+Delete(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this vacation type?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.VacationTypesServ.Delete(id, this.DomainName).subscribe(
+        (d) => {
           this.GetAllData();
-        });
-      }
-    });
-  }
+          this.showSuccessAlert(this.translate.instant('Vacation type deleted successfully'));
+        },
+        (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete vacation type');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+  });
+}
 
   Edit(id: number) {
     this.mode = 'Edit';
@@ -156,61 +193,41 @@ export class VacationTypesComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.mode == 'Create') {
-        this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
-          (d) => {
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Created Successfully',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
-      }
-      if (this.mode == 'Edit') {
-        this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
-          (d) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
-      }
+CreateOREdit() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    if (this.mode == 'Create') {
+      this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+          this.showSuccessAlert(this.translate.instant('Vacation type created successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to create vacation type');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+    if (this.mode == 'Edit') {
+      this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
+        (d) => {
+          this.showSuccessAlert(this.translate.instant('Vacation type updated successfully'));
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update vacation type');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
   }
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -221,25 +238,18 @@ export class VacationTypesComponent {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.vacationType) {
-      if (this.vacationType.hasOwnProperty(key)) {
-        const field = key as keyof VacationTypes;
-        if (!this.vacationType[field]) {
-          if (
-            field == 'name'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+
+  // Validate required fields with translated messages
+  if (!this.vacationType.name) {
+    this.validationErrors['name'] = this.translate.instant('Name is required');
+    isValid = false;
   }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof VacationTypes): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');

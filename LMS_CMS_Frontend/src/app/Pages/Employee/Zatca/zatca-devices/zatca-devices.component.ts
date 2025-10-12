@@ -20,6 +20,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-zatca-devices',
   standalone: true,
@@ -72,7 +73,6 @@ export class ZatcaDevicesComponent implements OnInit {
     private zatcaService: ZatcaService,
     private realTimeService: RealTimeNotificationServiceService,
     private translate: TranslateService,
-
   ) {}
 
   ngOnInit() {
@@ -157,15 +157,15 @@ Edit(id: number) {
       this.isLoading = false;
       this.openModal();
     },
-    error: (error) => { 
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load device for editing',
-        confirmButtonText: 'Okay'
-      });
-    }
+error: (error) => { 
+  this.isLoading = false;
+  Swal.fire({
+    icon: 'error',
+    title: this.translate.instant('Error'),
+    text: this.translate.instant('Failed to load device for editing'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+}
   });
 }
 
@@ -201,17 +201,17 @@ private getSchoolIdFromName(schoolName: string): number {
     let isValid = true;
 
     if (!this.zatcaDevice.pcName) {
-      this.validationErrors['pcName'] = '*PC Name is required';
+      this.validationErrors['pcName'] = this.translate.instant('PC Name is required');
       isValid = false;
     }
 
     if (!this.zatcaDevice.serialNumber) {
-      this.validationErrors['serialNumber'] = '*Serial Number is required';
+      this.validationErrors['serialNumber'] = this.translate.instant('Serial Number is required');
       isValid = false;
     }
 
     if (!this.zatcaDevice.schoolId) {
-      this.validationErrors['schoolId'] = '*School is required';
+      this.validationErrors['schoolId'] = this.translate.instant('School is required');
       isValid = false;
     }
 
@@ -252,15 +252,15 @@ AddNewDevice() {
       this.closeModal();
       this.isLoading = false;
     },
-    error: (error) => { 
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.error?.message || 'Failed to create device',
-        confirmButtonText: 'Okay'
-      });
-    }
+error: (error) => { 
+  this.isLoading = false;
+  Swal.fire({
+    icon: 'error',
+    title: this.translate.instant('Error'),
+    text: error.error?.message || this.translate.instant('Failed to create device'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+}
   });
 }
 
@@ -276,27 +276,27 @@ Save() {
   }; 
 
   this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
-    next: () => {
-      this.GetTableData();
-      this.closeModal();
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'Device updated successfully',
-        confirmButtonText: 'Okay'
-      });
-    },
-    error: (error) => {
-      console.error('Update error:', error);
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.error?.message || 'Failed to update device',
-        confirmButtonText: 'Okay'
-      });
-    }
+next: () => {
+  this.GetTableData();
+  this.closeModal();
+  this.isLoading = false;
+  Swal.fire({
+    icon: 'success',
+    title: this.translate.instant('Success'),
+    text: this.translate.instant('Device updated successfully'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+},
+error: (error) => {
+  console.error('Update error:', error);
+  this.isLoading = false;
+  Swal.fire({
+    icon: 'error',
+    title: this.translate.instant('Error'),
+    text: error.error?.message || this.translate.instant('Failed to update device'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+}
   });
 }
 
@@ -313,65 +313,65 @@ Delete(id: number) {
     if (result.isConfirmed) {
       this.isLoading = true;
       this.schoolPCsService.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.GetTableData();
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Device has been deleted.',
-            confirmButtonText: 'Okay'
-          });
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Delete error details:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to delete device',
-            confirmButtonText: 'Okay'
-          });
-        }
+next: () => {
+  this.GetTableData();
+  this.isLoading = false;
+  Swal.fire({
+    icon: 'success',
+    title: this.translate.instant('Deleted!'),
+    text: this.translate.instant('Device has been deleted.'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+},
+error: (error) => {
+  this.isLoading = false;
+  console.error('Delete error details:', error);
+  Swal.fire({
+    icon: 'error',
+    title: this.translate.instant('Error'),
+    text: error.message || this.translate.instant('Failed to delete device'),
+    confirmButtonText: this.translate.instant('Okay')
+  });
+}
       });
     }
   });
 }
 
   generateCertificate() {
-    Swal.fire({
-      title: 'Generate Certificate',
-      text: 'Are you sure you want to generate a certificate for this device?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#FF7519',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Generate',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed && this.otp) {
-        this.isLoading = true;
-        this.zatcaService.generateCertificate(this.deviceToGenerateID, this.otp, this.DomainName).subscribe({
-          next: () => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Certificate generated successfully',
-              confirmButtonText: 'Okay'
-            });
-            this.GetTableData(); // Refresh table data
-            this.closeCertificateModal()
-          },
-          error: (error) => {  
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error || 'Failed to generate certificate',
-              confirmButtonText: 'Okay'
-            });
-          }
+Swal.fire({
+  title: this.translate.instant('Generate Certificate'),
+  text: this.translate.instant('Are you sure you want to generate a certificate for this device?'),
+  icon: 'question',
+  showCancelButton: true,
+  confirmButtonColor: '#FF7519',
+  cancelButtonColor: '#17253E',
+  confirmButtonText: this.translate.instant('Generate'),
+  cancelButtonText: this.translate.instant('Cancel')
+}).then((result) => {
+  if (result.isConfirmed && this.otp) {
+    this.isLoading = true;
+    this.zatcaService.generateCertificate(this.deviceToGenerateID, this.otp, this.DomainName).subscribe({
+      next: () => {
+        this.isLoading = false;
+        Swal.fire({
+          icon: 'success',
+          title: this.translate.instant('Success'),
+          text: this.translate.instant('Certificate generated successfully'),
+          confirmButtonText: this.translate.instant('Okay')
+        });
+        this.GetTableData();
+        this.closeCertificateModal()
+      },
+      error: (error) => {  
+        this.isLoading = false;
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('Error'),
+          text: error.error || this.translate.instant('Failed to generate certificate'),
+          confirmButtonText: this.translate.instant('Okay')
+        });
+      }
         });
       }
     });

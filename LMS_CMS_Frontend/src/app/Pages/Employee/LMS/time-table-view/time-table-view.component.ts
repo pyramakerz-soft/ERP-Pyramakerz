@@ -295,107 +295,179 @@ export class TimeTableViewComponent {
     });
   }
 
-  GetDataForPrint(): Observable<any[]> {
-    const groupedByDay: any[] = [];
+GetDataForPrint(): Observable<any[]> {
+  const groupedByDay: any[] = [];
 
-    this.TimeTable.forEach(day => {
-      const tableHeaders = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
-      const tableData: any[] = [];
+  this.TimeTable.forEach(day => {
+    const tableHeaders = ['Grade', 'Class'];
+    
+    // Add session headers with better formatting for many sessions
+    for (let i = 0; i < this.MaxPeriods; i++) {
+      tableHeaders.push(`S${i + 1}`);
+    }
 
-      day.grades.forEach(grade => {
-        grade.classrooms.forEach(classroom => {
-          const row: any = {};
-          row['Grade'] = grade.gradeName;
-          row['Class'] = classroom.classroomName;
+    const tableData: any[] = [];
 
-          for (let i = 0; i < this.MaxPeriods; i++) {
-            const session = classroom.sessions[i];
-            let sessionText = '';
+    day.grades.forEach(grade => {
+      grade.classrooms.forEach(classroom => {
+        const row: any = {};
+        row['Grade'] = grade.gradeName;
+        row['Class'] = classroom.classroomName;
 
-            if (session?.subjects?.length) {
-              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName || 'N/A'})`).join(', ');
-            }
+        for (let i = 0; i < this.MaxPeriods; i++) {
+          const session = classroom.sessions[i];
+          let sessionText = '';
 
-            if (session?.dutyTeacherName) {
-              sessionText += ` | Duty: ${session.dutyTeacherName}`;
-            }
-
-            row[`Session ${i + 1}`] = sessionText || '--';
+          if (session?.subjects?.length) {
+            // Use abbreviations for better fit
+            const subjectAbbr = session.subjects[0].subjectName.substring(0, 3);
+            const teacherAbbr = session.subjects[0].teacherName?.split(' ').map(n => n[0]).join('') || '';
+            sessionText = `${subjectAbbr}(${teacherAbbr})`;
           }
 
-          tableData.push(row);
-        });
-      });
+          if (session?.dutyTeacherName) {
+            sessionText += sessionText ? '/D' : 'Duty';
+          }
 
-      groupedByDay.push({
-        header: day.dayName,
-        data: [], // optional summary (e.g., grade totals)
-        tableHeaders,
-        tableData
+          row[`S${i + 1}`] = sessionText || '';
+        }
+
+        tableData.push(row);
       });
     });
 
-    return of(groupedByDay); // ✅ Must import: import { of } from 'rxjs';
-  }
+    groupedByDay.push({
+      header: day.dayName,
+      tableHeaders,
+      tableData,
+      // Add page break for days with many sessions
+      pageBreak: this.MaxPeriods > 12 ? 'always' : 'auto'
+    });
+  });
 
-  async triggerPrint() {
+  return of(groupedByDay);
+}
+
+triggerPrint() {
+  setTimeout(() => {
+    let printContents: string | undefined;
+    if (this.PrintType == "Teacher") {
+      printContents = document.getElementById("DataTeacher")?.innerHTML;
+    } else if (this.PrintType == "Class") {
+      printContents = document.getElementById("Data")?.innerHTML;
+    } else {
+      printContents = document.getElementById("All")?.innerHTML;
+    }
+    
+    if (!printContents) {
+      console.error("Element not found!");
+      return;
+    }
+
+    // Enhanced print-specific stylesheet
+    const printStyle = `
+      <style>
+        @page {
+          size: landscape; /* Use landscape for wider tables */
+          margin: 10mm;
+        }
+        
+        body { 
+          margin: 0;
+          font-family: Arial, sans-serif;
+          font-size: 10px; /* Smaller font for more content */
+        }
+        
+        .print-table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed; /* Better control over column widths */
+        }
+        
+        .print-table th,
+        .print-table td {
+          border: 1px solid #ddd;
+          padding: 4px;
+          word-wrap: break-word;
+          vertical-align: top;
+        }
+        
+        .print-table th {
+          background-color: #f5f5f5;
+          font-weight: bold;
+        }
+        
+        /* Session columns - auto width adjustment */
+        .session-cell {
+          min-width: 60px;
+          max-width: 80px;
+        }
+        
+        /* Ensure content breaks properly */
+        .break-words {
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+        
+        /* Page breaks for long content */
+        .day-section {
+          page-break-inside: avoid;
+        }
+        
+        @media print {
+          body > *:not(#print-container) {
+            display: none !important;
+          }
+          
+          #print-container {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            background: white !important;
+          }
+          
+          /* Force horizontal scroll for very wide tables */
+          .print-table-container {
+            width: 100%;
+            overflow-x: visible !important;
+          }
+        }
+      </style>
+    `;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+    
+    // Add print-specific class to tables
+    const tables = printContainer.getElementsByTagName('table');
+    Array.from(tables).forEach((table) => {
+      table.classList.add('print-table');
+      
+      // Add specific class to session cells
+      const headers = table.getElementsByTagName('th');
+      const cells = table.getElementsByTagName('td');
+      
+      // Skip first two columns (Grade, Class) and target session columns
+      for (let i = 2; i < headers.length; i++) {
+        if (headers[i]) headers[i].classList.add('session-cell');
+      }
+      
+      for (let i = 2; i < cells.length; i++) {
+        if (cells[i]) cells[i].classList.add('session-cell', 'break-words');
+      }
+    });
+
+    document.body.appendChild(printContainer);
+    window.print();
+
     setTimeout(() => {
-      let printContents: string | undefined;
-      if (this.PrintType == "Teacher") {
-        printContents = document.getElementById("DataTeacher")?.innerHTML;
-      } else if (this.PrintType == "Class") {
-        printContents = document.getElementById("Data")?.innerHTML;
-      } else {
-        printContents = document.getElementById("All")?.innerHTML;
-      }
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-  
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.closePrintModal()
-        this.isLoading = false;
-      }, 100);
-    }, 500);
-  }
+      document.body.removeChild(printContainer);
+      this.closePrintModal();
+      this.isLoading = false;
+    }, 100);
+  }, 500);
+}
 
   closePrintModal() {
     document.getElementById('Print_Modal')?.classList.remove('flex');
