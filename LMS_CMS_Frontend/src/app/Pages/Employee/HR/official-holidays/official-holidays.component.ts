@@ -64,7 +64,6 @@ export class OfficialHolidaysComponent {
     public OfficialHolidaysServ: OfficialHolidaysService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
-  
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -90,41 +89,13 @@ export class OfficialHolidaysComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  
-  ngOnDestroy(): void {
+   ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }
 
-  // Helper method to show translated error messages
-  private showErrorAlert(errorMessage: string) {
-    const translatedTitle = this.translate.instant('Error');
-    const translatedButton = this.translate.instant('Okay');
-    
-    Swal.fire({
-      icon: 'error',
-      title: translatedTitle,
-      text: errorMessage,
-      confirmButtonText: translatedButton,
-      customClass: { confirmButton: 'secondaryBg' },
-    });
-  }
-
-  // Helper method to show success messages
-  private showSuccessAlert(message: string) {
-    const translatedTitle = this.translate.instant('Success');
-    const translatedButton = this.translate.instant('Okay');
-    
-    Swal.fire({
-      icon: 'success',
-      title: translatedTitle,
-      text: message,
-      confirmButtonText: translatedButton,
-      customClass: { confirmButton: 'secondaryBg' },
-    });
-  }
 
   GetAllData() {
     this.TableData = [];
@@ -141,30 +112,19 @@ export class OfficialHolidaysComponent {
   }
 
   Delete(id: number) {
-    const deleteTitle = this.translate.instant('Are you sure you want to delete this official holiday?');
-    const deleteButton = this.translate.instant('Delete');
-    const cancelButton = this.translate.instant('Cancel');
-    
-    Swal.fire({
-      title: deleteTitle,
+   Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Official Holiday') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: deleteButton,
-      cancelButtonText: cancelButton,
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.OfficialHolidaysServ.Delete(id, this.DomainName).subscribe(
-          (d) => {
-            this.GetAllData();
-            this.showSuccessAlert(this.translate.instant('Official holiday deleted successfully'));
-          },
-          (error) => {
-            const errorMessage = error.error?.message || this.translate.instant('Failed to delete official holiday');
-            this.showErrorAlert(errorMessage);
-          }
-        );
+        this.OfficialHolidaysServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.GetAllData();
+        });
       }
     });
   }
@@ -204,27 +164,47 @@ export class OfficialHolidaysComponent {
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
-            this.showSuccessAlert(this.translate.instant('Official holiday created successfully'));
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
           },
           (error) => {
-            this.isLoading = false;
-            const errorMessage = error.error?.message || this.translate.instant('Failed to create official holiday');
-            this.showErrorAlert(errorMessage);
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
           }
         );
       }
       if (this.mode == 'Edit') {
         this.OfficialHolidaysServ.Edit(this.officialHoliday, this.DomainName).subscribe(
           (d) => {
-            this.showSuccessAlert(this.translate.instant('Official holiday updated successfully'));
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
+              confirmButtonColor: '#089B41',
+            });
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
           },
           (error) => {
-            this.isLoading = false;
-            const errorMessage = error.error?.message || this.translate.instant('Failed to update official holiday');
-            this.showErrorAlert(errorMessage);
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
           }
         );
       }
@@ -242,35 +222,23 @@ export class OfficialHolidaysComponent {
 
   isFormValid(): boolean {
     let isValid = true;
-    this.validationErrors = {};
-
-    // Validate required fields with translated messages
-    if (!this.officialHoliday.name) {
-      this.validationErrors['name'] = this.translate.instant('Name is required');
-      isValid = false;
-    }
-    
-    if (!this.officialHoliday.dateFrom) {
-      this.validationErrors['dateFrom'] = this.translate.instant('Start date is required');
-      isValid = false;
-    }
-    
-    if (!this.officialHoliday.dateTo) {
-      this.validationErrors['dateTo'] = this.translate.instant('End date is required');
-      isValid = false;
-    }
-
-    // Validate date range
-    if (this.officialHoliday.dateFrom && this.officialHoliday.dateTo) {
-      const fromDate = new Date(this.officialHoliday.dateFrom);
-      const toDate = new Date(this.officialHoliday.dateTo);
-      
-      if (fromDate > toDate) {
-        this.validationErrors['dateTo'] = this.translate.instant('End date cannot be before start date');
-        isValid = false;
+    for (const key in this.officialHoliday) {
+      if (this.officialHoliday.hasOwnProperty(key)) {
+        const field = key as keyof OfficialHolidays;
+        if (!this.officialHoliday[field]) {
+          if (
+            field == 'name' ||
+            field == 'dateTo' ||
+            field == 'dateFrom' 
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
       }
     }
-
     return isValid;
   }
 

@@ -14,6 +14,7 @@ using LMS_CMS_BL.DTO.LMS;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.EntityFrameworkCore;
 using LMS_CMS_DAL.Migrations.Domains;
+using System.Xml;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -146,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
            allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Duty Table" }
        )]
-        public IActionResult GetPeriods(DateOnly date, long ClassId)
+        public async Task<IActionResult> GetPeriodsAsync(DateOnly date, long ClassId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -158,7 +159,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             var dayOfWeek = date.DayOfWeek; // returns DayOfWeek enum (e.g. Monday, Tuesday...)
 
-            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c=>c.ID==ClassId && c.IsDeleted!= true);
+            int dayId = 0;
+
+            dayId = date.DayOfWeek switch
+            {
+                DayOfWeek.Monday => 1,
+                DayOfWeek.Tuesday => 2,
+                DayOfWeek.Wednesday => 3,
+                DayOfWeek.Thursday => 4,
+                DayOfWeek.Friday => 5,
+                DayOfWeek.Saturday => 6,
+                DayOfWeek.Sunday => 7,
+                _ => 0
+            };
+
+            Classroom classroom =await Unit_Of_Work.classroom_Repository.FindByIncludesAsync(
+                    c => c.ID == ClassId && c.IsDeleted != true,
+                    query => query.Include(c => c.AcademicYear)
+                );
             if (classroom == null)
             {
                 return BadRequest("no classroom with this id.");
@@ -168,6 +186,38 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (grade == null)
             {
                 return BadRequest("no grade with this id.");
+            }
+
+            // Get the school
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == classroom.AcademicYear.SchoolID && s.IsDeleted != true);
+            if (school == null)
+                return BadRequest("No school with this ID");
+
+            // If this day is not within the school's working days
+            if (school.WeekStartDayID.HasValue && school.WeekEndDayID.HasValue)
+            {
+                int startDay = (int)school.WeekStartDayID.Value;
+                int endDay = (int)school.WeekEndDayID.Value;
+
+                bool isValidDay;
+
+                // Handle normal week range (e.g., Monday–Friday)
+                if (startDay <= endDay)
+                {
+                    isValidDay = dayId >= startDay && dayId <= endDay;
+                }
+                else
+                {
+                    // Handle week wrap-around (e.g., Friday–Tuesday)
+                    isValidDay = dayId >= startDay || dayId <= endDay;
+                }
+
+                if (!isValidDay)
+                    return BadRequest("This day is Holiday.");
+            }
+            else
+            {
+                return BadRequest("School week start or end day not configured.");
             }
 
             // Determine period count based on day of week
@@ -182,6 +232,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 DayOfWeek.Sunday => grade.SUN ?? 0,
                 _ => 0
             };
+
+            if (periodCount == 0)
+            {
+                return BadRequest("This day Has no session in this class.");
+            }
 
             return Ok(periodCount);
         }
