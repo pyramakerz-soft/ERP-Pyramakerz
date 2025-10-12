@@ -257,6 +257,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 return NotFound();
             }
 
+            if (userTypeClaim == "parent")
+            {
+                if (registerationFormParent.ParentID == null || registerationFormParent.ParentID != userId)
+                {
+                    return BadRequest("This parent has no acsess on this registerationFormParent ");
+                }
+            }
+
             RegisterationFormParentGetDTO registerationFormParentDTO = mapper.Map<RegisterationFormParentGetDTO>(registerationFormParent);
 
             if (registerationFormParentDTO.GradeID != "")
