@@ -70,7 +70,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 if (!string.IsNullOrEmpty(r.TextAnswer) && r.CategoryField.FieldTypeID == 6)
                 { 
-                    r.TextAnswer = _fileService.GetFileUrl(r.TextAnswer, Request);
+                    r.TextAnswer = _fileService.GetFileUrl(r.TextAnswer, Request, HttpContext);
                 }
             }
              

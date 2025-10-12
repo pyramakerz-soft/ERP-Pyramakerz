@@ -70,7 +70,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var school in schoolDTO)
             {
-                school.ReportImage = _fileService.GetFileUrl(school.ReportImage, Request);
+                school.ReportImage = _fileService.GetFileUrl(school.ReportImage, Request, HttpContext);
             }
 
             return Ok(schoolDTO);
@@ -106,7 +106,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             School_GetDTO schoolDTO = mapper.Map<School_GetDTO>(School);
              
-            schoolDTO.ReportImage = _fileService.GetFileUrl(schoolDTO.ReportImage, Request);
+            schoolDTO.ReportImage = _fileService.GetFileUrl(schoolDTO.ReportImage, Request, HttpContext);
 
             return Ok(schoolDTO);
         }

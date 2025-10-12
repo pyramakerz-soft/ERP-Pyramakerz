@@ -90,7 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
              
             foreach (var item in cart_ShopItemGetDTO)
             {
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
             }
 
             Cart cart = Unit_Of_Work.cart_Repository.First_Or_Default(
@@ -153,7 +153,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
              
             foreach (var item in cart_ShopItemGetDTO)
             {
-                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request);
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
             }
 
             CartGetDTO cartGetDTO = mapper.Map<CartGetDTO>(cart);

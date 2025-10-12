@@ -1,4 +1,5 @@
 ﻿using Amazon.S3;
+using Microsoft.AspNetCore.Http;
 
 namespace LMS_CMS_PL.Services
 {
@@ -13,7 +14,7 @@ namespace LMS_CMS_PL.Services
             _domainService = domainService;
         }
          
-        public string GetFileUrl(string? filePath, HttpRequest request)
+        public string GetFileUrl(string? filePath, HttpRequest request, HttpContext httpContext)
         {
             if (string.IsNullOrEmpty(filePath))
                 return string.Empty;
@@ -22,9 +23,13 @@ namespace LMS_CMS_PL.Services
 
             if (isProduction)
             {
+                var domain = _domainService.GetDomain(httpContext);
+                string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
+                string fullPath = $"{domain}/{subDomain}/{filePath}";
+
                 AmazonS3Client s3Client = new AmazonS3Client();
                 S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                return s3Service.GetFileUrl(filePath);
+                return s3Service.GetFileUrl(filePath, _configuration);
             }
             else
             {

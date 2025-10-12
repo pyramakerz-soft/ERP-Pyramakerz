@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var subject in subjectsDTO)
             {
-                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request);
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);
@@ -143,7 +143,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var subject in subjectsDTO)
             {
-                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request);
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);
@@ -183,7 +183,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             if (!string.IsNullOrEmpty(subjectDTO.IconLink))
             {
-                subjectDTO.IconLink = _fileService.GetFileUrl(subject.IconLink, Request);
+                subjectDTO.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectDTO);
@@ -508,7 +508,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var subject in subjectsDTO)
             {
-                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request);
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);

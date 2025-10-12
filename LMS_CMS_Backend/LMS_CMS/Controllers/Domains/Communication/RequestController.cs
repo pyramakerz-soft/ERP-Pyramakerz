@@ -136,7 +136,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var request in requestsGetDTO)
             { 
-                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request, HttpContext);
                  
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -201,7 +201,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var request in requestsGetDTO)
             { 
-                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request, HttpContext);
                  
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -267,7 +267,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var request in requestsGetDTO)
             { 
-                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request);
+                request.FileLink = _fileService.GetFileUrl(request.FileLink, Request, HttpContext);
 
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
@@ -327,7 +327,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             RequestGetDTO requestGetDTO = mapper.Map<RequestGetDTO>(request);
              
-            requestGetDTO.FileLink = _fileService.GetFileUrl(requestGetDTO.FileLink, Request);
+            requestGetDTO.FileLink = _fileService.GetFileUrl(requestGetDTO.FileLink, Request, HttpContext);
 
             (requestGetDTO.SenderEnglishName, requestGetDTO.SenderArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.SenderID, requestGetDTO.SenderUserTypeID);
             (requestGetDTO.ReceiverEnglishName, requestGetDTO.ReceiverArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ReceiverID, requestGetDTO.ReceiverUserTypeID);

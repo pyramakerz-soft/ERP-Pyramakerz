@@ -70,7 +70,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
              
             foreach (var v in violationDTOs)
             {
-                v.Attach = _fileService.GetFileUrl(v.Attach, Request);
+                v.Attach = _fileService.GetFileUrl(v.Attach, Request, HttpContext);
             }
 
             return Ok(violationDTOs);
@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
              
             foreach (var report in violationReports)
             {
-                report.AttachmentUrl = _fileService.GetFileUrl(report.AttachmentUrl, Request);
+                report.AttachmentUrl = _fileService.GetFileUrl(report.AttachmentUrl, Request, HttpContext);
             }
             return Ok(violationReports);
         }
@@ -173,7 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             ViolationGetDTO violationDTOs = mapper.Map<ViolationGetDTO>(violations);
             
-            violationDTOs.Attach = _fileService.GetFileUrl(violationDTOs.Attach, Request); 
+            violationDTOs.Attach = _fileService.GetFileUrl(violationDTOs.Attach, Request, HttpContext); 
 
             return Ok(violationDTOs);
         }

@@ -90,7 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var AssignmentGetDTO in AssignmentGetDTOs)
             {
-                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request, HttpContext);
             }
 
             var paginationMetadata = new
@@ -164,7 +164,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var AssignmentGetDTO in AssignmentGetDTOs)
             {
-                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request, HttpContext);
             }
 
             var paginationMetadata = new
@@ -228,7 +228,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
              
-            AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request);
+            AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request, HttpContext);
 
             return Ok(AssignmentGetDTO);
         }

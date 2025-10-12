@@ -189,16 +189,23 @@ namespace LMS_CMS_PL.Services
             return false;
         }
 
-        public string GetFileUrl(string key, int expireMinutes = 120)
-        {
-            var request = new GetPreSignedUrlRequest
-            {
-                BucketName = _bucketName,
-                Key = key,
-                Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
-            };
+        //public string GetFileUrl(string key, int expireMinutes = 120)
+        //{
+        //    var request = new GetPreSignedUrlRequest
+        //    {
+        //        BucketName = _bucketName,
+        //        Key = key,
+        //        Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
+        //    };
 
-            return _s3Client.GetPreSignedURL(request);
+        //    return _s3Client.GetPreSignedURL(request);
+        //}
+        public string GetFileUrl(string key, IConfiguration config)
+        {
+            key = key.TrimStart('/');
+            var region = config["AWS:Region"] ?? "us-east-1";
+
+            return $"https://{_bucketName}.s3.{region}.amazonaws.com/{key}";
         }
 
         public async Task<bool> DeleteFileAsync(string subDirectory, string domain, string fileName)
