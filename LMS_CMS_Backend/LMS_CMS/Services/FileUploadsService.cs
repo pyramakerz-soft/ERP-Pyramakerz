@@ -107,7 +107,8 @@ namespace LMS_CMS_PL.Services
                 bool uploaded = await s3Service.UploadFileAsync(newFile, $"{basePath}/{entityId}", $"{domain}/{subDomain}");
                 if (uploaded)
                 {
-                    return $"{_configuration["AWS:Folder"]}/{domain}/{subDomain}/{basePath}/{entityId}/{newFile.FileName}";
+                    return $"{basePath}/{entityId}/{newFile.FileName}";
+                    //return $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{basePath}/{entityId}/{newFile.FileName}";
                 }
 
                 return oldFilePath ?? string.Empty;
