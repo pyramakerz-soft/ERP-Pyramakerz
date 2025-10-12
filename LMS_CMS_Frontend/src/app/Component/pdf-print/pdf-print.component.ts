@@ -277,51 +277,24 @@ export class PdfPrintComponent implements OnChanges {
     }
   }
 
-printPDF() {
+  printPDF() {
     const opt = {
       margin: [0.5, 0.5, 0.5, 0.5],
       filename: `${this.fileName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        letterRendering: true, 
-        allowTaint: false,
-        logging: false
-      },
-      jsPDF: { 
-        unit: 'in', 
-        format: 'a4', 
-        orientation: 'landscape', // Changed from portrait to landscape
-        compress: true 
-      },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait', compress: true },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     const printContainer = this.printContainer.nativeElement;
     const originalStyle = printContainer.style.cssText;
     
-    // Add styles for better PDF rendering
     printContainer.style.cssText += `
-      font-size: 11px !important;
-      line-height: 1.3 !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
       color: #000 !important;
-      background: white !important;
     `;
-
-    // Ensure tables don't overflow
-    const tables = printContainer.querySelectorAll('table');
-    tables.forEach((table: any) => {
-      table.style.width = '100%';
-      table.style.tableLayout = 'fixed';
-      
-      const cells = table.querySelectorAll('td, th');
-      cells.forEach((cell: any) => {
-        cell.style.wordBreak = 'break-word';
-        cell.style.whiteSpace = 'normal';
-        cell.style.overflow = 'visible';
-      });
-    });
 
     html2pdf()
       .from(printContainer)
@@ -329,26 +302,10 @@ printPDF() {
       .save()
       .then(() => {
         printContainer.style.cssText = originalStyle;
-        // Restore table styles
-        tables.forEach((table: any) => {
-          table.style.cssText = '';
-          const cells = table.querySelectorAll('td, th');
-          cells.forEach((cell: any) => {
-            cell.style.cssText = '';
-          });
-        });
       })
       .catch((error: any) => {
         console.error('PDF generation failed:', error);
         printContainer.style.cssText = originalStyle;
-        // Restore table styles on error
-        tables.forEach((table: any) => {
-          table.style.cssText = '';
-          const cells = table.querySelectorAll('td, th');
-          cells.forEach((cell: any) => {
-            cell.style.cssText = '';
-          });
-        });
       });
   }
 

@@ -267,6 +267,15 @@ export class DutyComponent {
     if (this.duty.date != '' && this.duty.classID != 0) {
       this.DutyServ.GetNumberOfPeriods(this.duty.date, this.duty.classID, this.DomainName).subscribe((d) => {
         this.periods = Array.from({ length: d }, (_, i) => i + 1);
+      },error=>{
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        console.log(123,error.error)
       });
     }
   }

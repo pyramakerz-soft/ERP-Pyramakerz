@@ -116,60 +116,23 @@ export class LocationComponent {
     this.openModal();
   }
 
-Delete(id: number) {
-  const deleteTitle = this.translate.instant('Are you sure you want to delete this location?');
-  const deleteButton = this.translate.instant('Delete');
-  const cancelButton = this.translate.instant('Cancel');
-  
-  Swal.fire({
-    title: deleteTitle,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: deleteButton,
-    cancelButtonText: cancelButton,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.LocationServ.Delete(id, this.DomainName).subscribe(
-        (d) => {
+  Delete(id: number) {
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Location') + this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.LocationServ.Delete(id, this.DomainName).subscribe((d) => {
           this.GetAllData();
-          this.showSuccessAlert(this.translate.instant('Location deleted successfully'));
-        },
-        (error) => {
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete location');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-  });
-}
-
-private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
-
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+        });
+      }
+    });
+  }
 
   Edit(id: number) {
     this.mode = 'Edit';
@@ -213,41 +176,61 @@ private showSuccessAlert(message: string) {
     return IsAllow;
   }
 
-CreateOREdit() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    if (this.mode == 'Create') {
-      this.LocationServ.Add(this.location, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(this.translate.instant('Location created successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to create location');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-    if (this.mode == 'Edit') {
-      this.LocationServ.Edit(this.location, this.DomainName).subscribe(
-        (d) => {
-          this.showSuccessAlert(this.translate.instant('Location updated successfully'));
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update location');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.mode == 'Create') {
+        this.LocationServ.Add(this.location, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.LocationServ.Edit(this.location, this.DomainName).subscribe(
+          (d) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
+              confirmButtonColor: '#089B41',
+            });
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      }
     }
   }
-}
 
   validateNumber(event: any, field: keyof Location): void {
     const value = event.target.value;
@@ -269,22 +252,28 @@ CreateOREdit() {
 
     setTimeout(() => {
       if (this.map) {
-        this.map.invalidateSize();
+        this.map.invalidateSize(); // Forces Leaflet to recalc width/height
       }
     }, 200);
   }
 
-isFormValid(): boolean {
-  let isValid = true;
-  this.validationErrors = {};
-
-  if (!this.location.name) {
-    this.validationErrors['name'] = this.translate.instant('Name is required');
-    isValid = false;
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.location) {
+      if (this.location.hasOwnProperty(key)) {
+        const field = key as keyof Location;
+        if (!this.location[field]) {
+          if (field == 'name') {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
   }
-
-  return isValid;
-}
 
   capitalizeField(field: keyof Location): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');

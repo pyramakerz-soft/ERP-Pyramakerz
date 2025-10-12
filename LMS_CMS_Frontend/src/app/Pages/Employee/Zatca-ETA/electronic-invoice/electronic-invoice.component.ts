@@ -13,11 +13,10 @@ import { StateService } from '../../../../Services/Employee/Inventory/state.serv
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import * as XLSX from 'xlsx';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-
 @Component({
   selector: 'app-electronic-invoice',
   standalone: true,
@@ -70,7 +69,6 @@ export class ElectronicInvoiceComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
   ) {
     this.DomainName = this.apiService.GetHeader();
     this.route.data.subscribe((data) => {
@@ -82,17 +80,17 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.loadSchools();
     this.restoreState();
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
+        this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   private restoreState() {
@@ -148,20 +146,20 @@ export class ElectronicInvoiceComponent implements OnInit {
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
-        title: this.translate.instant('Invalid Date Range'),
-        text: this.translate.instant('Start date cannot be later than end date.'),
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
         icon: 'warning',
-        confirmButtonText: this.translate.instant('OK'),
+        confirmButtonText: 'OK',
       });
       return;
     }
 
     if (!this.selectedSchoolId) {
       Swal.fire({
-        title: this.translate.instant('Missing Information'),
-        text: this.translate.instant('Please select a school'),
+        title: 'Missing Information',
+        text: 'Please select a school',
         icon: 'warning',
-        confirmButtonText: this.translate.instant('OK'),
+        confirmButtonText: 'OK',
       });
       return;
     }
@@ -242,7 +240,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   downloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
-      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), 'warning');
+      Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
@@ -270,10 +268,10 @@ export class ElectronicInvoiceComponent implements OnInit {
   printSelectedInvoices() {
     if (this.selectedInvoices.length === 0) {
       Swal.fire({
-        title: this.translate.instant('No Selection'),
-        text: this.translate.instant('Please select at least one invoice to print'),
+        title: 'No Selection',
+        text: 'Please select at least one invoice to print',
         icon: 'warning',
-        confirmButtonText: this.translate.instant('OK'),
+        confirmButtonText: 'OK',
       });
       return;
     }
@@ -293,7 +291,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   private printAll() {
     if (this.transactionsForExport.length === 0) {
-      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to print!'), 'warning');
+      Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
 
@@ -339,7 +337,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   exportExcel() {
     if (this.transactions.length === 0) {
-      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), 'warning');
+      Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
@@ -428,13 +426,17 @@ export class ElectronicInvoiceComponent implements OnInit {
       await firstValueFrom(serviceCall);
 
       Swal.fire(
-        this.translate.instant('Success'),
-        this.translate.instant(`Invoice ${this.currentSystem === 'zatca' ? 'reported to ZATCA' : 'submitted to ETA'} successfully`),
+        'Success',
+        `Invoice ${
+          this.currentSystem === 'zatca'
+            ? 'reported to ZATCA'
+            : 'submitted to ETA'
+        } successfully`,
         'success'
       );
       invoice.isValid = true;
     } catch (error) {
-      let errorMessage = this.translate.instant('Something went wrong');
+      let errorMessage = 'Something went wrong';
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (
@@ -446,10 +448,12 @@ export class ElectronicInvoiceComponent implements OnInit {
       }
 
       this.handleError(
-        this.translate.instant(`Failed to ${this.currentSystem === 'zatca' ? 'report' : 'submit'} invoice`),
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoice`,
         error
       );
-      Swal.fire(this.translate.instant('Error'), errorMessage, 'error');
+      Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.sendingInvoiceId = null;
     }
@@ -458,10 +462,10 @@ export class ElectronicInvoiceComponent implements OnInit {
   async sendAll() {
     if (this.selectedInvoices.length === 0) {
       Swal.fire({
-        title: this.translate.instant('No Selection'),
-        text: this.translate.instant('Please select at least one invoice to send'),
+        title: 'No Selection',
+        text: 'Please select at least one invoice to send',
         icon: 'warning',
-        confirmButtonText: this.translate.instant('OK'),
+        confirmButtonText: 'OK',
       });
       return;
     }
@@ -485,8 +489,12 @@ export class ElectronicInvoiceComponent implements OnInit {
       await firstValueFrom(serviceCall);
 
       Swal.fire(
-        this.translate.instant('Success'),
-        this.translate.instant(`Invoices ${this.currentSystem === 'zatca' ? 'reported to ZATCA' : 'submitted to ETA'} successfully`),
+        'Success',
+        `Invoices ${
+          this.currentSystem === 'zatca'
+            ? 'reported to ZATCA'
+            : 'submitted to ETA'
+        } successfully`,
         'success'
       );
 
@@ -495,7 +503,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       });
       this.selectedInvoices = [];
     } catch (error) {
-      let errorMessage = this.translate.instant('Something went wrong');
+      let errorMessage = 'Something went wrong';
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (
@@ -507,10 +515,12 @@ export class ElectronicInvoiceComponent implements OnInit {
       }
 
       this.handleError(
-        this.translate.instant(`Failed to ${this.currentSystem === 'zatca' ? 'report' : 'submit'} invoices`),
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoices`,
         error
       );
-      Swal.fire(this.translate.instant('Error'), errorMessage, 'error');
+      Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.isSubmitting = false;
     }
@@ -544,5 +554,4 @@ export class ElectronicInvoiceComponent implements OnInit {
     const value = event.target.value;
     this.pageSize = value ? parseInt(value, 10) : 10;
   }
-  
 }
