@@ -19,6 +19,7 @@ export class FollowUp {
     public insertedByUserId: number  = 0,
     public drugId: number = 0,
     public doseId: number = 0,
+    public date: Date|null = null 
   ) {}
   
 }

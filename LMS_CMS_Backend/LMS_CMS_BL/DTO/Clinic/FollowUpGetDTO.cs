@@ -25,5 +25,6 @@ namespace LMS_CMS_BL.DTO.Clinic
         public long? InsertedByUserId { get; set; }
         public string? en_name { get; set; }
         public DateTime InsertedAt { get; set; }
+        public DateOnly? Date { get; set; }
     }
 }
