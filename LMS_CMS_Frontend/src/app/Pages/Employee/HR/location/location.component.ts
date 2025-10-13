@@ -102,6 +102,32 @@ export class LocationComponent {
     }
   }
 
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
   GetAllData() {
     this.TableData = [];
     this.LocationServ.Get(this.DomainName).subscribe((d) => {
@@ -176,61 +202,41 @@ export class LocationComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.mode == 'Create') {
-        this.LocationServ.Add(this.location, this.DomainName).subscribe(
-          (d) => {
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Created Successfully',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }
-      if (this.mode == 'Edit') {
-        this.LocationServ.Edit(this.location, this.DomainName).subscribe(
-          (d) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }
+CreateOREdit() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    if (this.mode == 'Create') {
+      this.LocationServ.Add(this.location, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+          this.showSuccessAlert(this.translate.instant('Location created successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to create location');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+    if (this.mode == 'Edit') {
+      this.LocationServ.Edit(this.location, this.DomainName).subscribe(
+        (d) => {
+          this.showSuccessAlert(this.translate.instant('Location updated successfully'));
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update location');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
   }
+}
 
   validateNumber(event: any, field: keyof Location): void {
     const value = event.target.value;
@@ -252,7 +258,7 @@ export class LocationComponent {
 
     setTimeout(() => {
       if (this.map) {
-        this.map.invalidateSize(); // Forces Leaflet to recalc width/height
+        this.map.invalidateSize();
       }
     }, 200);
   }
@@ -264,10 +270,8 @@ export class LocationComponent {
         const field = key as keyof Location;
         if (!this.location[field]) {
           if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          isValid = false;
           }
         }
       }

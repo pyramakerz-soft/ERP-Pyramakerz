@@ -9,7 +9,7 @@ import { TableComponent } from '../../../../Component/reuse-table/reuse-table.co
 import { ApiService } from '../../../../Services/api.service';
 import { HygieneTypesService } from '../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../Models/Clinic/hygiene-types';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -44,7 +44,9 @@ isRtl: boolean = false;
     private hygieneTypesService: HygieneTypesService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
+
   ) {}
 
   ngOnInit(): void {

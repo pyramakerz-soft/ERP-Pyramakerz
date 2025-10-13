@@ -97,6 +97,32 @@ export class VacationTypesComponent {
       }
   }
 
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
 
   GetAllData() {
     this.TableData = [];
@@ -156,61 +182,41 @@ export class VacationTypesComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.mode == 'Create') {
-        this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
-          (d) => {
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Created Successfully',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
-      }
-      if (this.mode == 'Edit') {
-        this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
-          (d) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetAllData();
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
-      }
+CreateOREdit() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    if (this.mode == 'Create') {
+      this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+          this.showSuccessAlert(this.translate.instant('Vacation type created successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to create vacation type');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+    if (this.mode == 'Edit') {
+      this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
+        (d) => {
+          this.showSuccessAlert(this.translate.instant('Vacation type updated successfully'));
+          this.GetAllData();
+          this.isLoading = false;
+          this.closeModal();
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update vacation type');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
   }
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -230,10 +236,8 @@ export class VacationTypesComponent {
           if (
             field == 'name'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          isValid = false;
           }
         }
       }

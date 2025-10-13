@@ -96,6 +96,32 @@ export class OfficialHolidaysComponent {
       }
   }
 
+    private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
 
   GetAllData() {
     this.TableData = [];
@@ -164,52 +190,33 @@ export class OfficialHolidaysComponent {
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Created Successfully',
-              confirmButtonColor: '#089B41',
-            });
+            this.showSuccessAlert(this.translate.instant('Official holiday created successfully'));
           },
           (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to create official holiday');
+            this.showErrorAlert(errorMessage);
           }
         );
       }
       if (this.mode == 'Edit') {
         this.OfficialHolidaysServ.Edit(this.officialHoliday, this.DomainName).subscribe(
           (d) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
+            this.showSuccessAlert(this.translate.instant('Official holiday updated successfully'));
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
           },
           (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update official holiday');
+            this.showErrorAlert(errorMessage);
           }
         );
       }
     }
   }
+
 
   closeModal() {
     this.isModalVisible = false;
@@ -231,10 +238,8 @@ export class OfficialHolidaysComponent {
             field == 'dateTo' ||
             field == 'dateFrom' 
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          isValid = false;
           }
         }
       }
