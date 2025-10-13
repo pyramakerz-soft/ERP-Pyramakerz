@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.ECommerce;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -19,12 +20,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public AssignmentQuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AssignmentQuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
         /////////////////////////////////////////////
@@ -71,7 +74,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Assignment.AssignmentQuestions = Assignment.AssignmentQuestions.Where(aq => aq.IsDeleted != true && aq.QuestionBank != null && aq.QuestionBank.IsDeleted != true).ToList(); 
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
-             
+
+            if (AssignmentGetDTO.LinkFile != null)
+            {
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request, HttpContext);
+            }
             return Ok(AssignmentGetDTO);
         }
 

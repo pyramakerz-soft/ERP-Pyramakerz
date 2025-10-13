@@ -170,15 +170,18 @@ export class AccountingEmployeeEditComponent {
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d;
-      console.log(this.Data)
+      this.Data = d; 
       this.JobCategoryId = this.Data.jobCategoryID
       this.GetAllJobCategories();
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
-      this.parseDepartureTime(this.Data.departureTime);
-      this.parseAttendanceTime(this.Data.attendanceTime);
+      if(this.Data.departureTime){
+        this.parseDepartureTime(this.Data.departureTime);
+      }
+      if(this.Data.attendanceTime){
+        this.parseAttendanceTime(this.Data.attendanceTime);
+      }
       if (this.Data.dateOfLeavingWork != "" && this.Data.dateOfLeavingWork != null) {
         this.EndDate = true
       }
@@ -249,8 +252,14 @@ export class AccountingEmployeeEditComponent {
         (this.Data as any)[key] = null;
       }
     });
-    if (this.isFormValid()) {
+    if (this.isFormValid()) { 
       this.getFormattedTime()
+      if(this.Data.departureTime == ':00 AM'){
+        this.Data.departureTime = null
+      }
+      if(this.Data.attendanceTime == ':00 AM'){
+        this.Data.attendanceTime = null
+      }
       this.isLoading = true
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
