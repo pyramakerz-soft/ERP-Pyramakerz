@@ -46,7 +46,8 @@ using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using LMS_CMS_PL.Services.FileValidations;
-using Microsoft.AspNetCore.HttpOverrides; 
+using Microsoft.AspNetCore.HttpOverrides;
+using LMS_CMS_PL.Services.Dashboard;
 
 namespace LMS_CMS
 {
@@ -177,6 +178,14 @@ namespace LMS_CMS
             builder.Services.AddScoped<ValidTeachersForStudentService>(); 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<FileUploadsService>();
+            builder.Services.AddScoped<Accounting_Service>();
+            builder.Services.AddScoped<Clinic_Service>();
+            builder.Services.AddScoped<Communication_Service>();
+            builder.Services.AddScoped<ECommerce_Service>();
+            builder.Services.AddScoped<HR_Service>();
+            builder.Services.AddScoped<Inventory_Service>();
+            builder.Services.AddScoped<LMS_Service>();
+            builder.Services.AddScoped<Registration_Service>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
