@@ -96,6 +96,31 @@ export class SubjectViewComponent {
     }
   }
 
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   GetSubjectById() {
     this.subjectService.GetByID(this.subjectId, this.DomainName).subscribe((data) => {
@@ -211,45 +236,63 @@ export class SubjectViewComponent {
     this.validationErrorsForResources = {};
   }
 
-  DeleteSubjectWeight(id: number) {
-    Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Weight') + this.translate.instant('?'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.subjectWeightService.Delete(id, this.DomainName).subscribe(
-          (data: any) => {
-            this.GetSubjectWeightsBySubjectID()
-          }
-        );
-      }
-    });
-  }
+DeleteSubjectWeight(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this weight?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.subjectWeightService.Delete(id, this.DomainName).subscribe(
+        (data: any) => {
+          this.GetSubjectWeightsBySubjectID();
+          this.showSuccessAlert(this.translate.instant('Weight deleted successfully'));
+        },
+        error => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete weight');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+  });
+}
 
-  DeleteSubjecResource(id: number) {
-    Swal.fire({
-        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Resource') + this.translate.instant('?'),
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: this.translate.instant('Delete'),
-        cancelButtonText: this.translate.instant('Cancel'),
-      }).then((result) => {
-      if (result.isConfirmed) {
-        this.subjectResourceService.Delete(id, this.DomainName).subscribe(
-          (data: any) => {
-            this.GetSubjectResourcesBySubjectID()
-          }
-        );
-      }
-    });
-  }
+DeleteSubjecResource(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this resource?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.subjectResourceService.Delete(id, this.DomainName).subscribe(
+        (data: any) => {
+          this.GetSubjectResourcesBySubjectID();
+          this.showSuccessAlert(this.translate.instant('Resource deleted successfully'));
+        },
+        error => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete resource');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+  });
+}
 
   downloadFile(fileUrl: string): void {
     fetch(fileUrl)
@@ -276,71 +319,74 @@ export class SubjectViewComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValidForSubjectWeight(): boolean {
-    let isValid = true;
-    for (const key in this.subjectWeightElement) {
-      if (this.subjectWeightElement.hasOwnProperty(key)) {
-        const field = key as keyof SubjectWeight;
-        if (!this.subjectWeightElement[field]) {
-          if (field == "weightTypeID" || field == "weight") {
-            this.validationErrorsForWeights[field] = `*${this.capitalizeFieldForSubjectWeight(field)} is required`
-            isValid = false;
-          }
-        } else {
-          this.validationErrorsForWeights[field] = '';
+isFormValidForSubjectWeight(): boolean {
+  let isValid = true;
+  for (const key in this.subjectWeightElement) {
+    if (this.subjectWeightElement.hasOwnProperty(key)) {
+      const field = key as keyof SubjectWeight;
+      if (!this.subjectWeightElement[field]) {
+        if (field == "weightTypeID" || field == "weight") {
+          this.validationErrorsForWeights[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`; 
+          isValid = false;
         }
+      } else {
+        this.validationErrorsForWeights[field] = '';
       }
     }
-    return isValid;
   }
+  return isValid;
+}
 
-  isFormValidForSubjectResource(): boolean {
-    let isValid = true;
-    for (const key in this.SubjectResourceElement) {
-      if (this.SubjectResourceElement.hasOwnProperty(key)) {
-        const field = key as keyof SubjectResource;
-        if (!this.SubjectResourceElement[field]) {
-          if (field == "file" || field == "englishName" || field == 'arabicName') {
-            this.validationErrorsForResources[field] = `*${this.capitalizeFieldForSubjectResource(field)} is required`
+isFormValidForSubjectResource(): boolean {
+  let isValid = true;
+  for (const key in this.SubjectResourceElement) {
+    if (this.SubjectResourceElement.hasOwnProperty(key)) {
+      const field = key as keyof SubjectResource;
+      if (!this.SubjectResourceElement[field]) {
+        if (field == "file" || field == "englishName" || field == 'arabicName') {
+          this.validationErrorsForResources[field] = this.translate.instant('Field is required', { 
+            field: this.capitalizeFieldForSubjectResource(field) 
+          });
+          isValid = false;
+        }
+      } else {
+        if (field == "englishName" || field == 'arabicName') {
+          if (this.SubjectResourceElement.englishName.length > 100 || this.SubjectResourceElement.arabicName.length > 100) {
+            this.validationErrorsForResources[field] = this.translate.instant('Field cannot be longer than 100 characters', { 
+              field: this.capitalizeFieldForSubjectResource(field) 
+            });
             isValid = false;
-          }
-        } else {
-          if (field == "englishName" || field == 'arabicName') {
-            if (this.SubjectResourceElement.englishName.length > 100 || this.SubjectResourceElement.arabicName.length > 100) {
-              this.validationErrorsForResources[field] = `*${this.capitalizeFieldForSubjectResource(field)} cannot be longer than 100 characters`
-              isValid = false;
-            } else {
-              this.validationErrorsForResources[field] = '';
-            }
           } else {
             this.validationErrorsForResources[field] = '';
           }
+        } else {
+          this.validationErrorsForResources[field] = '';
         }
       }
     }
-
-    return isValid;
   }
+  return isValid;
+}
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    const input = event.target as HTMLInputElement;
+onFileSelected(event: any) {
+  const file: File = event.target.files[0];
+  const input = event.target as HTMLInputElement;
 
-    if (file) {
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrorsForResources['file'] = 'The file size exceeds the maximum limit of 25 MB.';
-        this.SubjectResourceElement.file = null;
-        return;
-      }
-      else {
-        this.SubjectResourceElement.file = file
-        this.validationErrorsForResources['file'] = '';
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-      }
+  if (file) {
+    if (file.size > 25 * 1024 * 1024) {
+      this.validationErrorsForResources['file'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
+      this.SubjectResourceElement.file = null;
+      return;
     }
-    input.value = '';
+    else {
+      this.SubjectResourceElement.file = file
+      this.validationErrorsForResources['file'] = '';
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+    }
   }
+  input.value = '';
+}
 
   onInputValueChangeForSubjectWeight(event: { field: keyof SubjectWeight, value: any }) {
     const { field, value } = event;
@@ -368,71 +414,59 @@ export class SubjectViewComponent {
     }
   }
 
-  SaveSubjectWeight() {
-    if (this.isFormValidForSubjectWeight()) {
-      this.subjectWeightElement.subjectID = this.subjectId
-      this.isLoading = true;
-      if (this.editSubjectWeight == false) {
-        this.subjectWeightService.Add(this.subjectWeightElement, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeSubjectWeight()
-            this.isLoading = false;
-            this.GetSubjectWeightsBySubjectID()
-          },
-          error => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      } else {
-        this.subjectWeightService.Edit(this.subjectWeightElement, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeSubjectWeight()
-            this.GetSubjectWeightsBySubjectID()
-            this.isLoading = false;
-          },
-          error => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }
-    }
-  }
-
-  SaveSubjectResource() {
-    if (this.isFormValidForSubjectResource()) {
-      this.SubjectResourceElement.subjectID = this.subjectId
-      this.isLoading = true;
-      this.subjectResourceService.Add(this.SubjectResourceElement, this.DomainName).subscribe(
+SaveSubjectWeight() {
+  if (this.isFormValidForSubjectWeight()) {
+    this.subjectWeightElement.subjectID = this.subjectId
+    this.isLoading = true;
+    if (this.editSubjectWeight == false) {
+      this.subjectWeightService.Add(this.subjectWeightElement, this.DomainName).subscribe(
         (result: any) => {
-          this.closeSubjectResource()
+          this.closeSubjectWeight()
           this.isLoading = false;
-          this.GetSubjectResourcesBySubjectID()
+          this.GetSubjectWeightsBySubjectID();
+          this.showSuccessAlert(this.translate.instant('Weight added successfully'));
         },
         error => {
           this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
+          const errorMessage = error.error?.message || this.translate.instant('Failed to add weight');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    } else {
+      this.subjectWeightService.Edit(this.subjectWeightElement, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeSubjectWeight()
+          this.GetSubjectWeightsBySubjectID();
+          this.isLoading = false;
+          this.showSuccessAlert(this.translate.instant('Weight updated successfully'));
+        },
+        error => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update weight');
+          this.showErrorAlert(errorMessage);
         }
       );
     }
   }
+}
+
+SaveSubjectResource() {
+  if (this.isFormValidForSubjectResource()) {
+    this.SubjectResourceElement.subjectID = this.subjectId
+    this.isLoading = true;
+    this.subjectResourceService.Add(this.SubjectResourceElement, this.DomainName).subscribe(
+      (result: any) => {
+        this.closeSubjectResource()
+        this.isLoading = false;
+        this.GetSubjectResourcesBySubjectID();
+        this.showSuccessAlert(this.translate.instant('Resource added successfully'));
+      },
+      error => {
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to add resource');
+        this.showErrorAlert(errorMessage);
+      }
+    );
+  }
+}
 }
