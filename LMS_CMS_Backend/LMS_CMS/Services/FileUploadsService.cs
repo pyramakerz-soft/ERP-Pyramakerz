@@ -157,11 +157,15 @@ namespace LMS_CMS_PL.Services
 
                 //string sourceKey = sourceFilePath.Replace("\\", "/");
 
-                string destinationKey = $"{_configuration["AWS:Folder"]}{basePath}/{entityId}/{fileName}";
+                string destinationKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{basePath}/{entityId}/{fileName}";
 
                 // Ensure source path uses forward slashes and includes the full path
-                string sourceKey = $"{_configuration["AWS:Folder"]}{sourceFilePath.Replace("\\", "/")}";
+                string sourceKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{sourceFilePath.Replace("\\", "/")}";
 
+                Console.WriteLine("--------------------------------------------------------------------------------");
+                Console.WriteLine(destinationKey);
+                Console.WriteLine(sourceKey);
+                Console.WriteLine("--------------------------------------------------------------------------------");
 
                 bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, $"{domain}/{subDomain}");
                 if (copied)
