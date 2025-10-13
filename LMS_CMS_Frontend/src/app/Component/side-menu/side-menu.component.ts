@@ -44,12 +44,7 @@ export class SideMenuComponent {
   toggleMenu() {
     this.IsMenuOpen = !this.IsMenuOpen
     this.IsSearchFocus = false
-  }
-
-  toggleSearch() {
-    this.IsMenuOpen = !this.IsMenuOpen
-    this.IsSearchFocus = !this.IsSearchFocus;
-  }
+  } 
 
   focusSearchInput() {
     if (this.searchInput) {

@@ -280,7 +280,8 @@ import { HrEmployeeReportComponent } from './Pages/Employee/HR/Reports/hr-employ
 import { AttendanceReportByTokenComponent } from './Pages/Employee/HR/Reports/attendance-report-by-token/attendance-report-by-token.component';
 import { SalarySummaryTokenComponent } from './Pages/Employee/HR/Reports/salary-summary-token/salary-summary-token.component';
 import { EmployeeSalaryDetailedByTokenComponent } from './Pages/Employee/HR/employee-salary-detailed-by-token/employee-salary-detailed-by-token.component';
-import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/loans-status.component';
+import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/loans-status.component'; 
+import { DashboardComponent } from './Pages/Employee/Dashboard/dashboard/dashboard.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -294,6 +295,7 @@ export const routes: Routes = [
         canActivate: [navigateIfEmployeeGuard, noNavigateWithoutLoginGuard],
          children: [
             { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" },
+            { path: "Dashboard", component: DashboardComponent, title: "Dashboard", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Diagnosis", component: DiagnosisComponent, title: "Diagnosis", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Drugs", component: DrugsComponent, title: "Drugs", canActivate: [noNavigateWithoutLoginGuard ,  navigateIfHaveSettingPageGuard] },
