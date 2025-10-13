@@ -201,6 +201,12 @@ export class FollowUpComponent implements OnInit {
     delete this.validationErrors['studentId'];
   }
 
+  onDateChange(event: Event) {
+    const selectedStudentId = (event.target as HTMLSelectElement).value;
+    // Clear student validation error when student changes
+    delete this.validationErrors['date'];
+  }
+
   onDiagnosisChange(event: Event) {
     const selectedDiagnosisId = (event.target as HTMLSelectElement).value;
     // Clear diagnosis validation error when diagnosis changes
@@ -213,8 +219,7 @@ export class FollowUpComponent implements OnInit {
       this.grades = await firstValueFrom(
         this.gradeService.GetBySchoolId(schoolId, domainName)
       );
-    } catch (error) {
-      console.error('Error loading grades:', error);
+    } catch (error) { 
       Swal.fire('Error', 'Failed to load grades.', 'error');
     }
   }
@@ -225,8 +230,7 @@ export class FollowUpComponent implements OnInit {
       this.classes = await firstValueFrom(
         this.classroomService.GetByGradeId(gradeId, domainName)
       );
-    } catch (error) {
-      console.error('Error loading classes:', error);
+    } catch (error) { 
       Swal.fire('Error', 'Failed to load classes.', 'error');
     }
   }
@@ -241,8 +245,7 @@ export class FollowUpComponent implements OnInit {
         id: student.id,
         name: student.en_name,
       }));
-    } catch (error) {
-      console.error('Error loading students:', error);
+    } catch (error) { 
       Swal.fire('Error', 'Failed to load students.', 'error');
     }
   }
@@ -272,6 +275,7 @@ export class FollowUpComponent implements OnInit {
           studentName: item.student || '-',
           complains: item.complains || 'No Complaints',
           diagnosisId: item.diagnosisId,
+          date: item.date,
           diagnosisName:
             this.diagnoses.find((d) => d.id === item.diagnosisId)?.name ||
             '-',
@@ -473,6 +477,10 @@ async saveDrug() {
       this.validationErrors['diagnosisId'] = '*Diagnosis is required';
       isValid = false;
     }
+    if (!this.followUp.date) {
+      this.validationErrors['date'] = '*Date is required';
+      isValid = false;
+    }
 
     if (!isValid) {
       return;
@@ -496,8 +504,7 @@ async saveDrug() {
       }
       this.loadFollowUps();
       this.closeModal();
-    } catch (error) {
-      console.error('Error saving follow-up:', error);
+    } catch (error) { 
       Swal.fire(
         'Error',
         'Failed to save follow-up. Please try again later.',
@@ -593,9 +600,9 @@ async saveDrug() {
 GetTableHeaders(){
    
 if(!this.isRtl){
-  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Actions']
+  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Date', 'Actions']
 }else{
-  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التشخيص', 'التوصية', 'الإجراءات']
+  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التشخيص', 'التوصية', 'التاريخ', 'الإجراءات']
 }
 }
 
