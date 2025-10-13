@@ -154,13 +154,7 @@ export class AssignmentStudentComponent {
   GetAllData(pageNumber: number, pageSize: number) {
     this.TableData = [];
     this.assignmentStudentServ
-      .GetByAssignmentClass(
-        this.AssignmentId,
-        this.ClassId,
-        this.DomainName,
-        pageNumber,
-        pageSize
-      )
+      .GetByAssignmentClass(this.AssignmentId,this.ClassId,this.DomainName,pageNumber,pageSize)
       .subscribe(
         (data) => {
           this.CurrentPage = data.pagination.currentPage;

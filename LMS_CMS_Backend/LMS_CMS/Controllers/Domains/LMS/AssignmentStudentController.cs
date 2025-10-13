@@ -39,9 +39,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAssignmentIDClassID/{Aid}/{CiD}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Assignment" }
+              allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment Student" }
           )]
         public async Task<IActionResult> GetByAssignmentIDClassID(long Aid, long CiD, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -105,7 +104,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAssignmentId/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa" , "student" } 
+             allowedTypes: new[] { "octa" , "student" },
+             pages: new[] { "Assignment Student" }
          )]
         public async Task<IActionResult> GetByAssignmentId(long id)
         {
@@ -201,9 +201,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee", "student" }
-         //,
-         //pages: new[] { "Assignment" }
+             allowedTypes: new[] { "octa", "employee", "student" },
+         pages: new[] { "Assignment Student Answer" }
          )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -286,10 +285,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" ,"student" }
-          //,
-          //pages: new[] { "Book Correction" }
-      )]
+          allowedTypes: new[] { "octa", "employee", "student" },
+          pages: new[] { "Assignment Student" }
+        )]
         public async Task<IActionResult> Add(AssignmentStudentAddDTO newData)
         {
 
@@ -406,7 +404,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost("AddWhenTextBookAssignment")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "student" } 
+          allowedTypes: new[] { "octa", "student" },
+          pages: new[] { "Assignment Student" }
       )]
         public async Task<IActionResult> AddWhenTextBookAssignment([FromForm]AssignmentStudentAddDTOFile newData)
         {
@@ -506,7 +505,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Assignment Student" , "Assignment Student Answer" }
         )]
         public async Task<IActionResult> EditAsync(AssignmentStudentEditDTO newData)
         {
