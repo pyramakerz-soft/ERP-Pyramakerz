@@ -1178,7 +1178,7 @@
   "Bonus": "المكافئة",
   "Deduction": "الخصم",
   "Request": "الطلب",
-  "Loan": "قرض",
+  "Loan": "القرض",
   "Loans": "القروض",
   "Vacation": "الاجازة",
   "Vacation Employee": "إجازات الموظفين",
@@ -1368,12 +1368,40 @@
   "Are you sure you want to delete this device?": "هل أنت متأكد من رغبتك في حذف هذا الجهاز؟",
   "Device created successfully": "تم إنشاء الجهاز بنجاح",
   "Field cannot be longer than 100 characters": "{{field}} لا يمكن أن يزيد عن 100 حرف",
-"Pass By Degree cannot be greater than Total Marks": "درجة النجاح لا يمكن أن تكون أكبر من الدرجة الكلية",
-"Subject created successfully": "تم إنشاء المادة بنجاح",
-"Subject updated successfully": "تم تحديث المادة بنجاح",
-"Failed to create subject": "فشل في إنشاء المادة",
-"Failed to update subject": "فشل في تحديث المادة",
-"weightTypeID" : "معرّف نوع الوزن" 
+  "Pass By Degree cannot be greater than Total Marks": "درجة النجاح لا يمكن أن تكون أكبر من الدرجة الكلية",
+  "Subject created successfully": "تم إنشاء المادة بنجاح",
+  "Subject updated successfully": "تم تحديث المادة بنجاح",
+  "Failed to create subject": "فشل في إنشاء المادة",
+  "Failed to update subject": "فشل في تحديث المادة",
+  "weightTypeID" : "نوع الوزن" ,
+  "weight" : "الوزن",
+  "name": "الاسم",
+  "dateFrom": "من تاريخ",
+  "dateTo": "إلى تاريخ",
+  "Edit Attendance": "تعديل الحضور",
+  "Attendence": "الحضور",
+  "clockOut": "وقت الخروج",
+"clockIn": "وقت الدخول",
+"date": "التاريخ",
+"employeeID": "الموظف",
+"Saved Successfully": "تم الحفظ بنجاح",
+"has been created successfully": "تم إنشاؤه بنجاح",
+"This Employee Has No Attendance so should take bouns by amount only": "هذا الموظف ليس لديه سجل حضور لذا يجب أن يأخذ المكافأة بالمبلغ فقط",
+"bounsTypeID": "نوع المكافأة",
+"amount": "المبلغ",
+"numberOfBounsDays": "عدد أيام المكافأة",
+"hours": "الساعات"
+
+
+
+
+
+
+
+
+
+
+
 
 
 

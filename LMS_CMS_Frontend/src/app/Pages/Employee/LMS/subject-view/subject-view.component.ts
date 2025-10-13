@@ -344,17 +344,13 @@ isFormValidForSubjectResource(): boolean {
       const field = key as keyof SubjectResource;
       if (!this.SubjectResourceElement[field]) {
         if (field == "file" || field == "englishName" || field == 'arabicName') {
-          this.validationErrorsForResources[field] = this.translate.instant('Field is required', { 
-            field: this.capitalizeFieldForSubjectResource(field) 
-          });
+          this.validationErrorsForResources[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
           isValid = false;
         }
       } else {
         if (field == "englishName" || field == 'arabicName') {
           if (this.SubjectResourceElement.englishName.length > 100 || this.SubjectResourceElement.arabicName.length > 100) {
-            this.validationErrorsForResources[field] = this.translate.instant('Field cannot be longer than 100 characters', { 
-              field: this.capitalizeFieldForSubjectResource(field) 
-            });
+            this.validationErrorsForResources[field] = `${this.translate.instant('Field cannot be longer than 100 characters')} ${this.translate.instant(field)}`;
             isValid = false;
           } else {
             this.validationErrorsForResources[field] = '';

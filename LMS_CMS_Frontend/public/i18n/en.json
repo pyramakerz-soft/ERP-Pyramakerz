@@ -1360,13 +1360,39 @@
   "Are you sure you want to delete this device?": "Are you sure you want to delete this device?",
   "Device created successfully": "Device created successfully",
   "Field cannot be longer than 100 characters": "{{field}} cannot be longer than 100 characters",
+  "Pass By Degree cannot be greater than Total Marks": "Pass By Degree cannot be greater than Total Marks",
+  "Subject created successfully": "Subject created successfully",
+  "Subject updated successfully": "Subject updated successfully",
+  "Failed to create subject": "Failed to create subject",
+  "Failed to update subject": "Failed to update subject",
+  "weightTypeID" : "weight Type" ,
+  "weight" : "Weight",
+  "name": "name",
+  "dateFrom": "dateFrom",
+  "dateTo": "dateTo",
+"Edit Attendance": "Edit Attendance",
+"Attendence": "Attendence",
+"clockOut": "clockOut",
+"clockIn": "clockIn",
+"date": "date",
+"employeeID": "employee",
+"Saved Successfully": "Saved Successfully",
+"has been created successfully": "has been created successfully",
+"This Employee Has No Attendance so should take bouns by amount only": "This Employee Has No Attendance so should take bouns by amount only",
+"bounsTypeID": "bouns Type",
+"amount": "amount",
+"numberOfBounsDays": "numberOfBounsDays",
+"hours": "hours"
 
-"Pass By Degree cannot be greater than Total Marks": "Pass By Degree cannot be greater than Total Marks",
-"Subject created successfully": "Subject created successfully",
-"Subject updated successfully": "Subject updated successfully",
-"Failed to create subject": "Failed to create subject",
-"Failed to update subject": "Failed to update subject",
-"weightTypeID" : "seif" 
+
+
+
+
+
+
+
+
+
 
 
 
