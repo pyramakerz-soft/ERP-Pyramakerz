@@ -31,9 +31,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Assignment" }
+              allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment" }
           )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -79,9 +78,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "" }
+            allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> Add(AssignmentQuestionAddDTO newData)
         {
@@ -267,9 +265,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           allowDelete: 1
-           // ,
-           //pages: new[] { "" }
+           allowDelete: 1,
+           pages: new[] { "Assignment" }
        )]
         public IActionResult Delete(long id)
         {
@@ -300,14 +297,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Floor", roleId, userId, floor);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Assignment", roleId, userId, assignmentQuestion);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             assignmentQuestion.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
