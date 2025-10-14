@@ -612,6 +612,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                 }
             }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student", roleId, userId, assignmentStudent);
+                if (accessCheck != null)
+                {
+                    IActionResult? accessCheck2 = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student Answer", roleId, userId, assignmentStudent);
+                    if (accessCheck2 != null)
+                    {
+                        return accessCheck2;
+                    }
+                }
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
