@@ -11,7 +11,7 @@
     </div>
 
     <app-table [headers]="GetTableHeaders()" [data]="followUps" [showViewAction]="true"
-        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'diagnosisName', 'recommendation', 'date']"
+        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'diagnosisName', 'recommendation']"
         (delete)="deleteFollowUp($event)" (edit)="openModal($event.id)">
     </app-table>
 </div>
@@ -228,9 +228,9 @@
     [isLoading]="isSavingDrug" (save)="saveDrug()" (close)="closeDrugModal()"
     [ngClass]="{ 'hidden': !isDrugModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="drugName">{{ 'Drug' | translate }} {{ 'Name' | translate }}</label>
+        <label class="mb-2 primaryTxt" for="drugName">{{ 'the' | translate }}{{ 'Drug' | translate }}</label>
         <input id="drugName" type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="drug.name"
-            placeholder="{{ 'Enter' | translate }} {{ 'Drug' | translate }} {{ 'Name' | translate }}">
+            placeholder="{{ 'Enter' | translate }} {{ 'the' | translate }}{{ 'Drug' | translate }}">
         <span *ngIf="drugValidationErrors['name']" class="text-red-500 ml-3 font-normal text-sm">
             {{ drugValidationErrors['name'] }}
         </span>
@@ -242,9 +242,9 @@
     [isLoading]="isSavingDose" (save)="saveDose()" (close)="closeDoseModal()"
     [ngClass]="{ 'hidden': !isDoseModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="doseTimes">{{ 'Dose' | translate }} {{ 'Times' | translate }}</label>
+        <label class="mb-2 primaryTxt" for="doseTimes">{{ 'the' | translate }}{{ 'Dose' | translate }}</label>
         <input id="doseTimes" type="text" class="rounded-lg border border-gray-300 px-4 py-3"
-            [(ngModel)]="dose.doseTimes" placeholder="Enter Dose Times">
+            [(ngModel)]="dose.doseTimes" placeholder="{{ 'Enter' | translate }} {{ 'the' | translate }}{{ 'Dose' | translate }}">
         <span *ngIf="doseValidationErrors['doseTimes']" class="text-red-500 ml-3 font-normal text-sm">
             {{ doseValidationErrors['doseTimes'] }}
         </span>

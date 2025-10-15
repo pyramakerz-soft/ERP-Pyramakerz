@@ -39,24 +39,23 @@ GetById(id: number, DomainName: string): Observable<HygieneForm> {
   return this.http.get<HygieneForm>(`${this.baseUrl}/HygieneForm/id?id=${id}`, { headers });
 }
   
-  Add(hygieneFormData: any, DomainName: string): Observable<any> {
-    if (DomainName != null) {
-      this.header = DomainName;
-    }
-    const token = localStorage.getItem('current_token');
-    const headers = new HttpHeaders()
-      .set('Domain-Name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
-
-    
-    hygieneFormData.studentHygieneTypes = hygieneFormData.studentHygieneTypes.map((student: any) => ({
-      ...student,
-      attendance: student.attendance === true || student.attendance === false ? student.attendance : false, 
-    }));
-
-    return this.http.post(`${this.baseUrl}/HygieneForm`, hygieneFormData, { headers });
+Add(hygieneFormData: any, DomainName: string): Observable<any> {
+  if (DomainName != null) {
+    this.header = DomainName;
   }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('Domain-Name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  hygieneFormData.studentHygieneTypes = hygieneFormData.studentHygieneTypes.map((student: any) => ({
+    ...student,
+    attendance: student.attendance === true || student.attendance === false ? student.attendance : false,
+  }));
+
+  return this.http.post(`${this.baseUrl}/HygieneForm`, hygieneFormData, { headers });
+}
 
   
 Delete(id: number, DomainName: string): Observable<any> {

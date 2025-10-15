@@ -1121,15 +1121,15 @@
   "Item Code": "Item Code",
   "Item Name": "Item Name",
   "Grand Total": "Grand Total",
-  "All Stores Purchase Price Report": "All Stores Purchase Price Report",
-  "All Stores Sales Price Report": "All Stores Sales Price Report",
-  "All Stores Cost Report": "All Stores Cost Report",
+  "All Stores Item Balance with Purchase" : "All Stores Item Balance with Purchase",
+  "All Stores Item Balance with Sales" : "All Stores Item Balance with Sales",
+  "All Stores Item Balance with Average Cost" : "All Stores Item Balance with Average Cost",
   "Quantity Only Report": "Quantity Only Report",
   "Store Items Balance": "Store Items Balance",
   "Purchase Price Report": "Purchase Price Report",
   "Sales Price Report": "Sales Price Report",
-  "Cost Report": "Cost Report",
-  "Items Under Limit Report": "Items Under Limit Report",
+  "Store Items Balance with Average Cost" : "Store Items Balance with Average Cost",
+  "Store Limited Items" : "Store Limited Items",
   "Purchase Price": "Purchase Price",
   "Total Purchase": "Total Purchase",
   "Sales Price": "Sales Price",
@@ -1385,25 +1385,22 @@
 "hours": "hours",
 "Updated successfully": "Updated successfully",
 "Created successfully": "Created successfully",
-"Deleted successfully": "Deleted successfully"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+"Deleted successfully": "Deleted successfully",
+"grade": "grade",
+"class": "class",
+"school": "school",
+"You will not be able to recover this item!": "You will not be able to recover this item!",
+"Are you sure?": "Are you sure?",
+"Yes, delete it!": "Yes, delete it!",
+"No, keep it": "No, keep it",
+  "needs selections for": "needs selections for",
+  "The Student": "The Student",
+  "Enter Dose Times" : "Enter Dose Times",
+  "Enter Drug Name" : "Enter Drug Name",
+  "The file size exceeds the maximum limit of 25 MB.": "The file size exceeds the maximum limit of 25 MB.",
+"Action Taken": "Action Taken",
+"Recommendations": "Recommendations",
+"Complains": "Complains"
 
 
 }
