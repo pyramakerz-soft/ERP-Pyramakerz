@@ -168,16 +168,18 @@
                                 <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
                             </select>
                             }
-
+ 
                             <div *ngSwitchCase="4" class="border rounded-lg p-3">
                                 <div *ngFor="let option of field.options" class="flex items-center">
-                                    <input type="checkbox" id="{{cat.enName}}_{{field.enName}}_{{option.name}}"
-                                        class="square-check" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
-                                        [ngModel]="getSelectedOption(field.id)" 
-                                        (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
-                                        [class.error-border]="isFieldInvalid(field)" />
-                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{
-                                        option.name }}</label>
+                                    <input type="checkbox" id="{{cat.enName}}_{{field.enName}}_{{option.name}}" 
+                                    class="square-check" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
+                                    [checked]="isOptionSelected(field.id, option.id)"  
+                                    (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
+                                    [class.error-border]="isFieldInvalid(field)"
+                                    />
+                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">
+                                        {{ option.name }}
+                                    </label>
                                 </div>
                             </div>
 

@@ -110,7 +110,7 @@ export class AttendanceComponent {
   }
 
   Create() {
-    this.router.navigateByUrl(`Employee/Attendance Create`);
+    this.router.navigateByUrl(`Employee/Attendance/Create`);
   }
 
   Edit(id: number) {

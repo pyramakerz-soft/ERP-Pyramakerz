@@ -151,23 +151,13 @@ namespace LMS_CMS_PL.Services
 
                 var s3Client = new AmazonS3Client();
                 var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-
+                 
                 string fileName = Path.GetFileName(sourceFilePath);
-                //string destinationKey = $"{basePath}/{entityId}/{fileName}";
-
-                //string sourceKey = sourceFilePath.Replace("\\", "/");
-
-                string destinationKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{basePath}/{entityId}/{fileName}";
-
-                // Ensure source path uses forward slashes and includes the full path
-                string sourceKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{sourceFilePath.Replace("\\", "/")}";
-
-                Console.WriteLine("--------------------------------------------------------------------------------");
-                Console.WriteLine(destinationKey);
-                Console.WriteLine(sourceKey);
-                Console.WriteLine("--------------------------------------------------------------------------------");
+                string destinationKey = $"{basePath}/{entityId}/{fileName}";
+                string sourceKey = sourceFilePath.Replace("\\", "/");
 
                 bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, $"{domain}/{subDomain}");
+
                 if (copied)
                 {
                     return destinationKey;
@@ -190,6 +180,11 @@ namespace LMS_CMS_PL.Services
 
                 var fileName = Path.GetFileName(sourceFilePath);
                 var destinationFilePath = Path.Combine(destinationFolder, fileName);
+
+                Console.WriteLine("--------------------------------------------------------------------------------");
+                Console.WriteLine(originalFilePath);
+                Console.WriteLine(destinationFilePath);
+                Console.WriteLine("--------------------------------------------------------------------------------");
 
                 System.IO.File.Copy(originalFilePath, destinationFilePath, overwrite: true);
 

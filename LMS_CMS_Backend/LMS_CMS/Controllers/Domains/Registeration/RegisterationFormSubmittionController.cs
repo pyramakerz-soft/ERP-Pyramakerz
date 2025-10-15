@@ -466,14 +466,72 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         }
                     }
                 }
-            } 
+            }
+
+            foreach (var group in newData.GroupBy(x => x.CategoryFieldID))
+            {
+                CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.ID == group.Key);
+                
+                if (categoryField == null)
+                    continue;
+
+                if(categoryField.FieldTypeID == 4)
+                {
+                    List<long> newOptionIds = group
+                        .Where(x => x.SelectedFieldOptionID.HasValue)
+                        .Select(x => x.SelectedFieldOptionID!.Value)
+                        .Distinct()
+                        .ToList();
+                    
+                    List<RegisterationFormSubmittion> existingSubmissions = Unit_Of_Work.registerationFormSubmittion_Repository.FindBy(
+                        r => r.RegisterationFormParentID == student.RegistrationFormParentID && r.CategoryFieldID == group.Key)
+                        .ToList();
+
+                    List<long> existingOptionIds = existingSubmissions
+                    .Where(r => r.SelectedFieldOptionID.HasValue)
+                    .Select(r => r.SelectedFieldOptionID!.Value)
+                    .ToList();
+
+                    List<long> optionsToAdd = newOptionIds.Except(existingOptionIds).ToList();
+
+                    foreach (var optionId in optionsToAdd)
+                    {
+                        var newSubmission = new RegisterationFormSubmittion
+                        {
+                            RegisterationFormParentID = student.RegistrationFormParentID.Value,
+                            CategoryFieldID = group.Key,
+                            SelectedFieldOptionID = optionId,
+                            InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                            IsDeleted = true
+                        };
+
+                        if (userTypeClaim == "octa")
+                            newSubmission.InsertedByOctaId = userId;
+                        else if (userTypeClaim == "employee")
+                            newSubmission.InsertedByUserId = userId;
+
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Add(newSubmission);
+                    }
+
+                    var optionsToDelete = existingOptionIds.Except(newOptionIds).ToList();
+
+                    foreach (var submission in existingSubmissions.Where(s => s.SelectedFieldOptionID.HasValue && optionsToDelete.Contains(s.SelectedFieldOptionID.Value)))
+                    { 
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Delete(submission.ID);
+                    }
+
+                    continue;
+                }
+            }
 
             foreach (var item in newData)
             {
                 CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == item.CategoryFieldID);
-                if (categoryField.FieldTypeID != 6)
+                if (categoryField.FieldTypeID != 6 && categoryField.FieldTypeID != 4)
                 {
-                    RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.RegisterationFormParentID == student.RegistrationFormParentID && r.CategoryFieldID == item.CategoryFieldID);
+                    RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(
+                        r => r.RegisterationFormParentID == student.RegistrationFormParentID && r.CategoryFieldID == item.CategoryFieldID);
                     if (registerationFormSubmittion == null) // new submission
                     {
                         registerationFormSubmittion = new RegisterationFormSubmittion
@@ -520,9 +578,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                             }
                         }
                         Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
-                    }
-
-                }
+                    } 
+                } 
 
                 //////////////////////////Edit Student//////////////////////////////////////
                  
