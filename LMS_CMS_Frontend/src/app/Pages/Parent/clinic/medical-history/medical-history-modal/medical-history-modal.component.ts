@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ParentMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
@@ -56,6 +56,8 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     private languageService: LanguageService,
     private apiService: ApiService,
     private realTimeService: RealTimeNotificationServiceService,
+      private translate: TranslateService
+
   ) {}
 
   ngOnInit() {
@@ -84,6 +86,32 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
       }
     }
   }
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   private resetForm() {
     this.editMode = false;

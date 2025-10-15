@@ -278,7 +278,7 @@ selectTab(tab: string) {
     id: item.id,  // Make sure to include this
     date: new Date(item.insertedAt).toLocaleDateString(),
     details: item.details || 'No details',
-    permanentDrug: item.permanentDrug || 'None'
+    permanentDrug: item.permanentDrug || '-'
   }));
   console.log('MH By Parent data with IDs:', this.tableData);  // Debug log
   break;
@@ -297,7 +297,7 @@ case 'MH By Doctor':
     id: item.id,  // Make sure to include this
     date: new Date(item.insertedAt).toLocaleDateString(),
     details: item.details || 'No details',
-    permanentDrug: item.permanentDrug || 'None'
+    permanentDrug: item.permanentDrug || '-'
   }));
   console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
   break;
@@ -318,8 +318,8 @@ case 'MH By Doctor':
             const row: any = {
               date: new Date(form.date).toLocaleDateString(),
               attendance: studentHygiene.attendance ? 'Present' : 'Absent',
-              comment: studentHygiene.comment || 'None',
-              actionTaken: studentHygiene.actionTaken || 'None'
+              comment: studentHygiene.comment || '-',
+              actionTaken: studentHygiene.actionTaken || '-'
             };
 
             if (studentHygiene.hygieneTypes) {

@@ -312,6 +312,7 @@
                         <input id="imageFile" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                     </div>
                 </div> 
+                <span *ngIf="validationErrors['imageFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['imageFile'] }}</span>
             </div> 
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="recordLink">  {{ 'Record' | translate }}  {{ 'Link' | translate }}</label>

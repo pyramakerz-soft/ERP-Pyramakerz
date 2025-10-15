@@ -60,8 +60,7 @@
                 <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
                 <option *ngIf="classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
-            <span *ngIf="validationErrors['class']" class="text-red-500 ml-3 font-normal">{{ validationErrors['class']
-                }}</span>
+            <span *ngIf="validationErrors['class']" class="text-red-500 ml-3 font-normal">{{ validationErrors['class']}}</span>
         </div>
 
         <!-- Date Input -->

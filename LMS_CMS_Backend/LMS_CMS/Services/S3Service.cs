@@ -321,12 +321,63 @@ namespace LMS_CMS_PL.Services
             return contentType;
         }
 
+        //public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
+        //{
+        //    try
+        //    {
+        //        var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("\\", "/");
+        //        var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("\\", "/");
+
+        //        var copyRequest = new CopyObjectRequest
+        //        {
+        //            SourceBucket = _bucketName,
+        //            DestinationBucket = _bucketName,
+        //            SourceKey = fullSourceKey,
+        //            DestinationKey = fullDestinationKey
+        //        };
+
+        //        await _s3Client.CopyObjectAsync(copyRequest);
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        //public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
+        //{
+        //    try
+        //    {
+        //        var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("\\", "/");
+        //        var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("\\", "/"); 
+
+        //        var copyRequest = new CopyObjectRequest
+        //        {
+        //            SourceBucket = _bucketName,
+        //            DestinationBucket = _bucketName,
+        //            SourceKey = fullSourceKey,
+        //            DestinationKey = fullDestinationKey
+        //        };
+
+        //        await _s3Client.CopyObjectAsync(copyRequest);
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    { 
+        //        return false;
+        //    }
+        //}
+
         public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
         {
             try
             {
-                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("\\", "/");
-                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("\\", "/");
+                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("//", "/");
+                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("//", "/");
+
+                Console.WriteLine($"[S3 COPY] From: {fullSourceKey}");
+                Console.WriteLine($"[S3 COPY] To:   {fullDestinationKey}");
 
                 var copyRequest = new CopyObjectRequest
                 {
@@ -339,10 +390,17 @@ namespace LMS_CMS_PL.Services
                 await _s3Client.CopyObjectAsync(copyRequest);
                 return true;
             }
-            catch
+            catch (AmazonS3Exception ex)
             {
+                Console.WriteLine($"AWS Error: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General Error: {ex.Message}");
                 return false;
             }
         }
+
     }
 }
