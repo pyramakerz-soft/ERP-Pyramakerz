@@ -49,7 +49,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 followUpCount,
                 feesAmount,
-                assignmentStats = new
+                submissionsCount = new
                 {
                     notAnswered,
                     answeredOnTime,

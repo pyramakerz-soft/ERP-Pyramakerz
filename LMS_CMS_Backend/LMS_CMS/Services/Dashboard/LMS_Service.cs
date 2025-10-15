@@ -24,17 +24,47 @@ namespace LMS_CMS_PL.Services.Dashboard
                     (month == null || f.DueDate.Month == month)
                 ).ToList();
 
-            List<long> studentClassroomIDs = new List<long>();
+            int totalStudentsNotAnswered = 0;
+            int totalStudentsAnsweredAtTheSpecificDate = 0;
+            int totalStudentsAnsweredAfterTheDueDate = 0;
 
             foreach (var assignment in assignments)
             {
                 if (assignment.IsSpecificStudents)
                 {
                     List<AssignmentStudentIsSpecific> studentIsSpecifics = unitOfWork.assignmentStudentIsSpecific_Repository.FindBy(
-                        d => d.IsDeleted != true && d.AssignmentID == assignment.ID && 
+                        d => d.IsDeleted != true && d.AssignmentID == assignment.ID &&
                         d.StudentClassroom.IsDeleted != true && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
-                        ).ToList(); 
-                    studentClassroomIDs.AddRange(studentIsSpecifics.Select(s => s.StudentClassroomID));
+                        ).ToList();
+
+                    foreach (var studentIsSpecific in studentIsSpecifics)
+                    {
+                        AssignmentStudent assignmentStudent = unitOfWork.assignmentStudent_Repository.First_Or_Default(
+                            d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentIsSpecific.StudentClassroomID
+                            && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
+                            );
+
+                        if (assignmentStudent == null)
+                        {
+                            totalStudentsNotAnswered++;
+                        }
+                        else
+                        {
+                            var insertedDateOnly = DateOnly.FromDateTime(assignmentStudent.InsertedAt.Value);
+                            if (insertedDateOnly >= assignment.OpenDate && insertedDateOnly <= assignment.DueDate)
+                            {
+                                totalStudentsAnsweredAtTheSpecificDate++;
+                            }
+                            else if (insertedDateOnly > assignment.DueDate && insertedDateOnly <= assignment.CutOfDate)
+                            {
+                                totalStudentsAnsweredAfterTheDueDate++;
+                            }
+                            else
+                            {
+                                totalStudentsNotAnswered++;
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -42,42 +72,36 @@ namespace LMS_CMS_PL.Services.Dashboard
                         d => d.SubjectID == assignment.SubjectID && d.IsDeleted != true && !d.Hide &&
                         d.StudentClassroom.IsDeleted != true && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
                         ).ToList();
-                    studentClassroomIDs.AddRange(studentClassroomSubjects.Select(s => s.StudentClassroomID)); 
+
+                    foreach (var studentClassroomSubject in studentClassroomSubjects)
+                    {
+                        AssignmentStudent assignmentStudent = unitOfWork.assignmentStudent_Repository.First_Or_Default(
+                            d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID
+                            && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
+                            );
+
+                        if (assignmentStudent == null)
+                        {
+                            totalStudentsNotAnswered++;
+                        }
+                        else
+                        {
+                            var insertedDateOnly = DateOnly.FromDateTime(assignmentStudent.InsertedAt.Value);
+                            if (insertedDateOnly >= assignment.OpenDate && insertedDateOnly <= assignment.DueDate)
+                            {
+                                totalStudentsAnsweredAtTheSpecificDate++;
+                            }
+                            else if (insertedDateOnly > assignment.DueDate && insertedDateOnly <= assignment.CutOfDate)
+                            {
+                                totalStudentsAnsweredAfterTheDueDate++;
+                            }
+                            else
+                            {
+                                totalStudentsNotAnswered++;
+                            }
+                        }
+                    }
                 }
-            }
-
-            studentClassroomIDs = studentClassroomIDs.Distinct().ToList();
-            var assignmentIDs = assignments.Select(d => d.ID).ToHashSet();
-               
-            List<AssignmentStudent> assignmentStudents = unitOfWork.assignmentStudent_Repository.FindBy(
-                d => studentClassroomIDs.Contains(d.StudentClassroomID) &&
-                assignmentIDs.Contains(d.AssignmentID) && 
-                d.IsDeleted != true &&
-                d.StudentClassroom.IsDeleted != true && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true && 
-                d.Assignment.IsDeleted != true 
-                ).ToList();
-
-            int totalStudentsNotAnswered = studentClassroomIDs.Where(d => !assignmentStudents.Select(s => s.StudentClassroomID).Contains(d)).Count();
-            int totalStudentsAnsweredAtTheSpecificDate = 0;
-            int totalStudentsAnsweredAfterTheDueDate = 0;
-
-            foreach (var assignmentStudent in assignmentStudents)
-            {
-                Assignment assignment = assignments.FirstOrDefault(d => d.ID == assignmentStudent.AssignmentID);
-
-                if (assignment == null || assignmentStudent.InsertedAt == null)
-                    continue;
-
-                var insertedDateOnly = DateOnly.FromDateTime(assignmentStudent.InsertedAt.Value);
-
-                if (insertedDateOnly >= assignment.OpenDate && insertedDateOnly <= assignment.DueDate)
-                {
-                    totalStudentsAnsweredAtTheSpecificDate++;
-                }
-                else if (insertedDateOnly > assignment.DueDate && insertedDateOnly <= assignment.CutOfDate)
-                {
-                    totalStudentsAnsweredAfterTheDueDate++;
-                } 
             }
 
             return (totalStudentsNotAnswered, totalStudentsAnsweredAtTheSpecificDate, totalStudentsAnsweredAfterTheDueDate);
