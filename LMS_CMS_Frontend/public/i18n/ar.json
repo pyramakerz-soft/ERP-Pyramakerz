@@ -1390,7 +1390,10 @@
 "bounsTypeID": "نوع المكافأة",
 "amount": "المبلغ",
 "numberOfBounsDays": "عدد أيام المكافأة",
-"hours": "الساعات"
+"hours": "الساعات",
+"Updated successfully": "تم التحديث بنجاح",
+"Created successfully": "تم الإنشاء بنجاح",
+"Deleted successfully": "تم الحذف بنجاح"
 
 
 

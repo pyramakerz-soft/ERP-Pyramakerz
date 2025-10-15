@@ -26,11 +26,21 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './bonus.component.html',
-  styleUrl: './bonus.component.css'
+  styleUrl: './bonus.component.css',
 })
 export class BonusComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -58,10 +68,10 @@ export class BonusComponent {
   SelectedEmployee: Employee = new Employee();
   employees: Employee[] = [];
   bounsType: BounsType[] = [];
-  CurrentPage: number = 1
-  PageSize: number = 10
-  TotalPages: number = 1
-  TotalRecords: number = 0
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
   isDeleting: boolean = false;
 
   constructor(
@@ -77,8 +87,8 @@ export class BonusComponent {
     public BonusServ: BonusService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService,
-  ) { }
+    private realTimeService: RealTimeNotificationServiceService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -97,11 +107,13 @@ export class BonusComponent {
       }
     });
 
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   ngOnDestroy(): void {
@@ -112,68 +124,69 @@ export class BonusComponent {
   }
 
   private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
 
-GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
-  this.TableData = [];
-  this.BonusServ.Get(DomainName, pageNumber, pageSize).subscribe(
-    (data) => {
-      this.CurrentPage = data.pagination.currentPage
-      this.PageSize = data.pagination.pageSize
-      this.TotalPages = data.pagination.totalPages
-      this.TotalRecords = data.pagination.totalRecords
-      this.TableData = data.data
-    },
-    (error) => {
-      if (error.status == 404) {
-        if (this.TotalRecords != 0) {
-          let lastPage
-          if (this.isDeleting) {
-            lastPage = (this.TotalRecords - 1) / this.PageSize
-          } else {
-            lastPage = this.TotalRecords / this.PageSize
-          }
-          if (lastPage >= 1) {
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.TableData = [];
+    this.BonusServ.Get(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
             if (this.isDeleting) {
-              this.CurrentPage = Math.floor(lastPage)
-              this.isDeleting = false
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
             } else {
-              this.CurrentPage = Math.ceil(lastPage)
+              lastPage = this.TotalRecords / this.PageSize;
             }
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
           }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load bonuses');
+          this.showErrorAlert(errorMessage);
         }
-      } else {
-        const errorMessage = error.error?.message || this.translate.instant('Failed to load bonuses');
-        this.showErrorAlert(errorMessage);
       }
-    }
-  )
-}
+    );
+  }
 
   Create() {
     this.mode = 'Create';
@@ -184,7 +197,15 @@ GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Bonus') + this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Bonus') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -194,7 +215,7 @@ GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     }).then((result) => {
       if (result.isConfirmed) {
         this.BonusServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -226,48 +247,51 @@ GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     return IsAllow;
   }
 
-CreateOREdit() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    console.log(this.bouns)
-    if (this.mode == 'Create') {
-      this.BonusServ.Add(this.bouns, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(
-            this.translate.instant('has been created successfully')
-          );
-        },
-        (error) => {
-          console.log(error)
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to create bonus');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-    if (this.mode == 'Edit') {
-      this.BonusServ.Edit(this.bouns, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(
-            this.translate.instant('Bonus') + ' ' + 
-            this.translate.instant('has been updated successfully')
-          );
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update bonus');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      console.log(this.bouns);
+      if (this.mode == 'Create') {
+        this.BonusServ.Add(this.bouns, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(
+              this.translate.instant('Created successfully')
+            );
+          },
+          (error) => {
+            console.log(error);
+            this.isLoading = false;
+            const errorMessage =
+              error.error?.message ||
+              this.translate.instant('Failed to create bonus');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.BonusServ.Edit(this.bouns, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(
+              this.translate.instant('Updated successfully')
+            );
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage =
+              error.error?.message ||
+              this.translate.instant('Failed to update bonus');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
   }
-}
 
   closeModal() {
     this.isModalVisible = false;
@@ -276,21 +300,21 @@ CreateOREdit() {
   openModal() {
     this.validationErrors = {};
     this.isModalVisible = true;
-    this.getAllEmployees()
-    this.getAllTypes()
+    this.getAllEmployees();
+    this.getAllTypes();
   }
 
   getAllEmployees() {
     this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
-      this.employees = d
-      console.log(this.employees)
-    })
+      this.employees = d;
+      console.log(this.employees);
+    });
   }
 
   getAllTypes() {
     this.BounsTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.bounsType = d
-    })
+      this.bounsType = d;
+    });
   }
 
   validateNumber(event: any, field: keyof Bonus): void {
@@ -303,48 +327,73 @@ CreateOREdit() {
     }
     if (field == 'minutes') {
       if (this.bouns.minutes > 60) {
-        this.bouns.minutes = 0
+        this.bouns.minutes = 0;
       }
     }
   }
 
-isFormValid(): boolean {
-  this.SelectedEmployee = this.employees.find(e => e.id == this.bouns.employeeID) || new Employee();
-  console.log(123,this.SelectedEmployee)
-  let isValid = true;
-  for (const key in this.bouns) {
-    if (this.bouns.hasOwnProperty(key)) {
-      const field = key as keyof Bonus;
-      if (!this.bouns[field]) {
-        if (
-          field == 'date' ||
-          field == 'bounsTypeID' ||
-          field == 'employeeID'
-        ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
-          isValid = false;
+  isFormValid(): boolean {
+    this.SelectedEmployee =
+      this.employees.find((e) => e.id == this.bouns.employeeID) ||
+      new Employee();
+    console.log(123, this.SelectedEmployee);
+    let isValid = true;
+    for (const key in this.bouns) {
+      if (this.bouns.hasOwnProperty(key)) {
+        const field = key as keyof Bonus;
+        if (!this.bouns[field]) {
+          if (
+            field == 'date' ||
+            field == 'bounsTypeID' ||
+            field == 'employeeID'
+          ) {
+            this.validationErrors[field] = `${this.translate.instant(
+              'Field is required'
+            )} ${this.translate.instant(field)}`;
+            isValid = false;
+          }
         }
       }
     }
+    if (
+      this.SelectedEmployee.hasAttendance != true &&
+      (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)
+    ) {
+      isValid = false;
+      this.validationErrors['bounsTypeID'] = this.translate.instant(
+        'This Employee Has No Attendance so should take bouns by amount only'
+      );
+    }
+    if (
+      this.bouns.bounsTypeID == 3 &&
+      (this.bouns.amount == 0 || this.bouns.amount == null)
+    ) {
+      isValid = false;
+      this.validationErrors['amount'] = `${this.translate.instant(
+        'Field is required'
+      )} ${this.translate.instant('amount')}`;
+    }
+    if (
+      this.bouns.bounsTypeID == 2 &&
+      (this.bouns.numberOfBounsDays == 0 ||
+        this.bouns.numberOfBounsDays == null)
+    ) {
+      isValid = false;
+      this.validationErrors['numberOfBounsDays'] = `${this.translate.instant(
+        'Field is required'
+      )} ${this.translate.instant('numberOfBounsDays')}`;
+    }
+    if (
+      this.bouns.bounsTypeID == 1 &&
+      (this.bouns.hours == 0 || this.bouns.hours == null)
+    ) {
+      isValid = false;
+      this.validationErrors['hours'] = `${this.translate.instant(
+        'Field is required'
+      )} ${this.translate.instant('hours')}`;
+    }
+    return isValid;
   }
-  if (this.SelectedEmployee.hasAttendance != true && (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)) {
-    isValid = false;
-    this.validationErrors['bounsTypeID'] = this.translate.instant('This Employee Has No Attendance so should take bouns by amount only');
-  }
-  if (this.bouns.bounsTypeID == 3 && (this.bouns.amount == 0 || this.bouns.amount == null)) {
-    isValid = false;
-    this.validationErrors['amount'] = `${this.translate.instant('Field is required')} ${this.translate.instant('amount')}`;
-  }
-  if (this.bouns.bounsTypeID == 2 && (this.bouns.numberOfBounsDays == 0 || this.bouns.numberOfBounsDays == null)) {
-    isValid = false;
-    this.validationErrors['numberOfBounsDays'] = `${this.translate.instant('Field is required')} ${this.translate.instant('numberOfBounsDays')}`;
-  }
-  if (this.bouns.bounsTypeID == 1 && (this.bouns.hours == 0 || this.bouns.hours == null)) {
-    isValid = false;
-    this.validationErrors['hours'] = `${this.translate.instant('Field is required')} ${this.translate.instant('hours')}`;
-  }
-  return isValid;
-}
 
   capitalizeField(field: keyof Bonus): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -359,9 +408,9 @@ isFormValid(): boolean {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
-    this.PageSize = this.TotalRecords
-    this.CurrentPage = 1
-    this.TotalPages = 1
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
@@ -381,7 +430,7 @@ isFormValid(): boolean {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -392,8 +441,8 @@ isFormValid(): boolean {
   }
 
   changeCurrentPage(currentPage: number) {
-    this.CurrentPage = currentPage
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
   validatePageSize(event: any) {
@@ -431,8 +480,7 @@ isFormValid(): boolean {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      this.PageSize = 0
+      this.PageSize = 0;
     }
   }
-
 }

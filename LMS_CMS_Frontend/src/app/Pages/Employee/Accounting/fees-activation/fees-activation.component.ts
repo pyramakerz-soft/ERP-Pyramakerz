@@ -50,6 +50,7 @@ export class FeesActivationComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: FeesActivation[] = [];
+  OriginalTableData: FeesActivation[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
@@ -150,8 +151,10 @@ export class FeesActivationComponent {
 
   GetAllFeesData() {
     this.TableData = []
+    this.OriginalTableData = []
     this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
+      this.OriginalTableData = d;
+      this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
       this.isSearchLoading = false
     },err=>{
      this.isSearchLoading = false
@@ -363,7 +366,7 @@ export class FeesActivationComponent {
     if (this.isFormValid()) {
       this.isLoading = true
       this.FeesForAdd = [];
-      const distinctStudentIDs = Array.from(new Set(this.TableData.map(stu => stu.studentID)));
+      const distinctStudentIDs = Array.from(new Set(this.OriginalTableData.map(stu => stu.studentID)));
       distinctStudentIDs.forEach(stu => {
         var fee: FeesActivationAddPut = new FeesActivationAddPut();
         fee.academicYearId = this.YearId;
@@ -381,6 +384,7 @@ export class FeesActivationComponent {
         this.GetAllFeesData();
         this.Search()
         this.Fees =new FeesActivationAddPut()
+        this.DiscountPercentage=null
         Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',

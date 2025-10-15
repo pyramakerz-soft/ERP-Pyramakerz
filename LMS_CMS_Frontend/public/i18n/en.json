@@ -1382,7 +1382,10 @@
 "bounsTypeID": "bouns Type",
 "amount": "amount",
 "numberOfBounsDays": "numberOfBounsDays",
-"hours": "hours"
+"hours": "hours",
+"Updated successfully": "Updated successfully",
+"Created successfully": "Created successfully",
+"Deleted successfully": "Deleted successfully"
 
 
 

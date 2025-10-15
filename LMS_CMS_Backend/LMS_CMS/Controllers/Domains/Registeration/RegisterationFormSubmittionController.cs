@@ -23,13 +23,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         IMapper mapper;
         private readonly UOW _Unit_Of_Work_Octa;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly CreateStudentService _createStudentService;
+        private readonly FileValidationService _fileValidationService;
         private readonly FileUploadsService _fileService;
 
-        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
+        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService , FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _Unit_Of_Work_Octa = unit_Of_Work_Octa;
+            _fileValidationService = fileValidationService;
             _checkPageAccessService = checkPageAccessService;   
             _fileService = fileService;
         }
@@ -139,65 +142,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         //////////////////////////////////////////////////////////
 
-        [HttpPost]
-        [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }, 
-          pages: new[] {"Student"}  
-        )]
-        public IActionResult Add(List<RegisterationFormSubmittionGetDTO> newData)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-            long.TryParse(userRoleClaim, out long roleId);
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID, Type claim not found.");
-            }
-            foreach (var item in newData)
-            {
-                RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
-
-                if (item.SelectedFieldOptionID == 0) 
-                {
-                    item.SelectedFieldOptionID = null;
-                }
-                mapper.Map(item, registerationFormSubmittion);
-
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                registerationFormSubmittion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                if (userTypeClaim == "octa")
-                {
-                    registerationFormSubmittion.InsertedByOctaId = userId;
-                }
-                else if (userTypeClaim == "employee")
-                {
-                    registerationFormSubmittion.InsertedByUserId = userId;
-                }
-
-                Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
-                
-            }
-
-            Unit_Of_Work.SaveChanges();
-            return Ok();
-        }
-
-        //////////////////////////////////////////////////////////
-
-        [HttpPut("ForSpacificStudent/{StudentId}")]
+        [HttpPut("{StudentId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] {"Student" }
          )]
-        public IActionResult Edit(long StudentId ,List<RegisterationFormSubmittionGetDTO> newData)
+        public async Task<IActionResult> EditAsync(long StudentId, [FromForm] List<RegisterationFormSubmittionGetDTO> newData, [FromForm] List<RegisterationFormSubmittionForFiles> filesFieldCat = null)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -233,50 +187,363 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             foreach (var item in newData)
             {
-                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID);
-                if (registerationFormSubmittion == null)
+                switch (item.CategoryFieldID)
                 {
-                    return NotFound("Registration Form Submittion Test not found");
-                }
-                if (item.SelectedFieldOptionID == 0)
-                {
-                    item.SelectedFieldOptionID = null;
-                }
-                mapper.Map(item, registerationFormSubmittion);
+                    case 3:
+                        if(item.SelectedFieldOptionID == null)
+                        {
+                          item.TextAnswer = item.TextAnswer.ToString();  // gender when edit it return from front text number and  option = null
+                        }
+                        else
+                        {
+                            item.TextAnswer = item.SelectedFieldOptionID.ToString();
+                            item.SelectedFieldOptionID = null;
+                        }
 
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                registerationFormSubmittion.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                if (userTypeClaim == "octa")
+                        break;
+
+                    case 5:
+                        if (item.SelectedFieldOptionID == null)
+                        {
+                            item.TextAnswer = item.TextAnswer.ToString();  // gender when edit it return from front text number and  option = null
+                        }
+                        else
+                        {
+                            item.TextAnswer = item.SelectedFieldOptionID.ToString();
+                            item.SelectedFieldOptionID = null;
+                        }
+                        break;
+
+                    case 7:
+                        item.TextAnswer = item.SelectedFieldOptionID.ToString();
+                        item.SelectedFieldOptionID = null;
+
+                        break;
+
+                    case 8:
+                        item.TextAnswer = item.SelectedFieldOptionID.ToString();
+                        item.SelectedFieldOptionID = null;
+
+                        break;
+
+                    case 9:
+                        item.TextAnswer = item.SelectedFieldOptionID.ToString();
+                        item.SelectedFieldOptionID = null;
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            string ParentEmail = newData.FirstOrDefault(s => s.CategoryFieldID == 21)?.TextAnswer ?? string.Empty;
+
+            string MotherEmail = newData.FirstOrDefault(s => s.CategoryFieldID == 28)?.TextAnswer ?? string.Empty;
+
+            string StudentName = newData.FirstOrDefault(s => s.CategoryFieldID == 1)?.TextAnswer ?? string.Empty;
+
+            string StudentArName = newData.FirstOrDefault(s => s.CategoryFieldID == 2)?.TextAnswer ?? string.Empty;
+
+            string Phone = newData.FirstOrDefault(s => s.CategoryFieldID == 20)?.TextAnswer ?? string.Empty;
+
+            string GradeID = newData.FirstOrDefault(s => s.CategoryFieldID == 9)?.TextAnswer ?? string.Empty;
+
+            string SchoolID = newData.FirstOrDefault(s => s.CategoryFieldID == 7)?.TextAnswer ?? string.Empty;
+
+            string AcademicYearID = newData.FirstOrDefault(s => s.CategoryFieldID == 8)?.TextAnswer ?? string.Empty;
+
+            if (ParentEmail != string.Empty)
+            {
+                try
                 {
-                    registerationFormSubmittion.UpdatedByOctaId = userId;
-                    if (registerationFormSubmittion.UpdatedByUserId != null)
+                    var mailAddress = new System.Net.Mail.MailAddress(ParentEmail);
+                    if (mailAddress.Address != ParentEmail)
                     {
-                        registerationFormSubmittion.UpdatedByUserId = null;
+                        return BadRequest("Invalid Guardian's email Format");
                     }
                 }
-                else if (userTypeClaim == "employee")
+                catch
                 {
-                    registerationFormSubmittion.UpdatedByUserId = userId;
-                    if (registerationFormSubmittion.UpdatedByOctaId != null)
+                    return BadRequest("Invalid Guardian's email Format");
+                }
+            }
+
+            if (MotherEmail != string.Empty)
+            {
+                try
+                {
+                    var mailAddress = new System.Net.Mail.MailAddress(MotherEmail);
+                    if (mailAddress.Address != MotherEmail)
                     {
-                        registerationFormSubmittion.UpdatedByOctaId = null;
+                        return BadRequest("Invalid Mother's email Format");
                     }
                 }
-                Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+                catch
+                {
+                    return BadRequest("Invalid Mother's email Format");
+                }
+            }
+           
 
-                if (item.CategoryFieldID ==  1) 
+            if (GradeID != string.Empty)
+            {
+                Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID == long.Parse(GradeID) && s.IsDeleted != true);
+                if (grade == null)
                 {
-                    student.en_name = item.TextAnswer;
-                    registerationFormParent.StudentEnName = item.TextAnswer;
+                    return NotFound("There is no Grade with this ID");
                 }
-                if (item.CategoryFieldID == 2)
+            }
+
+            if (SchoolID != string.Empty)
+            {
+                School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == long.Parse(SchoolID) && s.IsDeleted != true);
+                if (school == null)
                 {
-                    student.ar_name = item.TextAnswer;
-                    registerationFormParent.StudentArName = item.TextAnswer;
+                    return NotFound("There is no School with this ID");
                 }
+            }
+
+            if (AcademicYearID != string.Empty)
+            {
+                AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(s => s.ID == long.Parse(AcademicYearID) && s.IsDeleted != true);
+                if (academicYear == null)
+                {
+                    return NotFound("There is no Academic Year with this ID");
+                }
+            }
+
+            long parentID = 0;
+            Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(s => s.Email == ParentEmail && s.IsDeleted != true);
+            if (parent != null)
+            {
+                parentID = parent.ID;
+            }
+
+
+            if (filesFieldCat != null)
+            {
+                foreach (var file in filesFieldCat)
+                {
+                    if (file.SelectedFile != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.SelectedFile);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        }
+                    }
+                }
+            }
+
+            registerationFormParent.StudentName = $"{StudentName.Replace(" ", "_")}_{registerationFormParent.ID}";
+            registerationFormParent.StudentEnName = StudentName;
+            registerationFormParent.StudentArName = StudentArName;
+            registerationFormParent.Phone = Phone;
+            registerationFormParent.GradeID = GradeID.ToString();
+            registerationFormParent.Email = ParentEmail;
+            registerationFormParent.AcademicYearID = AcademicYearID.ToString();
+            registerationFormParent.RegisterationFormStateID = 1;// Pending
+            registerationFormParent.ParentID = parentID != 0 ? parentID : (long?)null;
+
+            if (userTypeClaim == "octa")
+            {
+                registerationFormParent.UpdatedByOctaId = userId;
+            }
+            else if (userTypeClaim == "employee")
+            {
+                registerationFormParent.UpdatedByUserId = userId;
+            }
+
+            Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent); 
+            Unit_Of_Work.SaveChanges();
+
+            ////////////////////////////////////////////////////////////////
+            
+            for (int i = 0; i < newData.Count; i++)
+            {
+                CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(s => s.ID == newData[i].CategoryFieldID && s.IsDeleted != true);
+                if (categoryField == null)
+                {
+                    return NotFound("There is no Category Field with this ID");
+                }
+
+                if (categoryField.IsMandatory)
+                {
+                    bool isThereAFile = false;
+                    if (filesFieldCat != null)
+                    {
+                        for (int j = 0; j < filesFieldCat.Count; j++)
+                        {
+                            if (filesFieldCat[j].SelectedFile.Length > 0)
+                            {
+                                if (filesFieldCat[j].CategoryFieldID == newData[i].CategoryFieldID)
+                                {
+                                    isThereAFile = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (newData[i].SelectedFieldOptionID == null && newData[i].TextAnswer == null && !isThereAFile)
+                    {
+                        return BadRequest($"Field {categoryField.EnName} is required");
+                    }
+                }
+
+                if (newData[i].SelectedFieldOptionID != null)
+                {
+                    FieldOption fieldOption = Unit_Of_Work.fieldOption_Repository.First_Or_Default(s => s.ID == newData[i].SelectedFieldOptionID && s.IsDeleted != true);
+                    if (fieldOption == null)
+                    {
+                        return NotFound("There is no Field Option with this ID" + newData[i].SelectedFieldOptionID + newData[i].TextAnswer);
+                    }
+                }
+            }
+
+            ////////////////////////////////////////////////////////////////
+              
+            if (filesFieldCat != null)
+            {
+                for (int j = 0; j < filesFieldCat.Count; j++)
+                {
+                    if (filesFieldCat[j].SelectedFile.Length > 0)
+                    {
+                        var fileLink = await _fileService.UploadFileAsync(filesFieldCat[j].SelectedFile,
+                            $"Registration/RegistrationForm/{registerationFormParent.RegistrationFormID.ToString()}/{student.RegistrationFormParentID.ToString()}",
+                            filesFieldCat[j].CategoryFieldID, HttpContext);
+
+                        RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(
+                            s => s.CategoryFieldID == filesFieldCat[j].CategoryFieldID && s.RegisterationFormParentID == student.RegistrationFormParentID);
+
+                        if (registerationFormSubmittion != null)
+                        {
+                            await _fileService.DeleteFileAsync(
+                                registerationFormSubmittion.TextAnswer,
+                                $"Registration/RegistrationForm/{registerationFormParent.RegistrationFormID.ToString()}/{student.RegistrationFormParentID.ToString()}",
+                                filesFieldCat[j].CategoryFieldID,
+                                HttpContext
+                            );
+
+                            if (userTypeClaim == "octa")
+                            {
+                                registerationFormSubmittion.UpdatedByOctaId = userId;
+                                registerationFormSubmittion.UpdatedByUserId = null;
+                            }
+                            else if (userTypeClaim == "employee")
+                            {
+                                registerationFormSubmittion.UpdatedByUserId = userId;
+                                registerationFormSubmittion.UpdatedByOctaId = null;
+                            }
+                            registerationFormSubmittion.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            registerationFormSubmittion.TextAnswer = fileLink;
+                            Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+                            Unit_Of_Work.SaveChanges();
+
+                        }
+                        else
+                        {
+                            registerationFormSubmittion = new RegisterationFormSubmittion
+                            {
+                                RegisterationFormParentID = student.RegistrationFormParentID.Value,
+                                CategoryFieldID = filesFieldCat[j].CategoryFieldID,
+                                SelectedFieldOptionID = null,
+                                TextAnswer = fileLink,
+                                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                                IsDeleted = true
+                            };
+                            if (userTypeClaim == "octa")
+                            {
+                                registerationFormSubmittion.InsertedByOctaId = userId;
+                            }
+                            else if (userTypeClaim == "employee")
+                            {
+                                registerationFormSubmittion.InsertedByUserId = userId;
+                            }
+                            Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                            Unit_Of_Work.SaveChanges();
+                        }
+                    }
+                }
+            } 
+
+            foreach (var item in newData)
+            {
+                CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == item.CategoryFieldID);
+                if (categoryField.FieldTypeID != 6)
+                {
+                    RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.RegisterationFormParentID == student.RegistrationFormParentID && r.CategoryFieldID == item.CategoryFieldID);
+                    if (registerationFormSubmittion == null) // new submission
+                    {
+                        registerationFormSubmittion = new RegisterationFormSubmittion
+                        {
+                            RegisterationFormParentID = student.RegistrationFormParentID.Value,
+                            CategoryFieldID = item.CategoryFieldID,
+                            SelectedFieldOptionID = item.SelectedFieldOptionID != null ? item.SelectedFieldOptionID : (long?)null,
+                            TextAnswer = item.TextAnswer != null ? item.TextAnswer : null,
+                            InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                            IsDeleted = true
+                        };
+                        if (userTypeClaim == "octa")
+                        {
+                            registerationFormSubmittion.InsertedByOctaId = userId;
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            registerationFormSubmittion.InsertedByUserId = userId;
+                        } 
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion); 
+                    }
+                    else // edit
+                    { 
+                        registerationFormSubmittion.RegisterationFormParentID = student.RegistrationFormParentID.Value;
+                        registerationFormSubmittion.CategoryFieldID = item.CategoryFieldID;
+                        registerationFormSubmittion.SelectedFieldOptionID = item.SelectedFieldOptionID != null ? item.SelectedFieldOptionID : (long?)null;
+                        registerationFormSubmittion.TextAnswer = item.TextAnswer != null ? item.TextAnswer : null;
+                     
+                        registerationFormSubmittion.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                        if (userTypeClaim == "octa")
+                        {
+                            registerationFormSubmittion.UpdatedByOctaId = userId;
+                            if (registerationFormSubmittion.UpdatedByUserId != null)
+                            {
+                                registerationFormSubmittion.UpdatedByUserId = null;
+                            }
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            registerationFormSubmittion.UpdatedByUserId = userId;
+                            if (registerationFormSubmittion.UpdatedByOctaId != null)
+                            {
+                                registerationFormSubmittion.UpdatedByOctaId = null;
+                            }
+                        }
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+                    }
+
+                }
+
+                //////////////////////////Edit Student//////////////////////////////////////
+                 
                 if (item.CategoryFieldID == 3)
                 {
-                    student.GenderId = Convert.ToInt64(item?.TextAnswer);
+                    if (!string.IsNullOrWhiteSpace(item.TextAnswer))
+                    {
+                        if (long.TryParse(item.TextAnswer, out long genderId))
+                        {
+                            var gender = Unit_Of_Work.gender_Repository.First_Or_Default(g => g.ID == genderId);
+                            if (gender == null)
+                            {
+                                return BadRequest($"Invalid Gender ID: {item.SelectedFieldOptionID} : {item.TextAnswer}");
+                            }
+                            student.GenderId = genderId;
+                        }
+                        else
+                        {
+                            return BadRequest($"Invalid Gender ID format: {item.TextAnswer}");
+                        }
+                    } 
                 }
                 if (item.CategoryFieldID == 4)
                 {
@@ -284,7 +551,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
                 if (item.CategoryFieldID == 5)
                 {
-                    student.Nationality = Convert.ToInt64(item?.TextAnswer);
+                    if (!string.IsNullOrWhiteSpace(item.TextAnswer))
+                    {
+                        if (long.TryParse(item.TextAnswer, out long nationalityId))
+                        {
+                            student.Nationality = nationalityId;
+                        }
+                        else
+                        {
+                            return BadRequest($"Invalid Nationality ID format: {item.TextAnswer}");
+                        }
+                    }
                 }
                 if (item.CategoryFieldID == 6)
                 {
@@ -330,11 +607,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 {
                     student.MotherEmail = item.TextAnswer;
                 }
-
             }
 
-            Unit_Of_Work.student_Repository.Update(student);
-            Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
+            student.en_name = StudentName;
+            student.ar_name = StudentArName;
+            student.User_Name = $"{StudentName.Replace(" ", "_")}_{registerationFormParent.ID}"; 
+            student.Parent_Id = parentID != 0 ? parentID : (long?)null;
+
+            Unit_Of_Work.student_Repository.Update(student); 
             Unit_Of_Work.SaveChanges();
             return Ok();
         }

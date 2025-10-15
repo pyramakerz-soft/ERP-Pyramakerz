@@ -50,8 +50,8 @@ export class RegistrationFormComponent {
   RegistrationFormData: RegistrationForm = new RegistrationForm();
   registrationForm: RegistrationFormForFormSubmission =
     new RegistrationFormForFormSubmission();
-  registrationFormSubmissionEdited: RegistrationFormSubmission[] = [];
-  registrationFormSubmissionNew: RegistrationFormSubmission[] = [];
+  // registrationFormSubmissionEdited: RegistrationFormSubmission[] = [];
+  // registrationFormSubmissionNew: RegistrationFormSubmission[] = [];
 
 
   registrationFormForFiles: RegistrationFormForFormSubmissionForFiles[] = [];
@@ -176,6 +176,7 @@ export class RegistrationFormComponent {
   getRegisterationFormSubmittion() {
     this.RegisterationFormSubmittionServ.GetByRegistrationParentID(this.RegistrationParentID, this.DomainName).subscribe((data) => {
       this.registrationForm.registerationFormSubmittions = data;
+            console.log(this.registrationForm.registerationFormSubmittions)
       this.selectedSchool =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 7)?.selectedFieldOptionID ?? 0;
       if (this.selectedSchool) {
         this.getAcademicYear();
@@ -202,7 +203,6 @@ export class RegistrationFormComponent {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     );
-     
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
@@ -343,6 +343,11 @@ export class RegistrationFormComponent {
     let answer: string | null = null;
     let option: number | null = null;
 
+    console.log(event)
+    console.log(selectedValue)
+    console.log(fieldTypeId)
+    console.log(fieldId)
+
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
       (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
       answer = selectedValue;
@@ -350,7 +355,7 @@ export class RegistrationFormComponent {
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
       answer = null; 
-    }
+    } 
 
     // if (fieldId == 3 || fieldId == 5) {
     //   option = parseInt(selectedValue);
@@ -379,15 +384,6 @@ export class RegistrationFormComponent {
         existingElement.selectedFieldOptionID = option;
         existingElement.textAnswer = null;
       }
-      if (this.path == 'Edit Student') { 
-        this.registrationFormSubmissionEdited.push({
-          id: existingElement.id,
-          registerationFormParentID: this.RegistrationParentID,
-          categoryFieldID: existingElement.categoryFieldID,
-          selectedFieldOptionID: existingElement.selectedFieldOptionID,
-          textAnswer: existingElement.textAnswer,
-        });
-      }
     } else {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
@@ -396,15 +392,6 @@ export class RegistrationFormComponent {
         selectedFieldOptionID: option,
         textAnswer: answer,
       });
-      if (this.mode == 'Edit') {
-        this.registrationFormSubmissionNew.push({
-          id: 0,
-          categoryFieldID: fieldId,
-          registerationFormParentID: this.RegistrationParentID,
-          selectedFieldOptionID: option,
-          textAnswer: answer,
-        });
-      }
     } 
   }
 
@@ -663,28 +650,19 @@ export class RegistrationFormComponent {
               }
             );
           } else if (this.mode == 'Edit') {
-            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe(
+            console.log(this.registrationForm.registerationFormSubmittions)
+            this.RegisterationFormSubmittionServ.Edit(this.StudentId,this.RegistrationParentID, this.registrationForm.registerationFormSubmittions, this.registrationFormForFiles, this.DomainName).subscribe(
               (s) => {
-                this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
-                  Swal.fire({
+                Swal.fire({
                     icon: 'success',
                     title: 'Success',
                     text: 'Student updated successfully',
                     confirmButtonText: 'Okay'
-                  });
-                  this.router.navigateByUrl(`Employee/Student`);
-                },
-                (error) => {
-                  this.isLoading = false;
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: error.error,
-                    confirmButtonColor: '#089B41',
-                  });
-                })
+                });
+                this.router.navigateByUrl(`Employee/Student`);
               },
               (error) => {
+            console.log(12345,error)
                 this.isLoading = false;
                 Swal.fire({
                   icon: 'error',
