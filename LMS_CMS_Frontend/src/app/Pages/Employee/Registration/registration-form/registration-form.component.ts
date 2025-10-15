@@ -35,6 +35,7 @@ import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Field } from '../../../../Models/Registration/field';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -159,12 +160,13 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
+
   getParentByID() {
     this.parentService
       .GetByID(this.UserID, this.DomainName)
@@ -175,8 +177,7 @@ export class RegistrationFormComponent {
 
   getRegisterationFormSubmittion() {
     this.RegisterationFormSubmittionServ.GetByRegistrationParentID(this.RegistrationParentID, this.DomainName).subscribe((data) => {
-      this.registrationForm.registerationFormSubmittions = data;
-            console.log(this.registrationForm.registerationFormSubmittions)
+      this.registrationForm.registerationFormSubmittions = data; 
       this.selectedSchool =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 7)?.selectedFieldOptionID ?? 0;
       if (this.selectedSchool) {
         this.getAcademicYear();
@@ -202,12 +203,20 @@ export class RegistrationFormComponent {
   getSelectedOption(fieldId: number): any | null {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
-    );
+    ); 
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
     return entry?.selectedFieldOptionID ?? null;
   }
+
+  isOptionSelected(fieldId: number, optionId: number): boolean {
+  return this.registrationForm.registerationFormSubmittions.some(
+    (entry) =>
+      entry.categoryFieldID === fieldId &&
+      entry.selectedFieldOptionID === optionId
+  );
+}
 
   getRegistrationFormData() {
     this.registrationFormService
@@ -341,12 +350,7 @@ export class RegistrationFormComponent {
     const selectedValue = (event.target as HTMLSelectElement).value;
 
     let answer: string | null = null;
-    let option: number | null = null;
-
-    console.log(event)
-    console.log(selectedValue)
-    console.log(fieldTypeId)
-    console.log(fieldId)
+    let option: number | null = null; 
 
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
       (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
@@ -356,6 +360,8 @@ export class RegistrationFormComponent {
       option = parseInt(selectedValue);
       answer = null; 
     } 
+
+    console.log(fieldId, selectedValue, answer, option);
 
     // if (fieldId == 3 || fieldId == 5) {
     //   option = parseInt(selectedValue);
@@ -400,7 +406,7 @@ export class RegistrationFormComponent {
     fieldTypeId: number,
     optionAnswer: number
   ) {
-    if (fieldTypeId == 4) {
+    if (fieldTypeId == 4) { 
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
         registerationFormParentID: this.RegistrationParentID,
@@ -411,14 +417,14 @@ export class RegistrationFormComponent {
     }
   }
 
-  FillOptionData() {
+  FillOptionData() {  
     this.selectedOptions.forEach((element) => {
       this.MultiOptionDataPush(
         element.fieldId,
         element.fieldTypeId,
         element.optionId
       );
-    });
+    }); 
     this.selectedOptions = [];
   }
 
@@ -427,12 +433,13 @@ export class RegistrationFormComponent {
     fieldId: number,
     fieldTypeId: number,
     optionId: number
-  ) {
+  ) {  
     const checkbox = event.target as HTMLInputElement;
 
     if (checkbox.checked) {
       this.addOptionToArray(fieldId, fieldTypeId, optionId);
     } else {
+      this.registrationForm.registerationFormSubmittions = this.registrationForm.registerationFormSubmittions.filter(d => d.categoryFieldID != fieldId || d.selectedFieldOptionID != optionId);
       this.removeOptionFromArray(fieldId, fieldTypeId, optionId);
     }
   }
@@ -593,7 +600,7 @@ export class RegistrationFormComponent {
     }
   }
 
-  async Save() {
+  async Save() { 
     if (this.User_Data_After_Login.type == 'parent') {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
@@ -607,8 +614,7 @@ export class RegistrationFormComponent {
     this.isGuardianEmailValid = true;
     this.isMotherEmailValid = true;
     this.isGuardianEmailSameAsParent = true;
-    this.FillOptionData();
-
+    this.FillOptionData(); 
     let valid = true;
     let EmptyFieldCat = [];
 
@@ -649,8 +655,7 @@ export class RegistrationFormComponent {
                 }
               }
             );
-          } else if (this.mode == 'Edit') {
-            console.log(this.registrationForm.registerationFormSubmittions)
+          } else if (this.mode == 'Edit') {  
             this.RegisterationFormSubmittionServ.Edit(this.StudentId,this.RegistrationParentID, this.registrationForm.registerationFormSubmittions, this.registrationFormForFiles, this.DomainName).subscribe(
               (s) => {
                 Swal.fire({
@@ -661,8 +666,7 @@ export class RegistrationFormComponent {
                 });
                 this.router.navigateByUrl(`Employee/Student`);
               },
-              (error) => {
-            console.log(12345,error)
+              (error) => { 
                 this.isLoading = false;
                 Swal.fire({
                   icon: 'error',
@@ -670,7 +674,7 @@ export class RegistrationFormComponent {
                   text: error.error,
                   confirmButtonColor: '#089B41',
                 });
-            })
+            }) 
           }
         }
         else {

@@ -572,7 +572,7 @@ export const routes: Routes = [
             { path: "Add Medal To Student", component: SocialWorkerMedalStudentComponent, title: "Social Worker Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Attendance", component: AttendanceComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Attendance/:id", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Attendance Create", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Attendance/Create", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Horizontal Meeting", component: HorizontalMeetingComponent, title: "Horizontal Meeting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Parent Meeting", component: ParentMeetingComponent, title: "Parent Meeting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Appoinment", component: AppointmentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -625,6 +625,7 @@ export const routes: Routes = [
             { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
             { path: "Medical History", component: ParentMedicalHistoryComponent, title: "Medical History" },
             { path: "Parent Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Parent Student Daily Performance Report", component: DailyPreformanceReportComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] , data: { reportType: 'parent' } },
         ]
     },
     {

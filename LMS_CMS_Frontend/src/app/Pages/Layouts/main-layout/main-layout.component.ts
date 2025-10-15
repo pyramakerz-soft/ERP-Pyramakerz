@@ -194,6 +194,10 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Certificate'),
               route: 'Parent Certificate'
+            },
+            {
+              label: this.translateFunction('Student Daily Performance'),
+              route: 'Parent Student Daily Performance Report'
             }
           ],
           icon: 'LMS'

@@ -536,7 +536,7 @@ export class DiscussionRoomComponent {
       const data: any = await firstValueFrom(
         this.discussionRoomService.Get(this.DomainName)
       );
-      this.TableData = data.data || [];
+      this.TableData = data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -558,4 +558,6 @@ export class DiscussionRoomComponent {
       this.TableData = [];
     }
   }
+
+   
 }
