@@ -16,6 +16,11 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import Swal from 'sweetalert2';
 import { SocialWorkerMedalStudentService } from '../../../../../Services/Employee/SocialWorker/social-worker-medal-student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { ActivatedRoute } from '@angular/router';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
+import { SocialWorkerMedalStudent } from '../../../../../Models/SocialWorker/social-worker-medal-student';
+import { Student } from '../../../../../Models/student';
 
 @Component({
   selector: 'app-student-medal-report',
@@ -25,6 +30,11 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   styleUrl: './student-medal-report.component.css'
 })
 export class StudentMedalReportComponent implements OnInit {
+  UserID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  reportType: string = 'employee';
+  DomainName: string = '';
+
   // Filter properties (all mandatory)
   selectedSchoolId: number = 0;
   selectedGradeId: number = 0;
@@ -36,9 +46,10 @@ export class StudentMedalReportComponent implements OnInit {
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
+  Student: Student= new Student();
 
   // Report data
-  medalReports: MedalStudentReportItem[] = [];
+  medalReports: SocialWorkerMedalStudent[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   isExporting: boolean = false;
@@ -66,6 +77,8 @@ export class StudentMedalReportComponent implements OnInit {
     private classroomService: ClassroomService,
     private studentService: StudentService,
     private apiService: ApiService,
+    public account: AccountService,   
+    private route: ActivatedRoute,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
     private reportsService: ReportsService
@@ -73,7 +86,28 @@ export class StudentMedalReportComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
+    this.DomainName = this.apiService.GetHeader();
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(this.reportType)
+    if(this.reportType == 'parent'){
+      this.getStudentsByParentId()
+    }
+    else if(this.reportType == 'student'){
+      this.showTable = true;
+      this.medalReportService.GetByStudentID(this.UserID,this.DomainName).subscribe((s)=>{
+        this.medalReports=s
+        this.prepareExportData();
+      })
     
+      this.studentService.GetByID(this.UserID,this.DomainName).subscribe((d)=>{
+        console.log(d)
+        this.Student =d
+      },error=>{
+        console.log(error)
+      })
+    }
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -85,6 +119,13 @@ export class StudentMedalReportComponent implements OnInit {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  getStudentsByParentId(){ 
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
   }
 
   async loadSchools() {
@@ -155,14 +196,27 @@ export class StudentMedalReportComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId) {
-      Swal.fire({
-        title: 'Incomplete Selection',
-        text: 'Please select School, Grade, Class, and Student to generate the report.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
+    if(this.reportType == 'employee'){
+      if (!this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId) {
+        Swal.fire({
+          title: 'Incomplete Selection',
+          text: 'Please select School, Grade, Class, and Student to generate the report.',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
+    }
+    else if(this.reportType == 'parent'){
+      if (!this.selectedStudentId) {
+        Swal.fire({
+          title: 'Incomplete Selection',
+          text: 'Please select Student to generate the report.',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
     }
 
     this.isLoading = true;
@@ -171,13 +225,7 @@ export class StudentMedalReportComponent implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
-        this.medalReportService.GetMedalToStudentReport(
-          this.selectedSchoolId,
-          this.selectedGradeId,
-          this.selectedClassId,
-          this.selectedStudentId,
-          domainName
-        )
+        this.medalReportService.GetByStudentID(this.selectedStudentId,domainName)
       );
 
       console.log('API Response:', response);
@@ -210,18 +258,15 @@ export class StudentMedalReportComponent implements OnInit {
 private prepareExportData(): void {
   // For PDF (object format)
   this.reportsForExport = this.medalReports.map((report) => ({
-    'Medal ID': report.medal,
-    'Medal Name': report.medalName,
-    'Added At': new Date(report.addedAt).toLocaleDateString(),
-    'Added By': report.addedBy
+    'Medal Name': report.socialWorkerMedalName,
+    'Added By': report.insertedByUserName
   }));
 
   // For Excel (array format)
   this.reportsForExcel = this.medalReports.map((report) => [
-    report.medal,
-    report.medalName,
-    new Date(report.addedAt).toLocaleDateString(),
-    report.addedBy
+    report.socialWorkerMedalID,
+    report.socialWorkerMedalName,
+    report.insertedByUserName
   ]);
 }
 
@@ -237,17 +282,65 @@ private prepareExportData(): void {
     return this.classes.find(c => c.id == this.selectedClassId)?.name || 'All Classes';
   }
 
-  getStudentName(): string {
-    return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
+  getStudentName(): string{
+   if(this.reportType === 'employee'){
+     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+   }
+   else if(this.reportType === 'parent'){
+    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+   }else{
+     return this.Student.en_name
+   }
+  }
+
+  OrCheck():boolean{
+    if(this.reportType === 'employee'){
+      return !this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId 
+    }
+    else{
+      return !this.selectedStudentId 
+    }
+  }
+
+  AndCheck():boolean{
+    if(this.reportType === 'employee'){
+     return (!!this.selectedSchoolId && !!this.selectedGradeId && !!this.selectedClassId && !!this.selectedStudentId && !this.isLoading )
+    }
+    else{
+      return (!!this.selectedStudentId && !this.isLoading )
+    }
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'School: ' + this.getSchoolName() },
-      { keyEn: 'Grade: ' + this.getGradeName() },
-      { keyEn: 'Class: ' + this.getClassName() },
-      { keyEn: 'Student: ' + this.getStudentName() }
-    ];
+    if(this.reportType === 'employee'){
+      return [
+        { keyEn: 'School: ' + this.getSchoolName() },
+        { keyEn: 'Grade: ' + this.getGradeName() },
+        { keyEn: 'Class: ' + this.getClassName() },
+        { keyEn: 'Student: ' + this.getStudentName() }
+      ]; 
+   }
+    else{
+      return [
+        { keyEn: 'Student: ' + this.getStudentName() }
+      ];
+    }
+  }
+
+  getInfoRowsExcel(): any[] {
+    if(this.reportType === 'employee'){
+      return [
+          { key: 'School', value: this.getSchoolName() },
+          { key: 'Grade', value: this.getGradeName() },
+          { key: 'Class', value: this.getClassName() },
+          { key: 'Student', value: this.getStudentName() }, 
+      ]; 
+    }
+    else{
+      return [
+          { key: 'Student', value: this.getStudentName() }, 
+      ];
+    }
   }
 
   DownloadAsPDF() {
@@ -332,16 +425,11 @@ async exportExcel() {
           ar: 'سجلات ميداليات الطالب'
         }
       ],
-      infoRows: [
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() }
-      ],
+      infoRows: this.getInfoRowsExcel(),
       tables: [
         {
           // title: 'Medal Report Data',
-          headers: ['Medal ID', 'Medal Name', 'Added At', 'Added By'],
+          headers: ['Medal Name', 'Added By'],
           data: this.reportsForExcel
         }
       ],

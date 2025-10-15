@@ -354,7 +354,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         ////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("AttendanceReport")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
+        allowedTypes: new[] { "octa", "employee" , "parent" },
         pages: new[] { "Attendance Report" }
         )]
             public async Task<IActionResult> AttendanceReport(

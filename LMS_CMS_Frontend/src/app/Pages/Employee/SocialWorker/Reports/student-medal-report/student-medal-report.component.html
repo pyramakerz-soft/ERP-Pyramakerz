@@ -4,9 +4,9 @@
     </h1>
 </div>
 
-<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+<div class="my-5 flex flex-wrap items-center md:flex-nowrap space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
     <!-- School Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
             [(ngModel)]="selectedSchoolId" (change)="loadGrades()" required>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Grade Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
             [(ngModel)]="selectedGradeId" (change)="loadClasses()" [disabled]="!selectedSchoolId" required>
@@ -28,7 +28,7 @@
     </div>
 
     <!-- Class Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
             [(ngModel)]="selectedClassId" (change)="loadStudents()" [disabled]="!selectedGradeId" required>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Student Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
             [(ngModel)]="selectedStudentId" [disabled]="!selectedClassId" required>
@@ -49,12 +49,22 @@
         </select>
     </div>
 
-    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+    <div *ngIf="this.reportType == 'parent'"  class="w-[70%] ">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" required>
+            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="this.reportType != 'student'"  class="w-full md:w-1/6 flex justify-end mt-8">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!selectedSchoolId || !selectedGradeId || !selectedClassId || !selectedStudentId || isLoading" 
+            [disabled]="OrCheck()|| isLoading" 
             [ngClass]="{
-                'bg-gray-100 text-gray-300': !selectedSchoolId || !selectedGradeId || !selectedClassId || !selectedStudentId,
-                'secondaryBg text-white': selectedSchoolId && selectedGradeId && selectedClassId && selectedStudentId && !isLoading
+                'bg-gray-100 text-gray-300': OrCheck(),
+                'secondaryBg text-white': AndCheck() && !isLoading
             }">
             <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
@@ -75,13 +85,10 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Medal ID' | translate }}
+                    {{ 'Medal' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Medal Name' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Added At' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Added By' | translate }}
@@ -99,16 +106,13 @@
                 [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                 class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.medal }}
+                    <img *ngIf="report.socialWorkerMedalFile" [src]="report.socialWorkerMedalFile" class="w-[10%]">
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.medalName }}
+                    {{ report.socialWorkerMedalName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.addedAt | date:'mediumDate' }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.addedBy }}
+                    {{ report.insertedByUserName }}
                 </td>
             </tr>
         </tbody>
@@ -120,7 +124,7 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Medal Student Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="['Medal ID', 'Medal Name', 'Added At', 'Added By']"
+            [tableHeaders]="['Medal Name', 'Added By']"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>

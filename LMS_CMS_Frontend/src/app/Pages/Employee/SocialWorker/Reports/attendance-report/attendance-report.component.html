@@ -19,7 +19,7 @@
             [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 <!-- School Selector -->
-<div class="w-[24%] mb-4">
+<div  *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
     <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
         [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
@@ -30,7 +30,7 @@
 </div>
 
 <!-- Academic Year Selector -->
-<div class="w-[24%] mb-4">
+<div  *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
     <label class="block mb-2 text-sm font-medium text-gray-900" for="academicYear">{{ 'Academic Year' | translate }}</label>
     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="academicYear"
         [(ngModel)]="selectedAcademicYearId" (change)="onAcademicYearChange()" [disabled]="!selectedSchoolId">
@@ -41,7 +41,7 @@
 </div>
 
 <!-- Grade Selector -->
-<div class="w-[24%] mb-4">
+<div  *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
     <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
         [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
@@ -52,7 +52,7 @@
 </div>
 
 <!-- Class Selector -->
-<div class="w-[24%] mb-4">
+<div  *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
     <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
         [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
@@ -63,7 +63,7 @@
 </div>
 
 <!-- Student Selector -->
-<div class="w-[24%] mb-4">
+<div  *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
     <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
         [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
@@ -72,6 +72,17 @@
         <option *ngFor="let student of students" [ngValue]="student.id">{{ student.name }}</option>
     </select>
 </div>
+
+          <!-- Student Selector when parent-->
+    <div *ngIf="this.reportType == 'parent'" class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let student of students" [ngValue]="student.id">{{ student.en_name }}</option>
+        </select>
+    </div>
 
     <!-- View Report Button -->
     <div class="w-[24%] flex justify-end">
