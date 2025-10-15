@@ -17,6 +17,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { firstValueFrom } from 'rxjs';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
 
 @Component({
   selector: 'app-daily-preformance-report',
@@ -26,6 +28,8 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './daily-preformance-report.component.css',
 })
 export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
+  UserID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   DomainName: string = '';
   SelectedSchoolId: number = 0;
   SelectedGradeId: number = 0;
@@ -68,18 +72,21 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
     private route: ActivatedRoute,
+    public account: AccountService,
     private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
-
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
     // Get report type from route data
     this.reportType = this.route.snapshot.data['reportType'] || 'student';
+    console.log(this.reportType)
 
     this.loadSchools();
 
-    if (this.reportType === 'student') {
+    if (this.reportType === 'student' || this.reportType === 'parent') {
       this.school.reportHeaderOneEn = 'Student Daily Performance Report';
       this.school.reportHeaderOneAr = 'تقرير أداء الطالب اليومي';
     } else {
@@ -87,6 +94,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       this.school.reportHeaderOneAr = 'تقرير أداء الفصل اليومي';
     }
 
+    if(this.reportType === 'parent'){
+      this.getStudentsByParentId()
+    }
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
         this.isRtl = direction === 'rtl';
@@ -100,6 +110,13 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  getStudentsByParentId(){ // menna => if this open by parent get only his students
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
   }
 
   async loadSchools() {
@@ -222,17 +239,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.tableData = [];
 
-    if (this.reportType === 'student') {
+    if (this.reportType === 'student' || this.reportType === 'parent') {
       this.dailyPerformanceService
-        .GetDailyPerformanceReport(
-          this.SelectedSchoolId,
-          this.SelectedGradeId,
-          this.SelectedClassroomId,
-          this.SelectedStudentId,
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName
-        )
+        .GetDailyPerformanceReport(this.SelectedSchoolId,this.SelectedGradeId,this.SelectedClassroomId,this.SelectedStudentId,this.SelectedStartDate,this.SelectedEndDate,this.DomainName)
         .subscribe(
           (data) => {
             this.processData(data);
@@ -299,6 +308,30 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   getStudentName(): string {
     const student = this.students.find(s => s.id == this.SelectedStudentId);
     return student ? student.name : 'Undefined';
+  }
+
+  OrCheck():boolean{
+    if(this.reportType === 'student'){
+      return !this.SelectedStartDate || !this.SelectedEndDate || !this.SelectedSchoolId || !this.SelectedGradeId || !this.SelectedClassroomId || !this.SelectedStudentId || this.isLoading
+    }
+    else if(this.reportType === 'parent'){
+      return !this.SelectedStartDate || !this.SelectedEndDate || !this.SelectedStudentId || this.isLoading
+    }
+    else{
+      return !this.SelectedStartDate || !this.SelectedEndDate || !this.SelectedSchoolId || !this.SelectedGradeId || !this.SelectedClassroomId || this.isLoading
+    }
+  }
+
+  AndCheck():boolean{
+    if(this.reportType === 'student'){
+     return (!!this.SelectedStartDate && !!this.SelectedEndDate && !!this.SelectedSchoolId && !!this.SelectedGradeId && !!this.SelectedClassroomId && !!this.SelectedStudentId && !this.isLoading   )
+   }
+    else if(this.reportType === 'parent'){
+     return (!!this.SelectedStartDate && !!this.SelectedEndDate && !!this.SelectedStudentId && !this.isLoading   )
+    }
+    else{
+     return (!!this.SelectedStartDate && !!this.SelectedEndDate && !!this.SelectedSchoolId && !!this.SelectedGradeId && !!this.SelectedClassroomId && !this.isLoading   )
+    }
   }
 
 getInfoRows(): any[] {

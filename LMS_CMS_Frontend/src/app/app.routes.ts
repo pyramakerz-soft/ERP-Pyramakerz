@@ -625,6 +625,7 @@ export const routes: Routes = [
             { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
             { path: "Medical History", component: ParentMedicalHistoryComponent, title: "Medical History" },
             { path: "Parent Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Parent Student Daily Performance Report", component: DailyPreformanceReportComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] , data: { reportType: 'parent' } },
         ]
     },
     {

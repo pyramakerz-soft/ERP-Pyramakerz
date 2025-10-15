@@ -121,11 +121,7 @@ export class RegistraionTestComponent {
 
   GetAllData() {
     this.registerServ
-      .GetByRegistrationParentId(
-        this.registerationFormParentID,
-        this.TestId,
-        this.DomainName
-      )
+      .GetByRegistrationParentId(this.registerationFormParentID,this.TestId,this.DomainName )
       .subscribe(
         (d: any) => {
           if (d.isVisibleToParent != true) {
