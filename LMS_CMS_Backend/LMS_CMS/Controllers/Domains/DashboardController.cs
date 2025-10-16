@@ -22,14 +22,19 @@ namespace LMS_CMS_PL.Controllers.Domains
         private readonly Clinic_Service _clinic_Service;
         private readonly Accounting_Service _account_Service;
         private readonly LMS_Service _lMS_Service;
+        private readonly Registration_Service _registration_Service;
+        private readonly Communication_Service _communication_Service;
 
-        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, Accounting_Service accounting_Service, LMS_Service lMS_Service)
+        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, 
+            Accounting_Service accounting_Service, LMS_Service lMS_Service, Registration_Service registration_Service, Communication_Service communication_Service)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _clinic_Service = clinic_Service;
             _account_Service = accounting_Service;
             _lMS_Service = lMS_Service;
+            _registration_Service = registration_Service;
+            _communication_Service = communication_Service;
         }
 
         [HttpGet]
@@ -44,6 +49,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             long followUpCount = _clinic_Service.CountOfFollowUps(year, month, HttpContext);
             decimal feesAmount = _account_Service.FeesCalculated(year, month, HttpContext);
             var (notAnswered, answeredOnTime, answeredLate) = _lMS_Service.AssignmentSubmissionCount(year, month, HttpContext);
+            var (AcceptedCount, DeclinedCount, Pending, WaitingListCount) = _registration_Service.RegistrationFormStateCount(year, month, HttpContext);
+            var (AcceptedRequestCount, DeclinedRequestCount, RequestPending) = _communication_Service.RequestStateCount(year, month, HttpContext);
 
             return Ok(new
             {
@@ -54,6 +61,19 @@ namespace LMS_CMS_PL.Controllers.Domains
                     notAnswered,
                     answeredOnTime,
                     answeredLate
+                },
+                registrationFormStateCount = new
+                {
+                    AcceptedCount,
+                    DeclinedCount,
+                    Pending,
+                    WaitingListCount
+                },
+                requestStateCount = new
+                {
+                    AcceptedRequestCount,
+                    DeclinedRequestCount,
+                    RequestPending
                 }
             });
         }

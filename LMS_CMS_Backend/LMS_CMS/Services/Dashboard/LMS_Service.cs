@@ -106,5 +106,56 @@ namespace LMS_CMS_PL.Services.Dashboard
 
             return (totalStudentsNotAnswered, totalStudentsAnsweredAtTheSpecificDate, totalStudentsAnsweredAfterTheDueDate);
         }
+
+        public int StudentCount(int year, int? month, HttpContext httpContext)
+        {
+            var unitOfWork = _dbContextFactory.CreateOneDbContext(httpContext);
+
+            List<long> academicYearIds = unitOfWork.academicYear_Repository.FindBy(d => d.IsDeleted != true && d.School.IsDeleted != true &&
+                    d.DateFrom.Year == year &&
+                    (month == null || d.DateFrom.Month == month)
+                    )
+                .Select(d => d.ID)
+                .ToList();
+
+            if (!academicYearIds.Any())
+                return 0;
+
+            List<long> classroomIds = unitOfWork.classroom_Repository
+              .FindBy(c => c.IsDeleted != true && academicYearIds.Contains(c.AcademicYearID))
+              .Select(c => c.ID)
+              .ToList();
+             
+            if (!classroomIds.Any())
+                return 0;
+
+            int totalStudents = unitOfWork.studentClassroom_Repository
+                .FindBy(sc => sc.IsDeleted != true && sc.Student.IsDeleted != true &&
+                              classroomIds.Contains(sc.ClassID))
+                .Count;
+             
+            return (totalStudents);
+        }
+
+        public int ClassroomCount(int year, int? month, HttpContext httpContext)
+        {
+            var unitOfWork = _dbContextFactory.CreateOneDbContext(httpContext);
+
+            List<long> academicYearIds = unitOfWork.academicYear_Repository.FindBy(d => d.IsDeleted != true && d.School.IsDeleted != true &&
+                    d.DateFrom.Year == year &&
+                    (month == null || d.DateFrom.Month == month)
+                    )
+                .Select(d => d.ID)
+                .ToList();
+
+            if (!academicYearIds.Any())
+                return 0;
+             
+            int totalClasses = unitOfWork.classroom_Repository
+                .FindBy(c => c.IsDeleted != true && academicYearIds.Contains(c.AcademicYearID))
+                .Count;
+             
+            return (totalClasses);
+        }
     }
 }

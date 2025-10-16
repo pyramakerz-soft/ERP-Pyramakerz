@@ -142,23 +142,33 @@ export class ClassroomsAccommodationComponent {
   }
 
   Save() {
-    this.isLoading = true
-    this.classroomServ
-      .AddStudentToClass(this.RpId, this.ClassroomId, this.DomainName)
-      .subscribe((d) => {
-        this.GetAllData();
-        this.closeModal();
-        this.isLoading = false
-      }, (error) => {
-        this.isLoading = false
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: error.error,
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
+    if(this.ClassroomId != 0){
+      this.isLoading = true
+      this.classroomServ
+        .AddStudentToClass(this.RpId, this.ClassroomId, this.DomainName)
+        .subscribe((d) => {
+          this.GetAllData();
+          this.closeModal();
+          this.isLoading = false
+        }, (error) => {
+          this.isLoading = false
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
         });
+    }else{
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'You must select classroom',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
       });
+    }
   }
   Create(id: number) {
     this.openModal();
