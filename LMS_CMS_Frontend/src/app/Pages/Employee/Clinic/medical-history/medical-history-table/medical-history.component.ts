@@ -33,8 +33,8 @@ export class MedicalHistoryComponent implements OnInit {
   medicalHistories: DoctorMedicalHistory[] = [];
   isModalVisible = false;
   isRtl: boolean = false;
-    subscription!: Subscription;
-    searchKey: string = 'id';
+  subscription!: Subscription;
+  searchKey: string = 'id';
   searchValue: string = '';
   
   constructor(

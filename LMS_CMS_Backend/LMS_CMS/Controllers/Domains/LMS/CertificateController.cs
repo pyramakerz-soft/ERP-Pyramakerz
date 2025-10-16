@@ -71,6 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID));
                 List<SubjectGetDTO> SubjectDTO= mapper.Map<List<SubjectGetDTO>>(subjects);  // first column
 
+                Console.WriteLine(1);
 
                 // All Weight types for this subject
                 List<SubjectWeightType> AllsubjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository
@@ -82,6 +83,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 List<CertificateSubject> certificateSubjects = new List<CertificateSubject>(); // The Data Fill In cell
                 List<CertificateSubjectTotalMark> certificateSubjectTotalMark = new List<CertificateSubjectTotalMark>(); // total marks in last column
+                Console.WriteLine(2);
 
                 foreach (var subjectId in subjectIds)
                 {
@@ -123,11 +125,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                      d.OpenDate >= DateFrom &&
                                      d.OpenDate <= DateTo);
 
-                        var allAssignments = specificAssignments.Select(a => a.Assignment)
+                        Console.WriteLine(11);
+
+                        var allAssignments = specificAssignments
+                            .Where(a => a.Assignment != null)
+                            .Select(a => a.Assignment)
                             .Concat(normalAssignments)
+                            .Where(a => a != null)
                             .GroupBy(a => a.ID)
                             .Select(g => g.First())
                             .ToList();
+
+                        Console.WriteLine(22);
 
                         // Sum assignment marks
                         foreach (var assignment in allAssignments.Where(a => a != null))
@@ -164,6 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 sumPercentageDegree += ((float)studentDirectMark.Degree / mark.Mark);
                             }
                         }
+                        Console.WriteLine(4);
 
                         int totalItems = directMarks.Count + allAssignments.Count;
                         float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
@@ -203,6 +213,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                     certificateSubjectTotalMark.Add(subjectTotalMark);
                 }
+                Console.WriteLine(5);
 
                 foreach (var percentage in certificateSubjectTotalMark)
                 {

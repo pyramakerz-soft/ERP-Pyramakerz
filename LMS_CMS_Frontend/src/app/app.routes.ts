@@ -634,6 +634,9 @@ export const routes: Routes = [
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
             { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard]},
             { path: 'Account Statement', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
+            { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
+            { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
+
         ]
     },
     {
