@@ -133,6 +133,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         var assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
                             .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
                                                    a.AssignmentID == assignment.ID &&
+                                                   a.Degree != null &&
                                                    a.IsDeleted != true);
 
                         if (assignmentStudent?.Degree != null && assignment?.Mark != null && assignment.Mark > 0)
