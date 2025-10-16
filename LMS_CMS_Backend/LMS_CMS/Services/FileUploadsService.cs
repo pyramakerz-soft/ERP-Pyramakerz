@@ -14,7 +14,7 @@ namespace LMS_CMS_PL.Services
             _configuration = configuration;
             _domainService = domainService;
         }
-         
+
         public string GetFileUrl(string? filePath, HttpRequest request, HttpContext httpContext)
         {
             if (string.IsNullOrEmpty(filePath))
@@ -149,10 +149,9 @@ namespace LMS_CMS_PL.Services
             {
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
+                string domainPath = $"{domain}/{subDomain}".Trim('/');
 
                 var s3Client = new AmazonS3Client(
-                    _configuration["AWS:AccessKey"],
-                    _configuration["AWS:SecretKey"],
                     RegionEndpoint.GetBySystemName(_configuration["AWS:Region"])
                 );
 
@@ -162,14 +161,10 @@ namespace LMS_CMS_PL.Services
                 string destinationKey = $"{basePath}/{entityId}/{fileName}";
                 string sourceKey = sourceFilePath.Replace("\\", "/");
 
-                // Build and normalize paths
-                string domainPath = $"{domain}/{subDomain}".Trim('/');
-                string folderPrefix = $"{_configuration["AWS:Folder"].TrimEnd('/')}/{domainPath}/";
-
-                // If sourceKey starts with full folder + domain, trim it to make it relative
-                if (sourceKey.StartsWith(folderPrefix))
+                // 👇 FIX HERE — remove folder/domain duplication
+                if (sourceKey.StartsWith($"{_configuration["AWS:Folder"]}{domainPath}/"))
                 {
-                    sourceKey = sourceKey.Substring(folderPrefix.Length);
+                    sourceKey = sourceKey.Substring($"{_configuration["AWS:Folder"]}{domainPath}/".Length);
                 }
 
                 Console.WriteLine($"[S3 Copy] SourceKey (relative): {sourceKey}");
@@ -178,10 +173,7 @@ namespace LMS_CMS_PL.Services
 
                 bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, domainPath);
 
-                if (copied)
-                    return destinationKey;
-
-                return string.Empty;
+                return copied ? destinationKey : string.Empty;
             }
             else
             {

@@ -360,9 +360,7 @@ export class RegistrationFormComponent {
       option = parseInt(selectedValue);
       answer = null; 
     } 
-
-    console.log(fieldId, selectedValue, answer, option);
-
+ 
     // if (fieldId == 3 || fieldId == 5) {
     //   option = parseInt(selectedValue);
     //   answer = null;
@@ -399,6 +397,9 @@ export class RegistrationFormComponent {
         textAnswer: answer,
       });
     } 
+
+    console.log(fieldId, selectedValue, answer, option);
+    console.log(this.registrationForm.registerationFormSubmittions);
   }
 
   MultiOptionDataPush(
