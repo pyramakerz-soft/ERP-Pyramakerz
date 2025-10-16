@@ -19,6 +19,9 @@ import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
 import { ProcedureType } from '../../../../../Models/SocialWorker/procedure-type';
 import { ConductReportItem } from '../../../../../Models/SocialWorker/conduct';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-conduct-report',
@@ -28,6 +31,10 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   styleUrl: './conduct-report.component.css'
 })
 export class ConductReportComponent implements OnInit {
+  UserID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  reportType: string = 'employee';
+  
   // Filter properties
   dateFrom: string = '';
   dateTo: string = '';
@@ -37,6 +44,7 @@ export class ConductReportComponent implements OnInit {
   selectedStudentId: number | null = null;
   selectedConductTypeId: number | null = null;
   selectedProcedureTypeId: number | null = null;
+  DomainName: string = '';
 
   // Data sources
   schools: any[] = [];
@@ -52,7 +60,6 @@ export class ConductReportComponent implements OnInit {
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
   reportsForPDF: any[] = [];
-
 
   // Language and RTL
   isRtl: boolean = false;
@@ -78,15 +85,25 @@ constructor(
   private classroomService: ClassroomService,
   private studentService: StudentService,
   private apiService: ApiService,
-  private languageService: LanguageService,
+  private languageService: LanguageService,   
+  public account: AccountService,   
   private realTimeService: RealTimeNotificationServiceService,
+  private route: ActivatedRoute,
   private reportsService: ReportsService 
 ) {}
 
   ngOnInit() {
     this.loadSchools();
     this.loadProcedureTypes();
-    
+    this.DomainName = this.apiService.GetHeader();
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(this.reportType)
+    if(this.reportType == 'parent'){
+      this.getStudentsByParentId()
+    }
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -98,6 +115,13 @@ constructor(
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  getStudentsByParentId(){
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
   }
 
   async loadSchools() {
@@ -227,7 +251,12 @@ constructor(
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+    if(this.reportType == 'parent'){
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
+    }
+    else{
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    }
     this.conductReports = [];
   }
 
@@ -322,7 +351,12 @@ private prepareExportData(): void {
   }
 
   getStudentName(): string {
-    return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
+   if(this.reportType === 'employee'){
+     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+   }
+   else{
+    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+   }
   }
 
   getConductTypeName(): string {
@@ -334,16 +368,49 @@ private prepareExportData(): void {
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'School: ' + this.getSchoolName() },
-      { keyEn: 'Grade: ' + this.getGradeName() },
-      { keyEn: 'Class: ' + this.getClassName() },
-      { keyEn: 'Student: ' + this.getStudentName() },
-      { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-      { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
-    ];
+    if(this.reportType === 'employee'){
+       return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'School: ' + this.getSchoolName() },
+        { keyEn: 'Grade: ' + this.getGradeName() },
+        { keyEn: 'Class: ' + this.getClassName() },
+        { keyEn: 'Student: ' + this.getStudentName() },
+        { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
+        { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
+      ];
+   }
+    else{
+      return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'Student: ' + this.getStudentName() },
+      ];
+    }
+  }
+
+  getInfoRowsExcel(): any[] {
+    if(this.reportType === 'employee'){
+      return [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() },
+        { key: 'Conduct Type', value: this.getConductTypeName() },
+        { key: 'Procedure Type', value: this.getProcedureTypeName() }      
+      ]; 
+    }
+    else{
+      return [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'Student', value: this.getStudentName() },
+        { key: 'Conduct Type', value: this.getConductTypeName() },
+        { key: 'Procedure Type', value: this.getProcedureTypeName() }  
+      ];
+    }
   }
 
   DownloadAsPDF() {
@@ -426,16 +493,7 @@ async exportExcel() {
           ar: 'سجلات سلوك الطلاب'
         }
       ],
-      infoRows: [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() },
-        { key: 'Conduct Type', value: this.getConductTypeName() },
-        { key: 'Procedure Type', value: this.getProcedureTypeName() }
-      ],
+      infoRows: this.getInfoRowsExcel(),
       tables: [
         {
           // title: 'Conduct Report Data',

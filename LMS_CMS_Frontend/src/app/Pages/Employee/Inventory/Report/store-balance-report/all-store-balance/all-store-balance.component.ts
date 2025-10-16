@@ -259,7 +259,7 @@ getStoreData(item: StoreBalanceItem, storeName: string): {
     price: price,
     value: store.value ?? null,
     hasDecimalQuantity: this.hasDecimal(store.quantity),
-    hasDecimalPrice: this.hasDecimal(price),
+    hasDecimalPrice: this.hasDecimal(price), // <-- Already used here
     hasDecimalValue: this.hasDecimal(store.value)
   };
 }
@@ -629,5 +629,4 @@ getBalanceFiltersInfo(): string {
   if (this.overdrawnBalance) filters.push('Overdrawn');
   if (this.zeroBalances) filters.push('Zero Balances');
   return filters.length > 0 ? filters.join(', ') : 'No Filters';
-}
-}
+}}

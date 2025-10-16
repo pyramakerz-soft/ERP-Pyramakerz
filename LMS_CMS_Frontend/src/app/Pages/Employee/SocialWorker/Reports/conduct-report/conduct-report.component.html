@@ -4,7 +4,7 @@
     </h1>
 </div>
 
-<div class="my-5 flex flex-wrap justify-between items-center">
+<div class="my-5 flex flex-wrap justify-start space-x-2 items-center">
     <!-- Date From -->
     <div class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
@@ -18,8 +18,9 @@
         <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
             [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
+
     <!-- School Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
             [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
@@ -30,7 +31,7 @@
     </div>
 
     <!-- Grade Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
             [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
@@ -41,7 +42,7 @@
     </div>
 
     <!-- Class Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
             [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
@@ -52,7 +53,7 @@
     </div>
 
     <!-- Student Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
             [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
@@ -62,8 +63,19 @@
         </select>
     </div>
 
+          <!-- Student Selector when parent-->
+    <div *ngIf="this.reportType == 'parent'" class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let student of students" [ngValue]="student.id">{{ student.en_name }}</option>
+        </select>
+    </div>
+
     <!-- Conduct Type Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="conductType">{{ 'Conduct Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="conductType"
             [(ngModel)]="selectedConductTypeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedSchoolId">
@@ -74,7 +86,7 @@
     </div>
 
     <!-- Procedure Type Selector -->
-    <div class="w-[24%] mb-4">
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="procedureType">{{ 'Procedure Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="procedureType"
             [(ngModel)]="selectedProcedureTypeId" (ngModelChange)="onFilterChange()">
@@ -83,10 +95,8 @@
             <option *ngFor="let type of procedureTypes" [ngValue]="type.id">{{ type.name }}</option>
         </select>
     </div>
-</div>
 
-    <!-- View Report Button -->
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-end mb-4 w-[24%]">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
             'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
@@ -96,6 +106,9 @@
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
+</div>
+
+    <!-- View Report Button -->
 
 <!-- Export Buttons -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">

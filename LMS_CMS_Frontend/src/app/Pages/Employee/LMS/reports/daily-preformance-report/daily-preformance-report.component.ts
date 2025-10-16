@@ -112,7 +112,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStudentsByParentId(){ // menna => if this open by parent get only his students
+  getStudentsByParentId(){ 
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
       console.log(this.students)
@@ -245,6 +245,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         .subscribe(
           (data) => {
             this.processData(data);
+            console.log(data);
           },
           (error) => {
             this.handleError(error);

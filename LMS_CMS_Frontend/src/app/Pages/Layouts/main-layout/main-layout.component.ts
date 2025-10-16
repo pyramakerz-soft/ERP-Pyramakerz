@@ -146,6 +146,14 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Certificate'),
               route: 'Student Certificate'
+            },
+            {
+              label: this.translateFunction('Social Worker Cerificates'),
+              route: 'Certificate To Student Report'
+            },
+            {
+              label: this.translateFunction('Social Worker Medals'),
+              route: 'Students Medal'
             }
           ],
           icon: 'LMS'
@@ -187,17 +195,37 @@ export class MainLayoutComponent {
               label: this.translateFunction('Subjects'),
               route: 'Subjects'
             },
-            {
-              label: this.translateFunction('Reports'),
-              route: 'Reports'
-            },
+            // {
+            //   label: this.translateFunction('Reports'),
+            //   route: 'Reports'
+            // },
             {
               label: this.translateFunction('Certificate'),
-              route: 'Parent Certificate'
+              route: 'Certificate'
             },
             {
               label: this.translateFunction('Student Daily Performance'),
-              route: 'Parent Student Daily Performance Report'
+              route: 'Student Daily Performance Report'
+            },
+            {
+              label: this.translateFunction('Student Issue'),
+              route: 'Student Issue Report'
+            },
+            {
+              label: this.translateFunction('Conducts'),
+              route: 'Conducts Report'
+            },
+            {
+              label: this.translateFunction('Attendance'),
+              route: 'Attendance Report'
+            },
+            {
+              label: this.translateFunction('Students Certificate'),
+              route: 'Student Report'
+            },
+            {
+              label: this.translateFunction('Students Medal'),
+              route: 'Students Medal'
             }
           ],
           icon: 'LMS'

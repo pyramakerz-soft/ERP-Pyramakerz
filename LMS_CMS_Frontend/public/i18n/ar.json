@@ -262,7 +262,7 @@
   "Order": "الترتيب",
   "History": "التاريخ",
   "Drugs": "الأدوية",
-  "Drug": "الدواء",
+  "Drug": "دواء",
   "Diagnosis": "التشخيص",
   "Create Diagnosis": "إنشاء تشخيص",
   "Diagnosis Name": "اسم التشخيص",
@@ -1027,7 +1027,7 @@
   "Videos": "فيديوهات",
   "Conduct": "سلوك",
   "Conduct Type": "نوع السلوك",
-  "Is Send SMS To Parent": "هل يتم إرسال رسالة نصية لولي الأمر",
+  "Send SMS To Parent": "هل يتم إرسال رسالة نصية لولي الأمر",
   "Procedure Type": "نوع الإجراء",
   "Create Conduct": "إنشاء سلوك",
   "Edit Conduct": "تعديل السلوك",
@@ -1127,15 +1127,15 @@
   "Item Code": "كود الصنف",
   "Item Name": "اسم الصنف",
   "Grand Total": "الإجمالي الكلي",
-  "All Stores Purchase Price Report": "تقرير أسعار الشراء لجميع المخازن",
-  "All Stores Sales Price Report": "تقرير أسعار البيع لجميع المخازن",
-  "All Stores Cost Report": "تقرير التكاليف لجميع المخازن",
+  "All Stores Item Balance with Purchase" : "رصيد أصناف جميع المخازن مع الشراء",
+  "All Stores Item Balance with Sales" : "رصيد أصناف جميع المخازن مع المبيعات",
+  "All Stores Item Balance with Average Cost" : "رصيد أصناف جميع المخازن مع متوسط التكلفة",
   "Quantity Only Report": "تقرير الكميات فقط",
   "Store Items Balance": "رصيد أصناف المخزن",
   "Purchase Price Report": "تقرير أسعار الشراء",
   "Sales Price Report": "تقرير أسعار البيع",
   "Cost Report": "تقرير التكاليف",
-  "Items Under Limit Report": "تقرير الأصناف تحت الحد",
+  "Store Limited Items" : "الأصناف المحدودة في المخزن",
   "Purchase Price": "سعر الشراء",
   "Total Purchase": "إجمالي الشراء",
   "Sales Price": "سعر البيع",
@@ -1257,7 +1257,7 @@
   "Failed to delete official holiday": "فشل في حذف العطلة الرسمية",
   "Failed to create official holiday": "فشل في إنشاء العطلة الرسمية",
   "Failed to update official holiday": "فشل في تحديث العطلة الرسمية",
-  "Name is required": "اسم العطلة مطلوب",
+  "Name is required": "الاسم مطلوب",
   "Start date is required": "تاريخ البدء مطلوب",
   "End date is required": "تاريخ الانتهاء مطلوب",
   "End date cannot be before start date": "تاريخ الانتهاء لا يمكن أن يكون قبل تاريخ البدء",
@@ -1385,7 +1385,6 @@
 "date": "التاريخ",
 "employeeID": "الموظف",
 "Saved Successfully": "تم الحفظ بنجاح",
-"has been created successfully": "تم إنشاؤه بنجاح",
 "This Employee Has No Attendance so should take bouns by amount only": "هذا الموظف ليس لديه سجل حضور لذا يجب أن يأخذ المكافأة بالمبلغ فقط",
 "bounsTypeID": "نوع المكافأة",
 "amount": "المبلغ",
@@ -1393,20 +1392,22 @@
 "hours": "الساعات",
 "Updated successfully": "تم التحديث بنجاح",
 "Created successfully": "تم الإنشاء بنجاح",
-"Deleted successfully": "تم الحذف بنجاح"
-
-
-
-
-
-
-
-
-
-
-
-
-
+"Deleted successfully": "تم الحذف بنجاح",
+"grade": "الصف",
+"class": "الفصل",
+"school": "المدرسة",
+"You will not be able to recover this item!": "لن تتمكن من استعادة هذا العنصر!",
+"Are you sure?": "هل أنت متأكد؟",
+"Yes, delete it!": "نعم، احذفه!",
+"No, keep it": "لا، احتفظ به",
+"needs selections for": "يحتاج إلى تحديد",
+"The Student": "الطالب",
+"Enter Dose Times" : "أدخل أوقات الجرعات",
+"Enter Drug Name" : "أدخل اسم الدواء",
+"The file size exceeds the maximum limit of 25 MB.": "حجم الملف يتجاوز الحد الأقصى المسموح به وهو 25 ميجابايت.",
+"Action Taken": "الإجراء المتخذ",
+"Recommendations": "التوصيات",
+"Complains": "الشكاوى"
 
 
 

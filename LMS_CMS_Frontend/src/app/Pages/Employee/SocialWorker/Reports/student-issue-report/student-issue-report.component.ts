@@ -17,6 +17,9 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-student-issue-report',
@@ -26,6 +29,9 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   styleUrl: './student-issue-report.component.css'
 })
 export class StudentIssueReportComponent  implements OnInit {
+  UserID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  
   // Filter properties
   dateFrom: string = '';
   dateTo: string = '';
@@ -41,6 +47,7 @@ export class StudentIssueReportComponent  implements OnInit {
   classes: any[] = [];
   students: any[] = [];
   issueTypes: IssueType[] = [];
+  DomainName: string = '';
 
   // Report data
   studentIssueReports: StudentIssueReportItem[] = [];
@@ -49,6 +56,7 @@ export class StudentIssueReportComponent  implements OnInit {
   showViewReportBtn: boolean = false;
   isExporting: boolean = false;
   reportsForExcel: any[] = [];
+  reportType: string = 'employee';
 
   // Language and RTL
   isRtl: boolean = false;
@@ -74,14 +82,23 @@ export class StudentIssueReportComponent  implements OnInit {
     private studentService: StudentService,
     private apiService: ApiService,
     private languageService: LanguageService,
+    public account: AccountService,   
+    private route: ActivatedRoute,
     private realTimeService: RealTimeNotificationServiceService,
     private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
+    this.DomainName = this.apiService.GetHeader();
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
     this.loadSchools();
     this.loadIssueTypes();
-    
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(this.reportType)
+    if(this.reportType == 'parent'){
+      this.getStudentsByParentId()
+    }
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -93,6 +110,13 @@ export class StudentIssueReportComponent  implements OnInit {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  getStudentsByParentId(){
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
   }
 
   async loadSchools() {
@@ -204,7 +228,12 @@ export class StudentIssueReportComponent  implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+    if(this.reportType == 'parent'){
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
+    }
+    else{
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    }
     this.studentIssueReports = [];
   }
 
@@ -290,7 +319,12 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
   getStudentName(): string {
-    return this.students.find(s => s.id === this.selectedStudentId)?.name || 'All Students';
+   if(this.reportType === 'employee'){
+     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+   }
+   else{
+    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+   }
   }
 
   getIssueTypeName(): string {
@@ -299,16 +333,47 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'School: ' + this.getSchoolName() },
-      { keyEn: 'Grade: ' + this.getGradeName() },
-      { keyEn: 'Class: ' + this.getClassName() },
-      { keyEn: 'Student: ' + this.getStudentName() },
-      { keyEn: 'Issue Type: ' + this.getIssueTypeName() }
-    ];
+    if(this.reportType === 'employee'){
+      return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'School: ' + this.getSchoolName() },
+        { keyEn: 'Grade: ' + this.getGradeName() },
+        { keyEn: 'Class: ' + this.getClassName() },
+        { keyEn: 'Student: ' + this.getStudentName() },
+        { keyEn: 'Issue Type: ' + this.getIssueTypeName() }
+      ];
+   }
+    else{
+      return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'Student: ' + this.getStudentName() },
+      ];
+    }
   }
+
+  getInfoRowsExcel(): any[] {
+    if(this.reportType === 'employee'){
+      return [
+          { key: 'From Date', value: this.dateFrom },
+          { key: 'To Date', value: this.dateTo },
+          { key: 'School', value: this.getSchoolName() },
+          { key: 'Grade', value: this.getGradeName() },
+          { key: 'Class', value: this.getClassName() },
+          { key: 'Student', value: this.getStudentName() },
+          { key: 'Issue Type', value: this.getIssueTypeName() }
+      ]; 
+    }
+    else{
+      return [
+          { key: 'From Date', value: this.dateFrom },
+          { key: 'To Date', value: this.dateTo },
+          { key: 'Student', value: this.getStudentName() },
+      ];
+    }
+  }
+
 
   DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
@@ -392,15 +457,7 @@ export class StudentIssueReportComponent  implements OnInit {
             ar: 'سجلات مشاكل الطلاب'
           }
         ],
-        infoRows: [
-          { key: 'From Date', value: this.dateFrom },
-          { key: 'To Date', value: this.dateTo },
-          { key: 'School', value: this.getSchoolName() },
-          { key: 'Grade', value: this.getGradeName() },
-          { key: 'Class', value: this.getClassName() },
-          { key: 'Student', value: this.getStudentName() },
-          { key: 'Issue Type', value: this.getIssueTypeName() }
-        ],
+        infoRows:this.getInfoRowsExcel(),
         tables: [
           {
             // title: 'Student Issue Report Data',

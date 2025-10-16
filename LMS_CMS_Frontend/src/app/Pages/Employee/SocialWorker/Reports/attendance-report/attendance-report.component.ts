@@ -17,6 +17,9 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-attendance-report',
@@ -26,6 +29,11 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   styleUrl: './attendance-report.component.css'
 })
 export class AttendanceReportComponent implements OnInit {
+  UserID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  reportType: string = 'employee';
+  DomainName: string = '';
+
   // Filter properties
   dateFrom: string = '';
   dateTo: string = '';
@@ -68,11 +76,13 @@ export class AttendanceReportComponent implements OnInit {
 constructor(
   private attendanceService: AttendanceService,
   private schoolService: SchoolService,
+  public account: AccountService,   
   private academicYearService: AcadimicYearService,
   private gradeService: GradeService,
   private classroomService: ClassroomService,
   private studentService: StudentService,
   private apiService: ApiService,
+  private route: ActivatedRoute,
   private languageService: LanguageService,
   private realTimeService: RealTimeNotificationServiceService,
   private reportsService: ReportsService 
@@ -80,7 +90,15 @@ constructor(
 
   ngOnInit() {
     this.loadSchools();
-    
+    this.DomainName = this.apiService.GetHeader();
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(this.reportType)
+    if(this.reportType == 'parent'){
+      this.getStudentsByParentId()
+    }
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -92,6 +110,13 @@ constructor(
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  getStudentsByParentId(){ 
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
   }
 
   async loadSchools() {
@@ -225,7 +250,12 @@ constructor(
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+    if(this.reportType == 'parent'){
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
+    }
+    else{
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    }
     this.attendanceReports = [];
   }
 
@@ -317,19 +347,54 @@ private prepareExportData(): void {
   }
 
   getStudentName(): string {
-    return this.students.find(s => s.id === this.selectedStudentId)?.name || 'All Students';
+   if(this.reportType === 'employee'){
+     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+   }
+   else{
+    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+   }
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'School: ' + this.getSchoolName() },
-      { keyEn: 'Academic Year: ' + this.getAcademicYearName() },
-      { keyEn: 'Grade: ' + this.getGradeName() },
-      { keyEn: 'Class: ' + this.getClassName() },
-      { keyEn: 'Student: ' + this.getStudentName() }
-    ];
+    if(this.reportType === 'employee'){
+      return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'School: ' + this.getSchoolName() },
+        { keyEn: 'Academic Year: ' + this.getAcademicYearName() },
+        { keyEn: 'Grade: ' + this.getGradeName() },
+        { keyEn: 'Class: ' + this.getClassName() },
+        { keyEn: 'Student: ' + this.getStudentName() }
+      ];
+   }
+    else{
+      return [
+        { keyEn: 'From Date: ' + this.dateFrom },
+        { keyEn: 'To Date: ' + this.dateTo },
+        { keyEn: 'Student: ' + this.getStudentName() }
+      ];
+    }
+  }
+
+  getInfoRowsExcel(): any[] {
+    if(this.reportType === 'employee'){
+      return [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Academic Year', value: this.getAcademicYearName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() }
+      ]; 
+    }
+    else{
+      return [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'Student', value: this.getStudentName() }
+      ];
+    }
   }
 
   DownloadAsPDF() {
@@ -414,15 +479,7 @@ async exportExcel() {
           ar: 'سجلات حضور الطلاب'
         }
       ],
-      infoRows: [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Academic Year', value: this.getAcademicYearName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() }
-      ],
+      infoRows: this.getInfoRowsExcel(),
       tables: [
         {
           // title: 'Attendance Report Data',
