@@ -150,10 +150,13 @@ namespace LMS_CMS_PL.Services
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
                 string domainPath = $"{domain}/{subDomain}".Trim('/');
-
-                var s3Client = new AmazonS3Client(
-                    RegionEndpoint.GetBySystemName(_configuration["AWS:Region"])
-                );
+                 
+                //var s3Client = new AmazonS3Client(
+                //    _configuration["AWS:AccessKey"],
+                //    _configuration["AWS:SecretKey"],
+                //    RegionEndpoint.GetBySystemName(_configuration["AWS:Region"])
+                //);
+                var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]));
 
                 var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
 
