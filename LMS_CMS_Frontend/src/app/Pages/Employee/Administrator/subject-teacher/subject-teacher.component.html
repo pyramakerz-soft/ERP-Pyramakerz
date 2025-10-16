@@ -82,12 +82,12 @@
             </div>
 
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Subject' | translate }}</label>
-                <select id="Class"
+                <label for="subj" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Subject' | translate }}</label>
+                <select id="subj"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="SupjectTeacher.id" [disabled]="!SupjectTeacher.classroomID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
-                    <option value=0 disabled selected hidden> {{ 'Select a class' | translate }}</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Subject' | translate }}</option>
                     <option *ngFor="let ac of subject" [value]="ac.id">
                         {{ ac.subjectEnglishName }}
                     </option>
