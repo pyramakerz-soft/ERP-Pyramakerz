@@ -351,8 +351,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 Phone = Phone,
                 GradeID = GradeID,
                 Email = ParentEmail,
-                AcademicYearID = AcademicYearID,
-                RegisterationFormStateID = 1, // Pending
+                AcademicYearID = AcademicYearID, 
                 RegistrationFormID = registerationFormParentAddDTO.RegistrationFormID,
                 ParentID = parentID != 0 ? parentID : (long?)null,
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
@@ -374,6 +373,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 registerationFormParent.InsertedByUserId = userId;
             }
 
+            if(registerationFormParentAddDTO.IsStudent == false)
+            {
+                registerationFormParent.RegisterationFormStateID = 1;
+                registerationFormParent.IsFromRegistration = true;
+            }
             Unit_Of_Work.registerationFormParent_Repository.Add(registerationFormParent); ////////////////////////////////////////////////////////////////////////////////////
             Unit_Of_Work.SaveChanges();
 

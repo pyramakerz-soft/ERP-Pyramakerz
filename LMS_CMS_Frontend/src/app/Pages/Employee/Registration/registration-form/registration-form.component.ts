@@ -214,6 +214,12 @@ export class RegistrationFormComponent {
       }
     }
  
+    if(fieldId == 5){ 
+      if (entry?.textAnswer && isNaN(Number(entry?.textAnswer))) {
+        entry.textAnswer = entry?.selectedFieldOptionID?.toString() ?? null;
+      }
+    } 
+ 
     if (!entry) return null;
  
     if (fieldId == 6 || fieldId == 14 || fieldId == 5 || fieldId == 3) {
@@ -479,7 +485,7 @@ export class RegistrationFormComponent {
     if (this.isFormSubmitted) {
       const fieldSubmission =
         this.registrationForm.registerationFormSubmittions.find(
-          (submission) => submission.categoryFieldID === field.id
+          (submission) => submission.categoryFieldID === field.id 
         );
 
       const fieldSubmissionFile = this.registrationFormForFiles.find(
@@ -496,7 +502,7 @@ export class RegistrationFormComponent {
         if (field.fieldTypeID === 6) {
           fieldData = fieldSubmissionFile;
         }
-
+        
         if (fieldData) {
           return false;
         }
@@ -614,13 +620,13 @@ export class RegistrationFormComponent {
     this.FillOptionData(); 
     let valid = true;
     let EmptyFieldCat = [];
-
+ 
     // Validate all fields
     for (const cat of this.RegistrationFormData.categories) {
       for (const field of cat.fields) {
         if (field.isMandatory && this.isFieldInvalid(field)) {
           valid = false;
-          EmptyFieldCat.push(cat.orderInForm);
+          EmptyFieldCat.push(cat.orderInForm); 
         }
       }
     }
