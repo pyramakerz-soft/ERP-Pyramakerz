@@ -387,7 +387,7 @@ export class CertificateComponent {
 
   getPercentage(subjectId: number): string {
     const cell = this.LastColumn.find((c: CertificateSubjectTotalMark) => c.subjectID === subjectId);
-    return cell ? `${cell.percentage} %` : '-';
+    return cell ? `${Number(cell.percentage).toFixed(2)} %` : '-';
   }
 
   async getPDFData() {

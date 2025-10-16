@@ -299,6 +299,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = await Unit_Of_Work.assignmentStudentIsSpecific_Repository.Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
                 d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID && today >= d.Assignment.OpenDate,
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
+                query => query.Include(d => d.InsertedByEmployee),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
                 );
