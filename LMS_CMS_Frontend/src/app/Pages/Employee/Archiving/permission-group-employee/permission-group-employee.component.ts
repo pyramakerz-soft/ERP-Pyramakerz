@@ -85,15 +85,20 @@ export class PermissionGroupEmployeeComponent {
     )
   }
 
-  GetEmployees(){
-    this.employees = []
+  GetEmployees() {
+    this.employees = [];
     this.employeeService.Get_Employees(this.DomainName).subscribe(
-      (data) => { 
-        this.employees = data
+      (data) => {
+        // remove employees who already exist in TableData
+        const existingEmployeeIds = this.TableData.map(e => e.employeeID);
+        this.employees = data.filter(emp => !existingEmployeeIds.includes(emp.id));
+      },
+      (error) => {
+        console.error('Error loading employees:', error);
       }
-    )
-  }
-
+    );
+  } 
+ 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,

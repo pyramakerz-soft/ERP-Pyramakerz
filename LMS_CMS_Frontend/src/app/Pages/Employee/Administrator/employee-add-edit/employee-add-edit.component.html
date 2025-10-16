@@ -338,33 +338,35 @@
 <div *ngIf="Data.files.length > 0" class="bg-white p-4 rounded-lg">
     <div class="flex flex-wrap gap-4">
         <div *ngFor="let file of Data.files; let i = index" class="flex w-full items-center gap-4 mb-4">
-            <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
-                <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
-                <div class="border border-cacaca rounded-lg p-6">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                            <i class="fa-solid fa-file"></i>
-
-                        </div>
-                        <button (click)="deleteFile(i)">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div> 
-                    <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
-                          {{ 'Click to View' | translate }}
-                    </p>
+            <div *ngIf="!isFileInSelected(file)" class="flex w-full items-center gap-4 mb-4">
+                <div class="flex flex-col w-[34%]">
+                    <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
+                    <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
+                    <div class="border border-cacaca rounded-lg p-6">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                <i class="fa-solid fa-file"></i>
+    
+                            </div>
+                            <button (click)="deleteFile(i)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div> 
+                        <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
+                              {{ 'Click to View' | translate }}
+                        </p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="w-[64%]">
-                <div class="flex flex-col">
-                    <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
-                    <input id="name-{{ i }}" type="text" [value]="file.name"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                       
-                       placeholder="{{ 'Enter Attachment Name' | translate }}"
-                       (change)="changeFileName(file.id, $event)" />
+    
+                <div class="w-[64%]">
+                    <div class="flex flex-col">
+                        <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
+                        <input id="name-{{ i }}" type="text" [value]="file.name"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                           
+                           placeholder="{{ 'Enter Attachment Name' | translate }}"
+                           (change)="changeFileName(file.id, $event)" />
+                    </div>
                 </div>
             </div>
         </div>
