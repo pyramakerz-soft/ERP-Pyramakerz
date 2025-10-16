@@ -21,7 +21,7 @@
     </div>
 
     <!-- Account Type Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType=='employee'" class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
             [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
@@ -36,16 +36,35 @@
     </div>
 
     <!-- Account Selector -->
-    <div class="w-full md:w-1/4">
+    <div *ngIf="this.reportType=='employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="subAccountID">{{ 'Account' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="subAccountID"
             [(ngModel)]="subAccountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
             <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Sub Account' | translate }}</option>
             <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
             <option *ngFor="let account of accountOptions" [ngValue]="account.id">
-                {{ account.name }}
+                {{account.name ? account.name : account.en_name }}
             </option>
             <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
+                {{ 'No accounts available' | translate }}
+            </option>
+        </select>
+        <!-- <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading accounts...' | translate }}
+        </div> -->
+    </div>
+
+    <!-- Account Selector -->
+    <div *ngIf="this.reportType=='parent'"  class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="subAccountID">{{ 'Students' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="subAccountID"
+            [(ngModel)]="subAccountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
+            <option *ngFor="let account of Students" [ngValue]="account.id">
+                {{ account.en_name }}
+            </option>
+            <option *ngIf="Students.length === 0 && !isAccountsLoading" disabled>
                 {{ 'No accounts available' | translate }}
             </option>
         </select>

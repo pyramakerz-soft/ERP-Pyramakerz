@@ -471,7 +471,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudent/{StudentId}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee", "student" },
+             allowedTypes: new[] { "octa", "employee", "student" ,"parent" },
              pages: new[] { "Subject" }
          )]
         public async Task<IActionResult> GetByStudentId(long StudentId)

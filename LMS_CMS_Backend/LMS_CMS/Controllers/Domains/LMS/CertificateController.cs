@@ -38,7 +38,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-
             // Check if student exists
             var student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == StudentId && s.IsDeleted != true);
             if (student == null)
@@ -107,6 +106,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         .Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
                             d => d.IsDeleted != true &&
                                  d.StudentClassroomID == studentClassroom.ID &&
+                                 d.Assignment != null && 
                                  d.Assignment.IsDeleted != true &&
                                  d.Assignment.SubjectID == subject.ID &&
                                  d.Assignment.SubjectWeightTypeID == swt.WeightTypeID &&
@@ -128,7 +128,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         .ToList();
 
                     // Sum assignment marks
-                    foreach (var assignment in allAssignments)
+                    foreach (var assignment in allAssignments.Where(a => a != null))
                     {
                         var assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
                             .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&

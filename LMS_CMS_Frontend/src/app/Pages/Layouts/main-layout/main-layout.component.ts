@@ -226,6 +226,10 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Students Medal'),
               route: 'Students Medal'
+            },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
             }
           ],
           icon: 'LMS'
@@ -239,6 +243,16 @@ export class MainLayoutComponent {
             }
           ],
           icon: 'Virtual Meetings'
+        },
+        {
+          label: this.translateFunction('Accounting'),
+          subItems: [
+            {
+              label: this.translateFunction('Account Statement'),
+              route: 'Account Statement'
+            }
+          ],
+          icon: 'Accounting'
         },
         {
           label: this.translateFunction('Clinic'),
