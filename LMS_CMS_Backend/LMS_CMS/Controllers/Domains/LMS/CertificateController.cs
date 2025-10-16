@@ -48,7 +48,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var studentClassroom = Unit_Of_Work.studentClassroom_Repository
                 .First_Or_Default(s => s.StudentID == StudentId &&
                                        s.IsDeleted != true &&
+                                       s.Classroom != null &&
                                        s.Classroom.IsDeleted != true &&
+                                       s.Classroom.AcademicYear != null &&
                                        s.Classroom.AcademicYear.DateFrom <= DateFrom &&
                                        s.Classroom.AcademicYear.DateTo >= DateTo &&
                                        s.Classroom.AcademicYear.SchoolID == SchoolId);

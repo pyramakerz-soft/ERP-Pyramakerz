@@ -300,6 +300,7 @@ export class CertificateComponent {
 
   GetAllData() {
     this.TableData = []
+    this.LastColumn =[]
     this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
       console.log(d)
       this.subjects = d.subjectDTO
