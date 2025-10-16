@@ -316,10 +316,7 @@ namespace LMS_CMS_PL.Services
             {
                 var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("//", "/");
                 var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("//", "/");
-
-                Console.WriteLine($"[S3 COPY] From: {fullSourceKey}");
-                Console.WriteLine($"[S3 COPY] To:   {fullDestinationKey}");
-
+                 
                 var copyRequest = new CopyObjectRequest
                 {
                     SourceBucket = _bucketName,

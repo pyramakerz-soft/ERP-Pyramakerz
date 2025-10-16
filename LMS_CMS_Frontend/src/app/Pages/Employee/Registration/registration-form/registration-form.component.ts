@@ -199,24 +199,37 @@ export class RegistrationFormComponent {
       return entry?.textAnswer ?? "";
     }
   }
-
+ 
   getSelectedOption(fieldId: number): any | null {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     ); 
-    if (fieldId == 6 || fieldId == 14) {
-      return entry?.textAnswer ?? null;
+
+    if(fieldId == 3){
+      if(entry?.textAnswer == 'Male'){
+        entry.textAnswer = '1';
+      }
+      if(entry?.textAnswer == 'Female'){
+        entry.textAnswer = '2';
+      }
     }
-    return entry?.selectedFieldOptionID ?? null;
+ 
+    if (!entry) return null;
+ 
+    if (fieldId == 6 || fieldId == 14 || fieldId == 5 || fieldId == 3) {
+      return entry.textAnswer ?? null;
+    }
+   
+    return entry.selectedFieldOptionID ?? null;
   }
 
   isOptionSelected(fieldId: number, optionId: number): boolean {
-  return this.registrationForm.registerationFormSubmittions.some(
-    (entry) =>
-      entry.categoryFieldID === fieldId &&
-      entry.selectedFieldOptionID === optionId
-  );
-}
+    return this.registrationForm.registerationFormSubmittions.some(
+      (entry) =>
+        entry.categoryFieldID === fieldId &&
+        entry.selectedFieldOptionID === optionId
+    );
+  }
 
   getRegistrationFormData() {
     this.registrationFormService
@@ -353,28 +366,14 @@ export class RegistrationFormComponent {
     let option: number | null = null; 
 
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
-      (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
+      (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 || fieldId == 6 || fieldId == 7 || fieldId == 8 || fieldId == 9 || fieldId == 14))) {
       answer = selectedValue;
       option = null;
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
       answer = null; 
     } 
- 
-    // if (fieldId == 3 || fieldId == 5) {
-    //   option = parseInt(selectedValue);
-    //   answer = null;
-    // } else if (fieldId == 6 || fieldId == 14) {
-    //   answer = selectedValue;
-    //   option = null;
-    // } else if (fieldTypeId == 5 || fieldTypeId == 7) {
-    //   option = parseInt(selectedValue);
-    //   answer = null;
-    // } else {
-    //   answer = selectedValue;
-    //   option = null;
-    // }
-
+  
     const existingElement =
       this.registrationForm.registerationFormSubmittions.find(
         (element) => element.categoryFieldID === fieldId
@@ -396,10 +395,7 @@ export class RegistrationFormComponent {
         selectedFieldOptionID: option,
         textAnswer: answer,
       });
-    } 
-
-    console.log(fieldId, selectedValue, answer, option);
-    console.log(this.registrationForm.registerationFormSubmittions);
+    }   
   }
 
   MultiOptionDataPush(

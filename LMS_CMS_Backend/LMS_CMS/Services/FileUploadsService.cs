@@ -150,12 +150,7 @@ namespace LMS_CMS_PL.Services
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
                 string domainPath = $"{domain}/{subDomain}".Trim('/');
-                 
-                //var s3Client = new AmazonS3Client(
-                //    _configuration["AWS:AccessKey"],
-                //    _configuration["AWS:SecretKey"],
-                //    RegionEndpoint.GetBySystemName(_configuration["AWS:Region"])
-                //);
+                  
                 var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]));
 
                 var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
@@ -169,11 +164,7 @@ namespace LMS_CMS_PL.Services
                 {
                     sourceKey = sourceKey.Substring($"{_configuration["AWS:Folder"]}{domainPath}/".Length);
                 }
-
-                Console.WriteLine($"[S3 Copy] SourceKey (relative): {sourceKey}");
-                Console.WriteLine($"[S3 Copy] DestinationKey: {destinationKey}");
-                Console.WriteLine($"[S3 Copy] DomainPath: {domainPath}");
-
+                 
                 bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, domainPath);
 
                 return copied ? destinationKey : string.Empty;
@@ -199,62 +190,7 @@ namespace LMS_CMS_PL.Services
 
                 return Path.Combine("Uploads", basePath, entityId.ToString(), fileName);
             }
-        }
-
-        //public async Task<string> CopyFileAsync(string sourceFilePath, string basePath, long entityId, HttpContext httpContext)
-        //{
-        //    if (string.IsNullOrEmpty(sourceFilePath))
-        //        return string.Empty;
-
-        //    bool isProduction = _configuration.GetValue<bool>("IsProduction");
-
-        //    if (isProduction)
-        //    { 
-        //        var domain = _domainService.GetDomain(httpContext);
-        //        string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
-
-        //        //var s3Client = new AmazonS3Client();
-        //        var s3Client = new AmazonS3Client(
-        //           _configuration["AWS:AccessKey"],
-        //           _configuration["AWS:SecretKey"],
-        //           RegionEndpoint.GetBySystemName(_configuration["AWS:Region"])
-        //        );
-        //        var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-
-        //        string fileName = Path.GetFileName(sourceFilePath);
-        //        string destinationKey = $"{basePath}/{entityId}/{fileName}";
-        //        string sourceKey = sourceFilePath.Replace("\\", "/");
-
-        //        bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, $"{domain}/{subDomain}");
-
-        //        if (copied)
-        //        {
-        //            return destinationKey;
-        //        }
-
-        //        return string.Empty;
-        //    }
-        //    else
-        //    { 
-        //        var normalizedSource = sourceFilePath.Replace('\\', Path.DirectorySeparatorChar);
-        //        var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedSource);
-
-        //        if (!System.IO.File.Exists(originalFilePath))
-        //            throw new FileNotFoundException("File not found.", originalFilePath);
-
-        //        var destinationFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", basePath, entityId.ToString());
-
-        //        if (!Directory.Exists(destinationFolder))
-        //            Directory.CreateDirectory(destinationFolder);
-
-        //        var fileName = Path.GetFileName(sourceFilePath);
-        //        var destinationFilePath = Path.Combine(destinationFolder, fileName);
-
-        //        System.IO.File.Copy(originalFilePath, destinationFilePath, overwrite: true);
-
-        //        return Path.Combine("Uploads", basePath, entityId.ToString(), fileName);
-        //    }
-        //}
+        } 
 
         public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long entityId, HttpContext httpContext)
         {
