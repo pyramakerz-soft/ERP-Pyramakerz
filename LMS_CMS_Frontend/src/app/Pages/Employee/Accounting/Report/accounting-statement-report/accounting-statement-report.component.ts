@@ -17,6 +17,9 @@ import { LinkFileService } from '../../../../../Services/Employee/Accounting/lin
 import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
+import { ActivatedRoute } from '@angular/router';
+import { Student } from '../../../../../Models/student';
+import { StudentService } from '../../../../../Services/student.service';
 
 @Component({
   selector: 'app-accounting-statement-report',
@@ -30,14 +33,17 @@ export class AccountingStatementReportComponent implements OnInit {
   fromDate: string = '';
   toDate: string = '';
   linkFileID: number = 0;
+  UserID: number = 0;
   subAccountID: number = 0;
   pageNumber: number = 1;
   pageSize: number = 10;
+  reportType: string = 'employee';
 
   // Data
   reportData: AccountStatementResponse | null = null;
   accounts: AccountingTreeChart[] = [];
   linkFileOptions: LinkFile[] = [];
+  Students: Student[] = [];
   accountOptions: any[] = []; // For accounts based on selected link file
 
   // UI state
@@ -76,16 +82,23 @@ export class AccountingStatementReportComponent implements OnInit {
     public account: AccountService,
     public ApiServ: ApiService,
     private dataAccordingToLinkFileService: DataAccordingToLinkFileService,
-    private linkFileService: LinkFileService,
+    private linkFileService: LinkFileService,   
+    private route: ActivatedRoute,
+    public StudentService: StudentService,
     private reportsService: ReportsService
   ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
     this.loadLinkFiles();
     // this.loadAccounts();
-    
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    if(this.reportType == 'parent'){
+      this.linkFileID =13
+      this.GetStudentsData()
+    }
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -96,6 +109,13 @@ export class AccountingStatementReportComponent implements OnInit {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  GetStudentsData() {
+    this.Students = []
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.Students = d
+    })
   }
 
   loadLinkFiles() {
@@ -139,23 +159,24 @@ export class AccountingStatementReportComponent implements OnInit {
     }
   }
 
-loadAccountsByLinkFile() {
-  this.isAccountsLoading = true;
-  this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
-    next: (accounts) => {
-      console.log('Loaded accounts for link file:', accounts);
-      this.accountOptions = accounts.map(account => ({
-        ...account,
-        name: account.name || 'Unknown' // Use the actual name property from the response
-      }));
-      this.isAccountsLoading = false;
-    },
-    error: (error) => {
-      console.error('Error loading accounts by link file:', error);
-      this.isAccountsLoading = false;
-    }
-  });
-}
+  loadAccountsByLinkFile() {
+    this.isAccountsLoading = true;
+    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
+      next: (accounts) => {
+        console.log('Loaded accounts for link file:', accounts);
+        this.accountOptions = accounts.map(account => ({
+          ...account,
+          // name: account.name || 'Unknown' // Use the actual name property from the response
+        }));
+        console.log(accounts,this.accountOptions)
+        this.isAccountsLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading accounts by link file:', error);
+        this.isAccountsLoading = false;
+      }
+    });
+  }
 
   onFilterChange() {
     this.showTable = false;

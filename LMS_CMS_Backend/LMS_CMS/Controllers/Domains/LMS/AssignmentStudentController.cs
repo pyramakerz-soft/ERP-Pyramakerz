@@ -256,6 +256,37 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
+            if (assignmentStudent != null)
+            {
+                // Filter AssignmentQuestions where QuestionBank is not deleted
+                assignmentStudent.AssignmentStudentQuestions = assignmentStudent.AssignmentStudentQuestions.Where(aq =>
+                        aq.IsDeleted != true &&
+                        aq.QuestionBank != null &&
+                        aq.QuestionBank.IsDeleted != true).ToList();
+
+                foreach (var aq in assignmentStudent.AssignmentStudentQuestions)
+                {
+                    var qb = aq.QuestionBank;
+
+                    // Filter QuestionBankOptions
+                    if (qb?.QuestionBankOptions != null)
+                    {
+                        qb.QuestionBankOptions = qb.QuestionBankOptions
+                            .Where(opt => opt.IsDeleted != true)
+                            .ToList();
+                    }
+
+                    // Filter SubBankQuestions
+                    if (qb?.SubBankQuestions != null)
+                    {
+                        qb.SubBankQuestions = qb.SubBankQuestions
+                            .Where(sub => sub.IsDeleted != true)
+                            .ToList();
+                    }
+                }
+            }
+
+
             AssignmentStudentGetDTO DTO = mapper.Map<AssignmentStudentGetDTO>(assignmentStudent);
              
             if (DTO.AssignmentTypeID == 1)

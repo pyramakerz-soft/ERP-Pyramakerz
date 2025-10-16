@@ -227,6 +227,7 @@ export class ReceivableDetailsComponent {
         if (!this.receivable[field]) {
           if (
             field == 'receivableDocTypesID' ||
+            field == 'bankOrSaveID' ||
             field == 'linkFileID' ||
             field == 'date' ||
             field == 'docNumber'
@@ -234,13 +235,13 @@ export class ReceivableDetailsComponent {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
+            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
+              this.validationErrors[field] = `*bankOrSafeID is required`;
+            }
             isValid = false;
           }
         } else {
           this.validationErrors[field] = '';
-        }
-        if (field == 'bankOrSaveID') {
-          this.validationErrors[field] = `*bankOrSafeID is required`;
         }
       }
     }

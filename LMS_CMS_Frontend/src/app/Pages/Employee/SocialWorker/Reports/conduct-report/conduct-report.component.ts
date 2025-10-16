@@ -318,25 +318,25 @@ constructor(
     }
   }
 
-private prepareExportData(): void {
-  // For Excel (array format)
-  this.reportsForExport = this.conductReports.map((report) => [
-    new Date(report.date).toLocaleDateString(),
-    report.studentEnName,
-    report.conductType?.name || '-',
-    report.procedureType?.name || '-',
-    report.details || '-'
-  ]);
+  private prepareExportData(): void {
+    // For Excel (array format)
+    this.reportsForExport = this.conductReports.map((report) => [
+      new Date(report.date).toLocaleDateString(),
+      report.studentEnName,
+      report.conductType?.name || '-',
+      report.procedureType?.name || '-',
+      report.details || '-'
+    ]);
 
-  // For PDF (object format with proper keys)
-  this.reportsForPDF = this.conductReports.map((report) => ({
-    'Date': new Date(report.date).toLocaleDateString(),
-    'Student Name': report.studentEnName,
-    'Conduct Type': report.conductType?.name || '-',
-    'Procedure Type': report.procedureType?.name || '-',
-    'Details': report.details || '-'
-  }));
-}
+    // For PDF (object format with proper keys)
+    this.reportsForPDF = this.conductReports.map((report) => ({
+      'Date': new Date(report.date).toLocaleDateString(),
+      'Student Name': report.studentEnName,
+      'Conduct Type': report.conductType?.name || '-',
+      'Procedure Type': report.procedureType?.name || '-',
+      'Details': report.details || '-'
+    }));
+  }
 
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';

@@ -238,9 +238,9 @@ export class DrugsComponent implements OnInit {
   }
   GetTableHeaders() {
     if (!this.isRtl) {
-      return ['ID', 'Drug Name', 'Date', 'Actions'];
+      return ['ID', 'Drug Name', 'Actions'];
     } else {
-      return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات'];
+      return ['المعرف', 'اسم الدواء', 'الإجراءات'];
     }
   }
 }

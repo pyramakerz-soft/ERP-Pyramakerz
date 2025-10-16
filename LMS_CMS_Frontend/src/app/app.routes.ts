@@ -282,6 +282,7 @@ import { SalarySummaryTokenComponent } from './Pages/Employee/HR/Reports/salary-
 import { EmployeeSalaryDetailedByTokenComponent } from './Pages/Employee/HR/employee-salary-detailed-by-token/employee-salary-detailed-by-token.component';
 import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/loans-status.component'; 
 import { DashboardComponent } from './Pages/Employee/Dashboard/dashboard/dashboard.component';
+import { ParentLessonComponent } from './Pages/Parent/LMS/parent-lesson/parent-lesson.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -560,7 +561,7 @@ export const routes: Routes = [
             { path: 'Medal To Student Report', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard],data: { reportType: 'employee' }   },
             { path: 'Account Balance Report', component: AccountBalanceComponent, title: 'Account Balance Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Account Subledger Report', component: AccountingSubledgerComponent, title: 'Account Subledger Report', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Account Statement Report', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Account Statement Report', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'employee' }   },
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
@@ -631,6 +632,10 @@ export const routes: Routes = [
             { path: 'Attendance Report', component: AttendanceReportComponent, title: 'Attendance Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'parent' }  },
             { path: 'Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
+            { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard]},
+            { path: 'Account Statement', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
+            { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
+            { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
 
         ]
     },
