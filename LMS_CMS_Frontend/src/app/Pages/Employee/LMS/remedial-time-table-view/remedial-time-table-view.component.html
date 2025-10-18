@@ -29,7 +29,7 @@
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full min-h-[50px] flex flex-wrap gap-2">
       <div *ngFor="let class of remedialClasses" cdkDrag [cdkDragDisabled]="class.numberOfSession === 0"
         class="bg-gray-100 text-sm px-3 py-1 rounded-full cursor-move border-l-4" [ngClass]="{
-          'border-blue-500': class.numberOfSession > 0,
+          'border-blue-500': class.numberOfSession && class.numberOfSession > 0,
           'border-[#707070]': class.numberOfSession === 0
         }">
         {{ class.name }} / {{ class.numberOfSession }}

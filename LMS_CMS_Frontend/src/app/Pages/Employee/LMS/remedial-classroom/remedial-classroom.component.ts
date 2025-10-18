@@ -52,7 +52,7 @@ export class RemedialClassroomComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name', 'numberOfSession', 'insertedAt', 'schoolName', 'gradeName', "subjectEnglishName", 'teacherEnName'];
+  keysArray: string[] = ['id', 'name', 'numberOfSession', 'schoolName', 'gradeName', "subjectEnglishName", 'teacherEnName'];
 
   TableData: RemedialClassroom[] = [];
   schools: School[] = [];
@@ -63,6 +63,7 @@ export class RemedialClassroomComponent {
   Teachers: Employee[] = [];
   students: Employee[] = [];
   SelectedSchoolId: number = 0;
+  SelectedSchoolIdForFilter: number = 0;
   SelectedTimeTableId: number = 0;
   preSelectedClassroom: number | null = null;
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
@@ -73,6 +74,7 @@ export class RemedialClassroomComponent {
   hiddenColumns: string[] = ['Actions'];
   isRtl: boolean = false;
   subscription!: Subscription;
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -135,9 +137,11 @@ export class RemedialClassroomComponent {
 
   GetAllData() {
     this.TableData = [];
-    this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
-    });
+    if(this.SelectedSchoolIdForFilter != 0){
+      this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
+        this.TableData = d;
+      });
+    }
   }
 
   GetAllAcademicYearBySchool() {
@@ -311,6 +315,7 @@ export class RemedialClassroomComponent {
   }
 
   openModal() {
+    this.remedialClassroom = new RemedialClassroom();
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
@@ -345,12 +350,24 @@ export class RemedialClassroomComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  // validateNumber(event: any, field: keyof RemedialClassroom): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     if (typeof this.remedialClassroom[field] === 'string') {
+  //       this.remedialClassroom[field] = '' as never;
+  //     }
+  //   }
+  // }
+
   validateNumber(event: any, field: keyof RemedialClassroom): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
-      event.target.value = '';
+      event.target.value = ''; 
       if (typeof this.remedialClassroom[field] === 'string') {
-        this.remedialClassroom[field] = '' as never;
+        this.remedialClassroom[field] = '' as never;  
       }
     }
   }

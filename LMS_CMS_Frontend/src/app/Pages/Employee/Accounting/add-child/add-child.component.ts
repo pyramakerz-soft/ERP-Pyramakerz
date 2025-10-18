@@ -184,6 +184,7 @@ export class AddChildComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.IsNationalIsEmpty = '';
   }
 
   openModal() {

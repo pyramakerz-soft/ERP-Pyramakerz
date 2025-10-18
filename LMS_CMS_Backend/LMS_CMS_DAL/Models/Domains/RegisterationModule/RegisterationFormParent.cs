@@ -21,6 +21,10 @@ namespace LMS_CMS_DAL.Models.Domains.RegisterationModule
         public string GradeID { get; set; }
         public string AcademicYearID { get; set; }
         public string Email { get; set; }
+        
+        // To predict if from student or registration
+        public bool IsFromRegistration { get; set; }
+
         [ForeignKey("RegisterationFormState")]
         public long? RegisterationFormStateID { get; set; }
         public RegisterationFormState? RegisterationFormState { get; set; }

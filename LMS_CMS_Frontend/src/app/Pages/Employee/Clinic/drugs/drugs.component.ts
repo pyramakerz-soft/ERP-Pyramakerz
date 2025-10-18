@@ -203,9 +203,7 @@ export class DrugsComponent implements OnInit {
   validateForm(): boolean {
     let isValid = true;
     if (!this.drug.name) {
-      this.validationErrors['name'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('name')}`;
+      this.validationErrors['name'] = `${this.translate.instant('Name is required')}`;
       isValid = false;
     } else {
       this.validationErrors['name'] = '';
@@ -240,9 +238,9 @@ export class DrugsComponent implements OnInit {
   }
   GetTableHeaders() {
     if (!this.isRtl) {
-      return ['ID', 'Drug Name', 'Date', 'Actions'];
+      return ['ID', 'Drug Name', 'Actions'];
     } else {
-      return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات'];
+      return ['المعرف', 'اسم الدواء', 'الإجراءات'];
     }
   }
 }

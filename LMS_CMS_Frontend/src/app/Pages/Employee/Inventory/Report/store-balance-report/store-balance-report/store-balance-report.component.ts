@@ -248,6 +248,13 @@ export class StoreBalanceReportComponent implements OnInit {
     }
   }
 
+  // Format number for display in HTML template (with proper decimal places) - LTR support
+  formatNumberForDisplayWithLTR(value: number): string {
+    if (value == null) return '';
+    // Add LTR mark before negative numbers
+    return value < 0 ? '\u200E' + this.formatNumberForDisplay(value) : this.formatNumberForDisplay(value);
+  }
+
   private prepareExportData(): void {
     if (!this.reportData) return;
 

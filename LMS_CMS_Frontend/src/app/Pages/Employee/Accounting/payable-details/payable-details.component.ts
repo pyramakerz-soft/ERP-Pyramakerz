@@ -243,6 +243,7 @@ export class PayableDetailsComponent {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
           if (
+            field == 'bankOrSaveID' ||
             field == 'payableDocTypeID' ||
             field == 'linkFileID' ||
             field == 'date' ||
@@ -251,10 +252,9 @@ export class PayableDetailsComponent {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
-            isValid = false;
-          }
-          if (field == 'bankOrSaveID') {
-            this.validationErrors[field] = `*Bank Or SaFe is required`;
+            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
+              this.validationErrors[field] = `*bankOrSafeID is required`;
+            }
             isValid = false;
           }
         } else {

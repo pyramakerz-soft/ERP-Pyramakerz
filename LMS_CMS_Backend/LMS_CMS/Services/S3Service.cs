@@ -188,18 +188,7 @@ namespace LMS_CMS_PL.Services
 
             return false;
         }
-
-        //public string GetFileUrl(string key, int expireMinutes = 120)
-        //{
-        //    var request = new GetPreSignedUrlRequest
-        //    {
-        //        BucketName = _bucketName,
-        //        Key = key,
-        //        Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
-        //    };
-
-        //    return _s3Client.GetPreSignedURL(request);
-        //}
+         
         public string GetFileUrl(string key, IConfiguration config)
         {
             key = key.TrimStart('/');
@@ -320,14 +309,14 @@ namespace LMS_CMS_PL.Services
 
             return contentType;
         }
-
+         
         public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
         {
             try
             {
-                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("\\", "/");
-                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("\\", "/");
-
+                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("//", "/");
+                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("//", "/");
+                 
                 var copyRequest = new CopyObjectRequest
                 {
                     SourceBucket = _bucketName,
@@ -339,10 +328,17 @@ namespace LMS_CMS_PL.Services
                 await _s3Client.CopyObjectAsync(copyRequest);
                 return true;
             }
-            catch
+            catch (AmazonS3Exception ex)
             {
+                Console.WriteLine($"AWS Error: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General Error: {ex.Message}");
                 return false;
             }
         }
+
     }
 }

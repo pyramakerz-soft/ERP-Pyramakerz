@@ -776,6 +776,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 //////////////////////////////////// remove all registration form parent ////////////////////////////////////////
                 _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId);
 
+                registerationFormParent.RegisterationFormStateID = 2;
+                registerationFormParent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormParent.UpdatedByOctaId = userId;
+                    if (registerationFormParent.UpdatedByUserId != null)
+                    {
+                        registerationFormParent.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormParent.UpdatedByUserId = userId;
+                    if (registerationFormParent.UpdatedByOctaId != null)
+                    {
+                        registerationFormParent.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
+                Unit_Of_Work.SaveChanges();
+
                 return Ok();
             }
             catch (Exception ex)

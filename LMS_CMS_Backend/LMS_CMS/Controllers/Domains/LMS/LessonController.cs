@@ -161,6 +161,76 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetBySubjectIDAndStudent/{SubjectId}/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent" },
+            pages: new[] { "Lessons" }
+        )]
+        public async Task<IActionResult> GetBySubjectIDAndStudent(long SubjectId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SubjectId);
+            if (subject == null)
+            {
+                return NotFound("No Subject with this ID");
+            }
+
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                  s => s.StudentID == StudentId && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true,
+                  s => s.Include(stu => stu.Grade),
+                  s => s.Include(stu => stu.AcademicYear)
+                  );
+
+            Semester semester = new Semester();
+
+            if (studentGrade != null)
+            {
+                semester = Unit_Of_Work.semester_Repository.First_Or_Default(d => d.IsDeleted != true && d.AcademicYearID == studentGrade.AcademicYearID && d.IsCurrent == true);
+                if (semester == null)
+                {
+                    return NotFound("No Semester Curent in the Active Academic Year");
+                }
+              
+            }
+            else
+            {
+                return NotFound("This Student not in active academic year");
+            }
+
+            List<Lesson> lessons = await Unit_Of_Work.lesson_Repository.Select_All_With_IncludesById<Lesson>(
+                    b => b.IsDeleted != true && b.SubjectID == SubjectId && b.SemesterWorkingWeek.SemesterID == semester.ID,
+                    query => query.Include(d => d.SemesterWorkingWeek).ThenInclude(d => d.Semester).ThenInclude(d => d.AcademicYear),
+                    query => query.Include(d => d.Subject)
+                    );
+
+            if (lessons == null || lessons.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<LessonGetDTO> lessonsDTO = mapper.Map<List<LessonGetDTO>>(lessons);
+
+            foreach (var lesson in lessonsDTO)
+            {
+                lesson.Tags = new List<TagGetDTO>();
+                List<LessonTag> lessonTags = Unit_Of_Work.lessonTag_Repository.FindBy(d => d.IsDeleted != true && d.LessonID == lesson.ID);
+                foreach (var lessonTag in lessonTags)
+                {
+                    Tag tag = Unit_Of_Work.tag_Repository.First_Or_Default(d => d.ID == lessonTag.TagID);
+                    TagGetDTO tagDTO = mapper.Map<TagGetDTO>(tag);
+
+                    lesson.Tags.Add(tagDTO);
+                }
+            }
+
+            lessonsDTO = lessonsDTO.OrderBy(lesson => lesson.Order).ToList();
+
+            return Ok(lessonsDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("GetBySubjectID/{SubjectId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

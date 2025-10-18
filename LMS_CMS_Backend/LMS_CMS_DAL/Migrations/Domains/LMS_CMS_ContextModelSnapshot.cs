@@ -12836,6 +12836,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsFromRegistration")
+                        .HasColumnType("bit");
+
                     b.Property<long?>("ParentID")
                         .HasColumnType("bigint");
 

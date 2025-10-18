@@ -69,7 +69,7 @@
             'bg-[#089B41] text-white': selectedTab === tab,
             'bg-gray-200 text-gray-700': selectedTab !== tab
         }" class="px-4 py-3 text-sm font-medium rounded-sm focus:outline-none transition-colors duration-200">
-            {{ tab }}
+            {{ tab | translate }}
         </button>
     </div>
 
@@ -87,7 +87,7 @@
             <tr>
                 <th *ngFor="let header of getCurrentHeaders()"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ header }}
+                    {{ header | translate }}
                 </th>
             </tr>
         </thead>

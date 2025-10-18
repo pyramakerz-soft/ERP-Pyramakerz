@@ -137,8 +137,13 @@ export class RemedialTimeTableViewComponent {
       });
       this.remedialClasses.forEach(cl => {
         const used = classUsageCount[cl.id] || 0;
-        cl.numberOfSession -= used;
-        if (cl.numberOfSession < 0) {
+        if(cl.numberOfSession){
+          cl.numberOfSession -= used;
+        }else{
+          cl.numberOfSession = 0;
+          cl.numberOfSession -= used;
+        }
+        if (cl.numberOfSession && cl.numberOfSession < 0) {
           cl.numberOfSession = 0
         }
       });
@@ -207,7 +212,7 @@ export class RemedialTimeTableViewComponent {
     }
 
     const droppedClass = this.remedialClasses.find(s => s.id === draggedItem.id);
-    if (droppedClass && droppedClass.numberOfSession > 0) {
+    if (droppedClass && droppedClass.numberOfSession && droppedClass.numberOfSession > 0) {
       droppedClass.numberOfSession--;
     } else if (droppedClass && droppedClass.numberOfSession == 0) {
       this.remedialClasses = this.remedialClasses.filter(s => s.id != draggedItem.id);

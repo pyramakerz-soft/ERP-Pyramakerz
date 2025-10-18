@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using Amazon;
+using Amazon.S3;
 using Microsoft.AspNetCore.Http;
 
 namespace LMS_CMS_PL.Services
@@ -13,7 +14,7 @@ namespace LMS_CMS_PL.Services
             _configuration = configuration;
             _domainService = domainService;
         }
-         
+
         public string GetFileUrl(string? filePath, HttpRequest request, HttpContext httpContext)
         {
             if (string.IsNullOrEmpty(filePath))
@@ -145,38 +146,32 @@ namespace LMS_CMS_PL.Services
             bool isProduction = _configuration.GetValue<bool>("IsProduction");
 
             if (isProduction)
-            { 
+            {
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
+                string domainPath = $"{domain}/{subDomain}".Trim('/');
+                  
+                var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]));
 
-                var s3Client = new AmazonS3Client();
                 var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
 
                 string fileName = Path.GetFileName(sourceFilePath);
-                //string destinationKey = $"{basePath}/{entityId}/{fileName}";
+                string destinationKey = $"{basePath}/{entityId}/{fileName}";
+                string sourceKey = sourceFilePath.Replace("\\", "/");
 
-                //string sourceKey = sourceFilePath.Replace("\\", "/");
-
-                string destinationKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{basePath}/{entityId}/{fileName}";
-
-                // Ensure source path uses forward slashes and includes the full path
-                string sourceKey = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/{sourceFilePath.Replace("\\", "/")}";
-
-                Console.WriteLine("--------------------------------------------------------------------------------");
-                Console.WriteLine(destinationKey);
-                Console.WriteLine(sourceKey);
-                Console.WriteLine("--------------------------------------------------------------------------------");
-
-                bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, $"{domain}/{subDomain}");
-                if (copied)
+                // 👇 FIX HERE — remove folder/domain duplication
+                if (sourceKey.StartsWith($"{_configuration["AWS:Folder"]}{domainPath}/"))
                 {
-                    return destinationKey;
+                    sourceKey = sourceKey.Substring($"{_configuration["AWS:Folder"]}{domainPath}/".Length);
                 }
+                 
+                bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, domainPath);
 
-                return string.Empty;
+                return copied ? destinationKey : string.Empty;
             }
             else
-            { 
+            {
+                // Local file copy (non-production)
                 var normalizedSource = sourceFilePath.Replace('\\', Path.DirectorySeparatorChar);
                 var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedSource);
 
@@ -195,7 +190,7 @@ namespace LMS_CMS_PL.Services
 
                 return Path.Combine("Uploads", basePath, entityId.ToString(), fileName);
             }
-        }
+        } 
 
         public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long entityId, HttpContext httpContext)
         {

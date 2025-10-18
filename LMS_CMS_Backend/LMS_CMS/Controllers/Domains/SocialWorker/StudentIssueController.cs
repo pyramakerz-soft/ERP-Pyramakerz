@@ -318,7 +318,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         ////////////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("StudentIssueReport")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"parent"},
             pages: new[] { "Student Issue Report" }
         )]
         public async Task<IActionResult> StudentIssueReport(

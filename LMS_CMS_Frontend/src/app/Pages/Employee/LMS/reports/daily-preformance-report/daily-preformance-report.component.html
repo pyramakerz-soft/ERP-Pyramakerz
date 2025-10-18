@@ -1,10 +1,10 @@
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ (reportType === 'student' ? 'Student Daily Performance Report' : 'Classroom Daily Performance Report') | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ (reportType === 'student' ||  reportType === 'parent' ? 'Student Daily Performance Report' : 'Classroom Daily Performance Report') | translate }}</h1>
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
     <!-- School Selector -->
-    <div class="w-full md:w-1/4">
+    <div class="w-full md:w-1/4" *ngIf=" reportType != 'parent'">
         <label for="school" class="block mb-2 text-sm font-medium text-gray-900">{{'School'| translate }}</label>
         <select id="school" [(ngModel)]="SelectedSchoolId" (change)="loadGrades()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Grade Selector -->
-    <div class="w-full md:w-1/4">
+    <div class="w-full md:w-1/4" *ngIf=" reportType != 'parent'">
         <label for="grade" class="block mb-2 text-sm font-medium text-gray-900">{{'Grade'| translate }}</label>
         <select id="grade" [(ngModel)]="SelectedGradeId" (change)="loadClassrooms()" [disabled]="!SelectedSchoolId || SelectedSchoolId <= 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Classroom Selector -->
-    <div class="w-full md:w-1/4">
+    <div class="w-full md:w-1/4" *ngIf=" reportType != 'parent'">
         <label for="classroom" class="block mb-2 text-sm font-medium text-gray-900">{{'Classroom'| translate }}</label>
         <select id="classroom" [(ngModel)]="SelectedClassroomId" (change)="reportType === 'student' ? loadStudents() : DateChange()" 
             [disabled]="!SelectedGradeId || SelectedGradeId <= 0"
@@ -57,6 +57,19 @@
         </select>
     </div>
 
+     <!-- Student Selector (only for parent report) -->
+    <div class="w-full md:w-1/4" *ngIf="reportType === 'parent'">
+        <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
+        <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{'No Data'| translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id" [disabled]="student.id === -1">
+                {{ student.en_name }}
+            </option>
+        </select>
+    </div>
+
     <!-- Start Date -->
     <div class="w-full md:w-1/4">
         <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
@@ -74,10 +87,10 @@
     <!-- View Report Button -->
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
-            [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedSchoolId || !SelectedGradeId || !SelectedClassroomId || (reportType === 'student' ? !SelectedStudentId : false) || isLoading"
+            [disabled]="OrCheck()"
             [ngClass]="{
-                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedSchoolId || !SelectedGradeId || !SelectedClassroomId || (reportType === 'student' ? !SelectedStudentId : false),
-                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedSchoolId && SelectedGradeId && SelectedClassroomId && (reportType === 'student' ? SelectedStudentId : true) && !isLoading
+                'bg-gray-100 text-gray-300': OrCheck(),
+                'secondaryBg text-white': AndCheck()
             }">
             <span *ngIf="!isLoading">{{'View Report'| translate }}</span>
             <span *ngIf="isLoading">{{'Loading...'| translate }}</span>

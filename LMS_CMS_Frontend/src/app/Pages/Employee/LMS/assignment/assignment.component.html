@@ -5,7 +5,7 @@
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-               {{ 'Create' | translate }}  {{ 'Assignment' | translate }}
+               {{ 'Create' | translate }} {{ 'Assignment' | translate }}
         </button>
     </div>
 </div>
@@ -17,7 +17,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }}{{ 'School' | translate }}</option>
+            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -30,7 +30,7 @@
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
 
-            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }}{{ 'Grade' | translate }}</option>
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
             <ng-container *ngIf="Grades.length > 0; else noDataGrade">
                 <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
             </ng-container>
