@@ -129,6 +129,7 @@ export class AcademicSequentialReportComponent {
     this.studentServ.GetByStudentID(this.SelectedSchoolId,this.DomainName).subscribe((d) => {
       this.Students = d;
       this.filteredStudents = d; 
+      console.log(d)
     });
   }
 
