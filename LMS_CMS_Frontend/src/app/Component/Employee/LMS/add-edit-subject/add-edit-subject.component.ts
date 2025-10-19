@@ -178,36 +178,63 @@ private showSuccessAlert(message: string) {
     }
   }
 
-  capitalizeField(field: keyof Subject): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-  }
+capitalizeField(field: keyof Subject): string {
+  return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+}
 
 isFormValid(): boolean {
   let isValid = true;
-  for (const key in this.subject) {
-    if (this.subject.hasOwnProperty(key)) {
-      const field = key as keyof Subject;
-      if (!this.subject[field]) {
-        if(field == "ar_name" || field == "en_name" || field == "creditHours" || field == "gradeID" || field == "numberOfSessionPerWeek" || field == "orderInCertificate"
-           || field == "passByDegree"  || field == "totalMark"  || field == "subjectCategoryID"  || field == "subjectCode" || field == "assignmentCutOffDatePercentage"
-        ){
-          this.validationErrors[field] = this.translate.instant('Field is required', { field: field });
-          isValid = false;
-        } 
-      } else {
-        if(field == "en_name" || field == "ar_name"){
-          if(this.subject.en_name.length > 100 || this.subject.ar_name.length > 100){
-            this.validationErrors[field] = this.translate.instant('Field cannot be longer than 100 characters', { field: field });
-            isValid = false;
-          }
-        } else{
-          this.validationErrors[field] = '';
-        }
-      }
+  this.validationErrors = {}; // Clear previous errors
+
+  // Required field validations
+  const requiredFields: (keyof Subject)[] = [
+    'ar_name', 'en_name', 'creditHours', 'gradeID', 'numberOfSessionPerWeek', 
+    'orderInCertificate', 'passByDegree', 'totalMark', 'subjectCategoryID', 
+    'subjectCode', 'assignmentCutOffDatePercentage'
+  ];
+
+  for (const field of requiredFields) {
+    if (!this.subject[field] && this.subject[field] !== 0) {
+      const fieldName = this.getFieldDisplayName(field);
+      this.validationErrors[field] = `${fieldName} ${this.translate.instant('Is Required')}`;
+      isValid = false;
     }
   }
+
+  // Length validations
+  if (this.subject.en_name && this.subject.en_name.length > 100) {
+    this.validationErrors['en_name'] = `${this.translate.instant('English Name')} ${this.translate.instant('cannot be longer than 100 characters')}`;
+    isValid = false;
+  }
+
+  if (this.subject.ar_name && this.subject.ar_name.length > 100) {
+    this.validationErrors['ar_name'] = `${this.translate.instant('Arabic Name')} ${this.translate.instant('cannot be longer than 100 characters')}`;
+    isValid = false;
+  }
+
   return isValid;
 }
+
+// Helper method to get display names for fields
+private getFieldDisplayName(field: keyof Subject): string {
+  const fieldNames: { [key in keyof Subject]?: string } = {
+    'en_name': this.translate.instant('English Name'),
+    'ar_name': this.translate.instant('Arabic Name'),
+    'creditHours': this.translate.instant('Credit Hours'),
+    'gradeID': this.translate.instant('Grade'),
+    'numberOfSessionPerWeek': this.translate.instant('Number of session per week'),
+    'orderInCertificate': this.translate.instant('Order in Certificate'),
+    'passByDegree': this.translate.instant('Pass By Degree'),
+    'totalMark': this.translate.instant('Total Mark'),
+    'subjectCategoryID': this.translate.instant('Subject Category'),
+    'subjectCode': this.translate.instant('Subject Code'),
+    'assignmentCutOffDatePercentage': this.translate.instant('Assignment Cut Off Date Percentage')
+  };
+
+  return fieldNames[field] || this.capitalizeField(field);
+}
+
+
 
   validateNumber(event: any, field: keyof Subject): void {
     const value = event.target.value;

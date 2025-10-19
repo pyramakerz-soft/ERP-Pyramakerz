@@ -256,39 +256,39 @@ GetByIdByParent(id: number, DomainName: string): Observable<ParentMedicalHistory
 //   }
 
   
-  AddByParent(medicalHistory: ParentMedicalHistory, DomainName: string): Observable<any> {
-    if (DomainName != null) {
-      this.header = DomainName;
-    }
-
-    const token = localStorage.getItem('current_token');
-    const headers = new HttpHeaders()
-      .set('Domain-Name', this.header)
-      .set('Authorization', `Bearer ${token}`);
-
-    const formData = new FormData();
-    formData.append('Details', medicalHistory.details ?? '');
-    formData.append('PermanentDrug', medicalHistory.permanentDrug ?? '');
-
-    
-    if (medicalHistory.firstReport instanceof File) {
-      formData.append('FirstReport', medicalHistory.firstReport, medicalHistory.firstReport.name);
-    } else if (medicalHistory.firstReport === null) {
-      formData.append('FirstReport', ''); 
-    } else {
-      formData.append('FirstReport', medicalHistory.firstReport); 
-    }
-
-    
-    if (medicalHistory.secReport instanceof File) {
-      formData.append('SecReport', medicalHistory.secReport, medicalHistory.secReport.name);
-    } else if (medicalHistory.secReport === null) {
-      formData.append('SecReport', ''); 
-    } else {
-      formData.append('SecReport', medicalHistory.secReport); 
-    }
-
-    return this.http.post(`${this.baseUrl}/MedicalHistory/AddByParent`, formData, { headers });
+AddByParent(medicalHistory: ParentMedicalHistory, DomainName: string): Observable<any> {
+  if (DomainName != null) {
+    this.header = DomainName;
   }
+
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('Domain-Name', this.header)
+    .set('Authorization', `Bearer ${token}`);
+
+  const formData = new FormData();
+  formData.append('StudentId', medicalHistory.studentId?.toString() ?? ''); // Add StudentId
+  formData.append('Details', medicalHistory.details ?? '');
+  formData.append('PermanentDrug', medicalHistory.permanentDrug ?? '');
+
+  // Handle file uploads
+  if (medicalHistory.firstReport instanceof File) {
+    formData.append('FirstReport', medicalHistory.firstReport, medicalHistory.firstReport.name);
+  } else if (medicalHistory.firstReport === null) {
+    formData.append('FirstReport', ''); 
+  } else {
+    formData.append('FirstReport', medicalHistory.firstReport); 
+  }
+
+  if (medicalHistory.secReport instanceof File) {
+    formData.append('SecReport', medicalHistory.secReport, medicalHistory.secReport.name);
+  } else if (medicalHistory.secReport === null) {
+    formData.append('SecReport', ''); 
+  } else {
+    formData.append('SecReport', medicalHistory.secReport); 
+  }
+
+  return this.http.post(`${this.baseUrl}/MedicalHistory/AddByParent`, formData, { headers });
+}
 
 }

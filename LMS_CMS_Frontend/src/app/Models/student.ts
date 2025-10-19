@@ -28,5 +28,6 @@ export class Student {
       public gradeName: string = '',
       public className: string = '',
       public isSuspended: boolean = false, 
+      public passportNo: number =0
   ) {}
 } 
