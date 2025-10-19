@@ -67,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             foreach (var notification in notificationGetDTO)
             {
-                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request);
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationGetDTO);
@@ -100,7 +100,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var notification in notificationGetDTO)
             {
-                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request);
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationGetDTO);
@@ -131,7 +131,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             NotificationGetDTO notificationGetDTO = mapper.Map<NotificationGetDTO>(notification);
               
-            notificationGetDTO.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request);
+            notificationGetDTO.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
 
             if (notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
             {
@@ -207,7 +207,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request);
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationSharedToGetDTO);
@@ -261,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request);
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationSharedToGetDTO);
@@ -313,7 +313,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             NotificationSharedToGetDTO notificationSharedToGetDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
              
-            notificationSharedToGetDTO.ImageLink = _fileService.GetFileUrl(notificationSharedToGetDTO.ImageLink, Request);
+            notificationSharedToGetDTO.ImageLink = _fileService.GetFileUrl(notificationSharedToGetDTO.ImageLink, Request, HttpContext);
 
             notificationSharedTo.SeenOrNot = true;
             notificationSharedTo.NotifiedOrNot = true;
@@ -389,7 +389,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request);
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationSharedToGetDTO);
@@ -695,7 +695,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                      
                     if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
                     {
-                        notificationDTO.ImageLink = _fileService.GetFileUrl(notificationDTO.ImageLink, Request);
+                        notificationDTO.ImageLink = _fileService.GetFileUrl(notificationDTO.ImageLink, Request, HttpContext);
                     }
                      
                     await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 

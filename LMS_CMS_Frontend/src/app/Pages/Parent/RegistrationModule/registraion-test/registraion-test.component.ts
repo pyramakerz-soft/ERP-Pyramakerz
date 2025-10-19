@@ -121,11 +121,7 @@ export class RegistraionTestComponent {
 
   GetAllData() {
     this.registerServ
-      .GetByRegistrationParentId(
-        this.registerationFormParentID,
-        this.TestId,
-        this.DomainName
-      )
+      .GetByRegistrationParentId(this.registerationFormParentID,this.TestId,this.DomainName )
       .subscribe(
         (d: any) => {
           if (d.isVisibleToParent != true) {
@@ -217,7 +213,7 @@ export class RegistraionTestComponent {
   }
 
   checkForTestAvailabilityForParent() {
-    this.registerationFormParentService.GetById(this.registerationFormParentID, this.DomainName).subscribe(
+    this.registerationFormParentService.GetById(this.registerationFormParentID, this.DomainName).subscribe(  // this will check if this registerationFormParentID can access this test
       registrationParent => {
         this.testService.GetByID(this.TestId, this.DomainName).subscribe(
           test => {
@@ -226,6 +222,8 @@ export class RegistraionTestComponent {
             }
           }
         )
+      },error=>{
+       this.moveToTest()
       }
     )
 

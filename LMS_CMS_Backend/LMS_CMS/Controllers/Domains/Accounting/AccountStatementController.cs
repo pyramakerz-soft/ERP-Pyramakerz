@@ -22,7 +22,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         #region Account Statement
         [HttpGet("GetAccountStatement")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" , "parent" },
             pages: new[] { "Account Statement Report", "Assignment" }
         )]
         public async Task<IActionResult> GetAccountStatement(long linkFileID, DateTime? fromDate, DateTime? toDate, long SubAccountID, int pageNumber = 1, int pageSize = 10)

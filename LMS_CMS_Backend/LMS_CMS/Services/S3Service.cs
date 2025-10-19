@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Services
                 return false;
             }
 
-            var key = $"{_folder}/{domain}/{subDirectory}".Replace("//", "/");
+            var key = $"{_folder}/{domain}/{subDirectory}/{file.FileName}".Replace("//", "/");
 
             // Save to a temporary file first
             var tempFilePath = Path.GetTempFileName();
@@ -188,17 +188,13 @@ namespace LMS_CMS_PL.Services
 
             return false;
         }
-
-        public string GetFileUrl(string key, int expireMinutes = 120)
+         
+        public string GetFileUrl(string key, IConfiguration config)
         {
-            var request = new GetPreSignedUrlRequest
-            {
-                BucketName = _bucketName,
-                Key = key,
-                Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
-            };
+            key = key.TrimStart('/');
+            var region = config["AWS:Region"] ?? "us-east-1";
 
-            return _s3Client.GetPreSignedURL(request);
+            return $"https://{_bucketName}.s3.{region}.amazonaws.com/{key}";
         }
 
         public async Task<bool> DeleteFileAsync(string subDirectory, string domain, string fileName)
@@ -313,14 +309,14 @@ namespace LMS_CMS_PL.Services
 
             return contentType;
         }
-
+         
         public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
         {
             try
             {
-                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("\\", "/");
-                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("\\", "/");
-
+                var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("//", "/");
+                var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("//", "/");
+                 
                 var copyRequest = new CopyObjectRequest
                 {
                     SourceBucket = _bucketName,
@@ -332,10 +328,17 @@ namespace LMS_CMS_PL.Services
                 await _s3Client.CopyObjectAsync(copyRequest);
                 return true;
             }
-            catch
+            catch (AmazonS3Exception ex)
             {
+                Console.WriteLine($"AWS Error: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General Error: {ex.Message}");
                 return false;
             }
         }
+
     }
 }

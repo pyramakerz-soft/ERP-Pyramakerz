@@ -15,7 +15,7 @@ import { RoleService } from '../../../../Services/Employee/role.service';
 import Swal from 'sweetalert2';
 import { RoleDetailsService } from '../../../../Services/Employee/role-details.service';
 import { RolePut } from '../../../../Models/Administrator/role-put';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -68,7 +68,8 @@ export class RoleAddEditComponent {
     public RoleServ: RoleService,
     private router: Router,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) { }
 
   async ngOnInit() {
@@ -109,6 +110,33 @@ export class RoleAddEditComponent {
       this.subscription.unsubscribe();
     }
   }
+
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+// Helper method to show success messages
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
 
   GetRoleName() {
@@ -306,113 +334,65 @@ export class RoleAddEditComponent {
     updateParents(parentId);
   }
 
-  Save() {
-    const resultItems = this.ResultArray.filter(item => item.IsSave === true);
-    this.DataToSave.id = this.RoleId;
-    this.DataToSave.name = this.RoleName
-    this.DataToSave.pages = resultItems;
-    if (this.isFormValid()) {
-      this.isLoading = true
-      if (this.mode == "Create") {
-        this.RoleServ.AddRole(this.DataToSave, this.DomainName).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Role Added Succeessfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.isLoading = false
-            this.router.navigateByUrl("Employee/Role")
-          },
-          error: (error) => {
-            this.isLoading = false
+Save() {
+  const resultItems = this.ResultArray.filter(item => item.IsSave === true);
+  this.DataToSave.id = this.RoleId;
+  this.DataToSave.name = this.RoleName
+  this.DataToSave.pages = resultItems;
+  if (this.isFormValid()) {
+    this.isLoading = true
+    if (this.mode == "Create") {
+      this.RoleServ.AddRole(this.DataToSave, this.DomainName).subscribe({
+        next: (response) => {
+          this.showSuccessAlert(this.translate.instant('Role added successfully'));
+          this.isLoading = false
+          this.router.navigateByUrl("Employee/Role")
+        },
+        error: (error) => {
+          this.isLoading = false
+          const nameError = error?.error?.errors?.Name?.[0]
 
-            const nameError = error?.error?.errors?.Name?.[0]
+          if (error?.error?.status === 401) {
+            this.showErrorAlert(this.translate.instant('You are not allowed to add roles'));
+          } else if (
+            typeof nameError === 'string' &&
+            nameError.includes("Role cannot be longer than 100 characters")
+          ) {
+            this.showErrorAlert(this.translate.instant('Role name cannot be longer than 100 characters'));
+          } else {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to add role');
+            this.showErrorAlert(errorMessage);
+          }
+        },
+      });
+    }
+    else if (this.mode == "Edit") {
+      this.RoleServ.EditRole(this.DataToSave, this.DomainName).subscribe({
+        next: (response) => {
+          this.showSuccessAlert(this.translate.instant('Role updated successfully'));
+          this.isLoading = false
+          this.router.navigateByUrl("Employee/Role")
+        },
+        error: (error) => {
+          this.isLoading = false
+          const nameError = error?.error?.errors?.Name?.[0]
 
-            if (error?.error?.status === 401) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: "You Are Not Allowed To Add",
-              });
-            } else if (
-              typeof nameError === 'string' &&
-              nameError.includes("Role cannot be longer than 100 characters")
-            ) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Name cannot be longer than 100 characters',
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text:
-                  (typeof error?.error === 'string' && error.error) ||
-                  error?.error?.message ||
-                  'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-            }
-          },
-        });
-      }
-      else if (this.mode == "Edit") {
-        this.RoleServ.EditRole(this.DataToSave, this.DomainName).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Role Edited Succeessfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.isLoading = false
-            this.router.navigateByUrl("Employee/Role")
-          },
-          error: (error) => {
-            this.isLoading = false
-
-            const nameError = error?.error?.errors?.Name?.[0]
-
-            if (error?.error?.status === 401) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: "You Are Not Allowed To Edit This",
-              });
-            } else if (
-              typeof nameError === 'string' &&
-              nameError.includes("Role cannot be longer than 100 characters")
-            ) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Name cannot be longer than 100 characters',
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text:
-                  (typeof error?.error === 'string' && error.error) ||
-                  error?.error?.message ||
-                  'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-            }
-          },
-        });
-      }
+          if (error?.error?.status === 401) {
+            this.showErrorAlert(this.translate.instant('You are not allowed to edit this role'));
+          } else if (
+            typeof nameError === 'string' &&
+            nameError.includes("Role cannot be longer than 100 characters")
+          ) {
+            this.showErrorAlert(this.translate.instant('Role name cannot be longer than 100 characters'));
+          } else {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update role');
+            this.showErrorAlert(errorMessage);
+          }
+        },
+      });
     }
   }
+}
 
   onInputValueChange(event: { field: keyof RolePut, value: any }) {
     const { field, value } = event;
@@ -424,34 +404,22 @@ export class RoleAddEditComponent {
     }
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.DataToSave) {
-      if (this.DataToSave.hasOwnProperty(key)) {
-        const field = key as keyof RolePut;
-        if (!this.DataToSave[field]) {
-          if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
 
-    if (this.DataToSave.pages.length == 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        confirmButtonColor: '#089B41',
-        text: "Pages list cannot be null or empty",
-      });
-      isValid = false;
-    }
-
-    return isValid;
+  if (!this.DataToSave.name) {
+    this.validationErrors['name'] = this.translate.instant('Role name is required');
+    isValid = false;
   }
+
+  if (this.DataToSave.pages.length == 0) {
+    this.showErrorAlert(this.translate.instant('Please select at least one page'));
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof RolePut): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');

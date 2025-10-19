@@ -243,6 +243,7 @@ export class PayableDetailsComponent {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
           if (
+            field == 'bankOrSaveID' ||
             field == 'payableDocTypeID' ||
             field == 'linkFileID' ||
             field == 'date' ||
@@ -251,10 +252,9 @@ export class PayableDetailsComponent {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
-            isValid = false;
-          }
-          if (field == 'bankOrSaveID') {
-            this.validationErrors[field] = `*Bank Or SaFe is required`;
+            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
+              this.validationErrors[field] = `*bankOrSafeID is required`;
+            }
             isValid = false;
           }
         } else {
@@ -456,9 +456,7 @@ export class PayableDetailsComponent {
 
   GetLinkFilesTypeData(id: number) {
     this.linkFileTypesData = [];
-    this.dataAccordingToLinkFileService
-      .GetTableDataAccordingToLinkFile(this.DomainName, id)
-      .subscribe((data) => {
+    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileForPyable(this.DomainName, id).subscribe((data) => {
         this.linkFileTypesData = data;
       });
   }
@@ -499,7 +497,7 @@ export class PayableDetailsComponent {
     this.editedRowData = { ...row };
     if (this.editedRowData.linkFileID) {
       this.dataAccordingToLinkFileService
-        .GetTableDataAccordingToLinkFile(
+        .GetTableDataAccordingToLinkFileForPyable(
           this.DomainName,
           +this.editedRowData.linkFileID
         )

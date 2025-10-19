@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { ApiService } from '../../../../Services/api.service';
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -22,7 +22,7 @@ import { DrugClass } from '../../../../Models/Clinic/drug-class';
     SearchComponent,
     ModalComponent,
     TableComponent,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './drugs.component.html',
   styleUrls: ['./drugs.component.css'],
@@ -37,30 +37,60 @@ export class DrugsComponent implements OnInit {
   isModalVisible = false;
   drugs: DrugClass[] = [];
   DomainName: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   constructor(
     private drugService: DrugService,
-    private apiService: ApiService ,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
+    private apiService: ApiService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getDrugs();
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async getDrugs() {
     try {
@@ -121,7 +151,6 @@ export class DrugsComponent implements OnInit {
       const domainName = this.DomainName;
       const drug = { ...this.drug };
 
-      // Disable the save button during submission
       this.isSaving = true;
 
       const operation = isEditing
@@ -132,11 +161,10 @@ export class DrugsComponent implements OnInit {
         next: () => {
           this.getDrugs();
           this.closeModal();
-          Swal.fire(
-            'Success',
-            `Drug ${isEditing ? 'updated' : 'created'} successfully`,
-            'success'
-          );
+          const successMessage = isEditing
+            ? this.translate.instant('Updated successfully')
+            : this.translate.instant('Created successfully');
+          this.showSuccessAlert(successMessage);
           this.isSaving = false;
         },
         error: (err) => {
@@ -144,11 +172,12 @@ export class DrugsComponent implements OnInit {
             `Error ${isEditing ? 'updating' : 'creating'} drug:`,
             err
           );
-          Swal.fire(
-            'Error',
-            `Failed to ${isEditing ? 'update' : 'create'} drug`,
-            'error'
-          );
+          const errorMessage =
+            err.error?.message ||
+            this.translate.instant(
+              `Failed to ${isEditing ? 'update' : 'create'} drug`
+            );
+          this.showErrorAlert(errorMessage);
           this.isSaving = false;
         },
       });
@@ -156,33 +185,25 @@ export class DrugsComponent implements OnInit {
   }
 
   deleteDrug(row: any) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this drug?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.drugService.Delete(row.id, this.DomainName).subscribe({
-          next: (response) => {
-            this.getDrugs();
-          },
-          error: (error) => {
-            console.error('Error deleting drug:', error);
-            Swal.fire('Error!', 'Failed to delete the drug.', 'error');
-          },
-        });
-      }
+    this.drugService.Delete(row.id, this.DomainName).subscribe({
+      next: (response) => {
+        this.getDrugs();
+        this.showSuccessAlert(this.translate.instant('Deleted successfully'));
+      },
+      error: (error) => {
+        console.error('Error deleting drug:', error);
+        const errorMessage =
+          error.error?.message ||
+          this.translate.instant('Failed to delete the drug');
+        this.showErrorAlert(errorMessage);
+      },
     });
   }
 
   validateForm(): boolean {
     let isValid = true;
     if (!this.drug.name) {
-      this.validationErrors['name'] = '*Name is required';
+      this.validationErrors['name'] = `${this.translate.instant('Name is required')}`;
       isValid = false;
     } else {
       this.validationErrors['name'] = '';
@@ -215,14 +236,11 @@ export class DrugsComponent implements OnInit {
       });
     }
   }
-GetTableHeaders(){
-   
-if(!this.isRtl){
-  return ['ID', 'Drug Name', 'Date', 'Actions']
-}else{
-  return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات']
-}
-}
-
-
+  GetTableHeaders() {
+    if (!this.isRtl) {
+      return ['ID', 'Drug Name', 'Actions'];
+    } else {
+      return ['المعرف', 'اسم الدواء', 'الإجراءات'];
+    }
+  }
 }

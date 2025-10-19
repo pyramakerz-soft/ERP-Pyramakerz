@@ -15,5 +15,6 @@ namespace LMS_CMS_BL.DTO.Clinic
 
         public string? Recommendation { get; set; }
         public bool? SendSMS { get; set; }
+        public DateOnly? Date { get; set; }
     }
 }

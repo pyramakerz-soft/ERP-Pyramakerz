@@ -150,7 +150,7 @@ export class LessonActivityComponent {
     this.lessonActivityService.GetByID(id, this.DomainName).subscribe((data) => {
       this.lessonActivity = data;
       if (this.lessonActivity.attachmentLink != null && this.lessonActivity.attachmentLink != '') {
-        if (this.lessonActivity.attachmentLink?.includes('Uploads/')) {
+        if (this.lessonActivity.attachmentLink?.includes('LMS/LessonActivity')) {
           this.selectedAttachmentType = 'file'
         } else {
           this.selectedAttachmentType = 'text'

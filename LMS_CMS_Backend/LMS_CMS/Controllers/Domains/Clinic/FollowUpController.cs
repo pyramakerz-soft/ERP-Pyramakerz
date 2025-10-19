@@ -397,7 +397,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             Unit_Of_Work.followUp_Repository.Update(followUp);
             Unit_Of_Work.SaveChanges();
 
-            return Ok("Follow Up deleted successfully");
+            return Ok();
         }
         #endregion
     }

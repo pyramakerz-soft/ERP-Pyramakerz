@@ -7,6 +7,7 @@ export class Student {
       public en_name: string = '',
       public ar_name: string = '',
       public password: string = '',
+      public dateOfBirth : String = '' ,
       public mobile: string = '',
       public phone: string = '',
       public address: string = '',

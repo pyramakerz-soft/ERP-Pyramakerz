@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
          
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"parent" ,"student"},
             pages: new[] { "Add Certificate To Student" }
         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
              
             foreach (var item in Dto)
             {
-                item.CertificateTypeFile = _fileService.GetFileUrl(item.CertificateTypeFile, Request);
+                item.CertificateTypeFile = _fileService.GetFileUrl(item.CertificateTypeFile, Request, HttpContext);
             }
             return Ok(Dto);
         }
@@ -190,6 +190,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        ////////////////////////////////
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("CertificateToStudentReport")]
         [Authorize_Endpoint_(
@@ -214,10 +218,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
-            {
-                return BadRequest("School, Grade, Classroom, and Student are all required.");
-            }
+            //if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
+            //{
+            //    return BadRequest("School, Grade, Classroom, and Student are all required.");
+            //}
 
             IQueryable<CertificateStudent> query = Unit_Of_Work.certificateStudent_Repository.Query()
                 .Where(cs => cs.IsDeleted != true && cs.Student.IsDeleted != true)

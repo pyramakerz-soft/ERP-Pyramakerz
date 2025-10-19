@@ -146,6 +146,14 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Certificate'),
               route: 'Student Certificate'
+            },
+            {
+              label: this.translateFunction('Social Worker Cerificates'),
+              route: 'Certificate To Student Report'
+            },
+            {
+              label: this.translateFunction('Social Worker Medals'),
+              route: 'Students Medal'
             }
           ],
           icon: 'LMS'
@@ -187,13 +195,41 @@ export class MainLayoutComponent {
               label: this.translateFunction('Subjects'),
               route: 'Subjects'
             },
-            {
-              label: this.translateFunction('Reports'),
-              route: 'Reports'
-            },
+            // {
+            //   label: this.translateFunction('Reports'),
+            //   route: 'Reports'
+            // },
             {
               label: this.translateFunction('Certificate'),
-              route: 'Parent Certificate'
+              route: 'Certificate'
+            },
+            {
+              label: this.translateFunction('Student Daily Performance'),
+              route: 'Student Daily Performance Report'
+            },
+            {
+              label: this.translateFunction('Student Issue'),
+              route: 'Student Issue Report'
+            },
+            {
+              label: this.translateFunction('Conducts'),
+              route: 'Conducts Report'
+            },
+            {
+              label: this.translateFunction('Attendance'),
+              route: 'Attendance Report'
+            },
+            {
+              label: this.translateFunction('Students Certificate'),
+              route: 'Student Report'
+            },
+            {
+              label: this.translateFunction('Students Medal'),
+              route: 'Students Medal'
+            },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
             }
           ],
           icon: 'LMS'
@@ -207,6 +243,16 @@ export class MainLayoutComponent {
             }
           ],
           icon: 'Virtual Meetings'
+        },
+        {
+          label: this.translateFunction('Accounting'),
+          subItems: [
+            {
+              label: this.translateFunction('Account Statement'),
+              route: 'Account Statement'
+            }
+          ],
+          icon: 'Accounting'
         },
         {
           label: this.translateFunction('Clinic'),

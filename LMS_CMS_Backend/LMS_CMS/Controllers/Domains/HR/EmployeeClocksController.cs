@@ -444,6 +444,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest(new { error = "No Employee With This Id" });
             }
 
+            EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(e => e.IsDeleted != true && e.EmployeeID == NewClock.EmployeeID && e.ClockOut == null)   // still open, no clock out
+                .OrderByDescending(e => e.Date)
+                .ThenByDescending(e => e.ClockIn)
+                .FirstOrDefault();
+
+            if (clock == null)
+            {
+                return BadRequest(new { error = "this user already clock out" });
+            }
+
+            clock.ClockOut = DateTime.Now.TimeOfDay;
+
             if (employee.IsRestrictedForLoctaion)
             {
                 if (NewClock.Latitude == null)
@@ -456,12 +469,12 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     return BadRequest(new { error = "Latitude is Required" });
                 }
 
-                if (NewClock.LocationID == null || NewClock.LocationID == 0)
-                {
-                    return BadRequest(new { error = "LocationID is Required" });
-                }
+                //if (NewClock.LocationID == null || NewClock.LocationID == 0)
+                //{
+                //    return BadRequest(new { error = "LocationID is Required" });
+                //}
 
-                Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == NewClock.LocationID && s.IsDeleted != true);
+                Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == clock.LocationID && s.IsDeleted != true);
                 if (location == null)
                 {
                     return BadRequest(new { error = "No location With This Id" });
@@ -475,9 +488,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 List<long> locationsIds = employeeLocations.Select(e => e.LocationID).Distinct().ToList();
 
-                if (NewClock.LocationID != null && NewClock.LocationID != 0)
+                if (clock.LocationID != null && clock.LocationID != 0)
                 {
-                    if (locationsIds.Contains((long)NewClock.LocationID))
+                    if (locationsIds.Contains((long)clock.LocationID))
                     {
                         // compare lat and long
                         double distance = GetDistanceInMeters(
@@ -505,18 +518,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 NewClock.LocationID = null;
             }
 
-            EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository
-                .FindBy(e => e.IsDeleted != true && e.EmployeeID == NewClock.EmployeeID && e.ClockOut == null)   // still open, no clock out
-                .OrderByDescending(e => e.Date)
-                .ThenByDescending(e => e.ClockIn)
-                .FirstOrDefault();
-
-            if(clock == null)
-            {
-                return BadRequest(new { error = "this user already clock out" });
-            }
-
-            clock.ClockOut = DateTime.Now.TimeOfDay;             // current time
+         // current time
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             clock.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

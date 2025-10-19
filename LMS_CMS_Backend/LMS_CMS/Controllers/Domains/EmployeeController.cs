@@ -92,7 +92,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     {
                         if (!string.IsNullOrEmpty(file.Link))
                         {
-                            file.Link = _fileService.GetFileUrl(file.Link, Request); 
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext); 
                         }
                     }
                 }
@@ -202,7 +202,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     {
                         if (!string.IsNullOrEmpty(file.Link))
                         { 
-                            file.Link = _fileService.GetFileUrl(file.Link, Request);
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
                         }
                     }
                 }
@@ -502,7 +502,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 {
                     if (!string.IsNullOrEmpty(file.Link))
                     { 
-                        file.Link = _fileService.GetFileUrl(file.Link, Request);
+                        file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
                     }
                 }
             }

@@ -111,39 +111,68 @@ export class LoansComponent {
     }
   }
 
-  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
-    this.TableData = [];
-    this.LoansServ.Get(DomainName, pageNumber, pageSize).subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage;
-        this.PageSize = data.pagination.pageSize;
-        this.TotalPages = data.pagination.totalPages;
-        this.TotalRecords = data.pagination.totalRecords;
-        this.TableData = data.data;
-      },
-      (error) => {
-        if (error.status == 404) {
-          if (this.TotalRecords != 0) {
-            let lastPage;
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+  this.TableData = [];
+  this.LoansServ.Get(DomainName, pageNumber, pageSize).subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage;
+      this.PageSize = data.pagination.pageSize;
+      this.TotalPages = data.pagination.totalPages;
+      this.TotalRecords = data.pagination.totalRecords;
+      this.TableData = data.data;
+    },
+    (error) => {
+      if (error.status == 404) {
+        if (this.TotalRecords != 0) {
+          let lastPage;
+          if (this.isDeleting) {
+            lastPage = (this.TotalRecords - 1) / this.PageSize;
+          } else {
+            lastPage = this.TotalRecords / this.PageSize;
+          }
+          if (lastPage >= 1) {
             if (this.isDeleting) {
-              lastPage = (this.TotalRecords - 1) / this.PageSize;
+              this.CurrentPage = Math.floor(lastPage);
+              this.isDeleting = false;
             } else {
-              lastPage = this.TotalRecords / this.PageSize;
+              this.CurrentPage = Math.ceil(lastPage);
             }
-            if (lastPage >= 1) {
-              if (this.isDeleting) {
-                this.CurrentPage = Math.floor(lastPage);
-                this.isDeleting = false;
-              } else {
-                this.CurrentPage = Math.ceil(lastPage);
-              }
-              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-            }
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           }
         }
+      } else {
+        const errorMessage = error.error?.message || this.translate.instant('Failed to load loans');
+        this.showErrorAlert(errorMessage);
       }
-    );
-  }
+    }
+  );
+}
 
   Create() {
     this.mode = 'Create';
@@ -212,64 +241,46 @@ export class LoansComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      console.log(this.loan);
-      if (this.mode == 'Create') {
-        this.LoansServ.Add(this.loan, this.DomainName).subscribe(
-          (d) => {
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-            this.isLoading = false;
-            this.closeModal();
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Created Successfully',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            console.log(error);
-
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
+CreateOREdit() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    console.log(this.loan);
+    if (this.mode == 'Create') {
+      this.LoansServ.Add(this.loan, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+          this.isLoading = false;
+          this.closeModal();
+        this.showSuccessAlert(
+          this.translate.instant('Loan') + ' ' + 
+          this.translate.instant('has been created successfully')
         );
-      }
-      if (this.mode == 'Edit') {
-        this.LoansServ.Edit(this.loan, this.DomainName).subscribe(
-          (d) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }
+        },
+        (error) => {
+          console.log(error);
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to create loan');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+    if (this.mode == 'Edit') {
+      this.LoansServ.Edit(this.loan, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+          this.isLoading = false;
+          this.closeModal();
+          this.showSuccessAlert(this.translate.instant('Loan updated successfully'));
+        },
+        (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update loan');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
   }
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -317,31 +328,28 @@ export class LoansComponent {
     }
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.loan) {
-      if (this.loan.hasOwnProperty(key)) {
-        const field = key as keyof Loans;
-        if (!this.loan[field]) {
-          if (
-            field == 'date' ||
-            field == 'deductionStartMonth' ||
-            field == 'safeID' ||
-            field == 'employeeID' ||
-            field == 'numberOfDeduction' ||
-            field == 'amount'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.loan) {
+    if (this.loan.hasOwnProperty(key)) {
+      const field = key as keyof Loans;
+      if (!this.loan[field]) {
+        if (
+          field == 'date' ||
+          field == 'deductionStartMonth' ||
+          field == 'safeID' ||
+          field == 'employeeID' ||
+          field == 'numberOfDeduction' ||
+          field == 'amount'
+        ) {
+          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          isValid = false;
         }
       }
     }
-    return isValid;
   }
-
+  return isValid;
+}
   capitalizeField(field: keyof Loans): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }

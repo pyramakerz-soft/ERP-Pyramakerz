@@ -144,7 +144,7 @@ export class InventoryDetailsComponent {
     '.xls', '.xlsx', '.csv',
     '.mp4', '.avi', '.mkv', '.mov'
   ];
-  
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -272,13 +272,13 @@ export class InventoryDetailsComponent {
   ////////////////////////////////////////////////////// Get Data
 
   GetAllSaves() {
-    this.SafeEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
+    this.SafeEmployeeServ.GetByEmployeeId(this.UserID, this.DomainName).subscribe((d) => {
       this.Saves = d;
     });
   }
 
   GetAllBanks() {
-    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
+    this.BankEmployeeServ.GetByEmployeeId(this.UserID, this.DomainName).subscribe((d) => {
       this.Banks = d;
     });
   }
@@ -357,11 +357,11 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
-      if(this.Data.isVisa == false){
-        this.Data.bankID=0
+      if (this.Data.isVisa == false) {
+        this.Data.bankID = 0
       }
-      if(this.Data.isCash == false){
-        this.Data.saveID=0
+      if (this.Data.isCash == false) {
+        this.Data.saveID = 0
       }
       console.log(this.Data)
       this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
@@ -440,7 +440,7 @@ export class InventoryDetailsComponent {
   async selectShopItem(item: ShopItem) {
     this.SelectedSopItem = item;
     this.ShopItem = item;
-     this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
+    this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
     if (this.FlagId === 11 || this.FlagId === 12) {
       this.Item.price = item.salesPrice ?? 0;
     } else {
@@ -526,7 +526,10 @@ export class InventoryDetailsComponent {
         this.Data.inventoryDetails = this.TableData;
         this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
         this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
-        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
+        console.log(1234,this.Data)
+        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
+          this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
+        },
           (error) => {
             this.isLoading = false;
             Swal.fire({
@@ -647,7 +650,7 @@ export class InventoryDetailsComponent {
       this.Data.DeletedAttachments = [];
     }
     this.Data.DeletedAttachments.push(img);
-    console.log(123,this.Data.DeletedAttachments)
+    console.log(123, this.Data.DeletedAttachments)
     this.Data.attachments = this.Data.attachments.filter((i) => i != img);
   }
 
@@ -713,7 +716,7 @@ export class InventoryDetailsComponent {
     const input = event.target as HTMLInputElement;
     for (const file of Array.from(files)) {
       const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-      if (!this.allowedExtensions.includes(fileExtension)) { 
+      if (!this.allowedExtensions.includes(fileExtension)) {
         this.validationErrors['NewAttachments'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`
         input.value = '';
         return;
@@ -782,12 +785,12 @@ export class InventoryDetailsComponent {
       if (this.mode == 'Create') {
         this.Data.cashAmount = this.Data.cashAmount || 0;
         this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.Data.inventoryDetails.reduce( (sum, item) => sum + (item.totalPrice || 0),0);
+        this.Data.total = this.Data.inventoryDetails.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
         this.Data.remaining = +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
       } else if (this.mode == 'Edit') {
         this.Data.cashAmount = this.Data.cashAmount || 0;
         this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.TableData.reduce((sum, item) => sum + (item.totalPrice || 0),0);
+        this.Data.total = this.TableData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
         this.Data.remaining = +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
         // this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
       }

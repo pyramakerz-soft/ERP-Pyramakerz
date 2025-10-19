@@ -39,9 +39,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAssignmentIDClassID/{Aid}/{CiD}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Assignment" }
+              allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment Student" }
           )]
         public async Task<IActionResult> GetByAssignmentIDClassID(long Aid, long CiD, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -85,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.LinkFile))
                     { 
-                        item.LinkFile = _fileService.GetFileUrl(item.LinkFile, Request);
+                        item.LinkFile = _fileService.GetFileUrl(item.LinkFile, Request, HttpContext);
                     }
                 }
             }
@@ -105,7 +104,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAssignmentId/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa" , "student" } 
+             allowedTypes: new[] { "octa" , "student" },
+             pages: new[] { "Assignment Student" }
          )]
         public async Task<IActionResult> GetByAssignmentId(long id)
         {
@@ -181,7 +181,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
                 {
-                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request); 
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request, HttpContext); 
                 }
             }
             else
@@ -190,7 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.QuestionBank.Image))
                     {
-                        item.QuestionBank.Image = _fileService.GetFileUrl(item.QuestionBank.Image, Request);
+                        item.QuestionBank.Image = _fileService.GetFileUrl(item.QuestionBank.Image, Request, HttpContext);
                     }
                 }
             }
@@ -201,9 +201,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee", "student" }
-         //,
-         //pages: new[] { "Assignment" }
+             allowedTypes: new[] { "octa", "employee", "student" },
+         pages: new[] { "Assignment Student Answer" }
          )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -257,13 +256,44 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
+            if (assignmentStudent != null)
+            {
+                // Filter AssignmentQuestions where QuestionBank is not deleted
+                assignmentStudent.AssignmentStudentQuestions = assignmentStudent.AssignmentStudentQuestions.Where(aq =>
+                        aq.IsDeleted != true &&
+                        aq.QuestionBank != null &&
+                        aq.QuestionBank.IsDeleted != true).ToList();
+
+                foreach (var aq in assignmentStudent.AssignmentStudentQuestions)
+                {
+                    var qb = aq.QuestionBank;
+
+                    // Filter QuestionBankOptions
+                    if (qb?.QuestionBankOptions != null)
+                    {
+                        qb.QuestionBankOptions = qb.QuestionBankOptions
+                            .Where(opt => opt.IsDeleted != true)
+                            .ToList();
+                    }
+
+                    // Filter SubBankQuestions
+                    if (qb?.SubBankQuestions != null)
+                    {
+                        qb.SubBankQuestions = qb.SubBankQuestions
+                            .Where(sub => sub.IsDeleted != true)
+                            .ToList();
+                    }
+                }
+            }
+
+
             AssignmentStudentGetDTO DTO = mapper.Map<AssignmentStudentGetDTO>(assignmentStudent);
              
             if (DTO.AssignmentTypeID == 1)
             {
                 if (!string.IsNullOrEmpty(DTO.LinkFile))
                 { 
-                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request);
+                    DTO.LinkFile = _fileService.GetFileUrl(DTO.LinkFile, Request, HttpContext);
                 }
             }
             else
@@ -272,7 +302,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     if (!string.IsNullOrEmpty(item.QuestionImage))
                     {
-                        item.QuestionImage = _fileService.GetFileUrl(item.QuestionImage, Request);
+                        item.QuestionImage = _fileService.GetFileUrl(item.QuestionImage, Request, HttpContext);
                     }
                 }
             }
@@ -286,10 +316,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" ,"student" }
-          //,
-          //pages: new[] { "Book Correction" }
-      )]
+          allowedTypes: new[] { "octa", "employee", "student" },
+          pages: new[] { "Assignment Student" }
+        )]
         public async Task<IActionResult> Add(AssignmentStudentAddDTO newData)
         {
 
@@ -406,7 +435,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost("AddWhenTextBookAssignment")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "student" } 
+          allowedTypes: new[] { "octa", "student" },
+          pages: new[] { "Assignment Student" }
       )]
         public async Task<IActionResult> AddWhenTextBookAssignment([FromForm]AssignmentStudentAddDTOFile newData)
         {
@@ -506,7 +536,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Assignment Student" , "Assignment Student Answer" }
         )]
         public async Task<IActionResult> EditAsync(AssignmentStudentEditDTO newData)
         {
@@ -611,6 +643,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                 }
             }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student", roleId, userId, assignmentStudent);
+                if (accessCheck != null)
+                {
+                    IActionResult? accessCheck2 = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student Answer", roleId, userId, assignmentStudent);
+                    if (accessCheck2 != null)
+                    {
+                        return accessCheck2;
+                    }
+                }
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

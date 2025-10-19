@@ -147,12 +147,12 @@ export class AssignmentDetailComponent {
 
   save() {
     this.isLoading = true;
-    const today = new Date(); // current date
+    const TheSubmittedDate = new Date(this.assignmentStudent.insertedAt); // current date
     const dueDate = new Date(this.assignmentStudent.dueDate);
-    today.setHours(0, 0, 0, 0);
+    TheSubmittedDate.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
-    console.log(343, today, dueDate)
-    if (today > dueDate) {
+    console.log(343, TheSubmittedDate, dueDate)
+    if (TheSubmittedDate > dueDate) {
       Swal.fire({
         title: 'Apply Late Submission Penalty?',
         text: 'If The student submitted after the due date. Do you want to apply the late submission penalty?',

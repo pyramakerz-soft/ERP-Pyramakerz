@@ -54,7 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var subjectResource in subjectResourcesDTO)
             {
-                subjectResource.FileLink = _fileService.GetFileUrl(subjectResource.FileLink, Request);
+                subjectResource.FileLink = _fileService.GetFileUrl(subjectResource.FileLink, Request, HttpContext);
             }
 
             return Ok(subjectResourcesDTO);
@@ -81,7 +81,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             SubjectResourceGetDTO subjectResourceDTO = mapper.Map<SubjectResourceGetDTO>(subjectResource);
              
-            subjectResourceDTO.FileLink = _fileService.GetFileUrl(subjectResourceDTO.FileLink, Request);
+            subjectResourceDTO.FileLink = _fileService.GetFileUrl(subjectResourceDTO.FileLink, Request, HttpContext);
 
             return Ok(subjectResourceDTO);
         }

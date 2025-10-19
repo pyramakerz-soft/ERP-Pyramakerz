@@ -40,5 +40,7 @@ namespace LMS_CMS_DAL.Models.Domains.ClinicModule
 
         public string? Recommendation { get; set; }
         public bool? SendSMS { get; set; } = false;
+
+        public DateOnly? Date { get; set; }
     }
 }

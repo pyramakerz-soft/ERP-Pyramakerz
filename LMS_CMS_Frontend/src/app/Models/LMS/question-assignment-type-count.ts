@@ -1,6 +1,6 @@
 export class QuestionAssignmentTypeCount {
      constructor(
-        public numberOfQuestion: number = 0,
+        public numberOfQuestion: number | null= null,
         public questionTypeId:  number = 0,
     ) { }
 }

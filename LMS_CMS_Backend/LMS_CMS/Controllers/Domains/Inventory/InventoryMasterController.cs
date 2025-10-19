@@ -82,7 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
                     }
                 }
             }
@@ -154,7 +154,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (!string.IsNullOrEmpty(master.Attachments[i]))
                     {
-                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request); 
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
                     }
                 }
             }
@@ -288,7 +288,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 if (!string.IsNullOrEmpty(DTO.Attachments[i]))
                 {
-                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request); 
+                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request, HttpContext); 
                 }
             }
             return Ok(DTO);
@@ -864,6 +864,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
+
+            mapper.Map(newSale, sale);
+
             if (newSale.DeletedAttachments != null)
             {
                 foreach (var fileUrl in newSale.DeletedAttachments)
@@ -873,10 +876,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         "Inventory/InventoryMaster",
                         newSale.ID,
                         HttpContext
-                    ); 
+                    );
+
+                    // Normalize both fileUrl and sale.Attachments entries before comparing
+                    var index = fileUrl.IndexOf("Uploads", StringComparison.OrdinalIgnoreCase);
+                    var relativeFileUrl = index >= 0 ? fileUrl.Substring(index) : fileUrl;
+
+                    // Convert backslashes (\) to forward slashes (/)
+                    relativeFileUrl = relativeFileUrl.Replace("\\", "/");
+
+                    sale.Attachments = sale.Attachments
+                        .Select(s => s.Replace("\\", "/")) // normalize stored attachments
+                        .Where(s => !string.Equals(s, relativeFileUrl, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
                 }
             }
-
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             sale.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

@@ -392,6 +392,7 @@ export class EmployeeAddEditComponent {
     this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
+      const initialLength = this.Data.files.length; 
       for (let i = 0; i < this.SelectedFiles.length; i++) {
         this.Data.files.push(this.SelectedFiles[i]);
       }
@@ -451,6 +452,7 @@ export class EmployeeAddEditComponent {
                   break;
               }
               this.isLoading = false;
+              this.Data.files.splice(initialLength);
               return false;
             }
           );
@@ -504,6 +506,7 @@ export class EmployeeAddEditComponent {
                   });
                   break;
               }
+              this.Data.files.splice(initialLength);
               return false;
             }
           );
@@ -545,7 +548,13 @@ export class EmployeeAddEditComponent {
     }
 
   }
-
+ 
+  isFileInSelected(file: any): boolean { 
+    return this.SelectedFiles.some(
+      (f) => f.file?.name === file.name || f.name === file.name
+    );
+  }
+  
   //////////////////////////////////////////////////// floor
 
   toggleDropdown(): void {

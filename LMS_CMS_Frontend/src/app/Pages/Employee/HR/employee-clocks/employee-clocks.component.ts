@@ -6,7 +6,7 @@ import { EmployeeClocksService } from '../../../../Services/Employee/HR/employee
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -63,7 +63,9 @@ export class EmployeeClocksComponent {
     public EmployeeServ: EmployeeService,
     public EmployeeClocksServ: EmployeeClocksService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService,
+    
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,6 +89,33 @@ export class EmployeeClocksComponent {
       this.subscription.unsubscribe();
     }
   }
+
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   getAllEmployee() {
     this.employees = [];
@@ -116,26 +145,21 @@ export class EmployeeClocksComponent {
     row[field] = event.length === 5 ? `${event}:00` : event;
   }
 
-  GetAllData() {
-    this.TableData = [];
-    if (this.SelectedEmployeeId && this.year && this.month) {
-      this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
-        (data) => {
-          this.TableData = data;
-          console.log(this.TableData ,data);
-        },
-        (error) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        }
-      );
-    }
+GetAllData() {
+  this.TableData = [];
+  if (this.SelectedEmployeeId && this.year && this.month) {
+    this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
+      (data) => {
+        this.TableData = data;
+        console.log(this.TableData ,data);
+      },
+      (error) => {
+        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+        this.showErrorAlert(errorMessage);
+      }
+    );
   }
+}
 
   Apply() {
     this.IsShowTabls = true;
@@ -147,82 +171,62 @@ export class EmployeeClocksComponent {
     this.TableData = [];
   }
 
-  save(): void {
-    if (this.isFormValidForCreate()) {
-      this.isLoadingWhenEdit = true;
-      console.log(this.TableData);
-      this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe(
-        (d) => {
-          this.isLoadingWhenEdit = false;
-          this.GetAllData();
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Saved Successfully',
-            confirmButtonColor: '#089B41',
-          });
-        },
-        (error) => {
-          console.log(error);
-          this.isLoadingWhenEdit = false; // Hide spinner
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        }
-      );
-    }
+save(): void {
+  if (this.isFormValidForCreate()) {
+    this.isLoadingWhenEdit = true;
+    console.log(this.TableData);
+    this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe(
+      (d) => {
+        this.isLoadingWhenEdit = false;
+        this.GetAllData();
+        this.showSuccessAlert(this.translate.instant('Saved Successfully'));
+      },
+      (error) => {
+        console.log(error);
+        this.isLoadingWhenEdit = false;
+        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+        this.showErrorAlert(errorMessage);
+      }
+    );
   }
+}
 
-  AddClockIn() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (
-        this.employeeClocks.clockIn &&
-        this.employeeClocks.clockIn.length === 5
-      ) {
-        this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
-      }
-      if (
-        this.employeeClocks.clockOut &&
-        this.employeeClocks.clockOut.length === 5
-      ) {
-        this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
-      }
-      console.log(this.employeeClocks);
-      this.EmployeeClocksServ.Add(
-        this.employeeClocks,
-        this.DomainName
-      ).subscribe(
-        (d) => {
-          this.isLoading = false;
-          this.GetAllData();
-          this.closeModal();
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Saved Successfully',
-            confirmButtonColor: '#089B41',
-          });
-        },
-        (error) => {
-          console.log(error);
-          this.isLoading = false; // Hide spinner
-          this.closeModal();
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        }
-      );
+AddClockIn() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    if (
+      this.employeeClocks.clockIn &&
+      this.employeeClocks.clockIn.length === 5
+    ) {
+      this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
     }
+    if (
+      this.employeeClocks.clockOut &&
+      this.employeeClocks.clockOut.length === 5
+    ) {
+      this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
+    }
+    console.log(this.employeeClocks);
+    this.EmployeeClocksServ.Add(
+      this.employeeClocks,
+      this.DomainName
+    ).subscribe(
+      (d) => {
+        this.isLoading = false;
+        this.GetAllData();
+        this.closeModal();
+        this.showSuccessAlert(this.translate.instant('Saved Successfully'));
+      },
+      (error) => {
+        console.log(error);
+        this.isLoading = false;
+        this.closeModal();
+        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+        this.showErrorAlert(errorMessage);
+      }
+    );
   }
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -241,10 +245,8 @@ export class EmployeeClocksComponent {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
           if (field == 'date' || field == 'employeeID' || field == 'clockIn' || field == 'clockOut' ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          isValid = false;
           }
         }
       }

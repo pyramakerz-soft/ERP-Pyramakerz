@@ -1,6 +1,5 @@
 <div *ngIf="!IsMenuOpen" class="primaryBg rounded-lg text-[#919191] h-[89vh] overflow-y-hidden py-10 px-3 flex flex-col items-center text-sm lg:text-xl space-y-4">
-    <img class="w-3 lg:w-fit" src="Images/logo-orange 3.png" (click)="toggleMenu()">
-    <i class="fa-solid fa-magnifying-glass p-3" (click)="toggleSearch()"></i>  
+    <img class="w-3 lg:w-fit" src="Images/logo-orange 3.png" (click)="toggleMenu()"> 
     <div *ngFor="let item of menuItemsForEmployee" (click)="toggleMenu()">   
         <img class="w-3 lg:w-fit" [src]="getImageSrc(item)" />
     </div>
@@ -13,15 +12,7 @@
     <div class="px-7 text-base flex space-x-4 rtl:space-x-reverse items-center" (click)="toggleMenu()">
         <i class="fa-solid fa-angle-left"></i>
         <h1 class="uppercase text-sm lg:text-base font-semibold w-max">{{ 'Dashboard' | translate }}</h1>
-    </div>
-
-    <div class="px-7 mt-6 relative flex items-center w-full">
-        <span class="absolute text-[#FFFFFF0D] ltr:ml-2 rtl:mr-2">
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </span>
-        <input #searchInput type="text" class="bg-[#FFFFFF0D] ltr:pl-10 rtl:pr-10 ltr:pr-3 rtl:pl-3 py-2 text-sm rounded-md w-full"
-            placeholder="{{ 'Search' | translate }}" [disabled]="!IsMenuOpen" (blur)="onSearchBlur()"/>
-    </div>
+    </div> 
 
     <section class="mt-6 min-w-full overflow-y-auto custom-scrollbar">
         <div class="py-4 px-9">
@@ -50,11 +41,7 @@
                 </div>
             </details>
         </div>
-        <div class="text-xl w-full" *ngIf="menuItemsForEmployee">
-            <div class="px-9 py-3 w-full flex items-center space-x-3 rtl:space-x-reverse">
-                <img class="w-3 lg:w-fit" src="Icons/SideMenuIcons/Dashboard.png" />
-                <a class="cursor-pointer hover:opacity-30" routerLink="#">{{ 'Dashboard ' | translate }}</a>
-            </div>
+        <div class="text-xl w-full" *ngIf="menuItemsForEmployee"> 
             <app-side-menu-item *ngFor="let item of menuItemsForEmployee" [item]="item"></app-side-menu-item>
         </div>  
     </section>

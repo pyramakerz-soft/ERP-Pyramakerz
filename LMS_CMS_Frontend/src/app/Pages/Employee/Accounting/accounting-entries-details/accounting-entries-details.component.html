@@ -294,8 +294,8 @@
                 reportHeaderOneAr: 'تقرير القيود المحاسبية',
                 reportHeaderTwoAr: 'معلومات تفصيلية عن القيود المحاسبية'
             }" [fileName]="'Accounting_Entries_Report'" [infoRows]="infoRows"
-            [tableHeaders]="['id', 'debitAmount', 'creditAmount', 'accountingTreeChartName', 'subAccountingName', 'note']"
-            [tableData]="accountingEntriesDetailsData" #pdfComponentRef>
+            [tableHeaders]="['id', 'Debit Amount', 'Credit Amount', 'Account Name', 'sub Account', 'Note']"
+            [tableData]="accountingEntriesDetailsDataForPrint" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

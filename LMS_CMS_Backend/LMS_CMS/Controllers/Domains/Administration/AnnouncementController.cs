@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
              
             foreach (var announcement in announcementGetDTO)
             {
-                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
             }
 
             return Ok(announcementGetDTO);
@@ -94,7 +94,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
              
             foreach (var announcement in announcementGetDTO)
             {
-                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
             }
 
             return Ok(announcementGetDTO);
@@ -123,7 +123,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             AnnouncementGetDTO announcementGetDTO = mapper.Map<AnnouncementGetDTO>(announcement);
             
-            announcementGetDTO.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request);
+            announcementGetDTO.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
 
             return Ok(announcementGetDTO);
         }

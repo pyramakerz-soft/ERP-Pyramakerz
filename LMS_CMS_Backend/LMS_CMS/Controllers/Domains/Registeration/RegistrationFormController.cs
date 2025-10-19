@@ -351,8 +351,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 Phone = Phone,
                 GradeID = GradeID,
                 Email = ParentEmail,
-                AcademicYearID = AcademicYearID,
-                RegisterationFormStateID = 1, // Pending
+                AcademicYearID = AcademicYearID, 
                 RegistrationFormID = registerationFormParentAddDTO.RegistrationFormID,
                 ParentID = parentID != 0 ? parentID : (long?)null,
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
@@ -374,6 +373,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 registerationFormParent.InsertedByUserId = userId;
             }
 
+            if(registerationFormParentAddDTO.IsStudent == false)
+            {
+                registerationFormParent.RegisterationFormStateID = 1;
+                registerationFormParent.IsFromRegistration = true;
+            }
             Unit_Of_Work.registerationFormParent_Repository.Add(registerationFormParent); ////////////////////////////////////////////////////////////////////////////////////
             Unit_Of_Work.SaveChanges();
 
@@ -384,9 +388,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
 
             long newRegisterationFormParentID = registerationFormParent.ID;
-
-            var fileFolder = "";
-
+             
             List<long> fieldIDs = new List<long>();
 
             /// If File
@@ -417,7 +419,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         {
                             registerationFormSubmittion.InsertedByOctaId = userId;
                         }
-                        Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                        if (!fieldIDs.Contains(filesFieldCat[j].CategoryFieldID))
+                        {
+                            Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion); 
+                        }
+                        fieldIDs.Add(filesFieldCat[j].CategoryFieldID);
                     }
                 }
                 for (int i = 0; i < registerationFormParentAddDTO.RegisterationFormSubmittions.Count; i++)
@@ -437,8 +443,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     else if (userTypeClaim == "employee")
                     {
                         registerationFormSubmittion.InsertedByUserId = userId;
-                    } 
-                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID))
+                    }
+
+                    CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID);
+                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID) || categoryField.FieldTypeID == 4)
                     {
                         Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
                     }
@@ -465,7 +473,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     {
                         registerationFormSubmittion.InsertedByUserId = userId;
                     }
-                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID))
+
+                    CategoryField categoryField = Unit_Of_Work.categoryField_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID);
+                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID) || categoryField.FieldTypeID == 4)
                     {
                         Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
                     }

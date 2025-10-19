@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"parent" , "student"},
             pages: new[] { "Add Medal To Student" }
         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
              
             foreach (var item in Dto)
             {
-                item.SocialWorkerMedalFile = _fileService.GetFileUrl(item.SocialWorkerMedalFile, Request);
+                item.SocialWorkerMedalFile = _fileService.GetFileUrl(item.SocialWorkerMedalFile, Request, HttpContext);
             }
 
             return Ok(Dto);

@@ -60,7 +60,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var discussionRoom in discussionRoomGetDTO)
             {
-                discussionRoom.ImageLink = _fileService.GetFileUrl(discussionRoom.ImageLink, Request);
+                discussionRoom.ImageLink = _fileService.GetFileUrl(discussionRoom.ImageLink, Request, HttpContext);
             }
 
             return Ok(discussionRoomGetDTO);
@@ -89,7 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             DiscussionRoomGetDTO discussionRoomGetDTO = mapper.Map<DiscussionRoomGetDTO>(discussionRoom);
              
-            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request);
+            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request, HttpContext);
 
             return Ok(discussionRoomGetDTO);
         }
@@ -115,7 +115,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             DiscussionRoomGetDTO discussionRoomGetDTO = mapper.Map<DiscussionRoomGetDTO>(discussionRoom);
              
-            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request);
+            discussionRoomGetDTO.ImageLink = _fileService.GetFileUrl(discussionRoomGetDTO.ImageLink, Request, HttpContext);
 
             return Ok(discussionRoomGetDTO);
         }

@@ -3344,6 +3344,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Complains")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -12831,6 +12834,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFromRegistration")
                         .HasColumnType("bit");
 
                     b.Property<long?>("ParentID")

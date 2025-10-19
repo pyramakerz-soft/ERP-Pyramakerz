@@ -204,14 +204,20 @@ export class LessonComponent {
         reader.onload = async (e: any) => {
           const { value: formValues } = await Swal.fire({
             title: 'Set Image Size',
-            html:
-              `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-              `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            // html:
+            //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+            //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            html: `
+              <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+              <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            `,
             focusConfirm: false,
             preConfirm: () => {
               const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
               const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
-              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              if (!width || !height || isNaN(+width) || isNaN(+height) || Number(width) < 1 || Number(height) < 1) {
                 Swal.showValidationMessage('Please enter numeric values.');
                 return null;
               }
@@ -259,9 +265,15 @@ export class LessonComponent {
 
         const { value: formValues } = await Swal.fire({
           title: 'Set Video Size',
-          html:
-            `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-            `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          // html:
+          //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+          //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          html: `
+            <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          `,
           focusConfirm: false,
           preConfirm: () => {
             const width = (document.getElementById('swal-input1') as HTMLInputElement).value;

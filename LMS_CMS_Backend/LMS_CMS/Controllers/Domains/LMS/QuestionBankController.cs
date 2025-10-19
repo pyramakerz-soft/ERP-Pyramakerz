@@ -313,7 +313,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (!string.IsNullOrEmpty(Dto.Image))
             {
-                Dto.Image = _fileService.GetFileUrl(Dto.Image, Request);
+                Dto.Image = _fileService.GetFileUrl(Dto.Image, Request, HttpContext);
             }
 
             return Ok(Dto);

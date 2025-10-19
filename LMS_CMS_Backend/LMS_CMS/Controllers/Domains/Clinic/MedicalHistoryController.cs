@@ -72,8 +72,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
              
             foreach (var medicalHistory in medicalHistoryGetDTO)
             { 
-                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request);
-                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request);
+                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
             }
 
             return Ok(medicalHistoryGetDTO);
@@ -115,8 +115,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
              
             foreach (var medicalHistory in medicalHistoryGetDTO)
             {
-                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request);
-                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request);
+                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
             }
 
             return Ok(medicalHistoryGetDTO);
@@ -161,8 +161,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             MedicalHistoryGetByDoctorDTO medicalHistoryGetDTO = _mapper.Map<MedicalHistoryGetByDoctorDTO>(medicalHistory);
              
-            medicalHistoryGetDTO.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request);
-            medicalHistoryGetDTO.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request); 
+            medicalHistoryGetDTO.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+            medicalHistoryGetDTO.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext); 
 
             return Ok(medicalHistoryGetDTO);
         }
@@ -206,8 +206,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             MedicalHistoryGetByParentDTO dto = _mapper.Map<MedicalHistoryGetByParentDTO>(medicalHistory);
              
-            dto.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request);
-            dto.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request);
+            dto.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+            dto.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
 
             return Ok(dto);
         }

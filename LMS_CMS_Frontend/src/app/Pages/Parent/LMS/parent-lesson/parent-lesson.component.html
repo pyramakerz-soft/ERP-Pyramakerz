@@ -1,0 +1,110 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-bold text-2xl leading-9">  {{ 'Lessons' | translate }}</h1>
+</div>
+
+<div class="my-5 flex flex-wrap justify-start items-center gap-2">
+    
+    <div class="flex flex-col w-[30%] mb-4">
+        <label class="mb-2 primaryTxt" for="Student">{{ 'Students' | translate }}</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Student"
+            [(ngModel)]="StudentId" (change)="GetSubjectData(); showTable=false;">
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}  {{ 'Student' | translate }}</option>
+            <option *ngFor="let g of Students" [value]="g.id">{{ g.en_name }}</option>
+            <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="flex flex-col w-[30%] mb-4">
+        <label class="mb-2" for="subject"
+            [ngClass]="{ 'text-gray-400': !StudentId, 'primaryTxt': StudentId }">{{ 'Subject' | translate }}</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subject"
+            [disabled]="!StudentId" [ngClass]="{ 'bg-[#EBEBEB]': !StudentId }"
+            [(ngModel)]="SubjectId" (change)="showTable=false;">
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}  {{ 'Subject' | translate }}</option>
+            <option *ngFor="let g of Subjects" [value]="g.id">{{ g.en_name }}</option>
+            <option *ngIf="Subjects.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div>
+        <button class="p-4  font-medium text-xl rounded-lg" (click)="Apply()"
+            [disabled]="!SubjectId || !StudentId"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SubjectId || !StudentId, 'secondaryBg text-white': StudentId && SubjectId }">
+              {{ 'Apply' | translate }}
+        </button>
+    </div>
+</div>
+
+ <!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text- rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'English Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                     {{ 'Arabic Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'Order' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'Subject' | translate }}  {{ 'English Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'Subject' | translate }}  {{ 'Arabic Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                  {{ 'Week' | translate }}  {{ 'English Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                       {{ 'Week' | translate }}  {{ 'Arabic Name' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="TableData.length === 0">
+                <td colspan="9" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                      {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr *ngFor="let row of TableData; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.englishTitle }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.arabicTitle }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.order }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectEnglishName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectArabicName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.semesterWorkingWeekEnglishName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.semesterWorkingWeekArabicName }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+ 
+<!-- Hidden PDF Container -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Lesson Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['English Name', 'Arabic Name', 'Order', 'Subject English Name', 'Subject Arabic Name', 'Week English Name', 'Week Arabic Name']"
+            [tableData]="reportsForPDF" #pdfComponentRef> 
+        </app-pdf-print>
+    </div>
+</div>

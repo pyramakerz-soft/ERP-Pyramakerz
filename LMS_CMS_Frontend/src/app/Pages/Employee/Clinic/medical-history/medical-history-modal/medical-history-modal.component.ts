@@ -19,7 +19,7 @@ import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom
 import { StudentService } from '../../../../../Services/student.service';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
@@ -74,7 +74,9 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     private medicalHistoryService: MedicalHistoryService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+      private translate: TranslateService // Add this
+
   ) { }
 
   async ngOnInit() {
@@ -91,6 +93,32 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
       this.subscription.unsubscribe();
     }
   }
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   async ngOnChanges(changes: SimpleChanges) {
     if (changes['medicalHistoryData']) {
@@ -248,13 +276,13 @@ onFileUpload(event: any, field: 'firstReport' | 'secReport') {
     const isValidType = validImageTypes.includes(fileType);
 
     if (!isValidType) {
-      this.validationErrors[field] = 'Invalid file type. Please upload JPEG, PNG, JPG images or videos.';
+      this.validationErrors[field] = this.translate.instant('Invalid file type. Please upload JPEG, PNG, JPG images or videos.');
       return;
     }
 
     // Validate file size
     if (file.size > maxSize) {
-      this.validationErrors[field] = 'File size exceeds maximum limit of 25MB.';
+      this.validationErrors[field] = this.translate.instant('File size exceeds maximum limit of 25MB.');
       return;
     }
 
@@ -271,88 +299,74 @@ onFileUpload(event: any, field: 'firstReport' | 'secReport') {
       }
     };
     reader.readAsDataURL(fileToEmpty);
-
   }
 }
 
-  isFormValid(): boolean {
-    this.validationErrors = {};
-    let isValid = true;
+isFormValid(): boolean {
+  this.validationErrors = {};
+  let isValid = true;
 
-    // Existing validation checks...
-    if (!this.medicalHistory.schoolId || this.medicalHistory.schoolId === 0) {
-      this.validationErrors['schoolId'] = '*School is required';
-      isValid = false;
-    }
-
-    if (!this.medicalHistory.gradeId || this.medicalHistory.gradeId === 0) {
-      this.validationErrors['gradeId'] = '*Grade is required';
-      isValid = false;
-    }
-
-    if (!this.medicalHistory.classRoomID || this.medicalHistory.classRoomID === 0) {
-      this.validationErrors['classRoomID'] = '*Class is required';
-      isValid = false;
-    }
-
-    if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
-      this.validationErrors['studentId'] = '*Student is required';
-      isValid = false;
-    }
-
-    return isValid;
+  if (!this.medicalHistory.schoolId || this.medicalHistory.schoolId === 0) {
+    this.validationErrors['schoolId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('school')}`;
+    isValid = false;
   }
+
+  if (!this.medicalHistory.gradeId || this.medicalHistory.gradeId === 0) {
+    this.validationErrors['gradeId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('grade')}`;
+    isValid = false;
+  }
+
+  if (!this.medicalHistory.classRoomID || this.medicalHistory.classRoomID === 0) {
+    this.validationErrors['classRoomID'] = `${this.translate.instant('Field is required')} ${this.translate.instant('class')}`;
+    isValid = false;
+  }
+
+  if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
+    this.validationErrors['studentId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Student')}`;
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   isSaving: boolean = false;
 
 
-  async saveMedicalHistory() {
-    if (this.isFormValid()) {
-      try {
-        this.isSaving = true;
+async saveMedicalHistory() {
+  if (this.isFormValid()) {
+    try {
+      this.isSaving = true;
+      const domainName = this.apiService.GetHeader();
 
-        const domainName = this.apiService.GetHeader();
-
-        if (this.editMode) {
-          await firstValueFrom(
-            this.medicalHistoryService.UpdateByDoctorAsync(
-              this.medicalHistory,
-              domainName
-            )
-          );
-          Swal.fire(
-            'Success',
-            'Medical history updated successfully!',
-            'success'
-          );
-        } else {
-          await firstValueFrom(
-            this.medicalHistoryService.AddByDoctor(
-              this.medicalHistory,
-              domainName
-            )
-          );
-          Swal.fire(
-            'Success',
-            'Medical history created successfully!',
-            'success'
-          );
-        }
-
-        this.onSave.emit();
-        this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        Swal.fire(
-          'Error',
-          'Failed to save medical history. Please try again later.',
-          'error'
+      if (this.editMode) {
+        await firstValueFrom(
+          this.medicalHistoryService.UpdateByDoctorAsync(
+            this.medicalHistory,
+            domainName
+          )
         );
-      } finally {
-        this.isSaving = false;
+        this.showSuccessAlert(this.translate.instant('Updated successfully'));
+      } else {
+        await firstValueFrom(
+          this.medicalHistoryService.AddByDoctor(
+            this.medicalHistory,
+            domainName
+          )
+        );
+        this.showSuccessAlert(this.translate.instant('Created successfully'));
       }
+
+      this.onSave.emit();
+      this.closeModal();
+    } catch (error) {
+      console.error('Error saving medical history:', error);
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSaving = false;
     }
   }
+}
 
   // Add this method to clear validation error for a field
   clearValidationError(field: string) {
@@ -381,7 +395,7 @@ onFirstReportFileSelected(event: any) {
   
   if (file) {
     if (file.size > 25 * 1024 * 1024) {
-      this.validationErrors['firstReport'] = 'The file size exceeds the maximum limit of 25 MB.';
+      this.validationErrors['firstReport'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
       this.medicalHistory.firstReport = null;
       this.firstReportPreview = null;
       return; 
@@ -396,7 +410,7 @@ onFirstReportFileSelected(event: any) {
       };
       reader.readAsDataURL(file);
     } else {
-      this.validationErrors['firstReport'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+      this.validationErrors['firstReport'] = this.translate.instant('Invalid file type. Only JPEG, JPG and PNG are allowed');
       this.medicalHistory.firstReport = null;
       this.firstReportPreview = null;
       return; 
@@ -412,7 +426,7 @@ onSecReportFileSelected(event: any) {
   
   if (file) {
     if (file.size > 25 * 1024 * 1024) {
-      this.validationErrors['secReport'] = 'The file size exceeds the maximum limit of 25 MB.';
+      this.validationErrors['secReport'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
       this.medicalHistory.secReport = null;
       this.secReportPreview = null;
       return; 
@@ -427,7 +441,7 @@ onSecReportFileSelected(event: any) {
       };
       reader.readAsDataURL(file);
     } else {
-      this.validationErrors['secReport'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+      this.validationErrors['secReport'] = this.translate.instant( 'Invalid file type. Only JPEG, JPG and PNG are allowed');
       this.medicalHistory.secReport = null;
       this.secReportPreview = null;
       return; 

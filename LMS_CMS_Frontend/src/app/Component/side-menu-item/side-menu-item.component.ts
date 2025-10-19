@@ -70,8 +70,7 @@ export class SideMenuItemComponent {
       return; 
     }
 
-    const routeExists = this.isRouteExist(route.en_name, routes);
-
+    const routeExists = this.isRouteExist(route.en_name, routes); 
     if (routeExists) {
       this.router.navigateByUrl(`Employee/${route.en_name}`)
     }

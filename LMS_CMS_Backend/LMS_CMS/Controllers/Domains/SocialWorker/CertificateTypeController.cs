@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
              
             foreach (var item in Dto)
             {
-                item.File = _fileService.GetFileUrl(item.File, Request);
+                item.File = _fileService.GetFileUrl(item.File, Request, HttpContext);
             }
 
             return Ok(Dto);
@@ -105,7 +105,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             CertificateTypeGetDTO Dto = mapper.Map<CertificateTypeGetDTO>(certificateType);
               
-            Dto.File = _fileService.GetFileUrl(Dto.File, Request);
+            Dto.File = _fileService.GetFileUrl(Dto.File, Request, HttpContext);
 
             return Ok(Dto);
         }

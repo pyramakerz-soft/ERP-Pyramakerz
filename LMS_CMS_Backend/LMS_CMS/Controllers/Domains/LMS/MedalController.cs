@@ -57,7 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             foreach (var item in DTO)
             {
-                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request);
+                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request, HttpContext);
             }
 
             return Ok(DTO);
@@ -84,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             MedalGetDTO DTO = mapper.Map<MedalGetDTO>(medals);
              
-            DTO.ImageLink = _fileService.GetFileUrl(DTO.ImageLink, Request);
+            DTO.ImageLink = _fileService.GetFileUrl(DTO.ImageLink, Request, HttpContext);
 
             return Ok(DTO);
         }

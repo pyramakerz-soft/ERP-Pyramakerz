@@ -187,10 +187,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         ///////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("DailyPerformanceReport")]
         [Authorize_Endpoint_(
+<<<<<<< HEAD
                allowedTypes: new[] { "octa", "employee" },
                pages: new[] { "Student Daily Performance Report" }
          )]
         public async Task<IActionResult> GetDailyPerformanceReport([FromQuery]long studentId, DateOnly fromDate, DateOnly toDate)
+=======
+         allowedTypes: new[] { "octa", "employee" , "parent" },
+         pages: new[] { "Student Daily Performance Report" }
+        )]
+        public async Task<IActionResult> GetDailyPerformanceReport(
+         long? schoolId,
+         long? gradeId,
+         long? classroomId,
+         DateOnly? fromDate,
+         DateOnly? toDate,
+         long? studentId = null)
+>>>>>>> d3c80e6e974597dce6a46f748d15cc832e779202
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 

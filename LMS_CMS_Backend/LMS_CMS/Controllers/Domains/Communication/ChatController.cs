@@ -191,7 +191,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 { 
                     foreach (var item in chatDto.ChatMessageAttachments)
                     { 
-                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request, HttpContext);
                     }
                 }
 
@@ -299,7 +299,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     foreach (var item in chatMessage.ChatMessageAttachments)
                     { 
-                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request, HttpContext);
                     }
                 }
             }
@@ -362,7 +362,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 { 
                     foreach (var item in chatMessage.ChatMessageAttachments)
                     {
-                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request);
+                        item.FileLink = _fileService.GetFileUrl(item.FileLink, Request, HttpContext);
                     }
                 }
 
