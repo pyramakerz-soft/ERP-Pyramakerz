@@ -11,6 +11,23 @@
 
     <!-- Modal Content -->
     <div class="mt-4 bg-[#F7F7F7] rounded-[24px] p-[16px_24px] w-[573px] gap-[20px] mx-auto overflow-y-auto">
+        <!-- Student Selection -->
+        <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Select Student' | translate }}</h6>
+        <div class="flex flex-col">
+            <select [(ngModel)]="medicalHistory.studentId" 
+                    (change)="clearValidationError('studentId')"
+                    class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
+                    [disabled]="editMode">
+                <option value="0" hidden disabled>{{ 'Select a student' | translate }}</option>
+                <option *ngFor="let student of students" [value]="student.id">
+                    {{ student.en_name }}
+                </option>
+            </select>
+            <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['studentId'] }}
+            </span>
+        </div>
+
         <!-- Details -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Details' | translate }}</h6>
         <div class="flex flex-col">
