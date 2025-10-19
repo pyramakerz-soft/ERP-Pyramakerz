@@ -1,4 +1,4 @@
-export class MedicalHistory3 {
+export class MedicalHistory {
   [key: string]: any;
 
   constructor(
@@ -47,6 +47,7 @@ export class DoctorMedicalHistory {
 export class ParentMedicalHistory {
   constructor(
     public id: number,
+    public studentId: number,
     public details: string,
     public permanentDrug: string,
     public firstReport: File | null,

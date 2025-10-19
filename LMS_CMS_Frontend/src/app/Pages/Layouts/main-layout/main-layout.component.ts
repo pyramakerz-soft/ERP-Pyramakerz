@@ -42,9 +42,9 @@ export class MainLayoutComponent {
     this.languageService.setLanguage(currentDir);
     this.isRtl = document.documentElement.dir === 'rtl';
 
-    // this.communicationService.action$.subscribe((state) => {
-    //   this.GetInfo();
-    // });
+    this.communicationService.action$.subscribe((state) => {
+      this.GetInfo();
+    });
 
     this.subscriptions.add(
       this.communicationService.action$.subscribe(() => this.GetInfo())
@@ -57,14 +57,9 @@ export class MainLayoutComponent {
       })
     );
 
-    // this.realTimeService.startConnection();
-    // this.realTimeRequestService.startRequestConnection();
-    // this.realTimeChatServiceService.startChatMessageConnection();
-
-    // this.subscription = this.languageService.language$.subscribe((direction) => {
-    //   this.isRtl = direction === 'rtl';
-    //   this.GetInfo();
-    // });
+    this.realTimeService.startConnection();
+    this.realTimeRequestService.startRequestConnection();
+    this.realTimeChatServiceService.startChatMessageConnection();
 
     this.GetInfo();
   }

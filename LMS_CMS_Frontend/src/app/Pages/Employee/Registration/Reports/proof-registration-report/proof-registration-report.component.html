@@ -12,7 +12,6 @@
                 {{ stu.name }}
             </option>
             <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
         </select>
     </div>
     <div class="w-[49%]">
@@ -23,8 +22,9 @@
             <option *ngFor="let ac of academicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
-            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
+            <option *ngIf="academicYears.length === 0" value=0 disabled selected>
+                {{ SelectedSchoolId ? 'No Academic Years Found' : 'Select School First' | translate }}
+            </option>
         </select>
     </div>
 </div>
@@ -40,8 +40,9 @@
                 <option *ngFor="let ac of filteredStudents" [value]="ac.id">
                     {{ ac.en_name }}
                 </option>
-                <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
+                <option *ngIf="filteredStudents.length === 0" value=0 disabled selected>
+                    {{ SelectedYearId ? 'No Students Found' : 'Select Year First' | translate }}
+                </option>
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
@@ -51,19 +52,11 @@
         </ng-container>
     </div>
 
-    <!-- <div
-        class="w-[58px] h-[45px] gap-[8px] border-t border-r border-b border-l-0 border-solid border-gray-300 rounded-tr-[8px] rounded-br-[8px] pt-[12px] pr-[16px] pb-[12px] pl-[16px] mt-7">
-        <i class="fas fa-search ltr:mr-3 rtl:ml-3 text-gray-500"
-            style="width: 22.51px; height: 22.51px; font-size: 22.51px;" (click)="toggleSearchMode()">
-        </i>
-    </div> -->
-
-
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
             [disabled]="!SelectedSchoolId || !SelectedStudentId || !SelectedYearId"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedStudentId || !SelectedYearId, 'secondaryBg text-white': SelectedSchoolId && SelectedStudentId && SelectedYearId }">View
-            Report</button>
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedStudentId || !SelectedYearId, 'secondaryBg text-white': SelectedSchoolId && SelectedStudentId && SelectedYearId }">
+            View Report</button>
     </div>
 </div>
 
@@ -71,70 +64,128 @@
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
-<!-- Certificate Display on Main Page -->
-<div *ngIf="showTable" class="mt-5 bg-white p-8 rounded-lg shadow-lg border border-gray-300">
-  <!-- School Header -->
-  <div class="text-center mb-8">
-    <h1 class="text-2xl font-bold">{{school.reportHeaderOneEn}}</h1>
-    <h2 class="text-xl">{{school.reportHeaderTwoEn}}</h2>
-    <div *ngIf="school.reportImage" class="mt-4">
-      <img [src]="school.reportImage" class="max-h-20 mx-auto" alt="School Logo">
-    </div>
-  </div>
 
-  <!-- Certificate Title -->
-  <h1 class="text-3xl font-bold text-center mb-8 primaryTxt">Identifier Letter</h1>
-
-  <!-- Certificate Content -->
-  <div class="space-y-4 text-lg leading-8">
-    <div class="flex justify-between">
-      <span><strong>Date:</strong> {{CurrentDate}}</span>
-    </div>
-    
-    <p><strong>Dear Sirs,</strong></p>
-    
-    <p>This to certify that Student / {{getStudentName()}}</p>
-    
-    <p>{{getNationality()}} Nationality</p>
-    
-    <!-- <p>and identity no {{getnationalIDExpiredDate() || 'N/A'}}</p> -->
-    
-    <p>Is registered in this school this year {{getCurrentGrade()}}</p>
-    
-    <p>And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.</p>
-  </div>
-
-  <!-- Footer -->
-  <div class="mt-12 space-y-4">
-    <p><strong>Best Regards,</strong></p>
-    <p><strong>Administration</strong></p>
-  </div>
-
-  <!-- Arabic Version (for RTL support) -->
-  <div class="mt-12 border-t pt-8" [dir]="'rtl'">
-    <div class="space-y-4 text-lg leading-8">
-      <div class="flex justify-between">
-        <span><strong>التاريخ:</strong> {{ArabicCurrentDate}}</span>
-      </div>
-      
-      <p><strong>تحية طيبة وبعد</strong></p>
-      
-      <p>نفيدكم بأن الطالبة / {{getStudentArabicName()}}</p>
-      
-      <p>تحمل الجنسية / {{getArabicNationality()}}</p>
-      
-      <!-- <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p> -->
-      
-      <p>مقيدة لدينا من للعام الدراسي الحالى {{getCurrentGrade()}}</p>
-      
-      <p>وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.</p>
+<!-- Main Page Display - Now matches PDF exactly -->
+<div *ngIf="showTable" class="mt-5 bg-white p-8 text-sm font-sans" [dir]="direction">
+    <!-- Header Section - Matches PDF -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="w-[40%]">
+            <p class="text-base font-semibold mb-1">{{school.reportHeaderOneEn}}</p>
+            <p class="text-sm">{{school.reportHeaderTwoEn}}</p>
+        </div>
+        
+        <div class="flex justify-center w-[15%]">
+            <img *ngIf="school.reportImage" [src]="school.reportImage" 
+                 style="max-width: 120px; max-height: 120px; width: auto; height: auto;" />
+        </div>
+        
+        <div class="w-[40%]" [class]="direction === 'rtl' ? 'text-left' : 'text-right'">
+            <p class="text-base font-semibold mb-1">{{school.reportHeaderOneAr}}</p>
+            <p class="text-sm">{{school.reportHeaderTwoAr}}</p>
+        </div>
     </div>
 
-    <div class="mt-12 space-y-4">
-      <p><strong>وتقبلوا فائق التحية والاحترام</strong></p>
-      <p><strong>ادارة المدرسة</strong></p>
+    <!-- Title - Matches PDF -->
+    <div class="my-10 flex justify-center">
+        <h1 class="text-3xl font-bold tracking-wide">Identifier Letter</h1>
     </div>
-  </div>
+
+    <!-- Bilingual Content - Matches PDF structure -->
+    <div class="my-10 space-y-4" dir="ltr">
+        <!-- Date -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8"><strong>Date :</strong> {{CurrentDate}}</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{ArabicCurrentDate}} <strong>:التاريخ</strong></div>
+            </div>
+        </div>
+
+        <!-- Dear Sirs -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8"><strong>Dear Sirs ,</strong></div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8"><strong>تحية طيبة وبعد</strong></div>
+            </div>
+        </div>
+
+        <!-- Student Name -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">This is to certify that Student / {{getStudentName()}}</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{getStudentArabicName()}} <strong>/ نفيدكم بأن الطالبة</strong></div>
+            </div>
+        </div>
+
+        <!-- Nationality -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">{{getNationality()}} Nationality</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{getArabicNationality()}} <strong>/ تحمل الجنسية</strong></div>
+            </div>
+        </div>
+
+        <!-- Identity Number -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">and identity No. {{DataToPrint?.student?.nationalID || 'N/A'}}</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{DataToPrint?.student?.nationalID || 'غير متوفر'}} <strong>/ هوية رقم</strong></div>
+            </div>
+        </div>
+
+        <!-- Passport Number -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">Hold Passport No. {{getPassportNo()}}</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{getPassportNo()}} <strong>/ و جواز سفر رقم</strong></div>
+            </div>
+        </div>
+
+        <!-- Registration -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">Is registered in this school this year {{getCurrentGrade()}}</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">{{getCurrentGrade()}} <strong>مقيدة لدينا من للعام الدراسي الحالى</strong></div>
+            </div>
+        </div>
+
+        <!-- Certificate Purpose -->
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8">And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.</div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8">وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer - Matches PDF -->
+    <div class="mt-12 space-y-4" dir="ltr">
+        <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+                <div class="text-lg leading-8"><strong>Best Regards ,</strong></div>
+                <div class="text-lg leading-8"><strong>Administration</strong></div>
+            </div>
+            <div class="w-1/2 text-right">
+                <div class="text-lg leading-8"><strong>وتقبلوا فائق التحية والاحترام</strong></div>
+                <div class="text-lg leading-8"><strong>ادارة المدرسة</strong></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">
@@ -150,7 +201,7 @@
           keyAr: 'تحية طيبة وبعد'
         },
         {
-          keyEn: 'This to certify that Student / ' + getStudentName(),
+          keyEn: 'This is to certify that Student / ' + getStudentName(),
           keyAr: 'نفيدكم بأن الطالبة / ' + getStudentArabicName()
         },
         {
@@ -158,8 +209,16 @@
           keyAr: 'تحمل الجنسية / ' + getArabicNationality()
         },
         {
+          keyEn: 'and identity No. ' + (DataToPrint?.student?.nationalID || 'N/A'),
+          keyAr: (DataToPrint?.student?.nationalID || 'غير متوفر') + ' / هوية رقم'
+        },
+        {
+          keyEn: 'Hold Passport No.  ' + getPassportNo(),
+          keyAr: getPassportNo() + ' / و جواز سفر رقم'
+        },
+        {
           keyEn: 'Is registered in this school this year ' + getCurrentGrade(),
-          keyAr: 'مقيدة لدينا من للعام الدراسي الحالى ' + getCurrentGrade()
+          keyAr: getCurrentGrade() + ' مقيدة لدينا من للعام الدراسي الحالى '
         },
         {
           keyEn: 'And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',

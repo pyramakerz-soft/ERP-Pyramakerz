@@ -14,15 +14,21 @@ namespace LMS_CMS_PL.Services.Dashboard
         public (int NotAnswered, int AnsweredOnTime, int AnsweredLate) AssignmentSubmissionCount(int year, int? month, HttpContext httpContext)
         {
             var unitOfWork = _dbContextFactory.CreateOneDbContext(httpContext);
-
-            // Date ==> Assignment Due Date
-
+             
             List<Assignment> assignments = unitOfWork.assignment_Repository
                 .FindBy(f =>
                     f.IsDeleted != true &&
-                    f.DueDate.Year == year &&
-                    (month == null || f.DueDate.Month == month)
-                ).ToList();
+                    ( 
+                        (month == null &&
+                         (f.OpenDate.Year <= year && f.DueDate.Year >= year)
+                        )
+                        ||
+                        (month != null &&
+                         f.OpenDate <= DateOnly.FromDateTime(new DateTime(year, month.Value, DateTime.DaysInMonth(year, month.Value))) &&
+                         f.DueDate >= DateOnly.FromDateTime(new DateTime(year, month.Value, 1)))
+                    )
+                )
+                .ToList();
 
             int totalStudentsNotAnswered = 0;
             int totalStudentsAnsweredAtTheSpecificDate = 0;
@@ -107,14 +113,12 @@ namespace LMS_CMS_PL.Services.Dashboard
             return (totalStudentsNotAnswered, totalStudentsAnsweredAtTheSpecificDate, totalStudentsAnsweredAfterTheDueDate);
         }
 
-        public int StudentCount(int year, int? month, HttpContext httpContext)
+        public int StudentCount(HttpContext httpContext)
         {
             var unitOfWork = _dbContextFactory.CreateOneDbContext(httpContext);
 
             List<long> academicYearIds = unitOfWork.academicYear_Repository.FindBy(d => d.IsDeleted != true && d.School.IsDeleted != true &&
-                    d.DateFrom.Year == year &&
-                    (month == null || d.DateFrom.Month == month)
-                    )
+                    d.IsActive == true)
                 .Select(d => d.ID)
                 .ToList();
 
@@ -137,14 +141,12 @@ namespace LMS_CMS_PL.Services.Dashboard
             return (totalStudents);
         }
 
-        public int ClassroomCount(int year, int? month, HttpContext httpContext)
+        public int ClassroomCount(HttpContext httpContext)
         {
             var unitOfWork = _dbContextFactory.CreateOneDbContext(httpContext);
 
             List<long> academicYearIds = unitOfWork.academicYear_Repository.FindBy(d => d.IsDeleted != true && d.School.IsDeleted != true &&
-                    d.DateFrom.Year == year &&
-                    (month == null || d.DateFrom.Month == month)
-                    )
+                    d.IsActive == true)
                 .Select(d => d.ID)
                 .ToList();
 

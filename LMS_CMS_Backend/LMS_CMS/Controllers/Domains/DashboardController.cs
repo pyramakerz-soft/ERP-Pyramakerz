@@ -24,9 +24,11 @@ namespace LMS_CMS_PL.Controllers.Domains
         private readonly LMS_Service _lMS_Service;
         private readonly Registration_Service _registration_Service;
         private readonly Communication_Service _communication_Service;
+        private readonly HR_Service _hr_Service;
+        private readonly Inventory_Service _inventory_Service;
 
-        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, 
-            Accounting_Service accounting_Service, LMS_Service lMS_Service, Registration_Service registration_Service, Communication_Service communication_Service)
+        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, Accounting_Service accounting_Service, 
+            LMS_Service lMS_Service, Registration_Service registration_Service, Communication_Service communication_Service, HR_Service hr_Service, Inventory_Service inventory_Service)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -35,6 +37,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             _lMS_Service = lMS_Service;
             _registration_Service = registration_Service;
             _communication_Service = communication_Service;
+            _hr_Service = hr_Service;
+            _inventory_Service = inventory_Service;
         }
 
         [HttpGet]
@@ -42,39 +46,51 @@ namespace LMS_CMS_PL.Controllers.Domains
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Dashboard" }
         )] 
-        public IActionResult Get(int year, int? month)
+        public async Task<IActionResult> GetAsync(int year, int? month)
         {
             var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            long followUpCount = _clinic_Service.CountOfFollowUps(year, month, HttpContext);
-            decimal feesAmount = _account_Service.FeesCalculated(year, month, HttpContext);
-            var (notAnswered, answeredOnTime, answeredLate) = _lMS_Service.AssignmentSubmissionCount(year, month, HttpContext);
+            long FollowUpCount = _clinic_Service.CountOfFollowUps(year, month, HttpContext);
+            decimal FeesAmount = _account_Service.FeesCalculated(year, month, HttpContext);
+            var (NotAnswered, AnsweredOnTime, AnsweredLate) = _lMS_Service.AssignmentSubmissionCount(year, month, HttpContext);
             var (AcceptedCount, DeclinedCount, Pending, WaitingListCount) = _registration_Service.RegistrationFormStateCount(year, month, HttpContext);
             var (AcceptedRequestCount, DeclinedRequestCount, RequestPending) = _communication_Service.RequestStateCount(year, month, HttpContext);
+            decimal TotalSalaries = _hr_Service.TotalSalaries(year, month, HttpContext);
+            int StudentCountInCurrentActive = _lMS_Service.StudentCount(HttpContext);
+            int ClassroomCountInCurrentActive = _lMS_Service.ClassroomCount(HttpContext);
+            int InventoryLowItemsToday = await _inventory_Service.LowItemsAsync(HttpContext);
+            Dictionary<string, decimal> InventoryPurchase = _inventory_Service.Purchase(year, month, HttpContext);
+            Dictionary<string, decimal> InventorySales = _inventory_Service.Sales(year, month, HttpContext);
 
             return Ok(new
             {
-                followUpCount,
-                feesAmount,
-                submissionsCount = new
+                FollowUpCount,
+                FeesAmount,
+                SubmissionsCount = new
                 {
-                    notAnswered,
-                    answeredOnTime,
-                    answeredLate
+                    NotAnswered,
+                    AnsweredOnTime,
+                    AnsweredLate
                 },
-                registrationFormStateCount = new
+                RegistrationFormStateCount = new
                 {
                     AcceptedCount,
                     DeclinedCount,
                     Pending,
                     WaitingListCount
                 },
-                requestStateCount = new
+                RequestStateCount = new
                 {
                     AcceptedRequestCount,
                     DeclinedRequestCount,
                     RequestPending
-                }
+                },
+                TotalSalaries,
+                StudentCountInCurrentActive,
+                ClassroomCountInCurrentActive,
+                InventoryLowItemsToday,
+                InventoryPurchase,
+                InventorySales
             });
         }
 
