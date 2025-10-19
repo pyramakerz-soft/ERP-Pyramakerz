@@ -76,6 +76,7 @@ export class ParentLessonComponent {
   showPDF = false;
   reportsForExport: any[] = [];
   reportsForPDF: any[] = [];
+  reportType: string = 'parent';
 
   constructor(
     private router: Router,
@@ -104,6 +105,11 @@ export class ParentLessonComponent {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
+    this.reportType = this.activeRoute.snapshot.data['reportType'] || 'parent';
+    if(this.reportType == 'student'){
+      this.StudentId=this.UserID
+      this.GetSubjectData()
+    }
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
     });

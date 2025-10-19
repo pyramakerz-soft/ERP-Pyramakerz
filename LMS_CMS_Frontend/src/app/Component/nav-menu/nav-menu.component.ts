@@ -443,7 +443,7 @@ export class NavMenuComponent {
         confirmButtonColor: '#089B41',
       });
     }else{
-      if(this.password != "" && this.editpasss.oldPassword != ""){
+      if(this.password != "" ){
         this.editpasss.id=this.User_Data_After_Login.id;
         this.editpasss.password=this.password 
         this.isLoading = true
@@ -532,9 +532,9 @@ export class NavMenuComponent {
         if(this.password == ""){
           this.PasswordError = "Password Can't be Empty"
         }
-        if(this.editpasss.oldPassword == ""){
-          this.OldPasswordError = "Old Password Can't be Empty"
-        }
+        // if(this.editpasss.oldPassword == ""){
+        //   this.OldPasswordError = "Old Password Can't be Empty"
+        // }
       }
     }
   }

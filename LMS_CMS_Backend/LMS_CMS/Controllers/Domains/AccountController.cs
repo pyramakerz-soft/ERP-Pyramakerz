@@ -239,11 +239,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                 _ => null,
             };
              
-            bool isMatch = BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password);
-            if (isMatch == false)
-            {
-                return BadRequest("Old Password isn't right");
-            }
+            //bool isMatch = BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password);
+            //if (isMatch == false)
+            //{
+            //    return BadRequest("Old Password isn't right");
+            //}
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             if (userTypeClaim == "octa")

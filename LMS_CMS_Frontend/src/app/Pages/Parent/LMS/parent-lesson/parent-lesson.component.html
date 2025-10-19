@@ -4,7 +4,7 @@
 
 <div class="my-5 flex flex-wrap justify-start items-center gap-2">
     
-    <div class="flex flex-col w-[30%] mb-4">
+    <div *ngIf="this.reportType == 'parent' " class="flex flex-col w-[30%] mb-4">
         <label class="mb-2 primaryTxt" for="Student">{{ 'Students' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Student"
             [(ngModel)]="StudentId" (change)="GetSubjectData(); showTable=false;">

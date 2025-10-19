@@ -19,7 +19,6 @@ namespace LMS_CMS_PL.Services
                                           && details.IsDeleted != true
                                     select details.Quantity * flag.ItemInOut
                                    ).SumAsync();
-
             return totalStock;
         }
 

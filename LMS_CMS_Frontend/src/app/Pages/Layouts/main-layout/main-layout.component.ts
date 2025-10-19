@@ -154,6 +154,14 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Social Worker Medals'),
               route: 'Students Medal'
+            },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
+            },
+            {
+              label: this.translateFunction('Time Table'),
+              route: 'Time Table'
             }
           ],
           icon: 'LMS'

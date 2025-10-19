@@ -65,7 +65,10 @@ export class SubjectAssignmentComponent {
       this.SolvedAssignment = d.solvedAssignments
       this.UnSolvedAssignment = d.unsolvedAssignments
     }, error => {
-      this.router.navigateByUrl(`Student/Subject`)
+      console.log(12,error)
+      if(!error.error.includes("No Assignments For This Student For this Subject")){
+        this.router.navigateByUrl(`Student/Subject`)
+      }
     })
   }
 

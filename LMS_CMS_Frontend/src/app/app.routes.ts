@@ -283,6 +283,7 @@ import { EmployeeSalaryDetailedByTokenComponent } from './Pages/Employee/HR/empl
 import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/loans-status.component'; 
 import { DashboardComponent } from './Pages/Employee/Dashboard/dashboard/dashboard.component';
 import { ParentLessonComponent } from './Pages/Parent/LMS/parent-lesson/parent-lesson.component';
+import { TimeTableStudentComponent } from './Pages/Student/time-table-student/time-table-student.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -632,9 +633,8 @@ export const routes: Routes = [
             { path: 'Attendance Report', component: AttendanceReportComponent, title: 'Attendance Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'parent' }  },
             { path: 'Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
-            { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard]},
+            { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }  },
             { path: 'Account Statement', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
-            { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
 
         ]
@@ -668,7 +668,9 @@ export const routes: Routes = [
             { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Student Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
             { path: 'Certificate To Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }   },
+            { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }  },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }   },
+            { path: 'Time Table', component: TimeTableStudentComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }   },
         ]
     },
     {

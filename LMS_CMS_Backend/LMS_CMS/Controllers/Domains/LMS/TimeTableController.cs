@@ -741,6 +741,111 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
+        [HttpGet("GetByIdForStudentIdAsync/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" , "student" },
+            pages: new[] { "Time Table" }
+        )]
+        public async Task<IActionResult> GetByIdForStudentIdAsync( long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            StudentClassroom studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
+                query => query.IsDeleted != true && query.StudentID == StudentId && query.Student.IsDeleted != true && query.Classroom.IsDeleted != true && query.Classroom.AcademicYear.IsActive == true,
+                query => query.Include(stu => stu.Student),
+                query => query.Include(stu => stu.Classroom.AcademicYear),
+                query => query.Include(stu => stu.Classroom.AcademicYear.School)
+            );
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == studentClassrooms.Classroom.AcademicYear.SchoolID && s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.ID == studentClassrooms.ClassID);
+
+            // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
+            TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
+                t => t.AcademicYearID == studentClassrooms.Classroom.AcademicYearID && t.IsFavourite == true && t.IsDeleted != true,
+                query => query
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == studentClassrooms.ClassID && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Subject)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == studentClassrooms.ClassID && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Teacher)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == studentClassrooms.ClassID && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Classroom)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == studentClassrooms.ClassID && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Day)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == studentClassrooms.ClassID && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Classroom.Grade)
+                    .Include(tt => tt.AcademicYear)
+            );
+
+            if (timeTable == null)
+            {
+                return BadRequest("No timetable with this ID");
+            }
+
+            //School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTable.AcademicYear.SchoolID && s.IsDeleted != true);
+            //if (school == null)
+            //{
+            //    return BadRequest("No school with this ID");
+            //}
+
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
+
+            var groupedResult = Dto.TimeTableClassrooms
+            .GroupBy(tc => new { tc.DayId, tc.DayName })
+            .Select(dayGroup => new TimeTableDayGroupDTO
+            {
+                DayId = dayGroup.Key.DayId,
+                DayName = dayGroup.Key.DayName,
+                Grades = dayGroup
+                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                    .Select(gradeGroup => new GradeGroupDTO
+                    {
+                        GradeId = gradeGroup.Key.GradeId,
+                        GradeName = gradeGroup.Key.GradeName,
+                        Classrooms = gradeGroup
+                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                            .Select(classGroup => new ClassroomGroupDTO
+                            {
+                                ClassroomId = classGroup.Key.ClassroomID,
+                                ClassroomName = classGroup.Key.ClassroomName,
+                                Sessions = classGroup
+                                    .SelectMany(c => c.TimeTableSessions)
+                                    .Select(session => new SessionGroupDTO
+                                    {
+                                        SessionId = session.ID,
+                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
+                                        {
+                                            SubjectId = s.SubjectID,
+                                            SubjectName = s.SubjectName,
+                                            TeacherId = s.TeacherID,
+                                            TeacherName = s.TeacherName
+                                        }).ToList()
+                                    }).ToList()
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            // Return the grouped result as JSON
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable, ClassName = classroom.Name });
+        }
+
+        /////////////////
+
         [HttpGet("GetByIdForTeacherAsync/{Tid}/{TeacherId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" } ,

@@ -22,7 +22,7 @@ export class SideMenuComponent {
   @ViewChild('searchInput') searchInput: any;
   @ViewChildren('details') detailsList!: QueryList<ElementRef>;
 
-  IsMenuOpen = false
+  IsMenuOpen = true
   IsSearchFocus = false
 
   isRtl: boolean = false;
