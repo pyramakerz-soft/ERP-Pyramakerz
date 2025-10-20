@@ -26,9 +26,10 @@ namespace LMS_CMS_PL.Controllers.Domains
         private readonly Communication_Service _communication_Service;
         private readonly HR_Service _hr_Service;
         private readonly Inventory_Service _inventory_Service;
+        private readonly ECommerce_Service _ecommerce_Service;
 
-        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, Accounting_Service accounting_Service, 
-            LMS_Service lMS_Service, Registration_Service registration_Service, Communication_Service communication_Service, HR_Service hr_Service, Inventory_Service inventory_Service)
+        public DashboardController(DbContextFactoryService dbContextFactory, IMapper mapper, Clinic_Service clinic_Service, Accounting_Service accounting_Service, LMS_Service lMS_Service, 
+            Registration_Service registration_Service, Communication_Service communication_Service, HR_Service hr_Service, Inventory_Service inventory_Service, ECommerce_Service ecommerce_Service)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -39,6 +40,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             _communication_Service = communication_Service;
             _hr_Service = hr_Service;
             _inventory_Service = inventory_Service;
+            _ecommerce_Service = ecommerce_Service;
         }
 
         [HttpGet]
@@ -61,6 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             int InventoryLowItemsToday = await _inventory_Service.LowItemsAsync(HttpContext);
             Dictionary<string, decimal> InventoryPurchase = _inventory_Service.Purchase(year, month, HttpContext);
             Dictionary<string, decimal> InventorySales = _inventory_Service.Sales(year, month, HttpContext);
+            var categoryRankings = await _ecommerce_Service.GetTopRequestedItemsByCategoryAsync(year, month, HttpContext);
 
             return Ok(new
             {
@@ -90,7 +93,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 ClassroomCountInCurrentActive,
                 InventoryLowItemsToday,
                 InventoryPurchase,
-                InventorySales
+                InventorySales,
+                categoryRankings
             });
         }
 
