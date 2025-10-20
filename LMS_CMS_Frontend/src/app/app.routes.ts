@@ -636,6 +636,11 @@ export const routes: Routes = [
             { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }  },
             { path: 'Account Statement', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'parent' }   },
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report", canActivate: [noNavigateWithoutLoginGuard ] ,data: { reportType: 'parent' }},
+            { path: "The Shop", component: ShopComponent, title: "Shop", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Ecommerce/ShopItem/:id", component: ShopItemComponent, title: "Shop Item" },
+            { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },
+            { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
+            { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
 
         ]
     },

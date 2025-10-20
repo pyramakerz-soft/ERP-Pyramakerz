@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
         )]
         public IActionResult Add(CartShopItemAddDTO cartShopItem)
         {
@@ -208,7 +208,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpDelete("RemoveItemFromCart/{CartShopItemID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "student", "employee" }
+           allowedTypes: new[] { "octa", "student", "employee" , "parent" }
         )]
         public IActionResult RemoveItemFromCart(long CartShopItemID)
         {
@@ -280,7 +280,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpPut("ChangeQuantity")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
         )]
         public IActionResult ChangeQuantity(CartShopItemPutDTO cartShopItem)
         {

@@ -276,7 +276,7 @@ export class MainLayoutComponent {
           subItems: [
             {
               label: this.translateFunction('The Shop'),
-              route: 'Ecommerce/The Shop'
+              route: 'The Shop'
             },
             {
               label: this.translateFunction('Cart'),

@@ -48,6 +48,14 @@
                     <option *ngFor="let empStu of emplyeeStudent" [value]="empStu.studentID">{{ empStu.studentName }}</option>
                     <option *ngIf="emplyeeStudent.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
+
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto "
+                    *ngIf="User_Data_After_Login.type == 'parent'"
+                    [(ngModel)]="StuID">
+                    <option [value]=0 disabled selected hidden> {{ 'Choose Your Student' | translate }}</option>
+                    <option *ngFor="let empStu of students" [value]="empStu.id">{{ empStu.en_name }}</option>
+                    <option *ngIf="students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                </select>
             </div>
         </div>
 

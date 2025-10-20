@@ -99,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("GetBySubCategoryID/{SubCategoryID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+           allowedTypes: new[] { "octa", "employee" , "parent" , "student" }
         )]
         public async Task<IActionResult> GetBySubCategoryID(long SubCategoryID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         { 
@@ -197,7 +197,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("GetBySubCategoryIDWithGenderAndGradeAndStudentID/{SubCategoryID}/{StudentID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee", "student" }
+           allowedTypes: new[] { "octa", "employee", "student" , "parent" }
         )]
         public async Task<IActionResult> GetBySubCategoryIDWithGenderAndGradeAndStudentID(long SubCategoryID, long StudentID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         {
@@ -384,7 +384,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "student" },
+            allowedTypes: new[] { "octa", "employee", "student" , "parent"},
             pages: new[] { "Shop Item", "Shop" }
          )]
         public async Task<IActionResult> GetByIdAsync(long id)
