@@ -17,6 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { keyframes } from '@angular/animations';
 interface FlagOption {
   id: number;
   name: string;
@@ -362,7 +363,7 @@ onFilterChange() {
 
 private prepareExportData(): void {
   this.transactionsForExport = this.transactions.map((t) => ({
-    header: `Invoice #${t.invoiceNumber}`,
+    header: `${t.invoiceNumber}`,
     summary: [
       { key: 'Date', value: new Date(t.date).toLocaleDateString() },
       { key: 'Store', value: t.storeName },
@@ -437,12 +438,17 @@ trackByTableRow(index: number, item: any): number {
 
 getInfoRows(): any[] {
   const rows = [
-    { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
-    { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
-    { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
+    { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' ,
+      keyAr: 'من تاريخ: ' + this.dateFrom, valueAr: ''
+    },
+    { keyEn: 'To Date: ' + this.dateTo, valueEn: '' ,
+      keyAr: 'إلى تاريخ: ' + this.dateTo, valueAr: ''
+    },
+    { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' ,
+      keyAr: this.getStoreName() +  ' :المخزن', valueAr: ''
+    },
   ];
 
-  // Add student/supplier info if available
   if (
     this.reportType == 'sales' &&
     this.transactions.some((t) => t.studentName)
@@ -450,6 +456,8 @@ getInfoRows(): any[] {
     rows.push({
       keyEn: 'Student: ' + (this.transactions[0]?.studentName || '-'),
       valueEn: '',
+      keyAr:  (this.transactions[0]?.studentName || '-') + ' :الطالب',
+      valueAr: ''
     });
   }
   if (
@@ -459,6 +467,8 @@ getInfoRows(): any[] {
     rows.push({
       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || '-'),
       valueEn: '',
+      keyAr:  (this.transactions[0]?.supplierName || '-') + ' :المورد',
+      valueAr: ''
     });
   }
 

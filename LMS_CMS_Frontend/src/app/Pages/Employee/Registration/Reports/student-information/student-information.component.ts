@@ -250,8 +250,6 @@ export class StudentInformationComponent {
         console.error('Element not found!');
         return;
       }
-
-      // Create a print-specific stylesheet
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -278,16 +276,13 @@ export class StudentInformationComponent {
         </style>
       `;
 
-      // Create a container for printing
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
 
-      // Add to body and print
       document.body.appendChild(printContainer);
       window.print();
 
-      // Clean up
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -298,7 +293,7 @@ export class StudentInformationComponent {
   DownloadAsPDF() {
     this.showPDF = true;
     setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
+      this.pdfComponentRef.downloadPDF();
       setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
@@ -358,7 +353,7 @@ export class StudentInformationComponent {
         { key: 'Student', value: this.SelectedStudent.user_Name },
         { key: 'School', value: this.school.name },
       ],
-      reportImage: this.school.reportImage,
+      // reportImage: this.school.reportImage,
       filename: 'Student Information Report.xlsx',
       tables: tables,
     });
@@ -366,7 +361,6 @@ export class StudentInformationComponent {
 
   GetData(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Validate all required fields
       if (!this.SelectedSchoolId || !this.SelectedYearId || !this.SelectedStudentId) {
         reject(new Error('School, Year, and Student must be selected'));
         return;
@@ -387,7 +381,6 @@ export class StudentInformationComponent {
             this.direction
           );
           
-          // Helper function to format dates
           const formatDateString = (dateString: string): string => {
             if (!dateString || dateString === '-') return '-';
             try {
@@ -410,8 +403,8 @@ export class StudentInformationComponent {
                 key: 'Admission Date',
                 value: formatDateString(d.student?.insertedAt) || '-',
               },
-              { key: 'Mobile', value: d.student?.mobile || '-' },
-              { key: 'Alternative Mobile', value: d.student?.phone || '-' },
+              // { key: 'Mobile', value: d.student?.mobile || '-' },
+              // { key: 'Alternative Mobile', value: d.student?.phone || '-' },
               {
                 key: 'Date of Birth',
                 value: formatDateString(d.student?.dateOfBirth) || '-',
@@ -427,13 +420,13 @@ export class StudentInformationComponent {
               },
               {
                 key: "Student's Id Number",
-                value: d.student?.idNumber || '-',
+                value: d.student?.nationalID || '-',
               },
               { key: 'Religion', value: d.student?.religion || '-' },
-              {
-                key: 'Place To Birth',
-                value: d.student?.placeOfBirth || '-',
-              },
+              // {
+              //   key: 'Place To Birth',
+              //   value: d.student?.placeOfBirth || '-',
+              // },
               {
                 key: 'Pre-School',
                 value: d.student?.previousSchool || '-',
@@ -455,10 +448,10 @@ export class StudentInformationComponent {
                 key: "Guardian's Name",
                 value: d.student?.guardianName || '-',
               },
-              {
-                key: 'Relationship',
-                value: d.student?.guardianRelation || '-',
-              },
+              // {
+              //   key: 'Relationship',
+              //   value: d.student?.guardianRelation || '-',
+              // },
               {
                 key: 'Passport',
                 value: d.student?.guardianPassportNo || '-',
@@ -471,10 +464,10 @@ export class StudentInformationComponent {
                 key: 'Qualification',
                 value: d.student?.guardianQualification || '-',
               },
-              {
-                key: 'Profession',
-                value: d.student?.guardianProfession || '-',
-              },
+              // {
+              //   key: 'Profession',
+              //   value: d.student?.guardianProfession || '-',
+              // },
               {
                 key: 'WorkPlace',
                 value: d.student?.guardianWorkPlace || '-',
@@ -483,14 +476,14 @@ export class StudentInformationComponent {
                 key: 'E-mail Address',
                 value: d.student?.guardianEmail || '-',
               },
-              {
-                key: 'Identity Expiration',
-                value: formatDateString(d.student?.guardianNationalIDExpiredDate) || '-',
-              },
-              {
-                key: 'Passport Expiration',
-                value: formatDateString(d.student?.guardianPassportExpireDate) || '-',
-              },
+              // {
+              //   key: 'Identity Expiration',
+              //   value: formatDateString(d.student?.guardianNationalIDExpiredDate) || '-',
+              // },
+              // {
+              //   key: 'Passport Expiration',
+              //   value: formatDateString(d.student?.guardianPassportExpireDate) || '-',
+              // },
             ],
           };
           this.DataToPrint.push(GuardianInformation);
@@ -507,18 +500,18 @@ export class StudentInformationComponent {
                 key: 'Identity',
                 value: d.student?.motherNationalID || '-',
               },
-              {
-                key: 'Passport Expiration',
-                value: formatDateString(d.student?.motherPassportExpireDate) || '-',
-              },
+              // {
+              //   key: 'Passport Expiration',
+              //   value: formatDateString(d.student?.motherPassportExpireDate) || '-',
+              // },
               {
                 key: 'Qualification',
                 value: d.student?.motherQualification || '-',
               },
-              {
-                key: 'Profession',
-                value: d.student?.motherProfession || '-',
-              },
+              // {
+              //   key: 'Profession',
+              //   value: d.student?.motherProfession || '-',
+              // },
               {
                 key: 'WorkPlace',
                 value: d.student?.motherWorkPlace || '-',
@@ -527,59 +520,59 @@ export class StudentInformationComponent {
                 key: 'E-mail Address',
                 value: d.student?.motherEmail || '-',
               },
-              {
-                key: 'Experiences',
-                value: d.student?.motherExperiences || '-',
-              },
+              // {
+              //   key: 'Experiences',
+              //   value: d.student?.motherExperiences || '-',
+              // },
             ],
           };
           this.DataToPrint.push(MotherInformation);
 
-          const EmergencyContactPerson = {
-            header: 'Emergency Contact Person',
-            data: [
-              {
-                key: 'Name',
-                value: d.student?.emergencyContactName || '-',
-              },
-              {
-                key: 'RelationShip',
-                value: d.student?.emergencyContactRelation || '-',
-              },
-              {
-                key: 'Mobile',
-                value: d.student?.emergencyContactMobile || '-',
-              },
-            ],
-          };
-          this.DataToPrint.push(EmergencyContactPerson);
+          // const EmergencyContactPerson = {
+          //   header: 'Emergency Contact Person',
+          //   data: [
+          //     {
+          //       key: 'Name',
+          //       value: d.student?.emergencyContactName || '-',
+          //     },
+          //     {
+          //       key: 'RelationShip',
+          //       value: d.student?.emergencyContactRelation || '-',
+          //     },
+          //     {
+          //       key: 'Mobile',
+          //       value: d.student?.emergencyContactMobile || '-',
+          //     },
+          //   ],
+          // };
+          // this.DataToPrint.push(EmergencyContactPerson);
 
-          const AddressInformation = {
-            header: 'Address Information',
-            data: [{ key: 'Address', value: d.student?.address || '-' }],
-          };
-          this.DataToPrint.push(AddressInformation);
+          // const AddressInformation = {
+          //   header: 'Address Information',
+          //   data: [{ key: 'Address', value: d.student?.address || '-' }],
+          // };
+          // this.DataToPrint.push(AddressInformation);
 
-          const PersonResponsibleToPickUpAndReceiveTheStudent = {
-            header: 'Person Responsible To Pick Up And Receive The Student',
-            data: [
-              {
-                key: 'Pick_name',
-                value: d.student?.pickUpContactName || '-',
-              },
-              {
-                key: 'Pick_Relation',
-                value: d.student?.pickUpContactRelation || '-',
-              },
-              {
-                key: 'Pick_mobile',
-                value: d.student?.pickUpContactMobile || '-',
-              },
-            ],
-          };
-          this.DataToPrint.push(
-            PersonResponsibleToPickUpAndReceiveTheStudent
-          );
+          // const PersonResponsibleToPickUpAndReceiveTheStudent = {
+          //   header: 'Person Responsible To Pick Up And Receive The Student',
+          //   data: [
+          //     {
+          //       key: 'Pick_name',
+          //       value: d.student?.pickUpContactName || '-',
+          //     },
+          //     {
+          //       key: 'Pick_Relation',
+          //       value: d.student?.pickUpContactRelation || '-',
+          //     },
+          //     {
+          //       key: 'Pick_mobile',
+          //       value: d.student?.pickUpContactMobile || '-',
+          //     },
+          //   ],
+          // };
+          // this.DataToPrint.push(
+          //   PersonResponsibleToPickUpAndReceiveTheStudent
+          // );
           resolve();
         },
         error: (err) => {
