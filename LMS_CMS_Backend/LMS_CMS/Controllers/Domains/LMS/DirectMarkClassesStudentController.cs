@@ -71,7 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             // Fetch paginated records with includes
             List<DirectMarkClassesStudent> DirectMarkClassesStudents = await Unit_Of_Work.directMarkClassesStudent_Repository
                 .Select_All_With_IncludesById_Pagination<DirectMarkClassesStudent>(
-                    sem => sem.IsDeleted != true && sem.DirectMarkID == DirectMarkId && sem.StudentClassroom.ClassID == ClassId,
+                    sem => sem.IsDeleted != true && sem.DirectMarkID == DirectMarkId && sem.StudentClassroom.ClassID == ClassId && sem.StudentClassroom.Student.IsDeleted != true,
                     query => query.Include(emp => emp.StudentClassroom)
                                   .ThenInclude(a => a.Student),
                     query => query.Include(emp => emp.DirectMark)

@@ -13,6 +13,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Student } from '../../../../Models/student';
+import { StudentService } from '../../../../Services/student.service';
 @Component({
   selector: 'app-order',
   standalone: true,
@@ -32,8 +34,9 @@ export class OrderComponent {
 
   filteredOrders: Order[] = [] 
   searchTerm: string = '';
+  students: Student[] = [];
 
-  constructor(public account: AccountService,private languageService: LanguageService,
+  constructor(public account: AccountService,private languageService: LanguageService,public StudentService: StudentService,
     private realTimeService: RealTimeNotificationServiceService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
   
   ngOnInit(){
@@ -49,6 +52,10 @@ export class OrderComponent {
     if(this.User_Data_After_Login.type == 'student'){
       this.StuID = this.UserID
     }
+    
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.getStudentsByParent()
+    }
 
     this.getOrders() 
         this.subscription = this.languageService.language$.subscribe(direction => {
@@ -56,12 +63,14 @@ export class OrderComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
   ngOnDestroy(): void { 
           this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }
+
   getStudents(){
     this.employeeStudentService.Get(this.UserID, this.DomainName).subscribe(
       data => {
@@ -70,11 +79,23 @@ export class OrderComponent {
     )
   }
 
+  getStudentsByParent(){
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }  
+
   goToCart() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Cart")
-    } else{
+    } 
+    else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Ecommerce/Cart")
+    }
+    else{
+      this.router.navigateByUrl("Parent/Ecommerce/Cart")
     }
   } 
 
@@ -106,8 +127,11 @@ export class OrderComponent {
   goToOrderItems(id: number) {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Order/" + id)
-    } else{
+    } else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Ecommerce/Order/" + id)
+    }
+    else{
+      this.router.navigateByUrl("Parent/Ecommerce/Order/" + id)
     }
   }
   
@@ -115,8 +139,11 @@ export class OrderComponent {
     if(this.User_Data_After_Login.type == 'employee'){ 
       this.router.navigate(['Employee/Order', id], { queryParams: { download: 'true' } }); 
 
-    } else{ 
+    } else if(this.User_Data_After_Login.type == 'student'){ 
       this.router.navigate(['Student/Ecommerce/Order', id], { queryParams: { download: 'true' } }); 
+    } 
+    else{
+      this.router.navigate(['Parent/Ecommerce/Order', id], { queryParams: { download: 'true' } }); 
     }
   }
 
