@@ -16,10 +16,10 @@ namespace LMS_CMS_BL.DTO.Inventory
         public DateOnly Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
-        public int CashAmount { get; set; }
-        public int VisaAmount { get; set; }
-        public int Remaining { get; set; }
-        public int Total { get; set; }
+        public decimal CashAmount { get; set; }
+        public decimal VisaAmount { get; set; }
+        public decimal Remaining { get; set; }
+        public decimal Total { get; set; }
         public string Notes { get; set; }
         public List<string>? Attachments { get; set; }
         public long StoreID { get; set; }
