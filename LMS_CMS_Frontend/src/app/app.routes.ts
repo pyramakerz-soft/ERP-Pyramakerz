@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './Pages/Login/login/login.component';
-import { HomeParentComponent } from './Pages/Parent/home-parent/home-parent.component';
-import { StudentHomeComponent } from './Pages/Student/student-home/student-home.component';
+import { HomeParentComponent } from './Pages/Parent/home-parent/home-parent.component'; 
 import { EmployeeHomeComponent } from './Pages/Employee/employee-home/employee-home.component';
 import { noNavigateWithoutLoginGuard } from './Guards/no-navigate-without-login.guard';
 import { noNavigateToLoginIfLoginGuard } from './Guards/no-navigate-to-login-if-login.guard';
@@ -647,10 +646,10 @@ export const routes: Routes = [
     {
         path: "Student",
         component: MainLayoutComponent,
-        title: "Student Home",
+        title: "Subject",
         canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],
         children: [
-            { path: "", component: StudentHomeComponent, title: "StudentHome" },
+            { path: "", component: SubjectStudentComponent, title: "StudentHome" },
             { path: "Ecommerce/The Shop", component: ShopComponent, title: "Shop" },
             { path: "Ecommerce/ShopItem/:id", component: ShopItemComponent, title: "Shop Item" },
             { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },

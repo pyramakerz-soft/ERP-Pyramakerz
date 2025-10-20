@@ -27,8 +27,7 @@ import { RealTimeChatServiceService } from '../../../Services/shared/real-time-c
 export class MainLayoutComponent {
   menuItems: { label: string; route?: string; icon?: string; subItems?: { label: string; route: string; icon?: string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
-  isRtl: boolean = false;
-  // subscription!: Subscription;
+  isRtl: boolean = false; 
   private subscriptions = new Subscription();
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
@@ -74,9 +73,8 @@ export class MainLayoutComponent {
     }
   }
 
-  translations: { [key: string]: { en: string; ar?: string } } = {
-    'Dashboard Student': { en: 'Dashboard Student', ar: 'لوحة تحكم الطالب' },
-    'Dashboard Parent': { en: 'Dashboard Parent', ar: 'لوحة تحكم ولي الأمر' },
+  translations: { [key: string]: { en: string; ar?: string } } = { 
+    'Dashboard': { en: 'Dashboard', ar: 'لوحة التحكم' },
     'ECommerce': { en: 'E-Commerce', ar: 'التجارة الإلكترونية' },
     'The Shop': { en: 'The Shop', ar: 'المتجر' },
     'LMS': { en: 'LMS', ar: 'نظام إدارة التعلم' },
@@ -115,12 +113,7 @@ export class MainLayoutComponent {
     if (this.User_Data_After_Login.type == "employee") {
       this.Get_Pages_With_RoleID();
     } else if (this.User_Data_After_Login.type == "student") {
-      this.menuItems = [
-        {
-          label: this.translateFunction('Dashboard Student'),
-          route: '#',
-          icon: 'Dashboard'
-        },
+      this.menuItems = [ 
         {
           label: this.translateFunction('ECommerce'),
           subItems: [
@@ -165,7 +158,7 @@ export class MainLayoutComponent {
     } else if (this.User_Data_After_Login.type == "parent") {
       this.menuItems = [
         {
-          label: this.translateFunction('Dashboard Parent'),
+          label: this.translateFunction('Dashboard'),
           route: '#',
           icon: 'Dashboard'
         },
