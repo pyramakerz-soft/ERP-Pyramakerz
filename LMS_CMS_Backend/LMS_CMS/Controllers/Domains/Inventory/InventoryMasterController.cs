@@ -821,7 +821,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newSale.FlagId == 8 || newSale.FlagId == 9 || newSale.FlagId == 10 || newSale.FlagId == 11 || newSale.FlagId == 12)
             {
-                double expectedRemaining = (newSale.Total) - ((newSale.CashAmount ?? 0) + (newSale.VisaAmount ?? 0));
+                decimal expectedRemaining = (newSale.Total) - ((newSale.CashAmount ?? 0) + (newSale.VisaAmount ?? 0));
                 if (expectedRemaining != newSale.Remaining)
                 {
                     return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
