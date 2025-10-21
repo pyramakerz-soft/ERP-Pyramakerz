@@ -656,12 +656,6 @@ export const routes: Routes = [
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
             { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" },
-            { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Lesson-Resources-UI/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentStudentStudentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject", component: SubjectStudentComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectWeeks/:id", component: SubjectWeeksComponent, title: "SubjectWeeks", canActivate: [noNavigateWithoutLoginGuard] },
@@ -675,6 +669,8 @@ export const routes: Routes = [
             { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }  },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }   },
             { path: 'Time Table', component: TimeTableStudentComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard],data: { reportType: 'student' }   },
+            { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {

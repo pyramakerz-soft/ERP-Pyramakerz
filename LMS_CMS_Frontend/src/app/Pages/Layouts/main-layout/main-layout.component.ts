@@ -150,6 +150,10 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Time Table'),
               route: 'Time Table'
+            },
+            {
+              label: this.translateFunction('Lesson Live'),
+              route: 'Lesson Live'
             }
           ],
           icon: 'LMS'
@@ -184,18 +188,6 @@ export class MainLayoutComponent {
           label: this.translateFunction('LMS'),
           subItems: [
             {
-              label: this.translateFunction('Live Sessions'),
-              route: 'Live Sessions'
-            },
-            {
-              label: this.translateFunction('Subjects'),
-              route: 'Subjects'
-            },
-            // {
-            //   label: this.translateFunction('Reports'),
-            //   route: 'Reports'
-            // },
-            {
               label: this.translateFunction('Certificate'),
               route: 'Certificate'
             },
@@ -207,6 +199,16 @@ export class MainLayoutComponent {
               label: this.translateFunction('Student Issue'),
               route: 'Student Issue Report'
             },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
+            }
+          ],
+          icon: 'LMS'
+        },
+        {
+          label: this.translateFunction('Social Worker'),
+          subItems: [
             {
               label: this.translateFunction('Conducts'),
               route: 'Conducts Report'
@@ -223,22 +225,8 @@ export class MainLayoutComponent {
               label: this.translateFunction('Students Medal'),
               route: 'Students Medal'
             },
-            {
-              label: this.translateFunction('Lessons'),
-              route: 'Lessons'
-            }
           ],
-          icon: 'LMS'
-        },
-        {
-          label: this.translateFunction('Virtual Meetings'),
-          subItems: [
-            {
-              label: this.translateFunction('Discussion Room'),
-              route: 'Discussion Room'
-            }
-          ],
-          icon: 'Virtual Meetings'
+          icon: 'Registration'
         },
         {
           label: this.translateFunction('Accounting'),

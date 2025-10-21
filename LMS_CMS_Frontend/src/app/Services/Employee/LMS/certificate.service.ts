@@ -19,7 +19,7 @@ export class CertificateService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(SchoolId:number , StudentId:number,DateFrom:string,DateTo:String ,DomainName: string) {
+  Get(SchoolId:number ,ClassId:number , StudentId:number,DateFrom:string,DateTo:String ,DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -28,6 +28,6 @@ export class CertificateService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] ,lastColumn :CertificateSubjectTotalMark[] }>(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${StudentId}/${DateFrom}/${DateTo}`, { headers });
+      return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] ,lastColumn :CertificateSubjectTotalMark[] }>(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${DateFrom}/${DateTo}`, { headers });
   }
 }

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Unicode;
 using LMS_CMS_DAL.Models.Octa;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -131,6 +132,63 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
                     sem => sem.IsDeleted != true && sem.Section.SchoolID == id && sem.Section.IsDeleted!= true,
+                    query => query.Include(emp => emp.Section));
+
+            if (Grades == null || Grades.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<GradeGetDTO> GradeDTO = mapper.Map<List<GradeGetDTO>>(Grades);
+
+            return Ok(GradeDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetBySchoolAndStudent/{SchoolId}/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student", "parent" }
+        )]
+        public async Task<IActionResult> GetBySchool(long SchoolId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (SchoolId == 0  || StudentId == 0 )
+            {
+                return BadRequest("Please Enter School ID and StudentId");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SchoolId);
+            if (school == null)
+            {
+                return NotFound("There is no School with this ID");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == StudentId);
+            if (student == null)
+            {
+                return NotFound("There is no student with this ID");
+            }
+
+            List<StudentGrade> StudentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
+                   sem => sem.IsDeleted != true && sem.StudentID == StudentId && sem.AcademicYear.SchoolID == SchoolId && sem.AcademicYear.IsDeleted != true,
+                   query => query.Include(emp => emp.Grade));
+
+            List<long> gradesIds= StudentGrades.Select(g => g.GradeID).ToList();
+
+            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
+                    sem => sem.IsDeleted != true && sem.Section.SchoolID == SchoolId && sem.Section.IsDeleted != true && gradesIds.Contains(sem.ID),
                     query => query.Include(emp => emp.Section));
 
             if (Grades == null || Grades.Count == 0)

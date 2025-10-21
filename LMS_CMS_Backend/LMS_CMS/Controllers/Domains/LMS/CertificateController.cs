@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -29,12 +29,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
-        [HttpGet("ByStudentId/{SchoolId}/{StudentId}/{DateFrom}/{DateTo}")]
+        [HttpGet("ByStudentId/{SchoolId}/{ClassId}/{StudentId}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] {"octa", "employee", "student", "parent" },
             pages: new[] { "Certificate" }
         )]
-        public async Task<IActionResult> GetById(long SchoolId, long StudentId, DateOnly DateFrom, DateOnly DateTo)
+        public async Task<IActionResult> GetById(long SchoolId, long ClassId, long StudentId, DateOnly DateFrom, DateOnly DateTo)
         {
             try
             {
@@ -50,6 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     .First_Or_Default(s => s.StudentID == StudentId &&
                                            s.IsDeleted != true &&
                                            s.Classroom != null &&
+                                           s.ClassID == ClassId &&
                                            s.Classroom.IsDeleted != true &&
                                            s.Classroom.AcademicYear != null &&
                                            s.Classroom.AcademicYear.DateFrom <= DateFrom &&
@@ -62,7 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 // All Subjects for this student
                 var studentClassroomSubjects = await Unit_Of_Work.studentClassroomSubject_Repository
                     .Select_All_With_IncludesById<StudentClassroomSubject>(
-                        f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && !f.Hide);
+                        f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true && !f.Hide);
 
                 if (studentClassroomSubjects == null || !studentClassroomSubjects.Any())
                     return NotFound("No subjects found for this student.");
