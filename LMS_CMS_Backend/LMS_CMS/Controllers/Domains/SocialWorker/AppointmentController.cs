@@ -244,7 +244,37 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 Unit_Of_Work.SaveChanges();
             }
 
-            // parent Appointment
+            /////////////////////////////// parent Appointment
+            List<long> ParentIds =new List<long>();
+
+            foreach (var item in NewAppointment.GradeIds)
+            {
+                /// 1) get all parents That has student 
+                List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(s => s.GradeID == item && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+                List<long> studentIds = studentGrades.Select(s=>s.StudentID).Distinct().ToList();
+
+                List<Student> students = Unit_Of_Work.student_Repository.FindBy(s => s.IsDeleted != true && studentIds.Contains(s.ID));
+                foreach (var student in students)
+                {
+                    if(student.Parent_Id != null)
+                    {
+                        ParentIds.Add(student.Parent_Id.Value);
+                    }
+                }
+            }
+            ParentIds = ParentIds.Distinct().ToList();
+            foreach (var ParentId in ParentIds)
+            {
+                var appointmentParent = new AppointmentParent();
+                appointmentParent.ParentID = ParentId;
+                appointmentParent.AppointmentID = appointment.ID;
+                appointmentParent.AppointmentStatusID = 1;
+
+                Unit_Of_Work.appointmentParent_Repository.Add(appointmentParent);
+                Unit_Of_Work.SaveChanges();
+
+                //
+            }
 
             return Ok(NewAppointment);
         }
