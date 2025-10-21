@@ -148,6 +148,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
           
             var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
+
             foreach (var master in dto)
             {
                 for (int i = 0; i < master.Attachments.Count; i++)
