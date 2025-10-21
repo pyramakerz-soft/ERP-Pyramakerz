@@ -141,6 +141,7 @@ private showSuccessAlert(message: string) {
 
   GetRoleName() {
     this.RoleServ.Get_Role_id(this.RoleId, this.DomainName).subscribe((data) => {
+      console.log('Fetched role data:', data);
       this.RoleName = data.name;
     })
   }
