@@ -142,10 +142,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                 return NotFound("Item Is Not available right now");
             }
 
-            if (shopItem.Limit == 0)
-            {
-                return NotFound("Item Is Out Of Stock");
-            }
+            //if (shopItem.Limit == 0)
+            //{
+            //    return NotFound("Item Is Out Of Stock");
+            //}
 
             if (cartShopItem.ShopItemColorID != 0 && cartShopItem.ShopItemColorID != null)
             {
@@ -165,10 +165,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                 }
             }
 
-            if (shopItem.Limit < cartShopItem.Quantity)
-            {
-                return BadRequest($"There are only {shopItem.Limit} items in the store");
-            }
+            //if (shopItem.Limit < cartShopItem.Quantity)
+            //{
+            //    return BadRequest($"There are only {shopItem.Limit} items in the store");
+            //}
 
             Student ExStu = Unit_Of_Work.student_Repository.First_Or_Default(s => s.IsDeleted != true && s.ID == cartShopItem.StudentID);
             if (ExStu.Nationality != 148)
@@ -189,7 +189,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
             Unit_Of_Work.cart_Repository.Update(cart);
 
-            shopItem.Limit = shopItem.Limit - cartShopItem.Quantity;
+            //shopItem.Limit = shopItem.Limit - cartShopItem.Quantity;
             Unit_Of_Work.shopItem_Repository.Update(shopItem);
 
             cartShopItem.CartID = cart.ID;
@@ -245,7 +245,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                 return NotFound("No Shop Item With this ID");
             }
 
-            shopItem.Limit = shopItem.Limit + cartShopItem.Quantity;
+            //shopItem.Limit = shopItem.Limit + cartShopItem.Quantity;
             Student stu = Unit_Of_Work.student_Repository.First_Or_Default(s => s.IsDeleted != true && s.ID == cart.StudentID);
             if (stu.Nationality != 148)
             {
@@ -310,20 +310,20 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             }
 
             ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(sh => sh.IsDeleted != true && sh.ID == existsCartShopItem.ShopItemID);
-            if(existsCartShopItem.Quantity < cartShopItem.Quantity)
-            {
-                if (shopItem.Limit < (existsCartShopItem.Quantity - cartShopItem.Quantity))
-                {
-                    return BadRequest($"There are only {shopItem.Limit} items in the store");
-                }
-            }
+            //if(existsCartShopItem.Quantity < cartShopItem.Quantity)
+            //{
+            //    if (shopItem.Limit < (existsCartShopItem.Quantity - cartShopItem.Quantity))
+            //    {
+            //        return BadRequest($"There are only {shopItem.Limit} items in the store");
+            //    }
+            //}
 
             if (cartShopItem.Quantity < 0)
             {
                 return BadRequest("Can't Request minus");
             }
 
-            shopItem.Limit = shopItem.Limit + (existsCartShopItem.Quantity - cartShopItem.Quantity);
+            //shopItem.Limit = shopItem.Limit + (existsCartShopItem.Quantity - cartShopItem.Quantity);
             Student stu = Unit_Of_Work.student_Repository.First_Or_Default(s => s.IsDeleted != true && s.ID == cart.StudentID);
             if (stu.Nationality != 148)
             {

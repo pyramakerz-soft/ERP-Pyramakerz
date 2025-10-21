@@ -184,11 +184,9 @@ export class ShopComponent {
     )
   }
 
-  onAddToCartClick(event: MouseEvent, itemId: number, limit: number|null) {
-    event.stopPropagation(); 
-    if (limit && limit > 0) {
-        this.addShopItemToCart(itemId);
-    }
+  onAddToCartClick(event: MouseEvent, itemId: number) {
+    event.stopPropagation();  
+    this.addShopItemToCart(itemId);
   }
 
   changeCurrentPage(currentPage:number){
