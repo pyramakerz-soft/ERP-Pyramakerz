@@ -648,7 +648,7 @@ export const routes: Routes = [
         component: MainLayoutComponent,
         title: "Subject",
         canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],
-        children: [ 
+        children: [
             { path: "", redirectTo: "Subject", pathMatch: "full" },
             { path: "Ecommerce/The Shop", component: ShopComponent, title: "Shop", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Ecommerce/ShopItem/:id", component: ShopItemComponent, title: "Shop Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
@@ -656,12 +656,6 @@ export const routes: Routes = [
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Lesson-Resources-UI/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Assignment/:id", component: AssignmentStudentStudentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Subject", component: SubjectStudentComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "SubjectWeeks/:id", component: SubjectWeeksComponent, title: "SubjectWeeks", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
@@ -675,6 +669,7 @@ export const routes: Routes = [
             { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }  },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }   },
             { path: 'Time Table', component: TimeTableStudentComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }   },
+            { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] }, 
         ]
     },
     {

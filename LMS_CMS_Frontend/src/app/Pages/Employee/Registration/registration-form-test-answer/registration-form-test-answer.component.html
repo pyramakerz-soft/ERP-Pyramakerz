@@ -22,6 +22,15 @@
                      'border-[#177C03]': q.answerName === q.correctAnswerName,
                      'border-[#EA3A3D]': q.answerName !== q.correctAnswerName
                    }">
+                   <div *ngIf="q.video" class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
+                        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Video' | translate }}</p>
+                        <video *ngIf="q.video" [src]="q.video" class="object-cover w-fit" controls>
+                        </video>
+                    </div>
+                    <div *ngIf="q.image " class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
+                        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Image' | translate }}</p>
+                        <img *ngIf="q.image" [src]="q.image" class="object-cover w-fit">
+                    </div>
                     <div>
                         {{q.description}} ?
                     </div>

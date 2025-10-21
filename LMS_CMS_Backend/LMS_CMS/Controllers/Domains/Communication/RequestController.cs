@@ -442,7 +442,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             var message = $"Your Request {request.Message} Has Been Accepted by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
 
-            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
+            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, null, request.SenderUserTypeID, request.SenderID, domainName);
             await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
             await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
 
@@ -503,7 +503,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             var message = $"Your Request {request.Message} Has Been Declined by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
 
-            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
+            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, null, request.SenderUserTypeID, request.SenderID, domainName);
             await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
             await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
 

@@ -179,6 +179,13 @@ namespace LMS_CMS_PL.Controllers.Domains
                 StudentDTO.NationalityArName = nationality.ArName;
             }
 
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == StudentDTO.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                 query => query.Include(emp => emp.AcademicYear),
+                 query => query.Include(emp => emp.AcademicYear.School)
+                 );
+
+            StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+            StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
 
             return Ok(StudentDTO);
         }
@@ -343,7 +350,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         /////
 
         [HttpGet("Get_By_ParentID/{Id}")]
-        public IActionResult Get_By_ParentID(long Id)
+        public async Task<IActionResult> Get_By_ParentID(long Id)
         {
             if (Id == 0)
             {
@@ -374,8 +381,19 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("No students found.");
             }
-             
+
+
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in studentDTOs)
+            {
+                StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == item.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                   query => query.Include(emp => emp.AcademicYear),
+                   query => query.Include(emp => emp.AcademicYear.School)
+                   );
+
+                item.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            }
 
             return Ok(studentDTOs);
         }

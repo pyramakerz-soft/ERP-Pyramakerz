@@ -39,6 +39,18 @@ export class AcadimicYearService {
    return this.http.get<AcademicYear[]>(`${this.baseUrl}/AcademicYear/BySchoolId/${id}`, { headers })
  }
 
+  GetBySchoolIdAndDate(id:number ,DateFrom:string,DateTo:String ,DomainName:string){
+    if(DomainName!=null) {
+     this.header=DomainName 
+   }
+   const token = localStorage.getItem("current_token");
+   const headers = new HttpHeaders()
+   .set('domain-name', this.header)
+   .set('Authorization', `Bearer ${token}`)
+   .set('Content-Type', 'application/json');
+   return this.http.get<AcademicYear>(`${this.baseUrl}/AcademicYear/BySchoolIdAndDate/${id}/${DateFrom}/${DateTo}`, { headers })
+  } 
+
   GetByID(id: number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 

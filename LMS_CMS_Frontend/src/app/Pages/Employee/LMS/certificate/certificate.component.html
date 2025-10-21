@@ -5,7 +5,19 @@
 </div>
 
 <div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
-    <div class="w-[24%]">
+
+    <div *ngIf="this.User_Data_After_Login.type =='parent'" class="w-[24%]">
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
+        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedStudentId" (change)="OnStudentChange()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
+            </option>
+            <option *ngFor="let c of studentOfParent" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="studentOfParent.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="this.User_Data_After_Login.type=='employee'" class="w-[24%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId"
@@ -15,51 +27,6 @@
                 {{ stu.name }}
             </option>
             <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-        </select>
-    </div>
-
-    <div *ngIf="mode=='employee'" class="w-[24%]">
-        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Grade' | translate }}</label>
-        <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId"
-            (change)="getAllClassByGradeId(); IsShowTabls = false">
-            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
-            <option *ngFor="let ac of Grades" [value]="ac.id">
-                {{ ac.name }}
-            </option>
-            <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
-        </select>
-    </div>
-
-    <div *ngIf="mode=='employee'" class="w-[24%]">
-        <label for="Class" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Class' | translate }}</label>
-        <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedClassId" [disabled]="!SelectedGradeId" (change)="getAllStudentByClass()">
-            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
-            <option *ngFor="let c of Classes" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-        </select>
-    </div>
-
-    <div *ngIf="mode=='employee'" class="w-[24%]">
-        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
-        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedStudentId" [disabled]="!SelectedClassId" (change)="OnStudentChange()">
-            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
-            </option>
-            <option *ngFor="let c of Students" [value]="c.id">{{ c.en_name }}</option>
-            <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-        </select>
-    </div>
-
-    <div *ngIf="mode=='parent'" class="w-[24%]">
-        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
-        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedStudentId" (change)="OnStudentChange()">
-            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
-            </option>
-            <option *ngFor="let c of studentOfParent" [value]="c.id">{{ c.en_name }}</option>
-            <option *ngIf="studentOfParent.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
@@ -81,7 +48,7 @@
             translate }}</label>
         <select id="SelectedAcademicYearId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedAcademicYearId" (change)="SelectAcadimicYear()">
+            [(ngModel)]="SelectedAcademicYearId" (change)="SelectAcadimicYear(); getAllClassByGradeIdAndAcYearId()">
             <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
             </option>
             <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
@@ -94,7 +61,7 @@
             translate }}</label>
         <select id="SelectedAcademicYearId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedAcademicYearId" (change)="getSemestersBySchool()">
+            [(ngModel)]="SelectedAcademicYearId" (change)="getSemestersBySchool(); getAllClassByGradeIdAndAcYearId()">
             <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
             </option>
             <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
@@ -123,6 +90,42 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             (change)="onMonthChange($event)" />
     </div>
+
+    <div class="w-[24%]">
+        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Grade' | translate }}</label>
+        <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId"
+            (change)="getAllClassByGradeIdAndAcYearId(); IsShowTabls = false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngFor="let ac of Grades" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[24%]">
+        <label for="Class" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Class' | translate }}</label>
+        <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedClassId" [disabled]="!SelectedGradeId || !SelectedAcademicYearId" (change)="getAllStudentByClass()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngFor="let c of Classes" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="mode=='employee'" class="w-[24%]">
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
+        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedStudentId" [disabled]="!SelectedClassId" (change)="OnStudentChange()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
+            </option>
+            <option *ngFor="let c of Students" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+
 
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" [disabled]="ValidateViewOr()" (click)="Apply()"

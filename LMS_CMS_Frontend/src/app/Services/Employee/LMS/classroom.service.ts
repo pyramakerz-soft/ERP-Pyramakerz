@@ -76,6 +76,18 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByGradeAndAcademicYearID/${GradeId}/${AcYearId}`, { headers })
   }
 
+  ByGradeAndAcademicYearIDAndStudent(GradeId:number, AcYearId:number,StudentId : number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByGradeAndAcademicYearIDAndStudent/${GradeId}/${AcYearId}/${StudentId}`, { headers })
+  }  
+
   GetByAcYearId(AcYearId:number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
