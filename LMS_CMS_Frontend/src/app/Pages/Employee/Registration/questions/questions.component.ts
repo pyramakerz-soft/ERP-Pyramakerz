@@ -68,6 +68,11 @@ export class QuestionsComponent {
     'correctAnswerName'
   ];
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif', 
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -390,9 +395,12 @@ export class QuestionsComponent {
     }
   }
 
-  onFileUpload(event: Event): void {
+  onFileUpload(event: any): void {
     this.validationErrors['imageFile'] = '';
+
+    const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
+    
     if (input.files && input.files[0]) {
       const file = input.files[0];
       const fileType = file.type;
@@ -404,9 +412,23 @@ export class QuestionsComponent {
         this.question.imageFile = null;
         return;
       }
-      if (fileType.startsWith('image/')) {
+
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        }); 
         this.question.videoFile = null;
+        this.question.imageFile = null;
+        return;
+      }
+      if (fileType.startsWith('image/')) {
         this.question.video = "";
+        this.question.videoFile = null;
         this.question.image = file.name;
         this.question.imageFile = file;
       } else if (fileType.startsWith('video/')) {
@@ -418,8 +440,7 @@ export class QuestionsComponent {
         alert('Invalid file type. Please upload an image or video.');
       }
     }
-  }
-
+  }  
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;

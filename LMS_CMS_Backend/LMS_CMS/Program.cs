@@ -153,6 +153,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<DbContextFactoryService>();
             builder.Services.AddScoped<GenerateJWTService>();
             builder.Services.AddScoped<FileImageValidationService>();
+            builder.Services.AddScoped<FileVideoValidationService>();
             builder.Services.AddScoped<FileWordPdfValidationService>();
             builder.Services.AddScoped<FileValidationService>();
             builder.Services.AddScoped<CancelInterviewDayMessageService>();

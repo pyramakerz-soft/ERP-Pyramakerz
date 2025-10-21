@@ -43,55 +43,67 @@ namespace LMS_CMS_PL.Controllers.Domains
             _ecommerce_Service = ecommerce_Service;
         }
 
-        [HttpGet]
+        [HttpGet("GetTodaysData")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Dashboard" }
         )] 
-        public async Task<IActionResult> GetAsync(int year, int? month)
-        {
-            var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            long FollowUpCount = _clinic_Service.CountOfFollowUps(year, month, HttpContext);
-            decimal FeesAmount = _account_Service.FeesCalculated(year, month, HttpContext);
-            var (NotAnswered, AnsweredOnTime, AnsweredLate) = _lMS_Service.AssignmentSubmissionCount(year, month, HttpContext);
-            var (AcceptedCount, DeclinedCount, Pending, WaitingListCount) = _registration_Service.RegistrationFormStateCount(year, month, HttpContext);
-            var (AcceptedRequestCount, DeclinedRequestCount, RequestPending) = _communication_Service.RequestStateCount(year, month, HttpContext);
-            decimal TotalSalaries = _hr_Service.TotalSalaries(year, month, HttpContext);
+        public async Task<IActionResult> GetAsync()
+        { 
             int StudentCountInCurrentActive = _lMS_Service.StudentCount(HttpContext);
             int ClassroomCountInCurrentActive = _lMS_Service.ClassroomCount(HttpContext);
             int InventoryLowItemsToday = await _inventory_Service.LowItemsAsync(HttpContext);
-            Dictionary<string, decimal> InventoryPurchase = _inventory_Service.Purchase(year, month, HttpContext);
-            Dictionary<string, decimal> InventorySales = _inventory_Service.Sales(year, month, HttpContext);
-            var categoryRankings = await _ecommerce_Service.GetTopRequestedItemsByCategoryAsync(year, month, HttpContext);
+
+            return Ok(new
+            { 
+                StudentCountInCurrentActive,
+                ClassroomCountInCurrentActive,
+                InventoryLowItemsToday
+            });
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+        
+        [HttpGet]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Dashboard" }
+        )]
+        public async Task<IActionResult> GetAsync(int year, int? month)
+        { 
+            var followUpTask = Task.Run(() => _clinic_Service.CountOfFollowUps(year, month, HttpContext));
+            var feesTask = Task.Run(() => _account_Service.FeesCalculated(year, month, HttpContext));
+            var submissionsTask = Task.Run(() => _lMS_Service.AssignmentSubmissionCount(year, month, HttpContext));
+            var registrationTask = Task.Run(() => _registration_Service.RegistrationFormStateCount(year, month, HttpContext));
+            var requestTask = Task.Run(() => _communication_Service.RequestStateCount(year, month, HttpContext));
+            var salariesTask = Task.Run(() => _hr_Service.TotalSalaries(year, month, HttpContext));
+            var purchaseTask = Task.Run(() => _inventory_Service.Purchase(year, month, HttpContext));
+            var salesTask = Task.Run(() => _inventory_Service.Sales(year, month, HttpContext));
+            var categoryTask = _ecommerce_Service.GetTopRequestedItemsByCategoryAsync(year, month, HttpContext); // already async
+
+            // Wait for all to finish together
+            await Task.WhenAll(followUpTask, feesTask, submissionsTask, registrationTask, requestTask,
+                               salariesTask, purchaseTask, salesTask, categoryTask);
+
+            // Extract results
+            long FollowUpCount = followUpTask.Result;
+            decimal FeesAmount = feesTask.Result;
+            var (NotAnswered, AnsweredOnTime, AnsweredLate) = submissionsTask.Result;
+            var (AcceptedCount, DeclinedCount, Pending, WaitingListCount) = registrationTask.Result;
+            var (AcceptedRequestCount, DeclinedRequestCount, RequestPending) = requestTask.Result;
+            decimal TotalSalaries = salariesTask.Result;
+            Dictionary<string, decimal> InventoryPurchase = purchaseTask.Result;
+            Dictionary<string, decimal> InventorySales = salesTask.Result;
+            var categoryRankings = categoryTask.Result;
 
             return Ok(new
             {
                 FollowUpCount,
                 FeesAmount,
-                SubmissionsCount = new
-                {
-                    NotAnswered,
-                    AnsweredOnTime,
-                    AnsweredLate
-                },
-                RegistrationFormStateCount = new
-                {
-                    AcceptedCount,
-                    DeclinedCount,
-                    Pending,
-                    WaitingListCount
-                },
-                RequestStateCount = new
-                {
-                    AcceptedRequestCount,
-                    DeclinedRequestCount,
-                    RequestPending
-                },
+                SubmissionsCount = new { NotAnswered, AnsweredOnTime, AnsweredLate },
+                RegistrationFormStateCount = new { AcceptedCount, DeclinedCount, Pending, WaitingListCount },
+                RequestStateCount = new { AcceptedRequestCount, DeclinedRequestCount, RequestPending },
                 TotalSalaries,
-                StudentCountInCurrentActive,
-                ClassroomCountInCurrentActive,
-                InventoryLowItemsToday,
                 InventoryPurchase,
                 InventorySales,
                 categoryRankings

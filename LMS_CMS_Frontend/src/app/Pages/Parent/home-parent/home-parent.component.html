@@ -8,226 +8,130 @@
             <p class="primaryTxt font-bold text-base">LMS</p> 
         </div>
         <div class="mt-7 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Live Sessions" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Live Sessions')"> 
+                <i class="fa-solid fa-headset text-gray-500 text-lg"></i>
                 <p class="text-gray-500 font-normal">Live Sessions</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Subjects" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Subjects')"> 
+                <i class="fas fa-tasks fa-lg text-gray-500"></i>
                 <p class="text-gray-500 font-normal">Subjects</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Certificate" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Certificate')">
+                <img src="Icons/ParentDashboard/Certificate.png" alt="Certificate" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Certificate</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Student Daily Performance" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Daily Performance Report')">
+                <img src="Icons/ParentDashboard/DailyPerformance.png" alt="Student Daily Performance" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Student Daily Performance</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Student Issue" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Issue Report')">
+                <img src="Icons/ParentDashboard/StudentIssue.png" alt="Student Issue" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Student Issue</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Conducts" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Conducts Report')">
+                <img src="Icons/ParentDashboard/Conduct.png" alt="Conducts" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Conducts</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Attendance" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Attendance Report')">
+                <img src="Icons/ParentDashboard/Attendance.png" alt="Attendance" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Attendance</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Students Certificate" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Report')">
+                <img src="Icons/ParentDashboard/StudentCerrtificate.png" alt="Students Certificate" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Students Certificate</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Students Medal" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Students Medal')">
+                <img src="Icons/ParentDashboard/Medal.png" alt="Students Medal" class="w-6 h-6">
                 <p class="text-gray-500 font-normal">Students Medal</p> 
             </div>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <img src="Icons/ParentDashboard/LMS.png" alt="Lessons" class="w-6 h-6">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Lessons')"> 
+                <i class="fas fa-book fa-lg text-gray-500"></i>
                 <p class="text-gray-500 font-normal">Lessons</p> 
             </div> 
         </div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-green-100 text-green-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-tasks fa-lg"></i>
+    <div class="mt-8 flex justify-between">
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[27%]">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/VirtualMeeting.png" alt="VM" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Virtual Meetings</p> 
             </div>
-            <div>
-                <p class="text-gray-500">Pending Assignments</p>
-                <p class="text-2xl font-semibold text-gray-800">3</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-yellow-100 text-yellow-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-calendar-alt fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Upcoming Events</p>
-                <p class="text-2xl font-semibold text-gray-800">2</p>
+            <div class="mt-7">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Discussion Room')">   
+                    <i class="fas fa-comments fa-lg text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Discussion Room</p> 
+                </div> 
             </div>
         </div>
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-blue-100 text-blue-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-envelope fa-lg"></i>
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[27%]">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Accounting.png" alt="Accounting" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Accounting</p> 
             </div>
-            <div>
-                <p class="text-gray-500">New Messages</p>
-                <p class="text-2xl font-semibold text-gray-800">5</p>
+            <div class="mt-7">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Account Statement')">    
+                    <img src="Icons/ParentDashboard/AccountStatement.png" alt="Account Statement" class="w-6 h-6">
+                    <p class="text-gray-500 font-normal">Account Statement</p> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[40%]">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Clinic.png" alt="Clinic" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Clinic</p> 
             </div>
-        </div>
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-red-100 text-red-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-exclamation-triangle fa-lg"></i>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Medical History')">  
+                    <img src="Icons/ParentDashboard/MedicalHistory.png" alt="Medical History" class="w-6 h-6">
+                    <p class="text-gray-500 font-normal">Medical History</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Medical Report')">  
+                    <img src="Icons/ParentDashboard/MedicalReport.png" alt="Medical Report" class="w-6 h-6">  
+                    <p class="text-gray-500 font-normal">Medical Report</p> 
+                </div> 
             </div>
-            <div>
-                <p class="text-gray-500">Alerts</p>
-                <p class="text-2xl font-semibold text-gray-800">1</p>
+        </div> 
+    </div>
+    <div class="mt-8 flex justify-between">
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[47%]">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Registration.png" alt="Registration" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Registration</p> 
             </div>
-        </div>
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-purple-100 text-purple-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-chart-line fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Progress</p>
-                <p class="text-2xl font-semibold text-gray-800">75%</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-teal-100 text-teal-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-comments fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Forum Posts</p>
-                <p class="text-2xl font-semibold text-gray-800">12</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-indigo-100 text-indigo-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-book fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Books Borrowed</p>
-                <p class="text-2xl font-semibold text-gray-800">4</p>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Registration Form')">  
+                    <i class="fa-solid fa-address-card text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Registration Form</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Admission Test')">  
+                    <i class="fa-solid fa-keyboard text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Admission Test</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Interview Registration')"> 
+                    <i class="fa-solid fa-circle-question text-gray-500 text-lg"></i> 
+                    <p class="text-gray-500 font-normal">Interview Registration</p> 
+                </div> 
             </div>
         </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-pink-100 text-pink-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-user-friends fa-lg"></i>
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[47%]">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/ECommerce.png" alt="ECommerce" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">E-Commerce</p> 
             </div>
-            <div>
-                <p class="text-gray-500">Parent-Teacher Meetings</p>
-                <p class="text-2xl font-semibold text-gray-800">1</p>
-            </div>
-        </div>
-
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-gray-100 text-gray-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-cog fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Settings</p>
-                <p class="text-2xl font-semibold text-gray-800">Configured</p>
-            </div>  
-        </div>
-        
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-yellow-100 text-yellow-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-bell fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Notifications</p>
-                <p class="text-2xl font-semibold text-gray-800">7</p>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('The Shop')">  
+                    <i class="fa-solid fa-store text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">The Shop</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Ecommerce/Cart')">  
+                    <i class="fa-solid fa-cart-shopping text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Cart</p> 
+                </div> 
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Ecommerce/Order')">  
+                    <i class="fa-solid fa-bag-shopping text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Order</p> 
+                </div> 
             </div>
         </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-cyan-100 text-cyan-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-globe fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Language Preferences</p>
-                <p class="text-2xl font-semibold text-gray-800">English</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-lime-100 text-lime-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-shield-alt fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Security Alerts</p>
-                <p class="text-2xl font-semibold text-gray-800">0</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-orange-100 text-orange-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-question-circle fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Help Center Visits</p>
-                <p class="text-2xl font-semibold text-gray-800">2</p>
-            </div>
-        </div>
-
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-violet-100 text-violet-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-thumbs-up fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Positive Feedbacks</p>
-                <p class="text-2xl font-semibold text-gray-800">15</p>
-            </div>
-        </div>
-        <div
-            class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow duration-300">
-            <div
-                class="bg-rose-100 text-rose-600 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                <i class="fas fa-heart fa-lg"></i>
-            </div>
-            <div>
-                <p class="text-gray-500">Wellness Check-ins</p>
-                <p class="text-2xl font-semibold text-gray-800">4</p>
-            </div>
-        </div>
-
     </div>
 </div>

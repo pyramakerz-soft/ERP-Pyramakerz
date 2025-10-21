@@ -10,12 +10,20 @@ namespace LMS_CMS_PL.Services.FileValidations
             "video/mp4", "video/x-msvideo", "video/x-matroska", "video/quicktime"
         };
 
-        private readonly Dictionary<string, (byte[] signature, int offset)> _fileSignatures = new()
+        //private readonly Dictionary<string, (byte[] signature, int offset)> _fileSignatures = new()
+        //{
+        //    { ".mp4", (new byte[] { 0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70 }, 4) },
+        //    { ".avi", (new byte[] { 0x52, 0x49, 0x46, 0x46 }, 0) },
+        //    { ".mkv", (new byte[] { 0x1A, 0x45, 0xDF, 0xA3 }, 0) },
+        //    { ".mov", (new byte[] { 0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70 }, 4) }
+        //};
+
+        private readonly Dictionary<string, byte[][]> _fileSignatures = new()
         {
-            { ".mp4", (new byte[] { 0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70 }, 4) },
-            { ".avi", (new byte[] { 0x52, 0x49, 0x46, 0x46 }, 0) },
-            { ".mkv", (new byte[] { 0x1A, 0x45, 0xDF, 0xA3 }, 0) },
-            { ".mov", (new byte[] { 0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70 }, 4) }
+            { ".avi", new[] { new byte[] { 0x52, 0x49, 0x46, 0x46 } } },          // "RIFF"
+            { ".mkv", new[] { new byte[] { 0x1A, 0x45, 0xDF, 0xA3 } } },          // MKV
+            { ".mov", new[] { new byte[] { 0x66, 0x74, 0x79, 0x70 } } },          // "ftyp"
+            { ".mp4", new[] { new byte[] { 0x66, 0x74, 0x79, 0x70 } } }           // "ftyp"
         };
 
         public async Task<string?> ValidateVideoFileAsync(IFormFile file)
@@ -39,6 +47,52 @@ namespace LMS_CMS_PL.Services.FileValidations
             }
         }
 
+        //public async Task<string?> ValidateVideoInternalAsync(IFormFile file, CancellationToken cancellationToken)
+        //{
+        //    var basicCheck = await ValidateBasicChecksAsync(file, _allowedExtensions, _allowedMimeTypes);
+        //    if (basicCheck != null) return basicCheck;
+
+        //    var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+
+        //    try
+        //    {
+        //        using var stream = file.OpenReadStream();
+        //        var signatureInfo = _fileSignatures[extension];
+        //        var headerSize = signatureInfo.signature.Length + signatureInfo.offset;
+        //        var header = new byte[headerSize];
+
+        //        var bytesRead = await stream.ReadAsync(header, 0, headerSize, cancellationToken);
+
+        //        if (bytesRead < headerSize)
+        //            return "File is too small for signature validation.";
+
+        //        if (IsExecutableContent(header))
+        //            return "File contains executable content";
+
+        //        var actualSignature = header.Skip(signatureInfo.offset)
+        //                                   .Take(signatureInfo.signature.Length)
+        //                                   .ToArray();
+
+        //        if (!actualSignature.SequenceEqual(signatureInfo.signature))
+        //            return $"File content doesn't match its extension. Expected {extension} video file.";
+
+        //        stream.Position = 0;
+        //        //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+        //        //    return "File contains potentially dangerous content";
+
+        //        // Video-specific validation
+        //        if (extension == ".mp4" && !await ContainsMp4MoovAtom(stream))
+        //            return "The MP4 file appears to be incomplete or corrupted (missing moov atom).";
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return $"Unable to verify video content: {ex.Message}";
+        //    }
+
+        //    return null;
+        //}
+
         public async Task<string?> ValidateVideoInternalAsync(IFormFile file, CancellationToken cancellationToken)
         {
             var basicCheck = await ValidateBasicChecksAsync(file, _allowedExtensions, _allowedMimeTypes);
@@ -49,33 +103,45 @@ namespace LMS_CMS_PL.Services.FileValidations
             try
             {
                 using var stream = file.OpenReadStream();
-                var signatureInfo = _fileSignatures[extension];
-                var headerSize = signatureInfo.signature.Length + signatureInfo.offset;
-                var header = new byte[headerSize];
 
-                var bytesRead = await stream.ReadAsync(header, 0, headerSize, cancellationToken);
+                // Read the first few KB instead of only a small fixed header
+                var header = new byte[4096];
+                var bytesRead = await stream.ReadAsync(header, 0, header.Length, cancellationToken);
 
-                if (bytesRead < headerSize)
-                    return "File is too small for signature validation.";
+                if (bytesRead == 0)
+                    return "Empty file.";
 
                 if (IsExecutableContent(header))
-                    return "File contains executable content";
+                    return "File contains executable content.";
 
-                var actualSignature = header.Skip(signatureInfo.offset)
-                                           .Take(signatureInfo.signature.Length)
-                                           .ToArray();
+                // --- ✅ NEW SIGNATURE CHECK ---
+                bool isValidSignature = false;
 
-                if (!actualSignature.SequenceEqual(signatureInfo.signature))
+                if (extension == ".mp4" || extension == ".mov")
+                {
+                    // MP4/MOV must contain "ftyp" within first few KB
+                    var asciiHeader = Encoding.ASCII.GetString(header);
+                    if (asciiHeader.Contains("ftyp"))
+                        isValidSignature = true;
+                }
+                else if (extension == ".avi")
+                {
+                    isValidSignature = header.Take(4).SequenceEqual(new byte[] { 0x52, 0x49, 0x46, 0x46 }); // "RIFF"
+                }
+                else if (extension == ".mkv")
+                {
+                    isValidSignature = header.Take(4).SequenceEqual(new byte[] { 0x1A, 0x45, 0xDF, 0xA3 });
+                }
+
+                if (!isValidSignature)
                     return $"File content doesn't match its extension. Expected {extension} video file.";
 
+                // Reset stream position
                 stream.Position = 0;
-                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-                //    return "File contains potentially dangerous content";
 
-                // Video-specific validation
+                // Additional video-specific validation
                 if (extension == ".mp4" && !await ContainsMp4MoovAtom(stream))
                     return "The MP4 file appears to be incomplete or corrupted (missing moov atom).";
-
             }
             catch (Exception ex)
             {
@@ -84,5 +150,6 @@ namespace LMS_CMS_PL.Services.FileValidations
 
             return null;
         }
+
     }
 }
