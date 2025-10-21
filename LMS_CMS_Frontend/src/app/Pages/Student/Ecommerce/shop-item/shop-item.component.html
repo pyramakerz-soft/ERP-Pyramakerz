@@ -14,7 +14,7 @@
         </div>
     </div>
 </div>
-
+  
 <div class="mt-8 flex justify-between space-x-5 rtl:space-x-reverse">
     <div class="w-1/2">
         <img *ngIf="shopItem.mainImage" [src]="shopItem.mainImage" class="object-cover rounded-lg">
@@ -33,13 +33,9 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                <i class="fa-solid fa-cart-plus bg-white rounded p-2 text-3xl" 
-                *ngIf="User_Data_After_Login.type == 'student' || (User_Data_After_Login.type == 'employee' && StuID!=0)"
-                [ngClass]="{
-                    'secondaryTxt cursor-pointer': shopItem.limit && shopItem.limit > 0, 
-                    'text-gray-200': shopItem.limit && shopItem.limit <= 0
-                }" 
-                (click)="onAddToCartClick($event, shopItem.id, shopItem.limit)"></i>
+                <i class="fa-solid fa-cart-plus bg-white rounded p-2 text-3xl secondaryTxt cursor-pointer" 
+                *ngIf="User_Data_After_Login.type == 'student' || ((User_Data_After_Login.type == 'employee' || User_Data_After_Login.type == 'parent') && StuID!=0)" 
+                (click)="onAddToCartClick($event, shopItem.id)"></i>
                 
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto "
                     *ngIf="User_Data_After_Login.type == 'employee'"
@@ -58,7 +54,6 @@
                 </select>
             </div>
         </div>
-
         <div *ngIf="shopItem.shopItemColors.length != 0" class="mt-6">
             <p class="font-medium text-base mb-2">{{ 'Color' | translate }}</p>
             <div class="flex space-x-2 rtl:space-x-reverse">
