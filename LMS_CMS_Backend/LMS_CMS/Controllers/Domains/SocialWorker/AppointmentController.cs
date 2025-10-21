@@ -23,11 +23,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly SendNotificationService _sendNotificationService;
 
-        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, SendNotificationService sendNotificationService, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _sendNotificationService = sendNotificationService;
             _checkPageAccessService = checkPageAccessService;
         }
 
@@ -240,6 +242,15 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 appointmentGrade.GradeID = gradeId;
                 appointmentGrade.AppointmentID = appointment.ID;
 
+                if (userTypeClaim == "octa")
+                {
+                    appointmentGrade.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentGrade.InsertedByUserId = userId;
+                }
+
                 Unit_Of_Work.appointmentGrade_Repository.Add(appointmentGrade);
                 Unit_Of_Work.SaveChanges();
             }
@@ -270,10 +281,21 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 appointmentParent.AppointmentID = appointment.ID;
                 appointmentParent.AppointmentStatusID = 1;
 
+                if (userTypeClaim == "octa")
+                {
+                    appointmentParent.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentParent.InsertedByUserId = userId;
+                }
+
                 Unit_Of_Work.appointmentParent_Repository.Add(appointmentParent);
                 Unit_Of_Work.SaveChanges();
 
                 //
+                //var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+                //await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", null, request.SenderUserTypeID, request.SenderID, domainName);
 
             }
 
@@ -287,7 +309,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] { "Appoinment" }
-      )]
+        )]
         public async Task<IActionResult> EditAsync(AppointmentEditDTO NewAppointment)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

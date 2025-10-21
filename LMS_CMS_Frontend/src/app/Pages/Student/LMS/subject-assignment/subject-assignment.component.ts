@@ -92,12 +92,17 @@ export class SubjectAssignmentComponent {
     const today = new Date();
     const due = new Date(dueDate);
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= due || today >= cutoff;
   }
 
   isPastCutoff(cutOfDate: string): boolean {
     const today = new Date();
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= cutoff;
   }
 }
