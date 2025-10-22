@@ -42,6 +42,7 @@ import { ChatMessageService } from '../../Services/shared/chat-message.service';
 import { ChatMessage } from '../../Models/Communication/chat-message';
 import { ConnectionStatus } from '../../Models/connection-status';
 import { ConnectionStatusServiceService } from '../../Services/shared/connection-status-service.service';
+import { RoleDetailsService } from '../../Services/Employee/role-details.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -118,8 +119,16 @@ export class NavMenuComponent {
     '.mp4', '.avi', '.mkv', '.mov'
   ];
 
+  /////////////////////////////// Search Bar ///////////////////////////////
+  allKeywords: string[] = []; 
+  filteredKeywords: string[] = []; 
+  searchText: string = ''; 
+  showSuggestions: boolean = false;
+ 
+  /////////////////////////////////////////////////////////////////////////
+
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public roleDetailsService:RoleDetailsService,
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
@@ -158,6 +167,29 @@ export class NavMenuComponent {
         this.loadUnseenMessages();
       });
     }
+
+    if(this.User_Data_After_Login.type == 'employee'){ 
+      this.roleDetailsService.GetPagesNameForSearch(this.DomainName).subscribe(
+        data => {
+          this.allKeywords = data
+        }
+      )
+    }else if(this.User_Data_After_Login.type == 'student'){
+      this.allKeywords = [
+        'Subject', 'Student Certificate', 'Certificate To Student Report', 'Students Medal', 'Lessons', 'Time Table', 'Lesson Live', 
+        'The Shop', 'Cart', 'Order'
+      ]
+    }else if(this.User_Data_After_Login.type == 'parent'){
+      this.allKeywords = [
+        'Registration Form', 'Admission Test', 'Interview Registration', 'Certificate', 'Student Daily Performance Report', 'Student Issue Report', 'Lessons',
+        'Students Medal', 'Student Report', 'Attendance Report', 'Conducts Report', 'Account Statement', 'Medical History', 'Medical Report', 
+        'The Shop', 'Cart', 'Order', 'Appointment'
+      ]
+    }else if(this.User_Data_After_Login.type == 'octa'){
+      this.allKeywords = [
+        'Domains', 'School Types', 'School', 'Account'
+      ]
+    } 
   }
 
   getConnectionStatus() {
@@ -373,30 +405,7 @@ export class NavMenuComponent {
     this.employeeService.clearMyDataCache()
   }
 
-  async logOut() {
-    // const count = parseInt(localStorage.getItem("count") ?? "0", 10);
-    // let currentTokenn = localStorage.getItem("current_token") ?? "";
-
-    // const currentIndex = this.allTokens.findIndex(token => token.value === currentTokenn);
-
-    // if (currentIndex === -1) {
-    //   return;
-    // }
-
-    // const currentToken = this.allTokens[currentIndex];
-    // localStorage.removeItem(currentToken.KeyInLocal);
-
-    // this.allTokens.splice(currentIndex, 1);
-
-    // if (this.allTokens.length > 0) {
-    //   const newToken = this.allTokens[currentIndex] || this.allTokens[currentIndex - 1];
-
-    //   localStorage.setItem("current_token", newToken.value);
-    // } else {
-    //   localStorage.removeItem("current_token");
-    // }
-
-    // localStorage.setItem("count", this.allTokens.length.toString());
+  async logOut() { 
     if(this.User_Type=="octa"){
       this.router.navigateByUrl("Octa/login");
     }else{
@@ -1138,4 +1147,39 @@ export class NavMenuComponent {
     
     input.value = '';
   } 
+
+
+
+  /////////////////////////////// Search Bar /////////////////////////////// 
+  onFocus() {
+    this.showSuggestions = true;
+    this.filteredKeywords = [...this.allKeywords];
+  }
+ 
+  onSearchChange() {
+    const search = this.searchText.toLowerCase();
+    this.filteredKeywords = this.allKeywords.filter(item =>
+      item.toLowerCase().includes(search)
+    );
+  }
+ 
+  selectKeyword(keyword: string) {
+    this.searchText = keyword;
+    this.showSuggestions = false;
+    if(this.User_Data_After_Login.type == 'octa'){
+      this.router.navigateByUrl(`Octa/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'employee'){
+      this.router.navigateByUrl(`Employee/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'student'){
+      this.router.navigateByUrl(`Student/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'parent'){
+      this.router.navigateByUrl(`Parent/${keyword}`); 
+    }
+    this.searchText = '';
+  }
+
+  // hide dropdown when clicking outside
+  onBlur() {
+    setTimeout(() => this.showSuggestions = false, 200);
+  }
 }

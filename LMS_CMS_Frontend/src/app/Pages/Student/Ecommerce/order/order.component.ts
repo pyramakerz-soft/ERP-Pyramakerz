@@ -92,14 +92,15 @@ export class OrderComponent {
       this.router.navigateByUrl("Employee/Cart")
     } 
     else if(this.User_Data_After_Login.type == 'student'){
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Student/Cart")
     }
     else{
-      this.router.navigateByUrl("Parent/Ecommerce/Cart")
+      this.router.navigateByUrl("Parent/Cart")
     }
   } 
 
   getOrders() {
+    this.orders = []
     this.orderrService.getByStudentID(this.StuID, this.DomainName).subscribe(
       data => {
         this.orders = data
@@ -128,10 +129,10 @@ export class OrderComponent {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Order/" + id)
     } else if(this.User_Data_After_Login.type == 'student'){
-      this.router.navigateByUrl("Student/Ecommerce/Order/" + id)
+      this.router.navigateByUrl("Student/Order/" + id)
     }
     else{
-      this.router.navigateByUrl("Parent/Ecommerce/Order/" + id)
+      this.router.navigateByUrl("Parent/Order/" + id)
     }
   }
   
@@ -140,10 +141,10 @@ export class OrderComponent {
       this.router.navigate(['Employee/Order', id], { queryParams: { download: 'true' } }); 
 
     } else if(this.User_Data_After_Login.type == 'student'){ 
-      this.router.navigate(['Student/Ecommerce/Order', id], { queryParams: { download: 'true' } }); 
+      this.router.navigate(['Student/Order', id], { queryParams: { download: 'true' } }); 
     } 
     else{
-      this.router.navigate(['Parent/Ecommerce/Order', id], { queryParams: { download: 'true' } }); 
+      this.router.navigate(['Parent/Order', id], { queryParams: { download: 'true' } }); 
     }
   }
 

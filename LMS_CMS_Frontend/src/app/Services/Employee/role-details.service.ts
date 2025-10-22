@@ -61,4 +61,17 @@ export class RoleDetailsService {
 
     return this.http.get<any>(`${this.baseUrl}/Role_Details/CheckPageAccess?roleId=${roleID}&pageName=${pageName}`, { headers });
   }
+  
+  GetPagesNameForSearch(DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('domain-name', this.header) 
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<string[]>(`${this.baseUrl}/Role_Details/GetPagesNameForSearch`, { headers });
+  }
 }

@@ -2,12 +2,18 @@
     <div class="flex items-center justify-between">
         <div>
             <img src="Images/OctaWhiteLogo3.png">
-        </div>
-        <div>
-            <input type="text"
-                class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
-                placeholder="{{ 'Enter Key Word' | translate }}" />
         </div> 
+        <div class="relative w-full lg:w-[543px]">
+            <input type="text" [(ngModel)]="searchText" (focus)="onFocus()" (input)="onSearchChange()" (blur)="onBlur()"
+                placeholder="{{ 'Enter Key Word' | translate }}"
+                class="w-full lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"/>
+ 
+            <ul *ngIf="showSuggestions && filteredKeywords.length" class="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-[8px] shadow-lg z-10 max-h-60 overflow-auto" >
+                <li *ngFor="let keyword of filteredKeywords" (mousedown)="selectKeyword(keyword)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {{ keyword }}
+                </li>
+            </ul>
+        </div>
         <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="flex space-x-4 rtl:space-x-reverse items-center"> 
             <div class="relative dropdown-container"> 
                 <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleMessagePopup()" >
