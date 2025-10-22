@@ -183,7 +183,7 @@ export class NavMenuComponent {
       this.allKeywords = [
         'Registration Form', 'Admission Test', 'Interview Registration', 'Certificate', 'Student Daily Performance Report', 'Student Issue Report', 'Lessons',
         'Students Medal', 'Student Report', 'Attendance Report', 'Conducts Report', 'Account Statement', 'Medical History', 'Medical Report', 
-        'The Shop', 'Cart', 'Order', 'Appointment'
+        'The Shop', 'Cart', 'Order', 'Appointment' ,'Meetings'
       ]
     }else if(this.User_Data_After_Login.type == 'octa'){
       this.allKeywords = [

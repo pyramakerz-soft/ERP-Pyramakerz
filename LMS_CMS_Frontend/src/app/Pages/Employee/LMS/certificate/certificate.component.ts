@@ -645,53 +645,54 @@ export class CertificateComponent {
   }
 
   getInfoData() {
-    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)!.name || '';
+    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
 
     this.infoRows = [
       { keyEn: 'School : ' + this.SelectedSchoolName },
     ];
 
     if (this.mode == 'employee') {
-      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
-      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
-      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
+      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
+      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
       this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
       this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
       this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
-    }
-    else if (this.mode == 'student') {
-      this.infoRows.push({ keyEn: 'Student : ' + this.student.en_name });
-    }
-    else if (this.mode == 'parent') {
-      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+    } else if (this.mode == 'student') {
+      this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
+    } else if (this.mode == 'parent') {
+      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
       this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
     }
 
     if (this.SelectedSearchType === 'Academic Year') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedSchoolId)!.name || ''
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
       this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
     }
+
     if (this.SelectedSearchType === 'Semester') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)!.name || ''
-      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)!.name || ''
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
       this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
       this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
     }
+
     if (this.SelectedSearchType === 'Month') {
       this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
       this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
     }
+
     const now = new Date();
     const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
       .toString()
-      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
-      + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
+      `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
         .toString()
         .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
     this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
 
-    return this.infoRows
+    return this.infoRows;
   }
 
 }
