@@ -118,6 +118,14 @@ export class NavMenuComponent {
     '.mp4', '.avi', '.mkv', '.mov'
   ];
 
+  /////////////////////////////// Search Bar ///////////////////////////////
+  allKeywords: string[] = []; 
+  filteredKeywords: string[] = []; 
+  searchText: string = ''; 
+  showSuggestions: boolean = false;
+ 
+  /////////////////////////////////////////////////////////////////////////
+
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
@@ -158,6 +166,15 @@ export class NavMenuComponent {
         this.loadUnseenMessages();
       });
     }
+
+    if(this.User_Data_After_Login.type == 'employee'){ 
+    }else if(this.User_Data_After_Login.type == 'student'){
+    }else if(this.User_Data_After_Login.type == 'parent'){
+    }else if(this.User_Data_After_Login.type == 'octa'){
+      this.allKeywords = [
+        'Domains', 'School Types', 'School', 'Account'
+      ]
+    } 
   }
 
   getConnectionStatus() {
@@ -373,30 +390,7 @@ export class NavMenuComponent {
     this.employeeService.clearMyDataCache()
   }
 
-  async logOut() {
-    // const count = parseInt(localStorage.getItem("count") ?? "0", 10);
-    // let currentTokenn = localStorage.getItem("current_token") ?? "";
-
-    // const currentIndex = this.allTokens.findIndex(token => token.value === currentTokenn);
-
-    // if (currentIndex === -1) {
-    //   return;
-    // }
-
-    // const currentToken = this.allTokens[currentIndex];
-    // localStorage.removeItem(currentToken.KeyInLocal);
-
-    // this.allTokens.splice(currentIndex, 1);
-
-    // if (this.allTokens.length > 0) {
-    //   const newToken = this.allTokens[currentIndex] || this.allTokens[currentIndex - 1];
-
-    //   localStorage.setItem("current_token", newToken.value);
-    // } else {
-    //   localStorage.removeItem("current_token");
-    // }
-
-    // localStorage.setItem("count", this.allTokens.length.toString());
+  async logOut() { 
     if(this.User_Type=="octa"){
       this.router.navigateByUrl("Octa/login");
     }else{
@@ -1138,4 +1132,33 @@ export class NavMenuComponent {
     
     input.value = '';
   } 
+
+
+
+  /////////////////////////////// Search Bar /////////////////////////////// 
+  onFocus() {
+    this.showSuggestions = true;
+    this.filteredKeywords = [...this.allKeywords];
+  }
+ 
+  onSearchChange() {
+    const search = this.searchText.toLowerCase();
+    this.filteredKeywords = this.allKeywords.filter(item =>
+      item.toLowerCase().includes(search)
+    );
+  }
+ 
+  selectKeyword(keyword: string) {
+    this.searchText = keyword;
+    this.showSuggestions = false;
+    if(this.User_Data_After_Login.type == 'octa'){
+      this.router.navigateByUrl(`Octa/${keyword}`); 
+    }
+    this.searchText = '';
+  }
+
+  // hide dropdown when clicking outside
+  onBlur() {
+    setTimeout(() => this.showSuggestions = false, 200);
+  }
 }
