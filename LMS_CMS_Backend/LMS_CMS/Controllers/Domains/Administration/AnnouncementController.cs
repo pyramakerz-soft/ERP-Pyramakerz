@@ -127,6 +127,51 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             return Ok(announcementGetDTO);
         }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetMyAnnouncement")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetMyAnnouncement()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            var UserTypeID = 0; 
+            switch (userTypeClaim)
+            {
+                case "employee":
+                    UserTypeID = 1;
+                    break;
+                case "parent":
+                    UserTypeID = 3;
+                    break;
+                case "student":
+                    UserTypeID = 2;
+                    break;
+            }
+
+            List<AnnouncementSharedTo> announcementSharedTos = await Unit_Of_Work.announcementSharedTo_Repository.Select_All_With_IncludesById<AnnouncementSharedTo>(
+                d => d.IsDeleted != true && d.UserTypeID == UserTypeID && d.Announcement.IsDeleted != true,
+                query => query.Include(d => d.Announcement)
+                );
+             
+            if (announcementSharedTos == null || announcementSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcementSharedTos.Select(d => d.Announcement).ToList());
+
+            foreach (var item in announcementGetDTO)
+            {
+                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request, HttpContext);
+            }
+
+            return Ok(announcementGetDTO);
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
