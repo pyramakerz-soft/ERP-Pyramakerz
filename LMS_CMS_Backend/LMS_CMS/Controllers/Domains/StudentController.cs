@@ -649,9 +649,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsID = 0;
             for (int i = 0; i < classrooms.Count; i++)
             {
-                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
                 StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
-                
+
                 if (stuAY != null)
                 {
                     clsID = stuAY.ClassID;
@@ -671,9 +670,30 @@ namespace LMS_CMS_PL.Controllers.Domains
                 studentDTO.NationalityArName = nationality.ArName;
             }
 
+            RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 16 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion2 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 17 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion3 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 18 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion4 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 19 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            if (registerationFormSubmittion != null)
+            {
+                studentDTO.GuardianPassportNo = registerationFormSubmittion.TextAnswer; 
+                studentDTO.GuardianNationalID = registerationFormSubmittion2.TextAnswer;
+                studentDTO.GuardianQualification = registerationFormSubmittion3.TextAnswer;
+                studentDTO.GuardianWorkPlace = registerationFormSubmittion4.TextAnswer;
+            }
+
+
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "Egypt Standard Time"
-                : "Africa/Cairo";
+            ? "Egypt Standard Time"
+            : "Africa/Cairo";
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
@@ -687,7 +707,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
-
         /////
 
         [HttpGet("GetStudentProofRegistrationAndSuccessForm")]

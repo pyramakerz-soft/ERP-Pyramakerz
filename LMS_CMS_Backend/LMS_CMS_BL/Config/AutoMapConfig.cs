@@ -144,7 +144,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Parent, ParentGetDTO>();
             CreateMap<ParentGetDTO, Parent>();
 
-            CreateMap<Student, StudentGetDTO>()
+             CreateMap<Student, StudentGetDTO>()
               .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name))
               .ForMember(dest => dest.GuardianName, opt => opt.MapFrom(src => src.Parent.en_name))
               .ForMember(dest => dest.GuardianPassportNo, opt => opt.MapFrom(src => src.Parent.PassportNo))

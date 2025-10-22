@@ -1,0 +1,117 @@
+import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { Chart } from 'chart.js';
+import { SubmissionsCount } from '../../../../Models/Dashboard/dashboard.models';
+
+@Component({
+  selector: 'app-assignment-pie',
+  standalone: true,
+  imports: [CommonModule, TranslateModule],
+  template: `
+    <div class="p-11 bg-white rounded-xl shadow border">
+      <h2 class="font-semibold mb-6">{{ 'Assignment Submission' | translate }}</h2>
+      <hr>
+      <div class="relative flex flex-col md:flex-row justify-center items-center gap-6">
+        <div class="flex flex-col items-end gap-4 text-sm w-40">
+          <div>
+            <span class="text-green-500 font-bold">{{ answerOnTimePercentage }}%</span>
+            <span class="text-gray-700 ml-2">{{ 'Answered On Time' | translate }}</span>
+          </div>
+          <div>
+            <span class="text-yellow-500 font-bold">{{ answerLatePercentage }}%</span>
+            <span class="text-gray-700 ml-2">{{ 'Answered Late' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="relative h-64 w-64">
+          <canvas id="assignmentPieChart" class="w-full h-full"></canvas>
+        </div>
+
+        <div class="flex flex-col items-start gap-4 text-sm w-40">
+          <div>
+            <span class="text-red-500 font-bold">{{ notAnsweredPercentage }}%</span>
+            <span class="text-gray-700 ml-2">{{ 'Not Answered' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class AssignmentPieComponent implements AfterViewInit, OnChanges {
+  @Input() submissionsCount?: SubmissionsCount;
+  
+  private chart?: Chart;
+  answerOnTimePercentage: number = 0;
+  answerLatePercentage: number = 0;
+  notAnsweredPercentage: number = 0;
+
+  ngAfterViewInit(): void {
+    this.createChart();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['submissionsCount'] && !changes['submissionsCount'].firstChange) {
+      this.updateChart();
+    }
+  }
+
+  private calculatePercentages(): void {
+    if (!this.submissionsCount) return;
+    
+    const total = this.submissionsCount.answeredOnTime + 
+                  this.submissionsCount.answeredLate + 
+                  this.submissionsCount.notAnswered;
+    
+    if (total > 0) {
+      this.answerOnTimePercentage = Math.round((this.submissionsCount.answeredOnTime / total) * 100);
+      this.answerLatePercentage = Math.round((this.submissionsCount.answeredLate / total) * 100);
+      this.notAnsweredPercentage = Math.round((this.submissionsCount.notAnswered / total) * 100);
+    }
+  }
+
+  private createChart(): void {
+    this.calculatePercentages();
+    const ctx = document.getElementById('assignmentPieChart') as HTMLCanvasElement;
+    
+    if (!ctx) return;
+
+    const data = this.submissionsCount ? [
+      this.submissionsCount.answeredOnTime,
+      this.submissionsCount.answeredLate,
+      this.submissionsCount.notAnswered
+    ] : [0, 0, 0];
+
+    this.chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Answered On Time', 'Answered Late', 'Not Answered'],
+        datasets: [{
+          data: data,
+          backgroundColor: ['#22C55E', '#EAB308', '#EF4444'],
+          borderRadius: 10,
+          spacing: 5,
+        }]
+      },
+      options: {
+        cutout: '65%',
+        plugins: { legend: { display: false } },
+        responsive: true,
+        maintainAspectRatio: false,
+      }
+    });
+  }
+
+  private updateChart(): void {
+    this.calculatePercentages();
+    
+    if (this.chart && this.submissionsCount) {
+      this.chart.data.datasets[0].data = [
+        this.submissionsCount.answeredOnTime,
+        this.submissionsCount.answeredLate,
+        this.submissionsCount.notAnswered
+      ];
+      this.chart.update();
+    }
+  }
+}
