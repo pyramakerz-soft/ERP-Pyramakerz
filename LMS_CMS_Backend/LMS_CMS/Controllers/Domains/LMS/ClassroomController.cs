@@ -265,10 +265,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(DTO);
         }
 
-
+        ///
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
+          allowedTypes: new[] { "octa", "employee" ,"parent" , "student" },
           pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId)
@@ -277,6 +277,40 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.GradeID== GradeId && f.AcademicYearID == AcYeaId,
+                    query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
+                    query => query.Include(emp => emp.AcademicYear),
+                    query => query.Include(emp => emp.Floor)
+                    );
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+
+            return Ok(classroomsDTO);
+        }
+
+        ///
+        [HttpGet("ByGradeAndAcademicYearIDAndStudent/{GradeId}/{AcYeaId}/{StudentId}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee", "parent", "student" },
+          pages: new[] { "Classroom" }
+        )]
+        public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<StudentClassroom> studentClassrooms= await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                    f => f.IsDeleted != true && f.StudentID == StudentId && f.Classroom.AcademicYearID == AcYeaId,
+                    query => query.Include(emp => emp.Classroom) );
+
+            List<long> ClassRoomsIds = studentClassrooms.Select(c=>c.ClassID).Distinct().ToList();
+
+            List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
+                    f => f.IsDeleted != true && f.GradeID == GradeId && f.AcademicYearID == AcYeaId && ClassRoomsIds.Contains(f.ID),
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),

@@ -381,9 +381,9 @@ export class FeesActivationComponent {
       });
       try {
         await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
+        this.Fees =new FeesActivationAddPut()
         this.GetAllFeesData();
         this.Search()
-        this.Fees =new FeesActivationAddPut()
         this.DiscountPercentage=null
         Swal.fire({
           title: 'Fees Added Successfully',

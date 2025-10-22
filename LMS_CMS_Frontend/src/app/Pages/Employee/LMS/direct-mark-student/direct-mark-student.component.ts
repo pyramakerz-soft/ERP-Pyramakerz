@@ -196,6 +196,18 @@ export class DirectMarkStudentComponent {
     this.TableData = []
   }
 
+  validateNumberOnly(event: any, field: keyof DirectMarkClassesStudent , row : DirectMarkClassesStudent ): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;  
+      }
+    }
+  }
+
   save(): void {
     if (this.isFormValid()) {
       this.isLoading = true
@@ -219,9 +231,8 @@ export class DirectMarkStudentComponent {
   }
 
   isFormValid(): boolean {
-    let isValid = true;
-    isValid = !this.TableData.some(element => element.degree > this.directMark.mark);
-    return isValid;
+   if (!this.TableData || !this.directMark) return false;
+   return !this.TableData.some(element => element.degree > (this.directMark?.mark ?? 0));
   }
 
 }

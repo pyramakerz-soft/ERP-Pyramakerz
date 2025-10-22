@@ -34,6 +34,7 @@ import { CertificateSubjectTotalMark } from '../../../../Models/LMS/certificate-
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-certificate',
@@ -69,7 +70,7 @@ export class CertificateComponent {
   semester: Semester[] = []
   LastColumn: CertificateSubjectTotalMark[] = []
 
-  student: Student = new Student()
+  student: Student | any = new Student()
   studentOfParent: Student[] = []
   SelectedSchoolId: number = 0;
   SelectedGradeId: number = 0;
@@ -123,13 +124,18 @@ export class CertificateComponent {
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
       console.log("path", this.path)
-      if (this.path == 'Student Certificate') {
+      if (this.User_Data_After_Login.type == 'student') {
         this.mode = 'student'
         this.SelectedStudentId = this.UserID
         this.StudentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
           this.student = d
+          this.SelectedSchoolId = this.student.currentSchoolId
+          this.Grades=[]
+          this.GradeServ.GetBySchoolAndStudent(this.SelectedSchoolId,this.SelectedStudentId,this.DomainName).subscribe((d=>{
+            this.Grades=d
+          }))
         })
-      } else if (this.path == 'Parent Certificate') {
+      } else if (this.User_Data_After_Login.type == 'parent') {
         this.mode = 'parent'
         this.StudentServ.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
           this.studentOfParent = d
@@ -169,6 +175,10 @@ export class CertificateComponent {
   }
 
   getSemestersBySchool() {
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
     this.IsShowTabls = false
     this.TableData = []
     this.semester = []
@@ -183,9 +193,28 @@ export class CertificateComponent {
   OnStudentChange() {
     this.IsShowTabls = false
     this.TableData = []
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.Grades=[]
+      this.student = this.studentOfParent.find(s=>s.id==this.SelectedStudentId) || null
+      console.log(this.studentOfParent)
+      if(this.student){
+       this.SelectedSchoolId = this.student.currentSchoolId
+       this.GradeServ.GetBySchoolAndStudent(this.SelectedSchoolId,this.SelectedStudentId,this.DomainName).subscribe((d=>{
+        this.Grades=d
+       }))
+      }
+    }
   }
 
   OnSearchTypeChange() {
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
+    this.academicYears = []
+    this.Classes = []
+    this.semester = []
+    this.SelectedClassId = 0
     this.IsShowTabls = false
     this.TableData = []
     this.SelectedAcademicYearId = 0
@@ -250,7 +279,32 @@ export class CertificateComponent {
 
       console.log('DateFrom:', this.DateFrom);
       console.log('DateTo:', this.DateTo);
+      this.getAcademicYearByDateAndSchool()
     }
+  }
+
+  getAcademicYearByDateAndSchool() {
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
+    this.academicYears = []
+    this.Classes = []
+    this.SelectedAcademicYearId = 0
+    this.SelectedClassId = 0
+    this.AcadimicYearServ.GetBySchoolIdAndDate(this.SelectedSchoolId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
+      this.SelectedAcademicYearId = d.id
+      this.getAllClassByGradeIdAndAcYearId()
+
+    }, error => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'No academic year and classes in this month',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    })
   }
 
   getAllGradesBySchoolId() {
@@ -270,7 +324,6 @@ export class CertificateComponent {
       this.SelectedStudentId = 0
     }
     else if (this.mode == 'parent') {
-
       this.Students = []
       this.SelectedStudentId = 0
     }
@@ -279,29 +332,41 @@ export class CertificateComponent {
     })
   }
 
-  getAllClassByGradeId() {
+  getAllClassByGradeIdAndAcYearId() {
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
     this.IsShowTabls = false
     this.Classes = []
-    this.Students = []
     this.SelectedClassId = 0
-    this.SelectedStudentId = 0
-    this.classServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      this.Classes = d
-    })
+    if (this.SelectedGradeId, this.SelectedAcademicYearId) {
+      if(this.User_Data_After_Login.type == 'employee'){
+        this.classServ.GetByGradeAndAcYearId(this.SelectedGradeId, this.SelectedAcademicYearId, this.DomainName).subscribe((d) => {
+          this.Classes = d
+        })
+      }else{
+        this.classServ.ByGradeAndAcademicYearIDAndStudent(this.SelectedGradeId, this.SelectedAcademicYearId, this.SelectedStudentId, this.DomainName).subscribe((d) => {
+          this.Classes = d
+        })
+      }
+    }
   }
 
   getAllStudentByClass() {
-    this.Students = []
-    this.SelectedStudentId = 0
-    this.StudentServ.GetByClassID(this.SelectedClassId, this.DomainName).subscribe((d) => {
-      this.Students = d
-    })
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+      this.StudentServ.GetByClassID(this.SelectedClassId, this.DomainName).subscribe((d) => {
+        this.Students = d
+      })
+    }
   }
 
   GetAllData() {
     this.TableData = []
-    this.LastColumn =[]
-    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
+    this.LastColumn = []
+    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedClassId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
       console.log(d)
       this.subjects = d.subjectDTO
       this.TableData = d.cells
@@ -323,10 +388,10 @@ export class CertificateComponent {
         !this.SelectedStudentId || !this.DateFrom || !this.DateTo;
     }
     else if (this.mode === 'student') {
-      return !this.SelectedSchoolId || !this.DateFrom || !this.DateTo;
+      return !this.SelectedSchoolId || !this.DateFrom || !this.DateTo || !this.SelectedClassId;
     }
     else if (this.mode === 'parent') {
-      return !this.SelectedSchoolId || !this.SelectedStudentId || !this.DateFrom || !this.DateTo;
+      return !this.SelectedSchoolId || !this.SelectedStudentId || !this.SelectedClassId || !this.DateFrom || !this.DateTo;
     }
     return true;
   }
@@ -336,10 +401,10 @@ export class CertificateComponent {
       return this.SelectedSchoolId && this.SelectedGradeId && this.SelectedClassId && this.SelectedStudentId && this.DateFrom && this.DateTo;
     }
     else if (this.mode === 'student') {
-      return this.SelectedSchoolId && this.DateFrom && this.DateTo;
+      return this.SelectedSchoolId && this.SelectedClassId && this.DateFrom && this.DateTo;
     }
     else if (this.mode === 'parent') {
-      return this.SelectedSchoolId && this.SelectedStudentId && this.DateFrom && this.DateTo;
+      return this.SelectedSchoolId && this.SelectedStudentId && this.SelectedClassId && this.DateFrom && this.DateTo;
     }
     return true;
   }

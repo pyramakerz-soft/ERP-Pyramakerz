@@ -89,6 +89,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public int? TypeID { get; set; }
         public bool IsSuspended { get; set; }
 
+        public long? CurrentSchoolId { get; set; }
+        public string? CurrentSchoolName { get; set; }
 
 
         public string AcademicYearName { get; set; }

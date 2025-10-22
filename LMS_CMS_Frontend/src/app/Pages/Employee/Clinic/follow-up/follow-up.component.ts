@@ -19,7 +19,7 @@ import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { DrugClass } from '../../../../Models/Clinic/drug-class';
 @Component({
@@ -30,8 +30,8 @@ import { DrugClass } from '../../../../Models/Clinic/drug-class';
     CommonModule,
     SearchComponent,
     TableComponent,
-    ModalComponent, 
-    TranslateModule
+    ModalComponent,
+    TranslateModule,
   ],
   templateUrl: './follow-up.component.html',
   styleUrls: ['./follow-up.component.css'],
@@ -69,8 +69,8 @@ export class FollowUpComponent implements OnInit {
   diagnoses: any[] = [];
   drugs: any[] = [];
   doses: any[] = [];
-     isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedDrugId: number | null = null;
   selectedDoseId: number | null = null;
   drugDoseList: any[] = [];
@@ -101,7 +101,6 @@ export class FollowUpComponent implements OnInit {
   isSavingDrug: boolean = false;
   isSavingDose: boolean = false;
 
-
   constructor(
     private followUpService: FollowUpService,
     private schoolService: SchoolService,
@@ -112,51 +111,54 @@ export class FollowUpComponent implements OnInit {
     private drugService: DrugService,
     private doseService: DoseService,
     private apiService: ApiService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService,  private translate: TranslateService
-
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.loadFollowUps();
     this.loadDropdownOptions();
-     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
-    private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.searchKey = event.key;
@@ -245,7 +247,7 @@ private showSuccessAlert(message: string) {
       this.grades = await firstValueFrom(
         this.gradeService.GetBySchoolId(schoolId, domainName)
       );
-    } catch (error) { 
+    } catch (error) {
       Swal.fire('Error', 'Failed to load grades.', 'error');
     }
   }
@@ -256,7 +258,7 @@ private showSuccessAlert(message: string) {
       this.classes = await firstValueFrom(
         this.classroomService.GetByGradeId(gradeId, domainName)
       );
-    } catch (error) { 
+    } catch (error) {
       Swal.fire('Error', 'Failed to load classes.', 'error');
     }
   }
@@ -271,7 +273,7 @@ private showSuccessAlert(message: string) {
         id: student.id,
         name: student.en_name,
       }));
-    } catch (error) { 
+    } catch (error) {
       Swal.fire('Error', 'Failed to load students.', 'error');
     }
   }
@@ -303,8 +305,7 @@ private showSuccessAlert(message: string) {
           diagnosisId: item.diagnosisId,
           date: item.date,
           diagnosisName:
-            this.diagnoses.find((d) => d.id === item.diagnosisId)?.name ||
-            '-',
+            this.diagnoses.find((d) => d.id === item.diagnosisId)?.name || '-',
           recommendation: item.recommendation || '-',
           sendSMSToParent: item.sendSMSToParent || false,
           followUpDrugs: item.followUpDrugs || [],
@@ -355,31 +356,33 @@ private showSuccessAlert(message: string) {
     this.doseValidationErrors = {};
   }
 
-async saveDrug() {
-  this.drugValidationErrors = {};
-  if (!this.drug.name) {
-    this.drugValidationErrors['name'] = `${this.translate.instant('Field is required')} ${this.translate.instant('name')}`;
-    return;
-  }
+  async saveDrug() {
+    this.drugValidationErrors = {};
+    if (!this.drug.name) {
+      this.drugValidationErrors['name'] = `${this.translate.instant(
+        'Field Is Required'
+      )} ${this.translate.instant('name')}`;
+      return;
+    }
 
-  if (this.isSavingDrug) return;
-  
-  this.isSavingDrug = true;
+    if (this.isSavingDrug) return;
 
-  try {
-    const domainName = this.apiService.GetHeader();
-    await firstValueFrom(this.drugService.Add(this.drug, domainName));
-    this.loadDropdownOptions();
-    this.closeDrugModal();
-    this.showSuccessAlert(this.translate.instant('Saved successfully'));
-  } catch (error) {
-    console.error('Error saving drug:', error);
-    const errorMessage = this.translate.instant('Failed to save the item');
-    this.showErrorAlert(errorMessage);
-  } finally {
-    this.isSavingDrug = false;
+    this.isSavingDrug = true;
+
+    try {
+      const domainName = this.apiService.GetHeader();
+      await firstValueFrom(this.drugService.Add(this.drug, domainName));
+      this.loadDropdownOptions();
+      this.closeDrugModal();
+      this.showSuccessAlert(this.translate.instant('Saved successfully'));
+    } catch (error) {
+      console.error('Error saving drug:', error);
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSavingDrug = false;
+    }
   }
-}
 
   openDoseModal() {
     this.isDoseModalVisible = true;
@@ -395,31 +398,33 @@ async saveDrug() {
     this.doseValidationErrors = {};
   }
 
-async saveDose() {
-  this.doseValidationErrors = {};
-  if (!this.dose.doseTimes) {
-    this.doseValidationErrors['doseTimes'] = `${this.translate.instant('Field is required')} ${this.translate.instant('dose times')}`;
-    return;
-  }
+  async saveDose() {
+    this.doseValidationErrors = {};
+    if (!this.dose.doseTimes) {
+      this.doseValidationErrors['doseTimes'] = `${this.translate.instant(
+        'Field Is Required'
+      )} ${this.translate.instant('dose times')}`;
+      return;
+    }
 
-  if (this.isSavingDose) return;
-  
-  this.isSavingDose = true;
+    if (this.isSavingDose) return;
 
-  try {
-    const domainName = this.apiService.GetHeader();
-    await firstValueFrom(this.doseService.Add(this.dose, domainName));
-    this.loadDropdownOptions();
-    this.closeDoseModal();
-    this.showSuccessAlert(this.translate.instant('Saved successfully'));
-  } catch (error) {
-    console.error('Error saving dose:', error);
-    const errorMessage = this.translate.instant('Failed to save the item');
-    this.showErrorAlert(errorMessage);
-  } finally {
-    this.isSavingDose = false;
+    this.isSavingDose = true;
+
+    try {
+      const domainName = this.apiService.GetHeader();
+      await firstValueFrom(this.doseService.Add(this.dose, domainName));
+      this.loadDropdownOptions();
+      this.closeDoseModal();
+      this.showSuccessAlert(this.translate.instant('Saved successfully'));
+    } catch (error) {
+      console.error('Error saving dose:', error);
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSavingDose = false;
+    }
   }
-}
 
   openModal(id?: number) {
     this.isModalVisible = true;
@@ -479,61 +484,101 @@ async saveDose() {
   }
 
   isSaving: boolean = false;
-async saveFollowUp() {
-  this.validationErrors = {};
-  let isValid = true;
+  async saveFollowUp() {
+    this.validationErrors = {};
+    let isValid = true;
 
-  if (!this.followUp.schoolId || this.followUp.schoolId === 0) {
-    this.validationErrors['schoolId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('school')}`;
-    isValid = false;
-  }
-  if (!this.followUp.gradeId || this.followUp.gradeId === 0) {
-    this.validationErrors['gradeId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('grade')}`;
-    isValid = false;
-  }
-  if (!this.followUp.classroomId || this.followUp.classroomId === 0) {
-    this.validationErrors['classroomId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('class')}`;
-    isValid = false;
-  }
-  if (!this.followUp.studentId || this.followUp.studentId === 0) {
-    this.validationErrors['studentId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Student')}`;
-    isValid = false;
-  }
-  if (!this.followUp.diagnosisId || this.followUp.diagnosisId === 0) {
-    this.validationErrors['diagnosisId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Diagnosis')}`;
-    isValid = false;
-  }
-  if (!this.followUp.date) {
-    this.validationErrors['date'] = `${this.translate.instant('Field is required')} ${this.translate.instant('date')}`;
-    isValid = false;
-  }
-
-  if (!isValid) {
-    return;
-  }
-
-  try {
-    this.isSaving = true;
-    const domainName = this.apiService.GetHeader();
-    
-    if (this.followUp.id) {
-      await firstValueFrom(this.followUpService.Edit(this.followUp, domainName));
-      this.showSuccessAlert(this.translate.instant('Updated successfully'));
-    } else {
-      await firstValueFrom(this.followUpService.Add(this.followUp, domainName));
-      this.showSuccessAlert(this.translate.instant('Created successfully'));
+    if (!this.followUp.schoolId || this.followUp.schoolId === 0) {
+      this.validationErrors['schoolId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'School'
+          )}`
+        : `${this.translate.instant('School')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
     }
-    
-    this.loadFollowUps();
-    this.closeModal();
-  } catch (error) {
-    console.error('Error saving follow-up:', error);
-    const errorMessage = this.translate.instant('Failed to save the item');
-    this.showErrorAlert(errorMessage);
-  } finally {
-    this.isSaving = false;
+    if (!this.followUp.gradeId || this.followUp.gradeId === 0) {
+      this.validationErrors['gradeId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Grade'
+          )}`
+        : `${this.translate.instant('Grade')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+    if (!this.followUp.classroomId || this.followUp.classroomId === 0) {
+      this.validationErrors['classroomId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Class'
+          )}`
+        : `${this.translate.instant('Class')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+    if (!this.followUp.studentId || this.followUp.studentId === 0) {
+      this.validationErrors['studentId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Student'
+          )}`
+        : `${this.translate.instant('Student')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+    if (!this.followUp.diagnosisId || this.followUp.diagnosisId === 0) {
+      this.validationErrors['diagnosisId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Diagnosis'
+          )}`
+        : `${this.translate.instant('Diagnosis')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+    if (!this.followUp.date) {
+      this.validationErrors['date'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Date'
+          )}`
+        : `${this.translate.instant('Date')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    try {
+      this.isSaving = true;
+      const domainName = this.apiService.GetHeader();
+
+      if (this.followUp.id) {
+        await firstValueFrom(
+          this.followUpService.Edit(this.followUp, domainName)
+        );
+        this.showSuccessAlert(this.translate.instant('Updated successfully'));
+      } else {
+        await firstValueFrom(
+          this.followUpService.Add(this.followUp, domainName)
+        );
+        this.showSuccessAlert(this.translate.instant('Created successfully'));
+      }
+
+      this.loadFollowUps();
+      this.closeModal();
+    } catch (error) {
+      console.error('Error saving follow-up:', error);
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSaving = false;
+    }
   }
-}
   addDrugAndDose() {
     if (this.isAddingDrugDose) return;
     if (this.selectedDrugId && this.selectedDoseId) {
@@ -580,48 +625,70 @@ async saveFollowUp() {
     this.followUp.followUpDrugs.splice(index, 1);
   }
 
-deleteFollowUp(row: any) {
-  const translatedTitle = this.translate.instant('Are you sure?');
-  const translatedText = this.translate.instant('You will not be able to recover this item!');
-  const translatedConfirm = this.translate.instant('Yes, delete it!');
-  const translatedCancel = this.translate.instant('No, keep it');
-  const successMessage = this.translate.instant('Deleted successfully');
+  deleteFollowUp(row: any) {
+    const translatedTitle = this.translate.instant('Are you sure?');
+    const translatedText = this.translate.instant(
+      'You will not be able to recover this item!'
+    );
+    const translatedConfirm = this.translate.instant('Yes, delete it!');
+    const translatedCancel = this.translate.instant('No, keep it');
+    const successMessage = this.translate.instant('Deleted successfully');
 
-  Swal.fire({
-    title: translatedTitle,
-    text: translatedText,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#2E3646',
-    confirmButtonText: translatedConfirm,
-    cancelButtonText: translatedCancel,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const domainName = this.apiService.GetHeader();
-      this.followUpService.Delete(row.id, domainName).subscribe({
-        next: () => {
-          if (this.followUps.length === 1) {
-            this.followUps = [];
-          }
-          this.loadFollowUps();
-          this.showSuccessAlert(successMessage);
-        },
-        error: (error) => {
-          console.error('Error deleting follow-up:', error);
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
-          this.showErrorAlert(errorMessage);
-        },
-      });
+    Swal.fire({
+      title: translatedTitle,
+      text: translatedText,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#2E3646',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const domainName = this.apiService.GetHeader();
+        this.followUpService.Delete(row.id, domainName).subscribe({
+          next: () => {
+            if (this.followUps.length === 1) {
+              this.followUps = [];
+            }
+            this.loadFollowUps();
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            console.error('Error deleting follow-up:', error);
+            const errorMessage =
+              error.error?.message ||
+              this.translate.instant('Failed to delete the item');
+            this.showErrorAlert(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+  GetTableHeaders() {
+    if (!this.isRtl) {
+      return [
+        'ID',
+        'School',
+        'Grade',
+        'Class',
+        'Student',
+        'Diagnosis',
+        'Recommendation',
+        'Actions',
+      ];
+    } else {
+      return [
+        'المعرف',
+        'المدرسة',
+        'الصف',
+        'الفصل',
+        'الطالب',
+        'التشخيص',
+        'التوصية',
+        'الإجراءات',
+      ];
     }
-  });
-}
-
-GetTableHeaders(){
-if(!this.isRtl){
-  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Actions']
-}else{
-  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التشخيص', 'التوصية', 'الإجراءات']
-}
-}
+  }
 }

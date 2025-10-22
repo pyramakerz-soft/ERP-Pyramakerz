@@ -24,6 +24,8 @@ export class Student {
       public insertedByUserId :number =0,
       public genderName: string = '',
       public genderId :number =0,
+      public currentSchoolName: string = '',
+      public currentSchoolId :number =0,
       public academicYearName: string = '',
       public gradeName: string = '',
       public className: string = '',

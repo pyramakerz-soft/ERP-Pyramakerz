@@ -63,6 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             List<FollowUpGetDTO> followUpDto = _mapper.Map<List<FollowUpGetDTO>>(followUps);
+            followUpDto = followUpDto.OrderByDescending(f => f.Date).ToList();
 
             foreach (var follow in followUpDto)
             {

@@ -27,8 +27,7 @@ import { RealTimeChatServiceService } from '../../../Services/shared/real-time-c
 export class MainLayoutComponent {
   menuItems: { label: string; route?: string; icon?: string; subItems?: { label: string; route: string; icon?: string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
-  isRtl: boolean = false;
-  // subscription!: Subscription;
+  isRtl: boolean = false; 
   private subscriptions = new Subscription();
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
@@ -74,9 +73,8 @@ export class MainLayoutComponent {
     }
   }
 
-  translations: { [key: string]: { en: string; ar?: string } } = {
-    'Dashboard Student': { en: 'Dashboard Student', ar: 'لوحة تحكم الطالب' },
-    'Dashboard Parent': { en: 'Dashboard Parent', ar: 'لوحة تحكم ولي الأمر' },
+  translations: { [key: string]: { en: string; ar?: string } } = { 
+    'Dashboard': { en: 'Dashboard', ar: 'لوحة التحكم' },
     'ECommerce': { en: 'E-Commerce', ar: 'التجارة الإلكترونية' },
     'The Shop': { en: 'The Shop', ar: 'المتجر' },
     'LMS': { en: 'LMS', ar: 'نظام إدارة التعلم' },
@@ -115,12 +113,7 @@ export class MainLayoutComponent {
     if (this.User_Data_After_Login.type == "employee") {
       this.Get_Pages_With_RoleID();
     } else if (this.User_Data_After_Login.type == "student") {
-      this.menuItems = [
-        {
-          label: this.translateFunction('Dashboard Student'),
-          route: '#',
-          icon: 'Dashboard'
-        },
+      this.menuItems = [ 
         {
           label: this.translateFunction('ECommerce'),
           subItems: [
@@ -157,6 +150,10 @@ export class MainLayoutComponent {
             {
               label: this.translateFunction('Time Table'),
               route: 'Time Table'
+            },
+            {
+              label: this.translateFunction('Lesson Live'),
+              route: 'Lesson Live'
             }
           ],
           icon: 'LMS'
@@ -165,7 +162,7 @@ export class MainLayoutComponent {
     } else if (this.User_Data_After_Login.type == "parent") {
       this.menuItems = [
         {
-          label: this.translateFunction('Dashboard Parent'),
+          label: this.translateFunction('Dashboard'),
           route: '#',
           icon: 'Dashboard'
         },
@@ -191,18 +188,6 @@ export class MainLayoutComponent {
           label: this.translateFunction('LMS'),
           subItems: [
             {
-              label: this.translateFunction('Live Sessions'),
-              route: 'Live Sessions'
-            },
-            {
-              label: this.translateFunction('Subjects'),
-              route: 'Subjects'
-            },
-            // {
-            //   label: this.translateFunction('Reports'),
-            //   route: 'Reports'
-            // },
-            {
               label: this.translateFunction('Certificate'),
               route: 'Certificate'
             },
@@ -214,6 +199,16 @@ export class MainLayoutComponent {
               label: this.translateFunction('Student Issue'),
               route: 'Student Issue Report'
             },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
+            }
+          ],
+          icon: 'LMS'
+        },
+        {
+          label: this.translateFunction('Social Worker'),
+          subItems: [
             {
               label: this.translateFunction('Conducts'),
               route: 'Conducts Report'
@@ -230,22 +225,8 @@ export class MainLayoutComponent {
               label: this.translateFunction('Students Medal'),
               route: 'Students Medal'
             },
-            {
-              label: this.translateFunction('Lessons'),
-              route: 'Lessons'
-            }
           ],
-          icon: 'LMS'
-        },
-        {
-          label: this.translateFunction('Virtual Meetings'),
-          subItems: [
-            {
-              label: this.translateFunction('Discussion Room'),
-              route: 'Discussion Room'
-            }
-          ],
-          icon: 'Virtual Meetings'
+          icon: 'Registration'
         },
         {
           label: this.translateFunction('Accounting'),
@@ -276,7 +257,7 @@ export class MainLayoutComponent {
           subItems: [
             {
               label: this.translateFunction('The Shop'),
-              route: 'Ecommerce/The Shop'
+              route: 'The Shop'
             },
             {
               label: this.translateFunction('Cart'),
@@ -288,6 +269,16 @@ export class MainLayoutComponent {
             }
           ],
           icon: 'E-Commerce'
+        },
+        {
+          label: this.translateFunction('Meetings'),
+          subItems: [
+            {
+              label: this.translateFunction('Appointment'),
+              route: 'Appointment'
+            }
+          ],
+          icon: 'Social Worker'
         },
       ];
     } else if (this.User_Data_After_Login.type == "octa") {

@@ -142,7 +142,7 @@
             validationErrors["expireDate"]}}</span>
     </div>
 
-    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
+    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4 space-x-3 rtl:space-x-reverse">
         <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
             [(ngModel)]="Data.busCompanyID">
@@ -152,23 +152,23 @@
         </select>
     </div>
 
-    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full space-x-3 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequest">
         <label class="mb-2" for="canReceiveRequest">  {{ 'Can Receive Request' | translate }}</label>
     </div>  
 
-    <div class="flex align-middle space-x-2 mb-4 w-full">
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveRequestFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequestFromParent">
         <label class="mb-2" for="canReceiveRequestFromParent">  {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
     </div>
 
-    <div class="flex align-middle space-x-2 mb-4 w-full">
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveMessageFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessageFromParent">
         <label class="mb-2" for="canReceiveMessageFromParent">  {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
     </div>
 
-    <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2">
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 items-center justify-between">
+        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" (change)="onLocationChange()">
             <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Loctaion' | translate }}</label>
         </div>
@@ -206,7 +206,7 @@
     </div>    
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2">
+        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
 
             <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" (change)="onFloorsSupervisorChange()">
             <label class="mb-2" for="isFloorMonitor">  {{ 'Floor Monitor' | translate }}</label>
@@ -325,9 +325,9 @@
             <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                 <img src="Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                    <span class="secondaryTxt">  {{ 'Click to Upload' | translate }}</span>
+                    <span class="secondaryTxt">  {{ 'Click To Upload' | translate }}</span>
                 </p>
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
+                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{'Max. File size' | translate}} 25 MB</p>
             </label>
             <input id="file" type="file" class="hidden" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" multiple
                 (change)="onFilesSelected($event)" />

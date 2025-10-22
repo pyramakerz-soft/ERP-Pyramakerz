@@ -23,11 +23,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly SendNotificationService _sendNotificationService;
 
-        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, SendNotificationService sendNotificationService, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _sendNotificationService = sendNotificationService;
             _checkPageAccessService = checkPageAccessService;
         }
 
@@ -240,11 +242,62 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 appointmentGrade.GradeID = gradeId;
                 appointmentGrade.AppointmentID = appointment.ID;
 
+                if (userTypeClaim == "octa")
+                {
+                    appointmentGrade.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentGrade.InsertedByUserId = userId;
+                }
+
                 Unit_Of_Work.appointmentGrade_Repository.Add(appointmentGrade);
                 Unit_Of_Work.SaveChanges();
             }
 
-            // parent Appointment
+            /////////////////////////////// parent Appointment
+            List<long> ParentIds =new List<long>();
+
+            foreach (var item in NewAppointment.GradeIds)
+            {
+                /// 1) get all parents That has student 
+                List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(s => s.GradeID == item && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+                List<long> studentIds = studentGrades.Select(s=>s.StudentID).Distinct().ToList();
+
+                List<Student> students = Unit_Of_Work.student_Repository.FindBy(s => s.IsDeleted != true && studentIds.Contains(s.ID));
+                foreach (var student in students)
+                {
+                    if(student.Parent_Id != null)
+                    {
+                        ParentIds.Add(student.Parent_Id.Value);
+                    }
+                }
+            }
+            ParentIds = ParentIds.Distinct().ToList();
+            foreach (var ParentId in ParentIds)
+            {
+                var appointmentParent = new AppointmentParent();
+                appointmentParent.ParentID = ParentId;
+                appointmentParent.AppointmentID = appointment.ID;
+                appointmentParent.AppointmentStatusID = 1;
+
+                if (userTypeClaim == "octa")
+                {
+                    appointmentParent.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentParent.InsertedByUserId = userId;
+                }
+
+                Unit_Of_Work.appointmentParent_Repository.Add(appointmentParent);
+                Unit_Of_Work.SaveChanges();
+
+                //
+                //var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+                //await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", null, request.SenderUserTypeID, request.SenderID, domainName);
+
+            }
 
             return Ok(NewAppointment);
         }
@@ -256,7 +309,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] { "Appoinment" }
-      )]
+        )]
         public async Task<IActionResult> EditAsync(AppointmentEditDTO NewAppointment)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

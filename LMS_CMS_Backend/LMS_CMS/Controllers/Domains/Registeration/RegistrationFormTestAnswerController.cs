@@ -20,20 +20,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
+        private readonly FileUploadsService _fileService;
 
-        public RegistrationFormTestAnswerController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public RegistrationFormTestAnswerController(DbContextFactoryService dbContextFactory, IMapper mapper, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _fileService = fileService;
         }
 
         ///////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" ,"parent"},
-         pages: new[] { "Registration Confirmation"}
-     )]
+             allowedTypes: new[] { "octa", "employee" ,"parent"},
+             pages: new[] { "Registration Confirmation"}
+        )]
         public async Task<IActionResult> GetAsync(long id, long testId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -61,6 +63,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             RegisterationFormTest registerationFormTest = Unit_Of_Work.registerationFormTest_Repository.First_Or_Default(r=>r.TestID==testId && r.RegisterationFormParentID==id && r.IsDeleted!=true);
             
             var testDTOs = mapper.Map<List<RegisterationFormTestAnswerGetDTO>>(tests);
+
+            foreach (var item in testDTOs)
+            {
+                if (item.Image != null && item.Image != "")
+                {
+                    item.Image = _fileService.GetFileUrl(item.Image, Request, HttpContext);
+                }
+                if (item.Video != null && item.Video != "")
+                {
+                    item.Video = _fileService.GetFileUrl(item.Video, Request, HttpContext);
+                }
+            }
 
             var groupedByQuestionType = testDTOs
                 .GroupBy(dto => new { dto.QuestionTypeID, dto.QuestionTypeName })

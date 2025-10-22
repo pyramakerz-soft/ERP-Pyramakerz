@@ -68,12 +68,12 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" >
                         <div class="flex items-center gap-2">
-                            <input type="number" [(ngModel)]="row.degree"
-                                [max]="row.degree" min="0"
+                            <input type="txt" [(ngModel)]="row.degree" (input)="validateNumberOnly($event, 'degree' ,row)"
+                                [max]="row.degree"
                                 class="w-20 px-2 py-1 border border-gray-300 rounded" />
                             / {{ directMark.mark }}
                         </div>
-                        <div *ngIf="row.degree!= 0 && row.degree > directMark.mark" class="text-red-500 text-sm mt-1">
+                        <div *ngIf="row.degree!= 0 && directMark.mark && row.degree > directMark.mark" class="text-red-500 text-sm mt-1">
                                {{ 'Degree cannot exceed' | translate }} {{ directMark.mark }}.
                         </div>
                     </td>

@@ -275,14 +275,18 @@
                     <!-- Main box -->
                     <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
                         [class.opacity-50]="!directMark.subjectID" [class.cursor-not-allowed]="!directMark.subjectID"
-                        (click)="directMark.subjectID && toggleClassDropdown()" tabindex="0">
+                        (click)="directMark.subjectID && toggleClassDropdown();  $event.stopPropagation()" tabindex="0">
 
                         <!-- Selected classes -->
                         <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder"
                             class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-gray-200 rounded text-sm flex items-center"
                                 *ngFor="let selected of directMark.directMarkClasses">
-                                {{ selected.classroomName }}
+                                {{ selected.classroomName }}                           
+                            <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1"
+                                (click)="removeClass(selected.classroomID, $event)">
+                                &times;
+                            </button>
                             </span>
                         </div>
 
@@ -294,7 +298,7 @@
                     </div>
 
                     <!-- Dropdown -->
-                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
+                    <div #classDropdown class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
                         *ngIf="directMark.directMarkClasses && directMark.subjectID && classDropdownOpen">
                         <ul>
                             <li class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
