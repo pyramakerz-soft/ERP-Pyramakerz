@@ -79,7 +79,7 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Date' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 violation-type">
                         {{ 'Violation Type' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -103,7 +103,7 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.date }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 violation-type">
                         {{ data.violationType }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -142,7 +142,7 @@
         keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
       },
       ]"
-            [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+            [tableHeaders]="['ID', 'Date', 'Employee Name', 'Details']"
             [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>

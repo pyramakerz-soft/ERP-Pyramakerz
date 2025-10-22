@@ -1371,7 +1371,12 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
                 .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
 
+            CreateMap<AppointmentParentGetDTO, AppointmentParent>();
             CreateMap<AppointmentParent, AppointmentParentGetDTO>()
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Appointment.Date))
+                .ForMember(dest => dest.DueDateToParentToAccept, opt => opt.MapFrom(src => src.Appointment.DueDateToParentToAccept))
+                .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
                 .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
                 .ForMember(dest => dest.ParentArName, opt => opt.MapFrom(src => src.Parent.ar_name))
                 .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));

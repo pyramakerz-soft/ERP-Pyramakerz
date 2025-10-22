@@ -184,8 +184,8 @@
   "852": "٨٥٢",
   "View": "عرض",
   "Study tools": "أدوات الدراسة",
-  "expireDate": "تاريخ_انتهاء_",
-  "licenseNumber": "رقم_الرخصة",
+  "expireDate": "تاريخ انتهاء",
+  "licenseNumber": "رقم الرخصة",
   "Subject Teacher": "معلم المادة",
   "English Name": "الاسم بالانجليزية",
   "Subject Co-Teacher": "المعلم المساعد للمادة",
@@ -267,7 +267,7 @@
   "Create Diagnosis": "إنشاء تشخيص",
   "Diagnosis Name": "اسم التشخيص",
   "Enter Diagnosis Name": "أدخل اسم التشخيص",
-  "Add Classroom & Subject": "إضافة فصل دراسي ومادة",
+  "Add Classroom & Subject": "إضافة فصل دراسي ومادة دراسية ",
   "Completed": "مكتمل",
   "Supject Co-Teacher": "المدرس المساعد للمادة",
   "School": "المدرسة",
@@ -431,10 +431,10 @@
   "Allow Edit": "السماح بالتعديل",
   "Allow Delete": "السماح بالحذف",
   "Enter new role": "أدخل الدور الجديد",
-  "busCompanyName": "اسم_شركة_النقل",
+  "busCompanyName": "اسم شركة النقل",
   "Allow Edit For Others": "السماح بالتعديل للآخرين",
   "Allow Delete For Others": "السماح بالحذف للآخرين",
-  "employeeTypeName": "اسم_نوع_الموظف",
+  "employeeTypeName": "اسم نوع الموظف",
   "Role": "الدور",
   "District": "الطريق",
   "Password": "كلمة المرور",
@@ -1031,7 +1031,9 @@
   "Enter User date": "أدخل تاريخ المستخدم",
   "Conduct Level": "مستوى السلوك",
   "ar_name": "الاسم بالعربية",
+  "Ar_name": "الاسم بالعربية",
   "en_name": "الاسم بالإنجليزية",
+  "En_name": "الاسم بالإنجليزية",
   "Issue Types": "انواع المشكلات",
   "Add Medal To Student": "إضافة ميدالية للطالب",
   "Student Issue": "مشكلة الطالب",
@@ -1076,7 +1078,7 @@
   "Week 7": "الأسبوع 7",
   "Week 8": "الأسبوع 8",
   "Week 9": "الأسبوع 9",
-  ":weekId": ":معرف_الأسبوع",
+  ":weekId": ":معرف الأسبوع",
   "Lesson Resources": "موارد الدرس",
   "Drop here...": "... أسقط هنا",
   "Your answer...": "... إجابتك",
@@ -1404,7 +1406,10 @@
 "The file size exceeds the maximum limit of 25 MB.": "حجم الملف يتجاوز الحد الأقصى المسموح به وهو 25 ميجابايت.",
 "Action Taken": "الإجراء المتخذ",
 "Recommendations": "التوصيات",
-"Complains": "الشكاوى"
+"Complains": "الشكاوى",
+"role_Name": "اسم الدور"
+
+
 
 
 

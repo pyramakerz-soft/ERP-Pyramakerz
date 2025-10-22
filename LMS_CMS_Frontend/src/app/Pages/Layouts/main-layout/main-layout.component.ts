@@ -270,6 +270,16 @@ export class MainLayoutComponent {
           ],
           icon: 'E-Commerce'
         },
+        {
+          label: this.translateFunction('Meetings'),
+          subItems: [
+            {
+              label: this.translateFunction('Appointment'),
+              route: 'Appointment'
+            }
+          ],
+          icon: 'Social Worker'
+        },
       ];
     } else if (this.User_Data_After_Login.type == "octa") {
       this.menuItems = [

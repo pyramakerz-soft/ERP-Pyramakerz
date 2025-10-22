@@ -18,7 +18,6 @@ import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 
-
 @Component({
   selector: 'app-violation-report',
   standalone: true,
@@ -43,23 +42,23 @@ export class ViolationReportComponent {
 
   empTypes: EmployeeTypeGet[] = [];
   violationTypes: ViolationType[] = [];
-  tableDataForExport: any[] = []; 
-           
+  tableDataForExport: any[] = [];
+
   school = {
     reportHeaderOneEn: 'Violation Report',
     reportHeaderTwoEn: 'Detailed Violation Summary',
     reportHeaderOneAr: 'تقرير المخالفات',
     reportHeaderTwoAr: 'ملخص المخالفات التفصيلي',
     reportImage: 'assets/images/logo.png',
-  };  
+  };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
   constructor(
     public violationService: ViolationService,
     public employeeTypeService: EmployeeTypeService,
-    public violationTypeService: ViolationTypeService,  
-    public apiService: ApiService, 
+    public violationTypeService: ViolationTypeService,
+    public apiService: ApiService,
     public accountService: AccountService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
@@ -244,19 +243,11 @@ export class ViolationReportComponent {
         header: 'Violation Report',
         summary: this.getInfoRows(),
         table: {
-          headers: [
-            'ID',
-            'Date',
-            'Violation Type',
-            'Employee Type',
-            'Employee Name',
-            'Details',
-          ],
+          headers: ['ID', 'Date', 'Employee Name', 'Details'],
           data: this.tableData.map((item) => ({
             ID: item.id,
             Date: item.date,
-            'Violation Type': item.violationType,
-            'Employee Type': item.employeeType,
+
             'Employee Name': item.employeeEnglishName,
             Details: item.details,
           })),
@@ -340,8 +331,7 @@ export class ViolationReportComponent {
       const tableData = this.tableData.map((item) => [
         item.id,
         item.date,
-        item.violationType,
-        item.employeeType,
+
         item.employeeEnglishName,
         item.details || '-',
       ]);
@@ -363,14 +353,7 @@ export class ViolationReportComponent {
       ];
 
       // Prepare headers
-      const headers = [
-        'ID',
-        'Date',
-        'Violation Type',
-        'Employee Type',
-        'Employee Name',
-        'Details',
-      ];
+      const headers = ['ID', 'Date', 'Employee Name', 'Details'];
 
       // Generate the Excel report using the service - skip the image to avoid the error
       await this.reportsService.generateExcelReport({
