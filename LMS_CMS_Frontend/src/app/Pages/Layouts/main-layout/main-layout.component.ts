@@ -119,7 +119,7 @@ export class MainLayoutComponent {
           subItems: [
             {
               label: this.translateFunction('The Shop'),
-              route: 'Ecommerce/The Shop'
+              route: 'The Shop'
             }
           ],
           icon: 'E-Commerce'
@@ -269,11 +269,11 @@ export class MainLayoutComponent {
             },
             {
               label: this.translateFunction('Cart'),
-              route: 'Ecommerce/Cart'
+              route: 'Cart'
             },
             {
               label: this.translateFunction('Order'),
-              route: 'Ecommerce/Order'
+              route: 'Order'
             }
           ],
           icon: 'E-Commerce'

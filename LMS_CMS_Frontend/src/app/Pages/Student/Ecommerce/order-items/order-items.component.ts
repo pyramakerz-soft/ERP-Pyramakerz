@@ -86,7 +86,7 @@ export class OrderItemsComponent {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Cart")
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Student/Cart")
     } 
   } 
 
@@ -98,7 +98,7 @@ export class OrderItemsComponent {
         this.router.navigateByUrl("Employee/Order");
       }
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Student/Order")
     } 
   }
 

@@ -63,7 +63,19 @@
     </div>
 
     <div class="mt-8 flex justify-between">
-        <div class="bg-neutral-50 rounded-2xl p-6 w-[47%] shadow-lg">
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[25%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Meetings.png" alt="Meetings" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Meetings</p> 
+            </div>
+            <div class="mt-7">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Account Statement')">    
+                    <i class="fa-regular fa-calendar-check text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Appointment</p> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[32%] shadow-lg">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
                 <img src="Icons/ParentDashboard/Clinic.png" alt="Clinic" class="w-8 h-8">
                 <p class="primaryTxt font-bold text-base">Clinic</p> 
@@ -79,7 +91,7 @@
                 </div> 
             </div>
         </div> 
-        <div class="bg-neutral-50 rounded-2xl p-6 w-[47%] shadow-lg">
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[36%] shadow-lg">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
                 <img src="Icons/ParentDashboard/ECommerce.png" alt="ECommerce" class="w-8 h-8">
                 <p class="primaryTxt font-bold text-base">E-Commerce</p> 
@@ -89,11 +101,11 @@
                     <i class="fa-solid fa-store text-gray-500 text-lg"></i>
                     <p class="text-gray-500 font-normal">The Shop</p> 
                 </div>
-                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Ecommerce/Cart')">  
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Cart')">  
                     <i class="fa-solid fa-cart-shopping text-gray-500 text-lg"></i>
                     <p class="text-gray-500 font-normal">Cart</p> 
                 </div> 
-                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Ecommerce/Order')">  
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Order')">  
                     <i class="fa-solid fa-bag-shopping text-gray-500 text-lg"></i>
                     <p class="text-gray-500 font-normal">Order</p> 
                 </div> 

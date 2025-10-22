@@ -82,6 +82,7 @@ export class CartComponent {
   }
 
   getStudents(){
+    this.emplyeeStudent = []
     this.employeeStudentService.Get(this.UserID, this.DomainName).subscribe(
       data => {
         this.emplyeeStudent = data
@@ -93,13 +94,14 @@ export class CartComponent {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Order")
     } else if(this.User_Data_After_Login.type == 'student'){
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Student/Order")
     }else{
-      this.router.navigateByUrl("Parent/Ecommerce/Order")
+      this.router.navigateByUrl("Parent/Order")
     }
   } 
 
-  getStudentsByParent(){
+  getStudentsByParent(){ 
+    this.students = []
     this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
       data => {
         this.students = data

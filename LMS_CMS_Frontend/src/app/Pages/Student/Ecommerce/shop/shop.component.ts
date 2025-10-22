@@ -100,6 +100,7 @@ export class ShopComponent {
   }
 
   getStudentsByParent(){
+    this.students = []
     this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
       data => {
         this.students = data
@@ -108,6 +109,7 @@ export class ShopComponent {
   }
 
   getInventoryCategory(){
+    this.InventoryCategory = []
     this.inventoryCategoryService.Get(this.DomainName).subscribe(
       data => {
         this.InventoryCategory = data 
@@ -116,6 +118,7 @@ export class ShopComponent {
   }
 
   getInventorySubCategory(){
+    this.InventorySubCategory = []
     this.inventorySubCategoryService.GetByCategoryId(this.selectedInventoryCategory, this.DomainName).subscribe(
       data => { 
         this.InventorySubCategory = data 
@@ -227,10 +230,10 @@ export class ShopComponent {
       this.router.navigateByUrl("Employee/ShopItem/" + id)
     } 
     else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/ShopItem/" + id)
+      this.router.navigateByUrl("Student/ShopItem/" + id)
     }
     else{
-      this.router.navigateByUrl("Parent/Ecommerce/ShopItem/" + id)
+      this.router.navigateByUrl("Parent/ShopItem/" + id)
     }
   }
 
@@ -239,10 +242,10 @@ export class ShopComponent {
       this.router.navigateByUrl("Employee/Cart")
     }
     else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Student/Cart")
     }
     else{
-      this.router.navigateByUrl("Parent/Ecommerce/Cart")
+      this.router.navigateByUrl("Parent/Cart")
 
     }
   } 
@@ -252,10 +255,10 @@ export class ShopComponent {
       this.router.navigateByUrl("Employee/Order")
     } 
     else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Student/Order")
     }
     else{
-      this.router.navigateByUrl("Parent/Ecommerce/Order")
+      this.router.navigateByUrl("Parent/Order")
     }
   }
   

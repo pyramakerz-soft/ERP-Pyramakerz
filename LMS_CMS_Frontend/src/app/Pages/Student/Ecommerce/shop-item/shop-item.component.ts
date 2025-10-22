@@ -114,9 +114,9 @@ export class ShopItemComponent {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/The Shop")
     } else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/Shop")
+      this.router.navigateByUrl("Student/Shop")
     }else{
-      this.router.navigateByUrl("Parent/Ecommerce/Shop")
+      this.router.navigateByUrl("Parent/Shop")
     }
   }
 
@@ -124,9 +124,9 @@ export class ShopItemComponent {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Cart")
     } else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Student/Cart")
     } else{
-      this.router.navigateByUrl("Parent/Ecommerce/Cart")
+      this.router.navigateByUrl("Parent/Cart")
     }
   } 
 
@@ -134,9 +134,9 @@ export class ShopItemComponent {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Order")
     } else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Student/Order")
     } else{
-      this.router.navigateByUrl("Parent/Ecommerce/Order")
+      this.router.navigateByUrl("Parent/Order")
     }
   } 
 
