@@ -70,7 +70,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpGet("ByStudentId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee", "parent" }
          )]
         public async Task<IActionResult> GetByStudentId(long id)
         {

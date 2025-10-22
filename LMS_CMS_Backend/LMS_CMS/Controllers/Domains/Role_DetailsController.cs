@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -171,6 +172,41 @@ namespace LMS_CMS_PL.Controllers.Domains
                 .ToList();
 
             return Ok(parentPages);
+        }
+
+        [HttpGet("GetPagesNameForSearch")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] {"employee" }
+        )]
+        public async Task<IActionResult> GetPagesNameForSearch()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+
+            Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == userId && d.IsDeleted != true);
+            if(emp == null)
+            {
+                return BadRequest("No Employee with this ID");
+            }
+             
+            List<Role_Detailes> role_Detailes = await Unit_Of_Work.role_Detailes_Repository.Select_All_With_IncludesById<Role_Detailes>(
+                d => d.IsDeleted != true && d.Role_ID == emp.Role_ID && d.Page.IsDisplay == true,
+                query => query.Include(d => d.Page)
+                );
+
+            List<string> pages = new List<string>();
+
+            foreach (var item in role_Detailes)
+            {
+                List<Page> children = Unit_Of_Work.page_Repository.FindBy(d => d.Page_ID == item.Page_ID); 
+                if(children == null || children.Count == 0)
+                {
+                    pages.Add(item.Page.en_name);
+                }
+            }
+
+            return Ok(pages);
         }
     }
 }

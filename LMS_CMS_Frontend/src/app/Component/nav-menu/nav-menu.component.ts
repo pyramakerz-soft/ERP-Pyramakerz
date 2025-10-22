@@ -42,6 +42,7 @@ import { ChatMessageService } from '../../Services/shared/chat-message.service';
 import { ChatMessage } from '../../Models/Communication/chat-message';
 import { ConnectionStatus } from '../../Models/connection-status';
 import { ConnectionStatusServiceService } from '../../Services/shared/connection-status-service.service';
+import { RoleDetailsService } from '../../Services/Employee/role-details.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -127,7 +128,7 @@ export class NavMenuComponent {
   /////////////////////////////////////////////////////////////////////////
 
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public roleDetailsService:RoleDetailsService,
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
@@ -168,8 +169,22 @@ export class NavMenuComponent {
     }
 
     if(this.User_Data_After_Login.type == 'employee'){ 
+      this.roleDetailsService.GetPagesNameForSearch(this.DomainName).subscribe(
+        data => {
+          this.allKeywords = data
+        }
+      )
     }else if(this.User_Data_After_Login.type == 'student'){
+      this.allKeywords = [
+        'Subject', 'Student Certificate', 'Certificate To Student Report', 'Students Medal', 'Lessons', 'Time Table', 'Lesson Live', 
+        'The Shop', 'Cart', 'Order'
+      ]
     }else if(this.User_Data_After_Login.type == 'parent'){
+      this.allKeywords = [
+        'Registration Form', 'Admission Test', 'Interview Registration', 'Certificate', 'Student Daily Performance Report', 'Student Issue Report', 'Lessons',
+        'Students Medal', 'Student Report', 'Attendance Report', 'Conducts Report', 'Account Statement', 'Medical History', 'Medical Report', 
+        'The Shop', 'Cart', 'Order', 'Appointment'
+      ]
     }else if(this.User_Data_After_Login.type == 'octa'){
       this.allKeywords = [
         'Domains', 'School Types', 'School', 'Account'
@@ -1153,6 +1168,12 @@ export class NavMenuComponent {
     this.showSuggestions = false;
     if(this.User_Data_After_Login.type == 'octa'){
       this.router.navigateByUrl(`Octa/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'employee'){
+      this.router.navigateByUrl(`Employee/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'student'){
+      this.router.navigateByUrl(`Student/${keyword}`); 
+    }else if(this.User_Data_After_Login.type == 'parent'){
+      this.router.navigateByUrl(`Parent/${keyword}`); 
     }
     this.searchText = '';
   }
