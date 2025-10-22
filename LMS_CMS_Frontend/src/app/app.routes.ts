@@ -273,6 +273,7 @@ import { LeaveRequestReportComponent } from './Pages/Employee/HR/Reports/leave-r
 import { VacationEmployeeReportComponent } from './Pages/Employee/HR/Reports/vacation-employee-report/vacation-employee-report.component';
 import { AttendanceReportComponent as HRAttendanceReportComponent} from './Pages/Employee/HR/Reports/attendance-report/attendance-report.component';
 import { ParentAppointmentComponent as ParentAppointmentComponent} from './Pages/Parent/LMS/parent-appointment/parent-appointment.component';
+import { ParentMeetingComponent as meetingParent} from './Pages/Parent/LMS/parent-meeting/parent-meeting.component';
 import { SalaryCalculationComponent } from './Pages/Employee/HR/salary-calculation/salary-calculation.component';
 import { EmployeeSalaryDetailedComponent } from './Pages/Employee/HR/employee-salary-detailed/employee-salary-detailed.component';
 import { SalarySummaryComponent } from './Pages/Employee/HR/Reports/salary-summary/salary-summary.component';
@@ -642,6 +643,7 @@ export const routes: Routes = [
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
             { path: "Appointment", component: ParentAppointmentComponent, title: "Appointment" },
+            { path: "Meetings", component: meetingParent, title: "Meetings" },
 
         ]
     },

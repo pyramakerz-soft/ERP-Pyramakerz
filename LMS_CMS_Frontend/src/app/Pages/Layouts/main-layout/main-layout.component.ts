@@ -225,6 +225,14 @@ export class MainLayoutComponent {
               label: this.translateFunction('Students Medal'),
               route: 'Students Medal'
             },
+            {
+              label: this.translateFunction('Appointment'),
+              route: 'Appointment'
+            },
+            {
+              label: this.translateFunction('Meetings'),
+              route: 'Meetings'
+            }
           ],
           icon: 'Registration'
         },
@@ -269,16 +277,6 @@ export class MainLayoutComponent {
             }
           ],
           icon: 'E-Commerce'
-        },
-        {
-          label: this.translateFunction('Meetings'),
-          subItems: [
-            {
-              label: this.translateFunction('Appointment'),
-              route: 'Appointment'
-            }
-          ],
-          icon: 'Social Worker'
         },
       ];
     } else if (this.User_Data_After_Login.type == "octa") {

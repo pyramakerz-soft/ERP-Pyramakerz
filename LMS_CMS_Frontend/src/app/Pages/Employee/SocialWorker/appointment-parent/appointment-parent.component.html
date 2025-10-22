@@ -6,12 +6,12 @@
 <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-2"> {{ 'Status' | translate }}</h1>
 <div class="flex gap-4 items-center">
     <button *ngFor="let status of statusCounts" [ngClass]="{
-      'bg-[#16A34A] text-white': status.statusID === 3,
+      'text-white bg-[#16A34A]': status.statusID === 3,
       'text-white': status.statusID === 1 || status.statusID === 2
     }" [ngStyle]="{
       'background-color': status.statusID === 1 ? '#F0874B' : 
                           status.statusID === 2 ? '#E74C3C' : ''
-    }" class="flex items-center gap-2 font-medium py-2 px-4 rounded-lg shadow">
+    }" class="flex items-center gap-2 font-medium py-2 px-4 rounded-lg shadow ">
 
         <span class="flex items-center justify-center w-6 h-6 border-2 border-white rounded-full text-sm">
             {{ status.count }}
@@ -49,7 +49,7 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.parentEnName }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td class="py-5 px-4 border border-[#EAECF0] text-white border-t-0 border-l-0">
                         <button [ngClass]="{
                                 'bg-[#16A34A] text-white': row.appointmentStatusID === 3,
                                 'text-white': row.appointmentStatusID === 1 || row.appointmentStatusID === 2
