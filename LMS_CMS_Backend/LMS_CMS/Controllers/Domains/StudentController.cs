@@ -688,8 +688,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 studentDTO.GuardianNationalID = registerationFormSubmittion2.TextAnswer;
                 studentDTO.GuardianQualification = registerationFormSubmittion3.TextAnswer;
                 studentDTO.GuardianWorkPlace = registerationFormSubmittion4.TextAnswer;
-
-
             }
 
 

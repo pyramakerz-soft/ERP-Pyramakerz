@@ -13,7 +13,7 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
@@ -98,7 +98,9 @@ school = {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
+
   ) {}
 
   ngOnInit() {
@@ -113,9 +115,28 @@ school = {
     
     this.loadStores();
     
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction == 'rtl';
-    });
+    // keep a composite subscription so we can unsubscribe once
+    this.subscription = new Subscription();
+
+    // update RTL and regenerate export data when direction changes
+    this.subscription.add(
+      this.languageService.language$.subscribe(direction => {
+        this.isRtl = direction == 'rtl';
+        if (this.transactions && this.transactions.length) {
+          this.prepareExportData();
+        }
+      })
+    );
+
+    // also listen to TranslateService language changes to re-run translations
+    this.subscription.add(
+      this.translate.onLangChange.subscribe(() => {
+        if (this.transactions && this.transactions.length) {
+          this.prepareExportData();
+        }
+      })
+    );
+
     this.isRtl = document.documentElement.dir == 'rtl';
   }
 
@@ -363,7 +384,7 @@ onFilterChange() {
 
 private prepareExportData(): void {
   this.transactionsForExport = this.transactions.map((t) => ({
-    header: `${t.invoiceNumber}`,
+    header: `${this.translate.instant('Invoice')} # ${t.invoiceNumber}`,
     summary: [
       { key: 'Date', value: new Date(t.date).toLocaleDateString() },
       { key: 'Store', value: t.storeName },
