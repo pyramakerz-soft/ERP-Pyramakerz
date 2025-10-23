@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -17,11 +18,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
     {
         private readonly IMapper _mapper;
         private readonly DbContextFactoryService _dbContextFactory;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public HygieneFormController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public HygieneFormController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get
@@ -206,13 +209,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Form Medical Report" }
         )]
-        public ActionResult Update(HygieneFormPutDTO hygieneFormDTO)
+        public IActionResult Update(HygieneFormPutDTO hygieneFormDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
@@ -230,6 +234,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (hygieneForm == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Hygiene Form Medical Report", roleId, userId, hygieneForm);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             _mapper.Map(hygieneFormDTO, hygieneForm);
@@ -268,13 +281,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Form Medical Report" }
         )]
-        public ActionResult Delete(long id)
+        public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
             
@@ -290,10 +304,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
             
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Hygiene Form Medical Report", roleId, userId, hygieneForm);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
             hygieneForm.IsDeleted = true;
 
             StudentHygieneTypes sht = Unit_Of_Work.studentHygieneTypes_Repository.First_Or_Default(x => x.HygieneFormId == hygieneForm.Id && x.IsDeleted != true);
-
+             
             if (sht.IsDeleted != true)
                 sht.IsDeleted = true;
 
