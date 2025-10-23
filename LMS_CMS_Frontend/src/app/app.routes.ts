@@ -320,15 +320,15 @@ export const routes: Routes = [
             { path: "Bus Companies", component: BusCompaniesComponent, title: "Bus Company", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Print Name Tag", component: BusPrintNameTagComponent, title: "Print Name Tag", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Role", component: RoleComponent, title: "Role", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Role Create", component: RoleAddEditComponent, title: "Role Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
-            { path: "Role Edit/:id", component: RoleAddEditComponent, title: "Role Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
+            { path: "Role/Create", component: RoleAddEditComponent, title: "Role Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
+            { path: "Role/:id", component: RoleAddEditComponent, title: "Role Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
             { path: "Subject Categories", component: SubjectCategoryComponent, title: "Subject Categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Subject", component: SubjectComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Subject/:domainName/:SubId", component: SubjectViewComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Employee", component: EmployeeComponent, title: "Employee", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Create", component: EmployeeAddEditComponent, title: "Employee Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "Employee Edit/:id", component: EmployeeAddEditComponent, title: "Employee Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "Employee Details/:id", component: EmployeeViewComponent, title: "Employee Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
+            { path: "Employee/Create", component: EmployeeAddEditComponent, title: "Employee Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
+            { path: "Employee/Edit/:id", component: EmployeeAddEditComponent, title: "Employee Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
+            { path: "Employee/:id", component: EmployeeViewComponent, title: "Employee Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
             { path: "Building", component: BuildingComponent, title: "Building", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Floor/:domainName/:Id", component: FloorComponent, title: "Floor", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Classroom", component: ClassroomComponent, title: "Classroom", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -498,8 +498,8 @@ export const routes: Routes = [
             { path: "Subject Teacher/:id", component: SubjectTeacherComponent, title: "Subject Teacher", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Subject Co-Teacher/:id", component: SubjectCoTeacherComponent, title: "Subject Co-Teacher", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Create Student", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Student/Create", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Student/Edit/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

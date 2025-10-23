@@ -78,7 +78,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByGradeId/{gradeId}")]
         [Authorize_Endpoint_(
               allowedTypes: new[] { "octa", "employee" },
-               pages: new[] { "Remedial Classes" }
+               pages: new[] { "Remedial Classes" , "Remedial TimeTable" }
           )]
         public async Task<IActionResult> GetByGradeIdAsync(long gradeId)
         {

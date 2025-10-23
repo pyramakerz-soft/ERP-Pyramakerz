@@ -154,7 +154,7 @@ export class RoleComponent {
   }
 
   Edit(id: number) {
-    this.router.navigateByUrl(`Employee/Role Edit/${id}`);
+    this.router.navigateByUrl(`Employee/Role/${id}`);
   }
 
   Delete(id: number) {
@@ -182,6 +182,6 @@ export class RoleComponent {
   }
 
   Create() {
-    this.router.navigateByUrl('Employee/Role Create');
+    this.router.navigateByUrl('Employee/Role/Create');
   }
 }

@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Floor" }
+            pages: new[] { "Floor", "Employee" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -87,7 +87,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("getByBuildingID/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Floor" }
+            pages: new[] { "Floor" , "Classroom" }
         )]
         public async Task<IActionResult> GetByBuildingId(long id)
         {

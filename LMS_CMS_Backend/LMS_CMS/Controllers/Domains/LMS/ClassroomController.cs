@@ -67,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySchoolId/{schoolID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "student", "parent" },
-            pages: new[] { "Classroom" }
+            pages: new[] { "Classroom" , "Duty Table" , "Evaluation" , "Evaluation Report" }
         )]
         public async Task<IActionResult> GetBySchoolId(long schoolID)
         {
@@ -210,7 +210,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByGradeID/{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] {"octa", "employee", "student", "parent" },
-          pages: new[] { "Classroom" }
+          pages: new[] { "Classroom" , "Enter Daily Performance" , "Student Daily Performance Report" , "Classroom Daily Performance Report" }
         )]
         public async Task<IActionResult> GetByGradeIdAsync(long id)
         {

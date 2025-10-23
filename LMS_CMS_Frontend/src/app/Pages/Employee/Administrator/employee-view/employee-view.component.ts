@@ -161,7 +161,7 @@ export class EmployeeViewComponent {
     this.router.navigateByUrl("Employee/Employee")
   }
   edit() {
-    this.router.navigateByUrl(`Employee/Employee Edit/${this.EmpId}`)
+    this.router.navigateByUrl(`Employee/Employee/Edit/${this.EmpId}`)
   }
 
   downloadFile(file: any): void {

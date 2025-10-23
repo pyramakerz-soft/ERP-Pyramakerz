@@ -79,23 +79,24 @@ export class RoleAddEditComponent {
     if (this.User_Data_After_Login.type === "employee") {
       this.DomainName = this.ApiServ.GetHeader();
       this.activeRoute.url.subscribe(url => {
-        this.path = url[0].path;
+        this.path = url.map(segment => segment.path).join('/');
       });
 
       await this.getAllPges();
+      console.log("this.path" ,this.path)
 
-      if (this.path === "Role Edit") {
+      if (this.path.endsWith("Role/Create")) {
+        this.mode = "Create";
+        this.loading = false; // Not loading in create mode
+      }else{
         this.RoleId = Number(this.activeRoute.snapshot.paramMap.get('id'));
         this.mode = "Edit";
         this.GetRoleName();
-
+  
         setTimeout(async () => {
           await this.GetAllPgesForEdit();
           this.loading = false; // Only set to false when the function completes
         }, 0);
-      } else if (this.path === "Role Create") {
-        this.mode = "Create";
-        this.loading = false; // Not loading in create mode
       }
     }
     this.subscription = this.languageService.language$.subscribe(direction => {

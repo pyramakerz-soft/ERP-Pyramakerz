@@ -169,7 +169,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByTypeId/{TypeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee", "Bus Details" }
+            pages: new[] { "Employee", "Bus Details" , "Floor" , "Classroom" , "Remedial Classes" , "Evaluation" , "Evaluation Report" }
         )]
         public async Task<IActionResult> GetByTypeIDAsync(long TypeId)
         {
@@ -248,7 +248,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee" , "Teacher Evaluation Report" }
         )]
         public IActionResult GetByDepartmentId(long DepartmentId)
         {
@@ -634,7 +634,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee Create" }
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> Add([FromForm] EmployeeAddDTO NewEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files)
         {
@@ -825,7 +825,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Employee Edit" }
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files , [FromForm] List<EmployeeAttachmentAddDTO> editedFiles)
         {
