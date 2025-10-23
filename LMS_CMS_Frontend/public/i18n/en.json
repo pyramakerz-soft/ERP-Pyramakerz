@@ -108,7 +108,7 @@
   "Transaction Report": "Transaction Report",
   "Transaction Types": "Transaction Types",
   "Sub-Category": "Sub-Category",
-  "Sub_Categories": "Sub_Categories",
+  "Sub_Categories": "Sub Categories",
   "Items": "Items",
   "Bar Code": "Bar Code",
   "Quantity": "Quantity",
@@ -902,6 +902,7 @@
   "Visible To Parent": "Visible To Parent",
   "Not Solved Yet": "Not Solved Yet",
   "Is Required": "Is Required",
+  "Are Required": "Are Required",
   "Student English Name": "Student English Name",
   "Student Arabic Name": "Student Arabic Name",
   "Accepted": "Accepted",
@@ -1399,7 +1400,11 @@
   "Action Taken": "Action Taken",
   "Recommendations": "Recommendations",
   "Complains": "Complains",
-  "role_Name": "Role Name"
+  "role_Name": "Role Name",
+  "storeID" : "Store",
+  "schoolPCId" : "School PC" ,
+  "Store Name" : "Store Name"
+
 
 
 

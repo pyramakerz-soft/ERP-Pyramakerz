@@ -906,6 +906,7 @@
   "Visible To Parent": "مرئي لولي الأمر",
   "Not Solved Yet": "لم يتم الحل بعد",
   "Is Required": "مطلوب",
+  "Are Required": "مطلوبة",
   "Student English Name": "اسم الطالب بالإنجليزية",
   "Student Arabic Name": "اسم الطالب بالعربية",
   "Accepted": "مقبول",
@@ -1407,7 +1408,11 @@
 "Action Taken": "الإجراء المتخذ",
 "Recommendations": "التوصيات",
 "Complains": "الشكاوى",
-"role_Name": "اسم الدور"
+"role_Name": "اسم الدور",
+"storeID" : "المدجر",
+"schoolPCId" : "حاسوب المدرسة",
+"Store Name" : "اسم المخزن",
+"&" : "و"
 
 
 

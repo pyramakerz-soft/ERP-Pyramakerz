@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center space-x-5">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      {{ 'Create' | translate }} {{InventoryFlag.enName}}
+      {{ 'Create' | translate }} {{InventoryFlag.enName | translate}}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
       {{ 'Edit' | translate }} {{InventoryFlag.enName}}
@@ -51,7 +51,7 @@
   </div>
 
   <div class="flex flex-col mb-4 w-[24%]">
-    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }}&{{'Time'| translate }}</label>
+    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }} {{'&' | translate}} {{'Time'| translate }}</label>
     <input *ngIf="!IsPrint" id="name" type="date"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"

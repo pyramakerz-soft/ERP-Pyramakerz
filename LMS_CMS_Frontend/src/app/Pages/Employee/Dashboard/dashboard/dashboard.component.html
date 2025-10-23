@@ -40,13 +40,13 @@
             <!-- Fees Collected -->
             <div class="bg-white p-4 rounded-xl shadow">
                 <p class="text-sm text-gray-500">{{ 'Fees Collected' | translate }}</p>
-                <h2 class="text-2xl font-bold">{{ 'EGP' | translate }} {{ dashboardData?.feesAmount || 0 | number:'1.0-0' }}</h2>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.feesAmount || 0 | number:'1.0-0' }}</h2>
             </div>
             
             <!-- HR Salary -->
             <div class="bg-white p-4 rounded-xl shadow">
                 <p class="text-sm text-gray-500">{{ 'HR Salary' | translate }}</p>
-                <h2 class="text-2xl font-bold">{{ 'EGP' | translate }} {{ dashboardData?.totalSalaries || 0 | number:'1.0-0' }}</h2>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.totalSalaries || 0 | number:'1.0-0' }}</h2>
             </div>
         </div>
 
