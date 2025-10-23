@@ -99,27 +99,17 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <label *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)"
-                            class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" [(ngModel)]="row.hide" (change)="onToggle(row)"
-                                class="sr-only peer" />
-
-                            <div
-                                class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-300 peer-checked:bg-green-500 relative transition-colors duration-300">
-                                <span
-                                    class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
-                            </div>
-                        </label>
-                        <label *ngIf="!AllowEdit && !IsAllowEdit(row.insertedByUserId)"
-                            class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" [(ngModel)]="row.hide" (change)="onToggleNotAllowed()"
-                                class="sr-only peer" />
-
-                            <div
-                                class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-300 peer-checked:bg-green-500 relative transition-colors duration-300">
-                                <span
-                                    class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                        <label class="inline-flex items-center cursor-pointer toggle-wrapper">
+                            <input
+                                type="checkbox"
+                                [(ngModel)]="row.hide" 
+                                (change)="AllowEdit && IsAllowEdit(row.insertedByUserId) ? onToggle(row) : null"
+                                [disabled]="!(AllowEdit && IsAllowEdit(row.insertedByUserId))" 
+                                class="peer absolute opacity-0 w-0 h-0 focus:outline-none"
+                            />
+                            <div class="w-11 h-6 bg-gray-200 rounded-full relative overflow-hidden transition-colors duration-300 peer-checked:bg-green-500">
+                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
                             </div>
                         </label>
                     </td>
