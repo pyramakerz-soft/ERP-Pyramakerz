@@ -38,14 +38,15 @@ namespace LMS_CMS_PL.Controllers.Octa
         HashSet<long> addedPageIds = new HashSet<long>();
         IMapper mapper;
         private readonly GetConnectionStringService _getConnectionStringService;
-
-        public DomainController(DynamicDatabaseService dynamicDatabaseService, UOW Unit_Of_Work, DbContextFactoryService dbContextFactory, IMapper mapper, GetConnectionStringService getConnectionStringService)
+        private readonly ILogger<DomainController> _logger;
+        public DomainController(DynamicDatabaseService dynamicDatabaseService, UOW Unit_Of_Work, DbContextFactoryService dbContextFactory, IMapper mapper, GetConnectionStringService getConnectionStringService, ILogger<DomainController> logger)
         {
             _Unit_Of_Work = Unit_Of_Work;
             _dynamicDatabaseService = dynamicDatabaseService;
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _getConnectionStringService = getConnectionStringService;
+            _logger = logger;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,9 +265,16 @@ namespace LMS_CMS_PL.Controllers.Octa
 
             HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(domainEx.Name);
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-
+             
+            TimeZoneInfo cairoZone;
+            try
+            {
+                cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            }
             // Create Admin role
             Role role = new Role
             {
@@ -550,33 +558,91 @@ namespace LMS_CMS_PL.Controllers.Octa
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpPut("ReRunMigrations")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa" }
-        )]
-        public async Task<IActionResult> ReRunMigrations()
-        { 
-            List<Domain> domains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
-            if (domains == null || domains.Count == 0)
-            {
-                return Conflict("Domains doesn't exist.");
-            }
+        //[HttpPut("ReRunMigrations")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa" }
+        //)]
+        //public async Task<IActionResult> ReRunMigrations()
+        //{ 
+        //    List<Domain> domains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+        //    if (domains == null || domains.Count == 0)
+        //    {
+        //        return Conflict("Domains doesn't exist.");
+        //    }
 
-            foreach (Domain domain in domains)
+        //    foreach (Domain domain in domains)
+        //    {
+        //        try
+        //        { 
+        //            await _dynamicDatabaseService.ApplyMigrations(domain.Name);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // Log the error
+        //            return BadRequest(new { message = $"Failed to apply migrations for domain {domain.Name}: {ex.Message}" });
+        //        }
+        //    }
+
+        //    return Ok(new { message = "Migrations are Updated successfully." });
+        //}
+        [HttpPut("ReRunMigrations")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa" })]
+        public async Task<IActionResult> ReRunMigrations()
+        {
+            try
             {
-                try
-                { 
-                    await _dynamicDatabaseService.ApplyMigrations(domain.Name);
-                }
-                catch (Exception ex)
+                // Step 1: Get all active domains
+                List<Domain> domains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+                if (domains == null || domains.Count == 0)
                 {
-                    // Log the error
-                    return BadRequest(new { message = $"Failed to apply migrations for domain {domain.Name}: {ex.Message}" });
+                    return Conflict("No domains exist.");
                 }
+
+                // Step 2: Track failed migrations (so we can report them all)
+                var failedMigrations = new List<object>();
+
+                foreach (var domain in domains)
+                {
+                    try
+                    {
+                        await _dynamicDatabaseService.ApplyMigrations(domain.Name);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error but continue with next domain
+                        _logger.LogError(ex, $"Migration failed for domain {domain.Name}");
+                        failedMigrations.Add(new
+                        {
+                            Domain = domain.Name,
+                            Error = ex.Message
+                        });
+                    }
+                }
+
+                // Step 3: Return summary
+                if (failedMigrations.Count > 0)
+                {
+                    return StatusCode(207, new
+                    {
+                        message = "Some migrations failed.",
+                        failed = failedMigrations
+                    });
+                    // 207 = Multi-Status, meaning partial success
+                }
+
+                return Ok(new { message = "All migrations applied successfully." });
             }
-             
-            return Ok(new { message = "Migrations are Updated successfully." });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ReRunMigrations endpoint.");
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred while rerunning migrations.",
+                    detail = ex.Message
+                });
+            }
         }
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -693,7 +759,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                 {
                     Unit_Of_Work.page_Repository.Delete(pagesNotInOcta[i].ID);
                 }
-            } 
+            }
 
 
             //var notFoundPages = new List<long>();
@@ -716,8 +782,15 @@ namespace LMS_CMS_PL.Controllers.Octa
             //        AddPageWithChildren(page, Unit_Of_Work);
             //    }
             //}
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            TimeZoneInfo cairoZone;
+            try
+            {
+                cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            } 
             //// Add all pages to Admin role
             foreach (var pageId in addedPageIds)
             {
@@ -763,177 +836,193 @@ namespace LMS_CMS_PL.Controllers.Octa
         )]
         public async Task<IActionResult> AddMissingPages()
         {
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            if (userIdClaim == null)
+            try
             {
-                return Unauthorized("User Id claim not found.");
-            } 
-
-            List<Domain> existingDomains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
-            if (existingDomains == null || existingDomains.Count == 0)
-            {
-                return Conflict("No Domain exist.");
-            }
-
-            var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
-            var globalPageIds = pagesInOcta.Select(p => p.ID).ToHashSet();
-
-            foreach (Domain existDomain in existingDomains)
-            {
-                HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(existDomain.Name);
-                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-                var existingPagesForDomain = Unit_Of_Work.page_Repository.Select_All();
-                var domainPageIDs = existingPagesForDomain.Select(p => p.ID).ToHashSet();
-
-                if (existingPagesForDomain != null && existingPagesForDomain.Count != 0)
+                TimeZoneInfo cairoZone;
+                try
                 {
-                    var pagesToDelete = existingPagesForDomain
-                        .Where(p => !globalPageIds.Contains(p.ID))
-                        .ToList();
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                }
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                long.TryParse(userIdClaim, out long userId);
+                if (userIdClaim == null)
+                {
+                    return Unauthorized("User Id claim not found.");
+                }
 
-                    if (pagesToDelete.Count > 0)
+                List<Domain> existingDomains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+                if (existingDomains == null || existingDomains.Count == 0)
+                {
+                    return Conflict("No Domain exist.");
+                }
+
+                var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+                var globalPageIds = pagesInOcta.Select(p => p.ID).ToHashSet();
+
+                foreach (Domain existDomain in existingDomains)
+                {
+                    HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(existDomain.Name);
+                    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+                    var existingPagesForDomain = Unit_Of_Work.page_Repository.Select_All();
+                    var domainPageIDs = existingPagesForDomain.Select(p => p.ID).ToHashSet();
+
+                    if (existingPagesForDomain != null && existingPagesForDomain.Count != 0)
                     {
-                        foreach (var page in pagesToDelete)
+                        var pagesToDelete = existingPagesForDomain
+                            .Where(p => !globalPageIds.Contains(p.ID))
+                            .ToList();
+
+                        if (pagesToDelete.Count > 0)
                         {
-                            Unit_Of_Work.page_Repository.Delete(page.ID);
+                            foreach (var page in pagesToDelete)
+                            {
+                                Unit_Of_Work.page_Repository.Delete(page.ID);
+                            }
+
+                            Unit_Of_Work.SaveChanges();
                         }
 
-                        Unit_Of_Work.SaveChanges();
-                    }
+                        var pagesToInsert = pagesInOcta
+                            .Where(octaPage => !domainPageIDs.Contains(octaPage.ID))
+                            .ToList();
 
-                    var pagesToInsert = pagesInOcta
-                        .Where(octaPage => !domainPageIDs.Contains(octaPage.ID))  
-                        .ToList();
-
-                    if (pagesToInsert.Count > 0)
-                    {
-                        foreach (var page in pagesToInsert)
+                        if (pagesToInsert.Count > 0)
                         {
-                            if (page.Page_ID != null)
+                            foreach (var page in pagesToInsert)
                             {
-                                if (domainPageIDs.Contains((long)page.Page_ID))
+                                if (page.Page_ID != null)
                                 {
-                                    AddPageWithChildren(page, Unit_Of_Work); 
+                                    if (domainPageIDs.Contains((long)page.Page_ID))
+                                    {
+                                        AddPageWithChildren(page, Unit_Of_Work);
+                                    }
+                                }
+                            }
+
+                            Unit_Of_Work.SaveChanges();
+
+                            var pagesAfterSaving = Unit_Of_Work.page_Repository.Select_All();
+                            foreach (var item in pagesAfterSaving)
+                            {
+                                Role_Detailes roleDetail = new Role_Detailes
+                                {
+                                    Role_ID = 1, // Admin Role
+                                    Page_ID = item.ID,
+                                    Allow_Edit = true,
+                                    Allow_Delete = true,
+                                    Allow_Edit_For_Others = true,
+                                    Allow_Delete_For_Others = true,
+                                };
+                                roleDetail.InsertedByOctaId = userId;
+                                roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                                Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
+                                if (existingRoleDetail == null)
+                                {
+                                    Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
                                 }
                             }
                         }
 
                         Unit_Of_Work.SaveChanges();
 
-                        var pagesAfterSaving = Unit_Of_Work.page_Repository.Select_All();
-                        foreach (var item in pagesAfterSaving)
+                        foreach (var octaPage in pagesInOcta)
                         {
-                            Role_Detailes roleDetail = new Role_Detailes
+                            var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
+                            if (domainPage != null)
                             {
-                                Role_ID = 1, // Admin Role
-                                Page_ID = item.ID,
-                                Allow_Edit = true,
-                                Allow_Delete = true,
-                                Allow_Edit_For_Others = true,
-                                Allow_Delete_For_Others = true,
-                            };
-                            roleDetail.InsertedByOctaId = userId;
-                            roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                bool needsUpdate = false;
 
-                            Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
-                            if (existingRoleDetail == null)
-                            {
-                                Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
+                                if (domainPage.en_name != octaPage.en_name)
+                                {
+                                    domainPage.en_name = octaPage.en_name;
+                                    needsUpdate = true;
+                                }
+
+                                if (domainPage.ar_name != octaPage.ar_name)
+                                {
+                                    domainPage.ar_name = octaPage.ar_name;
+                                    needsUpdate = true;
+                                }
+
+                                if (domainPage.IsDisplay != octaPage.IsDisplay)
+                                {
+                                    domainPage.IsDisplay = octaPage.IsDisplay;
+                                    needsUpdate = true;
+                                }
+
+                                //if (domainPage.Page_ID != octaPage.Page_ID)
+                                //{
+                                //    domainPage.Page_ID = octaPage.Page_ID;
+                                //    needsUpdate = true;
+                                //}
+
+                                if (domainPage.arDisplayName_name != octaPage.arDisplayName_name)
+                                {
+                                    domainPage.arDisplayName_name = octaPage.arDisplayName_name;
+                                    needsUpdate = true;
+                                }
+
+                                if (domainPage.enDisplayName_name != octaPage.enDisplayName_name)
+                                {
+                                    domainPage.enDisplayName_name = octaPage.enDisplayName_name;
+                                    needsUpdate = true;
+                                }
+
+                                if (domainPage.Order != octaPage.Order)
+                                {
+                                    domainPage.Order = octaPage.Order;
+                                    needsUpdate = true;
+                                }
+
+                                if (needsUpdate)
+                                {
+                                    Unit_Of_Work.page_Repository.Update(domainPage);
+                                }
                             }
                         }
-                    }
+                        Unit_Of_Work.SaveChanges();
 
-                    Unit_Of_Work.SaveChanges();
-
-                    foreach (var octaPage in pagesInOcta)
-                    {
-                        var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
-                        if (domainPage != null)
+                        // Second pass: now update Page_ID safely
+                        foreach (var octaPage in pagesInOcta)
                         {
-                            bool needsUpdate = false;
-
-                            if (domainPage.en_name != octaPage.en_name)
+                            var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
+                            if (domainPage != null && domainPage.Page_ID != octaPage.Page_ID)
                             {
-                                domainPage.en_name = octaPage.en_name;
-                                needsUpdate = true;
-                            }
-
-                            if (domainPage.ar_name != octaPage.ar_name)
-                            {
-                                domainPage.ar_name = octaPage.ar_name;
-                                needsUpdate = true;
-                            }
-
-                            if (domainPage.IsDisplay != octaPage.IsDisplay)
-                            {
-                                domainPage.IsDisplay = octaPage.IsDisplay;
-                                needsUpdate = true;
-                            }
-
-                            //if (domainPage.Page_ID != octaPage.Page_ID)
-                            //{
-                            //    domainPage.Page_ID = octaPage.Page_ID;
-                            //    needsUpdate = true;
-                            //}
-
-                            if (domainPage.arDisplayName_name != octaPage.arDisplayName_name)
-                            {
-                                domainPage.arDisplayName_name = octaPage.arDisplayName_name;
-                                needsUpdate = true;
-                            }
-
-                            if (domainPage.enDisplayName_name != octaPage.enDisplayName_name)
-                            {
-                                domainPage.enDisplayName_name = octaPage.enDisplayName_name;
-                                needsUpdate = true;
-                            }
-
-                            if (domainPage.Order != octaPage.Order)
-                            {
-                                domainPage.Order = octaPage.Order;
-                                needsUpdate = true;
-                            }
-
-                            if (needsUpdate)
-                            {
-                                Unit_Of_Work.page_Repository.Update(domainPage);  
+                                if (octaPage.Page_ID == null || Unit_Of_Work.page_Repository.Select_By_Id((long)octaPage.Page_ID) != null)
+                                {
+                                    domainPage.Page_ID = octaPage.Page_ID;
+                                    Unit_Of_Work.page_Repository.Update(domainPage);
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"Second-pass skipped: Page_ID {octaPage.Page_ID} not found for Page ID: {domainPage.ID}");
+                                }
                             }
                         }
+                        Unit_Of_Work.SaveChanges();
                     }
-                    Unit_Of_Work.SaveChanges();
-
-                    // Second pass: now update Page_ID safely
-                    foreach (var octaPage in pagesInOcta)
-                    {
-                        var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
-                        if (domainPage != null && domainPage.Page_ID != octaPage.Page_ID)
-                        {
-                            if (octaPage.Page_ID == null || Unit_Of_Work.page_Repository.Select_By_Id((long)octaPage.Page_ID) != null)
-                            {
-                                domainPage.Page_ID = octaPage.Page_ID;
-                                Unit_Of_Work.page_Repository.Update(domainPage);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Second-pass skipped: Page_ID {octaPage.Page_ID} not found for Page ID: {domainPage.ID}");
-                            }
-                        }
-                    }
-                    Unit_Of_Work.SaveChanges();
+                    existDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    existDomain.UpdatedByUserId = userId;
                 }
-                existDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                existDomain.UpdatedByUserId = userId;
+
+                _Unit_Of_Work.SaveOctaChanges();
+
+                return Ok(new
+                {
+                    message = "Pages Updated successfully."
+                });
             }
-
-            _Unit_Of_Work.SaveOctaChanges();
-
-            return Ok(new
+            catch (Exception ex)
             {
-                message = "Pages Updated successfully." 
-            });
+                _logger.LogError(ex, "Error in AddMissingPages");
+                return StatusCode(500, new { message = "An unexpected error occurred.", detail = ex.Message });
+            } 
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -965,7 +1054,15 @@ namespace LMS_CMS_PL.Controllers.Octa
             else
             {
                 domain.IsDeleted = true;
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                TimeZoneInfo cairoZone;
+                try
+                {
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                }
                 domain.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
                 domain.DeletedByUserId = userId;
 
