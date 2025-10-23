@@ -35,9 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         [HttpPost]
         public IActionResult Login([FromBody] LoginDTO UserInfo)
-        {
-            // bool isPasswordValid = BCrypt.Net.BCrypt.Verify(enteredPassword, storedHashedPassword);
-
+        { 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             if (UserInfo == null)
