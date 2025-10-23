@@ -307,7 +307,7 @@ export class FollowUpComponent implements OnInit {
           diagnosisName:
             this.diagnoses.find((d) => d.id === item.diagnosisId)?.name || '-',
           recommendation: item.recommendation || '-',
-          sendSMSToParent: item.sendSMSToParent || false,
+          sendSMS: item.sendSMS || false,
           followUpDrugs: item.followUpDrugs || [],
           actions: { edit: true, delete: true },
         };
