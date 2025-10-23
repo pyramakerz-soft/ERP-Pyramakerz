@@ -151,7 +151,7 @@
     </div>
 
     <div class="w-[20%] mr-5 mb-3">
-        <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount' | translate }}</label>
+        <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount Amount' | translate }}</label>
         <input (input)="validateNumber($event, 'discount')" [(ngModel)]="Fees.discount"
             (input)="CalculatePercentageFromDiscount()"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
@@ -166,7 +166,7 @@
     </div>
 
     <div class="w-[10%] mr-5 mb-3 flex items-center">
-        <button (click)="Activate()" class="secondaryBg text-white font-medium px-5 py-3 rounded-lg mt-4">
+        <button  [disabled]="isLoading" (click)="Activate()" class="secondaryBg text-white font-medium px-5 py-3 rounded-lg mt-4">
             <span *ngIf="!isLoading">{{ 'Activation' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>

@@ -166,6 +166,7 @@ export class BusStudentComponent {
       this.selectedSection = this.busStudent.sectionID
       this.selectedGrade = this.busStudent.gradeID
       this.selectedClass = this.busStudent.classID
+      console.log("this.selectedClass" ,this.selectedClass)
       this.selectedYear = this.busStudent.academicYearID
       this.sectionService.GetBySchoolId(this.selectedSchool ? this.selectedSchool : 0, this.DomainName).subscribe(
         (data) => {
@@ -188,6 +189,7 @@ export class BusStudentComponent {
         this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
           (data) => {
             this.filteredClasses = data
+            console.log(123,this.filteredClasses)
             this.studentService.GetByClassID(this.selectedClass ? this.selectedClass : 0, this.DomainName).subscribe((data) => {
               this.Students = data
             });

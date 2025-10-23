@@ -110,12 +110,12 @@ export class BusDetailsComponent {
   }
 
 
-          ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
 
   getAllDomains() {

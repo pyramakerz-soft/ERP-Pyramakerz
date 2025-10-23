@@ -67,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetByAcademicYear/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] {"octa", "employee", "student", "parent" },
-            pages: new[] { "Semester" }
+            pages: new[] { "Semester" , "Bus Students" }
         )]
         public async Task<IActionResult> GetAsyncByAcademicYear(long id)
         {

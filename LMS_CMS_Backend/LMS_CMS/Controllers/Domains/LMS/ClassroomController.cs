@@ -269,7 +269,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" ,"parent" , "student" },
-          pages: new[] { "Classroom" }
+          pages: new[] { "Classroom", "Bus Students" }
         )]
         public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId)
         {

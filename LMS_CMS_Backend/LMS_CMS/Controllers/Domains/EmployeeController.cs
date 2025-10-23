@@ -169,7 +169,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByTypeId/{TypeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Bus Details" }
         )]
         public async Task<IActionResult> GetByTypeIDAsync(long TypeId)
         {

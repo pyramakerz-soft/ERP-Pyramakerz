@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" , "student" },
-            pages: new[] { "Academic Years" }
+            pages: new[] { "Academic Years" , "Bus Students" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -104,7 +104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolId/{id}/")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" },
-            pages: new[] { "Academic Years", "Fees Activation" }
+            pages: new[] { "Academic Years", "Fees Activation", "Bus Students" }
         )]
         public async Task<IActionResult> GetBySchoolIdAsync(long id)
         {
