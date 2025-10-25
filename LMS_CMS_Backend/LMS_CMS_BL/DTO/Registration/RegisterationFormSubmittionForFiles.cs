@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace LMS_CMS_BL.DTO.Registration
 {
     public class RegisterationFormSubmittionForFiles
-    {
+    { 
         [FromForm]
         public long CategoryFieldID { get; set; }
         [FromForm]

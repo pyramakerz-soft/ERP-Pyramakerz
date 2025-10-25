@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
@@ -23,13 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileUploadsService _fileService; 
 
-        public SocialWorkerMedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        public SocialWorkerMedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         ////////////////////////////////
@@ -63,14 +67,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<SocialWorkerMedalGetDTO> Dto = mapper.Map<List<SocialWorkerMedalGetDTO>>(socialWorkerMedal);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in Dto)
             {
-                if (!string.IsNullOrEmpty(item.File))
-                {
-                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
-                }
+                item.File = _fileService.GetFileUrl(item.File, Request, HttpContext);
             }
 
             return Ok(Dto);
@@ -106,14 +106,9 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             SocialWorkerMedalGetDTO Dto = mapper.Map<SocialWorkerMedalGetDTO>(socialWorkerMedal);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(Dto.File))
-            {
-                Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
-            }
-
+              
+            Dto.File = _fileService.GetFileUrl(Dto.File, Request, HttpContext);
+             
             return Ok(Dto);
         }
 
@@ -149,8 +144,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     return BadRequest(returnFileInput);
                 }
             }
-
-
+             
             SocialWorkerMedal medal = mapper.Map<SocialWorkerMedal>(newMedal);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -167,28 +161,12 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.socialWorkerMedal_Repository.Add(medal);
             Unit_Of_Work.SaveChanges();
 
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SocialWorkerMedal");
-            var medalFolder = Path.Combine(baseFolder, medal.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+            if (newMedal.NewFile != null)
             {
-                Directory.CreateDirectory(medalFolder);
-            }
-
-            if (newMedal.NewFile != null && newMedal.NewFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(newMedal.NewFile.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newMedal.NewFile.CopyToAsync(stream);
-                }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.File = $"Uploads/SocialWorkerMedal/{medal.ID.ToString()}/{fileName}";
-            }
-
-            Unit_Of_Work.socialWorkerMedal_Repository.Update(medal);
-            Unit_Of_Work.SaveChanges();
+                medal.File = await _fileService.UploadFileAsync(newMedal.NewFile, "SocialWorker/SocialWorkerMedal", medal.ID, HttpContext);
+                Unit_Of_Work.socialWorkerMedal_Repository.Update(medal);
+                Unit_Of_Work.SaveChanges();
+            } 
             return Ok(newMedal);
         }
 
@@ -248,38 +226,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             mapper.Map(newModal, medal);
 
-            if (newModal.NewFile != null)
-            {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SocialWorkerMedal");
-                var oldMedalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-                var medalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-
-
-                if (System.IO.File.Exists(oldMedalFolder))
-                {
-                    System.IO.File.Delete(oldMedalFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(oldMedalFolder))
-                {
-                    Directory.Delete(oldMedalFolder, true);
-                }
-
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                var fileName = Path.GetFileName(newModal.NewFile.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newModal.NewFile.CopyToAsync(stream);
-                }
-                medal.File = $"Uploads/SocialWorkerMedal/{medal.ID.ToString()}/{fileName}";
-
-            }
-
+            medal.File = await _fileService.ReplaceFileAsync(
+                newModal.NewFile,
+                medal.File,
+                "SocialWorker/SocialWorkerMedal",
+                medal.ID,
+                HttpContext
+            ); 
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medal.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

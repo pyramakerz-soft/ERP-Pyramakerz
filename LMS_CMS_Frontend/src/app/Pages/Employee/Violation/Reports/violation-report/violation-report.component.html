@@ -1,16 +1,15 @@
-<!-- violation-report.component.html -->
 <div class="flex justify-between mb-3">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Violation Report' | translate }}</h1>
 </div>
 
-<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
 
     <div class="w-full md:w-1/4">
         <label for="employeeType" class="block mb-2 text-sm font-medium text-gray-900">{{'Employee Type'| translate
             }}</label>
         <select id="employeeType" [(ngModel)]="SelectedEmployeeTypeId" (change)="GetViolationTypes()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Employee Type'| translate }}</option>
             <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
         </select>
     </div>
@@ -22,7 +21,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [disabled]="!SelectedEmployeeTypeId">
             <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Violation Type'| translate }}</option>
 
             <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
                 {{ violationType.name }}
@@ -80,7 +79,7 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Date' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 violation-type">
                         {{ 'Violation Type' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -104,14 +103,14 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.date }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 violation-type">
                         {{ data.violationType }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.employeeType }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.employeeName }}
+                        {{ data.employeeEnglishName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.details }}
@@ -143,7 +142,7 @@
         keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
       },
       ]"
-            [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+            [tableHeaders]="['ID', 'Date', 'Employee Name', 'Details']"
             [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>

@@ -1,0 +1,126 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Salary Summary' | translate }} </h1>
+    </div>
+</div>
+
+<div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
+    <div class="w-[30%]">
+        <label for="Month" class="block mb-2 text-sm font-medium text-gray-900">
+            {{ 'Month' | translate }}
+        </label>
+        <input id="Month" type="month" [(ngModel)]="selectedMonth" required
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            (change)="onDateChange();">
+    </div>
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" [disabled]="!month || !year " (click)="Apply()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300':!month || !year , 'secondaryBg text-white': month && year}">
+            {{ 'View' | translate }}
+        </button>
+    </div>
+</div>
+
+<div *ngIf="IsShowTabls" class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="IsShowTabls">
+    <div class="w-full">
+        <div class="w-full mt-5">
+            <!-- Salary Slip Container -->
+            <div class="border border-gray-400 rounded-lg shadow-md p-4 bg-white">
+
+                <!-- Header -->
+                <div class="text-center font-bold text-lg border-b pb-2 mb-3">
+                    Salary Slip
+                </div>
+
+                <!-- Earnings Section -->
+                <div class="bg-gray-200 text-center py-1 font-semibold mb-2">
+                    Earnings
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Basic Salary</span>
+                    <span>{{ salaryHistory.basicSalary | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Bonuses</span>
+                    <span>{{ salaryHistory.totalBonus | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Overtime</span>
+                    <span>{{ salaryHistory.totalOvertime | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 font-semibold">
+                    <span>Total Earnings</span>
+                    <span>{{ (salaryHistory.basicSalary + salaryHistory.totalBonus + salaryHistory.totalOvertime) |
+                        number:'1.2-2' }}</span>
+                </div>
+
+                <!-- Deductions Section -->
+                <div class="bg-gray-200 text-center py-1 font-semibold mt-3 mb-2">
+                    Deductions
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Loans</span>
+                    <span>{{ salaryHistory.totalLoans | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b">
+                    <span>Deductions</span>
+                    <span>{{ salaryHistory.totalDeductions | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-1 font-semibold">
+                    <span>Total Deductions</span>
+                    <span>{{ (salaryHistory.totalLoans + salaryHistory.totalDeductions) | number:'1.2-2' }}</span>
+                </div>
+
+                <!-- Net Salary -->
+                <div class="bg-gray-100 text-center font-bold text-lg mt-4 py-2 border rounded">
+                    Net Salary: {{ salaryHistory.netSalary | number:'1.2-2' }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
+                    {
+                        keyEn: 'Month: ' + this.month + '/' +this.year,
+                    }, 
+                    {
+                        keyEn: 'Employee: ' + this.SelectedEmpName,
+                    },
+                    {
+                        keyEn: 'Salary: ' + this.salaryHistory.basicSalary
+                    },
+                    {
+                        keyEn: 'Total Bonus: ' + this.salaryHistory.totalBonus,
+                    },
+                    {
+                        keyEn: 'Total Overtime: ' + this.salaryHistory.totalOvertime,
+                    },
+                    {
+                        keyEn: 'Total Loans: ' + this.salaryHistory.totalLoans,
+                    },
+                    {
+                        keyEn: 'Total Deduction: ' + this.salaryHistory.totalDeductions,
+                    },
+                    {
+                        keyEn: 'Final Salary: ' + this.salaryHistory.netSalary,
+                    }
+                    ]"
+            [tableHeaders]="['employeeEnName', 'basicSalary', 'totalBonus', 'totalOvertime', 'totalDeductions', 'totalLoans', 'netSalary']"
+             #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

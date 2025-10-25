@@ -16,8 +16,6 @@ import { Student } from '../../../../Models/student';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
-import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
-import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
 import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
@@ -43,19 +41,40 @@ import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent, SearchDropdownComponent, TranslateModule],
+  imports: [
+    FormsModule,
+    CommonModule,
+    PdfPrintComponent,
+    SearchDropdownComponent,
+    TranslateModule,
+  ],
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -82,8 +101,8 @@ export class InventoryDetailsComponent {
   OriginsSuppliers: Supplier[] = [];
   StoresForTitle: Store[] = [];
   Stores: Store[] = [];
-  Saves: Saves[] = [];
-  Banks: Bank[] = [];
+  Saves: SafeEmployee[] = [];
+  Banks: BankEmployee[] = [];
   Categories: Category[] = [];
   subCategories: SubCategory[] = [];
   ShopItems: ShopItem[] = [];
@@ -123,19 +142,36 @@ export class InventoryDetailsComponent {
   filteredSuppliers: any[] = [];
   showSupplierDropdown: boolean = false;
 
-  IsPrint: boolean = false
+  IsPrint: boolean = false;
   searchTriggered = false;
   currentPage = 1;
   totalPages = 1;
 
   tableDataForPrint: any[] = [];
-  schools: School[] = []
-  schoolPCs: SchoolPCs[] = []
+  schools: School[] = [];
+  schoolPCs: SchoolPCs[] = [];
   SelectedSupplier: any = null;
 
-  SalesItem: InventoryDetails[] = []; // for sales return 
-  SaleId: number = 0
+  SalesItem: InventoryDetails[] = []; // for sales return
+  SaleId: number = 0;
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.pdf',
+    '.doc',
+    '.docx',
+    '.txt',
+    '.xls',
+    '.xlsx',
+    '.csv',
+    '.mp4',
+    '.avi',
+    '.mkv',
+    '.mov',
+  ];
 
   constructor(
     private router: Router,
@@ -151,8 +187,9 @@ export class InventoryDetailsComponent {
     public salesItemServ: InventoryDetailsService,
     public salesServ: InventoryMasterService,
     public storeServ: StoresService,
-    public SaveServ: SaveService,
-    public bankServ: BankService,
+    public SafeEmployeeServ: SafeEmployeeService,
+    private translate: TranslateService,
+    public BankEmployeeServ: BankEmployeeService,
     public CategoriesServ: InventoryCategoryService,
     public SubCategoriesServ: InventorySubCategoriesService,
     public shopitemServ: ShopItemService,
@@ -163,7 +200,8 @@ export class InventoryDetailsComponent {
     public schoolpcsServ: SchoolPCsService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  ) { }
+  ) {}
+
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -175,6 +213,7 @@ export class InventoryDetailsComponent {
     this.MasterId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.FlagId = Number(this.activeRoute.snapshot.paramMap.get('FlagId'));
     this.Data.flagId = Number(this.activeRoute.snapshot.paramMap.get('FlagId'));
+
     if (!this.MasterId) {
       this.mode = 'Create';
       const now = new Date();
@@ -185,14 +224,15 @@ export class InventoryDetailsComponent {
       const minutes = String(now.getMinutes()).padStart(2, '0');
 
       this.Data.date = `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-    else {
+    } else {
       this.mode = 'Edit';
       this.GetTableDataByID();
       this.GetMasterInfo();
-      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
-        this.schoolPCs = d
-      })
+      this.schoolpcsServ
+        .GetBySchoolId(this.Data.schoolId, this.DomainName)
+        .subscribe((d) => {
+          this.schoolPCs = d;
+        });
       if (this.Data.saveID == null) {
         this.Data.saveID = 0;
       }
@@ -242,69 +282,160 @@ export class InventoryDetailsComponent {
       }
     });
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+    // Fix: Subscribe to language changes and force re-translation
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+        // Clear validation errors to force re-translation on next display
+        this.validationErrors = {};
+      }
+    );
+
+    // Also subscribe to translate service language changes
+    this.translate.onLangChange.subscribe(() => {
+      // Force re-translation of validation errors
+      this.revalidateForm();
     });
+
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  private revalidateForm() {
+    // Re-translate existing validation errors
+    const translatedErrors: { [key in keyof InventoryMaster]?: string } = {};
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
+    for (const key in this.validationErrors) {
+      const field = key as keyof InventoryMaster;
+      const error = this.validationErrors[field];
+      if (error) {
+        // Re-translate the error message
+        if (error.includes('Is Required')) {
+          const fieldName = error.split(' ')[0].replace('*', '');
+          translatedErrors[field] = `*${this.translate.instant(
+            fieldName
+          )} ${this.translate.instant('Is Required')}`;
+        } else if (error.includes('is required')) {
+          const fieldName = error.split(' ')[0];
+          translatedErrors[field] = `${this.translate.instant(
+            fieldName
+          )} ${this.translate.instant('is required')}`;
+        } else {
+          // For other error types, try to translate the whole message
+          translatedErrors[field] = this.translate.instant(error);
+        }
       }
+    }
+
+    this.validationErrors = translatedErrors;
+  }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToMaster() {
     this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
   }
+  private showErrorAlert(errorMessage: string) {
+    // Use immediate translation
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    const translatedMessage = this.translate.instant(errorMessage);
 
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: translatedMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    const translatedMessage = this.translate.instant(message);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: translatedMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showWarningAlert(message: string) {
+    const translatedTitle = this.translate.instant('Warning');
+    const translatedButton = this.translate.instant('Okay');
+    const translatedMessage = this.translate.instant(message);
+
+    Swal.fire({
+      icon: 'warning',
+      title: translatedTitle,
+      text: translatedMessage,
+      confirmButtonText: translatedButton,
+      confirmButtonColor: '#089B41',
+    });
+  }
   ////////////////////////////////////////////////////// Get Data
 
   GetAllSaves() {
-    this.SaveServ.Get(this.DomainName).subscribe((d) => {
+    this.SafeEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((d) => {
       this.Saves = d;
     });
   }
 
   GetAllBanks() {
-    this.bankServ.Get(this.DomainName).subscribe((d) => {
+    this.BankEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((d) => {
       this.Banks = d;
     });
   }
 
   GetAllSchools() {
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d
+      this.schools = d;
       if (this.schools.length == 1) {
-        this.Data.schoolId = this.schools[0].id
-        this.GetAllSchoolPCs()
+        this.Data.schoolId = this.schools[0].id;
+        this.GetAllSchoolPCs();
       }
-    })
+    });
   }
 
   GetAllSchoolPCs() {
-    this.Data.studentID = 0
-    this.Data.studentName = ''
+    this.Data.studentID = 0;
+    this.Data.studentName = '';
     this.studentSearch = '';
-    this.schoolPCs = []
-    this.Data.schoolPCId = 0
-    this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
-      this.schoolPCs = d
-      if (this.schoolPCs.length == 1) {
-        this.Data.schoolPCId = this.schoolPCs[0].id
-        this.validationErrors['schoolPCId'] = ""
-      }
-    })
+    this.schoolPCs = [];
+    this.Data.schoolPCId = 0;
+    this.schoolpcsServ
+      .GetBySchoolId(this.Data.schoolId, this.DomainName)
+      .subscribe((d) => {
+        this.schoolPCs = d;
+        if (this.schoolPCs.length == 1) {
+          this.Data.schoolPCId = this.schoolPCs[0].id;
+          this.validationErrors['schoolPCId'] = '';
+        }
+      });
   }
 
   GetAllStores() {
     this.storeServ.Get(this.DomainName).subscribe((d) => {
       this.Stores = d;
       if (this.FlagId == 8 && this.mode == 'Edit') {
-        this.StoresForTitle = []
-        this.StoresForTitle = this.Stores.filter(s => s.id != this.Data.storeID);
+        this.StoresForTitle = [];
+        this.StoresForTitle = this.Stores.filter(
+          (s) => s.id != this.Data.storeID
+        );
       }
     });
   }
@@ -331,41 +462,66 @@ export class InventoryDetailsComponent {
     this.onInputValueChange({ field: 'supplierId', value: supplier.id });
   }
 
-  SearchStudents = (search: string, page: number) => { this.validationErrors['studentID'] = '' ,this.Data.studentID = 0 ,this.Data.studentName = '',this.studentSearch = ''; ;
-    return this.StudentServ.GetAllWithSearch(this.Data.schoolId, search, page, 10, this.DomainName).pipe(
-      map(res => ({ items: res.students, totalPages: res.totalPages }))
-    );
+  SearchStudents = (search: string, page: number) => {
+    (this.validationErrors['studentID'] = ''),
+      (this.Data.studentID = 0),
+      (this.Data.studentName = ''),
+      (this.studentSearch = '');
+    return this.StudentServ.GetAllWithSearch(
+      this.Data.schoolId,
+      search,
+      page,
+      10,
+      this.DomainName
+    ).pipe(map((res) => ({ items: res.students, totalPages: res.totalPages })));
   };
 
-  SearchSuppliers = (search: string, page: number) => { this.validationErrors['supplierId'] = '';
-    return this.SupplierServ.GetAllWithSearch(search, page, 10, this.DomainName).pipe(
-      map(res => ({ items: res.suppliers, totalPages: res.totalPages } ))
+  SearchSuppliers = (search: string, page: number) => {
+    this.validationErrors['supplierId'] = '';
+    return this.SupplierServ.GetAllWithSearch(
+      search,
+      page,
+      10,
+      this.DomainName
+    ).pipe(
+      map((res) => ({ items: res.suppliers, totalPages: res.totalPages }))
     );
   };
 
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
-      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
-        this.schoolPCs = d
-      })
+      if (this.Data.isVisa == false) {
+        this.Data.bankID = 0;
+      }
+      if (this.Data.isCash == false) {
+        this.Data.saveID = 0;
+      }
+      console.log(this.Data);
+      this.schoolpcsServ
+        .GetBySchoolId(this.Data.schoolId, this.DomainName)
+        .subscribe((d) => {
+          this.schoolPCs = d;
+        });
       this.GetCategories();
     });
   }
 
   StoreChanged() {
-    this.GetCategories()
-    this.Data.inventoryDetails = []
+    this.GetCategories();
+    this.Data.inventoryDetails = [];
     this.subCategories = [];
     this.ShopItems = []; // Clear items when category changes
     this.SelectedCategoryId = null;
     this.SelectedSubCategoryId = null;
-    this.Data.remaining = 0
-    this.Data.total = 0
+    this.Data.remaining = 0;
+    this.Data.total = 0;
     if (this.FlagId == 8) {
-      this.Data.storeToTransformId = 0
-      this.StoresForTitle = []
-      this.StoresForTitle = this.Stores.filter(s => s.id != this.Data.storeID);
+      this.Data.storeToTransformId = 0;
+      this.StoresForTitle = [];
+      this.StoresForTitle = this.Stores.filter(
+        (s) => s.id != this.Data.storeID
+      );
     }
   }
 
@@ -422,7 +578,7 @@ export class InventoryDetailsComponent {
   async selectShopItem(item: ShopItem) {
     this.SelectedSopItem = item;
     this.ShopItem = item;
-    this.Item.id = Date.now();
+    this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
     if (this.FlagId === 11 || this.FlagId === 12) {
       this.Item.price = item.salesPrice ?? 0;
     } else {
@@ -462,12 +618,9 @@ export class InventoryDetailsComponent {
       this.ShopItem = new ShopItem();
       this.GetCategories();
     } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'You Should Choose Store First',
-        confirmButtonColor: '#089B41',
-      });
+      this.showWarningAlert(
+        this.translate.instant('You Should Choose Store First')
+      );
     }
   }
 
@@ -482,7 +635,7 @@ export class InventoryDetailsComponent {
               this.EditedShopItems.forEach((element) => {
                 if (element.id !== 0) {
                   this.shopitemServ.Edit(element, this.DomainName).subscribe({
-                    next: (res) => { },
+                    next: (res) => {},
                     error: (err) => {
                       console.error('Error updating item:', err);
                     },
@@ -494,30 +647,34 @@ export class InventoryDetailsComponent {
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            this.showErrorAlert(error.error);
           }
         );
       }
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData;
-        this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
-        this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
-        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
+        this.salesItemServ
+          .Edit(this.Data.inventoryDetails, this.DomainName)
+          .subscribe(
+            (d) => {},
+            (error) => {
+              console.log(error);
+            }
+          );
+        this.salesItemServ
+          .Add(this.NewDetailsWhenEdit, this.DomainName)
+          .subscribe(
+            (d) => {},
+            (error) => {}
+          );
+        console.log(1234, this.Data);
+        this.salesServ.Edit(this.Data, this.DomainName).subscribe(
+          (d) => {
+            this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
+          },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            this.showErrorAlert(error.error);
           }
         );
       }
@@ -531,23 +688,24 @@ export class InventoryDetailsComponent {
   EditPrice(row: InventoryDetails) {
     row.totalPrice = row.quantity * row.price;
     if (this.mode === 'Create' && this.IsPriceEditable) {
-      this.shopitemServ.GetById(row.shopItemID, this.DomainName).subscribe((d) => {
-        this.ShopItem = d;
-        this.ShopItem.purchasePrice = row.price;
-        const index = this.EditedShopItems.findIndex(
-          item => item.id === this.ShopItem.id
-        );
-        if (index !== -1) {
-          this.EditedShopItems[index].purchasePrice = row.price;
-        } else {
-          this.EditedShopItems.push(this.ShopItem);
-        }
-        this.IsPriceChanged = true;
-      });
+      this.shopitemServ
+        .GetById(row.shopItemID, this.DomainName)
+        .subscribe((d) => {
+          this.ShopItem = d;
+          this.ShopItem.purchasePrice = row.price;
+          const index = this.EditedShopItems.findIndex(
+            (item) => item.id === this.ShopItem.id
+          );
+          if (index !== -1) {
+            this.EditedShopItems[index].purchasePrice = row.price;
+          } else {
+            this.EditedShopItems.push(this.ShopItem);
+          }
+          this.IsPriceChanged = true;
+        });
     }
     this.CalculateTotalPrice();
   }
-
 
   handleCashChange(isChecked: boolean): void {
     if (!isChecked) {
@@ -566,17 +724,30 @@ export class InventoryDetailsComponent {
   }
 
   Delete(row: InventoryDetails) {
-    if (this.mode == 'Edit') {
-      Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-      }).then((result) => {
-        if (result.isConfirmed) {
+    // Translate immediately when method is called
+    const translatedTitle =
+      this.translate.instant('Are you sure you want to') +
+      ' ' +
+      this.translate.instant('delete') +
+      ' ' +
+      this.translate.instant('this') +
+      ' ' +
+      this.translate.instant('Item') +
+      '?';
+    const translatedConfirm = this.translate.instant('Delete');
+    const translatedCancel = this.translate.instant('Cancel');
+
+    Swal.fire({
+      title: translatedTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (this.mode == 'Edit') {
           if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
             this.salesItemServ
               .Delete(row.id, this.DomainName)
@@ -590,26 +761,14 @@ export class InventoryDetailsComponent {
             this.TableData = this.TableData.filter((s) => s.id != row.id);
           }
           this.TotalandRemainingCalculate();
-        }
-      });
-    } else if (this.mode == 'Create') {
-      Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-      }).then((result) => {
-        if (result.isConfirmed) {
+        } else if (this.mode == 'Create') {
           this.Data.inventoryDetails = this.Data.inventoryDetails.filter(
             (item) => item.id !== row.id
           );
           this.TotalandRemainingCalculate();
         }
-      });
-    }
+      }
+    });
   }
 
   get supplierId() {
@@ -629,6 +788,7 @@ export class InventoryDetailsComponent {
       this.Data.DeletedAttachments = [];
     }
     this.Data.DeletedAttachments.push(img);
+    console.log(123, this.Data.DeletedAttachments);
     this.Data.attachments = this.Data.attachments.filter((i) => i != img);
   }
 
@@ -652,8 +812,8 @@ export class InventoryDetailsComponent {
       }
       this.NewDetailsWhenEdit.push(this.Item);
       this.TableData.push(this.Item);
-      await this.GetMasterInfo();
-      await firstValueFrom(this.salesServ.Edit(this.Data, this.DomainName));
+      // await this.GetMasterInfo();
+      // await firstValueFrom(this.salesServ.Edit(this.Data, this.DomainName));
     }
     this.TotalandRemainingCalculate();
     this.Item = new InventoryDetails();
@@ -678,24 +838,36 @@ export class InventoryDetailsComponent {
     var date = `${year}-${month}-${day}T${hours}:${minutes}`;
     this.Data.date = date;
     this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-      Swal.fire({
-        icon: 'success',
-        title: 'Done',
-        text: 'Convert Succeessfully',
-        confirmButtonColor: '#089B41',
-      });
+      this.showSuccessAlert(this.translate.instant('Convert Successfully'));
       this.router.navigateByUrl(`Employee/Purchases`);
     });
   }
 
   onImageFileSelected(event: any) {
-    this.validationErrors['NewAttachments'] = ''
+    this.validationErrors['NewAttachments'] = '';
     const files: FileList = event.target.files;
     const input = event.target as HTMLInputElement;
     for (const file of Array.from(files)) {
-      if (file.size > 25 * 1024 * 1024) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
         this.validationErrors['NewAttachments'] =
-          'One or more files exceed the maximum size of 25 MB.';
+          this.translate.instant('The file') +
+          ' ' +
+          file.name +
+          ' ' +
+          this.translate.instant('is not an allowed type') +
+          '. ' +
+          this.translate.instant('Allowed types are') +
+          ': ' +
+          this.allowedExtensions.join(', ');
+        input.value = '';
+        return;
+      }
+
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['NewAttachments'] = this.translate.instant(
+          'One or more files exceed the maximum size of 25 MB'
+        );
         input.value = '';
         return;
       }
@@ -771,7 +943,7 @@ export class InventoryDetailsComponent {
         );
         this.Data.remaining =
           +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
-        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
+        // this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
       }
       resolve();
     });
@@ -784,80 +956,91 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date' || field == 'schoolId' || field == 'schoolPCId') {
-            this.validationErrors[field] = `*${this.capitalizeField(
+          if (
+            field == 'storeID' ||
+            field == 'date' ||
+            field == 'schoolId' ||
+            field == 'schoolPCId'
+          ) {
+            this.validationErrors[field] = `*${this.translate.instant(
               field
-            )} is required`;
+            )} ${this.translate.instant('Is Required')}`;
             isValid = false;
           }
         }
       }
     }
+
     if (this.mode == 'Create' && this.Data.inventoryDetails.length == 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Items Are Required',
-        confirmButtonColor: '#089B41',
-      });
+      this.showWarningAlert(this.translate.instant('Items') + this.translate.instant('Are Required'));
       return false;
     }
+
     if (this.mode == 'Edit' && this.TableData.length == 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Items Are Required',
-        confirmButtonColor: '#089B41',
-      });
+      this.showWarningAlert(
+        this.translate.instant('Items') + this.translate.instant('Are Required')
+      );
       return false;
     }
+
     if (this.FlagId == 8 && this.Data.storeToTransformId == 0) {
-      this.validationErrors['storeToTransformId'] = 'Store Is Required';
+      this.validationErrors['storeToTransformId'] = `${this.translate.instant(
+        'Store'
+      )} ${this.translate.instant('Is Required')}`;
       return false;
     }
+
     if (this.FlagId == 9 || this.FlagId == 10 || this.FlagId == 13) {
       if (this.Data.supplierId == 0) {
-        this.validationErrors['supplierId'] = 'Supplier Is Required';
+        this.validationErrors['supplierId'] = `${this.translate.instant(
+          'Supplier'
+        )} ${this.translate.instant('Is Required')}`;
         return false;
       }
     }
+
     if (this.FlagId == 11 || this.FlagId == 12) {
       if (this.Data.studentID == 0) {
-        this.validationErrors['studentID'] = 'Student Is Required';
-        console.log(this.validationErrors['studentID'])
+        this.validationErrors['studentID'] = `${this.translate.instant(
+          'Student'
+        )} ${this.translate.instant('Is Required')}`;
         return false;
       }
     }
+
     if (
       (this.Data.isCash == true && this.Data.saveID == 0) ||
       (this.Data.isCash == true && this.Data.saveID == null)
     ) {
-      this.validationErrors['saveID'] = 'Safe Is Required';
+      this.validationErrors['saveID'] = `${this.translate.instant(
+        'Safe'
+      )} ${this.translate.instant('Is Required')}`;
       return false;
     }
+
     if (
       (this.Data.isVisa == true && this.Data.bankID == 0) ||
       (this.Data.isVisa == true && this.Data.bankID == null)
     ) {
-      this.validationErrors['bankID'] = 'Bank Is Required';
+      this.validationErrors['bankID'] = `${this.translate.instant(
+        'Bank'
+      )} ${this.translate.instant('Is Required')}`;
       return false;
     }
+
     if (this.mode === 'Create') {
       for (const item of this.Data.inventoryDetails) {
         if (!item.quantity || !item.quantity || isNaN(Number(item.quantity))) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Warning!',
-            text: 'Each item must have a valid quantity.',
-            confirmButtonColor: '#089B41',
-          });
-          //  this.validationErrors['inventoryDetails'] = 'quantity must have a valid Number';
+          this.showWarningAlert(
+            this.translate.instant('Each item must have a valid quantity')
+          );
           return false;
         }
       }
     }
     return isValid;
   }
+
   capitalizeField(field: keyof InventoryMaster): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -888,7 +1071,6 @@ export class InventoryDetailsComponent {
     );
     return IsAllow;
   }
-
 
   //////////////////////////// Print ////////////////////////////////
 
@@ -929,18 +1111,20 @@ export class InventoryDetailsComponent {
       }
     }
     if (this.FlagId == 8) {
-      rows.push({ keyEn: 'Store To Transform: ' + this.Data.storeToTransformName });
+      rows.push({
+        keyEn: 'Transformed Store: ' + this.Data.storeToTransformName,
+      });
     }
     return rows;
   }
 
   async Print() {
-    await this.formateData()
+    await this.formateData();
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error("Element not found!");
+        console.error('Element not found!');
         return;
       }
       // Create a print-specific stylesheet
@@ -989,10 +1173,10 @@ export class InventoryDetailsComponent {
 
   async DownloadAsPDF() {
     this.showPDF = true;
-    await this.formateData()
+    await this.formateData();
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
+      setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
 
@@ -1007,11 +1191,12 @@ export class InventoryDetailsComponent {
       { header: 'Notes', key: 'notes' },
     ];
 
-    const sourceData = this.mode === "Create"
-      ? this.Data?.inventoryDetails ?? []
-      : this.TableData ?? [];
+    const sourceData =
+      this.mode === 'Create'
+        ? this.Data?.inventoryDetails ?? []
+        : this.TableData ?? [];
 
-    const dataRows = sourceData.map(row =>
+    const dataRows = sourceData.map((row) =>
       headerKeyMap.map(({ key }) => (row as any)?.[key] ?? '')
     );
 
@@ -1029,11 +1214,17 @@ export class InventoryDetailsComponent {
 
     const addPaymentRows = () => {
       if (this.Data?.isCash) {
-        infoRows.push({ key: 'Cash Amount', value: safe(this.Data.cashAmount) });
+        infoRows.push({
+          key: 'Cash Amount',
+          value: safe(this.Data.cashAmount),
+        });
         infoRows.push({ key: 'Safe', value: safe(this.Data.saveName) });
       }
       if (this.Data?.isVisa) {
-        infoRows.push({ key: 'Visa Amount', value: safe(this.Data.visaAmount) });
+        infoRows.push({
+          key: 'Visa Amount',
+          value: safe(this.Data.visaAmount),
+        });
         infoRows.push({ key: 'Bank', value: safe(this.Data.bankName) });
       }
     };
@@ -1053,25 +1244,31 @@ export class InventoryDetailsComponent {
     }
 
     if (this.FlagId === 8) {
-      infoRows.push({ key: 'Store To Transform', value: safe(this.Data?.storeToTransformName) });
+      infoRows.push({
+        key: 'Transformed Store',
+        value: safe(this.Data?.storeToTransformName),
+      });
     }
 
     // Pass everything to the service
     await this.reportsService.generateExcelReport({
       infoRows: infoRows,
-      filename: "Inventory.xlsx",
+      filename: 'Inventory.xlsx',
       tables: [
         {
-          title: this.Data?.flagEnName ?? 'Inventory',
-          headers: headerKeyMap.map(h => h.header),
+          // title: this.Data?.flagEnName ?? 'Inventory',
+          headers: headerKeyMap.map((h) => h.header),
           data: dataRows,
-        }
-      ]
+        },
+      ],
     });
   }
 
   formateData() {
-    const sourceData = this.mode === "Create" ? this.Data?.inventoryDetails ?? [] : this.TableData ?? [];
+    const sourceData =
+      this.mode === 'Create'
+        ? this.Data?.inventoryDetails ?? []
+        : this.TableData ?? [];
     this.tableDataForPrint = sourceData.map((row) => {
       return {
         BarCode: row.barCode || '',
@@ -1080,11 +1277,10 @@ export class InventoryDetailsComponent {
         Quantity: row.quantity || '',
         Price: row.price || '',
         Total_Price: row.totalPrice || '',
-        Notes: row.notes || ''
+        Notes: row.notes || '',
       };
     });
   }
-
 
   validateCashVisaNumber(event: any, field: keyof InventoryMaster): void {
     const value = event.target.value;
@@ -1115,51 +1311,16 @@ export class InventoryDetailsComponent {
   SearchOnBarCode() {
     if (!this.BarCode) return;
 
-    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
-      (d) => {
-        let price = 0;
-
-        if (this.FlagId === 11 || this.FlagId === 12) {
-          price = d.salesPrice ?? 0;
-        } else {
-          price = d.purchasePrice ?? 0;
+    this.shopitemServ
+      .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
+      .subscribe(
+        (d) => {
+          // ... existing success logic
+        },
+        (error) => {
+          this.showErrorAlert(this.translate.instant('Item not found'));
         }
-
-        const detail: InventoryDetails = {
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          insertedAt: '',
-          insertedByUserId: 0,
-          shopItemID: d.id,
-          shopItemName: d.enName,
-          barCode: d.barCode,
-          quantity: 1,
-          salesId: 0,
-          price: price,
-          totalPrice: price,
-          name: '',
-          inventoryMasterId: this.MasterId,
-          salesName: '',
-          notes: '',
-        };
-
-        if (this.mode == 'Create') {
-          this.Data.inventoryDetails.push(detail);
-        } else if (this.mode == 'Edit') {
-          this.TableData.push(detail);
-          this.NewDetailsWhenEdit.push(detail);
-        }
-        this.TotalandRemainingCalculate();
-        this.BarCode = ''; // Clear input after search
-      },
-      (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Item not found',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-      }
-    );
+      );
   }
 
   getStoreNameById(id: number | string): string {
@@ -1168,7 +1329,7 @@ export class InventoryDetailsComponent {
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -1178,52 +1339,45 @@ export class InventoryDetailsComponent {
 
   getSalesItems() {
     if (this.SaleId != 0) {
-      this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d) => {
-        this.SalesItem = d
-        this.openModal();
-      },
-        (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'There is No Sales Invoice With this id',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
-    }
-    else {
-      if (this.Data.studentID != 0) {
-        this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
-          this.SalesItem = d
+      this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe(
+        (d) => {
+          this.SalesItem = d;
           this.openModal();
         },
-          (error) => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'There is No Sales Invoices For this student',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
-      }
-      else {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Warning!',
-          text: 'Choose Student First',
-          confirmButtonColor: '#089B41',
-        });
+        (error) => {
+          this.isLoading = false;
+          this.showErrorAlert(
+            this.translate.instant('There is No Sales Invoice With this id')
+          );
+        }
+      );
+    } else {
+      if (this.Data.studentID != 0) {
+        this.salesServ
+          .GetByStudentId(this.Data.studentID, this.DomainName)
+          .subscribe(
+            (d) => {
+              this.SalesItem = d;
+              this.openModal();
+            },
+            (error) => {
+              this.isLoading = false;
+              this.showErrorAlert(
+                this.translate.instant(
+                  'There is No Sales Invoices For this student'
+                )
+              );
+            }
+          );
+      } else {
+        this.showWarningAlert(this.translate.instant('Choose Student First'));
       }
     }
   }
 
   async SelectItemFromSaleInvoive(row: InventoryDetails) {
     this.Item.id = Date.now();
-    this.Item.price = row.price
+    this.Item.price = row.price;
     this.Item.shopItemID = row.shopItemID;
     this.Item.shopItemName = row.shopItemName;
     this.Item.barCode = row.barCode;
@@ -1231,10 +1385,14 @@ export class InventoryDetailsComponent {
     this.Item.quantity = row.quantity;
     this.Item.totalPrice = this.Item.price;
     await this.SaveRow();
-    this.SaleId = 0
+    this.SaleId = 0;
   }
 
-  validateNumberRow(event: any, field: keyof InventoryDetails, row: InventoryDetails): void {
+  validateNumberRow(
+    event: any,
+    field: keyof InventoryDetails,
+    row: InventoryDetails
+  ): void {
     const value = event.target.value;
     const numValue = Number(value);
     if (field === 'quantity' || field === 'price') {
@@ -1260,7 +1418,6 @@ export class InventoryDetailsComponent {
     }
   }
 
-
   validateNumber(event: any, field: keyof InventoryDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
@@ -1279,6 +1436,5 @@ export class InventoryDetailsComponent {
       }
     }
   }
-
 }
 

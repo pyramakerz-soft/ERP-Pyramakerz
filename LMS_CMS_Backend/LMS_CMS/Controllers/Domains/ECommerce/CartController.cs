@@ -19,19 +19,21 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
     public class CartController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
-        IMapper mapper; 
+        IMapper mapper;
+        private readonly FileUploadsService _fileService;
 
-        public CartController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public CartController(DbContextFactoryService dbContextFactory, IMapper mapper, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
-            this.mapper = mapper; 
+            this.mapper = mapper;
+            _fileService = fileService;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
         [HttpGet("ByStudentId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
          )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
@@ -85,15 +87,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     ); 
 
             List<Cart_ShopItemGetDTO> cart_ShopItemGetDTO = mapper.Map<List<Cart_ShopItemGetDTO>>(cart_ShopItem);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var item in cart_ShopItemGetDTO)
             {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                } 
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
             }
 
             Cart cart = Unit_Of_Work.cart_Repository.First_Or_Default(
@@ -117,7 +114,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpGet("ByOrderId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
          )]
         public async Task<IActionResult> GetByOrderId(long id)
         {
@@ -153,16 +150,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     );
 
             List<Cart_ShopItemGetDTO> cart_ShopItemGetDTO = mapper.Map<List<Cart_ShopItemGetDTO>>(cart_ShopItem);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var item in cart_ShopItemGetDTO)
             {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                }
-            } 
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+            }
 
             CartGetDTO cartGetDTO = mapper.Map<CartGetDTO>(cart);
             cartGetDTO.Cart_ShopItems = cart_ShopItemGetDTO;

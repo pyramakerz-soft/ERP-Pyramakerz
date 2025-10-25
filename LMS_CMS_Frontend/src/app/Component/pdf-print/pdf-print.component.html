@@ -1,66 +1,98 @@
-<div #printContainer class="p-5 text-sm font-sans">
+<div #printContainer class="p-5 text-sm font-sans" [dir]="isRtl ? 'rtl' : 'ltr'">
+    <!-- Header Section -->
     <div class="flex justify-between items-center mb-6">
         <div class="w-[40%]">
-            <p class="text-base font-semibold mb-1">{{ school?.reportHeaderOneEn }}</p>
-            <p class="text-sm">{{ school?.reportHeaderTwoEn }}</p>
+            <p class="text-base font-semibold mb-1">
+                {{ isRtl ? (school?.reportHeaderOneAr || school?.reportHeaderOneEn) : school?.reportHeaderOneEn }}
+            </p>
+            <p class="text-sm">
+                {{ isRtl ? (school?.reportHeaderTwoAr || school?.reportHeaderTwoEn) : school?.reportHeaderTwoEn }}
+            </p>
         </div>
+        
         <div class="flex justify-center w-[15%]">
             <img *ngIf="school?.reportImage" [src]="school.reportImage"
                 style="max-width: 120px; max-height: 120px; width: auto; height: auto;" />
         </div>
-        <div class="rtl text-end w-[40%]">
-            <p class="text-base font-semibold mb-1">{{ school?.reportHeaderOneAr }}</p>
-            <p class="text-sm">{{ school?.reportHeaderTwoAr }}</p>
+        
+        <div class="w-[40%]" [class]="isRtl ? 'text-left' : 'text-right'">
+            <p class="text-base font-semibold mb-1">
+                {{ !isRtl ? (school?.reportHeaderOneAr || school?.reportHeaderOneEn) : school?.reportHeaderOneEn }}
+            </p>
+            <p class="text-sm">
+                {{ !isRtl ? (school?.reportHeaderTwoAr || school?.reportHeaderTwoEn) : school?.reportHeaderTwoEn }}
+            </p>
         </div>
     </div>
 
     <div class="my-10 flex justify-center">
-        <h1 class="text-3xl font-bold tracking-wide ">{{ Title }}</h1>
+        <h1 class="text-3xl font-bold tracking-wide ">{{ Title | translate }}</h1>
     </div>
 
-    <div class="my-10 space-y-2">
-        <div *ngFor="let info of infoRows" class="flex justify-between text-xl">
-            <div class="w-full text-left mb-1">
-                <span class="font-semibold mr-2">{{ info.keyEn }} </span>
+    <div class="my-10 space-y-4" dir="ltr">
+        <div *ngFor="let info of infoRows" class="flex justify-between">
+            <!-- English content (left side) -->
+            <div class="w-1/2 text-left ltr">
+                <div [innerHTML]="info.keyEn" class="text-lg leading-8"></div>
             </div>
-            <!-- <div class="w-1/2 rtl text-right " *ngIf="info.keyAr ">
-                <span class="font-semibold ">{{ info.keyAr }} </span>
-            </div> -->
+            <!-- Arabic content (right side) -->
+            <div class="w-1/2 text-right rtl" *ngIf="info.keyAr">
+                <div [innerHTML]="info.keyAr" class="text-lg leading-8"></div>
+            </div>
         </div>
     </div>
 
     <div *ngIf="tableDataWithHeaderArray">
-        <div *ngFor="let section of tableDataWithHeaderArray; let last = last" class="mb-8">
+        <div *ngFor="let section of tableDataWithHeaderArray; let last = last" 
+             class="mb-8 pdf-table-container"
+             [ngClass]="{
+               'small-table-section': isSmallTable(section.tableData),
+               'large-table-section': isLargeTable(section.tableData),
+               'table-section': !isSmallTable(section.tableData) && !isLargeTable(section.tableData)
+             }">
             <!-- Combined box for both summary and table -->
             <div class="border rounded-2xl shadow-sm overflow-hidden">
                 <!-- Summary section -->
-                <div class="p-3 bg-[#EBEBEB]">
+                <div class="p-3 bg-[#EBEBEB] summary-section">
                     <h5 class="primaryTxt font-semibold text-xl leading-9 mb-2">{{ section.header }}</h5>
-                    <table class="w-full">
+                    <table class="w-full table-fixed">
+                        <colgroup>
+                            <col class="w-1/3">
+                            <col class="w-2/3">
+                        </colgroup>
                         <tbody>
-                            <tr *ngFor="let item of section.data">
-                                <td class="font-semibold p-2 w-1/3 border-b border-gray-300">{{ item.key }}</td>
-                                <td class="p-2 border-b border-gray-300">{{ item.value }}</td>
+                            <tr *ngFor="let item of section.data" class="pdf-table-row">
+                                <td class="font-semibold p-2 border-b border-gray-300 break-words">{{ item.key | translate }}</td>
+                                <td class="p-2 border-b border-gray-300 break-words whitespace-normal">{{ item.value }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
     
                 <!-- Table section -->
-                <div class="p-3">
-                    <table class="w-full text-left text-[#6F6F6F]">
+                <div class="p-3 overflow-x-auto">
+                    <table class="w-full text-left text-[#6F6F6F] table-fixed">
+                        <colgroup>
+                            <col *ngFor="let header of section.tableHeaders" 
+                                 [ngStyle]="getColumnWidth(header, section.tableHeaders.length)">
+                        </colgroup>
                         <thead>
-                            <tr class="bg-gray-200 text-sm">
-                                <th *ngFor="let header of section.tableHeaders" class="p-2 border">{{ header }}</th>
+                            <tr class="bg-gray-200 text-sm pdf-table-row">
+                                <th *ngFor="let header of section.tableHeaders" 
+                                    class="p-2 border break-words">{{ header | translate }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngIf="section.tableData?.length === 0">
+                            <tr *ngIf="section.tableData?.length === 0" class="pdf-table-row">
                                 <td [attr.colspan]="section.tableHeaders.length" class="text-center p-4">No Data Found</td>
                             </tr>
                             <tr *ngFor="let row of section.tableData; let i = index"
-                                [ngClass]="{ 'bg-gray-100': i % 2 === 1 }">
-                                <td *ngFor="let header of section.tableHeaders" class="p-2 border">{{ row[header] }}</td>
+                                [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
+                                class="pdf-table-row">
+                                <td *ngFor="let header of section.tableHeaders" 
+                                    class="p-2 border break-words whitespace-normal align-top">
+                                    {{ row[header] }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -68,23 +100,40 @@
             </div>
     
             <!-- Separator line between items (except after last item) -->
-            <div *ngIf="!last" class="mt-4 border-t-2 border-gray-300"></div>
+            <div *ngIf="!last" class="table-section-separator border-t-2 border-gray-300"></div>
         </div>
     </div>
     
-    <div *ngFor="let chunk of tableChunks" class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD]">
-        <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F]">
+    <div *ngFor="let chunk of tableChunks" 
+         class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
+         [ngClass]="{
+           'small-table-section': isSmallTable(chunk.data),
+           'large-table-section': isLargeTable(chunk.data),
+           'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
+         }">
+        <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
+            <colgroup>
+                <col *ngFor="let header of chunk.headers" 
+                     [ngStyle]="getColumnWidth(header, chunk.headers.length)">
+            </colgroup>
             <thead>
-                <tr class="bg-gray-200 text-sm">
-                    <th *ngFor="let header of chunk.headers" class="p-2">{{ header }}</th>
+                <tr class="bg-gray-200 text-sm pdf-table-row">
+                    <th *ngFor="let header of chunk.headers" 
+                        class="p-2 break-words">{{ header | translate }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngIf="chunk.data.length === 0">
+                <tr *ngIf="chunk.data.length === 0" class="pdf-table-row">
                     <td [attr.colspan]="chunk.headers.length" class="text-center p-4">No Data Found</td>
                 </tr>
-                <tr *ngFor="let row of chunk.data; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1 }">
-                    <td *ngFor="let header of chunk.headers" class="p-2 border">{{ row[header] }}</td>
+                <tr *ngFor="let row of chunk.data; let i = index" 
+                    [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
+                    class="pdf-table-row">
+                    <td *ngFor="let header of chunk.headers" 
+                        class="p-2 border break-words whitespace-normal align-top"
+                        [ngClass]="{'details-cell': header.toLowerCase() === 'details'}">
+                        {{ row[header] }}
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -96,11 +145,15 @@
                 <h5 class="primaryTxt font-semibold text-xl leading-9">{{ section.header }}</h5>
             </div>
             <div class="mb-4 p-3 border rounded-2xl shadow-sm  bg-[#EBEBEB]">
-                <table class="table table-striped table-bordered">
+                <table class="table table-striped table-bordered table-fixed w-full">
+                    <colgroup>
+                        <col class="w-1/3">
+                        <col class="w-2/3">
+                    </colgroup>
                     <tbody>
                         <tr *ngFor="let item of section.data">
-                            <td class="font-weight-bold mr-2">{{ item.key }}</td>
-                            <td>{{ item.value }}</td>
+                            <td class="font-weight-bold mr-2 break-words">{{ item.key }}</td>
+                            <td class="break-words whitespace-normal">{{ item.value }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -108,13 +161,16 @@
         </div>
     </div>
 
-    <div class="my-6 space-y-2 ">
-        <div *ngFor="let info of PsNotes" class="flex justify-between text-xl">
-            <div class="w-1/2 text-left mb-1">
-                <span class="font-semibold mr-2">{{ info.EnNote }} </span>
+    <!-- FIXED: Display both English and Arabic notes side by side -->
+    <div class="my-6 space-y-4">
+        <div *ngFor="let info of PsNotes" class="flex justify-between">
+            <!-- English notes (left side) -->
+            <div class="w-1/2 text-left ltr">
+                <div [innerHTML]="info.EnNote" class="text-lg leading-8"></div>
             </div>
-            <div class="w-1/2 rtl text-right ">
-                <span class="font-semibold ">{{ info.ArNote }} </span>
+            <!-- Arabic notes (right side) -->
+            <div class="w-1/2 text-right rtl" *ngIf="info.ArNote">
+                <div [innerHTML]="info.ArNote" class="text-lg leading-8"></div>
             </div>
         </div>
     </div>

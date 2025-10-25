@@ -564,9 +564,9 @@ export class MyRequestsComponent {
   }
 
   Send(){
-    if(this.requestToBeSend.message == '' && this.requestToBeSend.link == '' && this.requestToBeSend.fileFile == null){
+    if(this.requestToBeSend.message == ''){
       Swal.fire({
-        title: 'You have to insert at least one item (File - Message - Link)',
+        title: 'You have to insert the message',
         icon: 'warning', 
         confirmButtonColor: '#089B41', 
         confirmButtonText: "OK"
@@ -617,6 +617,12 @@ export class MyRequestsComponent {
         this.isLocalNotification = false  
       },
       error => {
+        Swal.fire({
+          icon: 'error',
+          text: error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
         this.isLoading = false;
       }
     ); 

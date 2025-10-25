@@ -26,7 +26,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetAccountsLedger")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Suppliers Subledger" }
+            pages: new[] { "Account Subledger Report" }
         )]
         public async Task<IActionResult> GetAccountsLedger(DateTime? fromDate, DateTime? toDate, long linkFileID, long? accountID = 0, int pageNumber = 1, int pageSize = 10)
         {
@@ -58,10 +58,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     new SqlParameter("@PageSize", pageSize)
                 )
                     .AsNoTracking()
-                    .ToListAsync(); 
+                    .ToListAsync();
 
-                var resultsCredits = results.Sum(x => x.Credit) ?? 0;
-                var resultsDebits = results.Sum(x => x.Debit) ?? 0;
+                if (results == null || !results.Any())
+                    return NotFound("No data found.");
+
+                var resultsCredits = results.Sum(x => x.Credit);
+                var resultsDebits = results.Sum(x => x.Debit);
 
                 var resultsTotals = new
                 {
@@ -81,16 +84,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .AsNoTracking()
                     .ToListAsync();
 
-                if (results == null || !results.Any())
-                    return NotFound("No data found.");
-
                 var fpCredits = isCredit ? firstPeriodBalance.Sum(x => x.Credit) : 0;
                 var fpDebits = !isCredit ? firstPeriodBalance.Sum(x => x.Debit) : 0;
 
                 var firstPeriodTotals = new
                 {
                     TotalCredit = isCredit ? fpCredits - fpDebits : 0,
-                    TotalDebit = !isCredit ? fpCredits - fpDebits : 0,
+                    TotalDebit = !isCredit ? fpDebits - fpCredits : 0,
                     Difference = isCredit ? fpCredits - fpDebits : fpDebits - fpCredits
                 };
 
@@ -102,8 +102,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     {
                         ID = results[i].ID,
                         Name = results[i].Name,
-                        Credit = isCredit ? (firstPeriodBalance[i].Credit - results[i]?.Debit) + results[i]?.Credit : 0,
-                        Debit = !isCredit ? (firstPeriodBalance[i]?.Debit - results[i]?.Credit) + results[i]?.Debit : 0
+                        Credit = isCredit ? 
+                            (firstPeriodBalance?.Count() > 0 ? 
+                            firstPeriodBalance[i].Credit - results[i].Debit : 
+                            0 - results[i].Debit) + results[i].Credit : 0,
+                        Debit = !isCredit ?
+                            (firstPeriodBalance?.Count() > 0 ?
+                            firstPeriodBalance[i].Debit - results[i].Credit :
+                            0 - results[i].Credit) + results[i].Debit : 0
                     });
                 }
 
@@ -143,7 +149,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     FirstPeriodTotals = new { Balance = firstPeriodBalance, Total = firstPeriodTotals },
                     TransactionsPeriodTotals = new { Balance = results, Total = resultsTotals },
-                    LastPeriodTotals = new { Bakance = lastPeriodBalance, Total = lastPeriodTotals },
+                    LastPeriodTotals = new { Balance = lastPeriodBalance, Total = lastPeriodTotals },
                     Pagination = paginationMetadata
                 });
             }
@@ -159,10 +165,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     return BadRequest("The selected account does not match the specified link file ID.");
 
                 var results = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                     "EXEC dbo.GetAccountLedger @DateFrom, @DateTo, @AccountId, @LinkFileID, @PageNumber, @PageSize",
+                     "EXEC dbo.GetAccountLedger @DateFrom, @DateTo, @MainAccNo, @LinkFileID, @PageNumber, @PageSize",
                      new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                      new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                     new SqlParameter("@AccountId", accountID),
+                     new SqlParameter("@MainAccNo", accountID),
                      new SqlParameter("@LinkFileID", linkFileID),
                     new SqlParameter("@PageNumber", pageNumber),
                     new SqlParameter("@PageSize", pageSize)
@@ -173,8 +179,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 if (results == null || !results.Any())
                     return NotFound("No data found.");
 
-                var resultsCredits = results.Sum(x => x.Credit) ?? 0;
-                var resultsDebits = results.Sum(x => x.Debit) ?? 0;
+                var resultsCredits = results.Sum(x => x.Credit);
+                var resultsDebits = results.Sum(x => x.Debit);
 
                 var resultsTotals = new
                 {
@@ -184,24 +190,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 };
 
                 var firstPeriodBalance = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetAccountLedger @DateFrom, @DateTo, @AccountId, @LinkFileID, @PageNumber, @PageSize",
+                    "EXEC dbo.GetAccountLedger @DateFrom, @DateTo, @MainAccNo, @LinkFileID, @PageNumber, @PageSize",
                     new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                    new SqlParameter("@AccountId", accountID),
-                    new SqlParameter("@LinkFileID", 2),
+                    new SqlParameter("@MainAccNo", accountID),
+                    new SqlParameter("@LinkFileID", linkFileID),
                     new SqlParameter("@PageNumber", pageNumber),
                     new SqlParameter("@PageSize", pageSize)
-                )   
+                )
                     .AsNoTracking()
                     .ToListAsync();
 
-                var fpCredits = firstPeriodBalance.Sum(x => x.Credit) ?? 0;
-                var fpDebits = firstPeriodBalance.Sum(x => x.Debit) ?? 0;
+                var fpCredits = isCredit ? firstPeriodBalance.Sum(x => x.Credit) : 0;
+                var fpDebits = !isCredit ? firstPeriodBalance.Sum(x => x.Debit) : 0;
 
                 var firstPeriodTotals = new
                 {
                     TotalCredit = isCredit ? fpCredits - fpDebits : 0,
-                    TotalDebit = !isCredit ? fpCredits - fpDebits : 0,
+                    TotalDebit = !isCredit ? fpDebits - fpCredits : 0,
                     Difference = isCredit ? fpCredits - fpDebits : fpDebits - fpCredits
                 };
 
@@ -213,8 +219,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     {
                         ID = results[i].ID,
                         Name = results[i].Name,
-                        Credit = (firstPeriodBalance[i].Credit - results[i].Debit) + results[i].Credit,
-                        Debit = 0
+                        Credit = isCredit ?
+                            (firstPeriodBalance?.Count() > 0 ?
+                            firstPeriodBalance[i].Credit - results[i].Debit :
+                            0 - results[i].Debit) + results[i].Credit : 0,
+                        Debit = !isCredit ?
+                            (firstPeriodBalance?.Count() > 0 ?
+                            firstPeriodBalance[i].Debit - results[i].Credit :
+                            0 - results[i].Credit) + results[i].Debit : 0
                     });
                 }
 
@@ -254,7 +266,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     FirstPeriodTotals = new { Balance = firstPeriodBalance, Total = firstPeriodTotals },
                     TransactionsPeriodTotals = new { Balance = results, Total = resultsTotals },
-                    LastPeriodTotals = new { Bakance = lastPeriodBalance, Total = lastPeriodTotals },
+                    LastPeriodTotals = new { Balance = lastPeriodBalance, Total = lastPeriodTotals },
                     Pagination = paginationMetadata
                 });
             }

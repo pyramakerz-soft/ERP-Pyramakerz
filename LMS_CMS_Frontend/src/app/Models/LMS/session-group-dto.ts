@@ -5,6 +5,6 @@ export class SessionGroupDTO {
        public sessionId: number=0,
        public dutyTeacherId: number=0,
         public dutyTeacherName: string = '',
-       public subjects: SubjectTeacherDTO[],
+       public subjects: SubjectTeacherDTO[]=[],
     ) { }
 }

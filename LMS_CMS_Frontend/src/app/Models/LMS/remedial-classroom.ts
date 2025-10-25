@@ -4,7 +4,7 @@ export class RemedialClassroom {
     constructor(
         public id: number = 0,
         public name: string = '',
-        public numberOfSession: number = 0,
+        public numberOfSession: number | null= null,
         public schoolID: number = 0,
         public schoolName: string = '',
         public academicYearID: number = 0,

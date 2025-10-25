@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -21,6 +20,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Location } from '../../../../Models/HR/location';
+import { LocationService } from '../../../../Services/Employee/HR/location.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-employee-view',
   standalone: true,
@@ -36,7 +38,7 @@ export class EmployeeViewComponent {
   UserID: number = 0;
   path: string = "";
 
-  Data: EmployeeGet = new EmployeeGet()
+  Data: Employee = new Employee()
   EmpId: number = 0;
 
   PasswordError: string = "";
@@ -55,6 +57,8 @@ export class EmployeeViewComponent {
   isSubjectSupervisor = false;
   floors: Floor[] = [];
   floorsSelected: Floor[] = [];
+  locationsSelected: Location[] = [];
+  locations: Location[] = [];
   grades: Grade[] = [];
   gradeSelected: Grade[] = [];
   subject: Subject[] = [];
@@ -64,6 +68,7 @@ export class EmployeeViewComponent {
 
   constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService, public FloorServ: FloorService,
     public GradeServ: GradeService,
+    public LocationServ: LocationService,
     public SubjectServ: SubjectService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
@@ -92,7 +97,15 @@ export class EmployeeViewComponent {
           if (this.Data.subjectSelected.length > 0) {
             this.isSubjectSupervisor = true
           }
-          this.FloorServ.Get(this.DomainName).subscribe((data) => {
+          this.LocationServ.Get(this.DomainName).subscribe((data) => {
+            this.locations = data;
+            if (this.Data.locationSelected.length > 0) {
+              this.locationsSelected = this.locations.filter((s) =>
+                this.Data.locationSelected.includes(s.id)
+              );
+            }
+          });
+           this.FloorServ.Get(this.DomainName).subscribe((data) => {
             this.floors = data;
             if (this.Data.floorsSelected.length > 0) {
               this.isFloorMonitor = true
@@ -148,7 +161,7 @@ export class EmployeeViewComponent {
     this.router.navigateByUrl("Employee/Employee")
   }
   edit() {
-    this.router.navigateByUrl(`Employee/Employee Edit/${this.EmpId}`)
+    this.router.navigateByUrl(`Employee/Employee/Edit/${this.EmpId}`)
   }
 
   downloadFile(file: any): void {
@@ -187,7 +200,7 @@ export class EmployeeViewComponent {
         confirmButtonColor: '#089B41',
       });
     }else{
-      if(this.password != "" && this.editpasss.oldPassword != ""){
+      if(this.password != ""){
         this.editpasss.id=this.User_Data_After_Login.id;
         this.editpasss.password=this.password 
         this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
@@ -237,9 +250,9 @@ export class EmployeeViewComponent {
         if(this.password == ""){
           this.PasswordError = "Password Can't be Empty"
         }
-        if(this.editpasss.oldPassword == ""){
-          this.OldPasswordError = "Old Password Can't be Empty"
-        }
+        // if(this.editpasss.oldPassword == ""){
+        //   this.OldPasswordError = "Old Password Can't be Empty"
+        // }
       }
     } 
   }

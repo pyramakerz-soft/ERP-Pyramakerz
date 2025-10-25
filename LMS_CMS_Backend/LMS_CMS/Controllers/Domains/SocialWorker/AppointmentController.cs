@@ -1,6 +1,8 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
@@ -23,11 +25,17 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly SendNotificationService _sendNotificationService;
+        private readonly IConfiguration _configuration;
+        private readonly DomainService _domainService;
 
-        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AppointmentController(DbContextFactoryService dbContextFactory, IMapper mapper, DomainService domainService ,SendNotificationService sendNotificationService, CheckPageAccessService checkPageAccessService , IConfiguration configuration)
         {
             _dbContextFactory = dbContextFactory;
+            _configuration = configuration;
             this.mapper = mapper;
+            _sendNotificationService = sendNotificationService;
+            _domainService = domainService;
             _checkPageAccessService = checkPageAccessService;
         }
 
@@ -240,8 +248,81 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 appointmentGrade.GradeID = gradeId;
                 appointmentGrade.AppointmentID = appointment.ID;
 
+                if (userTypeClaim == "octa")
+                {
+                    appointmentGrade.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentGrade.InsertedByUserId = userId;
+                }
+
                 Unit_Of_Work.appointmentGrade_Repository.Add(appointmentGrade);
                 Unit_Of_Work.SaveChanges();
+            }
+
+            /////////////////////////////// parent Appointment
+            List<long> ParentIds =new List<long>();
+
+            foreach (var item in NewAppointment.GradeIds)
+            {
+                /// 1) get all parents That has student 
+                List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(s => s.GradeID == item && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+                List<long> studentIds = studentGrades.Select(s=>s.StudentID).Distinct().ToList();
+
+                List<Student> students = Unit_Of_Work.student_Repository.FindBy(s => s.IsDeleted != true && studentIds.Contains(s.ID));
+                foreach (var student in students)
+                {
+                    if(student.Parent_Id != null)
+                    {
+                        ParentIds.Add(student.Parent_Id.Value);
+                    }
+                }
+            }
+            ParentIds = ParentIds.Distinct().ToList();
+            foreach (var ParentId in ParentIds)
+            {
+                var appointmentParent = new AppointmentParent();
+                appointmentParent.ParentID = ParentId;
+                appointmentParent.AppointmentID = appointment.ID;
+                appointmentParent.AppointmentStatusID = 1;
+
+                if (userTypeClaim == "octa")
+                {
+                    appointmentParent.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    appointmentParent.InsertedByUserId = userId;
+                }
+
+                Unit_Of_Work.appointmentParent_Repository.Add(appointmentParent);
+                Unit_Of_Work.SaveChanges();
+
+                //
+                var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+                string serverUrl = "";
+
+                bool isProduction = _configuration.GetValue<bool>("IsProduction");
+
+                if (isProduction)
+                {
+                    var domain = _domainService.GetDomain(HttpContext);
+                    string subDomain = HttpContext.Request.Headers["Domain-Name"].ToString();
+                    string fullPath = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/Parent/Appointment";
+
+                    AmazonS3Client s3Client = new AmazonS3Client();
+                    S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
+                    serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                }
+                else
+                {
+                    serverUrl = $"http://localhost:4200/Parent/Appointment";
+
+                }
+
+                await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, ParentId, domainName);
+
             }
 
             return Ok(NewAppointment);
@@ -254,7 +335,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] { "Appoinment" }
-      )]
+        )]
         public async Task<IActionResult> EditAsync(AppointmentEditDTO NewAppointment)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -341,6 +422,24 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 {
                     relation.IsDeleted = true;
                     Unit_Of_Work.appointmentGrade_Repository.Update(relation);
+
+                    //delete all parent that have children in this grade
+                    List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(s => s.GradeID == deletedId && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+                    List<long> studentIds = studentGrades.Select(s => s.StudentID).Distinct().ToList();
+
+                    List<Student> students = Unit_Of_Work.student_Repository.FindBy(s => s.IsDeleted != true && studentIds.Contains(s.ID));
+                    foreach (var student in students)
+                    {
+                        if (student.Parent_Id != null)
+                        {
+                            AppointmentParent appointmentParent = Unit_Of_Work.appointmentParent_Repository.First_Or_Default(a=>a.ParentID == student.Parent_Id && a.AppointmentID == NewAppointment.ID);
+                            if(appointmentParent != null)
+                            {
+                                appointmentParent.IsDeleted = true;
+                                Unit_Of_Work.appointmentParent_Repository.Update(appointmentParent);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -353,8 +452,67 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     GradeID = newId
                 };
                 Unit_Of_Work.appointmentGrade_Repository.Add(newRelation);
-            }
+                List<long> ParentIds = new List<long>();
 
+                /// 1) get all parents That has student 
+                List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(s => s.GradeID == newId && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+                List<long> studentIds = studentGrades.Select(s => s.StudentID).Distinct().ToList();
+
+                List<Student> students = Unit_Of_Work.student_Repository.FindBy(s => s.IsDeleted != true && studentIds.Contains(s.ID));
+                foreach (var student in students)
+                {
+                    if (student.Parent_Id != null)
+                    {
+                        ParentIds.Add(student.Parent_Id.Value);
+                    }
+                }
+                ParentIds = ParentIds.Distinct().ToList();
+
+                foreach (var ParentId in ParentIds)
+                {
+                    var appointmentParent = new AppointmentParent();
+                    appointmentParent.ParentID = ParentId;
+                    appointmentParent.AppointmentID = appointment.ID;
+                    appointmentParent.AppointmentStatusID = 1;
+
+                    if (userTypeClaim == "octa")
+                    {
+                        appointmentParent.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        appointmentParent.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.appointmentParent_Repository.Add(appointmentParent);
+                    Unit_Of_Work.SaveChanges();
+
+                    //
+                    var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+                    string serverUrl = "";
+
+                    bool isProduction = _configuration.GetValue<bool>("IsProduction");
+
+                    if (isProduction)
+                    {
+                        var domain = _domainService.GetDomain(HttpContext);
+                        string subDomain = HttpContext.Request.Headers["Domain-Name"].ToString();
+                        string fullPath = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/Parent/Appointment";
+
+                        AmazonS3Client s3Client = new AmazonS3Client();
+                        S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
+                        serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                    }
+                    else
+                    {
+                        serverUrl = $"http://localhost:4200/Parent/Appointment";
+
+                    }
+
+                    await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, ParentId, domainName);
+
+                }
+            }
             await Unit_Of_Work.SaveChangesAsync();
 
             Unit_Of_Work.appointment_Repository.Update(appointment);

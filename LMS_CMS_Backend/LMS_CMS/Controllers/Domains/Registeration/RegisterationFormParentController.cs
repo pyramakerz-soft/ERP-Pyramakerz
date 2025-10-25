@@ -231,7 +231,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Registration Confirmation" }
+            pages: new[] { "Registration Confirmation" ,"Student" }
         )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -255,6 +255,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (registerationFormParent == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "parent")
+            {
+                if (registerationFormParent.ParentID == null || registerationFormParent.ParentID != userId)
+                {
+                    return BadRequest("This parent has no acsess on this registerationFormParent ");
+                }
             }
 
             RegisterationFormParentGetDTO registerationFormParentDTO = mapper.Map<RegisterationFormParentGetDTO>(registerationFormParent);

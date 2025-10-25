@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
@@ -22,13 +25,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public MedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        public MedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         [HttpGet]
@@ -49,14 +54,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<MedalGetDTO> DTO = mapper.Map<List<MedalGetDTO>>(medals);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var item in DTO)
             {
-                if (!string.IsNullOrEmpty(item.ImageLink))
-                {
-                    item.ImageLink = $"{serverUrl}{item.ImageLink.Replace("\\", "/")}";
-                }
+                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request, HttpContext);
             }
 
             return Ok(DTO);
@@ -82,12 +83,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             MedalGetDTO DTO = mapper.Map<MedalGetDTO>(medals);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(DTO.ImageLink))
-            {
-                DTO.ImageLink = $"{serverUrl}{DTO.ImageLink.Replace("\\", "/")}";
-            }
+             
+            DTO.ImageLink = _fileService.GetFileUrl(DTO.ImageLink, Request, HttpContext);
 
             return Ok(DTO);
         }
@@ -133,8 +130,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest(returnFileInput);
                 }
             }
-
-
+             
             Medal medal = mapper.Map<Medal>(newMedal);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -150,30 +146,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             medal.ImageLink = "1";
             Unit_Of_Work.medal_Repository.Add(medal);
             Unit_Of_Work.SaveChanges();
-
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Medal");
-            var medalFolder = Path.Combine(baseFolder, medal.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+             
+            if (newMedal.ImageForm != null)
             {
-                Directory.CreateDirectory(medalFolder);
+                medal.ImageLink = await _fileService.UploadFileAsync(newMedal.ImageForm, "LMS/Medal", medal.ID, HttpContext);
+                Unit_Of_Work.medal_Repository.Update(medal);
+                Unit_Of_Work.SaveChanges();
             }
-
-            if (newMedal.ImageForm != null && newMedal.ImageForm.Length > 0)
-            {
-                var fileName = Path.GetFileName(newMedal.ImageForm.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newMedal.ImageForm.CopyToAsync(stream);
-                }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
-
-            }
-
-            Unit_Of_Work.medal_Repository.Update(medal);
-            Unit_Of_Work.SaveChanges();
             return Ok(newMedal);
         }
 
@@ -217,7 +196,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             Medal medal = Unit_Of_Work.medal_Repository.Select_By_Id(newModal.ID);
 
-            string imageLinkExists = newModal.ImageLink;
+            string imageLinkExists = medal.ImageLink;
+
             if (medal == null || medal.IsDeleted == true)
             {
                 return NotFound("No Medal with this ID");
@@ -235,36 +215,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newModal.ImageForm != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Medal");
-                var oldMedalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-                var medalFolder = Path.Combine(baseFolder, newModal.ID.ToString());
-
-
-                if (System.IO.File.Exists(oldMedalFolder))
-                {
-                    System.IO.File.Delete(oldMedalFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(oldMedalFolder))
-                {
-                    Directory.Delete(oldMedalFolder, true);
-                }
-
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                var fileName = Path.GetFileName(newModal.ImageForm.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await newModal.ImageForm.CopyToAsync(stream);
-                }
-                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
-
+                medal.ImageLink = await _fileService.ReplaceFileAsync(
+                    newModal.ImageForm,
+                    imageLinkExists,
+                    "LMS/Medal",
+                    newModal.ID,
+                    HttpContext
+                );
             }
-
+            else
+            {
+                medal.ImageLink = imageLinkExists;
+            } 
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medal.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -360,5 +322,69 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ///////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("MedalToStudentReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Medal To Student Report" }
+        )]
+            public async Task<IActionResult> MedalToStudentReport(
+            [FromQuery] long? SchoolId = null,
+            [FromQuery] long? GradeId = null,
+            [FromQuery] long? ClassroomId = null,
+            [FromQuery] long? StudentId = null)
+                {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            // Validate that all filters are provided (mandatory)
+            if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
+            {
+                return BadRequest("School, Grade, Classroom, and Student are all required.");
+            }
+
+            IQueryable<SocialWorkerMedalStudent> query = Unit_Of_Work.socialWorkerMedalStudent_Repository.Query()
+                .Where(sms => sms.IsDeleted != true && sms.Student.IsDeleted != true)
+                .Join(Unit_Of_Work.studentClassroom_Repository.Query(),
+                    sms => sms.StudentID,
+                    sc => sc.StudentID,
+                    (sms, sc) => new { SocialWorkerMedalStudent = sms, StudentClassroom = sc })
+                .Where(joined => joined.StudentClassroom.IsDeleted != true
+                    && joined.StudentClassroom.ClassID == ClassroomId.Value
+                    && joined.StudentClassroom.Classroom.GradeID == GradeId.Value
+                    && joined.StudentClassroom.Classroom.Grade.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.ID == SchoolId.Value
+                    && joined.SocialWorkerMedalStudent.StudentID == StudentId.Value)
+                .Select(joined => joined.SocialWorkerMedalStudent);
+
+            var medalStudents = await query
+                .Include(sms => sms.Student)
+                .Include(sms => sms.SocialWorkerMedal)
+                .Include(sms => sms.InsertedByEmployee)
+                .OrderBy(sms => sms.InsertedAt)
+                .ToListAsync();
+
+            if (medalStudents == null || medalStudents.Count == 0)
+            {
+                return NotFound("No medal records found for the specified criteria.");
+            }
+
+            var reportData = mapper.Map<List<SocialWorkerMedalStudentReportDTO>>(medalStudents);
+
+            return Ok(reportData);
+        }
+
+
     }
 }

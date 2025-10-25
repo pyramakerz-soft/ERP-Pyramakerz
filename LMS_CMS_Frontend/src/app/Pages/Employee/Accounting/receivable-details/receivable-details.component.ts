@@ -12,8 +12,6 @@ import { FormsModule } from '@angular/forms';
 import { Receivable } from '../../../../Models/Accounting/receivable';
 import { ReceivableDocType } from '../../../../Models/Accounting/receivable-doc-type';
 import { ReceivableDocTypeService } from '../../../../Services/Employee/Accounting/receivable-doc-type.service';
-import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
-import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
 import { ReceivableDetailsService } from '../../../../Services/Employee/Accounting/receivable-details.service';
 import { ReceivableDetails } from '../../../../Models/Accounting/receivable-details';
 import { LinkFile } from '../../../../Models/Accounting/link-file';
@@ -24,19 +22,23 @@ import html2pdf from 'html2pdf.js';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 
 @Component({
   selector: 'app-receivable-details',
   standalone: true,
   imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './receivable-details.component.html',
-  styleUrl: './receivable-details.component.css'
+  styleUrl: './receivable-details.component.css',
 })
 export class ReceivableDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -48,43 +50,58 @@ export class ReceivableDetailsComponent {
 
   path: string = '';
   ReceivableID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
-  isCreate: boolean = false
-  isEdit: boolean = false
-  isView: boolean = false
+  isCreate: boolean = false;
+  isEdit: boolean = false;
+  isView: boolean = false;
 
-  receivable: Receivable = new Receivable()
+  receivable: Receivable = new Receivable();
   validationErrors: { [key in keyof Receivable]?: string } = {};
-  validationErrorsForDetails: { [key in keyof ReceivableDetails]?: string } = {};
+  validationErrorsForDetails: { [key in keyof ReceivableDetails]?: string } =
+    {};
 
-  dataTypesData: ReceivableDocType[] = []
-  bankOrSaveData: any[] = []
-  receivableDetailsData: ReceivableDetails[] = []
-  newDetails: ReceivableDetails = new ReceivableDetails()
-  linkFilesData: LinkFile[] = []
-  linkFileTypesData: any[] = []
+  dataTypesData: ReceivableDocType[] = [];
+  // bankOrSaveData: any[] = [];
+  banksData: BankEmployee[] = [];
+  safesData: SafeEmployee[] = [];
+  bankOrSafe: string = '';
+  receivableDetailsData: ReceivableDetails[] = [];
+  newDetails: ReceivableDetails = new ReceivableDetails();
+  linkFilesData: LinkFile[] = [];
+  linkFileTypesData: any[] = [];
   totalAmount: number = 0;
 
-  isNewDetails: boolean = false
-  isDetailsValid: boolean = false
+  isNewDetails: boolean = false;
+  isDetailsValid: boolean = false;
 
   editingRowId: number | null = null;
-  editedRowData: ReceivableDetails = new ReceivableDetails()
-  isLoading = false
+  editedRowData: ReceivableDetails = new ReceivableDetails();
+  isLoading = false;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
 
   constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public receivableDocTypeService: ReceivableDocTypeService,
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public receivableService: ReceivableService,
-    public bankService: BankService, public saveService: SaveService, public receivableDetailsService: ReceivableDetailsService, public linkFileService: LinkFileService,
-
-    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService,
-  private languageService: LanguageService,
+    private router: Router,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public receivableDocTypeService: ReceivableDocTypeService,
+    public DomainServ: DomainService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public receivableService: ReceivableService,
+    public receivableDetailsService: ReceivableDetailsService,
+    public linkFileService: LinkFileService,
+    private translate: TranslateService,
+    public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
+    public reportsService: ReportsService,
+    private languageService: LanguageService,
+    private SafeEmployeeServ: SafeEmployeeService,
+    private BankEmployeeServ: BankEmployeeService,
     private realTimeService: RealTimeNotificationServiceService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,22 +109,24 @@ export class ReceivableDetailsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
 
-    this.ReceivableID = Number(this.activeRoute.snapshot.paramMap.get('id'))
+    this.ReceivableID = Number(this.activeRoute.snapshot.paramMap.get('id'));
 
     if (!this.ReceivableID) {
-      this.isCreate = true
+      this.isCreate = true;
+      this.receivable.linkFileID=5
+      this.getSaveData();
     } else {
-      this.GetReceivableByID()
-      this.GetReceivableDetails()
+      this.GetReceivableByID();
+      this.GetReceivableDetails();
     }
 
-    this.activeRoute.url.subscribe(url => {
-      this.path = url[0].path
-      if (url[1].path == "View") {
-        this.isView = true
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+      if (url[1].path == 'View') {
+        this.isView = true;
       } else {
         if (this.ReceivableID) {
-          this.isEdit = true
+          this.isEdit = true;
         }
       }
     });
@@ -117,77 +136,82 @@ export class ReceivableDetailsComponent {
       if (settingsPage) {
         this.AllowEdit = settingsPage.allow_Edit;
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
 
-    this.GetDocType()
-          this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.GetDocType();
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   moveToReceivable() {
-    this.router.navigateByUrl("Employee/Receivable")
+    this.router.navigateByUrl('Employee/Receivable');
   }
 
   GetDocType() {
-    this.dataTypesData = []
-    this.receivableDocTypeService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.dataTypesData = data
-      }
-    )
+    this.dataTypesData = [];
+    this.receivableDocTypeService.Get(this.DomainName).subscribe((data) => {
+      this.dataTypesData = data;
+    });
   }
 
   GetReceivableByID() {
-    this.receivableService.GetByID(this.ReceivableID, this.DomainName).subscribe(
-      (data) => {
-        this.receivable = data
+    this.receivableService
+      .GetByID(this.ReceivableID, this.DomainName)
+      .subscribe((data) => {
+        this.receivable = data;
         if (this.receivable.linkFileID == 5) {
-          this.getSaveData()
+          this.getSaveData();
         } else if (this.receivable.linkFileID == 6) {
-          this.getBankData()
+          this.getBankData();
         }
-      }
-    )
+      });
   }
 
   getBankData() {
-    this.bankOrSaveData = []
-    this.bankService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.bankOrSaveData = data
-      }
-    )
+    this.banksData = [];
+    this.bankOrSafe = 'bank';
+    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((data) => {
+      this.banksData = data;
+    });
   }
 
   getSaveData() {
-    this.bankOrSaveData = []
-    this.saveService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.bankOrSaveData = data
-      }
-    )
+    this.safesData = [];
+    this.bankOrSafe = 'safe';
+    this.SafeEmployeeServ.GetByEmployeeId( this.UserID,this.DomainName).subscribe((data) => {
+      this.safesData = data;
+    });
   }
 
   IsAllowDelete(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
     return IsAllow;
   }
 
   IsAllowEdit(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
     return IsAllow;
   }
 
@@ -201,8 +225,19 @@ export class ReceivableDetailsComponent {
       if (this.receivable.hasOwnProperty(key)) {
         const field = key as keyof Receivable;
         if (!this.receivable[field]) {
-          if (field == "receivableDocTypesID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date" || field == "docNumber") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          if (
+            field == 'receivableDocTypesID' ||
+            field == 'bankOrSaveID' ||
+            field == 'linkFileID' ||
+            field == 'date' ||
+            field == 'docNumber'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
+              this.validationErrors[field] = `*bankOrSafeID is required`;
+            }
             isValid = false;
           }
         } else {
@@ -223,61 +258,68 @@ export class ReceivableDetailsComponent {
       if (this.hasOwnProperty(key)) {
         const field = key as keyof ReceivableDetails;
         if (!detail[field]) {
-          if (field == "amount" || field == "linkFileName") {
-
-            this.validationErrorsForDetails[field] = `*${this.DetailsCapitalizeField(field)} is required`
+          if (field == 'amount' || field == 'linkFileName') {
+            this.validationErrorsForDetails[
+              field
+            ] = `*${this.DetailsCapitalizeField(field)} is required`;
             isValid = false;
           }
-        }
-        else {
+        } else {
           this.validationErrorsForDetails[field] = '';
         }
       }
     }
     if (detail.linkFileID == 0) {
-      this.validationErrorsForDetails["linkFileID"] = 'link File is required'
+      this.validationErrorsForDetails['linkFileID'] = 'link File is required';
       isValid = false;
     }
     if (detail.linkFileTypeID == 0) {
-      this.validationErrorsForDetails["linkFileTypeID"] = 'Link File Data is required'
+      this.validationErrorsForDetails['linkFileTypeID'] =
+        'Link File Data is required';
       isValid = false;
     }
-    if (detail.amount == null || detail.amount == "") {
-      this.validationErrorsForDetails["amount"] = 'amount is required'
+    if (detail.amount == null || detail.amount == '') {
+      this.validationErrorsForDetails['amount'] = 'amount is required';
       isValid = false;
     }
     return isValid;
   }
 
-  onInputValueChange(event: { field: keyof Receivable, value: any }) {
+  onInputValueChange(event: { field: keyof Receivable; value: any }) {
     const { field, value } = event;
     (this.receivable as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
     }
 
-    if (field == "linkFileID") {
-      this.receivable.bankOrSaveID = 0
+    if (field == 'linkFileID') {
+      this.receivable.bankOrSaveID = 0;
     }
   }
 
-  onInputValueChangeForDetails(event: { field: keyof ReceivableDetails, value: any }) {
+  onInputValueChangeForDetails(event: {
+    field: keyof ReceivableDetails;
+    value: any;
+  }) {
     const { field, value } = event;
     (this.newDetails as any)[field] = value;
     if (value) {
       this.validationErrorsForDetails[field] = '';
     }
-    if (field == "linkFileID") {
-      this.newDetails.linkFileTypeID = 0
+    if (field == 'linkFileID') {
+      this.newDetails.linkFileTypeID = 0;
     }
 
-    if ((this.newDetails.amount || this.editedRowData.amount) &&
-      (!isNaN(this.newDetails.amount ? this.newDetails.amount : 0) && !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0)) &&
+    if (
+      (this.newDetails.amount || this.editedRowData.amount) &&
+      !isNaN(this.newDetails.amount ? this.newDetails.amount : 0) &&
+      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
       (this.newDetails.linkFileID || this.editedRowData.linkFileID) &&
-      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)) {
-      this.isDetailsValid = true
+      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)
+    ) {
+      this.isDetailsValid = true;
     } else {
-      this.isDetailsValid = false
+      this.isDetailsValid = false;
     }
   }
 
@@ -313,36 +355,36 @@ export class ReceivableDetailsComponent {
 
   Save() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.isCreate) {
         this.receivableService.Add(this.receivable, this.DomainName).subscribe(
           (data) => {
-            let id = JSON.parse(data).id
-            this.router.navigateByUrl(`Employee/Receivable Details/${id}`)
+            let id = JSON.parse(data).id;
+            this.router.navigateByUrl(`Employee/Receivable Details/${id}`);
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
               confirmButtonColor: '#089B41',
-            })
-            this.isLoading = false
+            });
+            this.isLoading = false;
           },
-          err => {
-            this.isLoading = false
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           }
-        )
+        );
       } else if (this.isEdit) {
-        this.isLoading = false
+        this.isLoading = false;
         this.receivableService.Edit(this.receivable, this.DomainName).subscribe(
           (data) => {
-            this.GetReceivableByID()
-            this.isLoading = false
+            this.GetReceivableByID();
+            this.isLoading = false;
             Swal.fire({
               icon: 'success',
               title: 'Done!',
@@ -350,136 +392,143 @@ export class ReceivableDetailsComponent {
               confirmButtonColor: '#089B41',
             });
           },
-          err => {
-            this.isLoading = false
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           }
-        )
+        );
       }
     }
   }
 
-
   GetReceivableDetails() {
-    this.receivableDetailsData = []
-    this.receivableDetailsService.Get(this.DomainName, this.ReceivableID).subscribe(
-      (data) => {
-        this.receivableDetailsData = data
-        let total = 0
-        this.receivableDetailsData.forEach(element => {
-          total = total + (element.amount ? element.amount : 0)
+    this.receivableDetailsData = [];
+    this.receivableDetailsService
+      .Get(this.DomainName, this.ReceivableID)
+      .subscribe((data) => {
+        this.receivableDetailsData = data;
+        let total = 0;
+        this.receivableDetailsData.forEach((element) => {
+          total = total + (element.amount ? element.amount : 0);
         });
-        this.totalAmount = total
-      }
-    )
+        this.totalAmount = total;
+      });
   }
 
   GetLinkFiles() {
-    this.linkFileService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.linkFilesData = data
-      }
-    )
+    this.linkFileService.Get(this.DomainName).subscribe((data) => {
+      this.linkFilesData = data;
+    });
   }
 
   GetLinkFilesTypeData() {
-    this.linkFileTypesData = []
-    this.newDetails.linkFileTypeID=0
-    this.editedRowData.linkFileTypeID=0
-    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, +this.newDetails.linkFileID).subscribe(
-      (data) => {
-        this.linkFileTypesData = data
-      }
-    )
+    this.linkFileTypesData = [];
+    this.newDetails.linkFileTypeID = 0;
+    this.editedRowData.linkFileTypeID = 0;
+    this.dataAccordingToLinkFileService
+      .GetTableDataAccordingToLinkFile(
+        this.DomainName,
+        +this.newDetails.linkFileID
+      )
+      .subscribe((data) => {
+        this.linkFileTypesData = data;
+      });
   }
 
   AddReceivableDetails() {
-    this.isDetailsValid = false
+    this.isDetailsValid = false;
     this.editingRowId = null;
     this.editedRowData = new ReceivableDetails();
-    this.isNewDetails = true
-    this.GetLinkFiles()
+    this.isNewDetails = true;
+    this.GetLinkFiles();
   }
 
   SaveNewDetails() {
-    this.newDetails.receivableMasterID = this.ReceivableID
+    this.newDetails.receivableMasterID = this.ReceivableID;
     if (this.isDetailsFormValid(this.newDetails)) {
-      this.isLoading = true
-      this.receivableDetailsService.Add(this.newDetails, this.DomainName).subscribe(
-        (data) => {
-          this.isLoading = false
-          this.isNewDetails = false
-          this.newDetails = new ReceivableDetails()
-          this.GetReceivableDetails()
+      this.isLoading = true;
+      this.receivableDetailsService
+        .Add(this.newDetails, this.DomainName)
+        .subscribe((data) => {
+          this.isLoading = false;
+          this.isNewDetails = false;
+          this.newDetails = new ReceivableDetails();
+          this.GetReceivableDetails();
           this.editingRowId = null;
           this.editedRowData = new ReceivableDetails();
-          this.isDetailsValid = false
-        }
-      )
+          this.isDetailsValid = false;
+        });
     }
-    this.isLoading = false
+    this.isLoading = false;
   }
 
   EditDetail(row: ReceivableDetails) {
-    this.isNewDetails = false
-    this.isDetailsValid = true
-    this.newDetails = new ReceivableDetails()
-    this.GetLinkFiles()
-    this.editingRowId = row.id
-    this.editedRowData = { ...row }
+    this.isNewDetails = false;
+    this.isDetailsValid = true;
+    this.newDetails = new ReceivableDetails();
+    this.GetLinkFiles();
+    this.editingRowId = row.id;
+    this.editedRowData = { ...row };
     if (this.editedRowData.linkFileID) {
-      this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, +this.editedRowData.linkFileID).subscribe(
-        (data) => {
-          this.linkFileTypesData = data
-        }
-      )
+      this.dataAccordingToLinkFileService
+        .GetTableDataAccordingToLinkFile(
+          this.DomainName,
+          +this.editedRowData.linkFileID
+        )
+        .subscribe((data) => {
+          this.linkFileTypesData = data;
+        });
     }
-
   }
 
   SaveEditedDetail() {
-    this.newDetails.receivableMasterID = this.ReceivableID
+    this.newDetails.receivableMasterID = this.ReceivableID;
     if (this.isDetailsFormValid(this.editedRowData)) {
-      this.receivableDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-        (data) => {
+      this.receivableDetailsService
+        .Edit(this.editedRowData, this.DomainName)
+        .subscribe((data) => {
           this.editingRowId = null;
           this.editedRowData = new ReceivableDetails();
-          this.isDetailsValid = false
-          this.isNewDetails = false
-          this.newDetails = new ReceivableDetails()
-          this.GetReceivableDetails()
-        }
-      )
+          this.isDetailsValid = false;
+          this.isNewDetails = false;
+          this.newDetails = new ReceivableDetails();
+          this.GetReceivableDetails();
+        });
     }
     this.isLoading = false;
   }
 
   DeleteDetail(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Receivable Detail?',
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('Receivable Detail') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.receivableDetailsService.Delete(id, this.DomainName).subscribe(
-          (data) => {
-            this.GetReceivableDetails()
-          }
-        )
+        this.receivableDetailsService
+          .Delete(id, this.DomainName)
+          .subscribe((data) => {
+            this.GetReceivableDetails();
+          });
       }
     });
   }
-
 
   // DownloadData() {
   //   let orderElement = document.getElementById('DataToDownload');
@@ -506,22 +555,22 @@ export class ReceivableDetailsComponent {
   //       });
   //     });
   //   }, 500);
-  // }  
+  // }
 
   DownloadAsPDF() {
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
+      setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
 
   Print() {
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error("Element not found!");
+        console.error('Element not found!');
         return;
       }
 
@@ -565,34 +614,43 @@ export class ReceivableDetailsComponent {
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Receivable Report",
-        ar: "تقرير القبض"
+        en: 'Receivable Report',
+        ar: 'تقرير المستحقات',
       },
-      subHeaders: [
-        { en: "Detailed receivable information", ar: "معلومات تفصيلية عن القبض" },
-      ],
+      // subHeaders: [
+      //   { en: "Detailed receivable information", ar: "معلومات تفصيلية عن القبض" },
+      // ],
       infoRows: [
-        { key: 'Document Type', value: this.receivable.receivableDocTypesName || '' },
+        {
+          key: 'Document Type',
+          value: this.receivable.receivableDocTypesName || '',
+        },
         { key: 'Document Number', value: this.receivable.docNumber || '' },
         { key: 'Date', value: this.receivable.date || '' },
         { key: 'Total Amount', value: this.totalAmount || 0 },
-        { key: 'Note', value: this.receivable.notes || "No Notes" }
+        { key: 'Note', value: this.receivable.notes || 'No Notes' },
       ],
       reportImage: '', // Add image URL if available
-      filename: "Receivable_Report.xlsx",
+      filename: 'Receivable_Report.xlsx',
       tables: [
         {
-          title: "Receivable Details",
-          headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
+          // title: "Receivable Details",
+          headers: [
+            'id',
+            'amount',
+            'linkFileName',
+            'linkFileTypeName',
+            'notes',
+          ],
           data: this.receivableDetailsData.map((row) => [
             row.id || 0,
             row.amount || 0,
             row.linkFileName || '',
             row.linkFileTypeName || '',
-            row.notes || ''
-          ])
-        }
-      ]
+            row.notes || '',
+          ]),
+        },
+      ],
     });
   }
 }

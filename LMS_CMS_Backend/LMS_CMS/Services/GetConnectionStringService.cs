@@ -9,15 +9,15 @@
         //    var initialCatalog = domainName; 
         //    var userId = "admin";
         //    var password = "PyraDev1*";
-        //    var trustServerCertificate = "TrustServerCertificate=True";
+        //    var trustServerCertificate = "TrustServerCertificate=True
+
 
         //    return $"Data Source={dataSource};Initial Catalog={initialCatalog};User ID={userId};Password={password};{trustServerCertificate}";
         //}
 
         public string BuildConnectionString(string domainName)
-
         { 
-            var dataSource = ".";
+            var dataSource = "."; 
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";

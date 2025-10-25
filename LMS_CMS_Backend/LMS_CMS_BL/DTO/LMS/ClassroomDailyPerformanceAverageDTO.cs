@@ -9,20 +9,15 @@ namespace LMS_CMS_BL.DTO.LMS
     public class ClassroomDailyPerformanceAverageDTO
     {
         public DateOnly Date { get; set; }
-        public double AverageScore { get; set; }
-        //public int StudentCount { get; set; }
+        public string ClassroomName { get; set; }
+        public string Comment { get; set; }
+        public List<StudentPerformanceDTO> StudentPerformance { get; set; }
+    }
+    public class StudentPerformanceDTO
+    {
+        public long PerformanceTypeID { get; set; }
         public string PerformanceTypeEn { get; set; }
         public string PerformanceTypeAr { get; set; }
-        public string Comment { get; set; }
-
-
-        //public List<PerformanceDetail> PerformanceDetails { get; set; }
-    }
-
-    public class PerformanceDetail
-    {
-        
-        
-
+        public double AverageScore { get; set; }
     }
 }

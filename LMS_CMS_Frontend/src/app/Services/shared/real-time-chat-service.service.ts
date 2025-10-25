@@ -21,7 +21,7 @@ export class RealTimeChatServiceService {
   startChatMessageConnection() {
     if (this.isConnected && this.chatMessageHubConnection) return;
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
- 
+  
     this.chatMessageHubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.ApiServ.BaseUrlSignalR}chatMessageHub`, {
         skipNegotiation: true,

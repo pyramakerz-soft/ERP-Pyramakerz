@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Registration;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
@@ -169,18 +171,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 return BadRequest("Building cannot be null");
             }
-            
+
             if (NewCategory.ID >= 1 && NewCategory.ID <= 3)
             {
                 return BadRequest("You can't edit this Category");
             }
 
             RegistrationCategory CategoryExists = Unit_Of_Work.registrationCategory_Repository.First_Or_Default(b => b.ID == NewCategory.ID && b.IsDeleted != true);
-            if (CategoryExists == null )
+            if (CategoryExists == null)
             {
                 return NotFound("No Category with this ID");
             }
-             
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Form Field", roleId, userId, CategoryExists);
@@ -255,7 +257,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (category == null)
             {
                 return NotFound();
-            } 
+            }
 
             if (userTypeClaim == "employee")
             {
@@ -319,5 +321,58 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //     [HttpGet("ByStoreId/{id}")]
+        //     [Authorize_Endpoint_(
+        //         allowedTypes: new[] { "octa", "employee", "student" },
+        //         pages: new[] { "Stores" }
+        //     )]
+        //     public async Task<IActionResult> GetCategoriesByStoreId(long id)
+        //     {
+        //         UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //         if (id == 0)
+        //         {
+        //             return BadRequest("Enter Store ID");
+        //         }
+
+        //         Store store = Unit_Of_Work.store_Repository.First_Or_Default(
+        //             s => s.ID == id && s.IsDeleted != true
+        //         );
+
+        //         if (store == null)
+        //         {
+        //             return NotFound("No Store found with this ID");
+        //         }
+
+        //         List<StoreCategories> storeCategories = await Unit_Of_Work.storeCategories_Repository
+        //             .Select_All_With_IncludesById<StoreCategories>(
+        //                 sc => sc.StoreID == id && sc.IsDeleted != true,
+        //                 query => query.Include(sc => sc.InventoryCategories)
+        //             );
+
+        //         if (storeCategories == null || storeCategories.Count == 0)
+        //         {
+        //             return NotFound("No categories found for this store");
+        //         }
+
+        //         // Filter out any inventory categories that are deleted
+        //         var activeCategories = storeCategories
+        //             .Where(sc => sc.InventoryCategories != null && sc.InventoryCategories.IsDeleted != true)
+        //             .Select(sc => sc.InventoryCategories)
+        //             .ToList();
+
+        //         if (activeCategories.Count == 0)
+        //         {
+        //             return NotFound("No active categories found for this store");
+        //         }
+
+        //         var categoriesDTO = mapper.Map<List<InventoryCategoriesGetDto>>(activeCategories);
+
+        //         return Ok(categoriesDTO);
+        //     }
+        // }
+
     }
 }

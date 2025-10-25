@@ -15,282 +15,283 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { EvaluationTemplateGroups } from '../../../../Models/LMS/evaluation-template-groups';
 import { EvaluationTemplateGroupService } from '../../../../Services/Employee/LMS/evaluation-template-group.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-evaluation-template-group',
   standalone: true,
-  imports: [CommonModule , FormsModule,SearchComponent , TranslateModule],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './evaluation-template-group.component.html',
   styleUrl: './evaluation-template-group.component.css'
 })
 export class EvaluationTemplateGroupComponent {
- User_Data_After_Login: TokenData = new TokenData('', 0,0,0, 0,'','','','', '');
- 
-   AllowEdit: boolean = false;
-   AllowDelete: boolean = false;
-   AllowEditForOthers: boolean = false;
-   AllowDeleteForOthers: boolean = false; 
- 
-   DomainName: string = '';
-   UserID: number = 0;
- 
-   isModalVisible: boolean = false;
-   mode: string = '';
-   isRtl: boolean = false;
-  subscription!: Subscription;
-   path: string = '';
-   key: string = 'id';
-   value: any = '';
-   keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
- 
-   template: Template = new Template();
-   group: EvaluationTemplateGroups = new EvaluationTemplateGroups();
- 
-   validationErrors: { [key in keyof EvaluationTemplateGroups]?: string } = {};
-   isLoading = false;
- 
-   TemplateID: number = 0;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
-   constructor(
-     private router: Router,
-     private menuService: MenuService,
-     public activeRoute: ActivatedRoute,
-     public account: AccountService,
-     public DomainServ: DomainService,
-     public EditDeleteServ: DeleteEditPermissionService,
-     public ApiServ: ApiService,
-     public templateServ: EvaluationTemplateService ,
-     public GroupServ: EvaluationTemplateGroupService ,
-     private languageService: LanguageService,
+  AllowEdit: boolean = false;
+  AllowDelete: boolean = false;
+  AllowEditForOthers: boolean = false;
+  AllowDeleteForOthers: boolean = false;
+
+  DomainName: string = '';
+  UserID: number = 0;
+
+  isModalVisible: boolean = false;
+  mode: string = '';
+  isRtl: boolean = false;
+  subscription!: Subscription;
+  path: string = '';
+  key: string = 'id';
+  value: any = '';
+  keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
+
+  template: Template = new Template();
+  group: EvaluationTemplateGroups = new EvaluationTemplateGroups();
+
+  validationErrors: { [key in keyof EvaluationTemplateGroups]?: string } = {};
+  isLoading = false;
+
+  TemplateID: number = 0;
+
+  constructor(
+    private router: Router,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public DomainServ: DomainService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public templateServ: EvaluationTemplateService,
+    public GroupServ: EvaluationTemplateGroupService,
+    private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-   ) {}
-   ngOnInit() {
-     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-     this.UserID = this.User_Data_After_Login.id;
-     this.DomainName = this.ApiServ.GetHeader();
-     this.activeRoute.url.subscribe((url) => {
-       this.path = url[0].path;
-     });
- 
-     this.menuService.menuItemsForEmployee$.subscribe((items) => {
-       const settingsPage = this.menuService.findByPageName(this.path, items);
-       if (settingsPage) {
-         this.AllowEdit = settingsPage.allow_Edit;
-         this.AllowDelete = settingsPage.allow_Delete;
-         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
-         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
-       }
-     });
-     this.TemplateID = Number(this.activeRoute.snapshot.paramMap.get('id'));
-     this.GetTemplateData();
+    private translate: TranslateService,
+
+  ) { }
+  ngOnInit() {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+    });
+
+    this.menuService.menuItemsForEmployee$.subscribe((items) => {
+      const settingsPage = this.menuService.findByPageName(this.path, items);
+      if (settingsPage) {
+        this.AllowEdit = settingsPage.allow_Edit;
+        this.AllowDelete = settingsPage.allow_Delete;
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
+      }
+    });
+    this.TemplateID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.GetTemplateData();
 
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-   }
-
-
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
   }
 
- 
-   GetTemplateData() {
-     this.template = new Template();
-     this.templateServ.GetByID(this.TemplateID,this.DomainName).subscribe((d) => {
-       this.template = d;
-     });
-   }
- 
-   Create() {
-     this.mode = 'Create';
-     this.group = new EvaluationTemplateGroups();
-     this.validationErrors = {};
-     this.openModal();
-   }
- 
-   Delete(id: number) {
-     Swal.fire({
-       title: 'Are you sure you want to delete this Group?',
-       icon: 'warning',
-       showCancelButton: true,
-       confirmButtonColor: '#089B41',
-       cancelButtonColor: '#17253E',
-       confirmButtonText: 'Delete',
-       cancelButtonText: 'Cancel',
-     }).then((result) => {
-       if (result.isConfirmed) {
-         this.GroupServ.Delete(id, this.DomainName).subscribe((d) => {
-           this.GetTemplateData();
-         });
-       }
-     });
-   }
- 
-   Edit(row: EvaluationTemplateGroups) {
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+
+  GetTemplateData() {
+    this.template = new Template();
+    this.templateServ.GetByID(this.TemplateID, this.DomainName).subscribe((d) => {
+      this.template = d;
+    });
+  }
+
+  Create() {
+    this.mode = 'Create';
+    this.group = new EvaluationTemplateGroups();
     this.validationErrors = {};
-     this.mode = 'Edit';
-     this.GroupServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-       this.group = d;
-     });
-     this.openModal();
-   }
- 
-   IsAllowDelete(InsertedByID: number) {
-     const IsAllow = this.EditDeleteServ.IsAllowDelete(
-       InsertedByID,
-       this.UserID,
-       this.AllowDeleteForOthers
-     );
-     return IsAllow;
-   }
- 
-   IsAllowEdit(InsertedByID: number) {
-     const IsAllow = this.EditDeleteServ.IsAllowEdit(
-       InsertedByID,
-       this.UserID,
-       this.AllowEditForOthers
-     );
-     return IsAllow;
-   }
- 
-   CreateOREdit() {
-    this.group.evaluationTemplateID=this.TemplateID
-     if (this.isFormValid()) {
-       this.isLoading = true;
-       if (this.mode == 'Create') {
-         this.GroupServ.Add(
-           this.group,
-           this.DomainName
-         ).subscribe(
-           (d) => {
-             this.GetTemplateData();
-             this.isLoading = false;
-             this.closeModal();
-           },
-           (error) => {
-             this.isLoading = false; // Hide spinner
-             Swal.fire({
-               icon: 'error',
-               title: 'Oops...',
-               text: 'Try Again Later!',
-               confirmButtonText: 'Okay',
-               customClass: { confirmButton: 'secondaryBg' }
-             });
-           }
-         );
-       }
-       if (this.mode == 'Edit') {
-         this.GroupServ.Edit(
-           this.group,
-           this.DomainName
-         ).subscribe(
-           (d) => {
-             this.GetTemplateData();
-             this.isLoading = false;
-             this.closeModal();
-           },
-           (error) => {
-             this.isLoading = false; // Hide spinner
-             Swal.fire({
-               icon: 'error',
-               title: 'Oops...',
-               text: 'Try Again Later!',
-               confirmButtonText: 'Okay',
-               customClass: { confirmButton: 'secondaryBg' }
-             });
-           }
-         );
-       }
-     } 
-   }
- 
-   closeModal() {
-     this.isModalVisible = false;
-     this.validationErrors = {};
-   }
- 
-   openModal() {
-     this.validationErrors = {};
-     this.isModalVisible = true;
-   }
- 
-   isFormValid(): boolean {
-     let isValid = true;
-     for (const key in this.group) {
-       if (this.group.hasOwnProperty(key)) {
-         const field = key as keyof EvaluationTemplateGroups;
-         if (!this.group[field]) {
-           if (
-                field == 'englishTitle' ||
-                field == 'arabicTitle' 
-              ) {
-             this.validationErrors[field] = `*${this.capitalizeField(
-               field
-             )} is required`;
-             isValid = false;
-           }
-         }
-       }
-     }
-     return isValid;
-   }
-   capitalizeField(field: keyof EvaluationTemplateGroups): string {
-     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-   }
+    this.openModal();
+  }
 
-   onInputValueChange(event: { field: keyof EvaluationTemplateGroups; value: any }) {
-     const { field, value } = event;
-     (this.group as any)[field] = value;
-     if (value) {
-       this.validationErrors[field] = '';
-     }
-   }
- 
-   async onSearchEvent(event: { key: string; value: any }) {
-     this.key = event.key;
-     this.value = event.value;
-     try {
-       const data: Template = await firstValueFrom(
-        this.templateServ.GetByID(this.TemplateID,this.DomainName)
-       );
-       this.template = data ;
- 
-       if (this.value !== '') {
-         const numericValue = isNaN(Number(this.value))
-           ? this.value
-           : parseInt(this.value, 10);
- 
-         this.template.evaluationTemplateGroups = this.template.evaluationTemplateGroups.filter((t) => {
-           const fieldValue = t[this.key as keyof typeof t];
-           if (typeof fieldValue === 'string') {
-             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-           }
-           if (typeof fieldValue === 'number') {
-             return fieldValue.toString().includes(numericValue.toString())
-           }
-           return fieldValue == this.value;
-         });
-       }
-     } catch (error) {
+  Delete(id: number) {
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') +this.translate.instant('Group') + this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.GroupServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.GetTemplateData();
+        });
+      }
+    });
+  }
+
+  Edit(row: EvaluationTemplateGroups) {
+    this.validationErrors = {};
+    this.mode = 'Edit';
+    this.GroupServ.GetByID(row.id, this.DomainName).subscribe((d) => {
+      this.group = d;
+    });
+    this.openModal();
+  }
+
+  IsAllowDelete(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+    return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  }
+
+  CreateOREdit() {
+    this.group.evaluationTemplateID = this.TemplateID
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.mode == 'Create') {
+        this.GroupServ.Add(
+          this.group,
+          this.DomainName
+        ).subscribe(
+          (d) => {
+            this.GetTemplateData();
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.GroupServ.Edit(
+          this.group,
+          this.DomainName
+        ).subscribe(
+          (d) => {
+            this.GetTemplateData();
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
+      }
+    }
+  }
+
+  closeModal() {
+    this.isModalVisible = false;
+    this.validationErrors = {};
+  }
+
+  openModal() {
+    this.validationErrors = {};
+    this.isModalVisible = true;
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.group) {
+      if (this.group.hasOwnProperty(key)) {
+        const field = key as keyof EvaluationTemplateGroups;
+        if (!this.group[field]) {
+          if (
+            field == 'englishTitle' ||
+            field == 'arabicTitle'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+  capitalizeField(field: keyof EvaluationTemplateGroups): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  onInputValueChange(event: { field: keyof EvaluationTemplateGroups; value: any }) {
+    const { field, value } = event;
+    (this.group as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: Template = await firstValueFrom(
+        this.templateServ.GetByID(this.TemplateID, this.DomainName)
+      );
+      this.template = data;
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.template.evaluationTemplateGroups = this.template.evaluationTemplateGroups.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
       this.template.evaluationTemplateGroups = [];
-     }
-   }
+    }
+  }
 
-   moveToTemplate() {
+  moveToTemplate() {
     this.router.navigateByUrl('Employee/Template');
   }
 
   moveToQuestions(Id: number) {
     this.router.navigateByUrl(`Employee/EvaluationTemplateGroupQuestion/${Id}`);
   }
- }
- 
+}

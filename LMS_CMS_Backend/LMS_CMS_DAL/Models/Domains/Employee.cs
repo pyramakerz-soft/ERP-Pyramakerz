@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -45,7 +46,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? ResidenceNumber { get; set; }
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
         public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
@@ -57,9 +58,12 @@ namespace LMS_CMS_DAL.Models.Domains
         public decimal? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
+        public string? SerialNumber { get; set; }
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public bool IsSuspended { get; set; }
+        public bool IsRestrictedForLoctaion { get; set; }
 
         [ForeignKey("Role")]
         [Required]
@@ -125,12 +129,19 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
         public ICollection<MaintenanceEmployee> MaintenanceEmployees { get; set; } = new HashSet<MaintenanceEmployee>();
-        public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
         public ICollection<Loans> Loans { get; set; } = new HashSet<Loans>();
         public ICollection<Bouns> Bouns { get; set; } = new HashSet<Bouns>();
         public ICollection<Deduction> Deduction { get; set; } = new HashSet<Deduction>();
-        public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
         public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
-        public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>(); 
+        public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
+        public ICollection<AnnualVacationEmployee> AnnualVacationEmployee { get; set; } = new HashSet<AnnualVacationEmployee>();
+        public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
+        public ICollection<EmployeeClocks> EmployeeClocks { get; set; } = new HashSet<EmployeeClocks>();
+        public ICollection<EmployeeLocation> EmployeeLocation { get; set; } = new HashSet<EmployeeLocation>();
+        public ICollection<BankEmployee> BankEmployees { get; set; } = new HashSet<BankEmployee>();
+        public ICollection<SafeEmployee> SafeEmployee { get; set; } = new HashSet<SafeEmployee>();
+        public ICollection<MonthlyAttendance> MonthlyAttendance { get; set; } = new HashSet<MonthlyAttendance>();
+        public ICollection<SalaryHistory> SalaryHistory { get; set; } = new HashSet<SalaryHistory>();
+        public ICollection<EmployeeLoans> EmployeeLoans { get; set; } = new HashSet<EmployeeLoans>();
     }
 }

@@ -2,13 +2,19 @@
     <div class="flex items-center justify-between">
         <div>
             <img src="Images/OctaWhiteLogo3.png">
-        </div>
-        <div>
-            <input type="text"
-                class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
-                placeholder="{{ 'Enter Key Word' | translate }}" />
         </div> 
-        <div class="flex space-x-4 rtl:space-x-reverse items-center"> 
+        <div class="relative w-full lg:w-[543px]">
+            <input type="text" [(ngModel)]="searchText" (focus)="onFocus()" (input)="onSearchChange()" (blur)="onBlur()"
+                placeholder="{{ 'Enter Key Word' | translate }}"
+                class="w-full lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"/>
+ 
+            <ul *ngIf="showSuggestions && filteredKeywords.length" class="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-[8px] shadow-lg z-10 max-h-60 overflow-auto" >
+                <li *ngFor="let keyword of filteredKeywords" (mousedown)="selectKeyword(keyword)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {{ keyword }}
+                </li>
+            </ul>
+        </div>
+        <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="flex space-x-4 rtl:space-x-reverse items-center"> 
             <div class="relative dropdown-container"> 
                 <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleMessagePopup()" >
                     <i class="fi fi-rr-comment-alt-dots text-white text-3xl flex items-center"></i> 
@@ -32,8 +38,20 @@
                                     {{ chatMessage.unreadCount }}
                                 </div> 
                                 <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot && chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type}">
-                                    <div class="flex-shrink-0">
-                                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                                    <div class="flex-shrink-0"> 
+                                        <div class="relative">
+                                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">   
+                                            <span *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                                'bg-green-500': chatMessage.senderConnectionStatusID=== 1,
+                                                'bg-red-500': chatMessage.senderConnectionStatusID === 2,
+                                                'bg-yellow-500': chatMessage.senderConnectionStatusID === 3,
+                                            }"></span>
+                                            <span *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                                'bg-green-500': chatMessage.receiverConnectionStatusID=== 1,
+                                                'bg-red-500': chatMessage.receiverConnectionStatusID === 2,
+                                                'bg-yellow-500': chatMessage.receiverConnectionStatusID === 3,
+                                            }"></span>
+                                        </div> 
                                     </div>
                                     <div class="ml-4 text-start w-full"> 
                                         <p *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span>  {{ 'Sent you a message' | translate }}</p>
@@ -243,7 +261,7 @@
                 <div class="flex items-center justify-between space-x-3 rtl:space-x-reverse" (click)="togglePopup()">
                     <div class="relative">
                         <img src="Images/person-dummy.jpg" class="rounded-full w-14" alt="Profile Photo">   
-                        <span class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                        <span *ngIf="this.User_Data_After_Login.type != 'octa'" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
                             'bg-green-500': currentState.id === 1,
                             'bg-red-500': currentState.id === 2,
                             'bg-yellow-500': currentState.id === 3,
@@ -262,7 +280,7 @@
                     class="absolute ltr:right-0 rtl:left-0 mt-2 w-60 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50">
                     <h3 class="font-semibold text-gray-700"> {{ 'Account Options' | translate }}</h3>
 
-                    <div class="relative mt-4">  
+                    <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="relative mt-4">  
                         <button (click)="toggleStateDropdown()"
                             class="text-start w-full hover:bg-gray-100 p-2 rounded-md flex justify-between items-center"> 
                             <span class="flex items-center">
@@ -302,7 +320,7 @@
                         <li *ngFor="let token of allTokens">
                             <button (click)="ChangeAccount(token.id)" [ngClass]="{'border bg-gray-100':token.key == userName && token.UserType == User_Type}"
                                 class="text-start w-full hover:bg-gray-100 p-2 rounded-md"> 
-                                <p class="primaryTxt">{{ token.key }}</p>
+                                <p class="primaryTxt truncate" [title]="token.key">{{ token.key }}</p>
                                 <p class="text-gray-500 text-xs">{{ token.UserType }}</p>
                             </button>
                         </li>
@@ -329,12 +347,12 @@
         </div>
 
         <div class="mt-6 flex flex-wrap justify-between mb-4">
-            <div class="flex flex-col w-full mb-4"> 
+            <!-- <div class="flex flex-col w-full mb-4"> 
                 <label class="primaryTxt mb-2 font-medium" for="OldPassword"> {{ 'Old Password' | translate }}</label>
                 <input id="OldPassword" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Old Password' | translate }}"
                 (input)="onoldPasswordChange()" autocomplete="new-password" [(ngModel)]="editpasss.oldPassword"/> 
                 <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
-            </div> 
+            </div>  -->
             <div class="flex flex-col w-full mb-4"> 
                 <label class="primaryTxt mb-2 font-medium" for="Password"> {{ 'Password' | translate }}</label>
                 <input id="Password" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }}  {{ 'the password' | translate }}"
@@ -343,7 +361,7 @@
             </div> 
             <div class="flex flex-col w-full mb-4"> 
                 <label class="primaryTxt mb-2 font-medium" for="confirmPassword"> {{ 'Confirm Password' | translate }}</label>
-                <input id="confirmPassword" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'the password' | translate }}  {{ 'Again' | translate }}"
+                <input id="confirmPassword" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'the password' | translate }} {{ 'Again' | translate }}"
                 [(ngModel)]="confirmPassword"/> 
             </div> 
         </div> 

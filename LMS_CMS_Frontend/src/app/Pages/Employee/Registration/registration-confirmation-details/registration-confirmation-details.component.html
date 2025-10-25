@@ -23,7 +23,7 @@
                         <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID == 0 && field.fieldTypeID != 6"
                             class="font-normal text-sm">{{answer.textAnswer}}</p>
                         <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID != 0 && field.fieldTypeID != 6"
-                            class="font-normal text-sm">{{answer.textAnswer}}</p>
+                            class="font-normal text-sm">{{answer.textAnswer}} {{answer.selectedFieldOptionName}}</p> 
                         <span *ngIf="answer.categoryFieldID == field.id && field.fieldTypeID == 6"
                             class="font-normal text-sm">
                             <a href={{answer.textAnswer}} class="secondaryTxt" target="_blank">

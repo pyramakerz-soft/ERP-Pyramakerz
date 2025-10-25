@@ -28,14 +28,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly GenerateBarCodeEan13 _generateBarCodeEan13;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public ShopItemController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, GenerateBarCodeEan13 generateBarCodeEan13, CheckPageAccessService checkPageAccessService)
+        public ShopItemController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, GenerateBarCodeEan13 generateBarCodeEan13, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _fileImageValidationService = fileImageValidationService;
             _generateBarCodeEan13 = generateBarCodeEan13;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
         ///////////////////////////////////////////
@@ -67,15 +69,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             List<ShopItemGetDTO> shopItemGetDTO = mapper.Map<List<ShopItemGetDTO>>(shopItem);
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var item in shopItemGetDTO)
-            {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(item.OtherImage))
-                {
-                    item.OtherImage = $"{serverUrl}{item.OtherImage.Replace("\\", "/")}";
-                }
+            { 
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -103,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("GetBySubCategoryID/{SubCategoryID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+           allowedTypes: new[] { "octa", "employee" , "parent" , "student" }
         )]
         public async Task<IActionResult> GetBySubCategoryID(long SubCategoryID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         { 
@@ -164,14 +160,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             foreach (var item in shopItemGetDTO)
             {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(item.OtherImage))
-                {
-                    item.OtherImage = $"{serverUrl}{item.OtherImage.Replace("\\", "/")}";
-                }
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -207,7 +197,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("GetBySubCategoryIDWithGenderAndGradeAndStudentID/{SubCategoryID}/{StudentID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee", "student" }
+           allowedTypes: new[] { "octa", "employee", "student" , "parent" }
         )]
         public async Task<IActionResult> GetBySubCategoryIDWithGenderAndGradeAndStudentID(long SubCategoryID, long StudentID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         {
@@ -302,14 +292,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             foreach (var item in shopItemGetDTO)
             {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(item.OtherImage))
-                {
-                    item.OtherImage = $"{serverUrl}{item.OtherImage.Replace("\\", "/")}";
-                }
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -371,14 +355,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var item in shopItemGetDTO)
             {
-                if (!string.IsNullOrEmpty(item.MainImage))
-                {
-                    item.MainImage = $"{serverUrl}{item.MainImage.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(item.OtherImage))
-                {
-                    item.OtherImage = $"{serverUrl}{item.OtherImage.Replace("\\", "/")}";
-                }
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
                 List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
                 if (shopItemColors.Count != 0)
@@ -406,7 +384,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "student" },
+            allowedTypes: new[] { "octa", "employee", "student" , "parent"},
             pages: new[] { "Shop Item", "Shop" }
          )]
         public async Task<IActionResult> GetByIdAsync(long id)
@@ -433,16 +411,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             ShopItemGetDTO shopItemDTO = mapper.Map<ShopItemGetDTO>(shopItem);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(shopItemDTO.MainImage))
-            {
-                shopItemDTO.MainImage = $"{serverUrl}{shopItemDTO.MainImage.Replace("\\", "/")}";
-            }
-            if (!string.IsNullOrEmpty(shopItemDTO.OtherImage))
-            {
-                shopItemDTO.OtherImage = $"{serverUrl}{shopItemDTO.OtherImage.Replace("\\", "/")}";
-            }
+            
+            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request, HttpContext);
+            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request, HttpContext);
 
             List<ShopItemColor> shopItemColors = Unit_Of_Work.shopItemColor_Repository.FindBy(s => s.ShopItemID == shopItemDTO.ID && s.IsDeleted != true);
             List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
@@ -499,16 +470,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             ShopItemGetDTO shopItemDTO = mapper.Map<ShopItemGetDTO>(shopItem);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(shopItemDTO.MainImage))
-            {
-                shopItemDTO.MainImage = $"{serverUrl}{shopItemDTO.MainImage.Replace("\\", "/")}";
-            }
-            if (!string.IsNullOrEmpty(shopItemDTO.OtherImage))
-            {
-                shopItemDTO.OtherImage = $"{serverUrl}{shopItemDTO.OtherImage.Replace("\\", "/")}";
-            }
+            shopItemDTO.MainImage = _fileService.GetFileUrl(shopItemDTO.MainImage, Request, HttpContext);
+            shopItemDTO.OtherImage = _fileService.GetFileUrl(shopItemDTO.OtherImage, Request, HttpContext);
 
             List<ShopItemColor> shopItemColors = Unit_Of_Work.shopItemColor_Repository.FindBy(s => s.ShopItemID == shopItemDTO.ID && s.IsDeleted != true);
             List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
@@ -647,52 +610,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Unit_Of_Work.shopItem_Repository.Add(ShopItem);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ShopItems");
-            var shopItemFolder = Path.Combine(baseFolder, newShopItem.EnName + "_" + ShopItem.ID);
-            var shopItemMainImageFolder = Path.Combine(shopItemFolder, "MainImage");
-            var shopItemOtherImageFolder = Path.Combine(shopItemFolder, "OtherImage");
-
-            if (newShopItem.MainImageFile != null | newShopItem.OtherImageFile != null)
-            {
-                if (!Directory.Exists(shopItemMainImageFolder))
-                {
-                    Directory.CreateDirectory(shopItemMainImageFolder);
-                }
-                if (!Directory.Exists(shopItemOtherImageFolder))
-                {
-                    Directory.CreateDirectory(shopItemOtherImageFolder);
-                }
-            }
-
             if (newShopItem.MainImageFile != null)
             {
-                if (newShopItem.MainImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(shopItemMainImageFolder, newShopItem.MainImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await newShopItem.MainImageFile.CopyToAsync(stream);
-                    }
-                }
+                ShopItem.MainImage = await _fileService.UploadFileAsync(newShopItem.MainImageFile, "Inventory/ShopItems/MainImage", ShopItem.ID, HttpContext); 
             }
-
             if (newShopItem.OtherImageFile != null)
             {
-                if (newShopItem.OtherImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(shopItemOtherImageFolder, newShopItem.OtherImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await newShopItem.OtherImageFile.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            if (newShopItem.MainImageFile != null)
-                ShopItem.MainImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + ShopItem.ID, "MainImage", newShopItem.MainImageFile.FileName);
-            if (newShopItem.OtherImageFile != null)
-                ShopItem.OtherImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + ShopItem.ID, "OtherImage", newShopItem.OtherImageFile.FileName);
-
+                ShopItem.OtherImage = await _fileService.UploadFileAsync(newShopItem.OtherImageFile, "Inventory/ShopItems/OtherImage", ShopItem.ID, HttpContext); 
+            } 
 
             if (newShopItem.BarCode == "Test")
             {
@@ -873,9 +798,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
-            string otherImageExists = existingShopItem.MainImage;
-            string mainImageLinkExists = existingShopItem.OtherImage;
-            string enNameExists = existingShopItem.EnName;
+            string mainImageLinkExists = existingShopItem.MainImage;
+            string otherImageLinkExists = existingShopItem.OtherImage;
 
             if (userTypeClaim == "employee")
             {
@@ -886,357 +810,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
-            if (newShopItem.MainImageFile != null || newShopItem.OtherImageFile != null)
+            if (newShopItem.MainImageFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ShopItems");
-
-                var oldShopItemFolder = Path.Combine(baseFolder, existingShopItem.EnName + "_" + existingShopItem.ID);
-                var oldShopItemMainImageFolder = Path.Combine(oldShopItemFolder, "MainImage");
-                var oldShopItemOtherImageFolder = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                var shopItemFolder = Path.Combine(baseFolder, newShopItem.EnName + "_" + existingShopItem.ID);
-                var shopItemMainImageFolder = Path.Combine(shopItemFolder, "MainImage");
-                var shopItemOtherImageFolder = Path.Combine(shopItemFolder, "OtherImage");
-
-                if (newShopItem.MainImageFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldShopItemFolder, "MainImage");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (newShopItem.OtherImageFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (newShopItem.MainImageFile != null && newShopItem.OtherImageFile != null)
-                {
-                    if (Directory.Exists(oldShopItemFolder))
-                    {
-                        Directory.Delete(oldShopItemMainImageFolder, true);
-                        Directory.Delete(oldShopItemOtherImageFolder, true);
-                        Directory.Delete(oldShopItemFolder, true);
-                    }
-
-                    if (!Directory.Exists(shopItemMainImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemMainImageFolder);
-                    }
-
-                    if (!Directory.Exists(shopItemOtherImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemOtherImageFolder);
-                    }
-
-                    newShopItem.MainImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "MainImage", newShopItem.MainImageFile.FileName);
-                    newShopItem.OtherImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "OtherImage", newShopItem.OtherImageFile.FileName);
-
-                    if (newShopItem.MainImageFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(shopItemMainImageFolder, newShopItem.MainImageFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await newShopItem.MainImageFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (newShopItem.OtherImageFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(shopItemOtherImageFolder, newShopItem.OtherImageFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await newShopItem.OtherImageFile.CopyToAsync(stream);
-                        }
-                    }
-                }
-                else if (newShopItem.MainImageFile != null)
-                {
-                    if (Directory.Exists(oldShopItemMainImageFolder))
-                    {
-                        Directory.Delete(oldShopItemMainImageFolder, true);
-                    }
-
-                    if (!Directory.Exists(shopItemMainImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemMainImageFolder);
-                    }
-
-                    if (!Directory.Exists(shopItemOtherImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemOtherImageFolder);
-                    }
-
-                    newShopItem.MainImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "MainImage", newShopItem.MainImageFile.FileName);
-
-                    if (newShopItem.MainImageFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(shopItemMainImageFolder, newShopItem.MainImageFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await newShopItem.MainImageFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (newShopItem.OtherImageFile == null && (newShopItem.OtherImage == null || existingShopItem.OtherImage == null))
-                    {
-                        newShopItem.OtherImage = null;
-                        string existingFilePath = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (newShopItem.OtherImageFile == null && existingShopItem.OtherImage != null)
-                    {
-                        newShopItem.OtherImage = existingShopItem.OtherImage;
-                    }
-
-                    if (newShopItem.EnName != enNameExists && existingShopItem.OtherImage != null)
-                    {
-                        var filesOther = Directory.GetFiles(oldShopItemOtherImageFolder);
-
-                        var fileName = "";
-
-                        foreach (var file in filesOther)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(shopItemOtherImageFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldShopItemOtherImageFolder);
-                        Directory.Delete(oldShopItemFolder);
-                        newShopItem.OtherImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "OtherImage", fileName);
-                    }
-                }
-                else if (newShopItem.OtherImageFile != null)
-                {
-                    if (Directory.Exists(oldShopItemOtherImageFolder))
-                    {
-                        Directory.Delete(oldShopItemOtherImageFolder, true);
-                    }
-
-                    if (!Directory.Exists(shopItemMainImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemMainImageFolder);
-                    }
-
-                    if (!Directory.Exists(shopItemOtherImageFolder))
-                    {
-                        Directory.CreateDirectory(shopItemOtherImageFolder);
-                    }
-
-                    newShopItem.OtherImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "OtherImage", newShopItem.OtherImageFile.FileName);
-
-                    if (newShopItem.OtherImageFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(shopItemOtherImageFolder, newShopItem.OtherImageFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await newShopItem.OtherImageFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (newShopItem.MainImageFile == null && (newShopItem.MainImage == null || existingShopItem.MainImage == null))
-                    {
-                        newShopItem.MainImage = null;
-                        string existingFilePath = Path.Combine(oldShopItemFolder, "MainImage");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (newShopItem.MainImageFile == null && existingShopItem.MainImage != null)
-                    {
-                        newShopItem.MainImage = existingShopItem.MainImage;
-                    }
-
-                    if (newShopItem.EnName != enNameExists && existingShopItem.MainImage != null)
-                    {
-                        var filesMain = Directory.GetFiles(oldShopItemMainImageFolder);
-
-                        var fileName = "";
-                        foreach (var file in filesMain)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(shopItemMainImageFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldShopItemMainImageFolder);
-                        Directory.Delete(oldShopItemFolder);
-                        newShopItem.MainImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "MainImage", fileName);
-                    }
-                }
-                else
-                {
-                    newShopItem.MainImage = null;
-                    newShopItem.OtherImage = null;
-                }
+                newShopItem.MainImage = await _fileService.ReplaceFileAsync(
+                    newShopItem.MainImageFile,
+                    mainImageLinkExists,
+                    "Inventory/ShopItems/MainImage",
+                    existingShopItem.ID,
+                    HttpContext
+                );
             }
             else
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ShopItems");
-
-                var oldShopItemFolder = Path.Combine(baseFolder, existingShopItem.EnName + "_" + existingShopItem.ID);
-                var oldShopItemMainImageFolder = Path.Combine(oldShopItemFolder, "MainImage");
-                var oldShopItemOtherImageFolder = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                var shopItemFolder = Path.Combine(baseFolder, newShopItem.EnName + "_" + existingShopItem.ID);
-                var shopItemMainImageFolder = Path.Combine(shopItemFolder, "MainImage");
-                var shopItemOtherImageFolder = Path.Combine(shopItemFolder, "OtherImage");
-
-                // Check if the path already there or null, as if null so he wants to delete the existing files
-                if (newShopItem.MainImage != null || newShopItem.OtherImage != null)
-                {
-                    // Rename the folder if it exists
-                    if (newShopItem.EnName != enNameExists)
-                    {
-                        if (Directory.Exists(oldShopItemFolder))
-                        {
-                            if (!Directory.Exists(shopItemMainImageFolder))
-                            {
-                                Directory.CreateDirectory(shopItemMainImageFolder);
-                            }
-                            if (!Directory.Exists(shopItemOtherImageFolder))
-                            {
-                                Directory.CreateDirectory(shopItemOtherImageFolder);
-                            }
-
-                            var filesMain = Directory.GetFiles(oldShopItemMainImageFolder);
-                            var filesOther = Directory.GetFiles(oldShopItemOtherImageFolder);
-                            if (newShopItem.OtherImage != null && existingShopItem.OtherImage != null)
-                            {
-                                var fileName = "";
-                                foreach (var file in filesOther)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(shopItemOtherImageFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                newShopItem.OtherImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "OtherImage", fileName);
-                            }
-                            else
-                            {
-                                newShopItem.OtherImage = null;
-                            }
-
-                            if (newShopItem.MainImage != null && existingShopItem.MainImage != null)
-                            {
-                                var fileName = "";
-
-                                foreach (var file in filesMain)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(shopItemMainImageFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                newShopItem.MainImage = Path.Combine("Uploads", "ShopItems", newShopItem.EnName + "_" + existingShopItem.ID, "MainImage", fileName);
-                            }
-                            else
-                            {
-                                newShopItem.MainImage = null;
-                            }
-
-                            Directory.Delete(oldShopItemMainImageFolder, true);
-                            Directory.Delete(oldShopItemOtherImageFolder, true);
-                            Directory.Delete(oldShopItemFolder, true);
-                        }
-                        else
-                        {
-                            if (newShopItem.OtherImage != null && existingShopItem.OtherImage != null)
-                            {
-                                newShopItem.OtherImage = existingShopItem.OtherImage;
-                            }
-                            else
-                            {
-                                newShopItem.OtherImage = null;
-                            }
-
-                            if (newShopItem.MainImage != null && existingShopItem.MainImage != null)
-                            {
-                                newShopItem.MainImage = existingShopItem.MainImage;
-                            }
-                            else
-                            {
-                                newShopItem.MainImage = null;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (newShopItem.MainImage != null && newShopItem.OtherImage != null)
-                        {
-                            newShopItem.MainImage = existingShopItem.MainImage;
-                            newShopItem.OtherImage = existingShopItem.OtherImage;
-                        }
-                        else if (newShopItem.MainImage == null && newShopItem.OtherImage == null)
-                        {
-                            newShopItem.MainImage = null;
-                            string existingFilePath = Path.Combine(oldShopItemFolder, "MainImage");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-
-                            newShopItem.OtherImage = null;
-                            string existingFilePathOther = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                            if (System.IO.File.Exists(existingFilePathOther))
-                            {
-                                System.IO.File.Delete(existingFilePathOther); // Delete the old file
-                            }
-                        }
-                        else if (newShopItem.MainImage == null)
-                        {
-                            newShopItem.MainImage = null;
-                            string existingFilePath = Path.Combine(oldShopItemFolder, "MainImage");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                        else if (newShopItem.OtherImage == null)
-                        {
-                            newShopItem.OtherImage = null;
-                            string existingFilePath = Path.Combine(oldShopItemFolder, "OtherImage");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (Directory.Exists(oldShopItemFolder))
-                    {
-                        Directory.Delete(oldShopItemMainImageFolder, true);
-                        Directory.Delete(oldShopItemOtherImageFolder, true);
-                        Directory.Delete(oldShopItemFolder, true);
-                    }
-                    newShopItem.MainImage = null;
-                    newShopItem.OtherImage = null;
-                }
+                newShopItem.MainImage = mainImageLinkExists;
             }
-
-
+            
+            if (newShopItem.OtherImageFile != null)
+            {
+                newShopItem.OtherImage = await _fileService.ReplaceFileAsync(
+                    newShopItem.OtherImageFile,
+                    otherImageLinkExists,
+                    "Inventory/ShopItems/OtherImage",
+                    existingShopItem.ID,
+                    HttpContext
+                );
+            }
+            else
+            {
+                newShopItem.OtherImage = otherImageLinkExists;
+            }
+             
             mapper.Map(newShopItem, existingShopItem);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             existingShopItem.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

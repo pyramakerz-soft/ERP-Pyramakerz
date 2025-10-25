@@ -13,63 +13,68 @@ import { routes } from '../../../app.routes';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { RealTimeRequestServiceService } from '../../../Services/shared/real-time-request-service.service';
 import { RealTimeChatServiceService } from '../../../Services/shared/real-time-chat-service.service';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule , TranslateModule],
+  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule, TranslateModule],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent {
-  menuItems: { label: string; route?: string; icon?:string; subItems?: { label: string; route: string; icon?:string }[] }[] = [];
+  menuItems: { label: string; route?: string; icon?: string; subItems?: { label: string; route: string; icon?: string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
-  isRtl: boolean = false;
-  subscription!: Subscription;
+  isRtl: boolean = false; 
+  private subscriptions = new Subscription();
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
   isLanguageInitialized = false
-  constructor(public accountService: AccountService,private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
-    private communicationService: NewTokenService, private translate: TranslateService , private realTimeService: RealTimeNotificationServiceService, 
+  constructor(public accountService: AccountService, private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService,
+    private communicationService: NewTokenService, private translate: TranslateService, private realTimeService: RealTimeNotificationServiceService,
     private realTimeRequestService: RealTimeRequestServiceService, private realTimeChatServiceService: RealTimeChatServiceService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
     this.languageService.setLanguage(currentDir);
     this.isRtl = document.documentElement.dir === 'rtl';
 
-    this.communicationService.action$.subscribe(async (state) => {
-      await this.GetInfo();
-    });  
-    
+    this.communicationService.action$.subscribe((state) => {
+      this.GetInfo();
+    });
+
+    this.subscriptions.add(
+      this.communicationService.action$.subscribe(() => this.GetInfo())
+    );
+
+    this.subscriptions.add(
+      this.languageService.language$.subscribe(direction => {
+        this.isRtl = direction === 'rtl';
+        this.GetInfo();
+      })
+    );
+
     this.realTimeService.startConnection();
     this.realTimeRequestService.startRequestConnection();
     this.realTimeChatServiceService.startChatMessageConnection();
-     
-    this.subscription = this.languageService.language$.subscribe(async (direction) => {
-      this.isRtl = direction === 'rtl'; 
-      await this.GetInfo();
-    }); 
-      
-    await this.GetInfo();
+
+    this.GetInfo();
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-    this.realTimeRequestService.stopConnection(); 
-    this.realTimeChatServiceService.stopConnection(); 
-     
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  } 
+    this.realTimeService.stopConnection();
+    this.realTimeRequestService.stopConnection();
+    this.realTimeChatServiceService.stopConnection();
 
-  translations: { [key: string]: { en: string; ar?: string } } = {
-    'Dashboard Student': { en: 'Dashboard Student', ar: 'لوحة تحكم الطالب' },
-    'Dashboard Parent': { en: 'Dashboard Parent', ar: 'لوحة تحكم ولي الأمر' },
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
+    }
+  }
+
+  translations: { [key: string]: { en: string; ar?: string } } = { 
+    'Dashboard': { en: 'Dashboard', ar: 'لوحة التحكم' },
     'ECommerce': { en: 'E-Commerce', ar: 'التجارة الإلكترونية' },
     'The Shop': { en: 'The Shop', ar: 'المتجر' },
     'LMS': { en: 'LMS', ar: 'نظام إدارة التعلم' },
@@ -98,164 +103,217 @@ export class MainLayoutComponent {
   translateFunction(key: string) {
     const translation = this.translations[key];
     if (!translation) return key;
-    
-    return this.isRtl && translation.ar ? translation.ar : translation.en;
-  } 
 
-  async GetInfo(){
-    this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(); 
+    return this.isRtl && translation.ar ? translation.ar : translation.en;
+  }
+
+  GetInfo() {
+    this.User_Data_After_Login = this.accountService.Get_Data_Form_Token();
 
     if (this.User_Data_After_Login.type == "employee") {
-      await this.Get_Pages_With_RoleID();
+      this.Get_Pages_With_RoleID();
     } else if (this.User_Data_After_Login.type == "student") {
-      this.menuItems = [
+      this.menuItems = [ 
         {
-          label: this.translateFunction('Dashboard Student'), 
-          route: '#', 
-          icon: 'Dashboard'
-        },
-        {
-          label: this.translateFunction('ECommerce'), 
+          label: this.translateFunction('ECommerce'),
           subItems: [
             {
-              label: this.translateFunction('The Shop'), 
-              route: 'Ecommerce/The Shop'
+              label: this.translateFunction('The Shop'),
+              route: 'The Shop'
             }
-          ], 
+          ],
           icon: 'E-Commerce'
         },
         {
-          label: this.translateFunction('LMS'), 
+          label: this.translateFunction('LMS'),
           subItems: [
             {
-              label: this.translateFunction('Subject'), 
+              label: this.translateFunction('Subject'),
               route: 'Subject'
+            },
+            {
+              label: this.translateFunction('Certificate'),
+              route: 'Student Certificate'
+            },
+            {
+              label: this.translateFunction('Social Worker Cerificates'),
+              route: 'Certificate To Student Report'
+            },
+            {
+              label: this.translateFunction('Social Worker Medals'),
+              route: 'Students Medal'
+            },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
+            },
+            {
+              label: this.translateFunction('Time Table'),
+              route: 'Time Table'
+            },
+            {
+              label: this.translateFunction('Lesson Live'),
+              route: 'Lesson Live'
             }
-          ], 
+          ],
           icon: 'LMS'
         }
       ];
     } else if (this.User_Data_After_Login.type == "parent") {
       this.menuItems = [
         {
-          label: this.translateFunction('Dashboard Parent'), 
-          route: '#', 
+          label: this.translateFunction('Dashboard'),
+          route: '#',
           icon: 'Dashboard'
         },
         {
-          label: this.translateFunction('Registrations'), 
+          label: this.translateFunction('Registrations'),
           subItems: [
             {
-              label: this.translateFunction('Registration Form'), 
+              label: this.translateFunction('Registration Form'),
               route: 'Registration Form'
             },
             {
-              label: this.translateFunction('Admission Test'), 
+              label: this.translateFunction('Admission Test'),
               route: 'Admission Test'
             },
             {
-              label: this.translateFunction('Interview Registration'), 
+              label: this.translateFunction('Interview Registration'),
               route: 'Interview Registration'
             }
-          ], 
+          ],
           icon: 'Registration'
         },
         {
-          label: this.translateFunction('LMS'), 
+          label: this.translateFunction('LMS'),
           subItems: [
             {
-              label: this.translateFunction('Live Sessions'), 
-              route: 'Live Sessions'
+              label: this.translateFunction('Certificate'),
+              route: 'Certificate'
             },
             {
-              label: this.translateFunction('Subjects'), 
-              route: 'Subjects'
+              label: this.translateFunction('Student Daily Performance'),
+              route: 'Student Daily Performance Report'
             },
             {
-              label: this.translateFunction('Reports'), 
-              route: 'Reports'
+              label: this.translateFunction('Student Issue'),
+              route: 'Student Issue Report'
+            },
+            {
+              label: this.translateFunction('Lessons'),
+              route: 'Lessons'
             }
-          ], 
+          ],
           icon: 'LMS'
         },
         {
-          label: this.translateFunction('Virtual Meetings'), 
+          label: this.translateFunction('Social Worker'),
           subItems: [
             {
-              label: this.translateFunction('Discussion Room'), 
-              route: 'Discussion Room'
+              label: this.translateFunction('Conducts'),
+              route: 'Conducts Report'
+            },
+            {
+              label: this.translateFunction('Attendance'),
+              route: 'Attendance Report'
+            },
+            {
+              label: this.translateFunction('Students Certificate'),
+              route: 'Student Report'
+            },
+            {
+              label: this.translateFunction('Students Medal'),
+              route: 'Students Medal'
+            },
+            {
+              label: this.translateFunction('Appointment'),
+              route: 'Appointment'
+            },
+            {
+              label: this.translateFunction('Meetings'),
+              route: 'Meetings'
             }
-          ], 
-          icon: 'Virtual Meetings'
-        }, 
+          ],
+          icon: 'Registration'
+        },
         {
-          label: this.translateFunction('Clinic'), 
+          label: this.translateFunction('Accounting'),
           subItems: [
             {
-              label: this.translateFunction('Medical History'), 
+              label: this.translateFunction('Account Statement'),
+              route: 'Account Statement'
+            }
+          ],
+          icon: 'Accounting'
+        },
+        {
+          label: this.translateFunction('Clinic'),
+          subItems: [
+            {
+              label: this.translateFunction('Medical History'),
               route: 'Medical History'
             },
             {
-              label: this.translateFunction('Medical Report'), 
+              label: this.translateFunction('Medical Report'),
               route: 'Medical Report'
             }
-          ], 
+          ],
           icon: 'Clinic'
         },
         {
-          label: this.translateFunction('E-Commerce'), 
+          label: this.translateFunction('E-Commerce'),
           subItems: [
             {
-              label: this.translateFunction('The Shop'), 
-              route: 'Ecommerce/The Shop'
+              label: this.translateFunction('The Shop'),
+              route: 'The Shop'
             },
             {
-              label: this.translateFunction('Cart'), 
-              route: 'Ecommerce/Cart'
+              label: this.translateFunction('Cart'),
+              route: 'Cart'
             },
             {
-              label: this.translateFunction('Order'), 
-              route: 'Ecommerce/Order'
+              label: this.translateFunction('Order'),
+              route: 'Order'
             }
-          ], 
+          ],
           icon: 'E-Commerce'
         },
       ];
     } else if (this.User_Data_After_Login.type == "octa") {
       this.menuItems = [
         {
-          label: this.translateFunction('Administration'), 
+          label: this.translateFunction('Administration'),
           subItems: [
             {
-              label: this.translateFunction('Domains'), 
+              label: this.translateFunction('Domains'),
               route: "Domains"
             },
             {
-              label: this.translateFunction('School Types'), 
+              label: this.translateFunction('School Types'),
               route: "School Types"
             },
             {
-              label: this.translateFunction('School'), 
+              label: this.translateFunction('School'),
               route: "School"
             },
             {
-              label: this.translateFunction('Account'), 
+              label: this.translateFunction('Account'),
               route: "Account"
             }
-          ], 
+          ],
           icon: "Administration"
         }
       ];
     }
-  } 
- 
+  }
+
   Get_Pages_With_RoleID() {
     this.roleDetailsService.Get_Pages_With_RoleID(this.User_Data_After_Login.role).subscribe(
-      (data:any) => {
-        this.menuItemsForEmployee = data  
+      (data: any) => {
+        this.menuItemsForEmployee = data
         this.menuService.updateMenuItemsForEmployee(this.menuItemsForEmployee);
-      } ,(error)=>{
+      }, (error) => {
         this.menuItemsForEmployee = [];
       });
-  } 
+  }
 }

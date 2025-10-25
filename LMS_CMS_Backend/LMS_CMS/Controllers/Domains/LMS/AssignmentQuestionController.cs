@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.ECommerce;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -19,21 +20,22 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public AssignmentQuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public AssignmentQuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
         /////////////////////////////////////////////
 
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Assignment" }
+              allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment" }
           )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -61,7 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.AssignmentQuestions)
                                    .ThenInclude(aq => aq.QuestionBank)
-                                     .ThenInclude(qb => qb.SubBankQuestions)
+                                     .ThenInclude(qb => qb.SubBankQuestions)        
                    );
 
             if (Assignment == null)
@@ -72,13 +74,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
+            if (AssignmentGetDTO.LinkFile != null)
             {
-                AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
+                AssignmentGetDTO.LinkFile = _fileService.GetFileUrl(AssignmentGetDTO.LinkFile, Request, HttpContext);
             }
-
             return Ok(AssignmentGetDTO);
         }
 
@@ -86,9 +85,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "" }
+            allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> Add(AssignmentQuestionAddDTO newData)
         {
@@ -274,9 +272,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           allowDelete: 1
-           // ,
-           //pages: new[] { "" }
+           allowDelete: 1,
+           pages: new[] { "Assignment" }
        )]
         public IActionResult Delete(long id)
         {
@@ -307,14 +304,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Floor", roleId, userId, floor);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Assignment", roleId, userId, assignmentQuestion);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             assignmentQuestion.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -339,6 +336,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.assignmentQuestion_Repository.Update(assignmentQuestion);
             Unit_Of_Work.SaveChanges();
             return Ok();
-        }
+        }   
     }
 }

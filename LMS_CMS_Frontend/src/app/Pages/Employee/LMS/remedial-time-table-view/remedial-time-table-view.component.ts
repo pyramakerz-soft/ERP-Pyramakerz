@@ -91,8 +91,8 @@ export class RemedialTimeTableViewComponent {
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
     public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
-        private languageService: LanguageService,
-        private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -137,8 +137,13 @@ export class RemedialTimeTableViewComponent {
       });
       this.remedialClasses.forEach(cl => {
         const used = classUsageCount[cl.id] || 0;
-        cl.numberOfSession -= used;
-        if (cl.numberOfSession < 0) {
+        if(cl.numberOfSession){
+          cl.numberOfSession -= used;
+        }else{
+          cl.numberOfSession = 0;
+          cl.numberOfSession -= used;
+        }
+        if (cl.numberOfSession && cl.numberOfSession < 0) {
           cl.numberOfSession = 0
         }
       });
@@ -207,7 +212,7 @@ export class RemedialTimeTableViewComponent {
     }
 
     const droppedClass = this.remedialClasses.find(s => s.id === draggedItem.id);
-    if (droppedClass && droppedClass.numberOfSession > 0) {
+    if (droppedClass && droppedClass.numberOfSession && droppedClass.numberOfSession > 0) {
       droppedClass.numberOfSession--;
     } else if (droppedClass && droppedClass.numberOfSession == 0) {
       this.remedialClasses = this.remedialClasses.filter(s => s.id != draggedItem.id);
@@ -367,13 +372,13 @@ export class RemedialTimeTableViewComponent {
     const data = this.remedialTimeTable.groupDays.map((day: any) => {
       const row: any = { Day: day.dayName };
       for (let i = 0; i < this.remedialTimeTable.maximumPeriodCountRemedials; i++) {
-        const period = day.periods.find((p: any) => p.periodIndex === i);
+        // FIX: use i + 1 if periodIndex starts from 1
+        const period = day.periods.find((p: any) => p.periodIndex === i + 1);
         const classes = period?.remedialTimeTableClasses || [];
 
-        // Join multiple classes in same period
-        row[`Session ${i + 1}`] = classes.map((c: any) =>
-          `${c.remedialClassroomName} / ${c.teacherEnName}`
-        ).join(', ');
+        row[`Session ${i + 1}`] = classes
+          .map((c: any) => `${c.remedialClassroomName} / ${c.teacherEnName}`)
+          .join(', ');
       }
       return row;
     });
@@ -466,7 +471,7 @@ export class RemedialTimeTableViewComponent {
       filename: `${this.remedialTimeTable?.name ?? 'RemedialTimeTable'}.xlsx`,
       tables: [
         {
-          title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
+          // title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
           headers: headerKeyMap.map(h => h.header),
           data: dataMatrix   // ✅ array of arrays
         }

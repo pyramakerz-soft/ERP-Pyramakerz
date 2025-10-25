@@ -27,10 +27,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<TimeTable[]>(
-      `${this.baseUrl}/TimeTable/BySchoolId/${SchoolId}`,
-      { headers }
-    );
+    return this.http.get<TimeTable[]>(`${this.baseUrl}/TimeTable/BySchoolId/${SchoolId}`,{ headers });
   }
 
   GetByID(id: number, DomainName: string) {
@@ -42,7 +39,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(`${this.baseUrl}/TimeTable/${id}`, { headers });
+    return this.http.get<{ data: TimeTableDayGroupDTO[], maxPeriods: number ,timeTableName:string }>(`${this.baseUrl}/TimeTable/${id}`, { headers });
   }
 
 
@@ -55,7 +52,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(`${this.baseUrl}/TimeTable/${id}/${date}`, { headers });
+    return this.http.get<{ data: TimeTableDayGroupDTO[], maxPeriods: number ,timeTableName:string }>(`${this.baseUrl}/TimeTable/${id}/${date}`, { headers });
   }
 
 
@@ -68,10 +65,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Employee[]>(
-      `${this.baseUrl}/TimeTable/GetAllTeachersinThisTimetable/${id}`,
-      { headers }
-    );
+    return this.http.get<Employee[]>(`${this.baseUrl}/TimeTable/GetAllTeachersinThisTimetable/${id}`,{ headers });
   }
 
   GetAllClassesinThisTimetable(id: number, DomainName: string) {
@@ -83,10 +77,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Classroom[]>(
-      `${this.baseUrl}/TimeTable/GetAllClassesinThisTimetable/${id}`,
-      { headers }
-    );
+    return this.http.get<Classroom[]>(`${this.baseUrl}/TimeTable/GetAllClassesinThisTimetable/${id}`,{ headers });
   }
 
   GetByIdForClassAsync(Tid: number, ClassId: number, DomainName: string) {
@@ -98,10 +89,19 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(
-      `${this.baseUrl}/TimeTable/GetByIdForClassAsync/${Tid}/${ClassId}`,
-      { headers }
-    );
+    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForClassAsync/${Tid}/${ClassId}`,{ headers });
+  }
+
+  GetByIdForStudentIdAsync(studentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForStudentIdAsync/${studentId}`,{ headers });
   }
 
   GetByIdForTeacherAsync(Tid: number, ClassId: number, DomainName: string) {
@@ -113,10 +113,7 @@ export class TimeTableService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(
-      `${this.baseUrl}/TimeTable/GetByIdForTeacherAsync/${Tid}/${ClassId}`,
-      { headers }
-    );
+    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForTeacherAsync/${Tid}/${ClassId}`,{ headers });
   }
 
   Add(TimeTable: TimeTable, DomainName: string) {
@@ -129,10 +126,7 @@ export class TimeTableService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.post(`${this.baseUrl}/TimeTable`, TimeTable, {
-      headers: headers,
-      responseType: 'text' as 'json',
-    });
+    return this.http.post(`${this.baseUrl}/TimeTable`, TimeTable, { headers: headers, responseType: 'text' as 'json',});
   }
 
   EditIsFavourite(Id: number, IsFav: boolean, DomainName: string) {
@@ -144,11 +138,7 @@ export class TimeTableService {
       .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(
-      `${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`,
-      {},
-      { headers }
-    );
+    return this.http.put(`${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`,{},{ headers });
   }
 
   Edit(timetable: TimeTableReplace[], DomainName: string) {
@@ -160,9 +150,7 @@ export class TimeTableService {
       .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/TimeTable/Replace`, timetable, {
-      headers,
-    });
+    return this.http.put(`${this.baseUrl}/TimeTable/Replace`, timetable, {headers,});
   }
 
   Delete(id: number, DomainName: string) {

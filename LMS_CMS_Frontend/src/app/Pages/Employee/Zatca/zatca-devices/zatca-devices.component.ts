@@ -16,10 +16,11 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../Services/api.service';
 import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-zatca-devices',
   standalone: true,
@@ -56,7 +57,7 @@ export class ZatcaDevicesComponent implements OnInit {
   keysArray: string[] = ['id', 'pcName', 'serialNumber', 'schoolName'];
   validationErrors: { [key: string]: string } = {};
   
-  otp: number|null = null;
+  otp: number| null = null;
   deviceToGenerateID: number = 0;
 
   constructor( 
@@ -71,7 +72,7 @@ export class ZatcaDevicesComponent implements OnInit {
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
     private realTimeService: RealTimeNotificationServiceService,
-
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
@@ -104,17 +105,44 @@ export class ZatcaDevicesComponent implements OnInit {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   async GetTableData() {
@@ -139,40 +167,36 @@ export class ZatcaDevicesComponent implements OnInit {
     this.openModal();
   }
 
-Edit(id: number) {
-  this.mode = "edit";
-  this.isLoading = true;
-  
-  this.schoolPCsService.GetById(id, this.DomainName).subscribe({
-    next: (device) => { 
-      this.zatcaDevice = new ZatcaDevice(
-        device.id,
-        device.pcName,
-        device.serialNumber,
-        this.getSchoolIdFromName(device.school), // Convert school name to ID
-        device.school,
-        device.certificateDate
-      ); 
-      this.isLoading = false;
-      this.openModal();
-    },
-    error: (error) => { 
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load device for editing',
-        confirmButtonText: 'Okay'
-      });
-    }
-  });
-}
+  Edit(id: number) {
+    this.mode = "edit";
+    this.isLoading = true;
+    
+    this.schoolPCsService.GetById(id, this.DomainName).subscribe({
+      next: (device) => { 
+        this.zatcaDevice = new ZatcaDevice(
+          device.id,
+          device.pcName,
+          device.serialNumber,
+          this.getSchoolIdFromName(device.school), // Convert school name to ID
+          device.school,
+          device.certificateDate
+        ); 
+        this.isLoading = false;
+        this.openModal();
+      },
+      error: (error) => { 
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to load device for editing');
+        this.showErrorAlert(errorMessage);
+      }
+    });
+  }
 
-// Helper method to find school ID by name
-private getSchoolIdFromName(schoolName: string): number {
-  const school = this.schools.find(s => s.name === schoolName);
-  return school ? school.id : 0;
-}
+  // Helper method to find school ID by name
+  private getSchoolIdFromName(schoolName: string): number {
+    const school = this.schools.find(s => s.name === schoolName);
+    return school ? school.id : 0;
+  }
 
   openModal() {
     this.isModalVisible = true;
@@ -186,13 +210,13 @@ private getSchoolIdFromName(schoolName: string): number {
 
   openCertificate(devideID:number) {
     this.isCertificateModalVisible = true;
-    this.deviceToGenerateID = devideID
+    this.deviceToGenerateID = devideID;
   }
 
   closeCertificateModal() {
     this.isCertificateModalVisible = false;
-    this.deviceToGenerateID = 0
-    this.otp = null
+    this.deviceToGenerateID = 0;
+    this.otp = null;
   }
 
   isFormValid(): boolean {
@@ -200,17 +224,17 @@ private getSchoolIdFromName(schoolName: string): number {
     let isValid = true;
 
     if (!this.zatcaDevice.pcName) {
-      this.validationErrors['pcName'] = '*PC Name is required';
+      this.validationErrors['pcName'] = this.translate.instant('PC Name is required');
       isValid = false;
     }
 
     if (!this.zatcaDevice.serialNumber) {
-      this.validationErrors['serialNumber'] = '*Serial Number is required';
+      this.validationErrors['serialNumber'] = this.translate.instant('Serial Number is required');
       isValid = false;
     }
 
     if (!this.zatcaDevice.schoolId) {
-      this.validationErrors['schoolId'] = '*School is required';
+      this.validationErrors['schoolId'] = this.translate.instant('School is required');
       isValid = false;
     }
 
@@ -236,140 +260,119 @@ private getSchoolIdFromName(schoolName: string): number {
     }
   }
 
-AddNewDevice() {
-  // Create a complete ZatcaDevice object
-  const payload = new ZatcaDevice(
-    0, // id will be assigned by server
-    this.zatcaDevice.pcName,
-    this.zatcaDevice.serialNumber,
-    Number(this.zatcaDevice.schoolId),
-    '', // schoolName can be empty
-  ); 
-  this.schoolPCsService.Create(payload, this.DomainName).subscribe({
-    next: () => {
-      this.GetTableData();
-      this.closeModal();
-      this.isLoading = false;
-    },
-    error: (error) => { 
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.error?.message || 'Failed to create device',
-        confirmButtonText: 'Okay'
-      });
-    }
-  });
-}
+  AddNewDevice() {
+    // Create a complete ZatcaDevice object
+    const payload = new ZatcaDevice(
+      0, // id will be assigned by server
+      this.zatcaDevice.pcName,
+      this.zatcaDevice.serialNumber,
+      Number(this.zatcaDevice.schoolId),
+      '', // schoolName can be empty
+    ); 
+    this.schoolPCsService.Create(payload, this.DomainName).subscribe({
+      next: () => {
+        this.GetTableData();
+        this.closeModal();
+        this.isLoading = false;
+        this.showSuccessAlert(this.translate.instant('Device created successfully'));
+      },
+      error: (error) => { 
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to create device');
+        this.showErrorAlert(errorMessage);
+      }
+    });
+  }
 
-Save() {
-  const selectedSchool = this.schools.find(s => s.id === Number(this.zatcaDevice.schoolId));
-  const payload = {
-    id: this.zatcaDevice.id,
-    pcName: this.zatcaDevice.pcName,
-    serialNumber: this.zatcaDevice.serialNumber,
-    schoolId: Number(this.zatcaDevice.schoolId),
-    school: selectedSchool ? selectedSchool.name : '',
-    certificateDate: this.zatcaDevice.certificateDate
-  }; 
+  Save() {
+    const selectedSchool = this.schools.find(s => s.id === Number(this.zatcaDevice.schoolId));
+    const payload = {
+      id: this.zatcaDevice.id,
+      pcName: this.zatcaDevice.pcName,
+      serialNumber: this.zatcaDevice.serialNumber,
+      schoolId: Number(this.zatcaDevice.schoolId),
+      school: selectedSchool ? selectedSchool.name : '',
+      certificateDate: this.zatcaDevice.certificateDate
+    }; 
 
-  this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
-    next: () => {
-      this.GetTableData();
-      this.closeModal();
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'Device updated successfully',
-        confirmButtonText: 'Okay'
-      });
-    },
-    error: (error) => {
-      console.error('Update error:', error);
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.error?.message || 'Failed to update device',
-        confirmButtonText: 'Okay'
-      });
-    }
-  });
-}
+    this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
+      next: () => {
+        this.GetTableData();
+        this.closeModal();
+        this.isLoading = false;
+        this.showSuccessAlert(this.translate.instant('Device updated successfully'));
+      },
+      error: (error) => {
+        console.error('Update error:', error);
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to update device');
+        this.showErrorAlert(errorMessage);
+      }
+    });
+  }
 
-Delete(id: number) {
-  Swal.fire({
-    title: 'Are you sure you want to delete this device?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#FF7519',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.isLoading = true;
-      this.schoolPCsService.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.GetTableData();
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Device has been deleted.',
-            confirmButtonText: 'Okay'
-          });
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Delete error details:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to delete device',
-            confirmButtonText: 'Okay'
-          });
-        }
-      });
-    }
-  });
-}
+  Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this device?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+    
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.schoolPCsService.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.GetTableData();
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Device deleted successfully'));
+          },
+          error: (error) => {
+            this.isLoading = false;
+            console.error('Delete error details:', error);
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete device');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  }
 
   generateCertificate() {
+    const generateTitle = this.translate.instant('Generate Certificate');
+    const generateText = this.translate.instant('Are you sure you want to generate a certificate for this device?');
+    const generateButton = this.translate.instant('Generate');
+    const cancelButton = this.translate.instant('Cancel');
+    
     Swal.fire({
-      title: 'Generate Certificate',
-      text: 'Are you sure you want to generate a certificate for this device?',
+      title: generateTitle,
+      text: generateText,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#FF7519',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Generate',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: generateButton,
+      cancelButtonText: cancelButton
     }).then((result) => {
       if (result.isConfirmed && this.otp) {
         this.isLoading = true;
         this.zatcaService.generateCertificate(this.deviceToGenerateID, this.otp, this.DomainName).subscribe({
           next: () => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Certificate generated successfully',
-              confirmButtonText: 'Okay'
-            });
+            this.showSuccessAlert(this.translate.instant('Certificate generated successfully'));
             this.GetTableData(); // Refresh table data
-            this.closeCertificateModal()
+            this.closeCertificateModal();
           },
           error: (error) => {  
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error || 'Failed to generate certificate',
-              confirmButtonText: 'Okay'
-            });
+            const errorMessage = error.error?.message || this.translate.instant('Failed to generate certificate');
+            this.showErrorAlert(errorMessage);
           }
         });
       }

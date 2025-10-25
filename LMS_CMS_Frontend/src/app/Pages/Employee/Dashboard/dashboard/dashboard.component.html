@@ -1,0 +1,79 @@
+<div class="min-h-screen">
+    <!-- Filter Header -->
+    <app-filter-header (selectionChanged)="onSelection($event)"></app-filter-header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading">
+        <!-- Top Row: Today's Data -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <!-- Total Students -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Total' | translate }} {{ 'Students' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ todaysData?.studentCountInCurrentActive || 0 }}</h2>
+            </div>
+            
+            <!-- Total Classrooms -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Total' | translate }} {{ 'Classroom Count' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ todaysData?.classroomCountInCurrentActive || 0 }}</h2>
+            </div>
+            
+            <!-- Inventory Low Items -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Inventory Low Items Today' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ todaysData?.inventoryLowItemsToday || 0 }}</h2>
+            </div>
+        </div>
+
+        <!-- Second Row: Dashboard Data Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <!-- Visits in Clinic -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Visits In Clinic' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.followUpCount || 0 }}</h2>
+            </div>
+            
+            <!-- Fees Collected -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Fees Collected' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.feesAmount || 0 | number:'1.0-0' }}</h2>
+            </div>
+            
+            <!-- HR Salary -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'HR Salary' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.totalSalaries || 0 | number:'1.0-0' }}</h2>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Pie Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <!-- Assignment Submission Chart -->
+            <app-assignment-pie [submissionsCount]="dashboardData?.submissionsCount"></app-assignment-pie>
+            
+            <!-- Registration Chart -->
+            <app-chart-pie [registrationFormStateCount]="dashboardData?.registrationFormStateCount"></app-chart-pie>
+            
+            <!-- Request Status Progress Bar -->
+            <app-request-progress [requestStateCount]="dashboardData?.requestStateCount"></app-request-progress>
+        </div>
+
+        <!-- Charts Row 2: Inventory Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <!-- Inventory Purchase -->
+            <app-revenue-chart [inventoryPurchase]="dashboardData?.inventoryPurchase"></app-revenue-chart>
+            
+            <!-- Inventory Sales -->
+            <app-revenue-chart-sales [inventorySales]="dashboardData?.inventorySales"></app-revenue-chart-sales>
+        </div>
+
+        <!-- Bottom Section: Category Rankings -->
+        <div class="grid grid-cols-1 gap-4">
+            <app-category-rankings [categoryRankings]="dashboardData?.categoryRankings"></app-category-rankings>
+        </div>
+    </div>
+</div>

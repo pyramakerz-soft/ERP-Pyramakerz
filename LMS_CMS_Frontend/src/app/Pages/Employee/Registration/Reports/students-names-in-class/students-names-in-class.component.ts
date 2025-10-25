@@ -260,13 +260,23 @@ export class StudentsNamesInClassComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => this.showPDF = false, 2000);
-    }, 500);
-  }
+  preparePDFData(): any[] {
+  return this.StudentData.map((student) => ({
+    'ID': student.id,
+    'Name': student.en_name,
+    'Mobile': student.mobile,
+    'Nationality': student.nationalityEnName,
+    'Gender': student.genderName
+  }));
+}
+
+DownloadAsPDF() {
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => this.showPDF = false, 2000);
+  }, 500);
+}
 
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
@@ -281,7 +291,7 @@ export class StudentsNamesInClassComponent {
         { key: 'Class', value: this.class.name },
         { key: 'Number of Students', value: this.studentsCount },
         { key: 'Date', value: this.date },
-        { key: 'Session', value: '2024/2025' },
+        // { key: 'Session', value: '2024/2025' },
         { key: 'School', value: this.school.name },
         { key: 'Year', value: this.AcademicYearName },
         { key: 'Grade', value: this.GradeName }
@@ -291,8 +301,8 @@ export class StudentsNamesInClassComponent {
       filename: "List of students' names in class.xlsx",
       tables: [
         {
-          title: "Students List",
-          headers: ['id', 'en_name', 'mobile', 'nationalityName', 'genderName'],
+          // title: "Students List",
+          headers: ['id', 'en_name', 'mobile', 'Nationality', 'genderName'],
           data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
         }
       ]

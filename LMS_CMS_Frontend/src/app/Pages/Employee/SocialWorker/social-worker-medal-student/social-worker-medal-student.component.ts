@@ -6,7 +6,7 @@ import { SocialWorkerMedal } from '../../../../Models/SocialWorker/social-worker
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
@@ -89,6 +89,7 @@ export class SocialWorkerMedalStudentComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
+    private translate: TranslateService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
     public SocialWorkerMedalStudentServ: SocialWorkerMedalStudentService,
@@ -210,7 +211,7 @@ export class SocialWorkerMedalStudentComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' }
           });
@@ -324,13 +325,13 @@ export class SocialWorkerMedalStudentComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Medal?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.SocialWorkerMedalStudentServ.Delete(id, this.DomainName).subscribe((d) => {

@@ -12,7 +12,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
     {
         [Key]
         public long ID { get; set; }
-        public float? Degree { get; set; }
+        public float? Degree { get; set; }  
 
         [ForeignKey("Assignment")]
         public long AssignmentID { get; set; }

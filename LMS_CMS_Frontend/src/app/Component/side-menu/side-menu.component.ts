@@ -18,51 +18,46 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SideMenuComponent {
   @Input() menuItems?: { label: string; route?: string; icon?:string;  subItems?: { label: string; route: string; icon?:string }[]}[] = [];
   @Input() menuItemsForEmployee?: PagesWithRoleId[];
-
+  
   @ViewChild('searchInput') searchInput: any;
   @ViewChildren('details') detailsList!: QueryList<ElementRef>;
-
-  IsMenuOpen = false
+  
+  IsMenuOpen = true
   IsSearchFocus = false
-
+  
   isRtl: boolean = false;
   subscription!: Subscription;
-
+  
   constructor(private languageService: LanguageService, private router: Router) {} 
-
+  
   ngOnInit(): void {
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl'; 
   }
-
+  
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   } 
-
+  
   toggleMenu() {
     this.IsMenuOpen = !this.IsMenuOpen
     this.IsSearchFocus = false
-  }
-
-  toggleSearch() {
-    this.IsMenuOpen = !this.IsMenuOpen
-    this.IsSearchFocus = !this.IsSearchFocus;
-  }
+  } 
 
   focusSearchInput() {
     if (this.searchInput) {
       this.searchInput.nativeElement.focus();
     }
   }
-
+  
   ngAfterViewChecked() {
     if (this.IsSearchFocus) {
       this.focusSearchInput();
     }
   }
- 
+  
   onSearchBlur() {
     this.IsSearchFocus = false;
   } 
@@ -70,16 +65,20 @@ export class SideMenuComponent {
   getImageSrc(item: any): string {
     return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
   }
-
+  
   isMenuActive(route?: string): boolean {
     if (!route) return false;
     const currentUrl = this.router.url.toLowerCase();
     const encodedRoute = encodeURIComponent(route.trim()).toLowerCase();
     return currentUrl.includes(encodedRoute);
   }
-
+  
   isSubItemActive(subItems?: { route: string }[]): boolean {
     if (!subItems) return false;
     return subItems.some(sub => this.isMenuActive(sub.route));
+  }
+  
+  NavigateToStart() {
+    this.router.navigateByUrl("")
   }
 }

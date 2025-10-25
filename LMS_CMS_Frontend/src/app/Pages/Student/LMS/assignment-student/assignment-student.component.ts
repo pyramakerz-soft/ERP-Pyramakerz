@@ -19,7 +19,7 @@ import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
@@ -82,17 +82,23 @@ export class AssignmentStudentComponent {
     });
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
-        this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+
+    this.assignmentServ.CheckIfHaveAccess(this.UserID, this.AssignmentId, this.DomainName).subscribe((d) => {
+      console.log(d)
+    }, error => {
+      this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
+    })
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAssignment() {
@@ -100,6 +106,11 @@ export class AssignmentStudentComponent {
       this.assignment = d;
       this.assignmentStudent.assignmentID = this.AssignmentId;
       this.assignmentStudent.studentID = this.UserID;
+      const today = new Date();
+      const cutoff = new Date(this.assignment.cutOfDate);
+      if (today >= cutoff) {
+        this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
+      }
 
       this.assignmentStudent.assignmentStudentQuestions = this.assignment.assignmentQuestions.map(q => {
         const question = q.questionBank;
@@ -213,7 +224,7 @@ export class AssignmentStudentComponent {
           text: 'Assignment submitted successfully.',
           confirmButtonColor: '#089B41',
         });
-       this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
+        this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
       },
       error: (err) => {
         this.isLoading = false;
@@ -227,7 +238,7 @@ export class AssignmentStudentComponent {
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });
-        } else if (errorMessage.includes("You have already submitted this assignment and cannot submit it again") ) {
+        } else if (errorMessage.includes("You have already submitted this assignment and cannot submit it again")) {
           Swal.fire({
             icon: 'error',
             title: 'Submission Blocked',
@@ -240,7 +251,7 @@ export class AssignmentStudentComponent {
           Swal.fire({
             icon: 'error',
             title: 'Failed',
-            text: 'Something went wrong while submitting the assignment.',
+            text: err.error,
             confirmButtonText: 'Close',
             customClass: { confirmButton: 'secondaryBg' },
           });

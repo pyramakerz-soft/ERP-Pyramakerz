@@ -33,8 +33,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Academic Years" }
+            allowedTypes: new[] { "octa", "employee", "parent" , "student" },
+            pages: new[] { "Academic Years" , "Bus Students", "Classroom" , "Student" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -66,10 +66,45 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("BySchoolId/{id}")]
+        [HttpGet("BySchoolIdAndDate/{id}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" },
+            allowedTypes: new[] { "octa", "employee", "parent", "student" },
             pages: new[] { "Academic Years" , "Fees Activation" }
+        )]
+        public async Task<IActionResult> GetBySchoolIdAndDateAsync(long id, DateOnly DateFrom, DateOnly DateTo)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            AcademicYear academicYear = await Unit_Of_Work.academicYear_Repository.FindByIncludesAsync(
+                    sem => sem.IsDeleted != true && sem.SchoolID==id && sem.DateFrom <= DateFrom && sem.DateTo >= DateTo ,
+                    query => query.Include(emp => emp.School));
+
+            if (academicYear == null )
+            {
+                return NotFound();
+            }
+
+           AcademicYearGet AcademicYearDTOs = mapper.Map<AcademicYearGet>(academicYear);
+
+            return Ok(AcademicYearDTOs);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("BySchoolId/{id}/")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" },
+            pages: new[] { "Academic Years", "Fees Activation", "Bus Students" , "Classroom" , "Remedial Classes" , "Lessons" }
         )]
         public async Task<IActionResult> GetBySchoolIdAsync(long id)
         {
@@ -86,7 +121,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AcademicYear> academicYear = await Unit_Of_Work.academicYear_Repository.Select_All_With_IncludesById<AcademicYear>(
-                    sem => sem.IsDeleted != true && sem.SchoolID==id,
+                    sem => sem.IsDeleted != true && sem.SchoolID == id,
                     query => query.Include(emp => emp.School));
 
             if (academicYear == null || academicYear.Count == 0)

@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { DirectMark } from '../../../../Models/LMS/direct-mark';
 import { DirectMarkService } from '../../../../Services/Employee/LMS/direct-mark.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { School } from '../../../../Models/school';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -77,8 +77,8 @@ export class DirectMarkComponent {
   subjectsForCreate: Subject[] = [];
   subjectWeightsForCreate: SubjectWeight[] = [];
   classrooms: Classroom[] = [];
+  @ViewChild('classDropdown') classDropdown!: ElementRef;
   classDropdownOpen = false;
-
   IsView: boolean = false
 
   isLoading = false;
@@ -98,6 +98,7 @@ export class DirectMarkComponent {
     public classroomSubjectService: ClassroomSubjectService,
     public DirectMarkServ: DirectMarkService,
     public router: Router,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -207,14 +208,12 @@ export class DirectMarkComponent {
   }
 
   toggleClass(event: Event, classroom: Classroom) {
-    console.log(this.directMark.directMarkClasses, classroom)
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
       var classMark = new DirectMarkClasses()
       classMark.classroomID = classroom.id
       classMark.classroomName = classroom.name
       this.directMark.directMarkClasses.push(classMark);
-      console.log(this.directMark.directMarkClasses)
     } else {
       this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom.id)
     }
@@ -337,7 +336,6 @@ export class DirectMarkComponent {
     this.DirectMarkServ.GetById(Id, this.DomainName).subscribe(
       data => {
         this.directMark = data
-        console.log(this.directMark)
         this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
           this.subjectsForCreate = []
@@ -353,6 +351,17 @@ export class DirectMarkComponent {
         })
       }
     )
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    // if dropdown is open
+    if (this.classDropdownOpen) {
+      const clickedInside = this.classDropdown?.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.classDropdownOpen = false;
+      }
+    }
   }
 
   getSubjectData() {
@@ -471,14 +480,13 @@ export class DirectMarkComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           }
         );
       } else {
-        console.log("this.directMark before edit", this.directMark)
         this.DirectMarkServ.Edit(this.directMark, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
@@ -497,7 +505,7 @@ export class DirectMarkComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -509,13 +517,13 @@ export class DirectMarkComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Direct Mark?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Direct Mark') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.DirectMarkServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -524,6 +532,12 @@ export class DirectMarkComponent {
       }
     });
   }
+
+  removeClass(classroom: number, event: MouseEvent) {
+    event.stopPropagation(); // Prevent the click event from bubbling up
+    this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom)
+    this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);  }  
 
   onSchoolModalChange() {
     this.directMark.subjectWeightTypeID = 0

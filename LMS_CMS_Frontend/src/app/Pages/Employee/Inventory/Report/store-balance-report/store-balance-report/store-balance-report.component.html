@@ -36,15 +36,15 @@
     <div class="w-full md:w-1/3 flex flex-col">
         <label class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Filters' | translate }}</label>
         <div class="flex flex-wrap gap-4">
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="hasBalance" [(ngModel)]="hasBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
             <label for="hasBalance" class="text-sm text-gray-700"> {{ 'Has Balance' | translate }}</label>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="overdrawnBalance" [(ngModel)]="overdrawnBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
             <label for="overdrawnBalance" class="text-sm text-gray-700">{{ 'Overdrawn Balance' | translate }}</label>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="zeroBalances" [(ngModel)]="zeroBalances" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
             <label for="zeroBalances" class="text-sm text-gray-700">{{ 'Zero Balances' | translate }}</label>
         </div>
@@ -61,7 +61,6 @@
         </button>
     </div>
 </div>
-
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
@@ -132,31 +131,31 @@
                     {{ item.itemName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.quantity }}
+                    <span [innerHTML]="formatNumberForDisplayWithLTR(item.quantity)"></span>
                 </td>
                 <td *ngIf="reportType === 'PurchasePrice'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.purchasePrice | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.purchasePrice) }}
                 </td>
                 <td *ngIf="reportType === 'PurchasePrice'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalPurchase | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalPurchase) }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.salesPrice | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.salesPrice) }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalSales | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalSales) }}
                 </td>
                 <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.averageCost | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.averageCost) }}
                 </td>
                 <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalCost | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalCost) }}
                 </td>
                 <td *ngIf="reportType === 'ItemsUnderLimit'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.limit }}
+                    {{ formatNumberForDisplay(item.limit) }}
                 </td>
             </tr>
         </tbody>
@@ -172,7 +171,7 @@
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + getStoreName() },
       { keyEn: 'Category: ' + getCategoryName() },
-      { keyEn: 'Has Balance: ' + getBalanceFiltersInfo() },]"
+      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() },]"
             [tableHeaders]="baseHeaders"
             
              [tableData]="reportForExport" #pdfPrintComponent>

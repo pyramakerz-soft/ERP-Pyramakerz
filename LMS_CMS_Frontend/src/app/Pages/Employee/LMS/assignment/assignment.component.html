@@ -5,7 +5,7 @@
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-               {{ 'Create' | translate }}  {{ 'Assignment' | translate }}
+               {{ 'Create' | translate }} {{ 'Assignment' | translate }}
         </button>
     </div>
 </div>
@@ -17,7 +17,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }}{{ 'School' | translate }}</option>
+            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -30,7 +30,7 @@
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
 
-            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }}{{ 'Grade' | translate }}</option>
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
             <ng-container *ngIf="Grades.length > 0; else noDataGrade">
                 <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
             </ng-container>
@@ -211,7 +211,7 @@
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Subject"> {{ 'School' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="School"> {{ 'School' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
                     [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
                     (change)="onSchoolModalChange()" [(ngModel)]="assignment.schoolID"
@@ -287,7 +287,7 @@
                 <span *ngIf="validationErrors['arabicName']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['arabicName'] }}</span>
             </div>
-            <div class="flex flex-col mb-4 w-[49%]">
+            <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="AssignmentType"> {{ 'Assignment Type' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="AssignmentType" [(ngModel)]="assignment.assignmentTypeID"
@@ -305,6 +305,14 @@
                     placeholder="{{ 'Enter' | translate }} {{ 'Mark' | translate }}" [(ngModel)]="assignment.mark" (input)="validateNumber($event, 'mark')"
                     (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
                 <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mark']
+                    }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="passMark">  {{ 'Pass Mark' | translate }}</label>
+                <input id="passMark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Pass Mark' | translate }}" [(ngModel)]="assignment.passMark" (input)="validateNumber($event, 'passMark')"
+                    (ngModelChange)="onInputValueChange({ field: 'passMark', value: $event })" />
+                <span *ngIf="validationErrors['passMark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['passMark']
                     }}</span>
             </div>
             <div class="flex flex-col mb-4 w-[30%]">

@@ -23,7 +23,7 @@ import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -91,6 +91,7 @@ export class LessonLiveComponent {
     public acadimicYearService: AcadimicYearService,
     public schoolService: SchoolService,
     public SubjectServ: SubjectService,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -200,13 +201,13 @@ export class LessonLiveComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson Live?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +  this.translate.instant('Live') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.LessonLiveServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -262,7 +263,7 @@ export class LessonLiveComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -284,7 +285,7 @@ export class LessonLiveComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });

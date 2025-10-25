@@ -20,12 +20,13 @@ namespace LMS_CMS_PL.Services
             this.mapper = mapper;
         }
 
-        public async Task SendNotificationAsync(UOW Unit_Of_Work, string txt, long userTypeID, long userID, string domainName)
+        public async Task SendNotificationAsync(UOW Unit_Of_Work, string txt, string? link, long userTypeID, long userID, string domainName)
         {
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             Notification notification = new Notification();
             notification.Text = txt;
+            notification.Link = link;
             notification.IsAllowDismiss = true;
             notification.UserTypeID = userTypeID;
 

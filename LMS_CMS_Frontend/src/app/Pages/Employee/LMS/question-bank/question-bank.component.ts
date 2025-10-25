@@ -29,9 +29,9 @@ import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
@@ -40,7 +40,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, QuillModule , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule, TranslateModule],
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
@@ -145,6 +145,7 @@ export class QuestionBankComponent {
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
@@ -170,19 +171,18 @@ export class QuestionBankComponent {
     this.GetAllDokLevel()
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
-    this.GetAllTag()
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
   getAllGradesBySchoolId() {
     this.IsView = false
@@ -238,14 +238,20 @@ export class QuestionBankComponent {
         reader.onload = async (e: any) => {
           const { value: formValues } = await Swal.fire({
             title: 'Set Image Size',
-            html:
-              `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-              `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            // html:
+            //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+            //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            html: `
+              <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+              <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            `,
             focusConfirm: false,
             preConfirm: () => {
               const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
               const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
-              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              if (!width || !height || isNaN(+width) || isNaN(+height) || Number(width) < 1 || Number(height) < 1) {
                 Swal.showValidationMessage('Please enter numeric values.');
                 return null;
               }
@@ -294,9 +300,15 @@ export class QuestionBankComponent {
 
         const { value: formValues } = await Swal.fire({
           title: 'Set Video Size',
-          html:
-            `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-            `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          // html:
+          //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+          //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          html: `
+            <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          `, 
           focusConfirm: false,
           preConfirm: () => {
             const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
@@ -328,13 +340,13 @@ export class QuestionBankComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Question Bank?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Question Bank') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.QuestionBankServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -365,6 +377,9 @@ export class QuestionBankComponent {
 
   onSubjectChange() {
     this.questionBank.lessonID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.GetAllLesson()
   }
 
@@ -380,7 +395,10 @@ export class QuestionBankComponent {
   }
 
   GetAllTag() {
-    this.TagServ.Get(this.DomainName).subscribe((d) => {
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
+    this.TagServ.GetByLessonId(this.questionBank.lessonID, this.DomainName).subscribe((d) => {
       this.tag = d
     })
   }
@@ -509,7 +527,7 @@ export class QuestionBankComponent {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
+
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
@@ -529,7 +547,7 @@ export class QuestionBankComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -557,7 +575,7 @@ export class QuestionBankComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -782,6 +800,9 @@ export class QuestionBankComponent {
     this.subjectsForCreate = []
     this.questionBank.subjectID = 0
     this.questionBank.lessonID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.GradeServ.GetBySchoolId(this.questionBank.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
     })
@@ -792,12 +813,16 @@ export class QuestionBankComponent {
     this.subjectsForCreate = []
     this.questionBank.lessonID = 0
     this.questionBank.subjectID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.SubjectServ.GetByGradeId(this.questionBank.gradeID, this.DomainName).subscribe((d) => {
       this.subjectsForCreate = d
     })
   }
 
   closeModal() {
+    this.questionBank = new QuestionBank()
     this.isModalVisible = false;
   }
 

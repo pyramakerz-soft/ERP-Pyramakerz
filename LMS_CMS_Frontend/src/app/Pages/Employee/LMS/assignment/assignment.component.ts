@@ -28,7 +28,7 @@ import { Student } from '../../../../Models/student';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -102,6 +102,7 @@ export class AssignmentComponent {
     public classroomSubjectService: ClassroomSubjectService,
     public assignmentTypeService: AssignmentTypeService,
     public router: Router,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -117,7 +118,7 @@ export class AssignmentComponent {
     });
 
     // this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getSubjectData();
+    // this.getSubjectData();
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -142,7 +143,6 @@ export class AssignmentComponent {
         this.subscription.unsubscribe();
       }
   }
-
 
   getAllSchools() {
     this.schools = []
@@ -176,12 +176,12 @@ export class AssignmentComponent {
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
-    this.assignmentData = []
-    this.IsView = true
-    this.CurrentPage = 1
-    this.TotalPages = 1
-    this.TotalRecords = 0
     if (this.subjectID != 0) {
+        this.assignmentData = []
+        this.IsView = true
+        this.CurrentPage = 1
+        this.TotalPages = 1
+        this.TotalRecords = 0
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
         (data) => {
           this.CurrentPage = data.pagination.currentPage
@@ -208,31 +208,31 @@ export class AssignmentComponent {
         }
       )
     } else {
-      this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          this.CurrentPage = data.pagination.currentPage
-          this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
-          this.TotalRecords = data.pagination.totalRecords
-          this.assignmentData = data.data
-        },
-        (error) => {
-          if (error.status == 404) {
-            if (this.TotalRecords != 0) {
-              let lastPage = this.TotalRecords / this.PageSize
-              if (lastPage >= 1) {
-                if (this.isDeleting) {
-                  this.CurrentPage = Math.floor(lastPage)
-                  this.isDeleting = false
-                } else {
-                  this.CurrentPage = Math.ceil(lastPage)
-                }
-                this.GetAllData(this.CurrentPage, this.PageSize)
-              }
-            }
-          }
-        }
-      )
+    //   this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
+    //     (data) => {
+    //       this.CurrentPage = data.pagination.currentPage
+    //       this.PageSize = data.pagination.pageSize
+    //       this.TotalPages = data.pagination.totalPages
+    //       this.TotalRecords = data.pagination.totalRecords
+    //       this.assignmentData = data.data
+    //     },
+    //     (error) => {
+    //       if (error.status == 404) {
+    //         if (this.TotalRecords != 0) {
+    //           let lastPage = this.TotalRecords / this.PageSize
+    //           if (lastPage >= 1) {
+    //             if (this.isDeleting) {
+    //               this.CurrentPage = Math.floor(lastPage)
+    //               this.isDeleting = false
+    //             } else {
+    //               this.CurrentPage = Math.ceil(lastPage)
+    //             }
+    //             this.GetAllData(this.CurrentPage, this.PageSize)
+    //           }
+    //         }
+    //       }
+    //     }
+    //   )
     }
   }
 
@@ -287,7 +287,7 @@ export class AssignmentComponent {
     }
 
     this.assignment = new Assignment();
-    this.getSubjectData();
+    // this.getSubjectData();
     this.getAssignmentTypeData();
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
@@ -334,14 +334,14 @@ export class AssignmentComponent {
     )
   }
 
-  getSubjectData() {
-    this.subjects = []
-    this.subjectService.Get(this.DomainName).subscribe(
-      data => {
-        this.subjects = data
-      }
-    )
-  }
+  // getSubjectData() {
+  //   this.subjects = []
+  //   this.subjectService.Get(this.DomainName).subscribe(
+  //     data => {
+  //       this.subjects = data
+  //     }
+  //   )
+  // }
 
   getSubjectWeightData() {
     this.subjectWeights = []
@@ -625,7 +625,7 @@ export class AssignmentComponent {
       if (this.assignment.hasOwnProperty(key)) {
         const field = key as keyof Assignment;
         if (!this.assignment[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'passMark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
@@ -666,6 +666,12 @@ export class AssignmentComponent {
               this.validationErrors['cutOfDate'] = '*Cut Off Date must be after both Open Date and Due Date';
               isValid = false;
             }
+
+            if ((this.assignment.passMark  && this.assignment.mark) &&   Number(this.assignment.passMark) > Number(this.assignment.mark) ) {
+              console.log(1234,this.assignment)
+              this.validationErrors['passMark'] = '*Pass Mark must be smaller than Mark';
+              isValid = false;
+            }
           } else {
             this.validationErrors[field] = '';
           }
@@ -702,7 +708,7 @@ export class AssignmentComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -720,7 +726,7 @@ export class AssignmentComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -732,13 +738,13 @@ export class AssignmentComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Assignment?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "  +this.translate.instant('Assignment') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.assignmentService.Delete(id, this.DomainName).subscribe((D) => {

@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -15,12 +15,12 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-conduct-level',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './conduct-level.component.html',
   styleUrl: './conduct-level.component.css'
 })
@@ -61,6 +61,7 @@ export class ConductLevelComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public ConductLevelServ: ConductLevelService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
@@ -83,16 +84,16 @@ export class ConductLevelComponent {
 
     this.GetAllData();
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -112,13 +113,13 @@ export class ConductLevelComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Conduct Level?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Conduct Level') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.ConductLevelServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -175,7 +176,7 @@ export class ConductLevelComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -200,7 +201,7 @@ export class ConductLevelComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });

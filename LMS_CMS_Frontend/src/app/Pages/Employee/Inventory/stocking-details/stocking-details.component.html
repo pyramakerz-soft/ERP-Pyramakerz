@@ -91,7 +91,7 @@
     </div>
   </div>
 
-  <div class="my-5 flex justify-end space-x-4 rtl:space-x-reverse" *ngIf="mode == 'Edit'">
+  <div class="my-5 flex justify-end space-x-4 items-center rtl:space-x-reverse" *ngIf="mode == 'Edit'">
     <div class="relative inline-block text-left rtl:text-right" (clickOutside)="showPrintMenu = false">
       <button (click)="togglePrintMenu()" class="text-gray-700 hover:text-blue-600">
         <i class="fa-solid fa-print text-2xl"></i>

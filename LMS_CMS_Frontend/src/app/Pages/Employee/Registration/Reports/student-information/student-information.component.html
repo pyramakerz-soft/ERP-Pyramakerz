@@ -11,6 +11,8 @@
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
         </select>
     </div>
     <div class="w-[49%]">
@@ -21,21 +23,25 @@
             <option *ngFor="let ac of academicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
         </select>
     </div>
 </div>
 
-<div class="flex justify-start items-center mt-2">
+<div class="flex justify-start items-center mt-2  space-x-4 rtl:space-x-reverse">
     <div class="w-[80%]">
         <label for="Student" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Student' | translate }}</label>
         <ng-container *ngIf="!isSearching">
             <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                 [(ngModel)]="SelectedStudentId" (change)="onStudentChange()"
                 [disabled]="!SelectedSchoolId || !SelectedYearId">
-                <option value="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
+                <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
                 <option *ngFor="let ac of filteredStudents" [value]="ac.id">
-                    {{ ac.user_Name }}
+                    {{ ac.en_name }}
                 </option>
+                <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
@@ -60,50 +66,93 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+<div *ngIf="showTable" class="mt-5">
+  
+  <!-- Basic Student Info Table (Original) -->
+  <!-- <div class="mb-6 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <tr>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'ID' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Name' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Mobile' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Nationality' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Gender' | translate }}
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngIf="!SelectedStudent">
-                <td colspan="5" class="text-center p-4"> {{ 'No Data Found' | translate }}</td>
-            </tr>
-            <tr *ngIf="SelectedStudent" class="border-t border-gray-300 text-xs md:text-sm bg-white">
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.id }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.en_name }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.mobile }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.nationalityEnName }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.genderName }}
-                </td>
-            </tr>
-        </tbody>
+      <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+        <tr>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'ID' | translate }}
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Name' | translate }}
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Mobile' | translate }}
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Nationality' | translate }}
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Gender' | translate }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!SelectedStudent">
+          <td colspan="5" class="text-center p-4"> {{ 'No Data Found' | translate }}</td>
+        </tr>
+        <tr *ngIf="SelectedStudent" class="border-t border-gray-300 text-xs md:text-sm bg-white">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ SelectedStudent.id }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ SelectedStudent.en_name }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ SelectedStudent.mobile || '-'}}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ SelectedStudent.nationalityEnName }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ SelectedStudent.genderName }}
+          </td>
+        </tr>
+      </tbody>
     </table>
+  </div> -->
+
+  <!-- Detailed Information Tables - Same design as original -->
+  <div *ngFor="let section of DataToPrint" class="mb-6 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <!-- Section Title -->
+    <div class="bg-[#EBEBEB] px-4 py-3 border-b border-[#BDBDBD]">
+      <h3 class="font-semibold text-[#6F6F6F] text-sm md:text-base">{{ section.header | translate}}</h3>
+    </div>
+    
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+      <!-- <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+        <tr>
+          <th class="py-3 px-4 min-w-[200px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Field' | translate }}
+          </th>
+          <th class="py-3 px-4 min-w-[200px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'Value' | translate }}
+          </th>
+        </tr>
+      </thead> -->
+      <tbody>
+        <tr *ngIf="section.data.length === 0">
+          <td colspan="2" class="text-center p-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ 'No Data Found' | translate }}
+          </td>
+        </tr>
+        <tr *ngFor="let item of section.data; let i = index" 
+            class="border-t border-gray-300 text-xs md:text-sm"
+            [ngClass]="{'bg-white': i % 2 === 0, 'bg-gray-50': i % 2 !== 0}">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 font-medium">
+            {{ item.key | translate}}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ item.value || '-' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">

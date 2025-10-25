@@ -55,14 +55,13 @@
             </p>
         </div>
     
-        <!-- Description Box -->
-        <div class="bg-[#EBEBEB] p-4 w-[49%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Description' | translate }}</p>
-            <p class="font-medium text-base text-[#1E1E1E]">
-                {{ medicalHistory.details || 'No description provided' }}
-            </p>
-        </div>
-    </div>
+<!-- Description Box -->
+<div class="bg-[#EBEBEB] p-4 w-[49%]">
+    <p class="font-semibold text-sm text-[#6F6F6F] mb-2">{{ 'Description' | translate }}</p>
+    <p class="font-medium text-base text-[#1E1E1E] whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+        {{ medicalHistory.details || 'No description provided' }}
+    </p>
+</div>
 
     <!-- Permanent Drug Section (Parent only) -->
     <div *ngIf="reportType === 'parent' && medicalHistory.permanentDrug" class="bg-[#EBEBEB] p-4 rounded-lg mb-6">

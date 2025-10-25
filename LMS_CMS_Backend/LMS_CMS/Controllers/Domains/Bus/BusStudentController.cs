@@ -38,7 +38,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
         [HttpGet("GetByBusId/{busId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Buses" }
+            pages: new[] { "Buses" , "Print Name Tag" }
         )]
         public async Task<IActionResult> GetByBusID(long busId)
         {
@@ -234,6 +234,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
 
             if (studentGrade != null)
             {
+                busStudentDTO.AcademicYearID = studentGrade.AcademicYearID;
                 busStudentDTO.GradeID = studentGrade.GradeID;
                 var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
                 busStudentDTO.GradeName = grade.Name;

@@ -17,7 +17,7 @@ import { QuestionAddEdit } from '../../../../Models/Registration/question-add-ed
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { QuestionOption } from '../../../../Models/Registration/question-option';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -68,6 +68,11 @@ export class QuestionsComponent {
     'correctAnswerName'
   ];
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif', 
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -76,6 +81,7 @@ export class QuestionsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public testServ: TestService,
+    private translate: TranslateService,
     public QuestionServ: QuestionService,
     public QuestionTypeServ: QuestionTypeService,
     private realTimeService: RealTimeNotificationServiceService,
@@ -160,13 +166,13 @@ export class QuestionsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this question?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Question') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.QuestionServ.Delete(id, this.DomainName).subscribe((data: any) => {
@@ -220,7 +226,7 @@ export class QuestionsComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -237,7 +243,7 @@ export class QuestionsComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -389,9 +395,12 @@ export class QuestionsComponent {
     }
   }
 
-  onFileUpload(event: Event): void {
+  onFileUpload(event: any): void {
     this.validationErrors['imageFile'] = '';
+
+    const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
+    
     if (input.files && input.files[0]) {
       const file = input.files[0];
       const fileType = file.type;
@@ -403,9 +412,23 @@ export class QuestionsComponent {
         this.question.imageFile = null;
         return;
       }
-      if (fileType.startsWith('image/')) {
+
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        }); 
         this.question.videoFile = null;
+        this.question.imageFile = null;
+        return;
+      }
+      if (fileType.startsWith('image/')) {
         this.question.video = "";
+        this.question.videoFile = null;
         this.question.image = file.name;
         this.question.imageFile = file;
       } else if (fileType.startsWith('video/')) {
@@ -417,8 +440,7 @@ export class QuestionsComponent {
         alert('Invalid file type. Please upload an image or video.');
       }
     }
-  }
-
+  }  
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;

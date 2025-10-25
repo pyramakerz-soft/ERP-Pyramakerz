@@ -16,9 +16,9 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-add-child',
@@ -29,7 +29,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 })
 export class AddChildComponent {
 
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -51,14 +51,16 @@ export class AddChildComponent {
   NationalID: string = "";
   Student: Student = new Student();
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
+  IsNationalIsEmpty: string = ''
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     private languageService: LanguageService,
+    private translate: TranslateService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
@@ -67,7 +69,7 @@ export class AddChildComponent {
     public ApiServ: ApiService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
-      private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,11 +99,11 @@ export class AddChildComponent {
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
@@ -122,13 +124,13 @@ export class AddChildComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Child?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Child'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.EmplyeeStudentServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -147,14 +149,18 @@ export class AddChildComponent {
     return IsAllow;
   }
   CreateOREdit() {
+    if (this.NationalID == '') {
+      this.IsNationalIsEmpty = 'National Id Is Required'
+      return;
+    }
     if (this.emplyeeStudent.studentID != 0) {
       this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe(
         (d) => {
           this.GetAllData();
           this.closeModal()
-        }, 
+        },
         (error) => {
-          if(error.error == "Student Already Assigned To This Employee"){
+          if (error.error == "Student Already Assigned To This Employee") {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -178,6 +184,7 @@ export class AddChildComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.IsNationalIsEmpty = '';
   }
 
   openModal() {
@@ -216,6 +223,8 @@ export class AddChildComponent {
   }
 
   SelectChild(nationalId: string) {
+      this.IsNationalIsEmpty = ''
+
     this.Student = new Student()
     this.emplyeeStudent = new EmplyeeStudent()
     this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
@@ -254,15 +263,15 @@ export class AddChildComponent {
       this.TableData = [];
     }
   }
- 
+
   validateNumberOnly(event: any): void {
-    let value = event.target.value; 
-    value = value.replace(/[^0-9]/g, ''); 
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '');
     event.target.value = value;
- 
+
     if (isNaN(Number(value)) || value === '') {
-      event.target.value = ''; 
-    } else { 
+      event.target.value = '';
+    } else {
       this.NationalID = value;
     }
   }

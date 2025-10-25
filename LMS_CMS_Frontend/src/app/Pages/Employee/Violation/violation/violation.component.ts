@@ -19,14 +19,14 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 import { Employee } from '../../../../Models/Employee/employee';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-violation',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './violation.component.html',
   styleUrl: './violation.component.css'
 })
@@ -53,18 +53,26 @@ export class ViolationComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName', 'date'];
+  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName'];
 
   violation: Violation = new Violation();
 
   validationErrors: { [key in keyof Violation]?: string } = {};
   isLoading = false;
-
+  
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -94,17 +102,17 @@ export class ViolationComponent {
     });
 
     this.GetAllData();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -141,39 +149,29 @@ export class ViolationComponent {
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
-    this.violation.attach = '';
-    this.violation.attachFile = null;
-
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      'image/jpeg',
-      'image/png'
-    ];
 
     if (file) {
-      // Check size
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) { 
+        this.validationErrors['attachFile'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`;
+        this.violation.attachFile = null;
         return;
       }
 
-      // Check type
-      if (allowedMimeTypes.includes(file.type)) {
-        this.violation.attachFile = file;
-        this.validationErrors['attachFile'] = '';
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.violation.attachFile = null;
+        return; 
+      } else{
+        this.violation.attachFile = file;  
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['attachFile'] = 'Invalid file type. Only PDF, DOC, DOCX, JPEG, and PNG are allowed.';
-        return;
       }
     }
-
+    
     input.value = '';
-  }
+  }   
 
   Create() {
     this.mode = 'Create';
@@ -185,16 +183,16 @@ export class ViolationComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Violation?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Violation')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.violationServ.Delete(id, this.DomainName).subscribe((d) => {
+        this.violationServ.Delete(id, this.DomainName).subscribe(() => {
           this.GetAllData();
         });
       }
@@ -261,7 +259,7 @@ export class ViolationComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -286,7 +284,7 @@ export class ViolationComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -388,6 +386,6 @@ export class ViolationComponent {
   }
 
   view(Id: number) {
-    this.router.navigateByUrl('Employee/Violation/' + Id);
+    this.router.navigateByUrl('Employee/violation/' + Id);
   }
 }

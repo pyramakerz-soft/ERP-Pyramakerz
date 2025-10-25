@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_BL.DTO.HR;
 
 namespace LMS_CMS_BL.DTO.Accounting
 {
@@ -31,7 +32,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
         public string? NationalityName { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
         public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
@@ -59,6 +60,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string AcademicDegreeName { get; set; }
         public List<long>? Days { get; set; }
         public List<long>? Students { get; set; }
+        public List<AnnualVacationEmployeeGetDTO>? AnnualVacationEmployee { get; set; }
         public long InsertedByUserId { get; set; }
 
     }

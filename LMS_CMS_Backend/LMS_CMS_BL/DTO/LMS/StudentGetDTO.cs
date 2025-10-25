@@ -87,7 +87,10 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? LandMark { get; set; }
         public string? AdditionalInfo { get; set; }
         public int? TypeID { get; set; }
+        public bool IsSuspended { get; set; }
 
+        public long? CurrentSchoolId { get; set; }
+        public string? CurrentSchoolName { get; set; }
 
 
         public string AcademicYearName { get; set; }

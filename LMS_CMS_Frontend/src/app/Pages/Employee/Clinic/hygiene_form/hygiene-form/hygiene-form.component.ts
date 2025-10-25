@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { HygieneForm } from '../../../../../Models/Clinic/HygieneForm';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
@@ -42,7 +42,9 @@ export class HygieneFormComponent implements OnInit {
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
       private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+      private realTimeService: RealTimeNotificationServiceService,
+      private translate: TranslateService
+
   ) {}
 
   ngOnInit() {
@@ -60,6 +62,32 @@ export class HygieneFormComponent implements OnInit {
         this.subscription.unsubscribe();
       }
   } 
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
    
 
   async loadHygieneForms() {
@@ -74,9 +102,12 @@ export class HygieneFormComponent implements OnInit {
               date: new Date(item.date).toLocaleDateString(),
               actions: { delete: true, edit: true, view: true }
           }));
+          // console.log(this.originalHygieneForms);
 
           
           this.hygieneForms = [...this.originalHygieneForms];
+          console.log('Hygiene Forms Loaded:');
+          console.log(this.hygieneForms);
       } catch (error) {
           console.error('Error fetching hygiene forms:', error);
       }
@@ -114,7 +145,7 @@ async onSearchEvent(event: { key: string, value: any }) {
   // }
 
   navigateToCreateHygieneForm() {
-    this.router.navigate(['/Employee/Create Hygiene Form']);
+    this.router.navigate(['/Employee/Hygiene Form']);
   }
 
   openModal(id?: number) {
@@ -149,50 +180,57 @@ async onSearchEvent(event: { key: string, value: any }) {
   }
 
 deleteHygieneForm(row: any) {
+  const translatedTitle = this.translate.instant('Are you sure?');
+  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedConfirm = this.translate.instant('Yes, delete it!');
+  const translatedCancel = this.translate.instant('No, keep it');
+  const successMessage = this.translate.instant('Deleted successfully');
+
   Swal.fire({
-    title: 'Are you sure?',
-    text: 'You will not be able to recover this hygiene form!',
+    title: translatedTitle,
+    text: translatedText,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#089B41',
     cancelButtonColor: '#2E3646',
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'No, keep it'
+    confirmButtonText: translatedConfirm,
+    cancelButtonText: translatedCancel
   }).then((result) => {
     if (result.isConfirmed) {
       this.hygieneFormService.Delete(row.id, this.DomainName).subscribe({
         next: (response) => {
           if (this.hygieneForms.length === 1) {
-            this.hygieneForms = []; // Clear the array immediately
+            this.hygieneForms = [];
           }
-          this.loadHygieneForms(); // Refresh the data
-          Swal.fire('Deleted!', 'The hygiene form has been deleted.', 'success');
+          this.loadHygieneForms();
+          this.showSuccessAlert(successMessage);
         },
         error: (error) => {
           console.error('Error deleting hygiene form:', error);
-          Swal.fire('Error!', 'Failed to delete the hygiene form.', 'error');
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
+          this.showErrorAlert(errorMessage);
         },
       });
     }
   });
 }
 
-  validateForm(): boolean {
-    let isValid = true;
-    if (!this.hygieneForm.grade) {
-      this.validationErrors['grade'] = '*Grade is required';
-      isValid = false;
-    } else {
-      this.validationErrors['grade'] = '';
-    }
-    if (!this.hygieneForm.classes) {
-      this.validationErrors['classes'] = '*Classes are required';
-      isValid = false;
-    } else {
-      this.validationErrors['classes'] = '';
-    }
-    return isValid;
+validateForm(): boolean {
+  let isValid = true;
+  if (!this.hygieneForm.grade) {
+    this.validationErrors['grade'] = `${this.translate.instant('Field is required')} ${this.translate.instant('grade')}`;
+    isValid = false;
+  } else {
+    this.validationErrors['grade'] = '';
   }
+  if (!this.hygieneForm.classes) {
+    this.validationErrors['classes'] = `${this.translate.instant('Field is required')} ${this.translate.instant('classes')}`;
+    isValid = false;
+  } else {
+    this.validationErrors['classes'] = '';
+  }
+  return isValid;
+}
 
   onInputValueChange(event: { field: string, value: any }) {
     const { field, value } = event;
@@ -203,7 +241,7 @@ deleteHygieneForm(row: any) {
   }
 
   onView(row: any) {
-    this.router.navigate(['/Employee/view hygiene form', row.id]);
+    this.router.navigate(['/Employee/Hygiene Form', row.id]);
   }
 
 

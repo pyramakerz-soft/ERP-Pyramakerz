@@ -14,7 +14,7 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 @Component({
@@ -62,6 +62,8 @@ export class HorizontalMeetingComponent {
     public HorizontalMeetingServ: HorizontalMeetingService,
     private realTimeService: RealTimeNotificationServiceService,
     private languageService: LanguageService,
+    private translate: TranslateService,
+
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -110,14 +112,14 @@ export class HorizontalMeetingComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Meeting?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
+          title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Meeting') + this.translate.instant('?'),
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#089B41',
+          cancelButtonColor: '#17253E',
+          confirmButtonText: this.translate.instant('Delete'),
+          cancelButtonText: this.translate.instant('Cancel'),
+        }).then((result) => {
       if (result.isConfirmed) {
         this.HorizontalMeetingServ.Delete(id, this.DomainName).subscribe((d) => {
           this.GetAllData();
@@ -173,7 +175,7 @@ export class HorizontalMeetingComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -198,7 +200,7 @@ export class HorizontalMeetingComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });

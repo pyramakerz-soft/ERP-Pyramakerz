@@ -26,8 +26,7 @@ export const noNavigateWithoutOctaLoginGuard: CanActivateFn = (route, state) => 
     case 'octa':
       return octaService.GetByID(userId).pipe(
         map(() => true), 
-        catchError((error: any) => {
-          console.error('Error fetching employee data:', error);
+        catchError((error: any) => { 
           logOutService.logOut();
           router.navigateByUrl('');
           return of(false); 

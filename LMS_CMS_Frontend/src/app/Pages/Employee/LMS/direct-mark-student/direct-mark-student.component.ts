@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { elementAt, Subscription } from 'rxjs';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -56,13 +56,12 @@ export class DirectMarkStudentComponent {
   ClassId: number = 0;
   classRoomId: number = 0;
   IsShowTabls: boolean = false
-  // editDegree: boolean = false
-  editDegreeId: number | null = null
 
   classes: DirectMarkClasses[] = []
   TableData: DirectMarkClassesStudent[] = []
   OriginalData: DirectMarkClassesStudent[] = []
   directMark: DirectMark = new DirectMark()
+  isLoading = false
 
   constructor(
     private router: Router,
@@ -197,23 +196,43 @@ export class DirectMarkStudentComponent {
     this.TableData = []
   }
 
-  save(row: DirectMarkClassesStudent): void {
-    if (row.degree <= this.directMark.mark) {
-      // this.editDegree = false
-      this.DirectMarkClassesStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+  validateNumberOnly(event: any, field: keyof DirectMarkClassesStudent , row : DirectMarkClassesStudent ): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;  
+      }
+    }
+  }
+
+  save(): void {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      this.DirectMarkClassesStudentServ.Edit(this.TableData, this.DomainName).subscribe((d) => {
+        this.isLoading = false
         this.GetAllData(this.CurrentPage, this.PageSize)
-        this.editDegreeId = null
       }, error => {
-        this.editDegreeId = null
+        console.log(error)
+        this.isLoading = false
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });
         this.GetAllData(this.CurrentPage, this.PageSize)
       })
     }
+
   }
+
+  isFormValid(): boolean {
+   if (!this.TableData || !this.directMark) return false;
+   return !this.TableData.some(element => element.degree > (this.directMark?.mark ?? 0));
+  }
+
 }

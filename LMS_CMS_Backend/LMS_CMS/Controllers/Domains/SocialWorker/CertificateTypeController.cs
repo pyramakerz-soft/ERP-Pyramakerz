@@ -1,6 +1,10 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
+using LMS_CMS_BL.DTO.Administration;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -20,13 +24,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
-
-        public CertificateTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        private readonly FileUploadsService _fileService;
+        public CertificateTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         ////////////////////////////////
@@ -60,14 +65,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<CertificateTypeGetDTO> Dto = mapper.Map<List<CertificateTypeGetDTO>>(certificateType);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in Dto)
             {
-                if (!string.IsNullOrEmpty(item.File))
-                {
-                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
-                }
+                item.File = _fileService.GetFileUrl(item.File, Request, HttpContext);
             }
 
             return Ok(Dto);
@@ -103,13 +104,8 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             CertificateTypeGetDTO Dto = mapper.Map<CertificateTypeGetDTO>(certificateType);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(Dto.File))
-            {
-                Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
-            }
+              
+            Dto.File = _fileService.GetFileUrl(Dto.File, Request, HttpContext);
 
             return Ok(Dto);
         }
@@ -164,28 +160,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.certificateType_Repository.Add(medal);
             Unit_Of_Work.SaveChanges();
 
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/CertificateType");
-            var medalFolder = Path.Combine(baseFolder, medal.ID.ToString());
-            if (!Directory.Exists(medalFolder))
+            if (NewCertificate.NewFile != null)
             {
-                Directory.CreateDirectory(medalFolder);
-            }
+                medal.File = await _fileService.UploadFileAsync(NewCertificate.NewFile, "SocialWorker/CertificateType", medal.ID, HttpContext);
+                Unit_Of_Work.certificateType_Repository.Update(medal);
+                Unit_Of_Work.SaveChanges();
+            } 
 
-            if (NewCertificate.NewFile != null && NewCertificate.NewFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(NewCertificate.NewFile.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await NewCertificate.NewFile.CopyToAsync(stream);
-                }
-                //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.File = $"Uploads/CertificateType/{medal.ID.ToString()}/{fileName}";
-            }
-
-            Unit_Of_Work.certificateType_Repository.Update(medal);
-            Unit_Of_Work.SaveChanges();
             return Ok(NewCertificate);
         }
 
@@ -243,40 +224,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     return accessCheck;
                 }
             }
+             
             mapper.Map(NewCertificate, medal);
 
-            if (NewCertificate.NewFile != null)
-            {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SocialWorkerMedal");
-                var oldMedalFolder = Path.Combine(baseFolder, NewCertificate.ID.ToString());
-                var medalFolder = Path.Combine(baseFolder, NewCertificate.ID.ToString());
-
-
-                if (System.IO.File.Exists(oldMedalFolder))
-                {
-                    System.IO.File.Delete(oldMedalFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(oldMedalFolder))
-                {
-                    Directory.Delete(oldMedalFolder, true);
-                }
-
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                var fileName = Path.GetFileName(NewCertificate.NewFile.FileName);
-                var filePath = Path.Combine(medalFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await NewCertificate.NewFile.CopyToAsync(stream);
-                }
-                medal.File = $"Uploads/SocialWorkerMedal/{medal.ID.ToString()}/{fileName}";
-
-            }
-
+            medal.File = await _fileService.ReplaceFileAsync(
+                NewCertificate.NewFile,
+                medal.File,
+                "SocialWorker/CertificateType",
+                medal.ID,
+                HttpContext
+            );
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medal.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

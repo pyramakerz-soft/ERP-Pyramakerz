@@ -13,9 +13,9 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-medal',
@@ -45,7 +45,7 @@ export class MedalComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'englishName' ,'arabicName'];
+  keysArray: string[] = ['id', 'englishName', 'arabicName'];
 
   medal: Medal = new Medal();
 
@@ -62,6 +62,7 @@ export class MedalComponent {
     public ApiServ: ApiService,
     public medalServ: MedalService,
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
@@ -85,17 +86,17 @@ export class MedalComponent {
     this.GetAllData();
 
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
   GetAllData() {
     this.TableData = [];
@@ -113,13 +114,13 @@ export class MedalComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Medal?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.medalServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -173,7 +174,7 @@ export class MedalComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -195,14 +196,14 @@ export class MedalComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
           }
         );
       }
-    } 
+    }
   }
 
   closeModal() {
@@ -281,23 +282,23 @@ export class MedalComponent {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 
-    this.medal.imageLink=""
+    this.medal.imageLink = ""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['imageForm'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.medal.imageForm = null;
-        return; 
+        return;
       }
       if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.medal.imageForm = file; 
-        this.validationErrors['imageForm'] = ''; 
+        this.medal.imageForm = file;
+        this.validationErrors['imageForm'] = '';
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
       } else {
         this.validationErrors['imageForm'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
         this.medal.imageForm = null;
-        return; 
+        return;
       }
     }
 

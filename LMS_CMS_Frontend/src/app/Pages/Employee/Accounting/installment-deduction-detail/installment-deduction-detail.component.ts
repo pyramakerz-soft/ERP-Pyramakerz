@@ -22,7 +22,7 @@ import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting
 import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -75,6 +75,7 @@ export class InstallmentDeductionDetailComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -235,12 +236,12 @@ export class InstallmentDeductionDetailComponent {
 
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -250,13 +251,19 @@ export class InstallmentDeductionDetailComponent {
         this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
           this.GetMasterInfo()
           this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Done Succeessfully',
+            confirmButtonColor: '#089B41',
+          });
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -313,14 +320,14 @@ export class InstallmentDeductionDetailComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Installment Deduction Details?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Details')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.installmentDeductionDetailServ.Delete(id, this.DomainName).subscribe((D) => {

@@ -13,10 +13,11 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { keyframes } from '@angular/animations';
 interface FlagOption {
   id: number;
   name: string;
@@ -51,12 +52,12 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   showPDF = false;
   transactionsForExport: any[] = [];
 
-  school = {
-    reportHeaderOneEn: 'Inventory Report',
-    reportHeaderTwoEn: 'Transaction Details',
-    reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'تفاصيل المعاملة',
-  };
+school = {
+  reportHeaderOneEn: '',
+  reportHeaderTwoEn: 'Transaction Details',
+  reportHeaderOneAr: '',
+  reportHeaderTwoAr: 'تفاصيل المعاملة',
+};
 
   availableFlags: { [key: string]: FlagOption[] } = {
     inventory: [
@@ -87,6 +88,7 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   categories: any[] = [];
   subCategories: any[] = [];
   items: any[] = [];
+  showViewReportBtn: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -96,7 +98,9 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
+
   ) {}
 
   ngOnInit() {
@@ -104,15 +108,57 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
       this.selectedFlagIds = this.currentFlags.map((flag) => flag.id);
+      
+      // Set school header based on report type
+      this.setSchoolHeader();
     });
+    
     this.loadStores();
+    
+    // keep a composite subscription so we can unsubscribe once
+    this.subscription = new Subscription();
 
-    this.loadCategories();
-          this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    // update RTL and regenerate export data when direction changes
+    this.subscription.add(
+      this.languageService.language$.subscribe(direction => {
+        this.isRtl = direction == 'rtl';
+        if (this.transactions && this.transactions.length) {
+          this.prepareExportData();
+        }
+      })
+    );
+
+    // also listen to TranslateService language changes to re-run translations
+    this.subscription.add(
+      this.translate.onLangChange.subscribe(() => {
+        if (this.transactions && this.transactions.length) {
+          this.prepareExportData();
+        }
+      })
+    );
+
+    this.isRtl = document.documentElement.dir == 'rtl';
   }
+
+  private setSchoolHeader(): void {
+  switch (this.reportType) {
+    case 'inventory':
+      this.school.reportHeaderOneEn = 'Inventory Transactions Detailed Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات تفصيلي المخزون';
+      break;
+    case 'sales':
+      this.school.reportHeaderOneEn = 'Sales Transactions Detailed Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات تفصيلي المبيعات';
+      break;
+    case 'purchase':
+      this.school.reportHeaderOneEn = 'Purchase Transactions Detailed Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات تفصيلي المشتريات';
+      break;
+    default:
+      this.school.reportHeaderOneEn = 'Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير المعاملات';
+  }
+}
 
  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
@@ -121,67 +167,91 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       }
   }
 
-  loadCategories() {
-    this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
+loadCategories() {
+  // Only load categories if a store is selected
+  if (!this.selectedStoreId) {
+    this.categories = [];
+    return;
+  }
+
+  this.categoryService
+    .GetByStoreId(
+      this.categoryService.ApiServ.GetHeader(),
+      this.selectedStoreId
+    )
+    .subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        console.log(this.categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.categories = [];
+      },
+    });
+}
+
+
+onCategorySelected() {
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.subCategories = [];
+  this.items = [];
+
+  if (this.selectedCategoryId) {
+    this.subCategoryService
+      .GetByCategoryId(
+        this.selectedCategoryId,
+        this.subCategoryService.ApiServ.GetHeader()
+      )
       .subscribe({
-        next: (categories) => {
-          this.categories = categories;
-          console.log(this.categories);
+        next: (subCategories) => {
+          this.subCategories = subCategories;
         },
         error: (error) => {
-          console.error('Error loading categories:', error);
+          console.error('Error loading subcategories:', error);
+          this.subCategories = [];
         },
       });
+  } else {
+    this.subCategories = [];
   }
-  onCategorySelected() {
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
+  
+  this.onFilterChange();
+}
+
+onSubCategorySelected() {
+  this.selectedItemId = null;
+  this.items = [];
+
+  console.log('Subcategory selected:', this.selectedSubCategoryId); // Debug log
+
+  // Check if a specific subcategory is selected (not null)
+  if (this.selectedSubCategoryId) {
+    // Load items for the specific subcategory
+    this.shopItemService
+      .GetBySubCategory(
+        this.selectedSubCategoryId,
+        this.shopItemService.ApiServ.GetHeader()
+      )
+      .subscribe({
+        next: (items) => {
+          this.items = items;
+          console.log('Items loaded for subcategory:', items.length); // Debug log
+        },
+        error: (error) => {
+          console.error('Error loading items:', error);
+          this.items = [];
+        },
+      });
+  } else {
+    // "Select All" is chosen - reset items but keep dropdown enabled
     this.items = [];
-
-    if (this.selectedCategoryId === null) {
-      this.subCategories = [];
-      // Explicitly disable the dependent dropdowns
-      this.selectedSubCategoryId = null;
-      this.selectedItemId = null;
-    } else {
-      this.subCategoryService
-        .GetByCategoryId(
-          this.selectedCategoryId,
-          this.subCategoryService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (subCategories) => {
-            this.subCategories = subCategories;
-          },
-          error: (error) => {
-            console.error('Error loading subcategories:', error);
-          },
-        });
-    }
+    console.log('Select All chosen - items reset'); // Debug log
   }
-
-  onSubCategorySelected() {
-    this.selectedItemId = null;
-
-    if (this.selectedSubCategoryId === null) {
-      this.items = [];
-    } else {
-      this.shopItemService
-        .GetBySubCategory(
-          this.selectedSubCategoryId,
-          this.shopItemService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (items) => {
-            this.items = items;
-          },
-          error: (error) => {
-            console.error('Error loading items:', error);
-          },
-        });
-    }
-  }
+  
+  this.onFilterChange();
+}
 
   loadStores() {
     this.isLoading = true;
@@ -207,121 +277,155 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   }
 
   getAllFlagsForReportType(): number[] {
-    if (this.reportType === 'inventory') {
+    if (this.reportType == 'inventory') {
       return [1, 2, 3, 4, 5, 6, 7, 8];
     }
-    if (this.reportType === 'sales') {
+    if (this.reportType == 'sales') {
       return [11, 12];
     }
-    if (this.reportType === 'purchase') {
+    if (this.reportType == 'purchase') {
       return [9, 10, 13];
     }
     return [];
   }
 
-  viewReport() {
-    console.log('Viewing report with filters');
-    if (!this.validateFilters()) return;
-    console.log('2');
+  onStoreSelected() {
+  this.selectedCategoryId = null;
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.categories = [];
+  this.subCategories = [];
+  this.items = [];
+  
+  if (this.selectedStoreId) {
+    this.loadCategories();
+  } else {
+    this.categories = [];
+  }
+  
+  this.onFilterChange();
+}
 
-    this.isLoading = true;
-        console.log('3');
+viewReport() {
+  console.log('Viewing report with filters');
+  if (!this.validateFilters()) return;
+  console.log('2');
 
-    this.showTable = false;
-        console.log('nooooooooooo');
-
-    this.inventoryMasterService
-      .search(
-        this.inventoryMasterService.ApiServ.GetHeader(),
-        this.selectedStoreId,
-        this.dateFrom,
-        this.dateTo,
-        this.selectedFlagIds,
-        this.selectedCategoryId,
-        this.selectedSubCategoryId,
-        this.selectedItemId,
-        this.currentPage,
-        this.pageSize
-      )
-      .subscribe({
-        next: (response: any) => {
-          console.log(response);
-          if (Array.isArray(response)) {
-            console.log('Response is an array');
-            this.transactions = response;
-            this.totalRecords = response.length;
-            this.totalPages = Math.ceil(response.length / this.pageSize);
-          } else if (response?.data) {
-            console.log('Response contains data property');
-            this.transactions = response.data;
-            console.log('Transactions loaded:');
-            this.totalRecords =
-              response.pagination?.totalRecords || response.data.length;
-            this.totalPages =
-              response.pagination?.totalPages ||
-              Math.ceil(response.data.length / this.pageSize);
-          } else {
-            console.warn('Unexpected response format:');
-            this.transactions = [];
-          }
-
-          this.prepareExportData();
-          console.log('prep');
-          this.showTable = true;
-          console.log('show table true');
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading transactions:', error);
-          this.transactions = [];
-          this.showTable = true;
-          this.isLoading = false;
-        },
-      });
+  // Reset category-related filters if no store is selected
+  if (!this.selectedStoreId) {
+    this.selectedCategoryId = null;
+    this.selectedSubCategoryId = null;
+    this.selectedItemId = null;
   }
 
-  cachedTableDataForPDF: any[] = [];
-  private prepareExportData(): void {
-    this.transactionsForExport = this.transactions.map((t) => ({
-      header: `Invoice #${t.invoiceNumber}`,
-      summary: [
-        { key: 'Date', value: new Date(t.date).toLocaleDateString() },
-        { key: 'Store', value: t.storeName },
-        ...(this.reportType === 'sales'
-          ? [{ key: 'Student', value: t.studentName || 'N/A' }]
-          : []),
-        ...(this.reportType === 'purchase'
-          ? [{ key: 'Supplier', value: t.supplierName || 'N/A' }]
-          : []),
-        { key: 'Transaction Type', value: t.flagEnName },
-        { key: 'Invoice Number', value: t.invoiceNumber },
-        { key: 'Total Price', value: t.total },
-        { key: 'Notes', value: t.notes || 'N/A' },
-      ],
-      table: {
-        headers: [
-          'ID',
-          'Item ID',
-          'Name',
-          'Quantity',
-          'Price',
-          'Total Price',
-          'Notes',
-        ],
-        data:
-          t.inventoryDetails?.map((d) => ({
-            ID: d.id,
-            'Item ID': d.shopItemID,
-            Name: d.shopItemName || d.name || 'N/A',
-            Quantity: d.quantity,
-            Price: d.price,
-            'Total Price': d.totalPrice,
-            Notes: d.notes || 'N/A',
-          })) || [],
+  this.isLoading = true;
+  console.log('3');
+
+  this.showTable = false;
+  console.log('nooooooooooo');
+
+  this.inventoryMasterService
+    .search(
+      this.inventoryMasterService.ApiServ.GetHeader(),
+      this.selectedStoreId,
+      this.dateFrom,
+      this.dateTo,
+      this.selectedFlagIds,
+      this.selectedCategoryId,
+      this.selectedSubCategoryId,
+      this.selectedItemId,
+      this.currentPage,
+      this.pageSize
+    )
+    .subscribe({
+      next: (response: any) => {
+        console.log('resres' , response);
+        if (Array.isArray(response)) {
+          console.log('Response is an array');
+          this.transactions = response;
+          this.totalRecords = response.length;
+          this.totalPages = Math.ceil(response.length / this.pageSize);
+        } else if (response?.data) {
+          console.log('Response contains data property');
+          this.transactions = response.data;
+          console.log('Transactions loaded:');
+          this.totalRecords =
+            response.pagination?.totalRecords || response.data.length;
+          this.totalPages =
+            response.pagination?.totalPages ||
+            Math.ceil(response.data.length / this.pageSize);
+        } else {
+          console.warn('Unexpected response format:');
+          this.transactions = [];
+        }
+
+        this.prepareExportData();
+        console.log('prep');
+        this.showTable = true;
+        console.log('show table true');
+        this.isLoading = false;
       },
-    }));
+      error: (error) => {
+        console.error('Error loading transactions:', error);
+        this.transactions = [];
+        this.showTable = true;
+        this.isLoading = false;
+      },
+    });
+}
+
+onFilterChange() {
+  this.showTable = false;
+  this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+  this.transactions = [];
+}
+
+  cachedTableDataForPDF: any[] = [];
+
+private prepareExportData(): void {
+  this.transactionsForExport = this.transactions.map((t) => ({
+    header: `${this.translate.instant('Invoice')} # ${t.invoiceNumber}`,
+    summary: [
+      { key: 'Date', value: new Date(t.date).toLocaleDateString() },
+      { key: 'Store', value: t.storeName },
+      // Add student/supplier based on report type
+      ...(this.reportType == 'sales'
+        ? [{ key: 'Student', value: t.studentName || '-' }]
+        : []),
+      ...(this.reportType == 'purchase'
+        ? [{ key: 'Supplier', value: t.supplierName || '-' }]
+        : []),
+      { key: 'Transaction Type', value: t.flagEnName },
+      { key: 'Invoice Number', value: t.invoiceNumber },
+      { key: 'Total Price', value: t.total },
+      { key: 'Notes', value: t.notes || '-' },
+    ],
+    table: {
+      headers: [
+        'ID',
+        'Item ID',
+        'Name',
+        'Quantity',
+        'Price',
+        'Total Price',
+        'Notes',
+      ],
+      data:
+        t.inventoryDetails?.map((d) => ({
+          ID: d.id,
+          'Item ID': d.shopItemID,
+          Name: d.shopItemName || d.name || '-',
+          Quantity: d.quantity,
+          Price: d.price,
+          'Total Price': d.totalPrice,
+          Notes: d.notes || '-',
+        })) || [],
+    },
+  }));
   this.cachedTableDataForPDF = this.getTableDataWithHeader();
 }
+
+
   getTableDataWithHeader(): any[] {
     return this.transactionsForExport.map((item) => ({
       header: item.header,
@@ -353,39 +457,48 @@ trackByTableRow(index: number, item: any): number {
   //   }));
   // }
 
-  // getInfoRows(): any[] {
-  //   const rows = [
-  //     { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
-  //     { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
-  //     { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
-  //   ];
+getInfoRows(): any[] {
+  const rows = [
+    { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' ,
+      keyAr: 'من تاريخ: ' + this.dateFrom, valueAr: ''
+    },
+    { keyEn: 'To Date: ' + this.dateTo, valueEn: '' ,
+      keyAr: 'إلى تاريخ: ' + this.dateTo, valueAr: ''
+    },
+    { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' ,
+      keyAr: this.getStoreName() +  ' :المخزن', valueAr: ''
+    },
+  ];
 
-  //   // Add student/supplier info if available
-  //   if (
-  //     this.reportType === 'sales' &&
-  //     this.transactions.some((t) => t.studentName)
-  //   ) {
-  //     rows.push({
-  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
-  //       valueEn: '',
-  //     });
-  //   }
-  //   if (
-  //     this.reportType === 'purchase' &&
-  //     this.transactions.some((t) => t.supplierName)
-  //   ) {
-  //     rows.push({
-  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
-  //       valueEn: '',
-  //     });
-  //   }
+  if (
+    this.reportType == 'sales' &&
+    this.transactions.some((t) => t.studentName)
+  ) {
+    rows.push({
+      keyEn: 'Student: ' + (this.transactions[0]?.studentName || '-'),
+      valueEn: '',
+      keyAr:  (this.transactions[0]?.studentName || '-') + ' :الطالب',
+      valueAr: ''
+    });
+  }
+  if (
+    this.reportType == 'purchase' &&
+    this.transactions.some((t) => t.supplierName)
+  ) {
+    rows.push({
+      keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || '-'),
+      valueEn: '',
+      keyAr:  (this.transactions[0]?.supplierName || '-') + ' :المورد',
+      valueAr: ''
+    });
+  }
 
-  //   return rows;
-  // }
+  return rows;
+}
 
   getStoreName(): string {
     return (
-      this.stores.find((s) => s.id === this.selectedStoreId)?.name ||
+      this.stores.find((s) => s.id == this.selectedStoreId)?.name ||
       'All Stores'
     );
   }
@@ -439,7 +552,7 @@ trackByTableRow(index: number, item: any): number {
   }
 
   DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       alert('No data to export!');
       return;
     }
@@ -498,7 +611,7 @@ trackByTableRow(index: number, item: any): number {
   }
 
 exportExcel() {
-  if (this.transactions.length === 0) {
+  if (this.transactions.length == 0) {
     alert('No data to export!');
     return;
   }
@@ -523,6 +636,20 @@ exportExcel() {
     { v: 'Store:', s: { font: { bold: true } } },
     { v: this.getStoreName(), s: { font: { bold: true } } }
   ]);
+  
+  // Add student/supplier info if available
+  // if (this.reportType == 'sales') {
+  //   excelData.push([
+  //     { v: 'Student:', s: { font: { bold: true } } },
+  //     { v: this.transactions[0]?.studentName || '-', s: { font: { bold: true } } }
+  //   ]);
+  // } else if (this.reportType == 'purchase') {
+  //   excelData.push([
+  //     { v: 'Supplier:', s: { font: { bold: true } } },
+  //     { v: this.transactions[0]?.supplierName || '-', s: { font: { bold: true } } }
+  //   ]);
+  // }
+  
   excelData.push([]); // empty row
 
   // Add transaction data
@@ -536,17 +663,18 @@ exportExcel() {
     const details = [
       ['Date:', new Date(transaction.date).toLocaleDateString()],
       ['Store:', transaction.storeName],
-      ...(this.reportType === 'sales' ? [['Student:', transaction.studentName || 'N/A']] : []),
-      ...(this.reportType === 'purchase' ? [['Supplier:', transaction.supplierName || 'N/A']] : []),
-      ['Transaction Type:', transaction.flagEnName],
+      // Add student/supplier based on report type
+      ...(this.reportType == 'sales' ? [['Student:', transaction.studentName || '-']] : []),
+      ...(this.reportType == 'purchase' ? [['Supplier:', transaction.supplierName || '-']] : []),
+      // ['Transaction Type:', transaction.flagEnName],
       ['Total Price:', transaction.total],
-      ['Notes:', transaction.notes || 'N/A']
+      ['Notes:', transaction.notes || '-']
     ];
 
     details.forEach((row, i) => {
       excelData.push([
-        { v: row[0], s: { font: { bold: true }, fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } },
-        { v: row[1], s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } }
+        { v: row[0], s: { font: { bold: true }, fill: { fgColor: { rgb: i % 2 == 0 ? 'D9E1F2' : 'FFFFFF' } } } },
+        { v: row[1], s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'D9E1F2' : 'FFFFFF' } } } }
       ]);
     });
 
@@ -567,13 +695,13 @@ exportExcel() {
     if (transaction.inventoryDetails && transaction.inventoryDetails.length > 0) {
       transaction.inventoryDetails.forEach((item, i) => {
         excelData.push([
-          { v: item.id, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.shopItemID, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.shopItemName || item.name || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.quantity, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.price, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.totalPrice, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.notes || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
+          { v: item.id, s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'FFFFFF' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.shopItemID, s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.shopItemName || item.name || '-', s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.quantity, s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.price, s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.totalPrice, s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.notes || '-', s: { fill: { fgColor: { rgb: i % 2 == 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
         ]);
       });
     } else {

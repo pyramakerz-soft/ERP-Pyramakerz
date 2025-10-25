@@ -15,7 +15,7 @@ import { EvaluationTemplateService } from '../../../../Services/Employee/LMS/eva
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -62,6 +62,7 @@ export class TemplateComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     public templateServ: EvaluationTemplateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
@@ -114,13 +115,13 @@ export class TemplateComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Template?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+ this.translate.instant('the') +this.translate.instant('template') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.templateServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -174,7 +175,7 @@ export class TemplateComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -196,7 +197,7 @@ export class TemplateComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -252,6 +253,12 @@ export class TemplateComponent {
 
   validateNumber(event: any, field: keyof Template): void {
     const value = event.target.value;
+      if (isNaN(value) || value === '') {
+        event.target.value = ''; 
+        if (typeof this.template[field] === 'string') {
+          this.template[field] = '' as never;  
+        }
+      }
     if (field === 'afterCount') { 
       const intValue = parseInt(value, 10);
       if (!/^\d+$/.test(value)) {

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.HR;
 
 namespace LMS_CMS_BL.DTO
 {
@@ -23,14 +24,16 @@ namespace LMS_CMS_BL.DTO
 
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string? ar_name { get; set; }
-
-        [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+         
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public string? LicenseNumber { get; set; }
         public string? ExpireDate { get; set; }
+        public DateOnly? HireDate { get; set; }
+        public bool? HasAttendance { get; set; } 
+        public string? AttendanceTime { get; set; }
+        public string? DepartureTime { get; set; }
         public string? Address { get; set; }
         public long Role_ID { get; set; }
         public string? Role_Name { get; set; }
@@ -41,13 +44,17 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public decimal? MonthlyLeaveRequestBalance { get; set; }
+        public decimal? MonthlyLeaveRequestUsed { get; set; }
+        public bool IsSuspended { get; set; }
+        public bool IsRestrictedForLoctaion { get; set; }
+        public bool IsClockedIn { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }
         public List<long>? FloorsSelected { get; set; }
         public List<long>? GradeSelected { get; set; }
+        public List<long>? LocationSelected { get; set; }
+        public List<LocationGetDTO> Locations { get; set; }
         public List<long>? SubjectSelected { get; set; }
-
-
-
-
+        public long? InsertedByUserId { get; set; }
     }
 }

@@ -16,9 +16,9 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { CreditService } from '../../../../Services/Employee/Accounting/credit.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-credits',
@@ -42,7 +42,7 @@ export class CreditsComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';
@@ -60,6 +60,7 @@ export class CreditsComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
@@ -90,19 +91,19 @@ export class CreditsComponent {
 
     this.GetAllData();
     this.GetAllAccount()
-   this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
@@ -126,13 +127,13 @@ export class CreditsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Credit?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Credit')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.CreditServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -177,12 +178,12 @@ export class CreditsComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -194,18 +195,18 @@ export class CreditsComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           });
-      } 
-    } 
+      }
+    }
   }
 
   closeModal() {
@@ -238,7 +239,7 @@ export class CreditsComponent {
 
     if (this.credit.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
     return isValid;
   }

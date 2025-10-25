@@ -15,33 +15,45 @@ export class SemesterService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName:string){
-     if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.get<Semester[]>(`${this.baseUrl}/Semester`, { headers })
   }
 
-  GetByAcademicYearId(id:number, DomainName:string){
-     if(DomainName!=null) {
-      this.header=DomainName 
+  GetByAcademicYearId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.get<Semester[]>(`${this.baseUrl}/Semester/GetByAcademicYear/${id}`, { headers })
   }
 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetBySchoolId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Semester[]>(`${this.baseUrl}/Semester/GetBySchool/${id}`, { headers })
+  }
+
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -51,9 +63,9 @@ export class SemesterService {
     return this.http.get<Semester>(`${this.baseUrl}/Semester/${id}`, { headers })
   }
 
-  Add(Semester: Semester,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Add(Semester: Semester, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -67,9 +79,9 @@ export class SemesterService {
     });
   }
 
-  Edit(Semester: Semester,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(Semester: Semester, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -79,9 +91,9 @@ export class SemesterService {
     return this.http.put(`${this.baseUrl}/Semester`, Semester, { headers });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

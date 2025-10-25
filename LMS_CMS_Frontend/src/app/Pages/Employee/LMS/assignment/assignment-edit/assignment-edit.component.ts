@@ -25,12 +25,12 @@ import Swal from 'sweetalert2';
 import { AssignmentService } from '../../../../../Services/Employee/LMS/assignment.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule ,TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
@@ -58,8 +58,8 @@ export class AssignmentEditComponent {
   SelectedTagsIDs: number[] = [];
   Lessons: Lesson[] = [];
   tags: Tag[] = [];
-   isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedTagsIds: number[] = []; // Array to store selected type IDs
   dropdownOpen = false;
   tagsSelected: Tag[] = [];
@@ -102,22 +102,32 @@ export class AssignmentEditComponent {
     });
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.getAssignmentData();
-    this.getLessons();
     this.getTypes();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+
+    document.addEventListener('click', this.handleClickOutside);
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    document.removeEventListener('click', this.handleClickOutside);
   }
 
+  private handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const tagsContainer = document.querySelector('.tags-container');
 
+    if (tagsContainer && !tagsContainer.contains(target)) {
+      this.dropdownOpen = false;
+    }
+  }
 
   getAssignmentData() {
     this.AssigmentQuestionServ.GetById(
@@ -125,11 +135,13 @@ export class AssignmentEditComponent {
       this.DomainName
     ).subscribe((d) => {
       this.assignment = d;
+      this.getLessons();
+      console.log(this.assignment)
     });
   }
 
   getLessons() {
-    this.LessonServ.Get(this.DomainName).subscribe((d) => [(this.Lessons = d)]);
+    this.LessonServ.GetBySubjectID(this.assignment.subjectID, this.DomainName).subscribe((d) => [(this.Lessons = d)]);
   }
 
   getTags() {
@@ -166,15 +178,8 @@ export class AssignmentEditComponent {
           this.TotalPages = data.pagination.totalPages;
           this.TotalRecords = data.pagination.totalRecords;
           this.Questions = data.data;
-        },
-        error: (err) => {
-          console.error('❌ Error loading questions:', err);
-        },
+        }
       });
-    } else {
-      console.warn(
-        '⚠️ SelectedLessonID and SelectedTypeID must be set before calling GetQuestionBank.'
-      );
     }
   }
 
@@ -294,11 +299,17 @@ export class AssignmentEditComponent {
     this.IsQuestionsSelected = this.selectedQuestions.length > 0;
   }
 
-  toggleDropdown(): void {
+  toggleDropdown(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.dropdownOpen = !this.dropdownOpen;
   }
 
-  selectType(Type: Tag): void {
+  selectType(Type: Tag, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     if (!this.tagsSelected.some((e) => e.id === Type.id)) {
       this.tagsSelected.push(Type);
     }
@@ -310,7 +321,11 @@ export class AssignmentEditComponent {
     this.validationErrors['tag'] = ``;
   }
 
-  removeSelected(id: number): void {
+
+  removeSelected(id: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
     this.SelectedTagsIDs = this.SelectedTagsIDs.filter((e) => e !== id);
     this.GetQuestionBank(this.CurrentPage, this.PageSize);
@@ -325,7 +340,7 @@ export class AssignmentEditComponent {
     this.SelectedLessonID = 0
     this.SelectedTypeID = 0
     this.selectedTagsIds = []
-    this.tagsSelected = []
+    this.clearTags();
     this.Questions = []
     this.selectedQuestions = []
     this.questionTypeCounts = {};
@@ -345,6 +360,14 @@ export class AssignmentEditComponent {
       modal.classList.add('hidden');
     }
     this.assignment.fileFile = null;
+
+    this.clearTags();
+  }
+
+  clearTags(): void {
+    this.tagsSelected = [];
+    this.SelectedTagsIDs = [];
+    this.tags = [];
   }
 
   getFormattedQuestionTypes(): string {
@@ -385,7 +408,7 @@ export class AssignmentEditComponent {
     this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
     this.assignmentQuestion.questionAssignmentTypeCountDTO.push({
       questionTypeId: 0,
-      numberOfQuestion: 0,
+      numberOfQuestion: null,
     });
   }
 
@@ -555,7 +578,7 @@ export class AssignmentEditComponent {
       title: 'Are you sure you want to delete this Question?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

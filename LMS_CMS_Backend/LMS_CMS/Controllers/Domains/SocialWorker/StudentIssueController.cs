@@ -315,6 +315,89 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ////////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("StudentIssueReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" ,"parent"},
+            pages: new[] { "Student Issue Report" }
+        )]
+        public async Task<IActionResult> StudentIssueReport(
+        [FromQuery] DateOnly? FromDate,[FromQuery] DateOnly? ToDate, [FromQuery] long? SchoolId = null,
+        [FromQuery] long? GradeId = null, [FromQuery] long? ClassroomId = null,
+        [FromQuery] long? StudentId = null, [FromQuery] long? IssuesTypeId = null)
+        {
+        UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        var userClaims = HttpContext.User.Claims;
+        var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+        long.TryParse(userIdClaim, out long userId);
+        var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        if (userIdClaim == null || userTypeClaim == null)
+        {
+            return Unauthorized("User ID or Type claim not found.");
+        }
+
+        // Validate that FromDate and ToDate are provided
+        if (!FromDate.HasValue || !ToDate.HasValue)
+        {
+            return BadRequest("Both FromDate and ToDate are required.");
+        }
+
+        // Ensure ToDate is not before FromDate
+        if (ToDate.Value < FromDate.Value)
+        {
+            return BadRequest("ToDate cannot be earlier than FromDate.");
+        }
+
+        IQueryable<StudentIssue> query = Unit_Of_Work.studentIssue_Repository.Query()
+            .Where(si => si.IsDeleted != true && si.Date >= FromDate.Value && si.Date <= ToDate.Value);
+
+        if (SchoolId.HasValue)
+        {
+            query = query.Where(si => si.Classroom.Grade.Section.school.ID == SchoolId.Value);
+        }
+
+        if (GradeId.HasValue)
+        {
+            query = query.Where(si => si.Classroom.GradeID == GradeId.Value);
+        }
+
+        if (ClassroomId.HasValue)
+        {
+            query = query.Where(si => si.ClassroomID == ClassroomId.Value);
+        }
+
+        if (StudentId.HasValue)
+        {
+            query = query.Where(si => si.StudentID == StudentId.Value);
+        }
+
+        if (IssuesTypeId.HasValue)
+        {
+            query = query.Where(si => si.IssuesTypeID == IssuesTypeId.Value);
+        }
+
+        var studentIssues = await query
+            .Include(si => si.Student)
+            .Include(si => si.IssuesType)
+            .Include(si => si.Classroom)
+                .ThenInclude(cr => cr.Grade)
+                .ThenInclude(g => g.Section)
+                .ThenInclude(sec => sec.school)
+            .OrderBy(si => si.Date)
+            .ToListAsync();
+
+        if (studentIssues == null || studentIssues.Count == 0)
+        {
+            return NotFound("No student issue records found for the specified criteria.");
+        }
+
+        var reportData = mapper.Map<List<StudentIssueReportDTO>>(studentIssues);
+
+        return Ok(reportData);
+           
+        }
 
     }
 }

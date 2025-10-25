@@ -20,20 +20,22 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
-        private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly CheckPageAccessService _checkPageAccessService; 
+        private readonly FileUploadsService _fileService;
 
-        public OrderController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public OrderController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
-        
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee","parent" }
          )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -52,17 +54,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                 return NotFound();
             }
 
-            OrderGetDTO orderDTO = mapper.Map<OrderGetDTO>(order);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            OrderGetDTO orderDTO = mapper.Map<OrderGetDTO>(order); 
              
             Cart_ShopItem cartShopitem = await Unit_Of_Work.cart_ShopItem_Repository.FindByIncludesAsync(
                 c => c.IsDeleted != true && c.CartID == orderDTO.CartID,
                 query => query.Include(c => c.ShopItem)
                 );
+             
+            orderDTO.MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext);
 
-            orderDTO.MainImage = $"{serverUrl}{cartShopitem.ShopItem.MainImage.Replace("\\", "/")}"; 
-            
             return Ok(orderDTO);
         }
        
@@ -70,7 +70,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpGet("ByStudentId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee", "parent" }
          )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
@@ -95,9 +95,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             }
              
             List<OrderGetDTO> orderDTO = mapper.Map<List<OrderGetDTO>>(orders);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             for (int i = 0; i < orderDTO.Count; i++)
             {
                 Cart_ShopItem cartShopitem = await Unit_Of_Work.cart_ShopItem_Repository.FindByIncludesAsync(
@@ -105,7 +103,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = $"{serverUrl}{cartShopitem.ShopItem.MainImage.Replace("\\", "/")}"; 
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext);  
             }
              
             return Ok(orderDTO);
@@ -141,9 +139,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             }
              
             List<OrderGetDTO> orderDTO = mapper.Map<List<OrderGetDTO>>(orders);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             for (int i = 0; i < orderDTO.Count; i++)
             {
                 Cart_ShopItem cartShopitem = await Unit_Of_Work.cart_ShopItem_Repository.FindByIncludesAsync(
@@ -151,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = $"{serverUrl}{cartShopitem.ShopItem.MainImage.Replace("\\", "/")}"; 
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext); 
             }
              
             return Ok(orderDTO);
@@ -178,9 +174,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             }
              
             List<OrderGetDTO> orderDTO = mapper.Map<List<OrderGetDTO>>(orders);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             for (int i = 0; i < orderDTO.Count; i++)
             {
                 Cart_ShopItem cartShopitem = await Unit_Of_Work.cart_ShopItem_Repository.FindByIncludesAsync(
@@ -188,7 +182,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
                     query => query.Include(c => c.ShopItem)
                     );
 
-                orderDTO[i].MainImage = $"{serverUrl}{cartShopitem.ShopItem.MainImage.Replace("\\", "/")}"; 
+                orderDTO[i].MainImage = _fileService.GetFileUrl(cartShopitem.ShopItem.MainImage, Request, HttpContext); 
             }
              
             return Ok(orderDTO);
@@ -198,7 +192,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpDelete("CancelOrder/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
         )]
         public IActionResult CancelOrder(long id)
         {
@@ -224,7 +218,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
         [HttpGet("ConfirmCart/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "student", "employee" }
+            allowedTypes: new[] { "octa", "student", "employee" , "parent" }
         )]
         public async Task<IActionResult> ConfirmCart(long id)
         {

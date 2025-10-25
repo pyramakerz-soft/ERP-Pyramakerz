@@ -1,1 +1,148 @@
-<h1>{{ 'HELLO' | translate }}</h1>
+<p class="primaryTxt font-medium text-base">{{ greeting }}</p>
+<p class="primaryTxt font-semibold text-2xl">Welcome {{User_Data_After_Login.user_Name}}</p>
+
+<div class="mt-11">
+    <div class="bg-neutral-50 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <img src="Icons/ParentDashboard/LMS.png" alt="LMS" class="w-8 h-8">
+            <p class="primaryTxt font-bold text-base">LMS</p> 
+        </div>
+        <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">  
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Certificate')">
+                <img src="Icons/ParentDashboard/Certificate.png" alt="Certificate" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Certificate</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Daily Performance Report')">
+                <img src="Icons/ParentDashboard/DailyPerformance.png" alt="Student Daily Performance" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Student Daily Performance</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Issue Report')">
+                <img src="Icons/ParentDashboard/StudentIssue.png" alt="Student Issue" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Student Issue</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Lessons')"> 
+                <i class="fas fa-book fa-lg text-gray-500"></i>
+                <p class="text-gray-500 font-normal">Lessons</p> 
+            </div> 
+        </div>
+    </div>
+    
+    <div class="mt-8 flex justify-between"> 
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[34%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Accounting.png" alt="Accounting" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Accounting</p> 
+            </div>
+            <div class="mt-7">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Account Statement')">    
+                    <img src="Icons/ParentDashboard/AccountStatement.png" alt="Account Statement" class="w-6 h-6">
+                    <p class="text-gray-500 font-normal">Account Statement</p> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[60%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Registration.png" alt="Registration" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Registration</p> 
+            </div>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Registration Form')">  
+                    <i class="fa-solid fa-address-card text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Registration Form</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Admission Test')">  
+                    <i class="fa-solid fa-keyboard text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Admission Test</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Interview Registration')"> 
+                    <i class="fa-solid fa-circle-question text-gray-500 text-lg"></i> 
+                    <p class="text-gray-500 font-normal">Interview Registration</p> 
+                </div> 
+            </div>
+        </div> 
+    </div>
+
+    <div class="mt-8 flex justify-between">
+        <!-- <div class="bg-neutral-50 rounded-2xl p-6 w-[25%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Meetings.png" alt="Meetings" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Meetings</p> 
+            </div>
+            <div class="mt-7">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Account Statement')">    
+                    <i class="fa-regular fa-calendar-check text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Appointment</p> 
+                </div> 
+            </div> 
+        </div>  -->
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[40%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/Clinic.png" alt="Clinic" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">Clinic</p> 
+            </div>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Medical History')">  
+                    <img src="Icons/ParentDashboard/MedicalHistory.png" alt="Medical History" class="w-6 h-6">
+                    <p class="text-gray-500 font-normal">Medical History</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Medical Report')">  
+                    <img src="Icons/ParentDashboard/MedicalReport.png" alt="Medical Report" class="w-6 h-6">  
+                    <p class="text-gray-500 font-normal">Medical Report</p> 
+                </div> 
+            </div>
+        </div> 
+        <div class="bg-neutral-50 rounded-2xl p-6 w-[50%] shadow-lg">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <img src="Icons/ParentDashboard/ECommerce.png" alt="ECommerce" class="w-8 h-8">
+                <p class="primaryTxt font-bold text-base">E-Commerce</p> 
+            </div>
+            <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('The Shop')">  
+                    <i class="fa-solid fa-store text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">The Shop</p> 
+                </div>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Cart')">  
+                    <i class="fa-solid fa-cart-shopping text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Cart</p> 
+                </div> 
+                <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Order')">  
+                    <i class="fa-solid fa-bag-shopping text-gray-500 text-lg"></i>
+                    <p class="text-gray-500 font-normal">Order</p> 
+                </div> 
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 bg-neutral-50 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <img src="Icons/ParentDashboard/VirtualMeeting.png" alt="SW" class="w-8 h-8">
+            <p class="primaryTxt font-bold text-base">Social Worker</p> 
+        </div>
+        <div class="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> 
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Conducts Report')">
+                <img src="Icons/ParentDashboard/Conduct.png" alt="Conducts" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Conducts</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Attendance Report')">
+                <img src="Icons/ParentDashboard/Attendance.png" alt="Attendance" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Attendance</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Student Report')">
+                <img src="Icons/ParentDashboard/StudentCerrtificate.png" alt="Students Certificate" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Students Certificate</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Students Medal')">
+                <img src="Icons/ParentDashboard/Medal.png" alt="Students Medal" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Students Medal</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Appointment')">
+                <img src="Icons/ParentDashboard/Appoinment.png" alt="Appointment" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Appointment</p> 
+            </div>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 cursor-pointer rounded-xl hover:bg-[#01105317] transition-colors duration-200" (click)="NavigateeToPage('Meetings')">
+                <img src="Icons/ParentDashboard/Meetings.png" alt="Meetings" class="w-6 h-6">
+                <p class="text-gray-500 font-normal">Meetings</p> 
+            </div>
+        </div>
+    </div>
+</div>

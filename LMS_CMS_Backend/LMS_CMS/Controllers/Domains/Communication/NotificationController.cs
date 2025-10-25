@@ -29,8 +29,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly UserTreeService _userTreeService;
         private readonly NotificationService _notificationService;
+        private readonly FileUploadsService _fileService;
 
-        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService, NotificationService notificationService)
+        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService, NotificationService notificationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -38,6 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             _fileImageValidationService = fileImageValidationService;
             _userTreeService = userTreeService;
             _notificationService = notificationService;
+            _fileService = fileService;
         }
 
         [HttpGet]
@@ -62,14 +64,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var notification in notificationGetDTO)
             {
-                if (!string.IsNullOrEmpty(notification.ImageLink))
-                {
-                    notification.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
-                }
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationGetDTO);
@@ -100,13 +98,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var notification in notificationGetDTO)
             {
-                if (!string.IsNullOrEmpty(notification.ImageLink))
-                {
-                    notification.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
-                }
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationGetDTO);
@@ -136,13 +130,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             NotificationGetDTO notificationGetDTO = mapper.Map<NotificationGetDTO>(notification);
-            
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(notification.ImageLink))
-            {
-                notificationGetDTO.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
-            } 
-            
+              
+            notificationGetDTO.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
+
             if (notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
             {
                 foreach (var notificationSharedTo in notificationGetDTO.NotificationSharedTos)
@@ -214,14 +204,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 .ToList();
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
-
+             
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
-                {
-                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
-                }
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationSharedToGetDTO);
@@ -272,14 +258,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
-
+             
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
-                {
-                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
-                }
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
             }
 
             return Ok(notificationSharedToGetDTO);
@@ -330,12 +312,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             NotificationSharedToGetDTO notificationSharedToGetDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(notificationSharedToGetDTO.ImageLink))
-            {
-                notificationSharedToGetDTO.ImageLink = $"{serverUrl}{notificationSharedToGetDTO.ImageLink.Replace("\\", "/")}";
-            }
+             
+            notificationSharedToGetDTO.ImageLink = _fileService.GetFileUrl(notificationSharedToGetDTO.ImageLink, Request, HttpContext);
 
             notificationSharedTo.SeenOrNot = true;
             notificationSharedTo.NotifiedOrNot = true;
@@ -347,9 +325,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             return Ok(notificationSharedToGetDTO);
         }
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpGet("GetNotNotifiedYetByUserID")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
@@ -366,47 +344,59 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             if (userTypeClaim == "employee")
             {
                 userTypeID = 1;
-            } 
-            else if(userTypeClaim == "student")
+            }
+            else if (userTypeClaim == "student")
             {
-                userTypeID= 2;
+                userTypeID = 2;
             }
             else if (userTypeClaim == "parent")
             {
                 userTypeID = 3;
             }
 
-            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
-                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification),
-                    query => query.Include(d => d.InsertedByEmployee)
-                    );
+            //List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+            //        f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID,
+            //        query => query.Include(d => d.Notification),
+            //        query => query.Include(d => d.InsertedByEmployee)
+            //        );
 
-            notificationSharedTos = notificationSharedTos
-                .OrderByDescending(d => d.InsertedAt) 
-                .ToList();
+            //notificationSharedTos = notificationSharedTos
+            //    .OrderByDescending(d => d.InsertedAt)
+            //    .ToList();
 
-            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            //if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            //{
+            //    return NotFound();
+            //}
+
+            var dbContext = Unit_Of_Work.DbContext;
+
+            var notificationsQuery = dbContext.NotificationSharedTo
+                .AsNoTracking()
+                .Where(f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID)
+                .Include(d => d.Notification)
+                .Include(d => d.InsertedByEmployee)
+                .OrderByDescending(d => d.InsertedAt);
+
+            var notificationSharedTos = await notificationsQuery.ToListAsync();
+
+            if (notificationSharedTos.Count == 0)
             {
-                return NotFound();
+                return Ok(Array.Empty<NotificationSharedToGetDTO>());
             }
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
-
+             
             foreach (var notificationSharedTo in notificationSharedToGetDTO)
             {
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
-                {
-                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
-                }
-            } 
+                notificationSharedTo.ImageLink = _fileService.GetFileUrl(notificationSharedTo.ImageLink, Request, HttpContext);
+            }
 
             return Ok(notificationSharedToGetDTO);
         }
-        
+         
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpGet("UnSeenNotificationCount")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
@@ -663,27 +653,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Unit_Of_Work.notification_Repository.Add(notification);
             Unit_Of_Work.SaveChanges();
-
-            if(NewNotification.ImageFile != null)
-            { 
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Notification");
-                var subjectFolder = Path.Combine(baseFolder, notification.ID.ToString());
-                if (!Directory.Exists(subjectFolder))
-                {
-                    Directory.CreateDirectory(subjectFolder);
-                }
-                
-                if (NewNotification.ImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(subjectFolder, NewNotification.ImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewNotification.ImageFile.CopyToAsync(stream);
-                    }
-                }
-
-                notification.ImageLink = Path.Combine("Uploads", "Notification", notification.ID.ToString(), NewNotification.ImageFile.FileName);
-                Unit_Of_Work.notification_Repository.Update(notification); 
+ 
+            if (NewNotification.ImageFile != null)
+            {
+                notification.ImageLink = await _fileService.UploadFileAsync(NewNotification.ImageFile, "Communication/Notification", notification.ID, HttpContext);
+                Unit_Of_Work.notification_Repository.Update(notification);
+                Unit_Of_Work.SaveChanges();
             }
 
             foreach (long userID in targetUserIds)
@@ -717,11 +692,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 if (sharedTo != null)
                 {
                     var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(sharedTo);
-
-                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                     
                     if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
                     {
-                        notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
+                        notificationDTO.ImageLink = _fileService.GetFileUrl(notificationDTO.ImageLink, Request, HttpContext);
                     }
                      
                     await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 

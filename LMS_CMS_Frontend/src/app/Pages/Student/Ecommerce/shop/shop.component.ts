@@ -20,6 +20,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { StudentService } from '../../../../Services/student.service';
+import { Student } from '../../../../Models/student';
 
 @Component({
   selector: 'app-shop',
@@ -33,6 +35,7 @@ export class ShopComponent {
   UserID: number = 0;
   StuID: number = 0;
   emplyeeStudent: EmplyeeStudent[] = [];
+  students: Student[] = [];
   DomainName: string = "";
   
   InventoryCategory:Category[] = []
@@ -53,7 +56,7 @@ export class ShopComponent {
   searchQuery: string = '';
    
   constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
-    public account: AccountService,
+    public account: AccountService,public StudentService: StudentService,
     private realTimeService: RealTimeNotificationServiceService,public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
 
   ngOnInit(){
@@ -68,6 +71,10 @@ export class ShopComponent {
 
     if(this.User_Data_After_Login.type == 'student'){
       this.StuID = this.UserID
+    }
+
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.getStudentsByParent()
     }
 
     this.getInventoryCategory() 
@@ -92,7 +99,17 @@ export class ShopComponent {
     )
   }
 
+  getStudentsByParent(){
+    this.students = []
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }
+
   getInventoryCategory(){
+    this.InventoryCategory = []
     this.inventoryCategoryService.Get(this.DomainName).subscribe(
       data => {
         this.InventoryCategory = data 
@@ -101,6 +118,7 @@ export class ShopComponent {
   }
 
   getInventorySubCategory(){
+    this.InventorySubCategory = []
     this.inventorySubCategoryService.GetByCategoryId(this.selectedInventoryCategory, this.DomainName).subscribe(
       data => { 
         this.InventorySubCategory = data 
@@ -169,11 +187,9 @@ export class ShopComponent {
     )
   }
 
-  onAddToCartClick(event: MouseEvent, itemId: number, limit: number|null) {
-    event.stopPropagation(); 
-    if (limit && limit > 0) {
-        this.addShopItemToCart(itemId);
-    }
+  onAddToCartClick(event: MouseEvent, itemId: number) {
+    event.stopPropagation();  
+    this.addShopItemToCart(itemId);
   }
 
   changeCurrentPage(currentPage:number){
@@ -212,24 +228,37 @@ export class ShopComponent {
   goToShopItem(id: number) {  
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/ShopItem/" + id)
-    } else{
-      this.router.navigateByUrl("Student/Ecommerce/ShopItem/" + id)
+    } 
+    else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/ShopItem/" + id)
+    }
+    else{
+      this.router.navigateByUrl("Parent/ShopItem/" + id)
     }
   }
 
   goToCart() {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Cart")
-    } else{
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+    }
+    else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/Cart")
+    }
+    else{
+      this.router.navigateByUrl("Parent/Cart")
+
     }
   } 
 
   goToOrder() {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Order")
-    } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+    } 
+    else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/Order")
+    }
+    else{
+      this.router.navigateByUrl("Parent/Order")
     }
   }
   

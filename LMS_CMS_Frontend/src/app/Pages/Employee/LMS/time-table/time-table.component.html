@@ -95,7 +95,7 @@
                 <label class="mb-2 primaryTxt" for="name">{{ 'Title' | translate }}</label>
 
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder=" {{ 'Enter' | translate }} {{ 'Time Table' | translate }}" [(ngModel)]="timetable.name"
+                    placeholder=" {{ 'Enter' | translate }} {{ 'name' | translate }}" [(ngModel)]="timetable.name"
                     (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name']
                     }}</span>

@@ -14,9 +14,9 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-payable-doc-type',
@@ -27,17 +27,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 })
 export class PayableDocTypeComponent {
 
-  User_Data_After_Login: TokenData = new TokenData('',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -56,7 +46,7 @@ export class PayableDocTypeComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   data: PayableDocType = new PayableDocType();
 
@@ -67,13 +57,14 @@ export class PayableDocTypeComponent {
   constructor(
     private router: Router,
     private menuService: MenuService,
+    private translate: TranslateService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public PayableDocTypeServ :PayableDocTypeService,
+    public PayableDocTypeServ: PayableDocTypeService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -96,19 +87,19 @@ export class PayableDocTypeComponent {
     });
 
     this.GetAllData();
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   GetAllData() {
     this.TableData = []
@@ -119,19 +110,19 @@ export class PayableDocTypeComponent {
 
   Create() {
     this.mode = 'Create';
-    this.data=new PayableDocType()
+    this.data = new PayableDocType()
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Payable Doc Type?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.PayableDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -143,8 +134,8 @@ export class PayableDocTypeComponent {
 
   Edit(row: PayableDocType) {
     this.mode = 'Edit';
-    this.PayableDocTypeServ.GetByID(row.id,this.DomainName).subscribe((d)=>{
-      this.data=d
+    this.PayableDocTypeServ.GetByID(row.id, this.DomainName).subscribe((d) => {
+      this.data = d
     })
     this.openModal();
   }
@@ -175,38 +166,38 @@ export class PayableDocTypeComponent {
           this.GetAllData();
           this.closeModal()
         },
-        err => {
-          this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+          error => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
       }
       if (this.mode == 'Edit') {
         this.PayableDocTypeServ.Edit(this.data, this.DomainName).subscribe((d) => {
           this.GetAllData();
           this.closeModal()
         },
-        err => {
-          this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+          error => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
       }
     }
   }
 
   closeModal() {
-    this.isModalVisible = false;    
+    this.isModalVisible = false;
     this.validationErrors = {}
     this.isLoading = false
   }
@@ -235,7 +226,7 @@ export class PayableDocTypeComponent {
 
     if (this.data.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
 
     return isValid;

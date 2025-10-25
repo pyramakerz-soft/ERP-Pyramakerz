@@ -130,12 +130,29 @@ export class ProofRegistrationAndSuccessFormReportComponent {
     }
   }
 
-  getAllStudents() {
-    this.studentServ.GetByAcademicYearID(this.SelectedYearId,this.DomainName).subscribe((d) => {
-      this.Students = d;
-      this.filteredStudents = d; 
-    });
-  }
+getAllStudents() {
+  this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
+    this.Students = d || [];
+    this.filteredStudents = d || []; 
+  });
+}
+
+  onSchoolChange() {
+  this.SelectedYearId = 0;
+  this.SelectedStudentId = 0;
+  this.Students = []; // Clear students array
+  this.filteredStudents = []; // Clear filtered students array
+  this.showTable = false;
+  this.getAllYears();
+}
+
+onYearChange() {
+  this.SelectedStudentId = 0;
+  this.Students = []; // Clear students array
+  this.filteredStudents = []; // Clear filtered students array
+  this.showTable = false;
+  this.getAllStudents();
+}
 
   searchStudents() {
     if (this.searchQuery) {
@@ -154,11 +171,40 @@ export class ProofRegistrationAndSuccessFormReportComponent {
     })
   }
 
-  async ViewReport() {
-    await this.GetData()
-    this.showTable = true
-    this.GetStudentById()
-  }
+async ViewReport() {
+  await this.GetData()
+  this.showTable = true
+  // Remove GetStudentById() call since GetData() now handles everything
+}
+
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.studentServ.GetProofRegistrationAndSuccessForm(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
+      .subscribe({
+        next: (d) => {
+          this.DataToPrint = d; 
+          this.school = d.school;
+          this.CurrentDate = d.date
+          this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
+          this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          
+          // Update SelectedStudent with the complete data from API response
+          if (d.student) {
+            this.SelectedStudent = { ...this.SelectedStudent, ...d.student };
+          }
+          resolve();
+        },
+        error: (err) => {
+          reject(err);
+        }
+      });
+  });
+}
 
   Print() {
     this.showPDF = true;
@@ -258,27 +304,27 @@ export class ProofRegistrationAndSuccessFormReportComponent {
   }
   
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ.GetProofRegistrationAndSuccessForm(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = d; 
-            this.school = d.school;
-            this.CurrentDate=d.date
-            this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
-            this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            });
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          }
-        });
-    });
-  }
+  // GetData(): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     this.studentServ.GetProofRegistrationAndSuccessForm(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
+  //       .subscribe({
+  //         next: (d) => {
+  //           this.DataToPrint = d; 
+  //           this.school = d.school;
+  //           this.CurrentDate=d.date
+  //           this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
+  //           this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
+  //             weekday: 'long',
+  //             year: 'numeric',
+  //             month: 'long',
+  //             day: 'numeric'
+  //           });
+  //           resolve();
+  //         },
+  //         error: (err) => {
+  //           reject(err);
+  //         }
+  //       });
+  //   });
+  // }
 }

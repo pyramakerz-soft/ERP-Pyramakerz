@@ -19,7 +19,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [StringLength(100, ErrorMessage = "Arabic Name cannot be longer than 100 characters.")]
         public string ArabicName { get; set; }
         public float Mark { get; set; }
-        public DateOnly OpenDate { get; set; }
+        public float PassMark { get; set; }  
+        public DateOnly OpenDate { get; set; }  
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }
         public bool IsSpecificStudents { get; set; }

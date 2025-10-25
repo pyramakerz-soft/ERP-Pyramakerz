@@ -245,30 +245,58 @@ export class DomainsComponent {
     if(this.isFormValid()){
       this.isSaved = true
       if(this.editDomain == false){
-        this.domainService.Add(this.domain).subscribe(
-          (result: any) => {
-            Swal.fire({
-              title: 'Domain Created Successfully',
-              icon: 'success', 
-              html: `
-                <div class='grid justify-items-start'>
-                  <p><strong>Admin Name:</strong> ${result.userName}</p>
-                  <p><strong>Password:</strong> ${result.password}</p>
-                  <p><strong>Link:</strong> ${result.link}</p>
-                </div>
-              `,
-              showCancelButton: false,
-              confirmButtonColor: '#089B41',
-              confirmButtonText: 'Okay',
-            }).then((r) => {
-              this.closeModal()
-              this.domainService.Get().subscribe(
-                (data: any) => {
-                  this.domainData = data;
-                }
-              );
-              this.isSaved = false
-            });
+        this.domainService.CreateDomainDB(this.domain.name).subscribe(
+          (dataFromDBAndCreation: any) => {
+            this.domainService.RunDomainMigrations(this.domain.name).subscribe(
+              (dataFromMigrations: any) => {
+                this.domainService.SetupDomainData(this.domain).subscribe(
+                  (dataFromSetup: any) => {
+                    this.domainService.AWSServerCreation(this.domain.name).subscribe(
+                      (dataFromAWS: any) => {
+                        Swal.fire({
+                          title: 'Domain Created Successfully',
+                          icon: 'success', 
+                          html: `
+                            <div class='grid justify-items-start'>
+                              <p><strong>Admin Name:</strong> ${dataFromSetup.userName}</p>
+                              <p><strong>Password:</strong> ${dataFromSetup.password}</p>
+                              <p><strong>Link:</strong> ${dataFromAWS.link}</p>
+                            </div>
+                          `,
+                          showCancelButton: false,
+                          confirmButtonColor: '#089B41',
+                          confirmButtonText: 'Okay',
+                        }).then((r) => {
+                          this.closeModal()
+                          this.domainService.Get().subscribe(
+                            (data: any) => {
+                              this.domainData = data;
+                            }
+                          );
+                          this.isSaved = false
+                        });
+                      },
+                      (error) => {  
+                        Swal.fire({
+                          icon: "error",
+                          title: "Oops...",
+                          text: error.error
+                        });
+                        this.isSaved = false
+                      }
+                    )
+                  },
+                  (error) => {  
+                    Swal.fire({
+                      icon: "error",
+                      title: "Oops...",
+                      text: error.error
+                    });
+                    this.isSaved = false
+                  }
+                )
+              }
+            )
           },
           (error) => { 
             if(error.error == "Domain already exists."){
@@ -277,10 +305,52 @@ export class DomainsComponent {
                 title: "Oops...",
                 text: "Please Enter Another Name"
               });
+            }else{
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: error.error
+              });
             }
             this.isSaved = false
           }
-        );
+        )
+        // this.domainService.Add(this.domain).subscribe(
+        //   (result: any) => {
+        //     Swal.fire({
+        //       title: 'Domain Created Successfully',
+        //       icon: 'success', 
+        //       html: `
+        //         <div class='grid justify-items-start'>
+        //           <p><strong>Admin Name:</strong> ${result.userName}</p>
+        //           <p><strong>Password:</strong> ${result.password}</p>
+        //           <p><strong>Link:</strong> ${result.link}</p>
+        //         </div>
+        //       `,
+        //       showCancelButton: false,
+        //       confirmButtonColor: '#089B41',
+        //       confirmButtonText: 'Okay',
+        //     }).then((r) => {
+        //       this.closeModal()
+        //       this.domainService.Get().subscribe(
+        //         (data: any) => {
+        //           this.domainData = data;
+        //         }
+        //       );
+        //       this.isSaved = false
+        //     });
+        //   },
+        //   (error) => { 
+        //     if(error.error == "Domain already exists."){
+        //       Swal.fire({
+        //         icon: "error",
+        //         title: "Oops...",
+        //         text: "Please Enter Another Name"
+        //       });
+        //     }
+        //     this.isSaved = false
+        //   }
+        // );
       } else{
         this.domainService.Edit(this.domain).subscribe(
           (result: any) => {

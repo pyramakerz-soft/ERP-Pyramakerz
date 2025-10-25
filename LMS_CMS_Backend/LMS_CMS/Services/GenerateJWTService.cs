@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace LMS_CMS_PL.Services
@@ -37,11 +38,23 @@ namespace LMS_CMS_PL.Services
                 _configuration["JWT:Issuer"],
                 _configuration["JWT:Audience"],
                 claims,
-                expires: DateTime.UtcNow.AddDays(30),
+                //expires: DateTime.UtcNow.AddDays(30),
+                //expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signIn
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
     }
 }

@@ -236,7 +236,7 @@
                     [(ngModel)]="classroom.homeroomTeacherID">
                     <option *ngIf="!classroom.id" [value]="null" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
                     <option *ngIf="classroom.id" [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
-                    <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.user_Name }}</option>
+                    <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.en_name }}</option>
                     <option *ngIf="Employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>

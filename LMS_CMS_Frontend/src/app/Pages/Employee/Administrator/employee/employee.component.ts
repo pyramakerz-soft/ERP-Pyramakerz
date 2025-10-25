@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -13,15 +12,16 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-employee',
   standalone: true,
-  imports: [CommonModule, FormsModule ,SearchComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './employee.component.html',
   styleUrl: './employee.component.css'
 })
@@ -32,30 +32,31 @@ export class EmployeeComponent {
   DomainName: string = "";
   UserID: number = 0;
   path: string = "";
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  TableData: EmployeeGet[] = []
+  TableData: Employee[] = []
 
-  keysArray: string[] = ['id', 'user_Name','ar_name' ,'en_name' ,'mobile','phone','email','address','role_Name','employeeTypeName'];
-  key: string= "id";
+  keysArray: string[] = ['id', 'user_Name', 'ar_name', 'en_name', 'mobile', 'phone', 'email', 'address', 'role_Name', 'employeeTypeName'];
+  key: string = "id";
   value: any = "";
 
   constructor(
-    public activeRoute: ActivatedRoute, 
+    public activeRoute: ActivatedRoute,
     public account: AccountService,
-     public ApiServ: ApiService,
-      private menuService: MenuService, 
+    private translate: TranslateService,
+    public ApiServ: ApiService,
+    private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
-     private router: Router, 
-     public EmpServ: EmployeeService,
-        private languageService: LanguageService,
-        private realTimeService: RealTimeNotificationServiceService
-    ) { }
+    private router: Router,
+    public EmpServ: EmployeeService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -77,7 +78,7 @@ export class EmployeeComponent {
 
       });
     }
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -85,13 +86,48 @@ export class EmployeeComponent {
   }
 
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showLoadingAlert(message: string) {
+  Swal.fire({
+    title: message,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+}
 
   GetEmployee() {
     this.EmpServ.Get_Employees(this.DomainName).subscribe((data) => {
@@ -100,61 +136,90 @@ export class EmployeeComponent {
   }
 
   Create() {
-    this.router.navigateByUrl("Employee/Employee Create")
+    this.router.navigateByUrl("Employee/Employee/Create")
   }
 
   Edit(id: number) {
-    this.router.navigateByUrl(`Employee/Employee Edit/${id}`)
+    this.router.navigateByUrl(`Employee/Employee/Edit/${id}`)
 
   }
 
-  Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Employee?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Deleting...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+Delete(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this employee?');
+  const deleteButton = this.translate.instant('Delete');
+  const cancelButton = this.translate.instant('Cancel');
   
-        this.EmpServ.Delete(id, this.DomainName).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Deleted!',
-              text: 'The Employee has been deleted successfully.',
-              confirmButtonColor: '#089B41',
-            });
-            this.GetEmployee(); 
-          },
-          error: (error) => {
-            const errorMessage = error?.error || 'An unexpected error occurred.';
-            Swal.fire({
-              icon: 'error',
-              title: 'Error!',
-              text: errorMessage,
-              confirmButtonColor: '#089B41',
-            });
-          },
-        });
-      }
-    });
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: deleteButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.showLoadingAlert(this.translate.instant('Deleting...'));
+
+      this.EmpServ.Delete(id, this.DomainName).subscribe({
+        next: () => {
+          this.showSuccessAlert(this.translate.instant('Employee deleted successfully'));
+          this.GetEmployee();
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete employee');
+          this.showErrorAlert(errorMessage);
+        },
+      });
+    }
+  });
+}
+
+  view(id: number) {
+    this.router.navigateByUrl(`Employee/Employee/${id}`)
   }
 
-  view(id:number){
-    this.router.navigateByUrl(`Employee/Employee Details/${id}`)
-  }
+suspend(emp: Employee) {
+  const isSuspending = !emp.isSuspended;
   
+  const message = isSuspending 
+    ? this.translate.instant('Are you sure you want to suspend this employee?')
+    : this.translate.instant('Are you sure you want to unsuspend this employee?');
+  
+  const confirmButtonText = isSuspending 
+    ? this.translate.instant('Suspend')
+    : this.translate.instant('Unsuspend');
+  
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: message,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: confirmButtonText,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
+        next: () => {
+          const successMessage = isSuspending
+            ? this.translate.instant('Employee suspended successfully')
+            : this.translate.instant('Employee unsuspended successfully');
+          
+          this.showSuccessAlert(successMessage);
+          this.GetEmployee();
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update employee status');
+          this.showErrorAlert(errorMessage);
+        },
+      });
+    }
+  });
+}
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
     return IsAllow;
@@ -164,30 +229,30 @@ export class EmployeeComponent {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
-  
-   async onSearchEvent(event: { key: string, value: any }) {
-      this.key = event.key;
-      this.value = event.value;
-      try {
-        const data: EmployeeGet[] = await firstValueFrom( this.EmpServ.Get_Employees(this.DomainName));  
-        this.TableData = data || [];
-    
-        if (this.value !== "") {
-          const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-    
-          this.TableData = this.TableData.filter(t => {
-            const fieldValue = t[this.key as keyof typeof t];
-            if (typeof fieldValue === 'string') {
-              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-            }
-            if (typeof fieldValue === 'number') {
-              return fieldValue.toString().includes(numericValue.toString())
-            }
-            return fieldValue == this.value;
-          });
-        }
-      } catch (error) {
-        this.TableData = [];
+
+  async onSearchEvent(event: { key: string, value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: Employee[] = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName));
+      this.TableData = data || [];
+
+      if (this.value !== "") {
+        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+
+        this.TableData = this.TableData.filter(t => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
       }
+    } catch (error) {
+      this.TableData = [];
     }
+  }
 }

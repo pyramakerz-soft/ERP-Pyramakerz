@@ -22,29 +22,75 @@ namespace LMS_CMS_PL.Services
             _configuration = configuration;
         }
 
-        public async Task AddDomainAndSetupDatabase(string domainName, long userId)
+        //public async Task AddDomainAndSetupDatabase(string domainName, long userId)
+        //{
+        //    string connectionString = BuildConnectionString(domainName);
+
+        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        //    //var domain = new Domain { Name = domainName, ConnectionString = connectionString, InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone), InsertedByUserId =  userId };
+        //    var domain = new Domain { Name = domainName, InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone), InsertedByUserId =  userId };
+        //    Unit_Of_Work.domain_Octa_Repository.Add_Octa(domain);
+        //    Unit_Of_Work.SaveOctaChanges();
+
+        //    var optionsBuilder = new DbContextOptionsBuilder<LMS_CMS_Context>();
+        //    optionsBuilder.UseSqlServer(connectionString);
+
+        //    using (var dbContext = new LMS_CMS_Context(optionsBuilder.Options))
+        //    {
+        //        bool databaseExists = await dbContext.Database.CanConnectAsync();
+        //        if (!databaseExists)
+        //        {
+        //            await dbContext.Database.MigrateAsync();
+        //            await CreateAndPopulateMigrationHistoryTable(dbContext);
+        //        }
+        //    }
+        //}
+
+        public async Task CreateDomainDatabase(string domainName, long userId)
         {
             string connectionString = BuildConnectionString(domainName);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            //var domain = new Domain { Name = domainName, ConnectionString = connectionString, InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone), InsertedByUserId =  userId };
-            var domain = new Domain { Name = domainName, InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone), InsertedByUserId =  userId };
+            var domain = new Domain
+            {
+                Name = domainName,
+                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                InsertedByUserId = userId
+            };
+
             Unit_Of_Work.domain_Octa_Repository.Add_Octa(domain);
             Unit_Of_Work.SaveOctaChanges();
+
+            //var optionsBuilder = new DbContextOptionsBuilder<LMS_CMS_Context>();
+            //optionsBuilder.UseSqlServer(connectionString);
+
+            //using (var connection = new SqlConnection(connectionString))
+            //{
+            //    await connection.OpenAsync();
+            //    using (var command = new SqlCommand($"IF DB_ID('{domainName}') IS NULL CREATE DATABASE [{domainName}];", connection))
+            //    {
+            //        await command.ExecuteNonQueryAsync();
+            //    }
+            //}
+        }
+
+        public async Task RunDomainMigrations(string domainName)
+        {
+            string connectionString = BuildConnectionString(domainName);
 
             var optionsBuilder = new DbContextOptionsBuilder<LMS_CMS_Context>();
             optionsBuilder.UseSqlServer(connectionString);
 
             using (var dbContext = new LMS_CMS_Context(optionsBuilder.Options))
             {
-                bool databaseExists = await dbContext.Database.CanConnectAsync();
-                if (!databaseExists)
-                {
-                    await dbContext.Database.MigrateAsync();
-                    await CreateAndPopulateMigrationHistoryTable(dbContext);
-                }
+                // Run EF migrations
+                await dbContext.Database.MigrateAsync();
+
+                // Optional: ensure migration history table
+                await CreateAndPopulateMigrationHistoryTable(dbContext);
             }
         }
+
 
         public async Task ApplyMigrations(string domainName)
         {

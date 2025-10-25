@@ -1,0 +1,42 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Salary Configuration' | translate }}</h1>
+    <div class="flex justify-between items-center">
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="save()">
+            <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
+</div>
+
+<div class="mt-6 mb-4 rounded-3xl flex justify-between items-center">
+    <!-- Start Day Input -->
+    <div class="flex flex-col w-[49%]">
+        <label class="mb-2 primaryTxt" for="startDay"> {{ 'Start Day' | translate }}</label>
+        <input id="startDay" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event,'startDay')" placeholder="{{ 'Enter startDay' | translate }}"
+            [(ngModel)]="salaryConfiguration.startDay" 
+            (ngModelChange)="onInputValueChange({ field: 'startDay', value: $event })" />
+        <span *ngIf="validationErrors['startDay']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors['startDay']}}</span>
+    </div>
+
+    <!-- From Previous Month Checkbox -->
+    <div class="flex items-center w-[49%] mt-6 space-x-2 rtl:space-x-reverse">
+
+        <input type="checkbox" id="fromPreviousMonth" class="w-5 h-5 mr-2"
+            [(ngModel)]="salaryConfiguration.fromPreviousMonth">
+        <label for="fromPreviousMonth" class="primaryTxt">
+            {{ 'From Previous Month' | translate }}
+        </label>
+    </div>
+</div>
+
+<div class="flex flex-col w-[49%]">
+        <label class="mb-2 primaryTxt" for="overtimeStartAfterMinutes"> {{ 'Overtime is only counted after this many minutes' | translate }}</label>
+        <input id="overtimeStartAfterMinutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event,'overtimeStartAfterMinutes')" placeholder="{{ 'Enter Mnutes' | translate }}"
+            [(ngModel)]="salaryConfiguration.overtimeStartAfterMinutes" 
+            (ngModelChange)="onInputValueChange({ field: 'overtimeStartAfterMinutes', value: $event })" />
+        <span *ngIf="validationErrors['overtimeStartAfterMinutes']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors['overtimeStartAfterMinutes']}}</span>
+</div>

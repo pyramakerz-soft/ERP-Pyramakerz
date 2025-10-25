@@ -29,7 +29,7 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { FeesActivationAddPut } from '../../../../Models/Accounting/fees-activation-add-put';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { StudentService } from '../../../../Services/student.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -50,6 +50,7 @@ export class FeesActivationComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: FeesActivation[] = [];
+  OriginalTableData: FeesActivation[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
@@ -97,6 +98,7 @@ export class FeesActivationComponent {
     private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public ApiServ: ApiService,
     public accountServ: AccountingTreeChartService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -149,8 +151,10 @@ export class FeesActivationComponent {
 
   GetAllFeesData() {
     this.TableData = []
+    this.OriginalTableData = []
     this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
+      this.OriginalTableData = d;
+      this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
       this.isSearchLoading = false
     },err=>{
      this.isSearchLoading = false
@@ -158,14 +162,14 @@ export class FeesActivationComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Fees Activation?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "+ this.translate.instant('Fees Activation') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.feesActivationServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -360,11 +364,15 @@ export class FeesActivationComponent {
 
   async Activate() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       this.FeesForAdd = [];
-      const distinctStudentIDs = Array.from(new Set(this.TableData.map(stu => stu.studentID)));
+
+      const distinctStudentIDs = Array.from(
+        new Set(this.OriginalTableData.map(stu => stu.studentID))
+      );
+
       distinctStudentIDs.forEach(stu => {
-        var fee: FeesActivationAddPut = new FeesActivationAddPut();
+        const fee = new FeesActivationAddPut();
         fee.academicYearId = this.YearId;
         fee.amount = this.Fees.amount;
         fee.date = this.Fees.date;
@@ -375,20 +383,26 @@ export class FeesActivationComponent {
         fee.studentID = stu;
         this.FeesForAdd.push(fee);
       });
+
       try {
         await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
-        this.GetAllFeesData();
-        this.Search()
-        this.Fees =new FeesActivationAddPut()
-        Swal.fire({
+        this.Fees = new FeesActivationAddPut();
+        this.DiscountPercentage = null;
+
+        await this.GetAllFeesData();
+        await this.Search();
+
+        await Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',
           confirmButtonColor: '#089B41',
         });
-        this.isLoading = false
+
       } catch (error) {
         console.error("Error while activating fees:", error);
-        this.isLoading = false
+        this.isLoading = false;
+      } finally {
+        this.isLoading = false;
       }
     }
   }
@@ -410,7 +424,9 @@ export class FeesActivationComponent {
 
   async CalculateNet() {
     this.Fees.net = this.Fees.amount
-    await this.CalculateDiscountFromPercentage()
+    if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
+      this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+    }
     this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
   }
 

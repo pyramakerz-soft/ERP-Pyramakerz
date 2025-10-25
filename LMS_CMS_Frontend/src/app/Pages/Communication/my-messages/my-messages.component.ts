@@ -47,6 +47,7 @@ export class MyMessagesComponent {
   isShowChat = false
   englishNameForConversation = ''
   arabicNameForConversation = ''
+  connectionStatusForConversation = 0
 
   messageToBeSend:ChatMessage = new ChatMessage()
   messageToBeForwarded:ChatMessage = new ChatMessage()
@@ -92,7 +93,8 @@ export class MyMessagesComponent {
       this.otherUserTypeID = params['otherUserTypeID'] ? +params['otherUserTypeID'] : null;
       this.englishNameForConversation = params['englishNameForConversation'] ? params['englishNameForConversation'] : ""
       this.arabicNameForConversation = params['arabicNameForConversation'] ? params['arabicNameForConversation'] : ""
-       
+      this.connectionStatusForConversation = params['connectionStatusForConversation'] ? params['connectionStatusForConversation'] : 0 
+
       if (this.otherUserID && this.otherUserTypeID) {
         this.loadSpecificChat(this.otherUserID, this.otherUserTypeID);
       }  
@@ -100,7 +102,9 @@ export class MyMessagesComponent {
 
     // Subscribe to request opened events 
     this.chatMessageService.messageOpened$.subscribe(() => {
-      this.loadAllMessages();
+      if(!this.isShowChat){
+        this.loadAllMessages();
+      }
       if (this.otherUserID && this.otherUserTypeID) {
         this.loadSpecificChat(this.otherUserID, this.otherUserTypeID);
       } 
@@ -112,7 +116,7 @@ export class MyMessagesComponent {
     this.isConversationOpen = true
     this.chatMessageService.BySenderAndReceiverID(userID, userTypeID, this.DomainName).subscribe(
       data => {
-        this.conversation = data  
+        this.conversation = data   
 
         if(this.isShowChat){
           // call the subscribe again for the other pages
@@ -164,6 +168,8 @@ export class MyMessagesComponent {
   showChat(chatMessage: ChatMessage) { 
     this.messageToBeSend = new ChatMessage() 
     this.messageToBeForwarded = new ChatMessage() 
+    chatMessage.unreadCount = 0
+    chatMessage.seenOrNot = true
     var otherUserID = 0
     var otherUserTypeID = 0
     if(chatMessage.receiverID == this.User_Data_After_Login.id && chatMessage.receiverUserTypeName == this.User_Data_After_Login.type){
@@ -172,12 +178,14 @@ export class MyMessagesComponent {
  
       this.englishNameForConversation = chatMessage.senderEnglishName
       this.arabicNameForConversation = chatMessage.senderArabicName
+      this.connectionStatusForConversation = chatMessage.senderConnectionStatusID
     }else{
       otherUserID = chatMessage.receiverID ? chatMessage.receiverID : 0  
       otherUserTypeID = chatMessage.receiverUserTypeID ? chatMessage.receiverUserTypeID :0
 
       this.englishNameForConversation = chatMessage.receiverEnglishName
       this.arabicNameForConversation = chatMessage.receiverArabicName
+      this.connectionStatusForConversation = chatMessage.receiverConnectionStatusID
     }
 
     // this will automatically loaded because of the route
@@ -189,7 +197,8 @@ export class MyMessagesComponent {
             otherUserID: otherUserID,
             otherUserTypeID: otherUserTypeID,
             englishNameForConversation: this.englishNameForConversation,
-            arabicNameForConversation: this.arabicNameForConversation
+            arabicNameForConversation: this.arabicNameForConversation,
+            connectionStatusForConversation: this.connectionStatusForConversation
         },
         queryParamsHandling: 'merge' 
     });  
@@ -661,7 +670,7 @@ export class MyMessagesComponent {
         this.conversation = []
         this.isConversationOpen = false
         this.englishNameForConversation = ''
-        this.arabicNameForConversation = ''
+        this.connectionStatusForConversation = 0
 
         this.router.navigate([], {
           relativeTo: this.route,
@@ -669,13 +678,11 @@ export class MyMessagesComponent {
               otherUserID: this.otherUserID,
               otherUserTypeID: this.otherUserTypeID,
               englishNameForConversation: this.englishNameForConversation,
-              arabicNameForConversation: this.arabicNameForConversation
+              arabicNameForConversation: this.arabicNameForConversation,
+              connectionStatusForConversation: this.connectionStatusForConversation,
           },
           queryParamsHandling: 'merge' 
-        });
-
-        // call the subscribe again for the other pages
-        this.chatMessageService.notifyMessageOpened();
+        }); 
       },
       error => {
         this.isLoading = false;
@@ -712,7 +719,7 @@ export class MyMessagesComponent {
           }  
   
           // call the subscribe again for the other pages
-          this.chatMessageService.notifyMessageOpened();
+          // this.chatMessageService.notifyMessageOpened();
         },
         error => {
           this.isLoading = false;
@@ -768,6 +775,7 @@ export class MyMessagesComponent {
         this.isConversationOpen = false
         this.englishNameForConversation = ''
         this.arabicNameForConversation = ''
+        this.connectionStatusForConversation = 0
 
         this.router.navigate([], {
           relativeTo: this.route,
@@ -775,7 +783,8 @@ export class MyMessagesComponent {
               otherUserID: this.otherUserID,
               otherUserTypeID: this.otherUserTypeID,
               englishNameForConversation: this.englishNameForConversation,
-              arabicNameForConversation: this.arabicNameForConversation
+              arabicNameForConversation: this.arabicNameForConversation,
+              connectionStatusForConversation: this.connectionStatusForConversation,
           },
           queryParamsHandling: 'merge' 
         });

@@ -17,7 +17,6 @@
     </div>
 
     <!-- Item Selector -->
-
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="item">{{'Item'| translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="item"
@@ -56,7 +55,7 @@
 
 
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" Export to Excel>
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
 </div>
@@ -73,7 +72,7 @@
                   {{'Transaction Type'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Invoice Numberv'| translate }}
+                     {{'Invoice Number'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                      {{'Authority'| translate }}

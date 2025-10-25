@@ -142,7 +142,7 @@
             validationErrors["expireDate"]}}</span>
     </div>
 
-    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
+    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4 space-x-3 rtl:space-x-reverse">
         <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
             [(ngModel)]="Data.busCompanyID">
@@ -152,23 +152,61 @@
         </select>
     </div>
 
-    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full space-x-3 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequest">
         <label class="mb-2" for="canReceiveRequest">  {{ 'Can Receive Request' | translate }}</label>
     </div>  
 
-    <div class="flex align-middle space-x-2 mb-4 w-full">
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveRequestFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequestFromParent">
         <label class="mb-2" for="canReceiveRequestFromParent">  {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
     </div>
 
-    <div class="flex align-middle space-x-2 mb-4 w-full">
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveMessageFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessageFromParent">
         <label class="mb-2" for="canReceiveMessageFromParent">  {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
     </div>
 
+    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 items-center justify-between">
+        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
+            <input type="checkbox" id="isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" (change)="onLocationChange()">
+            <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Loctaion' | translate }}</label>
+        </div>
+        <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion" >
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Location' | translate }}</label>
+            <div class="relative">
+                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                    (click)="LocationtoggleDropdown()" tabindex="0">
+                    <ng-container *ngIf="locationsSelected.length > 0; else placeholder">
+                        <div class="flex flex-wrap">
+                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                *ngFor="let selected of locationsSelected">
+                                {{ selected.name }}
+                                <span class="ml-2 cursor-pointer text-red-500" (click)="LocationremoveSelected(selected.id)">
+                                    &times;
+                                </span>
+                            </span>
+                        </div>
+                    </ng-container>
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">  {{ 'Choose Location' | translate }}</span>
+                    </ng-template>
+                </div>
+                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="LocationdropdownOpen">
+                    <ul>
+                        <li *ngFor="let Type of locations" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            (click)="LocationselectType(Type)">
+                            {{ Type.name }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>    
+
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2">
+        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
 
             <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" (change)="onFloorsSupervisorChange()">
             <label class="mb-2" for="isFloorMonitor">  {{ 'Floor Monitor' | translate }}</label>
@@ -287,11 +325,11 @@
             <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                 <img src="Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                    <span class="secondaryTxt">  {{ 'Click to Upload' | translate }}</span>
+                    <span class="secondaryTxt">  {{ 'Click To Upload' | translate }}</span>
                 </p>
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
+                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{'Max. File size' | translate}} 25 MB</p>
             </label>
-            <input id="file" type="file" class="hidden" accept="image/jpeg, image/png" multiple
+            <input id="file" type="file" class="hidden" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" multiple
                 (change)="onFilesSelected($event)" />
         </div>
     </div>
@@ -300,33 +338,35 @@
 <div *ngIf="Data.files.length > 0" class="bg-white p-4 rounded-lg">
     <div class="flex flex-wrap gap-4">
         <div *ngFor="let file of Data.files; let i = index" class="flex w-full items-center gap-4 mb-4">
-            <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
-                <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
-                <div class="border border-cacaca rounded-lg p-6">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                            <i class="fa-solid fa-file"></i>
-
-                        </div>
-                        <button (click)="deleteFile(i)">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div> 
-                    <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
-                          {{ 'Click to View' | translate }}
-                    </p>
+            <div *ngIf="!isFileInSelected(file)" class="flex w-full items-center gap-4 mb-4">
+                <div class="flex flex-col w-[34%]">
+                    <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
+                    <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
+                    <div class="border border-cacaca rounded-lg p-6">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                <i class="fa-solid fa-file"></i>
+    
+                            </div>
+                            <button (click)="deleteFile(i)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div> 
+                        <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
+                              {{ 'Click to View' | translate }}
+                        </p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="w-[64%]">
-                <div class="flex flex-col">
-                    <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
-                    <input id="name-{{ i }}" type="text" [value]="file.name"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                       
-                       placeholder="{{ 'Enter Attachment Name' | translate }}"
- (change)="changeFileName(file.id, $event)" />
+    
+                <div class="w-[64%]">
+                    <div class="flex flex-col">
+                        <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
+                        <input id="name-{{ i }}" type="text" [value]="file.name"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                           
+                           placeholder="{{ 'Enter Attachment Name' | translate }}"
+                           (change)="changeFileName(file.id, $event)" />
+                    </div>
                 </div>
             </div>
         </div>

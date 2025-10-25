@@ -24,6 +24,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<ChatMessage> ReceiverChatMessages { get; set; } = new List<ChatMessage>();
         public ICollection<Request> SenderRequests { get; set; } = new List<Request>();
         public ICollection<Request> ReceiverRequests { get; set; } = new List<Request>();
+        public ICollection<RefreshTokens> RefreshTokens { get; set; } = new List<RefreshTokens>();
 
     }
 }

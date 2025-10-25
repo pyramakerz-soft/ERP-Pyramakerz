@@ -19,6 +19,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public long AssignmentTypeID { get; set; }
         public long StudentClassroomID { get; set; }
         public string? LinkFile { get; set; }
+        public bool IsVisibleToStudent { get; set; }
 
         public long ClassroomID { get; set; }
         public string ClassroomName { get; set; }
@@ -32,6 +33,8 @@ namespace LMS_CMS_BL.DTO.LMS
 
         public string AssignmentArabicName { get; set; }
         public string AssignmentEnglishName { get; set; }
+
+        public DateTime? InsertedAt { get; set; }
 
         public List<AssignmentStudentQuestionGetDTO> AssignmentStudentQuestions { get; set; }
     }

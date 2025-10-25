@@ -16,7 +16,7 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { OutComeService } from '../../../../Services/Employee/Accounting/out-come.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -60,7 +60,8 @@ export class OutcomesComponent {
   constructor(
     private router: Router,
     private menuService: MenuService,
-    public activeRoute: ActivatedRoute,
+    public activeRoute: ActivatedRoute,    
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
@@ -125,14 +126,14 @@ export class OutcomesComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this OutCome?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('Outcome')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.OutComeServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -178,12 +179,12 @@ export class OutcomesComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -195,12 +196,12 @@ export class OutcomesComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });

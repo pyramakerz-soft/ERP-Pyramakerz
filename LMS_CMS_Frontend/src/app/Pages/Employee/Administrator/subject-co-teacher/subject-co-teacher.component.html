@@ -67,11 +67,11 @@
 
         <div class="mt-6 mb-4 flex flex-wrap justify-between">
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classroom' | translate }}</label>
                 <select id="Class"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="SelectedClassId" (change)="GetSubjectByClassroom()">
-                    <option value="0" disabled selected hidden>  {{ 'Select a class' | translate }}</option>
+                    <option value="0" disabled selected hidden>{{ 'Select a class' | translate }}</option>
                     <option *ngFor="let ac of Classrooms" [value]="ac.id">
                         {{ ac.name }}
                     </option>
@@ -81,11 +81,11 @@
             </div>
 
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Subject' | translate }}</label>
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Subject' | translate }}</label>
                 <select id="Class"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" (ngModelChange)="onInputValueChange({ field: 'classroomSubjectID', value: $event })"
                     [(ngModel)]="SupjectCoTeacher.classroomSubjectID" [disabled]="!SelectedClassId">
-                    <option value=0 disabled selected hidden>  {{ 'Select a class' | translate }}</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Subject' | translate }}</option>
                     <option *ngFor="let ac of subject" [value]="ac.id">
                         {{ ac.subjectEnglishName }}
                     </option>

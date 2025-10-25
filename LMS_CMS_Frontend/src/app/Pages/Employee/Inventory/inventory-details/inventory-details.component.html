@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center space-x-5">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      {{ 'Create' | translate }} {{InventoryFlag.enName}}
+      {{ 'Create' | translate }} {{InventoryFlag.enName | translate}}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
       {{ 'Edit' | translate }} {{InventoryFlag.enName}}
@@ -51,8 +51,8 @@
   </div>
 
   <div class="flex flex-col mb-4 w-[24%]">
-    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }}&{{'Time'| translate }}</label>
-    <input *ngIf="!IsPrint" id="name" type="datetime-local"
+    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }} {{'&' | translate}} {{'Time'| translate }}</label>
+    <input *ngIf="!IsPrint" id="name" type="date"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
       placeholder=" {{'Enter'| translate }} {{'Date'| translate }}&{{'Time'| translate }}" [(ngModel)]="Data.date" />
@@ -143,8 +143,8 @@
       <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="save"
         (ngModelChange)=" onInputValueChange({ field: 'saveID', value: $event })" [(ngModel)]="Data.saveID">
         <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Safe'| translate }}</option>
-        <option *ngFor="let stu of Saves" [value]="stu.id">
-          {{ stu.name }}
+        <option *ngFor="let stu of Saves" [value]="stu.saveID">
+          {{ stu.saveName }}
         </option>
         <option *ngIf="Saves.length === 0" disabled selected>
           {{'No Data Found'| translate }}
@@ -170,8 +170,8 @@
       <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bank"
         (ngModelChange)=" onInputValueChange({ field: 'bankID', value: $event })" [(ngModel)]="Data.bankID">
         <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Bank'| translate }}</option>
-        <option *ngFor="let stu of Banks" [value]="stu.id">
-          {{ stu.name }}
+        <option *ngFor="let stu of Banks" [value]="stu.bankID">
+          {{ stu.bankName }}
         </option>
         <option *ngIf="Banks.length === 0" disabled selected>
           {{'No Data Found'| translate }}
@@ -209,17 +209,16 @@
     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
       <div class="flex justify-center w-full">
         <label for="NewAttachments" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-          <img src="Images/FileAttached.png" class="w-1/4" />
+          <img src="Images/Icon frame.png" class="w-1/4" />
           <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-            <span class="secondaryTxt"> {{'Click to'| translate }} {{'Upload'| translate }} </span>
-            {{'Icons'| translate }}
+            <span class="secondaryTxt"> {{'Click to'| translate }} {{'Upload'| translate }} </span> 
           </p>
           <p class="font-normal text-xs md:text-sm text-[#8E8E93]">
             {{'(Max. File size: 25 MB)'| translate }}
           </p>
         </label>
         <input id="NewAttachments" type="file" class="hidden" (change)="onImageFileSelected($event)"
-          accept="image/jpeg, image/png" multiple />
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" multiple />
       </div>
     </div>
     <span *ngIf="validationErrors['NewAttachments']"

@@ -17,7 +17,7 @@ import { ClassroomStudentService } from '../../../../Services/Employee/LMS/class
 import { ClassStudentForDiscussionRoom } from '../../../../Models/LMS/class-student-for-discussion-room';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -65,6 +65,7 @@ export class DiscussionRoomComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public router: Router,
+    private translate: TranslateService,
     public discussionRoomService: DiscussionRoomService,
     public classroomStudentService: ClassroomStudentService,
     public SchoolService: SchoolService,
@@ -512,14 +513,14 @@ export class DiscussionRoomComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this discussion room?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: "Yes, I'm sure",
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
+          title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +this.translate.instant('Discussion Room') + " " + this.translate.instant('?'),
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#089B41',
+          cancelButtonColor: '#17253E',
+          confirmButtonText: this.translate.instant('Delete'),
+          cancelButtonText: this.translate.instant('Cancel'),
+        }).then((result) => {
       if (result.isConfirmed) {
         this.discussionRoomService.Delete(id, this.DomainName).subscribe((d) => {
           this.getAllData()
@@ -535,7 +536,7 @@ export class DiscussionRoomComponent {
       const data: any = await firstValueFrom(
         this.discussionRoomService.Get(this.DomainName)
       );
-      this.TableData = data.data || [];
+      this.TableData = data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -557,4 +558,6 @@ export class DiscussionRoomComponent {
       this.TableData = [];
     }
   }
+
+   
 }

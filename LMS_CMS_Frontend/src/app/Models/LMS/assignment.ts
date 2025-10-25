@@ -7,6 +7,7 @@ export class Assignment {
         public englishName: string = '',
         public arabicName: string = '',
         public mark: number | null = null,
+        public passMark: number | null = null,
         public openDate: string = '',
         public dueDate: string | null = null,
         public cutOfDate: string = '',
@@ -34,4 +35,16 @@ export class Assignment {
         public insertedByUserId: number = 0,
         public insertedByUserName: string = ''
     ) { }
+}
+
+export class AssignmentReportItem {
+  constructor(
+    public id: number = 0,
+    public assignmentName: string = '',
+    public subjectID: number = 0,
+    public subjectName: string = '',
+    public attendanceNumber: number = 0,
+    public numberSuccessful: number = 0,
+    public numberFailed: number = 0
+  ) {}
 }

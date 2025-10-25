@@ -16,7 +16,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { DutyService } from '../../../../Services/Employee/LMS/duty.service';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -67,6 +67,7 @@ export class DutyComponent {
     private languageService: LanguageService,
     private SchoolServ: SchoolService,
     private DutyServ: DutyService,
+    private translate: TranslateService,
     private ClassroomServ: ClassroomService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -136,6 +137,7 @@ export class DutyComponent {
     this.validationErrors = {};
     this.isModalVisible = true;
     this.duty = new Duty();
+    this.mode = 'Create'
     if (id) {
       this.mode = 'Edit'
       this.DutyServ.GetById(id, this.DomainName).subscribe((d) => {
@@ -181,9 +183,9 @@ export class DutyComponent {
           this.closeModal()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false;
-            const errorMsg = err?.error ?? ''; // extract error message
+            const errorMsg = error?.error ?? ''; // extract error message
             if (errorMsg.includes("This Day doesn`t exist in current time table")) {
               Swal.fire({
                 icon: 'warning',
@@ -196,7 +198,7 @@ export class DutyComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
@@ -209,12 +211,12 @@ export class DutyComponent {
           this.closeModal()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -265,19 +267,28 @@ export class DutyComponent {
     if (this.duty.date != '' && this.duty.classID != 0) {
       this.DutyServ.GetNumberOfPeriods(this.duty.date, this.duty.classID, this.DomainName).subscribe((d) => {
         this.periods = Array.from({ length: d }, (_, i) => i + 1);
+      },error=>{
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        console.log(123,error.error)
       });
     }
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Duty?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('duty') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.DutyServ.Delete(id, this.DomainName).subscribe((data: any) => {

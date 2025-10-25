@@ -12,10 +12,11 @@ import { ActivatedRoute } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-subject-category',
   standalone: true,
@@ -45,8 +46,17 @@ export class SubjectCategoryComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false;
   
-  constructor( private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,public account: AccountService, public subjectCategoryService: SubjectCategoryService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public activeRoute: ActivatedRoute, private menuService: MenuService){}
+  constructor( 
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
+    public account: AccountService, 
+    public subjectCategoryService: SubjectCategoryService, 
+    private translate: TranslateService, 
+    public ApiServ: ApiService, 
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public activeRoute: ActivatedRoute, 
+    private menuService: MenuService
+  ){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -70,19 +80,53 @@ export class SubjectCategoryComponent {
       }
     });
 
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showWarningAlert(title: string, text: string, confirmButtonText: string) {
+    Swal.fire({
+      icon: 'warning',
+      title: title,
+      text: text,
+      confirmButtonText: confirmButtonText
+    });
+  }
 
   getSubjectCategoryData(){
     this.subjectCategoryData=[]
@@ -147,40 +191,27 @@ export class SubjectCategoryComponent {
     }
   }
 
-  capitalizeField(field: keyof SubjectCategory): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-  }
-
   isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.subjectCategory) {
-      if (this.subjectCategory.hasOwnProperty(key)) {
-        const field = key as keyof SubjectCategory;
-        if (!this.subjectCategory[field]) {
-          if(field == "name"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          if(field == "name"){
-            if(this.subjectCategory.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
-        }
-      }
+    this.validationErrors = {};
+    
+    if (!this.subjectCategory.name) {
+      this.validationErrors['name'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Name')}`;
+      return false;
     }
-    return isValid;
+    
+    if (this.subjectCategory.name && this.subjectCategory.name.length > 100) {
+      this.validationErrors['name'] = `${this.translate.instant('Name')} ${this.translate.instant('cannot be longer than 100 characters')}`;
+      return false;
+    }
+    
+    return true;
   }
 
   onInputValueChange(event: { field: keyof SubjectCategory, value: any }) {
     const { field, value } = event;
     if (field == "name" ) {
       (this.subjectCategory as any)[field] = value;
-      if (value) {
+      if (value && this.validationErrors[field]) {
         this.validationErrors[field] = '';
       }
     }
@@ -199,63 +230,66 @@ export class SubjectCategoryComponent {
   SaveSubjectCategory(){
     if(this.isFormValid()){
       this.isLoading = true;
-      if(this.editSubjectCategory == false){
-        this.subjectCategoryService.Add(this.subjectCategory, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal()
-            this.isLoading = false;
-            this.getSubjectCategoryData()
-          },
-          error => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+      const isEditing = this.editSubjectCategory;
+      
+      const operation = isEditing 
+        ? this.subjectCategoryService.Edit(this.subjectCategory, this.DomainName)
+        : this.subjectCategoryService.Add(this.subjectCategory, this.DomainName);
+
+      operation.subscribe({
+        next: () => {
+          this.closeModal();
+          this.getSubjectCategoryData();
+          const successMessage = isEditing 
+            ? this.translate.instant('Updated successfully')
+            : this.translate.instant('Created successfully');
+          this.showSuccessAlert(successMessage);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.isLoading = false;
+          if (error.status === 403 && error.error === 'User is suspended.') {  
+            const suspendedTitle = this.translate.instant('Account suspended');
+            const suspendedText = this.translate.instant('Your account has been suspended. You will be logged out.');
+            const okButton = this.translate.instant('OK');
+            this.showWarningAlert(suspendedTitle, suspendedText, okButton);
+          } else {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to save the item');
+            this.showErrorAlert(errorMessage);
           }
-        );
-      } else{
-        this.subjectCategoryService.Edit(this.subjectCategory, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal()
-            this.getSubjectCategoryData()
-            this.isLoading = false;
-          },
-          error => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
-      }  
+        }
+      });
     }
   } 
 
   deleteSubjectCategory(id:number){
+    const translatedTitle = this.translate.instant('Are you sure?');
+    const translatedText = this.translate.instant('You will not be able to recover this item!');
+    const translatedConfirm = this.translate.instant('Yes, delete it!');
+    const translatedCancel = this.translate.instant('No, keep it');
+    const successMessage = this.translate.instant('Deleted successfully');
+
     Swal.fire({
-      title: 'Are you sure you want to delete this Subject Category?',
+      title: translatedTitle,
+      text: translatedText,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
     }).then((result) => {
       if (result.isConfirmed) {
-        this.subjectCategoryService.Delete(id, this.DomainName).subscribe(
-          (data: any) => {
-            this.subjectCategoryData=[]
-            this.getSubjectCategoryData()
+        this.subjectCategoryService.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.getSubjectCategoryData();
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
+            this.showErrorAlert(errorMessage);
           }
-        );
+        });
       }
     });
   }

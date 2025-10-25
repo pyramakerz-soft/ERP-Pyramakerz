@@ -1,5 +1,4 @@
 ﻿using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -37,9 +36,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var context = Unit_Of_Work.DbContext;
 
             var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo",
+                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @PageNumber, @PageSize",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                new SqlParameter("@PageNumber", pageNumber),
+                new SqlParameter("@PageSize", pageSize)
             )
                 .AsNoTracking()
                 .ToListAsync();
@@ -48,8 +49,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 return NotFound("No accounting entries found for the specified date range.");
             }
-
-            TotalResult fullTotals = new();
 
             var groupedResults = results
             .GroupBy(x => x.Date.Value.Date)
@@ -75,18 +74,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                         Difference = difference
                     }
                 };
-            }).OrderBy(g => g.Date);
-
-            var pagedGroups = groupedResults
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+            })
+                .OrderBy(g => g.Date)
                 .ToList();
 
-            decimal? fullDebit = results?.Sum(x => x.Debit) ?? 0;
-            decimal? fullCredit = results?.Sum(x => x.Credit) ?? 0;
-            decimal? fullDifference = fullCredit > fullDebit ? fullCredit - fullDebit : fullDebit - fullCredit;
+            var fullTotals = await context.Set<TotalResult>().FromSqlRaw(
+                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
+                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
+            )
+                .ToListAsync();
 
-            long totalRecords = groupedResults.Count();
+            var totalRecords = await context.Database
+                .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
+                .FirstAsync();
+
 
             var paginationMetadata = new
             {
@@ -98,13 +102,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             return Ok(new
             {
-                Data = pagedGroups,
-                FullTotals = new
-                {
-                    Debit = fullDebit,
-                    Credit = fullCredit,
-                    Difference = fullDifference
-                },
+                Data = groupedResults,
+                FullTotals = fullTotals,
                 Pagination = paginationMetadata
             });
             

@@ -31,36 +31,6 @@ interface FlagOption {
 })
 
 export class InventoryTransactionReportComponent implements OnInit {
-  getTableDataWithHeader(): any[] {
-    return this.transactions.map((transaction) => ({
-      header: `Invoice #${transaction.invoiceNumber} - ${
-        transaction.storeName
-      } - ${new Date(transaction.date).toLocaleDateString()}`,
-      data: [
-        { key: 'Transaction Type', value: transaction.flagEnName },
-        { key: 'Total Amount', value: transaction.total },
-        {
-          key: 'Payment Type',
-          value: transaction.isCash
-            ? 'Cash'
-            : transaction.isVisa
-            ? 'Visa'
-            : 'Other',
-        },
-        { key: 'Notes', value: transaction.notes || 'N/A' },
-      ],
-      details: {
-        headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
-        data: transaction.inventoryDetails.map((detail) => ({
-          'Item ID': detail.id,
-          Quantity: detail.quantity,
-          Price: detail.price,
-          'Total Price': detail.totalPrice,
-          Notes: detail.notes || 'N/A',
-        })),
-      },
-    }));
-  }
 
   dateFrom: string = '';
   dateTo: string = '';
@@ -83,12 +53,13 @@ export class InventoryTransactionReportComponent implements OnInit {
 
   showPDF = false;
   transactionsForExport: any[] = [];
-  school = {
-    reportHeaderOneEn: 'Inventory Report',
-    reportHeaderTwoEn: 'Transaction Summary',
-    reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'ملخص المعاملات'
-  };
+
+
+school = {
+  reportHeaderOneEn: '',
+  reportHeaderOneAr: '',
+};
+
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
@@ -154,24 +125,63 @@ export class InventoryTransactionReportComponent implements OnInit {
     private realTimeService: RealTimeNotificationServiceService
   ) {}
 
-  ngOnInit() {
-    this.route.data.subscribe((data) => {
-      this.reportType = data['reportType'];
-      this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.getAllFlagsForReportType();
-    });
-    this.loadStores();
-    this.loadCategories();
-    this.selectedStoreId = null;
-    this.selectedCategoryId = null;
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
+ngOnInit() {
+  this.route.data.subscribe((data) => {
+    this.reportType = data['reportType'];
+    this.currentFlags = this.availableFlags[this.reportType];
+    this.selectedFlagIds = this.getAllFlagsForReportType();
+    
+    this.setSchoolHeader();
+  });
+  
+  this.loadStores();
+  this.selectedStoreId = null;
+  this.selectedCategoryId = null;
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+  });
+  this.isRtl = document.documentElement.dir === 'rtl';
+}
+
+onStoreSelected() {
+  this.selectedCategoryId = null;
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.categories = [];
+  this.subCategories = [];
+  this.items = [];
+  
+  if (this.selectedStoreId) {
+    this.loadCategories();
+  } else {
+    this.categories = [];
   }
+  
+  this.onFilterChange();
+}
+
+  private setSchoolHeader(): void {
+  switch (this.reportType) {
+    case 'inventory':
+      this.school.reportHeaderOneEn = 'Inventory Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المخزون';
+      break;
+    case 'sales':
+      this.school.reportHeaderOneEn = 'Sales Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المبيعات';
+      break;
+    case 'purchase':
+      this.school.reportHeaderOneEn = 'Purchase Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المشتريات';
+      break;
+    default:
+      this.school.reportHeaderOneEn = 'Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير المعاملات';
+  }
+}
 
  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
@@ -181,74 +191,110 @@ export class InventoryTransactionReportComponent implements OnInit {
   }
 
 
-  loadCategories() {
-    this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
+loadCategories() {
+  // Only load categories if a store is selected
+  if (!this.selectedStoreId) {
+    this.categories = [];
+    return;
+  }
+
+  this.categoryService
+    .GetByStoreId(
+      this.categoryService.ApiServ.GetHeader(),
+            this.selectedStoreId, 
+    )
+    .subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.categories = [];
+      },
+    });
+}
+
+onCategorySelected() {
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.subCategories = [];
+  this.items = [];
+
+  if (this.selectedCategoryId) {
+    this.subCategoryService
+      .GetByCategoryId(
+        this.selectedCategoryId,
+        this.subCategoryService.ApiServ.GetHeader()
+      )
       .subscribe({
-        next: (categories) => {
-          this.categories = categories;
+        next: (subCategories) => {
+          this.subCategories = subCategories;
         },
         error: (error) => {
-          console.error('Error loading categories:', error);
+          console.error('Error loading subcategories:', error);
+          this.subCategories = [];
         },
       });
+  } else {
+    this.subCategories = [];
   }
+  
+  this.onFilterChange();
+}
 
-  onCategorySelected() {
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
+onSubCategorySelected() {
+  this.selectedItemId = null;
+  this.items = [];
+
+  console.log('Subcategory selected:', this.selectedSubCategoryId); // Debug log
+
+  // Check if a specific subcategory is selected (not null)
+  if (this.selectedSubCategoryId) {
+    // Load items for the specific subcategory
+    this.shopItemService
+      .GetBySubCategory(
+        this.selectedSubCategoryId,
+        this.shopItemService.ApiServ.GetHeader()
+      )
+      .subscribe({
+        next: (items) => {
+          this.items = items;
+          console.log('Items loaded for subcategory:', items.length); // Debug log
+        },
+        error: (error) => {
+          console.error('Error loading items:', error);
+          this.items = [];
+        },
+      });
+  } else {
+    // "Select All" is chosen - reset items but keep dropdown enabled
     this.items = [];
-
-    if (this.selectedCategoryId) {
-      this.subCategoryService
-        .GetByCategoryId(
-          this.selectedCategoryId,
-          this.subCategoryService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (subCategories) => {
-            this.subCategories = subCategories;
-          },
-          error: (error) => {
-            console.error('Error loading subcategories:', error);
-          },
-        });
-    } else {
-      this.subCategories = [];
-    }
+    console.log('Select All chosen - items reset'); // Debug log
   }
+  
+  this.onFilterChange();
+}
 
-  onSubCategorySelected() {
-    this.selectedItemId = null;
+onFilterChange() {
+  this.showTable = false;
+  this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+  this.transactions = [];
+}
 
-    if (this.selectedSubCategoryId) {
-      this.shopItemService
-        .GetBySubCategory(
-          this.selectedSubCategoryId,
-          this.shopItemService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (items) => {
-            this.items = items;
-          },
-          error: (error) => {
-            console.error('Error loading items:', error);
-          },
-        });
-    } else {
-      this.items = [];
-    }
+onFlagSelected() {
+  this.selectedFlagIds = [];
+  
+  const flagId = Number(this.selectedFlagId);
+  
+  if (flagId === -1) {
+    this.selectedFlagIds = this.getAllFlagsForReportType();
+  } else {
+    this.selectedFlagIds = [flagId];
   }
-
-  onFlagSelected() {
-    this.selectedFlagIds = [];
-    if (this.selectedFlagId == -1) {
-      this.selectedFlagIds = this.getAllFlagsForReportType();
-    } else {
-      this.selectedFlagIds = [this.selectedFlagId];
-    }
-    this.onFilterChange();
-  }
+  
+  console.log('After onFlagSelected - Flag ID:', flagId, 'Flag IDs:', this.selectedFlagIds);
+  this.onFilterChange();
+}
 
   getAllFlagsForReportType(): number[] {
     if (this.reportType === 'inventory') {
@@ -263,11 +309,6 @@ export class InventoryTransactionReportComponent implements OnInit {
     return [];
   }
 
-  onFilterChange() {
-    this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
-    this.transactions = [];
-  }
 
   loadStores() {
     this.isLoading = true;
@@ -283,19 +324,25 @@ export class InventoryTransactionReportComponent implements OnInit {
     });
   }
 
-  viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
-    this.isLoading = true;
-    this.showTable = false;
+  if (!this.selectedStoreId) {
+    this.selectedCategoryId = null;
+    this.selectedSubCategoryId = null;
+    this.selectedItemId = null;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
 
     this.inventoryMasterService
       .searchInvoice(
@@ -340,16 +387,71 @@ export class InventoryTransactionReportComponent implements OnInit {
       });
   }
 
-  private prepareExportData(): void {
-    this.transactionsForExport = this.transactions.map((t) => ({
+  
+getTableDataWithHeader(): any[] {
+  return this.transactions.map((transaction) => {
+    const baseData = {
+      header: `Invoice #${transaction.invoiceNumber} - ${
+        transaction.storeName
+      } - ${new Date(transaction.date).toLocaleDateString()}`,
+      data: [
+        { key: 'Transaction Type', value: transaction.flagEnName },
+        { key: 'Total Amount', value: transaction.total },
+        {
+          key: 'Payment Type',
+          value: transaction.isCash
+            ? 'Cash'
+            : transaction.isVisa
+            ? 'Visa'
+            : 'Other',
+        },
+        { key: 'Notes', value: transaction.notes || '-' },
+      ],
+      details: {
+        headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
+        data: transaction.inventoryDetails.map((detail) => ({
+          'Item ID': detail.id,
+          Quantity: detail.quantity,
+          Price: detail.price,
+          'Total Price': detail.totalPrice,
+          Notes: detail.notes || '-',
+        })),
+      },
+    };
+    
+    // Add student/supplier based on report type
+    if (this.reportType === 'sales' && transaction.studentName) {
+      baseData.data.splice(1, 0, { key: 'Student', value: transaction.studentName });
+    } else if (this.reportType === 'purchase' && transaction.supplierName) {
+      baseData.data.splice(1, 0, { key: 'Supplier', value: transaction.supplierName });
+    }
+    
+    return baseData;
+  });
+}
+
+
+private prepareExportData(): void {
+  this.transactionsForExport = this.transactions.map((t) => {
+    const baseData = {
       'Invoice #': t.invoiceNumber,
       Date: new Date(t.date).toLocaleDateString(),
       Store: t.storeName,
       'Total Amount': t.total,
       'Transaction Type': t.flagEnName,
-      Notes: t.notes || 'N/A',
-    }));
-  }
+      Notes: t.notes || '-',
+    };
+    
+    // Add student/supplier based on report type
+    if (this.reportType === 'sales') {
+      return {...baseData, 'Student': t.studentName || '-'};
+    } else if (this.reportType === 'purchase') {
+      return {...baseData, 'Supplier': t.supplierName || '-'};
+    }
+    
+    return baseData;
+  });
+}
 
   // private formatDateForAPI(dateString: string): string {
   //   if (!dateString) return '';
@@ -395,19 +497,18 @@ export class InventoryTransactionReportComponent implements OnInit {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  DownloadAsPDF() {
-    console.log('Downloading PDF with transactions:', this.transactionsForExport);
-    // if (this.transactionsForExport.length === 0) {
-    //   Swal.fire('Warning', 'No data to export!', 'warning');
-    //   return;
-    // }
-
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
-  }
+DownloadAsPDF() {
+  console.log('Selected Flag ID:', this.selectedFlagId);
+  console.log('Selected Flag IDs:', this.selectedFlagIds);
+  console.log('Selected Flag Names:', this.getSelectedFlagNames());
+  console.log('Current Flags:', this.currentFlags);
+  
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => (this.showPDF = false), 2000);
+  }, 500);
+}
 
   Print() {
     if (this.transactionsForExport.length === 0) {
@@ -461,48 +562,62 @@ export class InventoryTransactionReportComponent implements OnInit {
     }, 500);
   }
 
-  getSelectedFlagNames(): string {
-    if (this.selectedFlagIds.includes(20)) {
-      return 'All Types';
-    }
-    return this.currentFlags
-      .filter((flag) => this.selectedFlagIds.includes(flag.id))
-      .map((flag) => flag.name)
-      .join(', ');
+getSelectedFlagNames(): string {
+  if (this.selectedFlagId === -1 || this.selectedFlagIds.length === this.getAllFlagsForReportType().length) {
+    return 'All Types';
   }
+  
+  const selectedNames = this.currentFlags
+    .filter((flag) => this.selectedFlagIds.includes(flag.id))
+    .map((flag) => flag.name);
+  
+  return selectedNames.length > 0 ? selectedNames.join(', ') : 'No types selected';
+}
 
 async exportExcel() {
-  const tableData = this.transactions.map((t) => ({
-    'Invoice #': t.invoiceNumber,
-    Date: new Date(t.date).toLocaleDateString(),
-    Store: t.storeName,
-    'Transaction Type': t.flagEnName,
-    'Total Amount': t.total,
-    'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-    Notes: t.notes || 'N/A',
-  }));
+  const tableData = this.transactions.map((t) => {
+    const baseData: any = {
+      'Invoice #': t.invoiceNumber,
+      Date: new Date(t.date).toLocaleDateString(),
+      Store: t.storeName,
+    };
+
+    if (this.reportType === 'sales') {
+      baseData['Student'] = t.studentName || '-';
+    } else if (this.reportType === 'purchase') {
+      baseData['Supplier'] = t.supplierName || '-';
+    }
+
+    baseData['Transaction Type'] = t.flagEnName;
+    baseData['Total Amount'] = t.total;
+    // baseData['Payment Type'] = t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other';
+    // baseData['Notes'] = t.notes || '-';
+
+    return baseData;
+  });
 
   await this.reportsService.generateExcelReport({
     mainHeader: {
-      en: 'Inventory Transactions Report',
-      ar: 'تقرير معاملات المخزون'
+      en: this.school.reportHeaderOneEn,
+      ar: this.school.reportHeaderOneAr
     },
-    subHeaders: [
-      { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
-    ],
+    // subHeaders: [
+    //   { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
+    // ],
     infoRows: [
       { key: 'From Date', value: this.dateFrom },
       { key: 'To Date', value: this.dateTo },
       { key: 'Store', value: this.getStoreName() },
       { key: 'Transaction Types', value: this.getSelectedFlagNames() }
     ],
-    reportImage: '', // You can add an image URL if needed
+    reportImage: '',
     filename: `${this.reportType}_Transactions_Report.xlsx`,
     tables: [{
-      title: 'Transactions',
+      // title: 'Transactions',
       headers: Object.keys(tableData[0] || {}),
       data: tableData.map(item => Object.values(item))
     }]
   });
 }
+
 }

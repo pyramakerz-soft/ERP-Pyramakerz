@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
+    public class EmployeeEvaluationReportDto
+    {
+        public long EmployeeId { get; set; }
+        public string EmployeeEnglishName { get; set; }
+        public string EmployeeArabicName { get; set; }
+        public List<EvaluationReportDto> ReportsByDate { get; set; } = new List<EvaluationReportDto>();
+    }
+
     public class EvaluationReportDto
     {
         public DateOnly Date { get; set; }
@@ -45,4 +53,5 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string EvaluationBookCorrectionArabicName { get; set; }
         public string AverageStudent { get; set; }
     }
+
 }

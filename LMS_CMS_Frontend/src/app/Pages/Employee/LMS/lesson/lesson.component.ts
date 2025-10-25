@@ -22,19 +22,19 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { Semester } from '../../../../Models/LMS/semester';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
-import { Grade } from '../../../../Models/LMS/grade'; 
-import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';  
+import { Grade } from '../../../../Models/LMS/grade';
+import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
 import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { Tag } from '../../../../Models/LMS/tag';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, QuillModule , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule, TranslateModule],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css'
 })
@@ -50,12 +50,12 @@ export class LessonComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-   isRtl: boolean = false;
-  subscription!: Subscription; 
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'englishTitle' ,'arabicTitle', 'order', 'subjectEnglishName', 'subjectArabicName'];
+  keysArray: string[] = ['id', 'englishTitle', 'arabicTitle', 'order', 'subjectEnglishName', 'subjectArabicName'];
 
   lesson: Lesson = new Lesson();
 
@@ -80,12 +80,12 @@ export class LessonComponent {
   Grades: Grade[] = []
   GradesModal: Grade[] = []
   Subjects: Subject[] = []
-  SubjectsModal: Subject[] = [] 
+  SubjectsModal: Subject[] = []
   Semesters: Semester[] = []
   SemestersModal: Semester[] = []
   WeeksModal: SemesterWorkingWeek[] = []
 
- @ViewChild('quillEditor') quillEditorComponent!: QuillEditorComponent;
+  @ViewChild('quillEditor') quillEditorComponent!: QuillEditorComponent;
   quillInstance: any;
 
   editorModules = {
@@ -117,13 +117,13 @@ export class LessonComponent {
   Tags: string[] = [];
   InsertedTags: string[] = [];
   ExistingTags: number[] = [];
-  
+
   SelectedLessonImportFrom = 0
   SelectedWeekImportTo = 0
   LessonsImportedFrom: Lesson[] = [];
   SubjectModalId: number = 0
-  
-  SchoolModalImportToId: number = 0 
+
+  SchoolModalImportToId: number = 0
   AcademicYearModalImportToId: number = 0
   AcademicYearsImportToModal: AcademicYear[] = []
   GradeModalImportToId: number = 0
@@ -132,13 +132,14 @@ export class LessonComponent {
   SemestersImportToModal: Semester[] = []
   SubjectModalImportToId: number = 0
   SubjectsImportToModal: Subject[] = []
-  WeeksImportToModal: SemesterWorkingWeek[] = [] 
+  WeeksImportToModal: SemesterWorkingWeek[] = []
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -172,26 +173,24 @@ export class LessonComponent {
     });
 
     this.getSchool()
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-  } 
-
-
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
   }
 
 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
   onEditorCreated(quill: any) {
-      this.quillInstance = quill;
-    }
-  
+    this.quillInstance = quill;
+  }
+
   customImageHandler() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -205,14 +204,20 @@ export class LessonComponent {
         reader.onload = async (e: any) => {
           const { value: formValues } = await Swal.fire({
             title: 'Set Image Size',
-            html:
-              `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-              `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            // html:
+            //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+            //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            html: `
+              <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+              <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+                type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            `,
             focusConfirm: false,
             preConfirm: () => {
               const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
               const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
-              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              if (!width || !height || isNaN(+width) || isNaN(+height) || Number(width) < 1 || Number(height) < 1) {
                 Swal.showValidationMessage('Please enter numeric values.');
                 return null;
               }
@@ -231,7 +236,7 @@ export class LessonComponent {
                 lastImg.setAttribute('width', formValues.width + '');
                 lastImg.setAttribute('height', formValues.height + '');
                 lastImg.setAttribute('style', `width:${formValues.width}px; height:${formValues.height}px`);
-                 
+
                 this.lesson.details = this.quillInstance.root.innerHTML;
               }
             }, 100);
@@ -241,7 +246,7 @@ export class LessonComponent {
       }
     };
   }
-  
+
   customVideoHandler() {
     Swal.fire({
       title: 'Enter video URL',
@@ -260,9 +265,15 @@ export class LessonComponent {
 
         const { value: formValues } = await Swal.fire({
           title: 'Set Video Size',
-          html:
-            `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
-            `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          // html:
+          //   `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+          //   `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          html: `
+            <input id="swal-input1" class="swal2-input" placeholder="Width (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input id="swal-input2" class="swal2-input" placeholder="Height (px)" 
+              type="number" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          `,
           focusConfirm: false,
           preConfirm: () => {
             const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
@@ -321,7 +332,7 @@ export class LessonComponent {
     this.Semesters = []
     this.showTable = false
 
-    this.TableData = []  
+    this.TableData = []
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SchoolId = Number(selectedValue)
@@ -339,11 +350,11 @@ export class LessonComponent {
     this.AcademicYearsModal = []
     this.GradesModal = []
     this.SubjectsModal = []
-    this.SemestersModal = [] 
-    this.WeeksModal = [] 
+    this.SemestersModal = []
+    this.WeeksModal = []
     this.lesson.semesterWorkingWeekID = 0
 
-    this.LessonsImportedFrom = [] 
+    this.LessonsImportedFrom = []
     this.SubjectModalId = 0
     this.SelectedLessonImportFrom = 0
 
@@ -364,9 +375,9 @@ export class LessonComponent {
     this.AcademicYearsImportToModal = []
     this.GradesImportToModal = []
     this.SubjectsImportToModal = []
-    this.SemestersImportToModal = [] 
-    this.WeeksImportToModal = [] 
-      
+    this.SemestersImportToModal = []
+    this.WeeksImportToModal = []
+
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SchoolModalImportToId = Number(selectedValue)
     if (this.SchoolModalImportToId) {
@@ -375,42 +386,42 @@ export class LessonComponent {
     }
   }
 
-  onGradeChange(event: Event) {  
-    this.SubjectId = 0 
-    this.Subjects = [] 
+  onGradeChange(event: Event) {
+    this.SubjectId = 0
+    this.Subjects = []
     this.showTable = false
 
-    this.TableData = []  
+    this.TableData = []
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.GradeId = Number(selectedValue)
-    if (this.GradeId) { 
+    if (this.GradeId) {
       this.GetSubjectData();
     }
   }
 
-  onGradeModalChange(event: Event) {  
+  onGradeModalChange(event: Event) {
     this.lesson.subjectID = 0
-    this.SubjectsModal = []  
+    this.SubjectsModal = []
 
-    this.LessonsImportedFrom = [] 
+    this.LessonsImportedFrom = []
     this.SubjectModalId = 0
     this.SelectedLessonImportFrom = 0
-  
+
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.GradeModalId = Number(selectedValue)
-    if (this.GradeModalId) { 
+    if (this.GradeModalId) {
       this.GetSubjectModalData();
     }
   }
 
-  onGradeModalImportToChange(event: Event) {  
+  onGradeModalImportToChange(event: Event) {
     this.SubjectModalImportToId = 0
-    this.SubjectsImportToModal = []  
-  
+    this.SubjectsImportToModal = []
+
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.GradeModalImportToId = Number(selectedValue)
-    if (this.GradeModalImportToId) { 
+    if (this.GradeModalImportToId) {
       this.GetSubjectModalImportToData();
     }
   }
@@ -420,48 +431,48 @@ export class LessonComponent {
     this.Semesters = []
     this.showTable = false
 
-    this.TableData = [] 
+    this.TableData = []
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.AcademicYearId = Number(selectedValue)
-    if (this.AcademicYearId) { 
+    if (this.AcademicYearId) {
       this.GetSemesterData();
     }
   }
 
   onYearModalChange(event: Event) {
     this.SemesterModalId = 0
-    this.SemestersModal = [] 
-    this.WeeksModal = [] 
+    this.SemestersModal = []
+    this.WeeksModal = []
     this.lesson.semesterWorkingWeekID = 0
-    this.LessonsImportedFrom = [] 
+    this.LessonsImportedFrom = []
     this.SelectedLessonImportFrom = 0
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.AcademicYearModalId = Number(selectedValue)
-    if (this.AcademicYearModalId) { 
+    if (this.AcademicYearModalId) {
       this.GetSemesterModalData();
     }
   }
 
   onYearModalImportToChange(event: Event) {
     this.SemesterModalImportToId = 0
-    this.SemestersImportToModal = [] 
-    this.WeeksImportToModal = [] 
+    this.SemestersImportToModal = []
+    this.WeeksImportToModal = []
     this.SelectedWeekImportTo = 0
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.AcademicYearModalImportToId = Number(selectedValue)
-    if (this.AcademicYearModalImportToId) { 
+    if (this.AcademicYearModalImportToId) {
       this.GetSemesterModalImportToData();
     }
   }
 
   onSemesterAndSubjectModalChange() {
     this.SelectedLessonImportFrom = 0
-    this.LessonsImportedFrom = []  
- 
-    if (this.SubjectModalId && this.SemesterModalId) { 
+    this.LessonsImportedFrom = []
+
+    if (this.SubjectModalId && this.SemesterModalId) {
       this.LessonsImportedFrom = [];
       this.lessonService.GetBySubjectIDAndSemester(this.SemesterModalId, this.SubjectModalId, this.DomainName).subscribe((data) => {
         this.LessonsImportedFrom = data;
@@ -470,31 +481,31 @@ export class LessonComponent {
   }
 
   onSemesterModalChange(event: Event) {
-    this.WeeksModal = [] 
+    this.WeeksModal = []
     this.lesson.semesterWorkingWeekID = 0
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SemesterModalId = Number(selectedValue)
-    if (this.SemesterModalId) { 
+    if (this.SemesterModalId) {
       this.GetWeekModalData();
     }
   }
 
   onSemesterModalImportToChange(event: Event) {
-    this.WeeksImportToModal = [] 
+    this.WeeksImportToModal = []
     this.SelectedWeekImportTo = 0
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SemesterModalImportToId = Number(selectedValue)
-    if (this.SemesterModalImportToId) { 
+    if (this.SemesterModalImportToId) {
       this.GetWeekModalImportToData();
     }
   }
 
-  onSubjectOrSemesterChange() { 
-    this.showTable = false 
-    this.TableData = [] 
-  }   
+  onSubjectOrSemesterChange() {
+    this.showTable = false
+    this.TableData = []
+  }
 
   GetYearData() {
     this.AcademicYears = []
@@ -537,73 +548,73 @@ export class LessonComponent {
       this.Grades = d
     })
   }
-  
+
   GetSubjectModalData() {
     this.SubjectsModal = []
     this.SubjectServ.GetByGradeId(this.GradeModalId, this.DomainName).subscribe((d) => {
       this.SubjectsModal = d
     })
   }
-  
+
   GetSubjectData() {
     this.Subjects = []
     this.SubjectServ.GetByGradeId(this.GradeId, this.DomainName).subscribe((d) => {
       this.Subjects = d
     })
   }
-  
+
   GetSubjectModalImportToData() {
     this.SubjectsImportToModal = []
     this.SubjectServ.GetByGradeId(this.GradeModalImportToId, this.DomainName).subscribe((d) => {
       this.SubjectsImportToModal = d
     })
   }
-  
+
   GetSemesterModalData() {
     this.SemestersModal = []
     this.SemesterServ.GetByAcademicYearId(this.AcademicYearModalId, this.DomainName).subscribe((d) => {
       this.SemestersModal = d
     })
   }
-  
+
   GetSemesterData() {
     this.Semesters = []
     this.SemesterServ.GetByAcademicYearId(this.AcademicYearId, this.DomainName).subscribe((d) => {
       this.Semesters = d
     })
   }
-  
+
   GetSemesterModalImportToData() {
     this.SemestersImportToModal = []
     this.SemesterServ.GetByAcademicYearId(this.AcademicYearModalImportToId, this.DomainName).subscribe((d) => {
       this.SemestersImportToModal = d
     })
   }
-  
+
   GetWeekModalData() {
     this.WeeksModal = []
     this.SemesterWorkingWeekServ.GetBySemesterID(this.SemesterModalId, this.DomainName).subscribe((d) => {
       this.WeeksModal = d
     })
   }
-  
+
   GetWeekModalImportToData() {
     this.WeeksImportToModal = []
     this.SemesterWorkingWeekServ.GetBySemesterID(this.SemesterModalImportToId, this.DomainName).subscribe((d) => {
       this.WeeksImportToModal = d
     })
   }
-  
+
   GetAllData() {
     this.TableData = [];
     this.lessonService.GetBySubjectIDAndSemester(this.SemesterId, this.SubjectId, this.DomainName).subscribe((data) => {
       this.TableData = data;
     });
   }
-  
+
   GetLessonById(Id: number) {
     this.lessonService.GetByID(Id, this.DomainName).subscribe((data) => {
-      this.lesson = data;  
+      this.lesson = data;
       this.lesson.tags.forEach((element: Tag) => {
         this.Tags.push(element.name)
         this.ExistingTags.push(element.id)
@@ -612,7 +623,7 @@ export class LessonComponent {
       this.SchoolModalId = this.lesson.schoolID
       this.GradeModalId = this.lesson.gradeID
       this.AcademicYearModalId = this.lesson.academicYearID
-      this.SemesterModalId = this.lesson.semesterID 
+      this.SemesterModalId = this.lesson.semesterID
 
       this.GetGradeModalData()
       this.GetSubjectModalData()
@@ -622,7 +633,7 @@ export class LessonComponent {
     });
   }
 
-  Apply(){
+  Apply() {
     this.showTable = true
     this.GetAllData()
   }
@@ -631,7 +642,7 @@ export class LessonComponent {
     if (lessonId) {
       this.editLesson = true;
       this.GetLessonById(lessonId);
-    } 
+    }
 
     this.getSchoolModal()
 
@@ -643,18 +654,18 @@ export class LessonComponent {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
 
-    this.lesson = new Lesson(); 
+    this.lesson = new Lesson();
 
     this.AcademicYearModalId = 0
     this.SchoolModalId = 0
     this.GradeModalId = 0
-    this.SemesterModalId = 0 
+    this.SemesterModalId = 0
     this.AcademicYearsModal = []
     this.SchoolsModal = []
     this.GradesModal = []
     this.SubjectsModal = []
-    this.SemestersModal = [] 
-    this.WeeksModal = [] 
+    this.SemestersModal = []
+    this.WeeksModal = []
     this.inputValue = '';
     this.Tags = [];
     this.ExistingTags = [];
@@ -666,7 +677,7 @@ export class LessonComponent {
     this.validationErrors = {};
   }
 
-  ImportModal() { 
+  ImportModal() {
     this.getSchoolModal()
 
     document.getElementById('Import_Modal')?.classList.remove('hidden');
@@ -675,7 +686,7 @@ export class LessonComponent {
 
   closeImportModal() {
     document.getElementById('Import_Modal')?.classList.remove('flex');
-    document.getElementById('Import_Modal')?.classList.add('hidden'); 
+    document.getElementById('Import_Modal')?.classList.add('hidden');
 
     this.SelectedLessonImportFrom = 0
     this.SelectedWeekImportTo = 0
@@ -684,23 +695,23 @@ export class LessonComponent {
     this.AcademicYearModalId = 0
     this.SchoolModalId = 0
     this.GradeModalId = 0
-    this.SemesterModalId = 0 
+    this.SemesterModalId = 0
     this.AcademicYearsModal = []
     this.SchoolsModal = []
     this.GradesModal = []
     this.SubjectsModal = []
-    this.SemestersModal = [] 
-    this.WeeksModal = []   
-    this.AcademicYearsImportToModal = []  
-    this.SchoolModalImportToId = 0 
-    this.AcademicYearModalImportToId = 0 
-    this.GradeModalImportToId = 0 
+    this.SemestersModal = []
+    this.WeeksModal = []
+    this.AcademicYearsImportToModal = []
+    this.SchoolModalImportToId = 0
+    this.AcademicYearModalImportToId = 0
+    this.GradeModalImportToId = 0
     this.GradesImportToModal = []
-    this.SemesterModalImportToId = 0 
+    this.SemesterModalImportToId = 0
     this.SemestersImportToModal = []
-    this.SubjectModalImportToId = 0 
+    this.SubjectModalImportToId = 0
     this.SubjectsImportToModal = []
-    this.WeeksImportToModal = [] 
+    this.WeeksImportToModal = []
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -720,7 +731,7 @@ export class LessonComponent {
     );
     return IsAllow;
   }
- 
+
   addTag() {
     if (this.inputValue.trim() !== '') {
       this.Tags.push(this.inputValue.trim());
@@ -734,12 +745,12 @@ export class LessonComponent {
     this.ExistingTags.splice(index, 1);
   }
 
-  MoveToLessonActivity(lessonId:number) {
-    this.router.navigateByUrl('Employee/Lesson Activity/'+ lessonId);
+  MoveToLessonActivity(lessonId: number) {
+    this.router.navigateByUrl('Employee/Lesson Activity/' + lessonId);
   }
 
-  MoveToLessonResource(lessonId:number) {
-    this.router.navigateByUrl('Employee/Lesson Resource/'+ lessonId);
+  MoveToLessonResource(lessonId: number) {
+    this.router.navigateByUrl('Employee/Lesson Resource/' + lessonId);
   }
 
   capitalizeField(field: keyof Lesson): string {
@@ -748,18 +759,18 @@ export class LessonComponent {
 
   isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.lesson) { 
+    for (const key in this.lesson) {
       if (this.lesson.hasOwnProperty(key)) {
         const field = key as keyof Lesson;
         if (!this.lesson[field]) {
           if (field == 'englishTitle' || field == 'arabicTitle' || field == 'semesterWorkingWeekID' || field == 'details' || field == 'order' || field == 'subjectID') {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
         } else {
           if (field == 'englishTitle' || field == 'arabicTitle') {
             if (this.lesson.englishTitle.length > 100 || this.lesson.arabicTitle.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField( field )} cannot be longer than 100 characters`;
+              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`;
               isValid = false;
             }
           } else {
@@ -767,7 +778,7 @@ export class LessonComponent {
           }
         }
       }
-    } 
+    }
     return isValid;
   }
 
@@ -784,31 +795,31 @@ export class LessonComponent {
     value = value.replace(/[^0-9]/g, '')
     event.target.value = value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.lesson[field] === 'string') {
-        this.lesson[field] = '' as never;  
+        this.lesson[field] = '' as never;
       }
     }
   }
 
-  Save() {  
+  Save() {
     if (this.isFormValid()) {
-      this.isLoading = true; 
+      this.isLoading = true;
 
-      this.lesson.tagNames = [] 
-      this.lesson.tagIDs = [] 
-      if(this.InsertedTags.length != 0){ 
-        this.InsertedTags.forEach( element => {
+      this.lesson.tagNames = []
+      this.lesson.tagIDs = []
+      if (this.InsertedTags.length != 0) {
+        this.InsertedTags.forEach(element => {
           this.lesson.tagNames.push(element)
         });
       }
-      if(this.ExistingTags.length != 0){ 
-        this.ExistingTags.forEach( element => {
+      if (this.ExistingTags.length != 0) {
+        this.ExistingTags.forEach(element => {
           this.lesson.tagIDs.push(element)
         });
       }
-       
-      if (this.editLesson == false) { 
+
+      if (this.editLesson == false) {
         this.lessonService.Add(this.lesson, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
@@ -820,7 +831,7 @@ export class LessonComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -838,7 +849,7 @@ export class LessonComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -848,8 +859,8 @@ export class LessonComponent {
     }
   }
 
-  Import() {  
-    this.isLoading = true; 
+  Import() {
+    this.isLoading = true;
     let lesson = new Lesson()
     lesson.subjectID = this.SubjectModalImportToId
     lesson.toSemesterWorkingWeekID = this.SelectedWeekImportTo
@@ -865,7 +876,7 @@ export class LessonComponent {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });
@@ -875,13 +886,13 @@ export class LessonComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +  this.translate.instant('Lesson') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.lessonService.Delete(id, this.DomainName).subscribe((data: any) => {

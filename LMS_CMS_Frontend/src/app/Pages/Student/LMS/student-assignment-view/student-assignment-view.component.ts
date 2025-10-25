@@ -17,7 +17,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-student-assignment-view',
@@ -28,7 +28,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 })
 export class StudentAssignmentViewComponent {
 
- User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   TableData: AssignmentStudent[] = [];
 
   DomainName: string = '';
@@ -40,7 +40,7 @@ export class StudentAssignmentViewComponent {
   AssignmentStudentId: number = 0;
   ClassId: number = 0;
   assignmentStudent: AssignmentStudent = new AssignmentStudent()
-  isLoading :boolean = false
+  isLoading: boolean = false
 
   constructor(
     private router: Router,
@@ -65,21 +65,25 @@ export class StudentAssignmentViewComponent {
     });
     this.AssignmentStudentId = Number(this.activeRoute.snapshot.paramMap.get('AssignmentStudentId'));
     this.GetAssignment()
-        this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
+      console.log(this.assignmentStudent)
+      if (this.assignmentStudent.isVisibleToStudent != true) {
+        this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignmentStudent.subjectId}`)
+      }
     })
   }
 

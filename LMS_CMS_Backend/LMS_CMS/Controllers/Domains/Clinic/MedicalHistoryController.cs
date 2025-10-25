@@ -21,13 +21,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         private readonly IMapper _mapper;
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public MedicalHistoryController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService)
+        public MedicalHistoryController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
             _fileImageValidationService = fileImageValidationService;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
         #region Get By Doctor
@@ -67,19 +69,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             List<MedicalHistoryGetByDoctorDTO> medicalHistoryGetDTO = _mapper.Map<List<MedicalHistoryGetByDoctorDTO>>(medicalHistories);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var medicalHistory in medicalHistoryGetDTO)
-            {
-                if (!string.IsNullOrEmpty(medicalHistory.FirstReport))
-                {
-                    medicalHistory.FirstReport = $"{serverUrl}{medicalHistory.FirstReport.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(medicalHistory.SecReport))
-                {
-                    medicalHistory.SecReport = $"{serverUrl}{medicalHistory.SecReport.Replace("\\", "/")}";
-                }
+            { 
+                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
             }
 
             return Ok(medicalHistoryGetDTO);
@@ -118,19 +112,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             List<MedicalHistoryGetByParentDTO> medicalHistoryGetDTO = _mapper.Map<List<MedicalHistoryGetByParentDTO>>(medicalHistories);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
+             
             foreach (var medicalHistory in medicalHistoryGetDTO)
             {
-                if (!string.IsNullOrEmpty(medicalHistory.FirstReport))
-                {
-                    medicalHistory.FirstReport = $"{serverUrl}{medicalHistory.FirstReport.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(medicalHistory.SecReport))
-                {
-                    medicalHistory.SecReport = $"{serverUrl}{medicalHistory.SecReport.Replace("\\", "/")}";
-                }
+                medicalHistory.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+                medicalHistory.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
             }
 
             return Ok(medicalHistoryGetDTO);
@@ -174,18 +160,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistoryGetByDoctorDTO medicalHistoryGetDTO = _mapper.Map<MedicalHistoryGetByDoctorDTO>(medicalHistory);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(medicalHistoryGetDTO.FirstReport))
-            {
-                medicalHistoryGetDTO.FirstReport = $"{serverUrl}{medicalHistoryGetDTO.FirstReport.Replace("\\", "/")}";
-            }
-
-            if (!string.IsNullOrEmpty(medicalHistoryGetDTO.SecReport))
-            {
-                medicalHistoryGetDTO.SecReport = $"{serverUrl}{medicalHistoryGetDTO.SecReport.Replace("\\", "/")}";
-            }
+             
+            medicalHistoryGetDTO.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+            medicalHistoryGetDTO.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext); 
 
             return Ok(medicalHistoryGetDTO);
         }
@@ -228,18 +205,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistoryGetByParentDTO dto = _mapper.Map<MedicalHistoryGetByParentDTO>(medicalHistory);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(dto.FirstReport))
-            {
-                dto.FirstReport = $"{serverUrl}{dto.FirstReport.Replace("\\", "/")}";
-            }
-
-            if (!string.IsNullOrEmpty(dto.SecReport))
-            {
-                dto.SecReport = $"{serverUrl}{dto.SecReport.Replace("\\", "/")}";
-            }
+             
+            dto.FirstReport = _fileService.GetFileUrl(medicalHistory.FirstReport, Request, HttpContext);
+            dto.SecReport = _fileService.GetFileUrl(medicalHistory.SecReport, Request, HttpContext);
 
             return Ok(dto);
         }
@@ -298,6 +266,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound("No Student With this ID");
             }
 
+            if (historyAddDTO.FirstReport != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyAddDTO.FirstReport);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+            if (historyAddDTO.SecReport != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyAddDTO.SecReport);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -316,64 +301,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             Unit_Of_Work.SaveChanges();
 
-            var enNameExists = student.en_name;
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-            var medicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-            var medicalHistoryFirstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-            var medicalHistorySecReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-            if (historyAddDTO.FirstReport != null | historyAddDTO.SecReport != null)
-            {
-                if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                {
-                    Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                }
-            }
-
-            if (!Directory.Exists(medicalHistorySecReportFolder))
-            {
-                Directory.CreateDirectory(medicalHistorySecReportFolder);
-            }
-
             if (historyAddDTO.FirstReport != null)
             {
-                if (historyAddDTO.FirstReport.Length > 0)
-                {
-                    var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyAddDTO.FirstReport.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await historyAddDTO.FirstReport.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            if (historyAddDTO.SecReport != null)
-            {
-                if (historyAddDTO.SecReport.Length > 0)
-                {
-                    var filePath = Path.Combine(medicalHistorySecReportFolder, historyAddDTO.SecReport.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await historyAddDTO.SecReport.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            if (historyAddDTO.FirstReport != null)
-            {
-                medicalHistory.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", historyAddDTO.FirstReport.FileName);
+                medicalHistory.FirstReport = await _fileService.UploadFileAsync(historyAddDTO.FirstReport, "Clinic/MedicalHistories/FirstReport", medicalHistory.Id, HttpContext);
                 medicalHistory.Attached += 1;
             }
             if (historyAddDTO.SecReport != null)
             {
-                medicalHistory.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", historyAddDTO.SecReport.FileName);
+                medicalHistory.SecReport = await _fileService.UploadFileAsync(historyAddDTO.SecReport, "Clinic/MedicalHistories/SecondReport", medicalHistory.Id, HttpContext);
                 medicalHistory.Attached += 1;
             }
 
             Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
             Unit_Of_Work.SaveChanges();
-
+             
             return Ok(historyAddDTO);
         }
         #endregion
@@ -438,9 +379,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound("No Classroom found");
             }
 
-            MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
+            if (historyAddDTO.FirstReport != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyAddDTO.FirstReport);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+            if (historyAddDTO.SecReport != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyAddDTO.SecReport);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
 
-            string enNameExists = userId.ToString();
+            MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
+             
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
@@ -456,54 +413,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             Unit_Of_Work.medicalHistory_Repository.Add(medicalHistory);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-            var medicalHistoryFolder = Path.Combine(baseFolder, Guid.NewGuid() + "_" + medicalHistory.Id);
-            var medicalHistoryFirstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-            var medicalHistorySecReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-            if (historyAddDTO.FirstReport != null | historyAddDTO.SecReport != null)
-            {
-                if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                {
-                    Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                }
-            }
-
-            if (!Directory.Exists(medicalHistorySecReportFolder))
-            {
-                Directory.CreateDirectory(medicalHistorySecReportFolder);
-            }
-
             if (historyAddDTO.FirstReport != null)
             {
-                if (historyAddDTO.FirstReport.Length > 0)
-                {
-                    medicalHistory.Attached += 1;
-                    var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyAddDTO.FirstReport.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await historyAddDTO.FirstReport.CopyToAsync(stream);
-                    }
-                }
+                medicalHistory.FirstReport = await _fileService.UploadFileAsync(historyAddDTO.FirstReport, "Clinic/MedicalHistories/FirstReport", medicalHistory.Id, HttpContext);
+                medicalHistory.Attached += 1;
             }
-
             if (historyAddDTO.SecReport != null)
             {
-                if (historyAddDTO.SecReport.Length > 0)
-                {
-                    medicalHistory.Attached += 1;
-                    var filePath = Path.Combine(medicalHistorySecReportFolder, historyAddDTO.SecReport.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await historyAddDTO.SecReport.CopyToAsync(stream);
-                    }
-                }
+                medicalHistory.SecReport = await _fileService.UploadFileAsync(historyAddDTO.SecReport, "Clinic/MedicalHistories/SecondReport", medicalHistory.Id, HttpContext);
+                medicalHistory.Attached += 1;
             }
-
-            if (historyAddDTO.FirstReport != null)
-                medicalHistory.FirstReport = Path.Combine("Uploads", "MedicalHistories", Guid.NewGuid() + "_" + medicalHistory.Id, "FirstReport", historyAddDTO.FirstReport.FileName);
-            if (historyAddDTO.SecReport != null)
-                medicalHistory.SecReport = Path.Combine("Uploads", "MedicalHistories", Guid.NewGuid() + "_" + medicalHistory.Id, "SecReport", historyAddDTO.SecReport.FileName);
 
             Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
             Unit_Of_Work.SaveChanges();
@@ -575,9 +494,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound("No Student with this ID");
             }
 
-            string secReportExists = medicalHistory.FirstReport;
-            string mainImageLinkExists = medicalHistory.SecReport;
-            string enNameExists = student.en_name;
+            if (historyPutDTO.FirstReportFile != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyPutDTO.FirstReportFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+            if (historyPutDTO.FirstReportFile != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(historyPutDTO.FirstReportFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
+            string firstReportExists = medicalHistory.FirstReport;
+            string secondReportExists = medicalHistory.SecReport; 
 
             if (userTypeClaim == "employee")
             {
@@ -588,364 +523,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 }
             }
 
-            if (historyPutDTO.FirstReportFile != null || historyPutDTO.SecReportFile != null)
+            if (historyPutDTO.FirstReportFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-
-                var oldMedicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var oldMedicalHistoryFirstReportFolder = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-                var oldMedicalHistorySecReportFolder = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                var medicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var medicalHistoryFirstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-                var medicalHistorySecReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                if (historyPutDTO.FirstReportFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (historyPutDTO.SecReportFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (historyPutDTO.FirstReportFile != null && historyPutDTO.SecReportFile != null)
-                {
-                    if (Directory.Exists(oldMedicalHistoryFolder))
-                    {
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder, true);
-                        Directory.Delete(oldMedicalHistorySecReportFolder, true);
-                        Directory.Delete(oldMedicalHistoryFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", historyPutDTO.FirstReportFile.FileName);
-                    historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", historyPutDTO.SecReportFile.FileName);
-
-                    if (historyPutDTO.FirstReportFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyPutDTO.FirstReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.FirstReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.SecReportFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistorySecReportFolder, historyPutDTO.SecReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.SecReportFile.CopyToAsync(stream);
-                        }
-                    }
-                }
-                else if (historyPutDTO.FirstReportFile != null)
-                {
-                    if (Directory.Exists(oldMedicalHistoryFirstReportFolder))
-                    {
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", historyPutDTO.FirstReportFile.FileName);
-
-                    if (historyPutDTO.FirstReport.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyPutDTO.FirstReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.FirstReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.SecReport == null && (historyPutDTO.SecReport == null || medicalHistory.SecReport == null))
-                    {
-                        historyPutDTO.SecReport = null;
-                        string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (historyPutDTO.SecReport == null && medicalHistory.SecReport != null)
-                    {
-                        historyPutDTO.SecReport = medicalHistory.SecReport;
-                    }
-
-                    if (enNameExists != enNameExists && medicalHistory.SecReport != null)
-                    {
-                        var filesOther = Directory.GetFiles(oldMedicalHistorySecReportFolder);
-
-                        var fileName = "";
-
-                        foreach (var file in filesOther)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(medicalHistorySecReportFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldMedicalHistorySecReportFolder);
-                        Directory.Delete(oldMedicalHistoryFolder);
-                        historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", fileName);
-                    }
-                }
-                else if (historyPutDTO.SecReport != null)
-                {
-                    if (Directory.Exists(oldMedicalHistorySecReportFolder))
-                    {
-                        Directory.Delete(oldMedicalHistorySecReportFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", historyPutDTO.SecReportFile.FileName);
-
-                    if (historyPutDTO.SecReport.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistorySecReportFolder, historyPutDTO.SecReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.SecReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.FirstReport == null && (historyPutDTO.FirstReport == null || medicalHistory.FirstReport == null))
-                    {
-                        historyPutDTO.FirstReport = null;
-                        string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (historyPutDTO.FirstReport == null && medicalHistory.FirstReport != null)
-                    {
-                        historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                    }
-
-                    if (enNameExists != enNameExists && medicalHistory.FirstReport != null)
-                    {
-                        var filesMain = Directory.GetFiles(oldMedicalHistoryFirstReportFolder);
-
-                        var fileName = "";
-                        foreach (var file in filesMain)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(medicalHistoryFirstReportFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder);
-                        Directory.Delete(oldMedicalHistoryFolder);
-                        historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", fileName);
-                    }
-                }
-                else
-                {
-                    historyPutDTO.FirstReport = null;
-                    historyPutDTO.SecReport = null;
-                }
+                historyPutDTO.FirstReport = await _fileService.ReplaceFileAsync(
+                    historyPutDTO.FirstReportFile,
+                    firstReportExists,
+                    "Clinic/MedicalHistories/FirstReport",
+                    medicalHistory.Id,
+                    HttpContext
+                );
             }
             else
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-
-                var oldMedicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var oldFirstReportFolder = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-                var oldSecReportFolder = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                var medicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var firstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-                var secReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                // Check if the path already there or null, as if null so he wants to delete the existing files
-                if (historyPutDTO.FirstReport != null || historyPutDTO.SecReport != null)
-                {
-                    // Rename the folder if it exists
-                    if (enNameExists != enNameExists)
-                    {
-                        if (Directory.Exists(oldMedicalHistoryFolder))
-                        {
-                            if (!Directory.Exists(firstReportFolder))
-                            {
-                                Directory.CreateDirectory(firstReportFolder);
-                            }
-                            if (!Directory.Exists(secReportFolder))
-                            {
-                                Directory.CreateDirectory(secReportFolder);
-                            }
-
-                            var filesFirst = Directory.GetFiles(oldFirstReportFolder);
-                            var filesSec = Directory.GetFiles(oldSecReportFolder);
-                            if (historyPutDTO.SecReport != null && medicalHistory.SecReport != null)
-                            {
-                                var fileName = "";
-                                foreach (var file in filesSec)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(secReportFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", fileName);
-                            }
-                            else
-                            {
-                                historyPutDTO.SecReport = null;
-                            }
-
-                            if (historyPutDTO.FirstReport != null && medicalHistory.FirstReport != null)
-                            {
-                                var fileName = "";
-
-                                foreach (var file in filesFirst)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(firstReportFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", fileName);
-                            }
-                            else
-                            {
-                                historyPutDTO.FirstReport = null;
-                            }
-
-                            Directory.Delete(firstReportFolder, true);
-                            Directory.Delete(secReportFolder, true);
-                            Directory.Delete(medicalHistoryFolder, true);
-                        }
-                        else
-                        {
-                            if (historyPutDTO.SecReport != null && medicalHistory.SecReport != null)
-                            {
-                                historyPutDTO.SecReport = medicalHistory.SecReport;
-                            }
-                            else
-                            {
-                                historyPutDTO.SecReport = null;
-                            }
-
-                            if (historyPutDTO.FirstReport != null && medicalHistory.FirstReport != null)
-                            {
-                                historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                            }
-                            else
-                            {
-                                historyPutDTO.FirstReport = null;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (historyPutDTO.FirstReport != null && historyPutDTO.SecReport != null)
-                        {
-                            historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                            historyPutDTO.SecReport = medicalHistory.SecReport;
-                        }
-                        else if (historyPutDTO.FirstReport == null && historyPutDTO.SecReport == null)
-                        {
-                            historyPutDTO.FirstReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "FirstReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-
-                            historyPutDTO.SecReport = null;
-                            string existingFilePathOther = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                            if (System.IO.File.Exists(existingFilePathOther))
-                            {
-                                System.IO.File.Delete(existingFilePathOther); // Delete the old file
-                            }
-                        }
-                        else if (historyPutDTO.FirstReport == null)
-                        {
-                            historyPutDTO.FirstReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "FirstReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                        else if (historyPutDTO.SecReport == null)
-                        {
-                            historyPutDTO.SecReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (Directory.Exists(medicalHistoryFolder))
-                    {
-                        if (Directory.Exists(firstReportFolder))
-                        {
-                            Directory.Delete(firstReportFolder, true);
-                        }
-
-                        if (Directory.Exists(secReportFolder))
-                        {
-                            Directory.Delete(secReportFolder, true);
-                        }
-
-                        Directory.Delete(medicalHistoryFolder, true);
-                    }
-                    historyPutDTO.FirstReport = null;
-                    historyPutDTO.SecReport = null;
-                }
+                historyPutDTO.FirstReport = firstReportExists;
             }
 
+            if (historyPutDTO.SecReportFile != null)
+            {
+                historyPutDTO.SecReport = await _fileService.ReplaceFileAsync(
+                    historyPutDTO.SecReportFile,
+                    secondReportExists,
+                    "Clinic/MedicalHistories/SecondReport",
+                    medicalHistory.Id,
+                    HttpContext
+                );
+            }
+            else
+            {
+                historyPutDTO.SecReport = secondReportExists;
+            }
+             
             _mapper.Map(historyPutDTO, medicalHistory);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -1010,9 +617,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound("No Medical History with this ID");
             }
 
-            string secReportExists = medicalHistory.FirstReport;
-            string mainImageLinkExists = medicalHistory.SecReport;
-            string enNameExists = userId.ToString();
+            string firstReportExists = medicalHistory.FirstReport;
+            string secondReportExists = medicalHistory.SecReport; 
 
             if (userTypeClaim == "parent")
             {
@@ -1023,365 +629,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 }
             }
 
-            if (historyPutDTO.FirstReportFile != null || historyPutDTO.SecReportFile != null)
+            if (historyPutDTO.FirstReportFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-
-                var oldMedicalHistoryFolder = Path.Combine(baseFolder, Guid.NewGuid() + "_" + medicalHistory.Id);
-                var oldMedicalHistoryFirstReportFolder = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-                var oldMedicalHistorySecReportFolder = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                var medicalHistoryFolder = Path.Combine(baseFolder, Guid.NewGuid() + "_" + medicalHistory.Id);
-                var medicalHistoryFirstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-                var medicalHistorySecReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                if (historyPutDTO.FirstReportFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (historyPutDTO.SecReportFile != null)
-                {
-                    string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                    if (System.IO.File.Exists(existingFilePath))
-                    {
-                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                    }
-                }
-
-                if (historyPutDTO.FirstReportFile != null && historyPutDTO.SecReportFile != null)
-                {
-                    if (Directory.Exists(oldMedicalHistoryFolder))
-                    {
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder, true);
-                        Directory.Delete(oldMedicalHistorySecReportFolder, true);
-                        Directory.Delete(oldMedicalHistoryFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", historyPutDTO.FirstReportFile.FileName);
-                    historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", historyPutDTO.SecReportFile.FileName);
-
-                    if (historyPutDTO.FirstReportFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyPutDTO.FirstReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.FirstReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.SecReportFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistorySecReportFolder, historyPutDTO.SecReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.SecReportFile.CopyToAsync(stream);
-                        }
-                    }
-                }
-                else if (historyPutDTO.FirstReportFile != null)
-                {
-                    if (Directory.Exists(oldMedicalHistoryFirstReportFolder))
-                    {
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", historyPutDTO.FirstReportFile.FileName);
-
-                    if (historyPutDTO.FirstReport.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistoryFirstReportFolder, historyPutDTO.FirstReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.FirstReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.SecReport == null && (historyPutDTO.SecReport == null || medicalHistory.SecReport == null))
-                    {
-                        historyPutDTO.SecReport = null;
-                        string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (historyPutDTO.SecReport == null && medicalHistory.SecReport != null)
-                    {
-                        historyPutDTO.SecReport = medicalHistory.SecReport;
-                    }
-
-                    if (enNameExists != enNameExists && medicalHistory.SecReport != null)
-                    {
-                        var filesOther = Directory.GetFiles(oldMedicalHistorySecReportFolder);
-
-                        var fileName = "";
-
-                        foreach (var file in filesOther)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(medicalHistorySecReportFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldMedicalHistorySecReportFolder);
-                        Directory.Delete(oldMedicalHistoryFolder);
-                        historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", fileName);
-                    }
-                }
-                else if (historyPutDTO.SecReport != null)
-                {
-                    if (Directory.Exists(oldMedicalHistorySecReportFolder))
-                    {
-                        Directory.Delete(oldMedicalHistorySecReportFolder, true);
-                    }
-
-                    if (!Directory.Exists(medicalHistoryFirstReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistoryFirstReportFolder);
-                    }
-
-                    if (!Directory.Exists(medicalHistorySecReportFolder))
-                    {
-                        Directory.CreateDirectory(medicalHistorySecReportFolder);
-                    }
-
-                    historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", historyPutDTO.SecReportFile.FileName);
-
-                    if (historyPutDTO.SecReport.Length > 0)
-                    {
-                        var filePath = Path.Combine(medicalHistorySecReportFolder, historyPutDTO.SecReportFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await historyPutDTO.SecReportFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    if (historyPutDTO.FirstReport == null && (historyPutDTO.FirstReport == null || medicalHistory.FirstReport == null))
-                    {
-                        historyPutDTO.FirstReport = null;
-                        string existingFilePath = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-                    }
-                    else if (historyPutDTO.FirstReport == null && medicalHistory.FirstReport != null)
-                    {
-                        historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                    }
-
-                    if (enNameExists != enNameExists && medicalHistory.FirstReport != null)
-                    {
-                        var filesMain = Directory.GetFiles(oldMedicalHistoryFirstReportFolder);
-
-                        var fileName = "";
-                        foreach (var file in filesMain)
-                        {
-                            fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(medicalHistoryFirstReportFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-
-                        Directory.Delete(oldMedicalHistoryFirstReportFolder);
-                        Directory.Delete(oldMedicalHistoryFolder);
-                        historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", fileName);
-                    }
-                }
-                else
-                {
-                    historyPutDTO.FirstReport = null;
-                    historyPutDTO.SecReport = null;
-                }
+                historyPutDTO.FirstReport = await _fileService.ReplaceFileAsync(
+                    historyPutDTO.FirstReportFile,
+                    firstReportExists,
+                    "Clinic/MedicalHistories/FirstReport",
+                    medicalHistory.Id,
+                    HttpContext
+                );
             }
             else
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
-
-                var oldMedicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var oldFirstReportFolder = Path.Combine(oldMedicalHistoryFolder, "FirstReport");
-                var oldSecReportFolder = Path.Combine(oldMedicalHistoryFolder, "SecReport");
-
-                var medicalHistoryFolder = Path.Combine(baseFolder, enNameExists + "_" + medicalHistory.Id);
-                var firstReportFolder = Path.Combine(medicalHistoryFolder, "FirstReport");
-                var secReportFolder = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                // Check if the path already there or null, as if null so he wants to delete the existing files
-                if (historyPutDTO.FirstReport != null || historyPutDTO.SecReport != null)
-                {
-                    // Rename the folder if it exists
-                    if (enNameExists != enNameExists)
-                    {
-                        if (Directory.Exists(oldMedicalHistoryFolder))
-                        {
-                            if (!Directory.Exists(firstReportFolder))
-                            {
-                                Directory.CreateDirectory(firstReportFolder);
-                            }
-                            if (!Directory.Exists(secReportFolder))
-                            {
-                                Directory.CreateDirectory(secReportFolder);
-                            }
-
-                            var filesFirst = Directory.GetFiles(oldFirstReportFolder);
-                            var filesSec = Directory.GetFiles(oldSecReportFolder);
-                            if (historyPutDTO.SecReport != null && medicalHistory.SecReport != null)
-                            {
-                                var fileName = "";
-                                foreach (var file in filesSec)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(secReportFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                historyPutDTO.SecReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "SecReport", fileName);
-                            }
-                            else
-                            {
-                                historyPutDTO.SecReport = null;
-                            }
-
-                            if (historyPutDTO.FirstReport != null && medicalHistory.FirstReport != null)
-                            {
-                                var fileName = "";
-
-                                foreach (var file in filesFirst)
-                                {
-                                    fileName = Path.GetFileName(file);
-                                    var destFile = Path.Combine(firstReportFolder, fileName);
-                                    System.IO.File.Move(file, destFile);
-                                }
-
-                                historyPutDTO.FirstReport = Path.Combine("Uploads", "MedicalHistories", enNameExists + "_" + medicalHistory.Id, "FirstReport", fileName);
-                            }
-                            else
-                            {
-                                historyPutDTO.FirstReport = null;
-                            }
-
-                            Directory.Delete(firstReportFolder, true);
-                            Directory.Delete(secReportFolder, true);
-                            Directory.Delete(medicalHistoryFolder, true);
-                        }
-                        else
-                        {
-                            if (historyPutDTO.SecReport != null && medicalHistory.SecReport != null)
-                            {
-                                historyPutDTO.SecReport = medicalHistory.SecReport;
-                            }
-                            else
-                            {
-                                historyPutDTO.SecReport = null;
-                            }
-
-                            if (historyPutDTO.FirstReport != null && medicalHistory.FirstReport != null)
-                            {
-                                historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                            }
-                            else
-                            {
-                                historyPutDTO.FirstReport = null;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (historyPutDTO.FirstReport != null && historyPutDTO.SecReport != null)
-                        {
-                            historyPutDTO.FirstReport = medicalHistory.FirstReport;
-                            historyPutDTO.SecReport = medicalHistory.SecReport;
-                        }
-                        else if (historyPutDTO.FirstReport == null && historyPutDTO.SecReport == null)
-                        {
-                            historyPutDTO.FirstReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "FirstReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-
-                            historyPutDTO.SecReport = null;
-                            string existingFilePathOther = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                            if (System.IO.File.Exists(existingFilePathOther))
-                            {
-                                System.IO.File.Delete(existingFilePathOther); // Delete the old file
-                            }
-                        }
-                        else if (historyPutDTO.FirstReport == null)
-                        {
-                            historyPutDTO.FirstReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "FirstReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                        else if (historyPutDTO.SecReport == null)
-                        {
-                            historyPutDTO.SecReport = null;
-                            string existingFilePath = Path.Combine(medicalHistoryFolder, "SecReport");
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (Directory.Exists(medicalHistoryFolder))
-                    {
-                        if (Directory.Exists(firstReportFolder))
-                        {
-                            Directory.Delete(firstReportFolder, true);
-                        }
-
-                        if (Directory.Exists(secReportFolder))
-                        {
-                            Directory.Delete(secReportFolder, true);
-                        }
-
-                        Directory.Delete(medicalHistoryFolder, true);
-                    }
-
-                    historyPutDTO.FirstReport = null;
-                    historyPutDTO.SecReport = null;
-                }
+                historyPutDTO.FirstReport = firstReportExists;
             }
 
+            if (historyPutDTO.SecReportFile != null)
+            {
+                historyPutDTO.SecReport = await _fileService.ReplaceFileAsync(
+                    historyPutDTO.SecReportFile,
+                    secondReportExists,
+                    "Clinic/MedicalHistories/SecondReport",
+                    medicalHistory.Id,
+                    HttpContext
+                );
+            }
+            else
+            {
+                historyPutDTO.SecReport = secondReportExists;
+            }
+             
             _mapper.Map(historyPutDTO, medicalHistory);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -1402,7 +679,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         #region Delete
         [HttpDelete("id")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "parent" },
             pages: new[] { "Medical History" }
         )]
         public IActionResult DeleteAsync(long id)
@@ -1411,27 +688,53 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
             if (userIdClaim == null || userTypeClaim == null)
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
             MedicalHistory medicalHistory = Unit_Of_Work.medicalHistory_Repository.First_Or_Default(m => m.IsDeleted != true && m.Id == id);
             if (medicalHistory == null)
             {
                 return NotFound();
             }
-            
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medical History", roleId, userId, medicalHistory);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+            else if (userTypeClaim == "parent")
+            {
+
+                if (medicalHistory.InsertedByParentID != userId)
+                {
+                    return Forbid("You can only delete medical history records that you created.");
+                }
+            }
+
+
             medicalHistory.IsDeleted = true;
-            
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            
+
             if (userTypeClaim == "octa")
             {
                 medicalHistory.DeletedByOctaId = userId;
                 if (medicalHistory.DeletedByUserId != null)
                 {
                     medicalHistory.DeletedByUserId = null;
+                }
+                if (medicalHistory.DeletedByParentID != null)
+                {
+                    medicalHistory.DeletedByParentID = null;
                 }
             }
             else if (userTypeClaim == "employee")
@@ -1441,11 +744,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 {
                     medicalHistory.DeletedByOctaId = null;
                 }
+                if (medicalHistory.DeletedByParentID != null)
+                {
+                    medicalHistory.DeletedByParentID = null;
+                }
+            }
+            else if (userTypeClaim == "parent")
+            {
+                medicalHistory.DeletedByParentID = userId;
+                if (medicalHistory.DeletedByOctaId != null)
+                {
+                    medicalHistory.DeletedByOctaId = null;
+                }
+                if (medicalHistory.DeletedByUserId != null)
+                {
+                    medicalHistory.DeletedByUserId = null;
+                }
             }
 
-                Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
+            Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
             Unit_Of_Work.SaveChanges();
-            
+
             return Ok("Medical History Deleted Successfully");
         }
         #endregion

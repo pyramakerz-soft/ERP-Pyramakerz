@@ -21,12 +21,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public SocialWorkerMedalStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public SocialWorkerMedalStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
 
@@ -34,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"parent" , "student"},
             pages: new[] { "Add Medal To Student" }
         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
@@ -63,14 +65,12 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<SocialWorkerMedalStudentGetDTO> Dto = mapper.Map<List<SocialWorkerMedalStudentGetDTO>>(types);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var item in Dto)
             {
-                if (!string.IsNullOrEmpty(item.SocialWorkerMedalFile))
-                {
-                    item.SocialWorkerMedalFile = $"{serverUrl}{item.SocialWorkerMedalFile.Replace("\\", "/")}";
-                }
+                item.SocialWorkerMedalFile = _fileService.GetFileUrl(item.SocialWorkerMedalFile, Request, HttpContext);
             }
+
             return Ok(Dto);
         }
 

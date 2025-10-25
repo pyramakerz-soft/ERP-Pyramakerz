@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +25,34 @@ namespace LMS_CMS_PL.Controllers.Domains
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+        }
+
+        [HttpGet("CheckPageAccess")]
+        public IActionResult CheckPageAccess([FromQuery] long roleId, [FromQuery] string pageName)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Page page = Unit_Of_Work.page_Repository.First_Or_Default(d => d.en_name == pageName);
+            if (page == null)
+            {
+                return BadRequest("No Page with this ID");
+            }
+
+            Role role = Unit_Of_Work.role_Repository.First_Or_Default(d => d.ID == roleId && d.IsDeleted != true);
+            if (role == null)
+            {
+                return BadRequest("No Role with this ID");
+            }
+
+            Role_Detailes role_Detaile = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Page_ID == page.ID && d.Role_ID == roleId);
+            if (role_Detaile == null)
+            {
+                return BadRequest("You don't have access to this page");
+            }
+            else
+            {
+                return Ok();
+            }
         }
 
         [HttpGet("Get_With_RoleID_Group_By/{roleId}")]
@@ -60,6 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     enDisplayName_name = group.First().Page.enDisplayName_name,
                     arDisplayName_name = group.First().Page.arDisplayName_name,
                     IsDisplay = group.First().Page.IsDisplay,
+                    Page_ID = group.First().Page.Page_ID,
                     order = group.First().Page.Order,
                     Allow_Edit = group.First().Allow_Edit,
                     Allow_Delete = group.First().Allow_Delete,
@@ -88,6 +118,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     arDisplayName_name = child.arDisplayName_name,
                     order = child.Order,
                     IsDisplay = child.IsDisplay,
+                    Page_ID = child.Page_ID,
                     Allow_Edit = roleDetails[child.ID].Allow_Edit,
                     Allow_Delete = roleDetails[child.ID].Allow_Delete,
                     Allow_Edit_For_Others = roleDetails[child.ID].Allow_Edit_For_Others,
@@ -130,6 +161,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     enDisplayName_name = group.First().Page.enDisplayName_name,
                     arDisplayName_name = group.First().Page.arDisplayName_name,
                     IsDisplay = group.First().Page.IsDisplay,
+                    Page_ID = group.First().Page.Page_ID,
                     order = group.First().Page.Order,
                     Allow_Edit = group.First().Allow_Edit,
                     Allow_Delete = group.First().Allow_Delete,
@@ -140,6 +172,41 @@ namespace LMS_CMS_PL.Controllers.Domains
                 .ToList();
 
             return Ok(parentPages);
+        }
+
+        [HttpGet("GetPagesNameForSearch")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] {"employee" }
+        )]
+        public async Task<IActionResult> GetPagesNameForSearch()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+
+            Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == userId && d.IsDeleted != true);
+            if(emp == null)
+            {
+                return BadRequest("No Employee with this ID");
+            }
+             
+            List<Role_Detailes> role_Detailes = await Unit_Of_Work.role_Detailes_Repository.Select_All_With_IncludesById<Role_Detailes>(
+                d => d.IsDeleted != true && d.Role_ID == emp.Role_ID && d.Page.IsDisplay == true,
+                query => query.Include(d => d.Page)
+                );
+
+            List<string> pages = new List<string>();
+
+            foreach (var item in role_Detailes)
+            {
+                List<Page> children = Unit_Of_Work.page_Repository.FindBy(d => d.Page_ID == item.Page_ID); 
+                if(children == null || children.Count == 0)
+                {
+                    pages.Add(item.Page.en_name);
+                }
+            }
+
+            return Ok(pages);
         }
     }
 }

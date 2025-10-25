@@ -1,0 +1,118 @@
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">Archiving</h1> 
+    <div class="flex space-x-3 rtl:space-x-reverse">
+        <button (click)="addFile()"
+            class="rounded-lg secondaryBg text-white px-4 py-3 flex items-center justify-center gap-2 space-x-1 rtl:space-x-reverse"> 
+            <i class="fa-solid fa-plus"></i>
+            Upload File
+        </button>
+        <button (click)="createFolder()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2 space-x-1 rtl:space-x-reverse">
+            <i class="fa-solid fa-folder-plus secondaryTxt"></i>
+            Create Folder
+        </button> 
+    </div>
+</div>
+
+<div class="mt-7 flex justify-between">
+    <div class="p-6 bg-[#F7F7F7] w-[35%] rounded-3xl overflow-x-auto">
+        <div class="flex space-x-2 rtl:space-x-reverse items-center w-full cursor-pointer" (click)="GetContent()">
+            <img src="Icons/Folder.png">
+            <p class="text-2xl">Content</p>
+        </div>
+
+        <div *ngIf="TableData && TableData.length > 0">
+            <app-archiving-item [archivingData]="TableData" (Selected)="GetDataByID($event)"></app-archiving-item>
+        </div>
+    </div>
+
+    <div *ngIf="archiving.id" class="p-6 bg-[#F7F7F7] w-[60%] rounded-3xl">
+        <div class="flex space-x-3 rtl:space-x-reverse items-center w-full">
+            <div class="w-full flex space-x-2 rtl:space-x-reverse items-center">
+                <img src="Icons/Folder.png">
+                <p class="text-2xl">{{archiving.name}}</p>
+            </div>
+            <button *ngIf="AllowDelete && IsAllowDelete(archiving.insertedByUserId) && archiving.name != 'Content'" class="cursor-pointer"
+                (click)="Delete(archiving)">
+                <i class="fa-regular fa-trash-can text-gray-600"></i>
+            </button>
+        </div>
+        <div class="mt-6 mb-4 flex flex-wrap items-center justify-between font-normal bg-white w-full rounded-3xl">   
+            <div *ngIf="archiving.children.length != 0" class="w-full p-6">
+                <div *ngFor="let child of archiving.children; let i = index" class="w-full justify-between flex space-x-4 items-center rtl:space-x-reverse py-3" 
+                [ngClass]="{'border-b': i != (archiving.children.length-1), 
+                'py-3': i != 0 && i != (archiving.children.length-1),
+                'pb-3': i == 0,
+                'pt-3': i == (archiving.children.length-1)}">
+                    <div class="w-full flex space-x-3 items-center rtl:space-x-reverse" 
+                    [class.cursor-pointer]="child.fileLink === '' || child.fileLink == null"
+                    (click)="child.fileLink === '' || child.fileLink == null ? GetDataByID(child.id) : null">
+                        <i *ngIf="child.fileLink === '' || child.fileLink == null" class="fa-solid fa-folder-open primaryTxt text-2xl"></i>
+                        <i *ngIf="child.fileLink !== '' && child.fileLink != null" class="fa-regular fa-file primaryTxt text-2xl"></i>
+                        <div class="flex items-center gap-1">
+                            <p>{{child.name}}</p>
+                            <span *ngIf="child.fileLink !== '' && child.fileLink != null" class="text-gray-500 text-sm">
+                                {{getFileExtension(child.fileLink)}}
+                            </span>
+
+                            <a *ngIf="child.fileLink !== '' && child.fileLink != null" [href]="child.fileLink" target="_blank" (click)="downloadFile(child.fileLink, child.fileLink)">
+                                <i class="fas fa-download secondaryTxt"></i>  
+                            </a>
+                        </div>
+                    </div>
+                    <button *ngIf="AllowDelete && IsAllowDelete(child.insertedByUserId)" class="cursor-pointer"
+                        (click)="Delete(child)">
+                        <i class="fa-regular fa-trash-can text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="archiving.children.length == 0" class="w-full">
+                <p class="text-gray-600 py-2 text-center">
+                    No Data Found
+                </p>
+            </div>
+        </div> 
+    </div>
+</div>
+
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+    <div class="flex justify-between items-center">
+      <h1 *ngIf="!isAddFileOpen" class="font-semibold text-2xl leading-9">Create Folder</h1> 
+      <h1 *ngIf="isAddFileOpen" class="font-semibold text-2xl leading-9">Add File</h1> 
+      <button (click)="closeAddFolderOrFileModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+    </div>
+
+    <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+        <div class="flex flex-col w-full" [ngClass]="{'mb-4': isAddFileOpen}">
+            <label class="mb-2 primaryTxt" for="FName">Name</label>
+            <input id="FName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Name" [(ngModel)]="newArchiving.name"/> 
+        </div>
+        <div class="w-full" *ngIf="isAddFileOpen">
+            <label class="mb-2 primaryTxt" for="file">File</label>
+            <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+                <div class="flex justify-center w-full">
+                    <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                        <img *ngIf="!newArchiving.fileFile" src="Images/Icon frame.png" class="w-1/4">
+                        <img *ngIf="newArchiving.fileFile" src="Images/FileAttached.png" class="w-1/4"> 
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(Max. File size: 25 MB)</p>
+                    </label>
+                    <input id="file" type="file" class="hidden" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"/>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
+        (click)="saveCreateFolder()">
+        <span *ngIf="!isLoading">Save</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+      </button>
+    </div>
+  </div>
+</div>

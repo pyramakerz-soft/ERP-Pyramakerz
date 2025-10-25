@@ -30,7 +30,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 @Component({
   selector: 'app-accounting-tree',
   standalone: true,
-  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, AccountingItemComponent, TranslateModule],
   templateUrl: './accounting-tree.component.html',
   styleUrl: './accounting-tree.component.css'
 })
@@ -145,7 +145,7 @@ export class AccountingTreeComponent {
   GetMainDataChildFiltered(id: number) {
     this.accountingTreeChartService.GetMainDataChildFiltered(id, this.DomainName).subscribe(
       (data) => {
-        this.MainData = data
+        this.MainData = data 
       }
     )
   }
@@ -227,7 +227,7 @@ export class AccountingTreeComponent {
     this.accountingTreeChart.linkFileID = 0
   }
 
-  handleIDSelected(accounting: number) {
+  handleIDSelected(accounting: number) { 
     this.accountingTreeChart.id = accounting
     this.GetDataByID()
   }

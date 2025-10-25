@@ -51,6 +51,18 @@ export class LessonService {
     return this.http.get<Lesson[]>(`${this.baseUrl}/Lesson/GetBySubjectIDAndSemester/${SubjectId}/${SemesterId}`, { headers })
   }
 
+  GetBySubjectIDAndStudent(StudentId: number, SubjectId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Lesson[]>(`${this.baseUrl}/Lesson/GetBySubjectIDAndStudent/${SubjectId}/${StudentId}`, { headers })
+  }
+
   GetBySubjectID(SubjectId: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

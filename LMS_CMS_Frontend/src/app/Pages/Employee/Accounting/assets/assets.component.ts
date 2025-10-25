@@ -17,9 +17,9 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { AssetService } from '../../../../Services/Employee/Accounting/asset.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assets',
@@ -37,7 +37,7 @@ export class AssetsComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Asset[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -61,14 +61,15 @@ export class AssetsComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AssetServ: AssetService,
     public accountServ: AccountingTreeChartService,
-       private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -100,12 +101,12 @@ export class AssetsComponent {
   }
 
 
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
@@ -129,13 +130,13 @@ export class AssetsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Asset?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Asset'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.AssetServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -180,12 +181,12 @@ export class AssetsComponent {
           this.GetAllData();
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -197,18 +198,18 @@ export class AssetsComponent {
           this.GetAllData();
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           });
       }
-    } 
+    }
   }
 
   closeModal() {
@@ -241,7 +242,7 @@ export class AssetsComponent {
 
     if (this.asset.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
     return isValid;
   }

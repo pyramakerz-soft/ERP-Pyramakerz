@@ -35,6 +35,7 @@ import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Field } from '../../../../Models/Registration/field';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -50,8 +51,8 @@ export class RegistrationFormComponent {
   RegistrationFormData: RegistrationForm = new RegistrationForm();
   registrationForm: RegistrationFormForFormSubmission =
     new RegistrationFormForFormSubmission();
-  registrationFormSubmissionEdited: RegistrationFormSubmission[] = [];
-  registrationFormSubmissionNew: RegistrationFormSubmission[] = [];
+  // registrationFormSubmissionEdited: RegistrationFormSubmission[] = [];
+  // registrationFormSubmissionNew: RegistrationFormSubmission[] = [];
 
 
   registrationFormForFiles: RegistrationFormForFormSubmissionForFiles[] = [];
@@ -93,6 +94,13 @@ export class RegistrationFormComponent {
   StudentId: number = 0;
   mode: string = 'Create'
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,
@@ -120,14 +128,15 @@ export class RegistrationFormComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
+    this.path = url.map(segment => segment.path).join('/');
       this.RegistrationParentID = Number(
         this.activeRoute.snapshot.paramMap.get('RegisterationFormParentId')
       );
       this.StudentId = Number(
         this.activeRoute.snapshot.paramMap.get('StudentId')
       );
-      if (this.path == 'Edit Student') {
+      console.log(1234,this.path)
+      if (this.path.startsWith('Student/Edit')) {
         this.getRegisterationFormSubmittion();
         this.mode = 'Edit'
       }
@@ -152,12 +161,13 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
+
   getParentByID() {
     this.parentService
       .GetByID(this.UserID, this.DomainName)
@@ -167,28 +177,15 @@ export class RegistrationFormComponent {
   }
 
   getRegisterationFormSubmittion() {
-    this.RegisterationFormSubmittionServ.GetByRegistrationParentID(
-      this.RegistrationParentID,
-      this.DomainName
-    ).subscribe((data) => {
-      this.registrationForm.registerationFormSubmittions = data;
-      this.selectedSchool =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 7
-        )?.selectedFieldOptionID ?? 0;
+    this.RegisterationFormSubmittionServ.GetByRegistrationParentID(this.RegistrationParentID, this.DomainName).subscribe((data) => {
+      this.registrationForm.registerationFormSubmittions = data; 
+      this.selectedSchool =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 7)?.selectedFieldOptionID ?? 0;
       if (this.selectedSchool) {
         this.getAcademicYear();
         this.getSections();
       }
-      this.selectedAcademicYear =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 8
-        )?.selectedFieldOptionID ?? 0;
-      this.selectedGrade =
-        this.registrationForm.registerationFormSubmittions.find(
-          (s) => s.categoryFieldID == 9
-        )?.selectedFieldOptionID ?? 0;
-
+      this.selectedAcademicYear = this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 8)?.selectedFieldOptionID ?? 0;
+      this.selectedGrade =this.registrationForm.registerationFormSubmittions.find((s) => s.categoryFieldID == 9 )?.selectedFieldOptionID ?? 0;
     });
   }
 
@@ -203,15 +200,42 @@ export class RegistrationFormComponent {
       return entry?.textAnswer ?? "";
     }
   }
-
+ 
   getSelectedOption(fieldId: number): any | null {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
-    );
-    if (fieldId == 6 || fieldId == 14) {
-      return entry?.textAnswer ?? null;
+    ); 
+
+    if(fieldId == 3){
+      if(entry?.textAnswer == 'Male'){
+        entry.textAnswer = '1';
+      }
+      if(entry?.textAnswer == 'Female'){
+        entry.textAnswer = '2';
+      }
     }
-    return entry?.selectedFieldOptionID ?? null;
+ 
+    if(fieldId == 5){ 
+      if (entry?.textAnswer && isNaN(Number(entry?.textAnswer))) {
+        entry.textAnswer = entry?.selectedFieldOptionID?.toString() ?? null;
+      }
+    } 
+ 
+    if (!entry) return null;
+ 
+    if (fieldId == 6 || fieldId == 14 || fieldId == 5 || fieldId == 3) {
+      return entry.textAnswer ?? null;
+    }
+   
+    return entry.selectedFieldOptionID ?? null;
+  }
+
+  isOptionSelected(fieldId: number, optionId: number): boolean {
+    return this.registrationForm.registerationFormSubmittions.some(
+      (entry) =>
+        entry.categoryFieldID === fieldId &&
+        entry.selectedFieldOptionID === optionId
+    );
   }
 
   getRegistrationFormData() {
@@ -297,9 +321,31 @@ export class RegistrationFormComponent {
     return el.schoolID == this.selectedSchool;
   }
 
-  handleFileUpload(event: any, fieldId: number) {
+  handleFileUpload(event: any, fieldId: number) { 
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
 
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!this.allowedExtensions.includes(fileExtension)) {
+      Swal.fire({
+        title: 'Invalid file type',
+        html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: "OK"
+      }); 
+      input.value = '';
+      return;
+    }else if(file.size > 25 * 1024 * 1024) {
+      Swal.fire({
+        title: 'The file size exceeds the maximum limit of 25 MB.',
+        icon: 'warning', 
+        confirmButtonColor: '#089B41', 
+        confirmButtonText: "OK"
+      }) 
+      input.value = '';
+      return; 
+    } 
     const existingElement = this.registrationFormForFiles.find(
       (element) => element.categoryFieldID === fieldId
     );
@@ -324,18 +370,17 @@ export class RegistrationFormComponent {
     const selectedValue = (event.target as HTMLSelectElement).value;
 
     let answer: string | null = null;
-    let option: number | null = null;
+    let option: number | null = null; 
 
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
-      (fieldTypeId == 7 &&(fieldId == 3 ||fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
+      (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 || fieldId == 6 || fieldId == 7 || fieldId == 8 || fieldId == 9 || fieldId == 14))) {
       answer = selectedValue;
       option = null;
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
-      answer = null;
-      console.log(option)
-    }
-
+      answer = null; 
+    } 
+  
     const existingElement =
       this.registrationForm.registerationFormSubmittions.find(
         (element) => element.categoryFieldID === fieldId
@@ -349,15 +394,6 @@ export class RegistrationFormComponent {
         existingElement.selectedFieldOptionID = option;
         existingElement.textAnswer = null;
       }
-      if (this.path == 'Edit Student') {
-        this.registrationFormSubmissionEdited.push({
-          id: existingElement.id,
-          registerationFormParentID: this.RegistrationParentID,
-          categoryFieldID: existingElement.categoryFieldID,
-          selectedFieldOptionID: existingElement.selectedFieldOptionID,
-          textAnswer: existingElement.textAnswer,
-        });
-      }
     } else {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
@@ -366,16 +402,7 @@ export class RegistrationFormComponent {
         selectedFieldOptionID: option,
         textAnswer: answer,
       });
-      if (this.mode == 'Edit') {
-        this.registrationFormSubmissionNew.push({
-          id: 0,
-          categoryFieldID: fieldId,
-          registerationFormParentID: this.RegistrationParentID,
-          selectedFieldOptionID: option,
-          textAnswer: answer,
-        });
-      }
-    }
+    }   
   }
 
   MultiOptionDataPush(
@@ -383,7 +410,7 @@ export class RegistrationFormComponent {
     fieldTypeId: number,
     optionAnswer: number
   ) {
-    if (fieldTypeId == 4) {
+    if (fieldTypeId == 4) { 
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
         registerationFormParentID: this.RegistrationParentID,
@@ -394,14 +421,14 @@ export class RegistrationFormComponent {
     }
   }
 
-  FillOptionData() {
+  FillOptionData() {  
     this.selectedOptions.forEach((element) => {
       this.MultiOptionDataPush(
         element.fieldId,
         element.fieldTypeId,
         element.optionId
       );
-    });
+    }); 
     this.selectedOptions = [];
   }
 
@@ -410,12 +437,13 @@ export class RegistrationFormComponent {
     fieldId: number,
     fieldTypeId: number,
     optionId: number
-  ) {
+  ) {  
     const checkbox = event.target as HTMLInputElement;
 
     if (checkbox.checked) {
       this.addOptionToArray(fieldId, fieldTypeId, optionId);
     } else {
+      this.registrationForm.registerationFormSubmittions = this.registrationForm.registerationFormSubmittions.filter(d => d.categoryFieldID != fieldId || d.selectedFieldOptionID != optionId);
       this.removeOptionFromArray(fieldId, fieldTypeId, optionId);
     }
   }
@@ -458,7 +486,7 @@ export class RegistrationFormComponent {
     if (this.isFormSubmitted) {
       const fieldSubmission =
         this.registrationForm.registerationFormSubmittions.find(
-          (submission) => submission.categoryFieldID === field.id
+          (submission) => submission.categoryFieldID === field.id 
         );
 
       const fieldSubmissionFile = this.registrationFormForFiles.find(
@@ -475,7 +503,7 @@ export class RegistrationFormComponent {
         if (field.fieldTypeID === 6) {
           fieldData = fieldSubmissionFile;
         }
-
+        
         if (fieldData) {
           return false;
         }
@@ -576,7 +604,7 @@ export class RegistrationFormComponent {
     }
   }
 
-  async Save() {
+  async Save() { 
     if (this.User_Data_After_Login.type == 'parent') {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
@@ -590,17 +618,16 @@ export class RegistrationFormComponent {
     this.isGuardianEmailValid = true;
     this.isMotherEmailValid = true;
     this.isGuardianEmailSameAsParent = true;
-    this.FillOptionData();
-
+    this.FillOptionData(); 
     let valid = true;
     let EmptyFieldCat = [];
-
+ 
     // Validate all fields
     for (const cat of this.RegistrationFormData.categories) {
       for (const field of cat.fields) {
         if (field.isMandatory && this.isFieldInvalid(field)) {
           valid = false;
-          EmptyFieldCat.push(cat.orderInForm);
+          EmptyFieldCat.push(cat.orderInForm); 
         }
       }
     }
@@ -611,7 +638,7 @@ export class RegistrationFormComponent {
         await this.CheckAgeForGrade();
         if (this.ageIsCompatibleWithGrade) {
           this.isLoading = true;
-          if (this.path == 'Create Student') {
+          if (this.path.startsWith('Student/Create')) {
             this.registrationForm.isStudent = true;
           }
           if (this.mode == 'Create') {
@@ -632,18 +659,26 @@ export class RegistrationFormComponent {
                 }
               }
             );
-          } else if (this.mode == 'Edit') {
-            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe((s) => {
-              this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
+          } else if (this.mode == 'Edit') {  
+            this.RegisterationFormSubmittionServ.Edit(this.StudentId,this.RegistrationParentID, this.registrationForm.registerationFormSubmittions, this.registrationFormForFiles, this.DomainName).subscribe(
+              (s) => {
                 Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Student updated successfully',
-                  confirmButtonText: 'Okay'
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Student updated successfully',
+                    confirmButtonText: 'Okay'
                 });
                 this.router.navigateByUrl(`Employee/Student`);
-              })
-            })
+              },
+              (error) => { 
+                this.isLoading = false;
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: error.error,
+                  confirmButtonColor: '#089B41',
+                });
+            }) 
           }
         }
         else {
@@ -679,7 +714,7 @@ export class RegistrationFormComponent {
   }
 
   DoneSuccessfully() {
-    if (this.path == 'Create Student') {
+    if (this.path.startsWith('Student/Create')) {
       this.router.navigateByUrl(`Employee/Student`);
     }
     this.RegistrationFormData = new RegistrationForm();
@@ -701,8 +736,9 @@ export class RegistrationFormComponent {
     this.selectedOptions = [];
 
     //////
-
-    this.isSuccess = true;
+    if (this.path == 'Registration Form') {
+        this.isSuccess = true;
+    }
   }
 
   moveToStudents() {

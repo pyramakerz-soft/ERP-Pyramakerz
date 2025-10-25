@@ -18,7 +18,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AppointmentGrade } from '../../../../Models/SocialWorker/appointment-grade';
 import { Grade } from '../../../../Models/LMS/grade';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -74,6 +74,7 @@ export class AppointmentComponent {
     public GradeServ: GradeService,
     public AppointmentServ: AppointmentService,
     private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService,
     private languageService: LanguageService,
   ) { }
   ngOnInit() {
@@ -152,13 +153,13 @@ export class AppointmentComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Appointment?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('the') +this.translate.instant('Appoinment') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.AppointmentServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -250,7 +251,7 @@ export class AppointmentComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' }
           });
@@ -272,7 +273,7 @@ export class AppointmentComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' }
           });

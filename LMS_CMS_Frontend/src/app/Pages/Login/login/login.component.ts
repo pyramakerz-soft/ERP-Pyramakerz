@@ -7,10 +7,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { EmployeeService } from '../../../Services/Employee/employee.service';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -35,16 +36,14 @@ export class LoginComponent {
   userNameError: string = "";
   passwordError: string = "";
   somthingError: string = "";
-
-  token1 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  token2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-
+  
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType:string}[] = [];
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading: boolean = false
  
   constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private realTimeService: RealTimeNotificationServiceService, private employeeService:EmployeeService ,   private translate: TranslateService
+) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate);
@@ -67,6 +66,33 @@ export class LoginComponent {
         this.subscription.unsubscribe();
       }
   }
+  // Helper method to show translated error messages
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+// Helper method to show warning messages
+private showWarningAlert(message: string) {
+  const translatedTitle = this.translate.instant('Warning');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'warning',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   checkLocalStorageOnNavigate(): void { 
     const current_tokenValue = localStorage.getItem('current_token'); 
@@ -87,28 +113,30 @@ export class LoginComponent {
     this.somthingError = ""
   }
 
-  isFormValid() {
-    let isValid = true
+isFormValid() {
+  let isValid = true
+  this.userNameError = "";
+  this.passwordError = "";
 
-    if (this.userInfo.user_Name.trim() === "" && this.userInfo.password.trim() === "") {
-      isValid = false;
-      this.userNameError = '*Username cannot be empty';
-      this.passwordError = '*Password cannot be empty';
-    } else if (this.userInfo.user_Name.trim() === "") {
-      isValid = false;
-      this.userNameError = '*Username cannot be empty';
-    } else if (this.userInfo.password.trim() === "") {
-      isValid = false;
-      this.passwordError = '*Password cannot be empty';
-    }
-    return isValid
+  if (this.userInfo.user_Name.trim() === "" && this.userInfo.password.trim() === "") {
+    isValid = false;
+    this.userNameError = this.translate.instant('Username cannot be empty');
+    this.passwordError = this.translate.instant('Password cannot be empty');
+  } else if (this.userInfo.user_Name.trim() === "") {
+    isValid = false;
+    this.userNameError = this.translate.instant('Username cannot be empty');
+  } else if (this.userInfo.password.trim() === "") {
+    isValid = false;
+    this.passwordError = this.translate.instant('Password cannot be empty');
   }
+  return isValid
+}
 
   SignIN() {
     if (this.isFormValid()) {
       this.isLoading = true
       this.accountService.Login(this.userInfo).subscribe(
-        (d: any) => {
+        (d: any) => {   
           localStorage.removeItem("GoToLogin");
           localStorage.setItem("GoToLogin", "false");
           localStorage.removeItem("current_token");
@@ -130,18 +158,17 @@ export class LoginComponent {
             }
           }
           
-          localStorage.setItem("current_token", token);
-
+          localStorage.setItem("current_token", token); 
           if (add == true) {
             if (count === null) {
               // localStorage.removeItem("count");
               // localStorage.setItem("count", "1");
               localStorage.setItem("token 1", token);
-
+              
             } else {
               let countNum = parseInt(count) + 1;
               // localStorage.setItem("count", countNum.toString());
-              let T = localStorage.getItem("token " + countNum)
+              let T = localStorage.getItem("token " + countNum) 
               if (T != null) {
                 let i = countNum + 1;
                 let Continue = true;
@@ -158,9 +185,10 @@ export class LoginComponent {
                 localStorage.setItem("token " + countNum, token);
               }
             }
+            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(true)    
           }
           else if(add == false) {
-            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
+            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(true)
             const currentIndex = this.allTokens.findIndex(token => token.UserType === this.User_Data_After_Login.type && token.key===this.User_Data_After_Login.user_Name);
             const currentToken = this.allTokens[currentIndex];
             localStorage.setItem(currentToken.KeyInLocal, token);
@@ -175,7 +203,6 @@ export class LoginComponent {
           }
           localStorage.removeItem("count");
           localStorage.setItem("count", Counter.toString());
-          this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
         
           if (this.User_Data_After_Login.type == "parent") {
             this.router.navigateByUrl("/Parent")
@@ -184,30 +211,26 @@ export class LoginComponent {
           } else if (this.User_Data_After_Login.type == "employee") {
             this.router.navigateByUrl("/Employee")
           }
+        this.isLoading = false
 
-        }, (error) => {
-          this.isLoading = false
-          if (error.error === "UserName or Password is Invalid") {
-            this.somthingError = "UserName or Password is Invalid"
-          }else if (error.status == 400) {
-            this.somthingError = "Username, Password or Type maybe wrong"
-          }else if (error.status == 404) {
-            this.somthingError = "Username, Password or Type maybe wrong"
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: {
-                confirmButton: 'secondaryBg' // Add your custom class here
-              }
-            });
-          }
+        
+      }, (error) => {
+        this.isLoading = false
+        if (error.error === "UserName or Password is Invalid") {
+          this.somthingError = this.translate.instant('Username or password is invalid');
+        } else if (error.status == 400) {
+          this.somthingError = this.translate.instant('Username, password or type may be incorrect');
+        } else if (error.status == 404) {
+          this.somthingError = this.translate.instant('Username, password or type may be incorrect');
+        } else if (error.status === 403) {  
+          this.showWarningAlert(this.translate.instant('Your account has been suspended'));
+        } else {
+          this.somthingError = this.translate.instant('An unexpected error occurred');
         }
-      );
-    }
+      }
+    );
   }
+}
 
   getAllTokens(): void {
     let count = 0;
@@ -215,16 +238,19 @@ export class LoginComponent {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       const value = localStorage.getItem(key || '');
-
+      
       if (key && key.includes('token') && key != "current_token"&& key != "token") {
-        if (value) {
+        if (value) { 
           this.User_Data_After_Login2 = jwtDecode(value)
-
-          this.allTokens.push({ id: count, key: this.User_Data_After_Login2.user_Name, KeyInLocal: key, value: value || '' ,UserType:this.User_Data_After_Login2.type});
-          count++;
+          
+          this.allTokens.push({ id: count, 
+            key: this.User_Data_After_Login2.user_Name, 
+            KeyInLocal: key, value: value || '' ,
+            UserType:this.User_Data_After_Login2.type});
+            count++;
+          }
         }
-      }
-    }
+      } 
   }
 
   selectType(type: string) {

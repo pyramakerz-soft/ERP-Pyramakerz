@@ -20,7 +20,7 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
@@ -78,6 +78,7 @@ export class AdmissionTestComponent {
     public GradeServ: GradeService,
     public AcadimicYearServ: AcadimicYearService,
     public SubjectServ: SubjectService,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -188,14 +189,14 @@ export class AdmissionTestComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Test?',
+        Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Admission Test') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.testServ.Delete(id, this.DomainName).subscribe(
@@ -243,7 +244,7 @@ export class AdmissionTestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -260,7 +261,7 @@ export class AdmissionTestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });

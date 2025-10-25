@@ -58,6 +58,13 @@ export class ConductAddEditComponent {
   conductTypes: ConductType[] = [];
   proceduresType: ProcedureType[] = [];
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(
     public RoleServ: RoleService,
     public empTypeServ: EmployeeTypeService,
@@ -87,13 +94,14 @@ export class ConductAddEditComponent {
       this.activeRoute.url.subscribe((url: { path: string; }[]) => {
         this.path = url[0].path;
 
-        if (this.path == 'Conduct Create') {
+        this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+        console.log(1243,this.ConductID)
+        if (!this.ConductID) {
           this.mode = 'Create';
           this.GetAllSchools()
           this.GetProceduresTypes()
-        } else if (this.path == 'Conduct Edit') {
+        } else if (this.ConductID) {
           this.mode = 'Edit';
-          this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
           this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe((data) => {
             this.Data = data;
             console.log(this.Data)
@@ -235,7 +243,7 @@ export class ConductAddEditComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -259,7 +267,7 @@ export class ConductAddEditComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -306,33 +314,29 @@ export class ConductAddEditComponent {
   }
 
   onImageFileSelected(event: any) {
-    console.log("event",event)
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 
     if (file) {
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) { 
+        this.validationErrors['newFile'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`;
         this.Data.newFile = null;
         return;
       }
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword', // .doc
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
-      ];
-      if (allowedTypes.includes(file.type)) {
-        this.Data.newFile = file;
-        this.Data.file = "";
-        this.validationErrors['newFile'] = '';
+
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['newFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.Data.newFile = null;
+        return; 
+      } else{
+        this.Data.newFile = file;  
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['newFile'] = 'Invalid file type. Only Word (.doc, .docx) and PDF (.pdf) files are allowed.';
-        this.Data.newFile = null;
       }
     }
+    
     input.value = '';
-  }
-
+  }  
 }

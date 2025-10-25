@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AccountingEmployee } from '../../../../Models/Accounting/accounting-employee';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -32,10 +31,11 @@ import { EmployeeStudentService } from '../../../../Services/Employee/Accounting
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { Student } from '../../../../Models/student';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -51,7 +51,7 @@ export class AccountingEmployeeEditComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  Data: AccountingEmployee = new AccountingEmployee();
+  Data: Employee = new Employee();
 
   DomainName: string = '';
   UserID: number = 0;
@@ -98,7 +98,7 @@ export class AccountingEmployeeEditComponent {
     period: 'AM'
   };
 
-  validationErrors: { [key in keyof AccountingEmployee]?: string } = {};
+  validationErrors: { [key in keyof Employee]?: string } = {};
   IsNationalIsEmpty: string = ''
 
   constructor(
@@ -107,6 +107,7 @@ export class AccountingEmployeeEditComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -159,24 +160,28 @@ export class AccountingEmployeeEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d;
+      this.Data = d; 
       this.JobCategoryId = this.Data.jobCategoryID
       this.GetAllJobCategories();
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
-      this.parseDepartureTime(this.Data.departureTime);
-      this.parseAttendanceTime(this.Data.attendanceTime);
+      if(this.Data.departureTime){
+        this.parseDepartureTime(this.Data.departureTime);
+      }
+      if(this.Data.attendanceTime){
+        this.parseAttendanceTime(this.Data.attendanceTime);
+      }
       if (this.Data.dateOfLeavingWork != "" && this.Data.dateOfLeavingWork != null) {
         this.EndDate = true
       }
@@ -247,8 +252,14 @@ export class AccountingEmployeeEditComponent {
         (this.Data as any)[key] = null;
       }
     });
-    if (this.isFormValid()) {
+    if (this.isFormValid()) { 
       this.getFormattedTime()
+      if(this.Data.departureTime == ':00 AM'){
+        this.Data.departureTime = null
+      }
+      if(this.Data.attendanceTime == ':00 AM'){
+        this.Data.attendanceTime = null
+      }
       this.isLoading = true
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
@@ -266,7 +277,7 @@ export class AccountingEmployeeEditComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: err.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });
@@ -299,6 +310,14 @@ export class AccountingEmployeeEditComponent {
 
       this.Data.days.push(day.id);
     }
+  }
+
+  selectAllDay() {
+    this.Data.days = [];
+    this.selectedDays= [];;
+   
+    this.Data.days = this.days.map(d=>d.id);
+    this.selectedDays= this.days
   }
 
   removeDay(dayId: number) {
@@ -418,13 +437,13 @@ export class AccountingEmployeeEditComponent {
 
   DeleteChild(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Child?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('Child'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.TableData = []
@@ -438,8 +457,8 @@ export class AccountingEmployeeEditComponent {
     });
   }
 
-  validateNumber(event: any, field?: keyof AccountingEmployee): void {
-    let value = event.target.value; 
+  validateNumber(event: any, field?: keyof Employee): void {
+    let value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (field) {
@@ -450,7 +469,7 @@ export class AccountingEmployeeEditComponent {
     }
   }
 
-  validateNumberOnly(event: any, field?: keyof AccountingEmployee): void {
+  validateNumberOnly(event: any, field?: keyof Employee): void {
     let value = event.target.value;
     value = value.replace(/[^0-9]/g, '')
     event.target.value = value;
@@ -464,10 +483,10 @@ export class AccountingEmployeeEditComponent {
     }
   }
 
-  capitalizeField(field: keyof AccountingEmployee): string {
+  capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-  onInputValueChange(event: { field: keyof AccountingEmployee; value: any }) {
+  onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;
     if (value) {
@@ -479,7 +498,7 @@ export class AccountingEmployeeEditComponent {
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
-        const field = key as keyof AccountingEmployee;
+        const field = key as keyof Employee;
         if (!this.Data[field]) {
           if (
             field == 'user_Name') {

@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" , "student", "parent" },
             pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetAsync()
@@ -66,8 +66,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySchoolId/{schoolID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Classroom" }
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
+            pages: new[] { "Classroom" , "Duty Table" , "Evaluation" , "Evaluation Report" }
         )]
         public async Task<IActionResult> GetBySchoolId(long schoolID)
         {
@@ -96,10 +96,42 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(classroomsDTO);
         }
+        
+        [HttpGet("GetByLessonID/{lessonID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
+            pages: new[] { "Classroom" }
+        )]
+        public async Task<IActionResult> GetByLessonIDAsync(long lessonID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Lesson lesson = await Unit_Of_Work.lesson_Repository.FindByIncludesAsync(
+                t => t.IsDeleted != true && t.ID == lessonID,
+                query => query.Include(d => d.SemesterWorkingWeek).ThenInclude(dd => dd.Semester)
+                );
+            if(lesson == null)
+            {
+                return NotFound("No Lesson with this ID");
+            }
+
+            List<Classroom> classrooms = Unit_Of_Work.classroom_Repository.FindBy(
+                    f => f.IsDeleted != true && f.AcademicYearID == lesson.SemesterWorkingWeek.Semester.AcademicYearID
+                    );
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+
+            return Ok(classroomsDTO);
+        }
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
             pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetById(long id)
@@ -177,8 +209,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByGradeID/{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Classroom" }
+          allowedTypes: new[] {"octa", "employee", "student", "parent" },
+          pages: new[] { "Classroom" , "Enter Daily Performance" , "Student Daily Performance Report" , "Classroom Daily Performance Report" }
         )]
         public async Task<IActionResult> GetByGradeIdAsync(long id)
         {
@@ -233,11 +265,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(DTO);
         }
 
-
+        ///
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Classroom" }
+          allowedTypes: new[] { "octa", "employee" ,"parent" , "student" },
+          pages: new[] { "Classroom", "Bus Students" }
         )]
         public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId)
         {
@@ -245,6 +277,40 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.GradeID== GradeId && f.AcademicYearID == AcYeaId,
+                    query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
+                    query => query.Include(emp => emp.AcademicYear),
+                    query => query.Include(emp => emp.Floor)
+                    );
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+
+            return Ok(classroomsDTO);
+        }
+
+        ///
+        [HttpGet("ByGradeAndAcademicYearIDAndStudent/{GradeId}/{AcYeaId}/{StudentId}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee", "parent", "student" },
+          pages: new[] { "Classroom" }
+        )]
+        public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<StudentClassroom> studentClassrooms= await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                    f => f.IsDeleted != true && f.StudentID == StudentId && f.Classroom.AcademicYearID == AcYeaId,
+                    query => query.Include(emp => emp.Classroom) );
+
+            List<long> ClassRoomsIds = studentClassrooms.Select(c=>c.ClassID).Distinct().ToList();
+
+            List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
+                    f => f.IsDeleted != true && f.GradeID == GradeId && f.AcademicYearID == AcYeaId && ClassRoomsIds.Contains(f.ID),
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
@@ -271,7 +337,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId,
+                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId && f.Grade.IsDeleted != true && f.AcademicYear.IsDeleted != true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
@@ -743,6 +809,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 //////////////////////////////////// remove all registration form parent ////////////////////////////////////////
                 _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId);
+
+                registerationFormParent.RegisterationFormStateID = 2;
+                registerationFormParent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormParent.UpdatedByOctaId = userId;
+                    if (registerationFormParent.UpdatedByUserId != null)
+                    {
+                        registerationFormParent.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormParent.UpdatedByUserId = userId;
+                    if (registerationFormParent.UpdatedByOctaId != null)
+                    {
+                        registerationFormParent.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
+                Unit_Of_Work.SaveChanges();
 
                 return Ok();
             }

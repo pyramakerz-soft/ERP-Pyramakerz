@@ -11,7 +11,7 @@ import { Assignment } from '../../../../Models/LMS/assignment';
 import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-assignment',
@@ -34,7 +34,7 @@ export class SubjectAssignmentComponent {
   SolvedAssignment: AssignmentStudent[] = []
   UnSolvedAssignment: Assignment[] = []
 
-  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
     public activeRoute: ActivatedRoute, private menuService: MenuService,
     private realTimeService: RealTimeNotificationServiceService,) { }
 
@@ -48,20 +48,27 @@ export class SubjectAssignmentComponent {
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.GetAssignments()
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
+
   GetAssignments() {
     this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe((d) => {
       this.SolvedAssignment = d.solvedAssignments
       this.UnSolvedAssignment = d.unsolvedAssignments
+    }, error => {
+      console.log(12,error)
+      if(!error.error.includes("No Assignments For This Student For this Subject")){
+        this.router.navigateByUrl(`Student/Subject`)
+      }
     })
   }
 
@@ -85,12 +92,17 @@ export class SubjectAssignmentComponent {
     const today = new Date();
     const due = new Date(dueDate);
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= due || today >= cutoff;
   }
 
   isPastCutoff(cutOfDate: string): boolean {
     const today = new Date();
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= cutoff;
   }
 }

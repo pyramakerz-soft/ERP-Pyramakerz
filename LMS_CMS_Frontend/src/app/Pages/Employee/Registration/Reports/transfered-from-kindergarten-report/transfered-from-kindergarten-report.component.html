@@ -1,5 +1,5 @@
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Transfered From Kindergarten Report' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Transferred From Kindergarten' | translate }}</h1>
 </div>
 
 <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
@@ -11,6 +11,7 @@
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="w-[49%]">
@@ -21,11 +22,12 @@
             <option *ngFor="let ac of academicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 </div>
 
-<div class="flex justify-start items-center mt-2">
+<div class="flex justify-start items-center mt-2 space-x-4 rtl:space-x-reverse">
     <div class="w-[80%]">
         <label for="Student" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Student' | translate }}</label>
         <ng-container *ngIf="!isSearching">
@@ -33,8 +35,9 @@
                 [(ngModel)]="SelectedStudentId" [disabled]="!SelectedSchoolId || !SelectedYearId">
                 <option value="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
                 <option *ngFor="let ac of filteredStudents" [value]="ac.id">
-                    {{ ac.user_Name }}
+                    {{ ac.en_name }}
                 </option>
+                <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
@@ -43,14 +46,6 @@
                 [(ngModel)]="searchQuery" (input)="searchStudents()" placeholder="{{ 'Search by Name' | translate }}">
         </ng-container>
     </div>
-
-    <!-- <div
-        class="w-[58px] h-[45px] gap-[8px] border-t border-r border-b border-l-0 border-solid border-gray-300 rounded-tr-[8px] rounded-br-[8px] pt-[12px] pr-[16px] pb-[12px] pl-[16px] mt-7">
-        <i class="fas fa-search ltr:mr-3 rtl:ml-3 text-gray-500"
-            style="width: 22.51px; height: 22.51px; font-size: 22.51px;" (click)="toggleSearchMode()">
-        </i>
-    </div> -->
-
 
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
@@ -98,7 +93,7 @@
                     {{ SelectedStudent.mobile }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ this.DataToPrint.student.nationalityEnName}}
+                    {{ this.DataToPrint?.student?.nationalityEnName || '-' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ SelectedStudent.genderName }}
@@ -108,54 +103,113 @@
     </table>
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'"
-            [Title]="'Report Of Success'" [infoRows]="[
-        {
-            keyEn: 'Student`s Name / ' + this.DataToPrint.student.en_name,
-            keyAr: ' اسم الطالب / الطالبة' + this.DataToPrint.student.ar_name
-        },
-        {
-          keyEn:' Nationality' + this.DataToPrint.student.nationalityEnName,
-          keyAr: ' الجنسية / ' + this.DataToPrint.student.nationalityArName
-        },
-        {
-            keyEn:' Place and date of birth ' + this.DataToPrint.student.dateOfBirth,
-            keyAr: 'مكان وتاريخ الميلاد / ' + this.DataToPrint.student.dateOfBirth
-        },  {
-            keyEn:' Passport No' + this.DataToPrint.student.passportNo,
-            keyAr: ' رقم جواز السفر / ' + this.DataToPrint.student.passportNo
-        },
-        {
-            keyEn: 'Id no ' + this.DataToPrint.student.nationalIDExpiredDate,
-            keyAr: 'السجل المدنى / ' + this.DataToPrint.student.nationalIDExpiredDate
-        },
-        {
-            keyEn: 'Admission Date' + this.DataToPrint.student.admissionDate,
-            keyAr: 'تاريخ الالتحاق بالمدرسة / ' + this.DataToPrint.student.admissionDate
-        },
-        {
-          keyEn: 'Previous School ' +this.DataToPrint.student.previousSchool ,
-          keyAr: 'اسم المدرسة السابقة ' + this.DataToPrint.student.previousSchool
-        }
-        ,
-        {
-          keyEn: 'Under the supervision of the ministry of education license (520-1567)
-           Kindergarten Section This is to certify that leaner ,
-          ' + this.DataToPrint.student.en_name + 'is registered in the School academic Year' + this.DataToPrint.student.currentAcademicYear + '
-          And Promoted to ' + this.DataToPrint.student.currentGradeName + 'in the School academic Year ' + this.DataToPrint.student.startAcademicYearName
-        }
-      ]
-      " [PsNotes]="[
-        {
-            EnNote: 'Best Regards ,',
-            ArNote: 'قائدة رياض الاطفال  '
-        },
-        {
-            ArNote: 'الاسم'
-        }
-      ]
-      " #pdfComponentRef></app-pdf-print>/app-pdf-print>
+<!-- Kindergarten Certificate Template (Hidden until PDF/Print) -->
+<div *ngIf="showPDF" #kindergartenContainer 
+     style="padding: 40px; font-family: Arial, sans-serif; background: white; max-width: 210mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px;">
+  
+  <!-- Header with logos -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+    <div style="width: 30%; text-align: left;">
+      <div style="font-size: 11px; line-height: 1.6;">
+        <strong>{{ getSchoolNameEn() }}</strong><br>
+        <!-- {{ getCurriculumEn() }}<br>
+        License No. {{ getLicenseNumber() }}<br> -->
+        Ministry of Education<br>
+        Directorate General of Education in Riyadh<br>
+        Private Education Office in Riyadh Region
+      </div>
     </div>
+    
+    <div style="width: 30%; text-align: center; display: flex; justify-content: center; gap: 20px; align-items: center;">
+      <img *ngIf="school?.reportImage" [src]="school.reportImage" style="height: 80px; width: auto; object-fit: contain;">
+    </div>
+    
+    <div style="width: 30%; text-align: right; direction: rtl; font-size: 11px; line-height: 1.6;">
+      <strong>{{ getSchoolNameAr() }}</strong><br>
+      <!-- {{ getCurriculumAr() }}<br>
+      ترخيص رقم: {{ getLicenseNumber() }}<br> -->
+      وزارة التعليم<br>
+      الإدارة العامة للتعليم بالرياض<br>
+      مكتب التعليم الأهلي بمنطقة الرياض
+    </div>
+  </div>
+
+  <!-- Title Section -->
+  <div style="text-align: center; margin: 10px 0 10px 0;">
+    <h1 style="font-size: 32px; font-weight: bold; margin: 0 0 5px 0;">Report Of Success</h1>
+    <div style="direction: rtl; font-size: 24px; font-weight: bold;">بيان نجاح</div>
+    <!-- <div style="font-size: 12px; margin-top: 5px;">
+      <div>العام الدراسى</div>
+      <div>2020_2021 G</div>
+      <div>1441-1442 H</div>
+    </div> -->
+  </div>
+  
+  <!-- Two Column Layout for Student Info -->
+  <div style="display: flex; gap: 30px; margin: 40px auto; max-width: 80%; justify-content: center;">
+    
+    <!-- Left Box - English Info -->
+    <div style="flex: 0 1 300px; border: 3px solid #333; border-radius: 20px; padding: 15px; min-height: 200px;">
+      <div style="font-size: 11px; line-height: 2;">
+        <strong>Student's Name:</strong> {{ DataToPrint?.student?.en_name || '-' }}<br>
+        <strong>Nationality:</strong> {{ DataToPrint?.student?.nationalityEnName || '-' }}<br>
+        <strong>Place and date of birth:</strong> {{ DataToPrint?.student?.dateOfBirth || '-' }}<br>
+        <strong>Passport NO:</strong> {{ DataToPrint?.student?.passportNo || '-' }}<br>
+        <strong>ID NO:</strong> {{ DataToPrint?.student?.nationalIDExpiredDate || '-' }}<br>
+        <strong>Admission Date:</strong> {{ DataToPrint?.student?.admissionDate || '-' }}<br>
+        <strong>Previous School:</strong> {{ DataToPrint?.student?.previousSchool || '-' }}
+      </div>
+    </div>
+
+    <!-- Right Box - Arabic Info -->
+    <div style="flex: 0 1 300px; border: 3px solid #333; border-radius: 20px; padding: 15px; min-height: 200px; direction: rtl; text-align: right;">
+      <div style="font-size: 11px; line-height: 2;">
+        <strong>اسم الطالب:</strong> {{ DataToPrint?.student?.ar_name || '-' }}<br>
+        <strong>الجنسية:</strong> {{ DataToPrint?.student?.nationalityArName || '-' }}<br>
+        <strong>مكان وتاريخ الميلاد:</strong> {{ DataToPrint?.student?.dateOfBirth || '-' }}<br>
+        <strong>رقم جواز السفر:</strong> {{ DataToPrint?.student?.passportNo || '-' }}<br>
+        <strong>السجل المدنى:</strong> {{ DataToPrint?.student?.nationalIDExpiredDate || '-' }}<br>
+        <strong>تاريخ الإلتحاق بالمدرسة:</strong> {{ DataToPrint?.student?.admissionDate || '-' }}<br>
+        <strong>اسم المدرسة السابقة:</strong> {{ DataToPrint?.student?.previousSchool || '-' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- License Info -->
+  <!-- <div style="text-align: center; margin: 30px 0 20px 0; font-size: 13px;">
+    Under the supervision of the Ministry of Education License ({{ getLicenseNumber() }})
+  </div> -->
+
+  <!-- Kindergarten Section Title -->
+  <div style="text-align: center; margin: 25px 0;">
+    <h2 style="font-size: 36px; font-weight: bold; margin: 0; letter-spacing: 1px;">Kindergarten Section</h2>
+  </div>
+
+  <!-- Certification Text -->
+  <div style="text-align: center; font-size: 13px; line-height: 1.8; margin: 25px 0;">
+    <p style="margin: 5px 0;">This is to certify that learner,</p>
+    <p style="font-size: 16px; font-weight: bold; margin: 10px 0; text-transform: uppercase;">
+      {{ DataToPrint?.student?.en_name || 'STUDENT NAME' }}
+    </p>
+    <p style="margin: 5px 0;">Is registered in the school academic year <strong>{{ DataToPrint?.student?.currentAcademicYear || '-' }}</strong></p>
+    <p style="margin: 5px 0;">And promoted to <strong>{{ getPromotedToGrade() }}</strong> in the school academic year <strong>{{ getNextAcademicYear() }}</strong></p>
+  </div>
+
+  <!-- Footer with Signature -->
+  <div style="display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px;">
+    <div style="width: 45%; text-align: left; font-size: 12px;">
+      <p style="margin: 5px 0;"><strong>Best Regards,</strong></p>
+      <p style="margin: 5px 0;">KG Section Principal</p>
+      <p style="margin: 30px 0 5px 0;">Name: ......................................</p>
+      <p style="margin: 5px 0;">Signature: ......................................</p>
+      <p style="margin: 5px 0;">Date: {{ CurrentDate }}</p>
+    </div>
+    
+    <div style="width: 45%; text-align: right; direction: rtl; font-size: 12px;">
+      <p style="margin: 5px 0;"><strong>قائدة رياض الأطفال</strong></p>
+      <p style="margin: 30px 0 5px 0;">الاسم: ......................................</p>
+      <p style="margin: 5px 0;">التوقيع: ......................................</p>
+      <p style="margin: 5px 0;">التاريخ: {{ ArabicCurrentDate }}</p>
+    </div>
+  </div>
 </div>

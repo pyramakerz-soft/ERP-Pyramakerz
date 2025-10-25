@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySemesterID/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Working Weeks" }
+            pages: new[] { "Working Weeks", "Lessons" }
          )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -113,16 +113,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (studentGrade == null)
             {
-                return BadRequest("This student does not exist in the current academic year.");
+                return BadRequest(new
+                {
+                    subjectName = subject.en_name,
+                    error = "This student does not exist in the current academic year"
+                });
+                
             }
 
             var semester = Unit_Of_Work.semester_Repository.First_Or_Default(s =>
                 s.AcademicYearID == studentGrade.AcademicYearID &&
                 s.IsCurrent == true);
 
+            //if (semester == null)
+            //{
+            //    return BadRequest("There is no current semester for this academic year.");
+            //}
+
             if (semester == null)
             {
-                return BadRequest("There is no current semester for this academic year.");
+                return BadRequest(new
+                {
+                    subjectName = subject.en_name,
+                    error = "There is no current semester for this academic year"
+                });
+
             }
 
             var semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository

@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Section" }
+            pages: new[] { "Section", "Classroom", "Student" , "Subject" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -105,7 +105,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolID/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Section" }
+            pages: new[] { "Section" , "Bus Students" }
         )]
         public async Task<IActionResult> GetAsyncBySchoolID(long id)
         {
@@ -459,7 +459,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {

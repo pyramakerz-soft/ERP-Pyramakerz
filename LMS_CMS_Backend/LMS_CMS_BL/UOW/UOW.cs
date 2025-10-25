@@ -2,6 +2,7 @@
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
@@ -16,6 +17,7 @@ using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_DAL.Models.Octa;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -254,7 +256,6 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<BounsType> BounsType_Repository;
         GenericRepo<Deduction> Deduction_Repository;
         GenericRepo<DeductionType> DeductionType_Repository;
-        GenericRepo<EmployeeVacationCount> EmployeeVacationCount_Repository;
         GenericRepo<LeaveRequest> LeaveRequest_Repository;
         GenericRepo<Loans> Loans_Repository;
         GenericRepo<OfficialHolidays> OfficialHolidays_Repository;
@@ -263,7 +264,22 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<DirectMark> DirectMark_Repository;
         GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
         GenericRepo<ConnectionStatus> ConnectionStatus_Repository;
-
+        GenericRepo<ArchivingTree> ArchivingTree_Repository;
+        GenericRepo<PermissionGroup> PermissionGroup_Repository;
+        GenericRepo<PermissionGroupEmployee> PermissionGroupEmployee_Repository;
+        GenericRepo<PermissionGroupDetails> PermissionGroupDetails_Repository; 
+        GenericRepo<AnnualVacationEmployee> AnnualVacationEmployee_Repository;
+        GenericRepo<EmployeeClocks> EmployeeClocks_Repository;
+        GenericRepo<EmployeeLocation> EmployeeLocation_Repository;
+        GenericRepo<Location> Location_Repository;
+        GenericRepo<SalaryConfigration> SalaryConfigration_Repository;
+        GenericRepo<BankEmployee> BankEmployee_Repository;
+        GenericRepo<SafeEmployee> SafeEmployee_Repository;
+        GenericRepo<RefreshTokens> RefreshTokens_Repository;
+        GenericRepo<MonthlyAttendance> MonthlyAttendance_Repository;
+        GenericRepo<DayStatus> DayStatus_Repository;
+        GenericRepo<SalaryHistory> SalaryHistory_Repository;
+        GenericRepo<EmployeeLoans> EmployeeLoans_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2946,18 +2962,6 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
-        public GenericRepo<EmployeeVacationCount> employeeVacationCount_Repository
-        {
-            get
-            {
-                if (EmployeeVacationCount_Repository == null)
-                {
-                    EmployeeVacationCount_Repository = new GenericRepo<EmployeeVacationCount>(db);
-                }
-                return EmployeeVacationCount_Repository;
-            }
-        }
-
         public GenericRepo<LeaveRequest> leaveRequest_Repository
         {
             get
@@ -3029,7 +3033,189 @@ namespace LMS_CMS_BL.UOW
                 return ConnectionStatus_Repository;
             }
         } 
+        
+        public GenericRepo<ArchivingTree> archivingTree_Repository
+        {
+            get
+            {
+                if (ArchivingTree_Repository == null)
+                {
+                    ArchivingTree_Repository = new GenericRepo<ArchivingTree>(db);
+                }
+                return ArchivingTree_Repository;
+            }
+        } 
+        public GenericRepo<PermissionGroup> permissionGroup_Repository
+        {
+            get
+            {
+                if (PermissionGroup_Repository == null)
+                {
+                    PermissionGroup_Repository = new GenericRepo<PermissionGroup>(db);
+                }
+                return PermissionGroup_Repository;
+            }
+        } 
+        public GenericRepo<PermissionGroupEmployee> permissionGroupEmployee_Repository
+        {
+            get
+            {
+                if (PermissionGroupEmployee_Repository == null)
+                {
+                    PermissionGroupEmployee_Repository = new GenericRepo<PermissionGroupEmployee>(db);
+                }
+                return PermissionGroupEmployee_Repository;
+            }
+        } 
+         public GenericRepo<PermissionGroupDetails> permissionGroupDetails_Repository
+        {
+            get
+            {
+                if (PermissionGroupDetails_Repository == null)
+                {
+                    PermissionGroupDetails_Repository = new GenericRepo<PermissionGroupDetails>(db);
+                }
+                return PermissionGroupDetails_Repository;
+            }
+        }
+        public GenericRepo<AnnualVacationEmployee> annualVacationEmployee_Repository
+        {
+            get
+            {
+                if (AnnualVacationEmployee_Repository == null)
+                {
+                    AnnualVacationEmployee_Repository = new GenericRepo<AnnualVacationEmployee>(db);
+                }
+                return AnnualVacationEmployee_Repository;
+            }
+        }
+        public GenericRepo<EmployeeClocks> employeeClocks_Repository
+        {
+            get
+            {
+                if (EmployeeClocks_Repository == null)
+                {
+                    EmployeeClocks_Repository = new GenericRepo<EmployeeClocks>(db);
+                }
+                return EmployeeClocks_Repository;
+            }
+        }
+        public GenericRepo<EmployeeLocation> employeeLocation_Repository
+        {
+            get
+            {
+                if (EmployeeLocation_Repository == null)
+                {
+                    EmployeeLocation_Repository = new GenericRepo<EmployeeLocation>(db);
+                }
+                return EmployeeLocation_Repository;
+            }
+        }
+        public GenericRepo<Location> location_Repository
+        {
+            get
+            {
+                if (Location_Repository == null)
+                {
+                    Location_Repository = new GenericRepo<Location>(db);
+                }
+                return Location_Repository;
+            }
+        }
 
+        public GenericRepo<SalaryConfigration> salaryConfigration_Repository
+        {
+            get
+            {
+                if (SalaryConfigration_Repository == null)
+                {
+                    SalaryConfigration_Repository = new GenericRepo<SalaryConfigration>(db);
+                }
+                return SalaryConfigration_Repository;
+            }
+        }
+
+        public GenericRepo<SafeEmployee> safeEmployee_Repository
+        {
+            get
+            {
+                if (SafeEmployee_Repository == null)
+                {
+                    SafeEmployee_Repository = new GenericRepo<SafeEmployee>(db);
+                }
+                return SafeEmployee_Repository;
+            }
+        }
+         
+        public GenericRepo<BankEmployee> bankEmployee_Repository
+        {
+            get
+            {
+                if (BankEmployee_Repository == null)
+                {
+                    BankEmployee_Repository = new GenericRepo<BankEmployee>(db);
+                }
+                return BankEmployee_Repository;
+            }
+        }
+
+        public GenericRepo<MonthlyAttendance> monthlyAttendance_Repository
+        {
+            get
+            {
+                if (MonthlyAttendance_Repository == null)
+                {
+                    MonthlyAttendance_Repository = new GenericRepo<MonthlyAttendance>(db);
+                }
+                return MonthlyAttendance_Repository;
+            }
+        }
+        public GenericRepo<DayStatus> dayStatus_Repository
+        {
+            get
+            {
+                if (DayStatus_Repository == null)
+                {
+                    DayStatus_Repository = new GenericRepo<DayStatus>(db);
+                }
+                return DayStatus_Repository;
+            }
+        }
+        public GenericRepo<SalaryHistory> salaryHistory_Repository
+        {
+            get
+            {
+                if (SalaryHistory_Repository == null)
+                {
+                    SalaryHistory_Repository = new GenericRepo<SalaryHistory>(db);
+                }
+                return SalaryHistory_Repository;
+            }
+        }
+
+        public GenericRepo<RefreshTokens> refreshTokens_Repository
+        {
+            get
+            {
+                if (RefreshTokens_Repository == null)
+                {
+                    RefreshTokens_Repository = new GenericRepo<RefreshTokens>(db);
+                }
+                return RefreshTokens_Repository;
+            }
+        }
+
+        public GenericRepo<EmployeeLoans> employeeLoans_Repository
+        {
+            get
+            {
+                if (EmployeeLoans_Repository == null)
+                {
+                    EmployeeLoans_Repository = new GenericRepo<EmployeeLoans>(db);
+                }
+                return EmployeeLoans_Repository;
+            }
+        }
 
         public void SaveChanges()
         {

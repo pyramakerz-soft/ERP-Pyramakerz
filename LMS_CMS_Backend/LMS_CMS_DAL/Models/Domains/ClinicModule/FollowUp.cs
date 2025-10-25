@@ -39,6 +39,8 @@ namespace LMS_CMS_DAL.Models.Domains.ClinicModule
         public ICollection<FollowUpDrug>? FollowUpDrugs { get; set; } = new HashSet<FollowUpDrug>();
 
         public string? Recommendation { get; set; }
-        public bool? SendSMS { get; set; }
+        public bool SendSMS { get; set; } 
+
+        public DateOnly? Date { get; set; }
     }
 }

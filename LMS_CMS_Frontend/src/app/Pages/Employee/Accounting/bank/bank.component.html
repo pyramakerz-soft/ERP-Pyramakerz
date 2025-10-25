@@ -5,7 +5,7 @@
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-         {{ 'Create Bank' | translate }}
+        {{ 'Create Bank' | translate }}
       </button>
     </div>
   </div>
@@ -16,41 +16,40 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-               {{ 'ID' | translate }}
+              {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'Name' | translate }}
+              {{ 'Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                 {{ 'Bank Name' | translate }}
+              {{ 'Bank Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                 {{ 'IBAN' | translate }}
+              {{ 'IBAN' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                 {{ 'Bank Account Number' | translate }}
+              {{ 'Bank Account Number' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                 {{ 'Account Opening Date' | translate }}
+              {{ 'Account Opening Date' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                 {{ 'Account Closing Date' | translate }}
+              {{ 'Account Closing Date' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'Account Number' | translate }}
+              {{ 'Account Number' | translate }}
             </th>
 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{ 'Actions' | translate }}
+              {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
         <tbody>
           <!-- No Data Row -->
           <tr *ngIf="TableData.length === 0">
-            <td colspan="9"
-              class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-               {{ 'No Data Found' | translate }}
+            <td colspan="9" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+              {{ 'No Data Found' | translate }}
             </td>
           </tr>
 
@@ -90,6 +89,9 @@
                 <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row)">
                   <i class="fa-solid fa-pencil"></i>
                 </button>
+                <button (click)="AddEmployee(row.id)" title="Add Employee">
+                  <i class="fa-solid fa-user-plus"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -108,8 +110,8 @@
       <i class="fa-solid fa-xmark text-2xl"></i>
     </button>
 
-    <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">  {{ 'Create Bank' | translate }}</h1>
-    <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">  {{ 'Edit bank' | translate }}</h1>
+    <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9"> {{ 'Create Bank' | translate }}</h1>
+    <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit bank' | translate }}</h1>
 
     <div
       class="mt-4 bg-[#F7F7F7] w-[573px] max-h-[500px] h-auto rounded-[24px] p-[16px_24px] gap-[20px] overflow-y-auto">
@@ -118,9 +120,7 @@
         <div class="flex flex-col w-full">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.name" 
-            placeholder="{{ 'Enter Title' | translate }}"
-
+            [(ngModel)]="bank.name" placeholder="{{ 'Enter Title' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
           <span *ngIf="validationErrors['name']" class="text-red-500 font-normal">{{ validationErrors['name'] }}</span>
         </div>
@@ -141,8 +141,7 @@
         <div class="flex flex-col w-full">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Bank Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankName"
-                 placeholder="{{ 'Enter bankName' | translate }}"
+            [(ngModel)]="bank.bankName" placeholder="{{ 'Enter bankName' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'bankName', value: $event })" />
           <span *ngIf="validationErrors['bankName']" class="text-red-500 font-normal">
             {{ validationErrors['bankName'] }}
@@ -152,8 +151,7 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'IBAN' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.iban"
-            placeholder="{{ 'Enter iban' | translate }}"
+            [(ngModel)]="bank.iban" placeholder="{{ 'Enter iban' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'iban', value: $event })" />
           <span *ngIf="validationErrors['iban']" class="text-red-500 font-normal">{{ validationErrors['iban'] }}</span>
         </div>
@@ -162,9 +160,7 @@
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Bank Account Number' | translate }}</h6>
           <input (input)="validateNumber($event, 'bankAccountNumber')"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankAccountName"
-              placeholder="{{ 'Enter Bank Account Number' | translate }}"
-
+            [(ngModel)]="bank.bankAccountName" placeholder="{{ 'Enter Bank Account Number' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'bankAccountNumber', value: $event })" />
           <span *ngIf="validationErrors['bankAccountNumber']" class="text-red-500 font-normal">{{
             validationErrors['bankAccountNumber'] }}</span>
@@ -173,8 +169,7 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Account Opening Date' | translate }}</h6>
           <input type="date" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.accountOpeningDate" 
-              placeholder="{{ 'Enter accountOpeningDate' | translate }}"
+            [(ngModel)]="bank.accountOpeningDate" placeholder="{{ 'Enter accountOpeningDate' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'accountOpeningDate', value: $event })" />
           <span *ngIf="validationErrors['accountOpeningDate']" class="text-red-500 font-normal">{{
             validationErrors['accountOpeningDate'] }}</span>
@@ -183,9 +178,7 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Account Closing Date' | translate }}</h6>
           <input type="date" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.accountClosingDate" 
-              placeholder="{{ 'Enter accountClosingDate' | translate }}"
-
+            [(ngModel)]="bank.accountClosingDate" placeholder="{{ 'Enter accountClosingDate' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'accountClosingDate', value: $event })" />
           <span *ngIf="validationErrors['accountClosingDate']" class="text-red-500 font-normal">{{
             validationErrors['accountClosingDate'] }}</span>
@@ -202,3 +195,43 @@
       </div>
     </div>
   </div>
+</div>
+
+
+
+
+<div id="Add_Employee" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+    <div class="flex justify-between items-center">
+      <h1 class="font-semibold text-2xl leading-9">{{ 'Employee' | translate }}</h1>
+      <button (click)="closeAddModal()" type="button"
+        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+    </div>
+
+    <div class="mt-6">
+      <label class="mb-2">{{ 'Employees' | translate }}</label> 
+      <select class="border rounded-lg p-2 w-full" (change)="onEmployeeSelect($event)">
+        <option value="" disabled selected>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+        <option *ngFor="let emp of Employees" [value]="emp.id">
+          {{ emp.en_name }} ({{ emp.ar_name }})
+        </option>
+      </select> 
+      <div class="flex flex-wrap gap-2 mt-4">
+        <div *ngFor="let emp of selectedEmployees" class="flex items-center bg-gray-200 px-3 py-1 rounded-lg space-x-2 rtl:space-x-reverse">
+          <span>{{ emp.employeeEnglishName }} ({{ emp.employeeArabicName }})</span>
+          <button (click)="removeEmployee(emp)" class="text-red-600 font-semibold">x</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="flex justify-end">
+      <div class="flex justify-end mt-4">
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+          <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

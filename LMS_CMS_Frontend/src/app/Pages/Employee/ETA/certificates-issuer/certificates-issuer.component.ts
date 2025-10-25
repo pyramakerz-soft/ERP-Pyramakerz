@@ -12,20 +12,20 @@ import { CertificatesIssuer } from '../../../../Models/ETA/certificates-issuer';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-certificates-issuer',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './certificates-issuer.component.html',
   styleUrl: './certificates-issuer.component.css'
 })
 export class CertificatesIssuerComponent {
-  validationErrors: { [key in keyof CertificatesIssuer]?: string } = {}; 
-  keysArray: string[] = ['id','name'];
+  validationErrors: { [key in keyof CertificatesIssuer]?: string } = {};
+  keysArray: string[] = ['id', 'name'];
   key: string = 'id';
   value: any = '';
 
@@ -37,19 +37,19 @@ export class CertificatesIssuerComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   certificatesIssuer: CertificatesIssuer = new CertificatesIssuer();
   certificatesIssuerData: CertificatesIssuer[] = [];
-   
-  CurrentPage:number = 1
-  PageSize:number = 10
-  TotalPages:number = 1
-  TotalRecords:number = 0
-  isDeleting:boolean = false;
-  viewClassStudents:boolean = false;
-  viewStudents:boolean = false;
-isRtl: boolean = false;
+
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
+  isDeleting: boolean = false;
+  viewClassStudents: boolean = false;
+  viewStudents: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isLoading = false;
 
@@ -57,13 +57,14 @@ isRtl: boolean = false;
     public account: AccountService,
     public ApiServ: ApiService,
     public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService,  
-    public activeRoute: ActivatedRoute, 
-    public certificatesIssuerService: CertificatesIssuerService, 
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public certificatesIssuerService: CertificatesIssuerService,
     public router: Router,
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -75,7 +76,7 @@ isRtl: boolean = false;
       this.path = url[0].path;
     });
 
-    this.GetAllData(this.CurrentPage, this.PageSize) 
+    this.GetAllData(this.CurrentPage, this.PageSize)
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -87,64 +88,64 @@ isRtl: boolean = false;
       }
     });
 
-         this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
-  GetAllData(pageNumber:number, pageSize:number){
-    this.certificatesIssuerData = [] 
-    this.CurrentPage = 1 
+  GetAllData(pageNumber: number, pageSize: number) {
+    this.certificatesIssuerData = []
+    this.CurrentPage = 1
     this.TotalPages = 1
     this.TotalRecords = 0
     this.certificatesIssuerService.Get(this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          this.CurrentPage = data.pagination.currentPage
-          this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
-          this.TotalRecords = data.pagination.totalRecords 
-          this.certificatesIssuerData = data.data 
-        }, 
-        (error) => { 
-          if(error.status == 404){
-            if(this.TotalRecords != 0){
-              let lastPage = this.TotalRecords / this.PageSize 
-              if(lastPage >= 1){
-                if(this.isDeleting){
-                  this.CurrentPage = Math.floor(lastPage) 
-                  this.isDeleting = false
-                } else{
-                  this.CurrentPage = Math.ceil(lastPage) 
-                }
-                this.GetAllData(this.CurrentPage, this.PageSize)
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage
+        this.PageSize = data.pagination.pageSize
+        this.TotalPages = data.pagination.totalPages
+        this.TotalRecords = data.pagination.totalRecords
+        this.certificatesIssuerData = data.data
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage = this.TotalRecords / this.PageSize
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
+                this.isDeleting = false
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
               }
-            } 
+              this.GetAllData(this.CurrentPage, this.PageSize)
+            }
           }
         }
-      )
+      }
+    )
   }
 
-  getPOSById(id:number){
+  getPOSById(id: number) {
     this.certificatesIssuer = new CertificatesIssuer()
     this.certificatesIssuerService.GetByID(id, this.DomainName).subscribe(
       data => {
-        this.certificatesIssuer = data  
+        this.certificatesIssuer = data
       }
     )
   }
 
   openModal(Id?: number) {
-    if (Id) { 
+    if (Id) {
       this.getPOSById(Id);
-    } 
+    }
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -152,9 +153,9 @@ isRtl: boolean = false;
 
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
-    document.getElementById('Add_Modal')?.classList.add('hidden'); 
-    this.validationErrors = {}; 
-    this.certificatesIssuer = new CertificatesIssuer();  
+    document.getElementById('Add_Modal')?.classList.add('hidden');
+    this.validationErrors = {};
+    this.certificatesIssuer = new CertificatesIssuer();
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -178,16 +179,16 @@ isRtl: boolean = false;
   capitalizeField(field: keyof CertificatesIssuer): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-    
-  changeCurrentPage(currentPage:number){
+
+  changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) { 
+  validatePageSize(event: any) {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-        event.target.value = '';
+      event.target.value = '';
     }
   }
 
@@ -219,37 +220,37 @@ isRtl: boolean = false;
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
+
   onInputValueChange(event: { field: keyof CertificatesIssuer; value: any }) {
     const { field, value } = event;
     (this.certificatesIssuer as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
-    } 
+    }
   }
 
   isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.certificatesIssuer) { 
+    for (const key in this.certificatesIssuer) {
       if (this.certificatesIssuer.hasOwnProperty(key)) {
         const field = key as keyof CertificatesIssuer;
         if (!this.certificatesIssuer[field]) {
-          if (field == 'name' ) {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+          if (field == 'name') {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
-        } else { 
+        } else {
           this.validationErrors[field] = '';
         }
       }
-    } 
+    }
     return isValid;
   }
 
-  Save() {  
+  Save() {
     if (this.isFormValid()) {
-      this.isLoading = true;    
-      if (this.certificatesIssuer.id == 0) { 
+      this.isLoading = true;
+      if (this.certificatesIssuer.id == 0) {
         this.certificatesIssuerService.Add(this.certificatesIssuer, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
@@ -261,7 +262,7 @@ isRtl: boolean = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -279,7 +280,7 @@ isRtl: boolean = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -291,16 +292,16 @@ isRtl: boolean = false;
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Certificates Issuer?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + " " +this.translate.instant('Certificate Issuer') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.certificatesIssuerService.Delete(id,this.DomainName).subscribe((D)=>{
+        this.certificatesIssuerService.Delete(id, this.DomainName).subscribe((D) => {
           this.GetAllData(this.CurrentPage, this.PageSize)
         })
       }
@@ -329,7 +330,7 @@ isRtl: boolean = false;
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
-          if (typeof fieldValue === 'number') { 
+          if (typeof fieldValue === 'number') {
             return fieldValue.toString().includes(numericValue.toString())
           }
           return fieldValue == this.value;

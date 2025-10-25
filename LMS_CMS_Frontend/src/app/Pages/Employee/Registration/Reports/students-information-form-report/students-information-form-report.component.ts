@@ -77,8 +77,8 @@ export class StudentsInformationFormReportComponent {
     this.direction = document.dir || 'ltr';
     this.getAllSchools();
     this.getAllYears();
-    this.showTable = false; // Hide table initially
-    this.showViewReportBtn = false; // Disable view report initially
+    this.showTable = false;
+    this.showViewReportBtn = false;
 
         this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -286,7 +286,7 @@ export class StudentsInformationFormReportComponent {
       filename: 'Student Information Report.xlsx',
       tables: [
         {
-          title: 'Students List',
+          // title: 'Students List',
           headers,
           data: dataRows,
         },

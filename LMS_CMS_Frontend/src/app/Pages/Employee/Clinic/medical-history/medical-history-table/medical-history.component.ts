@@ -13,10 +13,14 @@ import { StudentService } from '../../../../../Services/student.service';
 import { DoctorMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { SearchComponent } from '../../../../../Component/search/search.component';
 import { MedicalHistoryModalComponent } from "../medical-history-modal/medical-history-modal.component";
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { ActivatedRoute } from '@angular/router';
+import { AccountService } from '../../../../../Services/account.service';
+import { Student } from '../../../../../Models/student';
 @Component({
   selector: 'app-medical-history',
   standalone: true,
@@ -33,9 +37,15 @@ export class MedicalHistoryComponent implements OnInit {
   medicalHistories: DoctorMedicalHistory[] = [];
   isModalVisible = false;
   isRtl: boolean = false;
-    subscription!: Subscription;
-    searchKey: string = 'id';
+  subscription!: Subscription;
+  searchKey: string = 'id';
   searchValue: string = '';
+  students: Student[] = [];
+  
+  reportType: string = 'employee';
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  DomainName: string = '';
+  UserID: number = 0;
   
   constructor(
     private medicalHistoryService: MedicalHistoryService,
@@ -45,10 +55,24 @@ export class MedicalHistoryComponent implements OnInit {
     private classroomService: ClassroomService,
     private studentService: StudentService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private route: ActivatedRoute,
+    private translate: TranslateService
+
   ) {}
 
   ngOnInit(): void {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(12,this.reportType)
+    if(this.reportType == 'parent'){
+      this.GetStudentsData()
+    }
+
     this.loadMedicalHistories();
      this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -56,12 +80,38 @@ export class MedicalHistoryComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
+  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
   } 
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async onSearchEvent(event: { key: string, value: any }) {
     this.searchKey = event.key;
@@ -75,6 +125,14 @@ export class MedicalHistoryComponent implements OnInit {
         });
     }
   }
+
+  GetStudentsData() {
+    this.students = []
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
+  }  
 
   async loadMedicalHistories() {
     try {
@@ -122,30 +180,36 @@ export class MedicalHistoryComponent implements OnInit {
   }
 
 deleteMedicalHistory(row: any) {
+  const translatedTitle = this.translate.instant('Are you sure?');
+  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedConfirm = this.translate.instant('Yes, delete it!');
+  const translatedCancel = this.translate.instant('No, keep it');
+  const successMessage = this.translate.instant('Deleted successfully');
+
   Swal.fire({
-    title: 'Are you sure?',
-    text: 'You will not be able to recover this medical history!',
+    title: translatedTitle,
+    text: translatedText,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#089B41',
     cancelButtonColor: '#2E3646',
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'No, keep it',
+    confirmButtonText: translatedConfirm,
+    cancelButtonText: translatedCancel,
   }).then((result) => {
     if (result.isConfirmed) {
       const domainName = this.apiService.GetHeader();
       this.medicalHistoryService.Delete(row.id, domainName).subscribe({
         next: () => {
-          
           if (this.medicalHistories.length === 1) {
-            this.medicalHistories = []; 
+            this.medicalHistories = [];
           }
-          this.loadMedicalHistories(); 
-          Swal.fire('Deleted!', 'The medical history has been deleted.', 'success');
+          this.loadMedicalHistories();
+          this.showSuccessAlert(successMessage);
         },
         error: (error) => {
           console.error('Error deleting medical history:', error);
-          Swal.fire('Error', 'Failed to delete medical history. Please try again later.', 'error');
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
+          this.showErrorAlert(errorMessage);
         },
       });
     }

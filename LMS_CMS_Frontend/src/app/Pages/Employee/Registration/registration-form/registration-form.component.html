@@ -2,11 +2,11 @@
     <div class="flex-grow flex-col space-y-8">
         <div class="flex justify-between items-center">
             <p *ngIf="this.path == 'Registration Form'" class="primaryTxt text-2xl font-semibold">{{ isRtl ? "استمارة التسجيل" : RegistrationFormData.name }}</p>
-            <div *ngIf="this.path == 'Edit Student'" class="flex justify-between items-center space-x-5 "> 
+            <div *ngIf="this.path.startsWith('Student/Edit')" class="flex justify-between items-center space-x-5 "> 
                 <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180"(click)="moveToStudents()"></i>
                 <p class="primaryTxt text-2xl font-semibold">{{ 'Edit' | translate }} {{ 'Student' | translate }}</p>
             </div>
-            <p *ngIf="this.path == 'Create Student'" class="primaryTxt text-2xl font-semibold">{{ 'Create' | translate }}  {{ 'Student' | translate }}</p>
+            <p *ngIf="this.path.startsWith('Student/Create')" class="primaryTxt text-2xl font-semibold">{{ 'Create' | translate }}  {{ 'Student' | translate }}</p>
             <div class="w-[500px] flec flex-col space-y-2">
                 <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{
                     'Completed' | translate }}</p>
@@ -149,6 +149,7 @@
                                 <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                                     {{ ac.name }}
                                 </option>
+                                <option *ngIf="AcademicYears.length === 0" disabled selected>No Data Found</option>
                             </select>
 
                             <!-- Grade Dropdown -->
@@ -164,25 +165,29 @@
                                 <option *ngFor="let g of Grades" [value]="g.id">
                                     {{ g.name }}
                                 </option>
+                                <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
                             </select>
                             }
-
+ 
                             <div *ngSwitchCase="4" class="border rounded-lg p-3">
                                 <div *ngFor="let option of field.options" class="flex items-center">
-                                    <input type="checkbox" id="{{cat.enName}}_{{field.enName}}_{{option.name}}"
-                                        class="square-check" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
-                                        [value]="getSelectedOption(field.id)"
-                                        (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
-                                        [class.error-border]="isFieldInvalid(field)" />
-                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{
-                                        option.name }}</label>
+                                    <input type="checkbox" id="{{cat.enName}}_{{field.enName}}_{{option.name}}" 
+                                    class="square-check" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
+                                    [checked]="isOptionSelected(field.id, option.id)"  
+                                    (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
+                                    [class.error-border]="isFieldInvalid(field)"
+                                    />
+                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">
+                                        {{ option.name }}
+                                    </label>
                                 </div>
                             </div>
 
                             <div *ngSwitchCase="5" class="border rounded-lg p-3">
                                 <div *ngFor="let option of field.options" class="flex items-center">
                                     <input type="radio" id="{{cat.enName}}_{{field.enName}}_{{option.name}}"
-                                        class="square-radio" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
+                                        class="square-radio" name="{{cat.enName}}_{{field.enName}}" [value]="option.id" 
+                                        [checked]="getSelectedOption(field.id) === option.id"
                                         (change)="FillData($event, field.id, field.fieldTypeID)"
                                         [class.error-border]="isFieldInvalid(field)" />
                                     <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{
@@ -190,10 +195,31 @@
                                 </div>
                             </div>
 
-                            <input *ngSwitchCase="6" id="{{cat.enName}}_{{field.enName}}" type="file"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                (change)="handleFileUpload($event, field.id)"
-                                [class.error-border]="isFieldInvalid(field)" />
+                            <div *ngSwitchCase="6" class="flex flex-col gap-3 p-3 border rounded-lg">
+                                <div *ngIf="getTextAnswer(field.id)" class="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
+                                    <a
+                                    [href]="getTextAnswer(field.id)"
+                                    target="_blank"
+                                    class="secondaryTxt font-medium hover:text-[#075826] truncate" >
+                                    Download current file
+                                    </a> 
+                                </div>
+                                
+                                <label
+                                    [for]="cat.enName + '_' + field.enName"
+                                    class="text-sm text-gray-700 font-medium">
+                                    Upload new file
+                                </label>
+                                <input
+                                    id="{{cat.enName}}_{{field.enName}}"
+                                    type="file"
+                                    class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-white px-4 py-2
+                                        file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                        file:bg-blue-50 file:text-gray-700 hover:file:bg-gray-200"
+                                    accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
+                                    (change)="handleFileUpload($event, field.id)"
+                                    [class.error-border]="isFieldInvalid(field)"/>
+                            </div> 
                         </ng-container>
 
                         <span *ngIf="(field.id == 21) && isFormSubmitted && !isGuardianEmailValid"

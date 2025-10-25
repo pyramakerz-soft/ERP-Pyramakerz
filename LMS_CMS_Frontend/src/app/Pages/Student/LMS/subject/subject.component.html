@@ -4,23 +4,24 @@
     </div>
 </div>
 
-<div class="flex flex-wrap justify-start gap-3 mt-6">
-    <div *ngFor="let subject of subjectData" class="w-[30%] h-[250px] bg-[#F7F7F7] rounded-2xl p-1 shadow text-center overflow-hidden">
+<div class="flex flex-wrap justify-center gap-10 mt-6">
+    <div *ngFor="let subject of subjectData" class="w-[44%] bg-[#F7F7F7] rounded-2xl p-1 shadow text-center overflow-hidden">
         <h1 class="text-lg font-bold text-[#003366] mb-4">{{ subject.en_name }}</h1>
         <img *ngIf="subject.iconLink" [src]="subject.iconLink" alt="Subject Icon" (click)="moveToWeeks(subject.id)"
             class="mx-auto mb-4 w-[80%] h-[100px] object-contain rounded-md cursor-pointer" />
         <div class="flex flex-wrap justify-center gap-3 text-sm text-[#4F4F4F]">
-            <div class="flex items-center w-[40%] space-x-1 rtl:space-x-reverse cursor-pointer" (click)="moveToSubjectAssignments(subject.id)"> 
-                <img src="Icons/Assignments.png" alt="Assignments" />
-                <span>{{ 'Assignments' | translate }}</span>
+            <div class="flex items-center justify-center gap-2 w-[45%] py-2 px-2 bg-white border border-gray-200  rounded-xl shadow-sm hover:bg-[#003366] hover:text-white  transition duration-300 cursor-pointer overflow-hidden"
+                (click)="moveToSubjectAssignments(subject.id)">
+                <img src="Icons/Assignments.png" alt="Assignments" class="w-2 h-4 object-contain" />
+                <span class="font-medium whitespace-nowrap">{{ 'Assignments' | translate }}</span>
             </div>
-            <div class="flex items-center w-[40%] space-x-1 rtl:space-x-reverse cursor-pointer" (click)="moveToSubjectResources(subject.id)">
-                <img src="Icons/Resources.png" alt="Resources" />
-                <span>{{ 'Resources' | translate }}</span>
+            <div class="flex items-center justify-center gap-2 w-[45%] py-2 px-2 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-[#003366] hover:text-white transition duration-300 cursor-pointer overflow-hidden" (click)="moveToSubjectResources(subject.id)">
+                <img src="Icons/Resources.png" alt="Resources" class="w-4 h-4 object-contain" />
+                <span class="font-medium whitespace-nowrap">{{ 'Resources' | translate }}</span>
             </div>
-            <div class="flex items-center w-[40%] space-x-1 rtl:space-x-reverse cursor-pointer" (click)="moveToSubjectLive(subject.id)">
-                <img src="Icons/LessonLive.png" alt="Lesson Live" />
-                <span>{{ 'Lesson Live' | translate }}</span>
+            <div class="flex items-center justify-center gap-2 w-[45%] py-2 px-2 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-[#003366] hover:text-white transition duration-300 cursor-pointer overflow-hidden" (click)="moveToSubjectLive(subject.id)">
+                <img src="Icons/LessonLive.png" alt="Lesson Live" class="w-4 h-4 object-contain" />
+                <span class="font-medium whitespace-nowrap">{{ 'Lesson Live' | translate }}</span>
             </div>
         </div>
     </div>

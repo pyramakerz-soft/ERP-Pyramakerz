@@ -9,9 +9,9 @@ import { TableComponent } from '../../../../Component/reuse-table/reuse-table.co
 import { ApiService } from '../../../../Services/api.service';
 import { HygieneTypesService } from '../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../Models/Clinic/hygiene-types';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-hygiene-types',
@@ -22,13 +22,13 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
     SearchComponent,
     ModalComponent,
     TableComponent,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './hygiene-types.component.html',
   styleUrls: ['./hygiene-types.component.css'],
 })
 export class HygieneTypesComponent implements OnInit {
-  hygieneType: HygieneTypes = new HygieneTypes(0, '', new Date(), 0);
+  hygieneType: HygieneTypes = new HygieneTypes(0, '', 0);
   editHygieneType = false;
 
   validationErrors: { [key: string]: string } = {};
@@ -38,51 +38,81 @@ export class HygieneTypesComponent implements OnInit {
   isModalVisible = false;
   hygieneTypes: HygieneTypes[] = [];
   DomainName: string = '';
-isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private hygieneTypesService: HygieneTypesService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getHygieneTypes();
-      this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async getHygieneTypes() {
     try {
       const data = await firstValueFrom(
         this.hygieneTypesService.Get(this.DomainName)
       );
+      console.log('Fetched hygiene types:', data);
       this.hygieneTypes = data.map((item) => {
-        const insertedAtDate = new Date(item.insertedAt);
-        const options: Intl.DateTimeFormatOptions = {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        };
-        const formattedDate: string = insertedAtDate.toLocaleDateString(
-          undefined,
-          options
-        );
+        // const insertedAtDate = new Date(item.insertedAt);
+        // const options: Intl.DateTimeFormatOptions = {
+        //   year: 'numeric',
+        //   month: 'long',
+        //   day: 'numeric',
+        // };
+        // const formattedDate: string = insertedAtDate.toLocaleDateString(
+        //   undefined,
+        //   options
+        // );
 
         return {
           ...item,
-          insertedAt: formattedDate,
+          // insertedAt: formattedDate,
           actions: { delete: true, edit: true },
         };
       });
@@ -100,11 +130,11 @@ isRtl: boolean = false;
       this.hygieneType = new HygieneTypes(
         originalHygieneType.id,
         originalHygieneType.type,
-        new Date(originalHygieneType.insertedAt),
+        // new Date(originalHygieneType.insertedAt),
         originalHygieneType.insertedByUserId
       );
     } else {
-      this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
+      this.hygieneType = new HygieneTypes(0, '', 0);
       this.editHygieneType = false;
     }
     this.isModalVisible = true;
@@ -112,19 +142,19 @@ isRtl: boolean = false;
 
   closeModal() {
     this.isModalVisible = false;
-    this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
+    this.hygieneType = new HygieneTypes(0, '', 0);
     this.editHygieneType = false;
     this.validationErrors = {};
   }
 
   isSaving: boolean = false;
+
   saveHygieneType() {
     if (this.validateForm()) {
       const isEditing = this.editHygieneType;
       const domainName = this.DomainName;
       const hygieneType = { ...this.hygieneType };
 
-      // Disable the save button during submission
       this.isSaving = true;
 
       const operation = isEditing
@@ -135,11 +165,10 @@ isRtl: boolean = false;
         next: () => {
           this.getHygieneTypes();
           this.closeModal();
-          Swal.fire(
-            'Success',
-            `Hygiene type ${isEditing ? 'updated' : 'created'} successfully`,
-            'success'
-          );
+          const successMessage = isEditing
+            ? this.translate.instant('Updated successfully')
+            : this.translate.instant('Created successfully');
+          this.showSuccessAlert(successMessage);
           this.isSaving = false;
         },
         error: (err) => {
@@ -147,11 +176,12 @@ isRtl: boolean = false;
             `Error ${isEditing ? 'updating' : 'creating'} hygiene type:`,
             err
           );
-          Swal.fire(
-            'Error',
-            `Failed to ${isEditing ? 'update' : 'create'} hygiene type`,
-            'error'
-          );
+          const errorMessage =
+            err.error?.message ||
+            this.translate.instant(
+              `Failed to ${isEditing ? 'update' : 'create'} hygiene type`
+            );
+          this.showErrorAlert(errorMessage);
           this.isSaving = false;
         },
       });
@@ -169,33 +199,27 @@ isRtl: boolean = false;
   }
 
   deleteHygieneType(row: any) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Hygiene Type?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.hygieneTypesService.Delete(row.id, this.DomainName).subscribe({
-          next: (response) => {
-            this.getHygieneTypes();
-          },
-          error: (error) => {
-            console.error('Error deleting Hygiene Type:', error);
-            Swal.fire('Error!', 'Failed to delete the Hygiene Type.', 'error');
-          },
-        });
-      }
+    this.hygieneTypesService.Delete(row.id, this.DomainName).subscribe({
+      next: (response) => {
+        this.getHygieneTypes();
+        this.showSuccessAlert(this.translate.instant('Deleted successfully'));
+      },
+      error: (error) => {
+        console.error('Error deleting Hygiene Type:', error);
+        const errorMessage =
+          error.error?.message ||
+          this.translate.instant('Failed to delete');
+        this.showErrorAlert(errorMessage);
+      },
     });
   }
 
   validateForm(): boolean {
     let isValid = true;
     if (!this.hygieneType.type) {
-      this.validationErrors['name'] = '*Name is required';
+      this.validationErrors['name'] = `${this.translate.instant(
+        'Field is required'
+      )} ${this.translate.instant('type')}`;
       isValid = false;
     } else {
       this.validationErrors['name'] = '';
@@ -229,14 +253,11 @@ isRtl: boolean = false;
     }
   }
 
-
-
-  GetTableHeaders(){
-   
-if(!this.isRtl){
-  return ['ID', 'Hygiene Type', 'Date', 'Actions']
-}else{
-  return ['المعرف', 'نوع النظافة', 'التاريخ', 'الإجراءات']
-}
-}
+  GetTableHeaders() {
+    if (!this.isRtl) {
+      return ['ID', 'Hygiene Type', 'Actions'];
+    } else {
+      return ['المعرف', 'نوع النظافة', 'الإجراءات'];
+    }
+  }
 }

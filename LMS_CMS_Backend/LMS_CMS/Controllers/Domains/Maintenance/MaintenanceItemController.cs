@@ -23,10 +23,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         private readonly CheckPageAccessService _checkPageAccessService;
 
 
-        public MaintenanceItemController(
-            DbContextFactoryService dbContextFactory,
-            IMapper mapper,
-            CheckPageAccessService checkPageAccessService)
+        public MaintenanceItemController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -34,7 +31,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         }
 
         [HttpGet]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Items" }
+        )]
         public IActionResult GetAll()
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -58,9 +58,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok(dtoList);
         }
 
-
         [HttpGet("{id}")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Items" }
+        )]
         public IActionResult GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -80,9 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            MaintenanceItem? item = Unit_Of_Work.maintenanceItem_Repository
-                                       .First_Or_Default(i => i.ID == id && i.IsDeleted != true);
-
+            MaintenanceItem? item = Unit_Of_Work.maintenanceItem_Repository.First_Or_Default(i => i.ID == id && i.IsDeleted != true);
 
             if (item == null) return NotFound("No Maintenance Item with this ID");
 
@@ -92,7 +92,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         }
 
         [HttpPost]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Items" }
+        )]
         public IActionResult Add(MaintenanceItemAddDTO model)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -121,9 +124,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok(model);
         }
 
-        
         [HttpPut]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            allowEdit: 1, 
+            pages: new[] { "Maintenance Items" }
+        )]
         public IActionResult Edit(MaintenanceItemEditDTO model)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -138,7 +144,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
 
             if (model == null) return BadRequest();
-            if (model == null || string.IsNullOrWhiteSpace(model.A_Name) || string.IsNullOrWhiteSpace(model.E_Name))
+            if (model == null || string.IsNullOrWhiteSpace(model.Ar_Name) || string.IsNullOrWhiteSpace(model.En_Name))
                 return BadRequest("Name is required");
 
             MaintenanceItem? entity = uow.maintenanceItem_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);
@@ -171,8 +177,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             return Ok(model);
         }
+
         [HttpDelete]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowDelete: 1, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            allowDelete: 1, 
+            pages: new[] { "Maintenance Items" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -220,5 +231,5 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             return Ok();
         }
-        }
+    }
 }

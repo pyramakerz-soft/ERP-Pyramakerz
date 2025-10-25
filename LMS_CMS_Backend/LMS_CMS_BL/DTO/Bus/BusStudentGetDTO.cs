@@ -35,6 +35,7 @@ namespace LMS_CMS_BL.DTO.Bus
         public string GradeName { get; set; }
         public long ClassID { get; set; }
         public string ClassName { get; set; }
+        public long AcademicYearID { get; set; } 
         public string StudentAcademicYear { get; set; }
     }
 }

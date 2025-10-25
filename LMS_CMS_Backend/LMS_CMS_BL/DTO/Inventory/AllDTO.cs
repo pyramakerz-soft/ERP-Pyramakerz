@@ -10,14 +10,14 @@ namespace LMS_CMS_BL.DTO.Inventory
     {
         public long ShopItemId { get; set; }
         public long StoreId { get; set; }
-        public DateTime DateTo { get; set; }     // Summary 
-        public DateTime ToDate { get; set; }
-        public DateTime FromDate { get; set; }
+        public DateOnly DateTo { get; set; }     // Summary 
+        public DateOnly ToDate { get; set; }
+        public DateOnly FromDate { get; set; }
         public decimal InQuantity { get; set; }
         public decimal outQuantity { get; set; }
         public decimal? Quantitybalance { get; set; }
         public decimal? CostBalance { get; set; }
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public long FlagId { get; set; }
         public string FlagName { get; set; }
         public string InvoiceNumber { get; set; }

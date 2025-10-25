@@ -1,7 +1,7 @@
-﻿using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
@@ -247,15 +247,28 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<BounsType> BounsType { get; set; }
         public DbSet<Deduction> Deduction { get; set; }
         public DbSet<DeductionType> DeductionType { get; set; }
-        public DbSet<EmployeeVacationCount> EmployeeVacationCount { get; set; }
         public DbSet<LeaveRequest> LeaveRequest { get; set; }
         public DbSet<Loans> Loans { get; set; }
         public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
         public DbSet<VacationEmployee> VacationEmployee { get; set; }
         public DbSet<VacationTypes> VacationTypes { get; set; }
         public DbSet<ConnectionStatus> ConnectionStatus { get; set; }
-
-
+        public DbSet<ArchivingTree> ArchivingTree{ get; set; }
+        public DbSet<PermissionGroup> PermissionGroup { get; set; }
+        public DbSet<PermissionGroupDetails> PermissionGroupDetails { get; set; }
+        public DbSet<PermissionGroupEmployee> PermissionGroupEmployee { get; set; }
+        public DbSet<AnnualVacationEmployee> AnnualVacationEmployee { get; set; }
+        public DbSet<EmployeeClocks> EmployeeClocks { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<EmployeeLocation> EmployeeLocation { get; set; }
+        public DbSet<SalaryConfigration> SalaryConfigration { get; set; }
+        public DbSet<BankEmployee> BankEmployee { get; set; }
+        public DbSet<SafeEmployee> SafeEmployee { get; set; }
+        public DbSet<RefreshTokens> RefreshTokens { get; set; }
+        public DbSet<DayStatus> DayStatus { get; set; }
+        public DbSet<MonthlyAttendance> MonthlyAttendance { get; set; }
+        public DbSet<SalaryHistory> SalaryHistory { get; set; }
+        public DbSet<EmployeeLoans> EmployeeLoans { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -435,6 +448,14 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<DeductionType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<SalaryConfigration>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<DayStatus>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -2170,18 +2191,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.DeductionTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<EmployeeVacationCount>()
-                .HasOne(p => p.Employee)
-                .WithMany(p => p.EmployeeVacationCount)
-                .HasForeignKey(p => p.EmployeeID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<EmployeeVacationCount>()
-                .HasOne(p => p.VacationTypes)
-                .WithMany(p => p.EmployeeVacationCount)
-                .HasForeignKey(p => p.VacationTypesID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(p => p.Employee)
                 .WithMany(p => p.LeaveRequest)
@@ -2250,9 +2259,9 @@ namespace LMS_CMS_DAL.Models.Domains
                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
-                .HasOne(m => m.Employee)
+                .HasOne(m => m.MaintenanceEmployee)
                 .WithMany(m => m.Maintenances)
-                .HasForeignKey(m => m.EmployeeID)
+                .HasForeignKey(m => m.MaintenanceEmployeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
@@ -2260,6 +2269,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.Maintenances)
                 .HasForeignKey(m => m.CompanyID)
                 .OnDelete(DeleteBehavior.Restrict);
+
             
             modelBuilder.Entity<Employee>()
                 .HasOne(m => m.ConnectionStatus)
@@ -2278,6 +2288,134 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.Parents)
                 .HasForeignKey(m => m.ConnectionStatusID)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ArchivingTree>()
+                .HasOne(m => m.ArchivingTreeParent)
+                .WithMany(m => m.ChildArchivingTrees)
+                .HasForeignKey(m => m.ArchivingTreeParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.ArchivingTree)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.ArchivingTreeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.VacationTypes)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Bank)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.BankID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Save)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.SaveID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<RefreshTokens>()
+                .HasOne(m => m.UserType)
+                .WithMany(m => m.RefreshTokens)
+                .HasForeignKey(m => m.UserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.DayStatus)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.DayStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SalaryHistory)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Loans)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.loanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
 
             ///////////////////////// Exception: /////////////////////////
@@ -2396,12 +2534,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(v => v.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<EmployeeVacationCount>()
-                .HasOne(v => v.DeletedByEmployee)
-                .WithMany()
-                .HasForeignKey(v => v.DeletedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
@@ -2421,6 +2553,66 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Location>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

@@ -70,7 +70,7 @@
                 <label class="mb-2 primaryTxt" for="Purchase">  {{ 'Purchase' | translate }}</label>
                 <select [(ngModel)]="accountConfigDataToEdit.purchaseID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Purchase" >
-                    <option [value]="null" disabled selected hidden>  {{ 'Select Purchase Account' | translate }}</option>
+                    <option [value]="null" disabled selected hidden>  {{ 'Select Purchase' | translate }}</option>
                     <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
                     <option *ngIf="accountingTreeCharts.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
@@ -79,7 +79,7 @@
                 <label class="mb-2 primaryTxt" for="PurchaseReturn">  {{ 'Purchase Return' | translate }}</label>
                 <select [(ngModel)]="accountConfigDataToEdit.purchaseReturnID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="PurchaseReturn" >
-                    <option [value]="null" disabled selected hidden>  {{ 'Select Purchase Return Account' | translate }}</option>
+                    <option [value]="null" disabled selected hidden>  {{ 'Select Purchase Return' | translate }}</option>
                     <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
                     <option *ngIf="accountingTreeCharts.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
@@ -88,7 +88,7 @@
                 <label class="mb-2 primaryTxt" for="Sales">  {{ 'Sales' | translate }}</label>
                 <select [(ngModel)]="accountConfigDataToEdit.salesID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Sales" >
-                    <option [value]="null" disabled selected hidden>  {{ 'Select Sales Account' | translate }}</option>
+                    <option [value]="null" disabled selected hidden>  {{ 'Select Sales' | translate }}</option>
                     <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
                     <option *ngIf="accountingTreeCharts.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
@@ -97,7 +97,7 @@
                 <label class="mb-2 primaryTxt" for="SalesReturn">  {{ 'Sales Return' | translate }}</label>
                 <select [(ngModel)]="accountConfigDataToEdit.salesReturnID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SalesReturn" >
-                    <option [value]="null" disabled selected hidden>  {{ 'Select SalesReturn Account' | translate }}</option>
+                    <option [value]="null" disabled selected hidden>  {{ 'Select Sales Return' | translate }}</option>
                     <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
                     <option *ngIf="accountingTreeCharts.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>

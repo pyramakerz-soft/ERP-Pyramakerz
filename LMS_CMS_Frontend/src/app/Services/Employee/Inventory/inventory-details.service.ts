@@ -224,7 +224,6 @@ export class InventoryDetailsService {
 
     return this.http.get<StoreBalanceReport>(
       `${this.baseUrl}/InventoryDetails/AllStoresBalanceHorizontal?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
-//https://localhost:7205/api/with-domain/InventoryDetails/AllStoresBalanceHorizontal?toDate=2025-08-11&reportType=1&categoryId=0&typeId=0&hasBalance=true&overdrawnBalance=false&zeroBalances=false
       { headers }
     );
   }

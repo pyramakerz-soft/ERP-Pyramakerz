@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.FileValidations;
@@ -10,8 +12,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Drawing;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -23,20 +27,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly FileImageValidationService _fileImageValidationService;
         IMapper mapper;
-        private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly CheckPageAccessService _checkPageAccessService; 
+        private readonly FileUploadsService _fileService;
 
-        public SubjectController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, CheckPageAccessService checkPageAccessService)
+        public SubjectController(DbContextFactoryService dbContextFactory, IMapper mapper, FileImageValidationService fileImageValidationService, 
+            CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _fileImageValidationService = fileImageValidationService;
-            _checkPageAccessService = checkPageAccessService;
+            _checkPageAccessService = checkPageAccessService; 
+            _fileService = fileService;
         }
 
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Subject" }
+            pages: new[] { "Subject" , "Employee" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -56,14 +63,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var subject in subjectsDTO)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
-                {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}"; 
-                }
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);
@@ -117,7 +120,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetByGrade/{gradeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Subject" }
+            pages: new[] { "Subject", "Remedial Classes", "Enter Daily Performance" , "Lessons" }
         )]
         public async Task<IActionResult> GetByGrade(long gradeId)
         {
@@ -137,14 +140,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var subject in subjectsDTO)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
-                {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}"; 
-                }
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);
@@ -181,12 +180,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             SubjectGetDTO subjectDTO = mapper.Map<SubjectGetDTO>(subject);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            
+             
             if (!string.IsNullOrEmpty(subjectDTO.IconLink))
             {
-                subjectDTO.IconLink = $"{serverUrl}{subjectDTO.IconLink.Replace("\\", "/")}";
+                subjectDTO.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectDTO);
@@ -272,28 +269,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.subject_Repository.Add(subject);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-            var subjectFolder = Path.Combine(baseFolder, subject.ID.ToString());
-            if (!Directory.Exists(subjectFolder))
-            {
-                Directory.CreateDirectory(subjectFolder);
-            }
-
             if (NewSubject.IconFile != null)
             {
-                if (NewSubject.IconFile.Length > 0)
-                {
-                    var filePath = Path.Combine(subjectFolder, NewSubject.IconFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewSubject.IconFile.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            subject.IconLink = Path.Combine("Uploads", "SubjectIcon", subject.ID.ToString(), NewSubject.IconFile.FileName);
-            Unit_Of_Work.subject_Repository.Update(subject);
-            Unit_Of_Work.SaveChanges();
+                subject.IconLink = await _fileService.UploadFileAsync(NewSubject.IconFile, "LMS/Subject", subject.ID, HttpContext); 
+                Unit_Of_Work.subject_Repository.Update(subject);
+                Unit_Of_Work.SaveChanges();
+            } 
 
             return Ok(NewSubject);
         }
@@ -372,41 +353,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     return accessCheck;
                 }
-            }
+            } 
 
             if (EditSubject.IconFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-                var subjFolder = Path.Combine(baseFolder, EditSubject.ID.ToString());
-
-                if (System.IO.File.Exists(subjFolder))
-                {
-                    System.IO.File.Delete(subjFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(subjFolder))
-                {
-                    Directory.Delete(subjFolder, true);
-                }
-
-                if (!Directory.Exists(subjFolder))
-                {
-                    Directory.CreateDirectory(subjFolder);
-                }
-
-                if (EditSubject.IconFile.Length > 0)
-                {
-                    var filePath = Path.Combine(subjFolder, EditSubject.IconFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await EditSubject.IconFile.CopyToAsync(stream);
-                    }
-                }
-
-                EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.ID.ToString(), EditSubject.IconFile.FileName);
-            } 
+                EditSubject.IconLink = await _fileService.ReplaceFileAsync(
+                    EditSubject.IconFile,
+                    SubjectExists.IconLink,
+                    "LMS/Subject",
+                    SubjectExists.ID,
+                    HttpContext
+                );
+            }
+            else
+            {
+                EditSubject.IconLink = SubjectExists.IconLink;
+            }
 
             mapper.Map(EditSubject, SubjectExists);
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             SubjectExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -506,7 +471,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudent/{StudentId}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee", "student" },
+             allowedTypes: new[] { "octa", "employee", "student" ,"parent" },
              pages: new[] { "Subject" }
          )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
@@ -520,7 +485,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository
-                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
+                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true );
 
             if (studentClassroom == null)
             {
@@ -529,7 +494,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<StudentClassroomSubject> studentClassroomSubject = await Unit_Of_Work.studentClassroomSubject_Repository
                 .Select_All_With_IncludesById<StudentClassroomSubject>(
-                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Hide != true
+                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true && f.Hide != true
                 );
 
             if (studentClassroomSubject == null || studentClassroomSubject.Count == 0)
@@ -540,17 +505,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<long> subjectIds = studentClassroomSubject.Select(s => s.SubjectID).Distinct().ToList();
             List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID)).ToList();
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var subject in subjectsDTO)
             {
-                if (!string.IsNullOrEmpty(subject.IconLink))
-                {
-                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
-                }
+                subject.IconLink = _fileService.GetFileUrl(subject.IconLink, Request, HttpContext);
             }
 
             return Ok(subjectsDTO);
         }
+
         ////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetClassroomAndRemedialSubjectsByStudent/{StudentId}")]
