@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -79,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.AcademicYear.SchoolID == schoolID,
+                    f => f.IsDeleted != true && f.AcademicYear.SchoolID == schoolID && f.AcademicYear.IsActive == true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.HomeroomTeacher),
@@ -200,7 +201,39 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(classroomsDTO);
         }
-        
+
+
+        [HttpGet("GetBySubject/{SubjectId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject" }
+         )]
+        public async Task<IActionResult> GetBySubject(long SubjectId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.SubjectID == SubjectId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true && f.Teacher.IsDeleted != true,
+                    q => q.Include(cs => cs.Classroom)
+                );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Classroom?> classrooms = classroomSubjects.Select(s => s.Classroom).Distinct().ToList();
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+            List<ClassroomGetDTO> DTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+            return Ok(DTO);
+        }
+
+
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },

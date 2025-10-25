@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Conduct Level" }
         )]
         public IActionResult Get()
         {
@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Conduct Level" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -99,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Conduct Level" }
         )]
         public async Task<IActionResult> Add(ConductLevelAddDTO NewConduct)
         {
@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Lesson Resources Types" }
+           pages: new[] { "Conduct Level" }
        )]
         public async Task<IActionResult> EditAsync(ConductLevelAddDTO NewConduct)
         {
@@ -177,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, conductLevel);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -243,7 +243,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, conductLevel);
                 if (accessCheck != null)
                 {
                     return accessCheck;

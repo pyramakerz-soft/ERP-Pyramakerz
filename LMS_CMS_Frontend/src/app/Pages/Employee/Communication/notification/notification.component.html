@@ -223,14 +223,14 @@
                 <div class="w-full mb-4"> 
                     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                         <div class="flex justify-center w-full">
-                            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                            <label for="imageFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                                 <img *ngIf="!notification.imageLink && !notification.imageFile" src="Images/Icon frame.png" class="w-1/4">
                                 <img *ngIf="notification.imageFile" src="Images/FileAttached.png" class="w-1/4">
                                 <img *ngIf="notification.imageLink && !notification.imageFile" [src]="notification.imageLink" class="w-1/3 object-cover">
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{'Click to'| translate }} {{'Upload'| translate }}</span></p>
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{'(Max. File size: 25 MB)'| translate }}</p>
                             </label>
-                            <input [disabled]="this.notification.id != 0" id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+                            <input [disabled]="this.notification.id != 0" id="imageFile" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                         </div>
                     </div> 
                 </div>  

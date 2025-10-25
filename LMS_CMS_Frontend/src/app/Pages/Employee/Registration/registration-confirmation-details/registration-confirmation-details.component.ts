@@ -19,7 +19,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-confirmation-details',
   standalone: true,
@@ -50,7 +50,7 @@ export class RegistrationConfirmationDetailsComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public stateService: RegistrationFormStateService,
     public registrationFormSubmissionService: RegistrationFormSubmissionService, public registrationFormParentService: RegisterationFormParentService
-    , public registrationFormService: RegistrationFormService, private languageService: LanguageService){}
+    , public registrationFormService: RegistrationFormService, private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -82,9 +82,13 @@ export class RegistrationConfirmationDetailsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  } 
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
 
   IsAllowEdit(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);

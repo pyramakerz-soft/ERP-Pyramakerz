@@ -18,6 +18,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-template',
   standalone: true,
@@ -63,6 +64,7 @@ export class TemplateComponent {
     public ApiServ: ApiService,
     public templateServ: EvaluationTemplateService,
     private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -88,6 +90,13 @@ export class TemplateComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   GetAllData() {
     this.TableData = [];

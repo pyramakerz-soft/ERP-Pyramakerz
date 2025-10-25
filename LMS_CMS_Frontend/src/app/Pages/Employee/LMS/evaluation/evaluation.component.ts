@@ -23,10 +23,11 @@ import { EvaluationBookCorrectionService } from '../../../../Services/Employee/L
 import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
-import { Router } from '@angular/router';
+// import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-evaluation',
   standalone: true,
@@ -73,7 +74,8 @@ export class EvaluationComponent {
     public evaluationBookCorrectionService: EvaluationBookCorrectionService,
     public studentService: StudentService,
     public evaluationEmployeeService: EvaluationEmployeeService,
-        private languageService: LanguageService 
+    private languageService: LanguageService ,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -91,6 +93,14 @@ export class EvaluationComponent {
       });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
  
   getClassData() {
     this.Classs = [];

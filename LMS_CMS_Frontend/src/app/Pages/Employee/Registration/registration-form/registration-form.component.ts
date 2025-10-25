@@ -34,7 +34,7 @@ import { NationalityService } from '../../../../Services/Octa/nationality.servic
 import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -45,18 +45,7 @@ import { RegistrationFormSubmissionService } from '../../../../Services/Employee
 export class RegistrationFormComponent {
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   RegistrationFormData: RegistrationForm = new RegistrationForm();
   registrationForm: RegistrationFormForFormSubmission =
@@ -121,7 +110,8 @@ export class RegistrationFormComponent {
     public gradeServce: GradeService,
     public sectionServce: SectionService,
     private languageService: LanguageService,
-    public GenderServ: GenderService
+    public GenderServ: GenderService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -162,10 +152,12 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
-
   getParentByID() {
     this.parentService
       .GetByID(this.UserID, this.DomainName)
@@ -334,19 +326,8 @@ export class RegistrationFormComponent {
     let answer: string | null = null;
     let option: number | null = null;
 
-    if (
-      fieldTypeId == 1 ||
-      fieldTypeId == 2 ||
-      fieldTypeId == 3 ||
-      (fieldTypeId == 7 &&
-        (fieldId == 3 ||
-          fieldId == 5 ||
-          fieldId == 6 ||
-          fieldId == 7 ||
-          fieldId == 8 ||
-          fieldId == 9 ||
-          fieldId == 14))
-    ) {
+    if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
+      (fieldTypeId == 7 &&(fieldId == 3 ||fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
       answer = selectedValue;
       option = null;
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
@@ -464,7 +445,9 @@ export class RegistrationFormComponent {
   }
 
   validateNumber(event: any, field: any): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       field = '';

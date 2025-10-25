@@ -19,7 +19,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long ClassID { get; set; } 
         public Classroom Classroom { get; set; }
         public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
-        public ICollection<DirectMarkClassroomStudent> DirectMarkClassroomStudents { get; set; } = new HashSet<DirectMarkClassroomStudent>();
+        public ICollection<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; } = new HashSet<DirectMarkClassesStudent>();
         public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
         public ICollection<AssignmentStudentIsSpecific> AssignmentStudentIsSpecifics { get; set; } = new HashSet<AssignmentStudentIsSpecific>();
         public ICollection<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassrooms { get; set; } = new List<DiscussionRoomStudentClassroom>();

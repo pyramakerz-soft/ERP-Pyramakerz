@@ -56,9 +56,6 @@
                     {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Date' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'From' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
@@ -93,8 +90,6 @@
                 class="border-t border-gray-300 text-xs md:text-sm">
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.date }}
-                </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.fromTime }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.toTime }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.capacity }}</td>
@@ -185,7 +180,7 @@
                 <div *ngFor="let option of days" class="flex items-center">
                     <input type="checkbox" id="{{option}}" name="{{option}}" [value]="option"
                         (change)="handleDays($event, option)" />
-                    <label for="{{option}}" class="ml-2">{{ option }}</label>
+                    <label for="{{option}}" class="ml-2">{{ option|translate}}</label>
                 </div>
                 <span *ngIf="validationErrors['days']" class="text-red-500 ml-3 font-normal">{{ validationErrors['days']
                     }}</span>

@@ -2,17 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-week-details',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './week-details.component.html',
   styleUrls: ['./week-details.component.css']
 })
 export class WeekDetailsComponent implements OnInit {
   subjectName: string = '';
   weekName: string = '';
+    isRtl: boolean = false;
+  subscription!: Subscription;
   activeTab: string = 'lessons-activity';
   expandedSections: { [key: string]: boolean } = {
     sheets: false,
@@ -39,7 +44,9 @@ export class WeekDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private languageService: LanguageService,
+    private router: Router,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -55,8 +62,17 @@ export class WeekDetailsComponent implements OnInit {
         this.weekName = this.formatName(weekId);
       }
     });
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   formatName(name: string): string {
     return name.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

@@ -23,7 +23,8 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignment-student',
   standalone: true,
@@ -57,7 +58,7 @@ export class AssignmentStudentComponent {
   AssignmentId: number = 0;
   ClassId: number = 0;
   IsShowTabls: boolean = false
-  editDegree: boolean = false
+  editDegreeId: number | null = null
   assignment: Assignment = new Assignment()
 
   schools: School[] = []
@@ -80,7 +81,8 @@ export class AssignmentStudentComponent {
     private GradeServ: GradeService,
     public classServ: ClassroomService,
     public assignmentServ: AssignmentService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,12 +95,20 @@ export class AssignmentStudentComponent {
     this.GetAssignment()
     this.GetAllData(this.CurrentPage, this.PageSize)
     this.getAllSchools()
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAssignment() {
     this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
@@ -177,7 +187,7 @@ export class AssignmentStudentComponent {
     const value = event.target.value;
     this.PageSize = 0
   }
-  
+
   get visiblePages(): number[] {
     const total = this.TotalPages;
     const current = this.CurrentPage;
@@ -201,7 +211,7 @@ export class AssignmentStudentComponent {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
+
   Apply() {
     this.IsShowTabls = true
     this.GetAllData(this.CurrentPage, this.PageSize)
@@ -229,8 +239,7 @@ export class AssignmentStudentComponent {
   }
 
   saveDegree(row: AssignmentStudent): void {
-    if (row.degree && row.degree <= row.assignmentDegree) {
-      this.editDegree = false
+    if (row.degree != null && row.degree <= row.assignmentDegree) {
       Swal.fire({
         title: 'Apply Late Submission Penalty?',
         text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
@@ -243,8 +252,10 @@ export class AssignmentStudentComponent {
       }).then((result) => {
         row.evaluationConsideringTheDelay = result.isConfirmed;
         this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+          this.editDegreeId = null
           this.GetAllData(this.CurrentPage, this.PageSize)
         }, error => {
+          this.editDegreeId = null
           Swal.fire({
             icon: 'error',
             title: 'Oops...',

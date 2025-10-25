@@ -394,6 +394,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 return BadRequest("No Interview Time Table with this ID");
             }
 
+            RegisterationFormInterview RegisterationFormInterviewExists = await Unit_Of_Work.registerationFormInterview_Repository.FindByIncludesAsync(
+               t => t.IsDeleted != true && t.ID == EditedRegistrationFormInterviewPutByParentDTO.ID,
+                   query => query.Include(r => r.RegisterationFormParent),
+                   query => query.Include(e => e.InterviewState)
+               );
+            if (RegisterationFormInterviewExists == null)
+            {
+                return NotFound("No Registration Form Interview with this ID");
+            }
+
+            if (EditedRegistrationFormInterviewPutByParentDTO.InterviewTimeID == RegisterationFormInterviewExists.InterviewTimeID)
+            {
+                return Ok();
+            }
+
             if (interviewTime.Reserved >= interviewTime.Capacity)
             {
                 return BadRequest("There is No Space To Register an Interview");
@@ -430,17 +445,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (currentDateTime >= NewInterviewDateTimeTo)
             {
                 return BadRequest("Interview time has already ended");
-            }
-
-            RegisterationFormInterview RegisterationFormInterviewExists = await Unit_Of_Work.registerationFormInterview_Repository.FindByIncludesAsync(
-                t => t.IsDeleted != true && t.ID == EditedRegistrationFormInterviewPutByParentDTO.ID,
-                    query => query.Include(r => r.RegisterationFormParent),
-                    query => query.Include(e => e.InterviewState)
-                );
-            if (RegisterationFormInterviewExists == null)
-            {
-                return NotFound("No Registration Form Interview with this ID");
-            }
+            } 
+           
 
             if(RegisterationFormInterviewExists.RegisterationFormParent.AcademicYearID != interviewTime.AcademicYearID.ToString())
             {

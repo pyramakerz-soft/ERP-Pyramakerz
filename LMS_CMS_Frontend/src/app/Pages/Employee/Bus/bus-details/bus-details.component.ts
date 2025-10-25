@@ -24,6 +24,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-details',
   standalone: true,
@@ -67,7 +68,8 @@ export class BusDetailsComponent {
   constructor(public busService:BusService,
       private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
-    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService){}
+    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService
+  , private realTimeService: RealTimeNotificationServiceService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -106,6 +108,15 @@ export class BusDetailsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';   
   }
+
+
+          ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
 
   getAllDomains() {
     this.DomainServ.Get().subscribe((data) => {
@@ -282,7 +293,7 @@ export class BusDetailsComponent {
     if (field === 'capacity') {
         if (!/^\d+$/.test(value) && value !== '') {
             event.target.value = '';  // Clear invalid input
-            this.bus['capacity'] = 0;  // Reset bus field to empty string
+            this.bus['capacity'] = null;  // Reset bus field to empty string
         }
     } else {
         // For other fields, check if the value is a valid number

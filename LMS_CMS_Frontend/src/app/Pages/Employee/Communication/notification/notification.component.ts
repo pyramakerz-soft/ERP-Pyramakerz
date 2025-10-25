@@ -30,7 +30,7 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../Services/student.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
@@ -86,7 +86,8 @@ export class NotificationComponent {
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
-    public studentService: StudentService
+    public studentService: StudentService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -113,6 +114,13 @@ export class NotificationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   getAllData(){
     this.TableData = []
@@ -386,6 +394,12 @@ export class NotificationComponent {
         },
         error => {
           this.isLoading = false;
+          Swal.fire({
+            title: error.error,
+            icon: 'error', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          })
         }
       ); 
     }

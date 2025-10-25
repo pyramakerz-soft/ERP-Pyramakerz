@@ -26,11 +26,14 @@ import { ParentService } from '../../../Services/parent.service';
 import { Parent } from '../../../Models/parent';
 import { SubjectService } from '../../../Services/Employee/LMS/subject.service';
 import { Subject } from '../../../Models/LMS/subject';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-my-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './my-requests.component.html',
   styleUrl: './my-requests.component.css'
 })
@@ -50,7 +53,7 @@ export class MyRequestsComponent {
   isStudentHovered = false;
   isParentHovered = false;
   
-  departments: Department[] = []
+  departmentsToChooseFrom: Department[] = []
   employees: Employee[] = []
   schools: School[] = []
   sections:Section[] = []
@@ -59,7 +62,8 @@ export class MyRequestsComponent {
   students:Student[] = []
   subjects:Subject[] = []
   parent:Parent = new Parent()
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   departmentID = 0
   schoolID = 0
   sectionID = 0
@@ -67,6 +71,15 @@ export class MyRequestsComponent {
   classroomID = 0
  
   subjectID = 0  
+
+  private isLocalNotification = false;
+
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
 
   constructor(
     public account: AccountService,
@@ -81,7 +94,9 @@ export class MyRequestsComponent {
     public studentService: StudentService,
     public parentService: ParentService,
     public subjectService: SubjectService,
-    public requestService: RequestService
+    public requestService: RequestService,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -89,8 +104,33 @@ export class MyRequestsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
  
-    this.loadSentRequests()   
+    this.loadSentRequests() 
+    
+    // Subscribe to request opened events 
+    this.requestService.requestOpened$.subscribe(() => {
+      if (this.isLocalNotification) {
+        return; // Skip if the notification came from this component
+      }
+
+      if (this.activeTab == 'sent') {
+        this.loadSentRequests();
+      } else if (this.activeTab == 'received') {
+        this.loadReceivedRequests();
+      }
+    });
+            
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+  
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   loadSentRequests(){
     this.requestByID = new Request()
@@ -151,6 +191,11 @@ export class MyRequestsComponent {
           request.seenOrNot = true
         }
         this.requestByID = data 
+
+        // call the subscribe again for the other pages
+        this.isLocalNotification = true;
+        this.requestService.notifyRequestOpened();
+        this.isLocalNotification = false                          
       }
     ) 
   }
@@ -169,6 +214,10 @@ export class MyRequestsComponent {
         this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=true
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         });
       }
     });
@@ -188,16 +237,20 @@ export class MyRequestsComponent {
         this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=false
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         });
       }
     });
   }
 
   Forward(request:Request){
+    this.getDepartment() 
     this.requestToBeForwarded.requestID = request.id
-    this.getDepartment()
-    document.getElementById('Forward_Modal')?.classList.remove('hidden');
-    document.getElementById('Forward_Modal')?.classList.add('flex');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.remove('hidden');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.add('flex');
   }
 
   sendRequest(){
@@ -208,15 +261,15 @@ export class MyRequestsComponent {
       this.isEmployeeHovered = true
       this.getDepartment()
     }
-    document.getElementById('Add_Modal')?.classList.remove('hidden');
-    document.getElementById('Add_Modal')?.classList.add('flex');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.remove('hidden');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.add('flex');
   }
 
   getDepartment(){
-    this.departments = [] 
+    this.departmentsToChooseFrom = [] 
     this.departmentService.Get(this.DomainName).subscribe(
       data => {
-        this.departments = data
+        this.departmentsToChooseFrom = data 
       }
     )
   }
@@ -320,7 +373,7 @@ export class MyRequestsComponent {
     this.parentService.GetByStudentID(this.requestToBeSend.receiverID, this.DomainName).subscribe(
       data => {
         this.parent = data
-        this.requestToBeSend.receiverID == this.parent.id
+        this.requestToBeSend.receiverID = this.parent.id
         this.SendTheRequest()
       },
       error => {
@@ -423,12 +476,12 @@ export class MyRequestsComponent {
   }
 
   closeModal(){
-    document.getElementById('Add_Modal')?.classList.remove('flex');
-    document.getElementById('Add_Modal')?.classList.add('hidden');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.remove('flex');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.add('hidden');
 
     this.isLoading = false 
     
-    this.departments = []
+    this.departmentsToChooseFrom = []
     this.employees = []
     this.schools = []
     this.sections = []
@@ -454,12 +507,12 @@ export class MyRequestsComponent {
   }
   
   closeForwardModal(){
-    document.getElementById('Forward_Modal')?.classList.remove('flex');
-    document.getElementById('Forward_Modal')?.classList.add('hidden');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.remove('flex');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.add('hidden');
 
     this.isLoading = false
 
-    this.departments = []
+    this.departmentsToChooseFrom = []
     this.employees = []
 
     this.departmentID = 0
@@ -558,6 +611,10 @@ export class MyRequestsComponent {
         this.activeTab = "sent"
         this.closeModal();
         this.loadSentRequests()
+        // call the subscribe again for the other pages
+        this.isLocalNotification = true;
+        this.requestService.notifyRequestOpened();
+        this.isLocalNotification = false  
       },
       error => {
         this.isLoading = false;
@@ -581,9 +638,19 @@ export class MyRequestsComponent {
           this.activeTab = "received"
           this.closeForwardModal();
           this.loadReceivedRequests()
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         },
         error => {
           this.isLoading = false;
+          Swal.fire({
+            title: error.error,
+            icon: 'error', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          })
         }
       ); 
     } 
@@ -594,6 +661,20 @@ export class MyRequestsComponent {
     const input = event.target as HTMLInputElement;
 
     if (file) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+ 
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        });
+        this.requestToBeSend.fileFile = null;
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',
@@ -603,9 +684,14 @@ export class MyRequestsComponent {
         })
         this.requestToBeSend.fileFile = null;
         return; 
-      } 
+      } else{
+        this.requestToBeSend.fileFile = file;  
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      }
     }
     
     input.value = '';
-  }
+  } 
 }

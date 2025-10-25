@@ -30,6 +30,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-classroom',
@@ -83,7 +84,8 @@ export class ClassroomComponent {
 
   activeAcademicYearID = 0
 
-  constructor(public account: AccountService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
       private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public employeeServ : EmployeeService ,
       public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
       
@@ -117,6 +119,15 @@ export class ClassroomComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
   } 
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   openModal(classroomId?: number) {
     if (classroomId) {
@@ -343,7 +354,10 @@ export class ClassroomComponent {
   }
  
   validateNumber(event: any, field: keyof Classroom): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.classroom[field] === 'string') {

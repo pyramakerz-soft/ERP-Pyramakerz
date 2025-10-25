@@ -26,6 +26,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson-live',
   standalone: true,
@@ -90,7 +91,8 @@ export class LessonLiveComponent {
     public acadimicYearService: AcadimicYearService,
     public schoolService: SchoolService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -117,6 +119,14 @@ export class LessonLiveComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }  
+
 
   onSchoolChange() {
     this.selectedYear = 0;
@@ -397,7 +407,9 @@ export class LessonLiveComponent {
   }
 
   validateNumber(event: any, field: keyof LessonLive): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.live[field] === 'string') {

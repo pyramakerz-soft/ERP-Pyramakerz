@@ -1,46 +1,46 @@
 <div>
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Interview Registration</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Interview Registration' | translate }}</h1>
 </div>
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
+                    {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Student English Name
+                     {{ 'Student' | translate }} {{ 'English Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Student Arabic Name
+                    {{ 'Student' | translate }} {{ 'Arabic Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Email
+                     {{ 'Email' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Phone
+                     {{ 'Phone' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Grade
+                     {{ 'Grade' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Year
+                     {{ 'Year' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Interview Date
+                     {{ 'Interview Date' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    From Time
+                     {{ 'From Time' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    To Time
+                     {{ 'To Time' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    State
+                     {{ 'State' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Actions
+                     {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -49,7 +49,7 @@
             <tr *ngIf="registrationFormParentIncludeRegistrationFormInterview?.length === 0">
                 <td colspan="12"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -71,8 +71,8 @@
                     </div>
                     <div *ngIf="!row.interviewTimeDate" (click)="openModal(row.id, row.academicYearID)">
                         <p
-                            class="secondaryBg text-white cursor-pointer flex space-x-2 items-center justify-center rounded-md shadow px-2 py-1">
-                            Select Date</p>
+                            class="secondaryBg text-white cursor-pointer flex space-x-2 rtl:space-x-reverse items-center justify-center rounded-md shadow px-2 py-1">
+                             {{ 'Select' | translate }} {{ 'Date' | translate }}</p>
                     </div>
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.interviewTimeFromTime }}</td>
@@ -80,7 +80,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex justify-start">
                         <div *ngIf="row.registrationFormInterviewStateID == 2"
-                            class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
+                            class="border flex space-x-2 rtl:space-x-reverse items-center justify-between rounded-md shadow px-2 py-1 ">
                             <span class="w-[6px] h-[6px] rounded-full"
                                 style="background-color: green; padding: 4px;"></span>
                             <p>
@@ -88,7 +88,7 @@
                             </p>
                         </div>
                         <div *ngIf="row.registrationFormInterviewStateID == 3"
-                            class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
+                            class="border flex space-x-2 rtl:space-x-reverse items-center justify-between rounded-md shadow px-2 py-1 ">
                             <span class="w-[6px] h-[6px] rounded-full"
                                 style="background-color: red; padding: 4px;"></span>
                             <p>
@@ -96,7 +96,7 @@
                             </p>
                         </div>
                         <div *ngIf="row.registrationFormInterviewStateID == 1"
-                            class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
+                            class="border flex space-x-2 rtl:space-x-reverse items-center justify-between rounded-md shadow px-2 py-1 ">
                             <div class="w-[6px] h-[6px] rounded-full" style="background-color: gray; padding: 4px;">
                             </div>
                             <p>
@@ -107,7 +107,7 @@
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div *ngIf="row.registrationFormInterviewID && row.registrationFormInterviewStateID == 1"
-                        class="flex space-x-4">
+                        class="flex space-x-4 rtl:space-x-reverse">
                         <button (click)="deleteInterview(row.registrationFormInterviewID)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
@@ -128,14 +128,14 @@
     <div class="relative h-full w-full justify-center content-center">
         <div class="bg-white rounded-2xl p-12 w-[669px] m-auto">
             <div class="flex justify-between items-center">
-                <h1 class="font-semibold text-2xl leading-9">Choose Interview Date</h1>
+                <h1 class="font-semibold text-2xl leading-9"> {{ 'Choose' | translate }} {{ 'Interview Date' | translate }}</h1>
                 <button (click)="closeModal()" type="button"
                     class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
             </div>
 
             <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
                 <div class="flex flex-col mb-4">
-                    <label class="mb-2 primaryTxt font-medium text-base" for="status">Date</label>
+                    <label class="mb-2 primaryTxt font-medium text-base" for="status"> {{ 'Date' | translate }}</label>
                     <div class="text-gray-900 text-sm rounded-lg p-2.5 bg-gray-50 border border-gray-300 w-full flex justify-between"
                         (click)="openModalcalender()">
                         <p>{{ InterviewTimeID ? (selectedDate | date:'MMM d, yyyy') : "Choose Date"}} <span *ngIf="InterviewTimeID">{{selectedTime}}</span></p>
@@ -148,7 +148,7 @@
                         [ngClass]="{ 'bg-gray-500 opacity-15': !selectedDate, 'secondaryBg': selectedDate }"
                         (click)="Register()">
                         
-                        <span *ngIf="!isLoading">Register</span>
+                        <span *ngIf="!isLoading"> {{ 'Register' | translate }}</span>
                         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
                     </button> 
                 </div>
@@ -160,7 +160,7 @@
             <div class="flex flex-col items-center">
                 <div>
                     <div *ngIf="calendarMonths.length == 0" class="font-medium">
-                        No Interviews Yet
+                         {{ 'No Interviews Yet' | translate }}
                     </div>
                     <div *ngIf="calendarMonths.length != 0">
                         <div *ngFor="let month of calendarMonths">
@@ -169,7 +169,7 @@
                                     <h2 class="text-lg font-bold">
                                         {{ getMonthDate(month.month, month.year) | date: 'MMM' }} {{ month.year }}
                                     </h2>
-                                    <div class="flex space-x-3 text-3xl">
+                                    <div class="flex space-x-3 rtl:space-x-reverse text-3xl">
                                         <p class="cursor-pointer" *ngIf="currentMonth!=calendarMonths[0].month || currentYear!=calendarMonths[0].year" (click)="lastMonth(); showTime()">
                                             &lt;</p>
                                         <p class="cursor-pointer" *ngIf="currentMonth!=calendarMonths[calendarMonths.length-1].month || currentYear!=calendarMonths[calendarMonths.length-1].year"
@@ -216,8 +216,8 @@
                                     <table class="w-full mt-3 table-auto">
                                         <thead>
                                             <tr>
-                                                <th class="px-2 py-1 font-semibold">From</th>
-                                                <th class="px-2 py-1 font-semibold">To</th>
+                                                <th class="px-2 py-1 font-semibold"> {{ 'From' | translate }}</th>
+                                                <th class="px-2 py-1 font-semibold"> {{ 'To' | translate }}</th>
                                                 <th></th>
                                             </tr>
                                         </thead>

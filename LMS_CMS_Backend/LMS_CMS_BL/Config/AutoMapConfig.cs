@@ -8,8 +8,10 @@ using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.DTO.Communication;
 using LMS_CMS_BL.DTO.ECommerce;
 using LMS_CMS_BL.DTO.ETA;
+using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.Maintenance;
 using LMS_CMS_BL.DTO.Octa;
 using LMS_CMS_BL.DTO.Registration;
 using LMS_CMS_BL.DTO.SocialWorker;
@@ -23,8 +25,10 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -651,10 +655,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<ShopItemSizeAddDTO, ShopItemSize>();
 
 
-
             CreateMap<InventoryMaster, InventoryMasterGetDTO>()  
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
+                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name))
+                 .ForMember(dest => dest.SchoolPCName, opt => opt.MapFrom(src => src.SchoolPCs.PCName))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
                  .ForMember(dest => dest.FlagEnName, opt => opt.MapFrom(src => src.InventoryFlags.enName))
                  .ForMember(dest => dest.FlagArTitle, opt => opt.MapFrom(src => src.InventoryFlags.ar_Title))
@@ -1230,7 +1235,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<Request, RequestGetDTO>()
                 .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
                 .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
+            
+            CreateMap<ChatMessage, ChatGetDTO>()
+                .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
+                .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
 
+            CreateMap<ChatMessageAttachment, ChatMessageAttachmentGetDTO>();
+            
             CreateMap<IssuesType, IssueTypeGetDTO>();
             CreateMap<IssueTypeAddDTO, IssuesType>();
 
@@ -1289,6 +1300,79 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name));
             CreateMap<AttendanceAddDTO, Attendance>();
             CreateMap<AttendanceEditDTO, Attendance>();
+
+
+            CreateMap<ParentMeeting, ParentMeetingGetDTO>();
+            CreateMap<ParentMeetingAddDTO, ParentMeeting>();
+
+            CreateMap<HorizontalMeeting, HorizontalMeetingGetDTO>();
+            CreateMap<HorizontalMeetingAddDTO, HorizontalMeeting>();
+
+
+            CreateMap<AppointmentGrade, AppointmentGradeGetDTO>()
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
+                .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
+
+            CreateMap<AppointmentParent, AppointmentParentGetDTO>()
+                .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
+                .ForMember(dest => dest.ParentArName, opt => opt.MapFrom(src => src.Parent.ar_name))
+                .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
+
+            CreateMap<Appointment, AppointmentGetDTO>()
+                .ForMember(dest => dest.AppointmentParents, opt => opt.MapFrom(src => src.AppointmentParents))
+                .ForMember(dest => dest.AppointmentGrades, opt => opt.MapFrom(src => src.AppointmentGrades))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.School.ID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name));
+            CreateMap<AppointmentAddDTO, Appointment>();
+            CreateMap<AppointmentEditDTO, Appointment>();
+
+            CreateMap<OfficialHolidays, OfficialHolidaysGetDTO>();
+            CreateMap<OfficialHolidaysAddDTO, OfficialHolidays>();
+
+            CreateMap<DirectMarkClasses, DirectMarkClassesGetDTO>()
+                .ForMember(dest => dest.DirectMarkEnglishName, opt => opt.MapFrom(src => src.DirectMark.EnglishName))
+                .ForMember(dest => dest.DirectMarkArabicName, opt => opt.MapFrom(src => src.DirectMark.ArabicName))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name));
+            CreateMap<DirectMarkClassesStudent, DirectMarkClassesStudentGetDTO>()
+                .ForMember(dest => dest.DirectMarkEnglishName, opt => opt.MapFrom(src => src.DirectMark.EnglishName))
+                .ForMember(dest => dest.DirectMarkArabicName, opt => opt.MapFrom(src => src.DirectMark.ArabicName))
+                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
+                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name))
+                .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
+
+            CreateMap<DirectMark, DirectMarkGetDTO>()
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.Name))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.ID))
+                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
+                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName));
+            CreateMap<DirectMarkAddDTO, DirectMark>();
+            CreateMap<DirectMarkEditDTO, DirectMark>();
+
+            // Maintenance
+
+            CreateMap<MaintenanceItemAddDTO, MaintenanceItem>();
+            CreateMap<MaintenanceItemEditDTO, MaintenanceItem>(); 
+            CreateMap<MaintenanceItem, MaintenanceItemGetDTO>();
+
+            CreateMap<MaintenanceCompany, MaintenanceCompanyGetDto>();
+
+            CreateMap<MaintenanceCompanyAddDto, MaintenanceCompany>();
+
+            CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
+             
+            CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
+             .ForMember(dest => dest.En_Name,
+                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
+             .ForMember(dest => dest.Ar_Name,
+                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
+
+            CreateMap<MaintenanceEmployeeAddDto, MaintenanceEmployee>();
+
+            CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
         }
     } 
 }

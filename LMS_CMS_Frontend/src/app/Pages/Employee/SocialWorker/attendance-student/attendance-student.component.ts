@@ -25,11 +25,11 @@ import { AttendanceService } from '../../../../Services/Employee/SocialWorker/at
 import { AttendanceStudent } from '../../../../Models/SocialWorker/attendance-student';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-attendance-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './attendance-student.component.html',
   styleUrl: './attendance-student.component.css'
 })
@@ -64,8 +64,10 @@ export class AttendanceStudentComponent {
   isLoading = false
   isLoadingSaveClassroom = false
   validationErrors: { [key in keyof Attendance]?: string } = {};
+  validationIsLateErrors: { [studentId: number]: string } = {};
 
-  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public StudentServ: StudentService,
     public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceServ: AttendanceService) { }
 
@@ -91,6 +93,13 @@ export class AttendanceStudentComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAttendance() {
@@ -132,7 +141,8 @@ export class AttendanceStudentComponent {
         this.attendance.attendanceStudents = d.map(stu => ({
           studentID: stu.id,
           studentArName: stu.ar_name,
-          studentEnName: stu.en_name
+          studentEnName: stu.en_name,
+          lateTimeInMinutes : 0
         } as AttendanceStudent));
       });
   }
@@ -145,10 +155,19 @@ export class AttendanceStudentComponent {
     }
   }
 
+  onlateTimeMinuteChange(field: number) {
+    this.validationIsLateErrors[field] = ''
+  }  
+
   toggleStudentSelection(event: Event, row: AttendanceStudent): void {
     const isChecked = (event.target as HTMLInputElement).checked;
     row.isPresent = isChecked;
     this.allSelected = this.attendance.attendanceStudents.every(s => s.isPresent);
+    if(row.isPresent==false){
+      row.isLate=false
+      row.lateTimeInMinutes=0
+      row.note=''
+    }
   }
 
   GetAllSchools() {
@@ -192,6 +211,7 @@ export class AttendanceStudentComponent {
   }
 
   isFormValid(): boolean {
+    console.log(this.attendance.attendanceStudents)
     let isValid = true;
     for (const key in this.attendance) {
       if (this.attendance.hasOwnProperty(key)) {
@@ -210,7 +230,9 @@ export class AttendanceStudentComponent {
         }
         this.attendance.attendanceStudents.forEach(element => {
           if (element.isLate == true && element.lateTimeInMinutes == 0) {
-
+            // here
+            this.validationIsLateErrors[element.studentID] = 'late Time In Minutes Is Required If This Student Is Late'
+            isValid = false;
           }
         });
       }

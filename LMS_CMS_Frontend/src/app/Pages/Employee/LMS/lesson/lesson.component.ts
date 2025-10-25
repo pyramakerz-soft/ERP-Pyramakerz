@@ -30,6 +30,7 @@ import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-wee
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson',
   standalone: true,
@@ -148,7 +149,8 @@ export class LessonComponent {
     public SemesterServ: SemesterService,
     public SemesterWorkingWeekServ: SemesterWorkingWeekService,
     public acadimicYearService: AcadimicYearService,
-        private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -175,6 +177,16 @@ export class LessonComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   } 
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
 
   onEditorCreated(quill: any) {
       this.quillInstance = quill;
@@ -768,7 +780,9 @@ export class LessonComponent {
   }
 
   validateNumber(event: any, field: keyof Lesson): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.lesson[field] === 'string') {

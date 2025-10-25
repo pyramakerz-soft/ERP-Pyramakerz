@@ -71,6 +71,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryFlagGetDTO Flagdto = mapper.Map<InventoryFlagGetDTO>(inventoryFlags);
 
             List<InventoryMasterGetDTO> DTO = mapper.Map<List<InventoryMasterGetDTO>>(Data);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var master in DTO)
+            {
+                for (int i = 0; i < master.Attachments.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(master.Attachments[i]))
+                    {
+                        master.Attachments[i] = $"{serverUrl}{master.Attachments[i].Replace("\\", "/")}";
+                    }
+                }
+            }
 
             var paginationMetadata = new
             {
@@ -135,6 +146,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
           
             var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var master in dto)
+            {
+                for (int i = 0; i < master.Attachments.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(master.Attachments[i]))
+                    {
+                        master.Attachments[i] = $"{serverUrl}{master.Attachments[i].Replace("\\", "/")}";
+                    }
+                }
+            }
 
             return Ok(new
             {
@@ -247,6 +269,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryMaster Data = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                     s => s.IsDeleted != true && s.ID == id,
                     query => query.Include(store => store.Store),
+                    query => query.Include(store => store.StoreToTransform),
+                    query => query.Include(store => store.School),
+                    query => query.Include(store => store.SchoolPCs),
                     query => query.Include(store => store.Student),
                     query => query.Include(store => store.Supplier),
                     query => query.Include(store => store.Save),
@@ -260,12 +285,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             InventoryMasterGetDTO DTO = mapper.Map<InventoryMasterGetDTO>(Data);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master";
-            if (Data.Attachments != null)
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            for (int i = 0; i < DTO.Attachments.Count; i++)
             {
-                DTO.Attachments = Data.Attachments.Select(filePath =>
-                    $"{serverUrl}/{Data.ID}/{Path.GetFileName(filePath)}"
-                ).ToList();
+                if (!string.IsNullOrEmpty(DTO.Attachments[i]))
+                {
+                DTO.Attachments[i] = $"{serverUrl}{DTO.Attachments[i].Replace("\\", "/")}";
+                }
             }
             return Ok(DTO);
         }
@@ -613,7 +639,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                             await item.CopyToAsync(stream);
                         }
 
-                        var fileUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Sales/{SaleID}/{item.FileName}";
+                        var fileUrl = $"Uploads/Master/{SaleID}/{item.FileName}";
                         Master.Attachments.Add(fileUrl);
                     }
                 }
@@ -835,7 +861,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                             await item.CopyToAsync(stream);
                         }
 
-                        var fileUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master/{newSale.ID}/{item.FileName}";
+                        var fileUrl = $"Uploads/Master/{newSale.ID}/{item.FileName}";
                         sale.Attachments.Add(fileUrl);
                     }
                 }

@@ -1,11 +1,11 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{TestName}}</h1>
     </div>
     <div class="flex justify-between items-center ">
         <button (click)="AddDegree()" class="secondaryBg text-white font-medium px-5 py-2 rounded-lg mt-2">
-            Degree
+             {{ 'Degree' | translate }}
         </button>
     </div>
 </div>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div *ngIf="q.answerName !== q.correctAnswerName">
-                    Correct Answer : {{q.correctAnswerName}}
+                     {{ 'Correct Answer' | translate }} : {{q.correctAnswerName}}
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md overflow-y-auto max-h-[90vh]">
         <div class="flex justify-between">
-            <h1 class="font-semibold text-2xl leading-9">Mark</h1>
+            <h1 class="font-semibold text-2xl leading-9">{{ 'Mark' | translate }}</h1>
             <!-- Close Icon -->
             <button (click)="closeModal()"
                 class="text-gray-400 hover:text-gray-900 transition duration-200">
@@ -73,7 +73,7 @@
                         class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
                         [(ngModel)]="RegesterForm.mark" placeholder=" " (input)="validateNumber($event, 'mark')" min="0"
                         step="1" />
-                    <span *ngIf="MarkIsEmpty" class="text-red-500 ml-3 font-normal">Mark Is Required</span>
+                    <span *ngIf="MarkIsEmpty" class="text-red-500 ml-3 font-normal">{{ 'Mark' | translate }}  {{ 'Is Required' | translate }}</span>
                 </div>
             </div>
 
@@ -81,7 +81,7 @@
                 <input type="checkbox" id="i" [(ngModel)]="RegesterForm.visibleToParent"
                     class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41" />
                 <label for="i" class="text-gray-700">
-                    Visible To Parent
+                  {{ 'Visible To Parent' | translate }}
                 </label>
             </div>
 
@@ -89,7 +89,7 @@
             <div class="flex justify-end">
                 <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
                     (click)="Save()">
-                    <span *ngIf="!isLoading">Save</span>
+                    <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
                 </button>
             </div>

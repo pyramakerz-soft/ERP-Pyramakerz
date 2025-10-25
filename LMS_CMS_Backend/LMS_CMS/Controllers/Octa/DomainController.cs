@@ -254,6 +254,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             Employee emp = new Employee { User_Name = "Admin", en_name = "Admin", Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
             emp.InsertedByOctaId= userId;
             emp.InsertedAt= TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            emp.ConnectionStatusID = 1;
             Unit_Of_Work.employee_Repository.Add(emp);
             Unit_Of_Work.SaveChanges();
 

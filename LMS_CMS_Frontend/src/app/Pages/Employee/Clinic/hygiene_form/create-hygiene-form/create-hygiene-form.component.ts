@@ -20,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-create-hygiene-form',
   standalone: true,
@@ -54,7 +55,7 @@ export class CreateHygieneFormComponent implements OnInit {
     private gradeService: GradeService,
     private classroomService: ClassroomService,
     private studentService: StudentService,
-      private languageService: LanguageService
+      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit(): void {
@@ -65,6 +66,13 @@ export class CreateHygieneFormComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+          ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
    
   moveToHygieneForm() {
   this.router.navigateByUrl('Employee/Hygiene Form Medical Report');

@@ -221,7 +221,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
 
                 testDTO = testDTO
-                 .Where(t => (t.RegistrationTestVisibleToParent == true) || (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
+                 //.Where(t => (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
                  .ToList();
 
                 var response = new

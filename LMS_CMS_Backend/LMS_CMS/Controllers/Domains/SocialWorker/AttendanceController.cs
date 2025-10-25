@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
@@ -33,11 +34,19 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("ByAcademicYearAndClass/{AcademicYearId}/{ClassId}")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Attendance" }
         )]
-        public async Task<IActionResult> Get(long AcademicYearId , long ClassId)
+        public async Task<IActionResult> Get(long AcademicYearId , long ClassId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.attendance_Repository
+                .CountAsync(t => t.IsDeleted != true && t.AcademicYearID == AcademicYearId && t.ClassroomID == ClassId &&
+                    t.AcademicYear.IsDeleted != true && t.AcademicYear.School.IsDeleted != true && t.Classroom.IsDeleted != true && t.Classroom.Grade.IsDeleted != true);
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -49,10 +58,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Attendance> attendances =await Unit_Of_Work.attendance_Repository.Select_All_With_IncludesById<Attendance>(t => t.IsDeleted != true && t.AcademicYearID==AcademicYearId && t.ClassroomID== ClassId &&
+            List<Attendance> attendances =await Unit_Of_Work.attendance_Repository.Select_All_With_IncludesById_Pagination<Attendance>(t => t.IsDeleted != true && t.AcademicYearID==AcademicYearId && t.ClassroomID== ClassId &&
                     t.AcademicYear.IsDeleted != true && t.AcademicYear.School.IsDeleted!= true && t.Classroom.IsDeleted!= true && t.Classroom.Grade.IsDeleted!= true ,
                     query => query.Include(emp => emp.AcademicYear).ThenInclude(a => a.School),
-                    query => query.Include(emp => emp.Classroom).ThenInclude(a => a.Grade));
+                    query => query.Include(emp => emp.Classroom).ThenInclude(a => a.Grade))
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
             if (attendances == null || attendances.Count == 0)
             {
@@ -61,7 +73,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             List<AttendanceGetDTO> Dto = mapper.Map<List<AttendanceGetDTO>>(attendances);
 
-            return Ok(Dto);
+            // Pagination metadata
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
         }
 
         ////////////////////////////////
@@ -69,7 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Attendance" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -106,7 +127,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Attendance" }
         )]
         public async Task<IActionResult> Add(AttendanceAddDTO NewAttendence)
         {
@@ -163,7 +184,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Lesson Resources Types" }
+            pages: new[] { "Attendance" }
         )]
         public async Task<IActionResult> EditAsync(AttendanceEditDTO NewAttendence)
         {
@@ -198,7 +219,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, attendance);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Attendance", roleId, userId, attendance);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -268,7 +289,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Attendance" }
         )]
         public IActionResult Delete(long id)
         {
@@ -299,7 +320,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, attendance);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Attendance", roleId, userId, attendance);
                 if (accessCheck != null)
                 {
                     return accessCheck;

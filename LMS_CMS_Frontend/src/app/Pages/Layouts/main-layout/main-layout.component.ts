@@ -11,145 +11,243 @@ import { MenuService } from '../../../Services/shared/menu.service';
 import { NewTokenService } from '../../../Services/shared/new-token.service';
 import { routes } from '../../../app.routes';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { RealTimeRequestServiceService } from '../../../Services/shared/real-time-request-service.service';
+import { RealTimeChatServiceService } from '../../../Services/shared/real-time-chat-service.service';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule],
+  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule , TranslateModule],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent {
   menuItems: { label: string; route?: string; icon?:string; subItems?: { label: string; route: string; icon?:string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
-  constructor(public accountService: AccountService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
-    private communicationService: NewTokenService, private realTimeService: RealTimeNotificationServiceService) { }
+  isLanguageInitialized = false
+  constructor(public accountService: AccountService,private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
+    private communicationService: NewTokenService, private translate: TranslateService , private realTimeService: RealTimeNotificationServiceService, 
+    private realTimeRequestService: RealTimeRequestServiceService, private realTimeChatServiceService: RealTimeChatServiceService) { }
 
   async ngOnInit() {
-   await this.GetInfo();
+    const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+    this.languageService.setLanguage(currentDir);
+    this.isRtl = document.documentElement.dir === 'rtl';
+
     this.communicationService.action$.subscribe(async (state) => {
       await this.GetInfo();
-
     });  
+    
     this.realTimeService.startConnection();
+    this.realTimeRequestService.startRequestConnection();
+    this.realTimeChatServiceService.startChatMessageConnection();
+     
+    this.subscription = this.languageService.language$.subscribe(async (direction) => {
+      this.isRtl = direction === 'rtl'; 
+      await this.GetInfo();
+    }); 
+      
+    await this.GetInfo();
   }
 
   ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
-  }
+    this.realTimeRequestService.stopConnection(); 
+    this.realTimeChatServiceService.stopConnection(); 
+     
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+  translations: { [key: string]: { en: string; ar?: string } } = {
+    'Dashboard Student': { en: 'Dashboard Student', ar: 'لوحة تحكم الطالب' },
+    'Dashboard Parent': { en: 'Dashboard Parent', ar: 'لوحة تحكم ولي الأمر' },
+    'ECommerce': { en: 'E-Commerce', ar: 'التجارة الإلكترونية' },
+    'The Shop': { en: 'The Shop', ar: 'المتجر' },
+    'LMS': { en: 'LMS', ar: 'نظام إدارة التعلم' },
+    'Subject': { en: 'Subject', ar: 'المادة' },
+    'Registrations': { en: 'Registrations', ar: 'التسجيلات' },
+    'Registration Form': { en: 'Registration Form', ar: 'نموذج التسجيل' },
+    'Admission Test': { en: 'Admission Test', ar: 'اختبار القبول' },
+    'Interview Registration': { en: 'Interview Registration', ar: 'تسجيل المقابلة' },
+    'Live Sessions': { en: 'Live Sessions', ar: 'الجلسات المباشرة' },
+    'Subjects': { en: 'Subjects', ar: 'المواد' },
+    'Reports': { en: 'Reports', ar: 'التقارير' },
+    'Virtual Meetings': { en: 'Virtual Meetings', ar: 'الاجتماعات الافتراضية' },
+    'Discussion Room': { en: 'Discussion Room', ar: 'غرفة النقاش' },
+    'Clinic': { en: 'Clinic', ar: 'العيادة' },
+    'Medical History': { en: 'Medical History', ar: 'السجل الطبي' },
+    'Medical Report': { en: 'Medical Report', ar: 'التقرير الطبي' },
+    'Cart': { en: 'Cart', ar: 'عربة التسوق' },
+    'Order': { en: 'Order', ar: 'الطلبات' },
+    'Administration': { en: 'Administration', ar: 'الإدارة' },
+    'Domains': { en: 'Domains', ar: 'النطاقات' },
+    'School Types': { en: 'School Types', ar: 'أنواع المدارس' },
+    'School': { en: 'School', ar: 'المدرسة' },
+    'Account': { en: 'Account', ar: 'الحساب' }
+  };
+
+  translateFunction(key: string) {
+    const translation = this.translations[key];
+    if (!translation) return key;
+    
+    return this.isRtl && translation.ar ? translation.ar : translation.en;
+  } 
 
   async GetInfo(){
-    this.User_Data_After_Login = this.accountService.Get_Data_Form_Token() 
+    this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(); 
 
     if (this.User_Data_After_Login.type == "employee") {
-      await this.Get_Pages_With_RoleID()
+      await this.Get_Pages_With_RoleID();
     } else if (this.User_Data_After_Login.type == "student") {
       this.menuItems = [
         {
-          label: 'Dashboard Student', route: '#', icon: 'Dashboard'
+          label: this.translateFunction('Dashboard Student'), 
+          route: '#', 
+          icon: 'Dashboard'
         },
         {
-          label: 'ECommerce', subItems: [
+          label: this.translateFunction('ECommerce'), 
+          subItems: [
             {
-              label: 'The Shop', route: 'Ecommerce/The Shop'
+              label: this.translateFunction('The Shop'), 
+              route: 'Ecommerce/The Shop'
             }
-          ], icon: 'E-Commerce'
+          ], 
+          icon: 'E-Commerce'
         },
         {
-          label: 'LMS', subItems: [
+          label: this.translateFunction('LMS'), 
+          subItems: [
             {
-              label: 'Subject', route: 'Subject'
+              label: this.translateFunction('Subject'), 
+              route: 'Subject'
             }
-          ], icon: 'LMS'
+          ], 
+          icon: 'LMS'
         }
-      ]
+      ];
     } else if (this.User_Data_After_Login.type == "parent") {
-       this.menuItems = [
-        {
-          label: 'Dashboard Parent', route: '#', icon: 'Dashboard'
-        },
-        {
-          label: 'Registrations', subItems: [
-            {
-              label: 'Registration Form', route: 'Registration Form'
-            },
-            {
-              label: 'Admission Test', route: 'Admission Test'
-            },
-            {
-              label: 'Interview Registration', route: 'Interview Registration'
-            }
-          ], icon: 'Registration'
-        },
-        {
-          label: 'LMS', subItems: [
-            {
-              label: 'Live Sessions', route: 'Live Sessions'
-            },
-            {
-              label: 'Subjects', route: 'Subjects'
-            },
-            {
-              label: 'Reports', route: 'Reports'
-            }
-          ], icon: 'LMS'
-        },
-        {
-          label: 'Virtual Meetings', subItems: [
-            {
-              label: 'Discussion Room', route: 'Discussion Room'
-            }
-          ], icon: 'Virtual Meetings'
-        }, 
-        {
-          label: 'Clinic', subItems: [
-            {
-              label: 'Medical History', route: 'Medical History'
-            },
-            {
-              label: 'Medical Report', route: 'Medical Report'
-            }
-          ], icon: 'Clinic'
-        },
-        {
-          label: 'E-Commerce', subItems: [
-            {
-              label: 'The Shop', route: 'Ecommerce/The Shop'
-            },
-            {
-              label: 'Cart', route: 'Ecommerce/Cart'
-            },
-            {
-              label: 'Order', route: 'Ecommerce/Order'
-            }
-          ], icon: 'E-Commerce'
-        },
-      ]
-    }
-    else if (this.User_Data_After_Login.type == "octa") {
       this.menuItems = [
         {
-          label: 'Administration', subItems:[
+          label: this.translateFunction('Dashboard Parent'), 
+          route: '#', 
+          icon: 'Dashboard'
+        },
+        {
+          label: this.translateFunction('Registrations'), 
+          subItems: [
             {
-              label: "Domains", route: "Domains"
+              label: this.translateFunction('Registration Form'), 
+              route: 'Registration Form'
             },
             {
-              label: "School Types", route: "School Types"
+              label: this.translateFunction('Admission Test'), 
+              route: 'Admission Test'
             },
             {
-              label: "School", route: "School"
-            },
-            {
-              label: "Account", route: "Account"
+              label: this.translateFunction('Interview Registration'), 
+              route: 'Interview Registration'
             }
-          ], icon: "Administration"
+          ], 
+          icon: 'Registration'
+        },
+        {
+          label: this.translateFunction('LMS'), 
+          subItems: [
+            {
+              label: this.translateFunction('Live Sessions'), 
+              route: 'Live Sessions'
+            },
+            {
+              label: this.translateFunction('Subjects'), 
+              route: 'Subjects'
+            },
+            {
+              label: this.translateFunction('Reports'), 
+              route: 'Reports'
+            }
+          ], 
+          icon: 'LMS'
+        },
+        {
+          label: this.translateFunction('Virtual Meetings'), 
+          subItems: [
+            {
+              label: this.translateFunction('Discussion Room'), 
+              route: 'Discussion Room'
+            }
+          ], 
+          icon: 'Virtual Meetings'
+        }, 
+        {
+          label: this.translateFunction('Clinic'), 
+          subItems: [
+            {
+              label: this.translateFunction('Medical History'), 
+              route: 'Medical History'
+            },
+            {
+              label: this.translateFunction('Medical Report'), 
+              route: 'Medical Report'
+            }
+          ], 
+          icon: 'Clinic'
+        },
+        {
+          label: this.translateFunction('E-Commerce'), 
+          subItems: [
+            {
+              label: this.translateFunction('The Shop'), 
+              route: 'Ecommerce/The Shop'
+            },
+            {
+              label: this.translateFunction('Cart'), 
+              route: 'Ecommerce/Cart'
+            },
+            {
+              label: this.translateFunction('Order'), 
+              route: 'Ecommerce/Order'
+            }
+          ], 
+          icon: 'E-Commerce'
+        },
+      ];
+    } else if (this.User_Data_After_Login.type == "octa") {
+      this.menuItems = [
+        {
+          label: this.translateFunction('Administration'), 
+          subItems: [
+            {
+              label: this.translateFunction('Domains'), 
+              route: "Domains"
+            },
+            {
+              label: this.translateFunction('School Types'), 
+              route: "School Types"
+            },
+            {
+              label: this.translateFunction('School'), 
+              route: "School"
+            },
+            {
+              label: this.translateFunction('Account'), 
+              route: "Account"
+            }
+          ], 
+          icon: "Administration"
         }
-      ]
+      ];
     }
-  }
+  } 
  
   Get_Pages_With_RoleID() {
     this.roleDetailsService.Get_Pages_With_RoleID(this.User_Data_After_Login.role).subscribe(

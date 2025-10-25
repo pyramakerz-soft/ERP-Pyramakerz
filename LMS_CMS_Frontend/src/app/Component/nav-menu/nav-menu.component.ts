@@ -37,6 +37,11 @@ import { Classroom } from '../../Models/LMS/classroom';
 import { Student } from '../../Models/student'; 
 import { Subject } from '../../Models/LMS/subject';
 import { Section } from '../../Models/LMS/section';
+import { RealTimeRequestServiceService } from '../../Services/shared/real-time-request-service.service';
+import { ChatMessageService } from '../../Services/shared/chat-message.service';
+import { ChatMessage } from '../../Models/Communication/chat-message';
+import { ConnectionStatus } from '../../Models/connection-status';
+import { ConnectionStatusServiceService } from '../../Services/shared/connection-status-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -45,7 +50,7 @@ import { Section } from '../../Models/LMS/section';
   templateUrl: './nav-menu.component.html',
   styleUrl: './nav-menu.component.css'
 })
-export class NavMenuComponent {
+export class NavMenuComponent { 
   dropdownOpen: boolean = false;
   selectedLanguage: string = "English";
   User_Type: string = "";
@@ -53,6 +58,7 @@ export class NavMenuComponent {
   isPopupOpen = false;
   isNotificationPopupOpen = false;
   isRequuestPopupOpen = false;
+  isMessagePopupOpen = false;
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
@@ -70,11 +76,13 @@ export class NavMenuComponent {
   requestByID:Request = new Request()
   requestToBeForwarded:Request = new Request()
   requestToBeSend:Request = new Request()
+  chatMessages: ChatMessage[] = []
   
   private destroy$ = new RxSubject<void>();
   
   notificationsUnSeenCount = 0
   requestsUnSeenCount = 0
+  messagesUnSeenCount = 0
  
   isTeacherHovered = false;
   isEmployeeHovered = false;
@@ -99,12 +107,23 @@ export class NavMenuComponent {
   
   subjectID = 0 
 
+  connectionStatus:ConnectionStatus[] = []
+  isStateDropdownOpen = false;
+  currentState:ConnectionStatus = new ConnectionStatus()
+
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
-    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, public requestService:RequestService,
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
-    public subjectService: SubjectService, ) { }
+    public subjectService: SubjectService, public chatMessageService:ChatMessageService, public connectionStatusService:ConnectionStatusServiceService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -116,13 +135,53 @@ export class NavMenuComponent {
     });
     this.DomainName = this.ApiServ.GetHeader();
     
+    this.getConnectionStatus()
+    this.getUserStatus()
+    
     this.loadUnseenNotifications()
     this.loadUnseenRequests()
+    this.loadUnseenMessages()
 
     // Subscribe to notification opened events
     this.notificationService.notificationOpened$.subscribe(() => {
       this.loadUnseenNotifications();
     });
+
+    // Subscribe to request opened events
+    this.requestService.requestOpened$.subscribe(() => {
+      this.loadUnseenRequests();
+    });
+
+    // Subscribe to message opened events
+    this.chatMessageService.messageOpened$.subscribe(() => {
+      this.loadUnseenMessages();
+    });
+  }
+
+  getConnectionStatus() {
+    this.connectionStatusService.Get(this.DomainName).subscribe(
+      data => this.connectionStatus = data
+    );
+  }
+
+  getUserStatus() {
+    this.connectionStatusService.GetUserState(this.DomainName).subscribe(
+      data => this.currentState = data
+    );
+  }
+ 
+  toggleStateDropdown() {
+    this.isStateDropdownOpen = !this.isStateDropdownOpen;
+  }
+
+  // Set the selected state
+  selectState(state: ConnectionStatus) {
+    this.connectionStatusService.ChangeConnectionStatus(state.id, this.DomainName).subscribe(
+      data => {
+        this.currentState = state;
+      }
+    )
+    this.isStateDropdownOpen = false; 
   }
 
   loadUnseenNotifications() {
@@ -135,6 +194,12 @@ export class NavMenuComponent {
     this.requestService.UnSeenRequestCount(this.DomainName).subscribe(
       data => this.requestsUnSeenCount = data
     );
+  }
+
+  loadUnseenMessages() {
+    this.chatMessageService.UnSeenRequestCount(this.DomainName).subscribe(
+      data => this.messagesUnSeenCount = data
+    );  
   }
 
   getAllTokens(): void {
@@ -193,12 +258,14 @@ export class NavMenuComponent {
     this.isPopupOpen = !this.isPopupOpen;
     this.isNotificationPopupOpen = false;
     this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = false;
   }
   
   toggleNotificationPopup(){
     this.notifications = []
     this.isPopupOpen = false;
     this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = false;
     this.isNotificationPopupOpen = !this.isNotificationPopupOpen;
     this.notificationService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
@@ -211,10 +278,24 @@ export class NavMenuComponent {
     this.requests = []
     this.isPopupOpen = false;
     this.isNotificationPopupOpen = false;
+    this.isMessagePopupOpen = false;
     this.isRequuestPopupOpen = !this.isRequuestPopupOpen;
     this.requestService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
         this.requests = data
+      }
+    )
+  }
+
+  toggleMessagePopup(){
+    this.chatMessages = []
+    this.isPopupOpen = false;
+    this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = !this.isMessagePopupOpen;
+    this.chatMessageService.ByUserIDFirst5(this.DomainName).subscribe(
+      data => {
+        this.chatMessages = data
       }
     )
   }
@@ -233,8 +314,10 @@ export class NavMenuComponent {
 
     if (!clickedInsideAny) {
       this.isPopupOpen = false;
+      this.isStateDropdownOpen = false
       this.isNotificationPopupOpen = false;
       this.isRequuestPopupOpen = false;
+      this.isMessagePopupOpen = false;
     }
   }
 
@@ -244,6 +327,7 @@ export class NavMenuComponent {
     this.destroy$.complete();
     document.removeEventListener('click', this.onDocumentClick);
     this.realTimeService.stopConnection();
+    this.realTimeRequestService.stopConnection();
   } 
 
   ChangeAccount(id: number): void {
@@ -253,6 +337,7 @@ export class NavMenuComponent {
     if (tokenObject && token != tokenObject.value) {
       // First stop any existing SignalR connection
       this.realTimeService.stopConnection();
+      this.realTimeRequestService.stopConnection();
 
       localStorage.removeItem("current_token");
       localStorage.setItem("current_token", tokenObject.value);
@@ -262,6 +347,7 @@ export class NavMenuComponent {
       // Restart SignalR connection for the new account
       setTimeout(() => {
         this.realTimeService.startConnection();
+        this.realTimeRequestService.startRequestConnection();
       }, 100);
       
       this.communicationService.sendAction(true);
@@ -457,6 +543,33 @@ export class NavMenuComponent {
     this.router.navigateByUrl('CommunicationModule/My Requests')
   }
 
+  viewAllMessages() {
+    this.router.navigateByUrl('CommunicationModule/My Messages')
+  }
+  
+  moveToMessageInMyChat(chatMessage: ChatMessage) {
+    this.router.navigateByUrl('CommunicationModule/My Messages')
+    if(chatMessage.senderID == this.User_Data_After_Login.id && chatMessage.senderUserTypeName == this.User_Data_After_Login.type){
+      this.router.navigate(['CommunicationModule/My Messages'], {
+        queryParams: {
+          otherUserID: chatMessage.receiverID,
+          otherUserTypeID: chatMessage.receiverUserTypeID,
+          englishNameForConversation: chatMessage.receiverEnglishName,
+          arabicNameForConversation: chatMessage.receiverArabicName
+        }
+      }); 
+    }else{
+      this.router.navigate(['CommunicationModule/My Messages'], {
+        queryParams: {
+          otherUserID: chatMessage.senderID,
+          otherUserTypeID: chatMessage.senderUserTypeID,
+          englishNameForConversation: chatMessage.senderEnglishName,
+          arabicNameForConversation: chatMessage.senderArabicName
+        }
+      });
+    }
+  }
+
   formatInsertedAt(dateString: string | Date): string {
     if (!dateString) return '';
 
@@ -506,6 +619,8 @@ export class NavMenuComponent {
         this.requestByID = data
         document.getElementById("RequestModal")?.classList.remove("hidden");
         document.getElementById("RequestModal")?.classList.add("flex"); 
+        // call the subscribe again for the other pages
+        this.requestService.notifyRequestOpened(); 
       }
     )
   }
@@ -545,6 +660,8 @@ export class NavMenuComponent {
         this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=true
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         });
       }
     });
@@ -564,6 +681,8 @@ export class NavMenuComponent {
         this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=false
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         });
       }
     });
@@ -613,6 +732,8 @@ export class NavMenuComponent {
       this.requestService.Forward(this.requestToBeForwarded, this.DomainName).subscribe(
         (result: any) => { 
           this.closeForwardModal(); 
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         },
         error => {
           this.isLoading = false;
@@ -746,7 +867,7 @@ export class NavMenuComponent {
     this.parentService.GetByStudentID(this.requestToBeSend.receiverID, this.DomainName).subscribe(
       data => {
         this.parent = data
-        this.requestToBeSend.receiverID == this.parent.id
+        this.requestToBeSend.receiverID = this.parent.id
         this.SendTheRequest()
       },
       error => {
@@ -939,7 +1060,7 @@ export class NavMenuComponent {
       }else{
         this.requestToBeSend.receiverUserTypeID = 1;
       }
-
+ 
       if(this.isParentHovered){
         this.getParent()
       }else{
@@ -949,13 +1070,22 @@ export class NavMenuComponent {
   }
 
   SendTheRequest(){
+    console.log(this.requestToBeSend)
     this.isLoading = true; 
     this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
       (result: any) => { 
         this.closeSendRequestModal(); 
+        // call the subscribe again for the other pages
+        this.requestService.notifyRequestOpened(); 
       },
       error => {
         this.isLoading = false;
+        Swal.fire({
+          title: error.error,
+          icon: 'error', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: "OK"
+        })
       }
     ); 
   } 
@@ -965,6 +1095,19 @@ export class NavMenuComponent {
     const input = event.target as HTMLInputElement;
 
     if (file) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        });
+        this.requestToBeSend.fileFile = null;
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',
@@ -974,9 +1117,14 @@ export class NavMenuComponent {
         })
         this.requestToBeSend.fileFile = null;
         return; 
-      } 
+      } else{
+        this.requestToBeSend.fileFile = file;  
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      }
     }
     
     input.value = '';
-  }
+  } 
 }

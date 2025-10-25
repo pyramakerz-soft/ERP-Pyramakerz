@@ -30,27 +30,21 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { SearchDropdownComponent } from '../../../../Component/search-dropdown/search-dropdown.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { School } from '../../../../Models/school';
+import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-stocking-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, TranslateModule],
   templateUrl: './stocking-details.component.html',
   styleUrl: './stocking-details.component.css',
 })
 export class StockingDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -75,6 +69,8 @@ export class StockingDetailsComponent {
   SelectedCategoryId: number | null = null;
   SelectedSubCategoryId: number | null = null;
   SelectedSopItem: ShopItem | null = null;
+  schools: School[] = []
+  schoolPCs: SchoolPCs[] = []
 
   TableData: StockingDetails[] = [];
   Item: StockingDetails = new StockingDetails();
@@ -124,11 +120,14 @@ export class StockingDetailsComponent {
     public SubCategoriesServ: InventorySubCategoriesService,
     public shopitemServ: ShopItemService,
     public StockingServ: StockingService,
+    public SchoolServ: SchoolService,
+    public schoolpcsServ: SchoolPCsService,
     public StockingDetailsServ: StockingDetailsService,
     public InventoryMastrServ: InventoryMasterService,
     private cdr: ChangeDetectorRef,
     public printservice: ReportsService,
-      private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -141,6 +140,7 @@ export class StockingDetailsComponent {
     this.MasterId = Number(this.activeRoute.snapshot.paramMap.get('id'));
 
     await this.GetAllStores();
+    await this.GetAllSchools();
     if (!this.MasterId) {
       this.mode = 'Create';
       this.Data.date = new Date().toISOString().split('T')[0];
@@ -164,10 +164,18 @@ export class StockingDetailsComponent {
       this.AllShopItems = d;
     });
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';       
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToMaster() {
@@ -182,15 +190,45 @@ export class StockingDetailsComponent {
     });
   }
 
+  GetAllSchools() {
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+      if (this.schools.length == 1) {
+        this.Data.schoolId = this.schools[0].id
+        this.GetAllSchoolPCs()
+      }
+    })
+  }
+
+  GetAllSchoolPCs() {
+    this.schoolPCs = []
+    this.Data.schoolPCId = 0
+    this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+      this.schoolPCs = d
+      if (this.schoolPCs.length == 1) {
+        this.Data.schoolPCId = this.schoolPCs[0].id
+        this.validationErrors['schoolPCId'] = ""
+      }
+    })
+  }
+
   GetMasterInfo() {
     this.StockingServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+        this.schoolPCs = d
+      })
       this.GetCategories();
     });
   }
 
   onStoreChange(storeID: number) {
     this.onInputValueChange({ field: 'storeID', value: storeID });
+    this.Data.stockingDetails = []
+    this.subCategories = [];
+    this.ShopItems = [];
+    this.SelectedCategoryId = null;
+    this.SelectedSubCategoryId = null;
     if (storeID) {
       this.SelectedCategoryId = null;
       this.GetCategories();
@@ -610,7 +648,7 @@ export class StockingDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof Stocking;
         if (!this.Data[field]) {
-          if (field == 'date') {
+          if (field == 'date' || field == 'storeID' || field == 'schoolId' || field == 'schoolPCId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -754,6 +792,8 @@ export class StockingDetailsComponent {
     var date = `${year}-${month}-${day}T${hours}:${minutes}`;
     this.adiustmentDisbursement.date = date
     this.adiustmentDisbursement.storeID = this.Data.storeID;
+    this.adiustmentDisbursement.schoolId = this.Data.schoolId;
+    this.adiustmentDisbursement.schoolPCId = this.Data.schoolPCId;
     this.adiustmentDisbursement.flagId = flagId;
 
     this.adiustmentDisbursement.inventoryDetails = this.TableData

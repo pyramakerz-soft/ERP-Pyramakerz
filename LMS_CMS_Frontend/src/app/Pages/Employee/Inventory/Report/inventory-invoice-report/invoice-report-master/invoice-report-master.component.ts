@@ -16,7 +16,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
-
+import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 interface FlagOption {
   id: number;
   name: string;
@@ -150,7 +150,8 @@ export class InventoryTransactionReportComponent implements OnInit {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService,
-        private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -171,6 +172,14 @@ export class InventoryTransactionReportComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   loadCategories() {
     this.categoryService

@@ -16,11 +16,14 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { TimeTable } from '../../../../Models/LMS/time-table';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-remedial-time-table',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './remedial-time-table.component.html',
   styleUrl: './remedial-time-table.component.css'
 })
@@ -37,7 +40,8 @@ export class RemedialTimeTableComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   TableData: RemedialTimeTable[] = [];
   schools: School[] = [];
@@ -55,7 +59,9 @@ export class RemedialTimeTableComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public RemedialTimeTableServ: RemedialTimeTableService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -75,7 +81,17 @@ export class RemedialTimeTableComponent {
       }
     });
     this.GetAllSchools();
+           this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllSchools() {
     this.TableData = [];

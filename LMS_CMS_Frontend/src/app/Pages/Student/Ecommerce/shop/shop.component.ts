@@ -16,11 +16,15 @@ import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
@@ -36,7 +40,8 @@ export class ShopComponent {
   ShopItem:ShopItem[] = []
   selectedInventoryCategory = 0
   selectedInventorySubCategory = 0
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   CurrentPage:number = 1
   PageSize:number = 9
 
@@ -47,8 +52,9 @@ export class ShopComponent {
  
   searchQuery: string = '';
    
-  constructor(public inventoryCategoryService:InventoryCategoryService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
-    public account: AccountService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
+  constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
+    public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService,public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -65,6 +71,17 @@ export class ShopComponent {
     }
 
     this.getInventoryCategory() 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getStudents(){

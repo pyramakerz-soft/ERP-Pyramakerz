@@ -27,6 +27,7 @@ import { ReportsService } from '../../../../Services/shared/reports.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-payable-details',
   standalone: true,
@@ -93,7 +94,8 @@ isRtl: boolean = false;
        public linkFileService: LinkFileService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService, 
     public reportsService: ReportsService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   
   ) { }
 
@@ -140,6 +142,14 @@ isRtl: boolean = false;
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+    ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToPayable() {
     this.router.navigateByUrl("Employee/Payable")
@@ -208,10 +218,15 @@ isRtl: boolean = false;
       if (this.payable.hasOwnProperty(key)) {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
-          if (field == "payableDocTypeID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date" || field == "docNumber") {
+          if (field == "payableDocTypeID" || field == "linkFileID" ||  field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
+          if (field == "bankOrSaveID") {
+            this.validationErrors[field] = `*Bank Or SaFe is required`
+            isValid = false;
+          }
+
         } else {
           this.validationErrors[field] = '';
         }

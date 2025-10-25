@@ -5,6 +5,7 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -158,7 +159,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
                     m => m.IsDeleted != true && 
-                    m.InsertedByUserId == id, 
+                    m.Id == id &&
+                    (m.InsertedByUserId != null || m.InsertedByUserId != 0), 
                     query => query.Include(m => m.School),
                     query => query.Include(m => m.Grade),
                     query => query.Include(m => m.Classroom),
@@ -210,7 +212,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
-                x => x.InsertedByParentID == id && x.IsDeleted != true,
+                x => x.Id == id &&
+                x.IsDeleted != true &&
+                (x.InsertedByParentID != null || x.InsertedByParentID != 0),
                 query => query.Include(m => m.School),
                 query => query.Include(m => m.Grade),
                 query => query.Include(m => m.Classroom),

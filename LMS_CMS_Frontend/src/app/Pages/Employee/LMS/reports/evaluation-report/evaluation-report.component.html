@@ -1,0 +1,242 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Evaluation Report' | translate }}</h1>
+</div>
+
+<!-- Filters Section -->
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="template" class="mb-2 font-medium">{{ 'Template' | translate }}</label>
+        <select id="template" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [(ngModel)]="filterParams.templateId">
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Template' | translate }}</option>
+            <option *ngFor="let template of Templates" [value]="template.id">{{ template.englishTitle }}</option>
+            <option *ngIf="Templates.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
+        </select>
+    </div>
+
+    
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="fromDate" class="mb-2 font-medium">{{ 'Start Date' | translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate" (change)="DateChange()"
+            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
+    </div>
+
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="toDate" class="mb-2 font-medium">{{ 'End Date' | translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate" (change)="DateChange()"
+            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
+    </div>
+
+
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label for="employee" class="mb-2 font-medium">{{ 'Employee' | translate }}</label>
+        <select id="employee" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [(ngModel)]="filterParams.employeeId">
+            <option [value]="0">{{ 'All Employees' | translate }}</option>
+            <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
+        </select>
+    </div>
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label for="school" class="mb-2 font-medium">{{ 'School' | translate }}</label>
+        <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [(ngModel)]="SchoolID" (change)="onSchoolChange($event)">
+            <option [value]="0">{{ 'All Schools' | translate }}</option>
+            <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+
+
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label class="mb-2 font-medium" for="Class" [ngClass]="{ 'text-gray-400': !SchoolID, 'primaryTxt': SchoolID }">{{ 'Class' | translate }}</label>
+        <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [disabled]="!SchoolID" [(ngModel)]="filterParams.classroomId">
+            <option [value]="0">{{ 'All Classes' | translate }}</option>
+            <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
+        </select>
+    </div>
+
+
+
+
+    <div class="px-4 py-3 cursor-pointer font-medium text-lg rounded-lg">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="generateReport()"
+            [disabled]="!filterParams.templateId || !filterParams.fromDate || !filterParams.toDate"
+
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !filterParams.fromDate || !filterParams.toDate || !filterParams.templateId,
+             'secondaryBg text-white': filterParams.fromDate && filterParams.toDate && filterParams.templateId }">
+
+            {{ 'View Report' | translate }}
+        </button>
+    </div>
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+  <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" [title]="'Download Excel' | translate">
+  <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+  <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+</div>
+
+<!-- Report Results -->
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="reportData.length === 0 && !isLoading" class="w-full justify-center items-center flex py-8">
+        <span class="bg-white px-4 py-2 text-center border border-gray-300 text-sm md:text-base">
+            {{ 'No Data Found' | translate }}
+        </span>
+    </div>
+
+    <div *ngIf="isLoading" class="w-full justify-center items-center flex py-8">
+        <i class="fas fa-spinner fa-spin text-2xl primaryTxt"></i>
+        <span class="ml-2">{{ 'Loading...' | translate }}</span>
+    </div>
+
+    <div *ngFor="let evaluation of reportData; let i = index" class="border rounded-lg mb-4">
+        <div class="flex rounded-lg justify-between items-center cursor-pointer px-4 py-3 bg-[#394b6e3a]" 
+             (click)="toggleCollapse(i)">
+            <h3 class="text-lg font-semibold">{{ 'Evaluation Date' | translate }}: {{ evaluation.date }}</h3>
+            <i class="fa" [ngClass]="{
+                'fa-chevron-down': !collapsedItems.has(i),
+                'fa-chevron-up': collapsedItems.has(i) }">
+            </i>
+        </div>
+
+        <div *ngIf="collapsedItems.has(i)" class="p-4 bg-white">
+            <!-- Questions Section -->
+            <div *ngFor="let group of evaluation.evaluationEmployeeQuestionGroups" class="mb-6">
+                <div class="primaryBg p-4 rounded-xl text-white mb-4">
+                    {{ group.englishTitle }}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div *ngFor="let question of group.evaluationEmployeeQuestions" 
+                         class="bg-[#EBEBEB] p-4 rounded-xl border">
+                        <div class="font-medium mb-2">{{ question.questionEnglishTitle }}</div>
+                        
+                        <div class="flex my-2 items-center">
+                            <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let j = index">
+                                <i class="fa-star text-[#6F6F6F]" [class.fa-solid]="j < question.mark"
+                                    [class.fa-regular]="j >= question.mark" 
+                                    [class.text-yellow-400]="j < question.mark"></i>
+                            </ng-container>
+                            <!-- <span class="ml-2 text-sm text-gray-600">({{ question.average || 'N/A' }})</span> -->
+                        </div>
+                        
+                        <p class="text-gray-600 text-sm" *ngIf="question.note">
+                            <strong>{{ 'Notes' | translate }}:</strong> {{ question.note }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Corrections Section -->
+            <div *ngIf="evaluation.evaluationEmployeeStudentBookCorrections?.length > 0" class="mt-6">
+                <div class="primaryBg p-4 rounded-xl text-white mb-4">
+                    {{ 'Student Corrections' | translate }}
+                </div>
+                
+                <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                    <table class="w-full table-auto bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                        <thead class="bg-[#EBEBEB] text-sm md:text-base">
+                            <tr>
+                                <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                    {{ 'Student' | translate }}
+                                </th>
+                                <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                    {{ 'Correction Book' | translate }}
+                                </th>
+                                <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                    {{ 'Status' | translate }}
+                                </th>
+                                <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                    {{ 'Notes' | translate }}
+                                </th>
+                                <!-- <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                    {{ 'Average' | translate }}
+                                </th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let correction of evaluation.evaluationEmployeeStudentBookCorrections; let j = index"
+                                [ngClass]="{ 'bg-[#F7F7F7]': j % 2 === 1, 'bg-white': j % 2 !== 1 }"
+                                class="border-t border-gray-300 text-xs md:text-sm">
+                                <td class="py-3 px-4 border border-[#EAECF0]">
+                                    {{ correction.studentEnglishName }}
+                                </td>
+                                <td class="py-3 px-4 border border-[#EAECF0]">
+                                    {{ correction.evaluationBookCorrectionEnglishName }}
+                                </td>
+                                <td class="py-3 px-4 border border-[#EAECF0]">
+                                    <div class="flex">
+                                        <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let k = index">
+                                            <i class="fa-star" [class.fa-solid]="k < correction.state"
+                                                [class.fa-regular]="k >= correction.state" 
+                                                [class.text-yellow-400]="k < correction.state"></i>
+                                        </ng-container>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 border border-[#EAECF0]">
+                                    {{ correction.note || 'N/A' }}
+                                </td>
+                                <!-- <td class="py-3 px-4 border border-[#EAECF0]">
+                                    {{ correction.averageStudent || 'N/A' }}
+                                </td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<!-- <div *ngIf="showTable && reportData.length > 0" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>{{ 'Previous' | translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px] text-center cursor-pointer"
+                [ngClass]="{ 'border border-blue-500 text-blue-500': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                {{ page }}
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages}">
+            <p>{{ 'Next' | translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(1)">
+        <p>{{ 'items Per Page' | translate }}</p>
+    </div>
+
+    <div>
+        <p>{{ CurrentPage }} {{ 'of' | translate }} {{ TotalPages }} {{ 'pages' | translate }} ({{ TotalRecords }} {{ 'Item' | translate }})</p>
+    </div>
+</div> -->
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" 
+                       [fileName]="'Evaluation Report'"
+                       [infoRows]="getInfoRows()"
+                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                       #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

@@ -20,6 +20,7 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-floor',
   standalone: true,
@@ -49,18 +50,8 @@ export class FloorComponent {
   DomainName: string = '';
   UserID: number = 0;
   buildingId: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   isLoading = false;
 
   constructor(
@@ -73,7 +64,8 @@ export class FloorComponent {
     public floorService: FloorService,
     public employeeService: EmployeeService,
     public router: Router,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -109,6 +101,16 @@ export class FloorComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
 
   getBuildingData() {
     this.buildingService

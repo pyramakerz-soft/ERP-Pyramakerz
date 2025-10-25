@@ -13,6 +13,7 @@ import { RevenueChartSalesComponent } from '../../../Component/Employee/Home/rev
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-employee-home',
   standalone: true,
@@ -37,7 +38,9 @@ export class EmployeeHomeComponent {
 
   constructor(public account:AccountService, 
     public employeeService:EmployeeService, 
-    public ApiServ:ApiService,private languageService: LanguageService){}
+    public ApiServ:ApiService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token(); 
@@ -48,6 +51,13 @@ export class EmployeeHomeComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getEmployeeByID(){

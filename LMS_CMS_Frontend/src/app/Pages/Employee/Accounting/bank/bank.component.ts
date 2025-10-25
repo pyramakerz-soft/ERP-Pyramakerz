@@ -19,6 +19,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bank',
   standalone: true,
@@ -27,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './bank.component.css'
 })
 export class BankComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -77,6 +67,7 @@ isRtl: boolean = false;
     public BankServ: BankService,
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
+      private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -105,6 +96,15 @@ isRtl: boolean = false;
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
 
   GetAllData() {
     this.TableData = []

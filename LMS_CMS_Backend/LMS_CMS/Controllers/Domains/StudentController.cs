@@ -91,26 +91,39 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(StudentDTO);
         }
 
-        [HttpGet("Search")]
-        public async Task<IActionResult> SearchStudents(string keyword, int pageNumber = 1, int pageSize = 10)
+        [HttpGet("SearchBySchoolId/{SchoolId}")]
+        public async Task<IActionResult> SearchStudents(long SchoolId ,string keyword, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // Build query with optional filter
-            var query = Unit_Of_Work.student_Repository
-                .SelectQuery<Student>(s => s.IsDeleted != true && s.User_Name.Contains(keyword))
-                .Include(s => s.AccountNumber)
-                .Include(s => s.Gender)
-                .OrderBy(s => s.en_name); // You can change to ar_name or Id if needed
+             var studentClassrooms = Unit_Of_Work.studentClassroom_Repository
+                .SelectQuery<StudentClassroom>(
+                    sc => sc.IsDeleted != true
+                        && sc.Classroom.AcademicYear.SchoolID == SchoolId
+                        && sc.Student.User_Name.Contains(keyword)
+                        && sc.Student.IsDeleted != true
+                        && sc.Classroom.IsDeleted != true
+                )
+                .Include(sc => sc.Student);
+
+            //// Build query with optional filter
+            //var query = Unit_Of_Work.student_Repository
+            //    .SelectQuery<Student>(s => s.IsDeleted != true && s.User_Name.Contains(keyword))
+            //    .Include(s => s.AccountNumber)
+            //    .Include(s => s.Gender)
+            //    .OrderBy(s => s.en_name); // You can change to ar_name or Id if needed
 
             // Get total count for pagination info (optional)
-            int totalRecords = await query.CountAsync();
+            var query = studentClassrooms.Select(sa => sa.Student).ToList();
+
+
+            int totalRecords = query.Count();
 
             // Apply pagination
-            var pagedStudents = await query
+            var pagedStudents = query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToList();
 
             // Check for results
             if (pagedStudents == null || pagedStudents.Count == 0)
@@ -1205,7 +1218,16 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No student with this ID");
             }
 
-            if (newStudent.AccountNumberID != null)
+            if (newStudent.Email != null)
+            {
+                Student studentCheckEnail = Unit_Of_Work.student_Repository.First_Or_Default(s => s.Email == newStudent.Email && s.ID!=newStudent.ID );
+                if (studentCheckEnail != null)
+                {
+                    return NotFound("This Email Already Taken");
+                }
+            }
+
+            if (newStudent.AccountNumberID != null && newStudent.AccountNumberID!=0)
             {
                 AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newStudent.AccountNumberID);
 
@@ -1225,6 +1247,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                         return BadRequest("Wrong Link File, it should be Asset file link");
                     }
                 }
+            }
+            else
+            {
+                newStudent.AccountNumberID = null;
+
             }
 
 

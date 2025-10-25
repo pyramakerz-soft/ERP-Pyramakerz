@@ -20,6 +20,7 @@ import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-view',
   standalone: true,
@@ -55,7 +56,7 @@ export class SubjectViewComponent {
 
   constructor(private languageService: LanguageService,public subjectService: SubjectService, public activeRoute:ActivatedRoute, public router:Router, public EditDeleteServ: DeleteEditPermissionService, 
     public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService:SubjectWeightService, 
-    public subjectResourceService:SubjectResourceService, public weightTypeService:WeightTypeService){}
+    public subjectResourceService:SubjectResourceService,private realTimeService: RealTimeNotificationServiceService, public weightTypeService:WeightTypeService){}
 
   async ngOnInit(){
     this.subjectId = await Number(this.activeRoute.snapshot.paramMap.get('SubId'))
@@ -87,6 +88,14 @@ export class SubjectViewComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
+
 
   GetSubjectById() {
     this.subjectService.GetByID(this.subjectId, this.DomainName).subscribe((data) => {

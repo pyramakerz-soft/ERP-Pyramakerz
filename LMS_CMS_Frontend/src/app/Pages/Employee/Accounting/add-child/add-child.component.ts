@@ -19,6 +19,7 @@ import { StudentService } from '../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-add-child',
   standalone: true,
@@ -28,18 +29,7 @@ import {  Subscription } from 'rxjs';
 })
 export class AddChildComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -77,6 +67,7 @@ export class AddChildComponent {
     public ApiServ: ApiService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
+      private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -104,6 +95,14 @@ export class AddChildComponent {
 
     this.GetAllData();
   }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   GetAllData() {
     this.TableData = []
@@ -253,6 +252,18 @@ export class AddChildComponent {
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+ 
+  validateNumberOnly(event: any): void {
+    let value = event.target.value; 
+    value = value.replace(/[^0-9]/g, ''); 
+    event.target.value = value;
+ 
+    if (isNaN(Number(value)) || value === '') {
+      event.target.value = ''; 
+    } else { 
+      this.NationalID = value;
     }
   }
 }

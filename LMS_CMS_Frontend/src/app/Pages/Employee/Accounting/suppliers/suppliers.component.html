@@ -208,8 +208,8 @@
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Contact Person' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
             [(ngModel)]="Supplier.contactPerson" 
-        
-             placeholder="{{ 'Enter contactPerson' | translate }}"
+            (input)="validateNumber($event, 'phone1')" 
+            placeholder="{{ 'Enter contactPerson' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'contactPerson', value: $event })" />
           <span *ngIf="validationErrors['contactPerson']" class="text-red-500 font-normal">{{
             validationErrors['contactPerson'] }}</span>

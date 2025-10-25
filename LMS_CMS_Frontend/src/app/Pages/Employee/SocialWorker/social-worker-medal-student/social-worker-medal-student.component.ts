@@ -24,6 +24,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-social-worker-medal-student',
@@ -93,6 +94,7 @@ export class SocialWorkerMedalStudentComponent {
     public SocialWorkerMedalStudentServ: SocialWorkerMedalStudentService,
     public SocialWorkerMedalServ: SocialWorkerMedalService,
     private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -116,6 +118,13 @@ export class SocialWorkerMedalStudentComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAllSchools() {
@@ -294,4 +303,40 @@ export class SocialWorkerMedalStudentComponent {
       this.TableData = [];
     }
   }
+
+  IsAllowDelete(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+    return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  }
+
+  Delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Medal?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.SocialWorkerMedalStudentServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.GetAllData();
+        });
+      }
+    });
+  }  
 }

@@ -10,11 +10,15 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-violation-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './violation-view.component.html',
   styleUrl: './violation-view.component.css'
 })
@@ -25,14 +29,16 @@ export class ViolationViewComponent {
   violation: Violation = new Violation()
   path: string = ""
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   keysArray: string[] = ['id', 'englishName', "arabicName"];
   key: string = 'id';
   value: any = '';
 
 
-  constructor(public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute,
-    public router: Router, private menuService: MenuService, public ViolationServ: ViolationService) { }
+  constructor(public account: AccountService,private languageService: LanguageService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute,
+    public router: Router, private menuService: MenuService, public ViolationServ: ViolationService,
+    private realTimeService: RealTimeNotificationServiceService,) { }
 
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader();
@@ -44,7 +50,17 @@ export class ViolationViewComponent {
     this.activeRoute.url.subscribe(url => {
       this.path = url[0].path
     });
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
 
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToViolation() {

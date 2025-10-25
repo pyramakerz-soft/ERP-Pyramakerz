@@ -9,13 +9,12 @@ import { ApiService } from '../../../../../Services/api.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-
 import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-table.component';
 import { DatePipe } from '@angular/common';
 import { HygieneTypesService } from '../../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
 import { firstValueFrom } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-view-hygiene-form',
@@ -43,8 +42,9 @@ export class ViewHygieneFormComponent implements OnInit {
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-   private languageService: LanguageService,
-    private hygieneTypesService: HygieneTypesService
+    private languageService: LanguageService,
+    private hygieneTypesService: HygieneTypesService,
+    private realTimeService: RealTimeNotificationServiceService
 
   ) {}
 
@@ -60,7 +60,12 @@ export class ViewHygieneFormComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
 
 

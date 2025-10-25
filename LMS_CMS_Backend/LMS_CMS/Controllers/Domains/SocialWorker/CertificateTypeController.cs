@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Lesson Resources Types" }
+         pages: new[] { "Certificate Types" }
        )]
         public async Task<IActionResult> Get()
         {
@@ -77,7 +78,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Certificate Types" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -118,7 +119,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Medal" }
+            pages: new[] { "Certificate Types" }
         )]
         public async Task<IActionResult> Add([FromForm] CertificateTypeAddDTO NewCertificate)
         {
@@ -194,7 +195,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
              allowEdit: 1,
-            pages: new[] { "Medal" }
+            pages: new[] { "Certificate Types" }
         )]
         public async Task<IActionResult> Edit([FromForm] CertificateTypeEditDTO NewCertificate)
         {
@@ -213,7 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (NewCertificate == null)
             {
-                return BadRequest("Medal cannot be null");
+                return BadRequest("Certificate Types cannot be null");
             }
 
 
@@ -231,12 +232,12 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             string imageLinkExists = medal.File;
             if (medal == null || medal.IsDeleted == true)
             {
-                return NotFound("No Medal with this ID");
+                return NotFound("No Certificate Types with this ID");
             }
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Certificate Types", roleId, userId, medal);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -307,7 +308,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Medal" }
+            pages: new[] { "Certificate Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -340,7 +341,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Certificate Types", roleId, userId, medal);
                 if (accessCheck != null)
                 {
                     return accessCheck;

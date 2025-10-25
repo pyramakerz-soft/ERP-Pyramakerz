@@ -20,6 +20,7 @@ import { LessonActivityTypeService } from '../../../../Services/Employee/LMS/les
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson-activity',
   standalone: true,
@@ -67,7 +68,8 @@ export class LessonActivityComponent {
     public lessonService:LessonService,
     private sanitizer: DomSanitizer,
     public lessonActivityTypeService:LessonActivityTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -99,6 +101,17 @@ export class LessonActivityComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
   
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -209,7 +222,9 @@ export class LessonActivityComponent {
   }
   
   validateNumber(event: any, field: keyof LessonActivity): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.lessonActivity[field] === 'string') {

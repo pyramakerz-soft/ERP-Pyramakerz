@@ -1,0 +1,542 @@
+<div class="flex">
+    <div class="w-[20%] max-h-[87vh] overflow-y-auto overflow-x-hidden">  
+        <div class="flex justify-between items-center m-5">
+            <h3 class="primaryTxt font-semibold m-5">Messages</h3> 
+            <div class="flex space-x-2 rtl:space-x-reverse">
+                <button (click)="sendMessage()"
+                    class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                    Send Message
+                </button>
+            </div>
+        </div> 
+        <ul> 
+            <li *ngFor="let chatMessage of chatMessages; let i = index" class="relative cursor-pointer" (click)="showChat(chatMessage)">
+                <div> 
+                    <div *ngIf="chatMessage.unreadCount > 0"
+                        class="absolute top-2 left-2 w-5 h-5 border border-[#4d8db4] bg-[#8ccff8b6] text-blue-700 text-xs font-bold rounded-full flex items-center justify-center z-10">
+                        {{ chatMessage.unreadCount }}
+                    </div>
+                    <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot && chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type}">
+                        <div class="flex-shrink-0">
+                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                        </div>
+                        <div class="ml-4 text-start w-full"> 
+                            <p *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span> Sent you a message</p>
+                            <p *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.receiverEnglishName }}</span></p>
+                            <div class="mt-4 flex flex-col space-y-3">
+                                <div *ngIf="chatMessage.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
+                                    {{chatMessage.message}}
+                                </div> 
+                                <div *ngIf="chatMessage.chatMessageAttachments.length != 0" class="space-y-2">
+                                    <div *ngIf="chatMessage.chatMessageAttachments.length === 1" class="flex space-x-2 rtl:space-x-reverse items-center">
+                                        <img src="Images/Icon frame.png" 
+                                            class="border p-[4px] w-10 h-10 rounded-md object-contain" 
+                                            alt="File icon">
+                                        <span class="primaryTxt text-sm font-semibold truncate max-w-[150px]">
+                                            {{getFileName(chatMessage.chatMessageAttachments[0].fileLink)}}
+                                        </span>
+                                    </div>
+                                    <div *ngIf="chatMessage.chatMessageAttachments.length > 1" class="flex items-center space-x-2 rtl:space-x-reverse">
+                                        <div class="flex space-x-1 rtl:space-x-reverse">
+                                            <div *ngFor="let att of chatMessage.chatMessageAttachments | slice:0:1" class="relative">
+                                                <img src="Images/Icon frame.png" 
+                                                    class="border p-1 w-8 h-8 rounded-md object-contain" 
+                                                    alt="File icon">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gray-200 rounded-full px-2 py-1">
+                                            <span class="primaryTxt text-xs font-semibold">
+                                                +{{chatMessage.chatMessageAttachments.length - 1}} files
+                                            </span>
+                                        </div> 
+                                    </div>
+                                </div>  
+                            </div>
+                            <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(chatMessage.insertedAt) }}</p>
+                        </div> 
+                    </div>
+                </div> 
+            </li>
+            <li *ngIf="chatMessages.length == 0"> 
+                <div class="flex justify-center">
+                    <p class="text-[#BDBDBD]">No Messages Yet</p>
+                </div>  
+            </li>
+        </ul>  
+    </div>
+    <div *ngIf="isConversationOpen" class="w-[80%] h-[87vh] overflow-x-hidden flex flex-col justify-between">
+        <div class="py-6 px-8 flex space-x-3 rtl:space-x-reverse items-center border-b shadow-sm">
+            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+            <p class="primaryTxt text-sm font-semibold">{{ englishNameForConversation }}</p>
+        </div>
+
+        <div class="py-5 px-8 flex flex-col-reverse h-[70vh] overflow-y-auto">
+            <div *ngFor="let conv of conversation; let i = index" class="flex"
+            [ngClass]="{'justify-start': conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type, 
+                    'justify-end': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type
+                }"> 
+                <div class="w-full flex items-start space-x-3" [ngClass]="{'mb-5': i != conversation.length,
+                    'flex-row-reverse space-x-reverse': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type
+                }">
+                    <div class="flex-shrink-0">
+                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-11" alt="Profile Photo">
+                    </div>
+                    <div class="flex flex-col max-w-[66%] text-start">
+                        <div *ngIf="conv.forwardedOrNot && conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type">
+                            <p class="text-[#BDBDBD] text-sm font-semibold mt-2"
+                            [ngClass]="{'text-right': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
+                                Forwarded
+                            </p>
+                        </div>
+                        <div>
+                            <div *ngIf="conv.message" class="rounded-lg py-3 px-4" 
+                            [ngClass]="{'primaryTxt bg-white': conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type, 
+                                        'primaryBg text-white': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
+                                <p>{{conv.message}}</p>
+                            </div>
+                            <div *ngIf="conv.chatMessageAttachments.length > 0" class="mt-2"> 
+                                <div class="flex flex-wrap gap-2 w-full"
+                                 [ngClass]="{'justify-end': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
+                                    <div *ngFor="let attachment of conv.chatMessageAttachments" class="relative"> 
+                                        <div *ngIf="isImageFile(getFileType(attachment.fileLink))" class="rounded border overflow-hidden bg-gray-100 h-full"
+                                        (click)="downloadImage(attachment.fileLink, getFileName(attachment.fileLink))">
+                                            <img [src]="attachment.fileLink" 
+                                                [alt]="getFileName(attachment.fileLink)"
+                                                class="w-52 object-cover cursor-pointer"> 
+                                            <div class="absolute bottom-1 right-1 bg-white rounded-full py-1 px-2 shadow-md">
+                                                <i class="fas fa-download text-gray-600 text-xs cursor-pointer"
+                                                (click)="downloadImage(attachment.fileLink, getFileName(attachment.fileLink))"></i>
+                                            </div>
+                                        </div>
+     
+                                        <div *ngIf="!isImageFile(getFileType(attachment.fileLink))" 
+                                            class="rounded border bg-gray-100 p-2 w-52 h-full flex flex-col items-center justify-center cursor-pointer"
+                                            (click)="downloadFile(attachment.fileLink, getFileName(attachment.fileLink))">
+                                            
+                                            <img src="Images/FileAttached.png" class="w-8 h-8 object-contain mb-1">
+                                            
+                                            <span class="text-xs text-gray-600 text-center font-medium">
+                                                {{getFileType(attachment.fileLink)}}
+                                            </span>
+                                            
+                                            <div class="absolute bottom-1 right-1 bg-white rounded-full py-1 px-2 shadow-md">
+                                                <i class="fas fa-download text-gray-600 text-xs"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[#BDBDBD] text-sm font-semibold mt-2"
+                                [ngClass]="{'text-right': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
+                                    {{ formatInsertedAt(conv.insertedAt) }}
+                                </p>
+                            </div> 
+                        </div>
+                    </div>
+                    <div (click)="ForwardMessage(conv)">
+                        <p class="text-[#BDBDBD] text-sm font-semibold mt-2 cursor-pointer"
+                        [ngClass]="{'text-right': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
+                            <i class="fa-solid fa-share text-lg" 
+                            [ngStyle]="conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type ? {'transform': 'scaleX(-1)'} : {}" ></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="p-8 rounded-md bg-[#F7F7F7] flex items-center space-x-4 rtl:space-x-reverse">
+                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                <div class="p-8 rounded-md bg-white flex items-center space-x-3 px-6 py-3 w-full">
+                    <div class="w-full">
+                        <textarea class="w-full" placeholder="Write your message here..." [(ngModel)]="messageToBeSend.message"></textarea>
+                        
+                        <div *ngIf="messageToBeSend.chatMessageAttachmentFiles?.length" class="mt-3 space-y-2">
+                            <div *ngFor="let file of messageToBeSend.chatMessageAttachmentFiles; let i = index" class="flex items-center justify-between bg-white border p-2 rounded">
+                                <img src="Images/Icon frame.png" 
+                                        class="border p-1 w-8 h-8 rounded-md object-contain" 
+                                        alt="File icon">
+                                <span class="text-sm text-gray-700 truncate w-3/4">{{ file.name }}</span>
+                                <button (click)="removeFile(i)" class="text-red-500 hover:underline text-xs"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="fileToSend">
+                            <i class="fa-solid fa-paperclip text-gray-400 cursor-pointer"></i>
+                        </label>
+                        <input id="fileToSend" type="file" class="hidden" multiple
+                            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
+                            (change)="onFileSelected($event)" />
+                    </div>
+   
+                    <button [disabled]="isLoading" (click)="SendOneMessage()"> 
+                        <i *ngIf="!isLoading" class="fa-solid fa-paper-plane text-gray-400 cursor-pointer" style="transform: rotate(47deg);"></i>
+                        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
+
+<div id="sendMessage" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Send Message</h1> 
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div *ngIf="User_Data_After_Login.type == 'employee'" class="w-full m-auto mt-5"> 
+                <div class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
+                    <div>
+                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        (click)="selectType(2)">
+                    </div>
+                    <div>
+                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        (click)="selectType(3)">
+                    </div>
+                    <div>
+                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        (click)="selectType(1)">
+                    </div>
+                </div> 
+            </div>
+            
+            <div *ngIf="User_Data_After_Login.type != 'employee'" class="w-full my-5 flex space-x-5 rtl:space-x-reverse justify-center">  
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(2)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isTeacherHovered,
+                            'text-gray-500': !isTeacherHovered }" class="cursor-pointer pb-1 transition-all"> 
+                        Teacher
+                    </p>
+                </div>
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(1)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isEmployeeHovered,
+                            'text-gray-500': !isEmployeeHovered
+                        }" class="cursor-pointer pb-1 transition-all">
+                        Employee
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <div *ngIf="isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="Department">Department</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                        [(ngModel)]="messageToBeSend.userFilters.departmentID" (change)="onDepartmentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Department</option>
+                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.departmentID, 'primaryTxt': messageToBeSend.userFilters.departmentID }">Employee</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="messageToBeSend.userFilters.employeeID"
+                        [disabled]="!messageToBeSend.userFilters.departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.departmentID }">
+                            <option [value]="0" disabled selected hidden>Choose Employee</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div *ngIf="!isEmployeeHovered && User_Data_After_Login.type =='employee'" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="School">School</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School" 
+                        [(ngModel)]="messageToBeSend.userFilters.schoolID" (change)="onSchoolChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose School</option>
+                            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                            <option *ngIf="schools.length === 0" disabled selected> No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.schoolID, 'primaryTxt': messageToBeSend.userFilters.schoolID }">Section</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Section" 
+                        [(ngModel)]="messageToBeSend.userFilters.sectionID" (change)="onSectionChange($event)"
+                        [disabled]="!messageToBeSend.userFilters.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.schoolID }">
+                            <option [value]="0" disabled selected hidden>Choose Section</option>
+                            <option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</option>
+                            <option *ngIf="sections.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.sectionID, 'primaryTxt': messageToBeSend.userFilters.sectionID }">Grade</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" 
+                        [(ngModel)]="messageToBeSend.userFilters.gradeID" (change)="onGradeChange($event)"
+                        [disabled]="!messageToBeSend.userFilters.sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.sectionID }">
+                            <option [value]="0" disabled selected hidden>Choose Grade</option>
+                            <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                            <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.gradeID, 'primaryTxt': messageToBeSend.userFilters.gradeID }">Classroom</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroom" 
+                        [(ngModel)]="messageToBeSend.userFilters.classroomID" (change)="onClassroomChange($event)"
+                        [disabled]="!messageToBeSend.userFilters.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.gradeID }">
+                            <option [value]="0" disabled selected hidden>Choose Classroom</option>
+                            <option *ngFor="let classroom of classrooms" [value]="classroom.id">{{ classroom.name }}</option>
+                            <option *ngIf="classrooms.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.classroomID, 'primaryTxt': messageToBeSend.userFilters.classroomID }">Student</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
+                        [(ngModel)]="messageToBeSend.userFilters.studentID"
+                        [disabled]="!messageToBeSend.userFilters.classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.classroomID }">
+                            <option [value]="0" disabled selected hidden>Choose Student</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div> 
+
+                <div *ngIf="isTeacherHovered" class="w-full">
+                    <div *ngIf="User_Data_After_Login.type == 'parent'" class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="StudentParent">Student</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="StudentParent" 
+                        [(ngModel)]="messageToBeSend.userFilters.studentID" (change)="onStudentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Student</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Subject" [ngClass]="{ 'text-gray-400': !messageToBeSend.userFilters.studentID, 'primaryTxt': messageToBeSend.userFilters.studentID }">Subject</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject" 
+                        [(ngModel)]="subjectID" (change)="onSubjectChange($event)"
+                        [disabled]="!messageToBeSend.userFilters.studentID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeSend.userFilters.studentID }">
+                            <option [value]="0" disabled selected hidden>Choose Subject</option>
+                            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.en_name }}</option>
+                            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Teacher" [ngClass]="{ 'text-gray-400': !subjectID, 'primaryTxt': subjectID }">Teacher</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Teacher" [(ngModel)]="messageToBeSend.userFilters.employeeID"
+                        [disabled]="!subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !subjectID }">
+                            <option [value]="0" disabled selected hidden>Choose Teacher</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div> 
+    
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="text">Message</label>
+                    <input id="text" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                    placeholder="Enter Message" [(ngModel)]="messageToBeSend.message" /> 
+                </div>  
+                <div class="w-full mb-4"> 
+                    <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+                        <div class="flex justify-center w-full">
+                            <label for="fileFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                                <img *ngIf="!messageToBeSend.chatMessageAttachmentFiles?.length" src="Images/Icon frame.png" class="w-1/4">
+                                <img *ngIf="messageToBeSend.chatMessageAttachmentFiles?.length" src="Images/FileAttached.png" class="w-1/4"> 
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload Multi Files</span></p>
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(Max. File size: 25 MB)</p>
+                            </label>
+                            <input id="fileFile" type="file" class="hidden" 
+                            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
+                            multiple (change)="onFileSelected($event)" />
+                        </div>
+                    </div> 
+                </div>   
+                <div *ngIf="messageToBeSend.chatMessageAttachmentFiles?.length" class="mt-3 space-y-2">
+                    <div *ngFor="let file of messageToBeSend.chatMessageAttachmentFiles; let i = index" class="flex items-center justify-between bg-white border p-2 rounded">
+                        <img src="Images/Icon frame.png" 
+                                class="border p-1 w-8 h-8 rounded-md object-contain" 
+                                alt="File icon">
+                        <span class="text-sm text-gray-700 truncate w-3/4">{{ file.name }}</span>
+                        <button (click)="removeFile(i)" class="text-red-500 hover:underline text-xs"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Send()">
+                <span *ngIf="!isLoading">Send</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+ 
+
+<div id="forwardMessage" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Forward Message</h1> 
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div *ngIf="User_Data_After_Login.type == 'employee'" class="w-full m-auto mt-5"> 
+                <div class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
+                    <div>
+                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        (click)="selectType(2)">
+                    </div>
+                    <div>
+                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        (click)="selectType(3)">
+                    </div>
+                    <div>
+                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        (click)="selectType(1)">
+                    </div>
+                </div> 
+            </div>
+            
+            <div *ngIf="User_Data_After_Login.type != 'employee'" class="w-full my-5 flex space-x-5 rtl:space-x-reverse justify-center">  
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(2)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isTeacherHovered,
+                            'text-gray-500': !isTeacherHovered }" class="cursor-pointer pb-1 transition-all"> 
+                        Teacher
+                    </p>
+                </div>
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(1)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isEmployeeHovered,
+                            'text-gray-500': !isEmployeeHovered
+                        }" class="cursor-pointer pb-1 transition-all">
+                        Employee
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <div *ngIf="isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="DepartmentForward">Department</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.departmentID" (change)="onDepartmentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Department</option>
+                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="employeeForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.departmentID, 'primaryTxt': messageToBeForwarded.userFilters.departmentID }">Employee</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeForward" [(ngModel)]="messageToBeForwarded.userFilters.employeeID"
+                        [disabled]="!messageToBeForwarded.userFilters.departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.departmentID }">
+                            <option [value]="0" disabled selected hidden>Choose Employee</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div *ngIf="!isEmployeeHovered && User_Data_After_Login.type =='employee'" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="SchoolForward">School</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SchoolForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.schoolID" (change)="onSchoolChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose School</option>
+                            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                            <option *ngIf="schools.length === 0" disabled selected> No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="SectionForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.schoolID, 'primaryTxt': messageToBeForwarded.userFilters.schoolID }">Section</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SectionForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.sectionID" (change)="onSectionChange($event)"
+                        [disabled]="!messageToBeForwarded.userFilters.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.schoolID }">
+                            <option [value]="0" disabled selected hidden>Choose Section</option>
+                            <option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</option>
+                            <option *ngIf="sections.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="gradeForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.sectionID, 'primaryTxt': messageToBeForwarded.userFilters.sectionID }">Grade</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="gradeForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.gradeID" (change)="onGradeChange($event)"
+                        [disabled]="!messageToBeForwarded.userFilters.sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.sectionID }">
+                            <option [value]="0" disabled selected hidden>Choose Grade</option>
+                            <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                            <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="classroomForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.gradeID, 'primaryTxt': messageToBeForwarded.userFilters.gradeID }">Classroom</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroomForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.classroomID" (change)="onClassroomChange($event)"
+                        [disabled]="!messageToBeForwarded.userFilters.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.gradeID }">
+                            <option [value]="0" disabled selected hidden>Choose Classroom</option>
+                            <option *ngFor="let classroom of classrooms" [value]="classroom.id">{{ classroom.name }}</option>
+                            <option *ngIf="classrooms.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="studentForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.classroomID, 'primaryTxt': messageToBeForwarded.userFilters.classroomID }">Student</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.studentID"
+                        [disabled]="!messageToBeForwarded.userFilters.classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.classroomID }">
+                            <option [value]="0" disabled selected hidden>Choose Student</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div> 
+
+                <div *ngIf="isTeacherHovered" class="w-full">
+                    <div *ngIf="User_Data_After_Login.type == 'parent'" class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="StudentParentForward">Student</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="StudentParentForward" 
+                        [(ngModel)]="messageToBeForwarded.userFilters.studentID" (change)="onStudentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Student</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="SubjectForward" [ngClass]="{ 'text-gray-400': !messageToBeForwarded.userFilters.studentID, 'primaryTxt': messageToBeForwarded.userFilters.studentID }">Subject</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SubjectForward" 
+                        [(ngModel)]="subjectID" (change)="onSubjectChange($event)"
+                        [disabled]="!messageToBeForwarded.userFilters.studentID" [ngClass]="{ 'bg-[#EBEBEB]': !messageToBeForwarded.userFilters.studentID }">
+                            <option [value]="0" disabled selected hidden>Choose Subject</option>
+                            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.en_name }}</option>
+                            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="TeacherForward" [ngClass]="{ 'text-gray-400': !subjectID, 'primaryTxt': subjectID }">Teacher</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="TeacherForward" [(ngModel)]="messageToBeForwarded.userFilters.employeeID"
+                        [disabled]="!subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !subjectID }">
+                            <option [value]="0" disabled selected hidden>Choose Teacher</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div>  
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Forward()">
+                <span *ngIf="!isLoading">Forward</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

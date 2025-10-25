@@ -16,7 +16,7 @@
         <div class="flex flex-col">
             <select [(ngModel)]="medicalHistory.schoolId"
                 (change)="onSchoolChange($event); clearValidationError('schoolId')"
-                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3">
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                 <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
             </select>
@@ -30,7 +30,7 @@
         <div class="flex flex-col">
             <select [(ngModel)]="medicalHistory.gradeId"
                 (change)="onGradeChange($event); clearValidationError('gradeId')"
-                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                 [disabled]="!medicalHistory.schoolId">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                 <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
@@ -45,7 +45,7 @@
         <div class="flex flex-col">
             <select [(ngModel)]="medicalHistory.classRoomID"
                 (change)="onClassChange($event); clearValidationError('classRoomID')"
-                class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                 [disabled]="!medicalHistory.gradeId">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                 <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
@@ -59,14 +59,14 @@
         <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Student' | translate }}</h6>
         <div class="flex flex-col">
 
-<select [(ngModel)]="medicalHistory.studentId" (change)="clearValidationError('studentId')"
-    class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
-    [disabled]="!medicalHistory.classRoomID">
-    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
-    <option *ngFor="let student of students" [value]="student.id" [selected]="medicalHistory.studentId === student.id">
-        {{ student.name }}
-    </option>
-</select>
+        <select [(ngModel)]="medicalHistory.studentId" (change)="clearValidationError('studentId')"
+            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [disabled]="!medicalHistory.classRoomID">
+            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id" [selected]="medicalHistory.studentId === student.id">
+                {{ student.name }}
+            </option>
+        </select>
             <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['studentId'] }}
             </span>

@@ -25,6 +25,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject',
   standalone: true,
@@ -67,6 +68,7 @@ export class SubjectComponent {
   IsView: boolean = false;
 
   constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService,
     private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
     public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog) { }
@@ -100,6 +102,14 @@ export class SubjectComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }  
+
   // getSubjectData() {
   //   this.subjectService.Get(this.DomainName).subscribe(
   //     (data) => {
@@ -109,10 +119,12 @@ export class SubjectComponent {
   // }
 
   GetDate() {
-    this.IsView = true
-    this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      this.subjectData = d;
-    })
+    if(this.SelectedGradeId){
+      this.IsView = true
+      this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+        this.subjectData = d;
+      })
+    }
   }
 
   getAllGradesBySchoolId() {

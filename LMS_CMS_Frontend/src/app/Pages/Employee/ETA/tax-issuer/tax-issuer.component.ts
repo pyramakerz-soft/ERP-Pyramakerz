@@ -14,6 +14,7 @@ import { TaxTypeService } from '../../../../Services/Employee/ETA/tax-type.servi
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-tax-issuer',
   standalone: true,
@@ -40,7 +41,8 @@ export class TaxIssuerComponent {
     public countryService: CountryService,     
     public taxTypeService: TaxTypeService,     
     public taxIssuerService: TaxIssuerService,
-     private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -56,6 +58,13 @@ export class TaxIssuerComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetById(){

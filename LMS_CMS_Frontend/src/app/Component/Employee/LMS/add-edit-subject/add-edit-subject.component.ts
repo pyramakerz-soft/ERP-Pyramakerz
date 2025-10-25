@@ -37,8 +37,8 @@ export class AddEditSubjectComponent {
   Grades: Grade[] = []
   subjectCategories:SubjectCategory[] = []
   isLoading = false;
-    isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
 
   constructor( private languageService: LanguageService,public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService, public dialogRef: MatDialogRef<AddEditSubjectComponent>, 
     public schoolService: SchoolService, public sectionService:SectionService, public gradeService:GradeService, public ApiServ:ApiService,
@@ -50,16 +50,19 @@ export class AddEditSubjectComponent {
   }
       
   ngOnInit(){
+    const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+    this.languageService.setLanguage(currentDir);
+    this.isRtl = document.documentElement.dir === 'rtl';
+    
     this.DomainName = this.ApiServ.GetHeader();
     if(this.editSubject){
       this.GetSubjectById(this.subjectId)
-    }
+    } 
     this.getSubjectCategoryData() 
     this.getSchools()
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectById(subjectId: number) {
@@ -190,6 +193,18 @@ export class AddEditSubjectComponent {
     }
   }
 
+  validateNumberOnly(event: any, field: keyof Subject): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.subject[field] === 'string') {
+        this.subject[field] = '' as never;  
+      }
+    }
+  }
+
   onIsHideChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.subject.hideFromGradeReport = isChecked
@@ -252,7 +267,13 @@ export class AddEditSubjectComponent {
                   this.closeDialog();
                 },
                 error => {
-                  this.isLoading = false;
+                  this.isLoading = false; 
+                  Swal.fire({
+                    icon: 'error',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
                 }
               );
             });
@@ -262,7 +283,13 @@ export class AddEditSubjectComponent {
                 this.closeDialog();
               },
               error => {
-                this.isLoading = false;
+                this.isLoading = false; 
+                Swal.fire({
+                  icon: 'error',
+                  text: error.error,
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
               }
             );
           }       
@@ -272,7 +299,13 @@ export class AddEditSubjectComponent {
               this.closeDialog()
             },
             error => {
-              this.isLoading = false;
+              this.isLoading = false; 
+              Swal.fire({
+                icon: 'error',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
             }
           );
         }  

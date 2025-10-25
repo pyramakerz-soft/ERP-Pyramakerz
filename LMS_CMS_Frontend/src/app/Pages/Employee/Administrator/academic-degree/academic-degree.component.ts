@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-academic-degree',
   standalone: true,
@@ -25,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './academic-degree.component.css',
 })
 export class AcademicDegreeComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -72,7 +62,8 @@ export class AcademicDegreeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AcademicDegreeServ: AcademicDegreeService,
-        private languageService: LanguageService  
+        private languageService: LanguageService  ,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,6 +89,14 @@ export class AcademicDegreeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+    ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
 
   GetAllData() {
     this.TableData = [];

@@ -14,10 +14,14 @@ import { CommonModule } from '@angular/common';
 import { ParentMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-parent-medical-history-modal',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule , TranslateModule],
   standalone: true,
   templateUrl: './medical-history-modal.component.html',
   styleUrls: ['./medical-history-modal.component.css'],
@@ -41,16 +45,32 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     en_name: ''
   };
   firstReportPreview: File | null = null;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   secReportPreview: File | null = null;
   validationErrors: { [key: string]: string } = {};
   isSaving: boolean = false;
 
   constructor(
     private medicalHistoryService: MedicalHistoryService,
-    private apiService: ApiService
+    private languageService: LanguageService,
+    private apiService: ApiService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['medicalHistoryData']) {

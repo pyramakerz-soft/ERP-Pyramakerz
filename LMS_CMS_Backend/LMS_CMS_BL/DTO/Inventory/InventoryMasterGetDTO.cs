@@ -43,10 +43,13 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? QrImage { get; set; }
         public long? SaveID { get; set; }
         public long? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
         public long? SchoolPCId { get; set; }
+        public string? SchoolPCName { get; set; }
         public long? SupplierId { get; set; }
         public long? BankID { get; set; }
         public long? StoreToTransformId { get; set; }
+        public string? StoreToTransformName { get; set; }
         public string? StoreName { get; set; }
         public string? StudentName { get; set; }
         public string? SupplierName { get; set; }

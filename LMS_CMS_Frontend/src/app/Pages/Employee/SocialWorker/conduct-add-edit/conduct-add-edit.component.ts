@@ -27,7 +27,9 @@ import { ProcedureTypeService } from '../../../../Services/Employee/SocialWorker
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import Swal from 'sweetalert2';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-conduct-add-edit',
   standalone: true,
@@ -41,6 +43,8 @@ export class ConductAddEditComponent {
 
   DomainName: string = '';
   UserID: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   ConductID: number = 0;
   Data: Conduct = new Conduct();
@@ -61,6 +65,7 @@ export class ConductAddEditComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -71,6 +76,7 @@ export class ConductAddEditComponent {
     private ConductTypeServ: ConductTypeService,
     private ProcedureTypeServ: ProcedureTypeService,
     private ConductServ: ConductService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -119,6 +125,19 @@ export class ConductAddEditComponent {
         }
       });
     }
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   openFile(file: any) {
@@ -193,7 +212,7 @@ export class ConductAddEditComponent {
   }
 
   moveToConduct() {
-    this.router.navigateByUrl('Employee/Conduct');
+    this.router.navigateByUrl('Employee/Conducts');
   }
 
   Save() {
@@ -287,6 +306,7 @@ export class ConductAddEditComponent {
   }
 
   onImageFileSelected(event: any) {
+    console.log("event",event)
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 
