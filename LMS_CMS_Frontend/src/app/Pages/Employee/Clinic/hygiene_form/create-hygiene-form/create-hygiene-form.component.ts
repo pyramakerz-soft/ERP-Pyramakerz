@@ -66,10 +66,29 @@ export class CreateHygieneFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadHygieneTypes();
     this.loadSchools();
-         this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
+      this.retranslateValidationErrors();
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+ 
+  private retranslateValidationErrors(): void {
+    if (!this.validationErrors || Object.keys(this.validationErrors).length === 0) {
+      return;
+    }
+
+    const fieldNameMap: { [key: string]: string } = {
+      school: 'School',
+      grade: 'Grade',
+      class: 'Class',
+      date: 'Date',
+    };
+
+    for (const key of Object.keys(this.validationErrors)) {
+      const field = fieldNameMap[key] || key;
+      this.validationErrors[key] = this.getRequiredErrorMessage(field);
+    }
   }
 
   ngOnDestroy(): void {
@@ -78,6 +97,18 @@ export class CreateHygieneFormComponent implements OnInit {
         this.subscription.unsubscribe();
       }
   } 
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 
   private showErrorAlert(errorMessage: string) {
   const translatedTitle = this.translate.instant('Error');
@@ -228,19 +259,19 @@ validateForm(): boolean {
   let isValid = true;
 
   if (!this.selectedSchool) {
-    this.validationErrors['school'] = `${this.translate.instant('Field is required')} ${this.translate.instant('school')}`;
+    this.validationErrors['school'] = this.getRequiredErrorMessage('School');
     isValid = false;
   }
   if (!this.selectedGrade) {
-    this.validationErrors['grade'] = `${this.translate.instant('Field is required')} ${this.translate.instant('grade')}`;
+    this.validationErrors['grade'] = this.getRequiredErrorMessage('Grade');
     isValid = false;
   }
   if (!this.selectedClass) {
-    this.validationErrors['class'] = `${this.translate.instant('Field is required')} ${this.translate.instant('class')}`;
+    this.validationErrors['class'] = this.getRequiredErrorMessage('Class');
     isValid = false;
   }
   if (!this.selectedDate) {
-    this.validationErrors['date'] = `${this.translate.instant('Field is required')} ${this.translate.instant('date')}`;
+    this.validationErrors['date'] = this.getRequiredErrorMessage('Date');
     isValid = false;
   }
 

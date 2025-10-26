@@ -490,10 +490,10 @@ export class ElectronicInvoiceComponent implements OnInit {
   async sendAll() {
     if (this.selectedInvoices.length === 0) {
       Swal.fire({
-        title: 'No Selection',
-        text: 'Please select at least one invoice to send',
+        title: this.translate.instant('No Selection'),
+        text: this.translate.instant('Please select at least one invoice to send'),
         icon: 'warning',
-        confirmButtonText: 'OK',
+        confirmButtonText: this.translate.instant('OK'),
       });
       return;
     }
@@ -517,13 +517,13 @@ export class ElectronicInvoiceComponent implements OnInit {
       await firstValueFrom(serviceCall);
 
       Swal.fire(
-        'Success',
-        `Invoices ${
-          this.currentSystem === 'zatca'
-            ? 'reported to ZATCA'
-            : 'submitted to ETA'
-        } successfully`,
-        'success'
+        this.translate.instant('Success'),
+        `${this.translate.instant('Invoice')} ${
+          this.currentSystem == 'zatca'
+            ? this.translate.instant('reported to ZATCA')
+            : this.translate.instant('submitted to ETA')
+        } ${this.translate.instant('successfully')}`,
+        this.translate.instant('success')
       );
 
       this.transactions.forEach((t) => {
@@ -543,9 +543,9 @@ export class ElectronicInvoiceComponent implements OnInit {
       }
 
       this.handleError(
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
-        } invoices`,
+        `${this.translate.instant('Failed to')} ${
+          this.currentSystem == 'zatca' ? this.translate.instant('report') : this.translate.instant('submit')
+        } ${this.translate.instant('invoice')}`,
         error
       );
       Swal.fire('Error', errorMessage, 'error');

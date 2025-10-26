@@ -94,6 +94,17 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
   private showErrorAlert(errorMessage: string) {
   const translatedTitle = this.translate.instant('Error');
   const translatedButton = this.translate.instant('Okay');

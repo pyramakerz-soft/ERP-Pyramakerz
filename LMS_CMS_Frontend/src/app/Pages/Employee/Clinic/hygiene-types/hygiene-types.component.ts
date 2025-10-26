@@ -66,6 +66,17 @@ export class HygieneTypesComponent implements OnInit {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
   private showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
@@ -199,6 +210,23 @@ export class HygieneTypesComponent implements OnInit {
   }
 
   deleteHygieneType(row: any) {
+      const translatedTitle = this.translate.instant('Are you sure?');
+      const translatedText = this.translate.instant('You will not be able to recover this item!');
+      const translatedConfirm = this.translate.instant('Yes, delete it!');
+      const translatedCancel = this.translate.instant('No, keep it');
+      const successMessage = this.translate.instant('Deleted successfully');
+    
+      Swal.fire({
+        title: translatedTitle,
+        text: translatedText,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: translatedConfirm,
+        cancelButtonText: translatedCancel,
+      }).then((result) => {
+        if (result.isConfirmed) {
     this.hygieneTypesService.Delete(row.id, this.DomainName).subscribe({
       next: (response) => {
         this.getHygieneTypes();
@@ -213,13 +241,13 @@ export class HygieneTypesComponent implements OnInit {
       },
     });
   }
+    });
+  }
 
   validateForm(): boolean {
     let isValid = true;
     if (!this.hygieneType.type) {
-      this.validationErrors['name'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('type')}`;
+      this.validationErrors['name'] = this.getRequiredErrorMessage('Hygiene Type');
       isValid = false;
     } else {
       this.validationErrors['name'] = '';

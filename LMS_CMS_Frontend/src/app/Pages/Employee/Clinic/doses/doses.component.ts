@@ -55,6 +55,17 @@ export class DosesComponent implements OnInit {
       }
     } 
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
     private showErrorAlert(errorMessage: string) {
   const translatedTitle = this.translate.instant('Error');
   const translatedButton = this.translate.instant('Okay');
@@ -190,11 +201,13 @@ deleteDose(row: Dose) {
 validateForm(): boolean {
   this.validationErrors = {};
   if (!this.dose.doseTimes) {
-    this.validationErrors['doseTimes'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Dose')}`;
+    this.validationErrors['doseTimes'] = this.getRequiredErrorMessage('Dose');
     return false;
   }
   return true;
 }
+
+
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;
     (this.dose as any)[field] = value;
