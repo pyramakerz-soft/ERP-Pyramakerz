@@ -282,6 +282,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<Grade, GradeGetDTO>()
                 .ForMember(dest => dest.SectionName, opt => opt.MapFrom(src => src.Section.Name))
+                .ForMember(dest => dest.UpgradeToName, opt => opt.MapFrom(src => src.UpgradeTo.Name))
                 .ForMember(dest => dest.SectionID, opt => opt.MapFrom(src => src.Section.ID));
             CreateMap<GradeGetDTO, Grade>();
 

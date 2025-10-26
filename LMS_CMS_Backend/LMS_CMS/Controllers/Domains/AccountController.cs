@@ -125,7 +125,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             //{
             //    AccessToken = accessToken,
             //    RefreshToken = refreshToken
-            //}); 
+            //});
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -345,19 +345,16 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             if (user is Employee emp)
-            {
-                // 1️⃣ Generate Access Token
+            { 
                 var accessToken = _generateJWT.Generate_Jwt_Token(
                     emp.User_Name,
                     emp.ID.ToString(),
                     UserInfo.Type,
                     emp.Role_ID.ToString()
                 );
-
-                // 2️⃣ Generate Refresh Token
+                  
                 var refreshToken = _generateJWT.GenerateRefreshToken();
-
-                // 3️⃣ Save refresh token in DB
+                 
                 var refreshTokenEntity = new RefreshTokens
                 {
                     Token = refreshToken,
@@ -369,8 +366,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
                 Unit_Of_Work.refreshTokens_Repository.Add(refreshTokenEntity);
                 Unit_Of_Work.SaveChanges();
-
-                // 4️⃣ Return both tokens
+                 
                 return Ok(new
                 {
                     AccessToken = accessToken,

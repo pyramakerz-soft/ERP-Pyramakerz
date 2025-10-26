@@ -25,6 +25,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public int? WED { get; set; }
         public int? THRU { get; set; }
         public int? FRI { get; set; }
+        public long? UpgradeToID { get; set; }
+        public string UpgradeToName { get; set; }
+
         public long? InsertedByUserId { get; set; }
     }
 }

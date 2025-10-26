@@ -27,10 +27,7 @@ namespace LMS_CMS_PL.Controllers.Octa
 
         [HttpPost]
         public IActionResult Login([FromBody] LoginDTO UserInfo)
-        {
-            // bool isPasswordValid = BCrypt.Net.BCrypt.Verify(enteredPassword, storedHashedPassword);
-
-            Console.WriteLine(UserInfo);
+        { 
             if (UserInfo == null)
             {
                 return BadRequest("Data Can't be null");

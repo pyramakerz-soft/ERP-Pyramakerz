@@ -151,10 +151,10 @@ export class MainLayoutComponent {
               label: this.translateFunction('Time Table'),
               route: 'Time Table'
             },
-            {
-              label: this.translateFunction('Lesson Live'),
-              route: 'Lesson Live'
-            }
+            // {
+            //   label: this.translateFunction('Lesson Live'),
+            //   route: 'Lesson Live'
+            // }
           ],
           icon: 'LMS'
         }

@@ -735,6 +735,12 @@ namespace LMS_CMS_DAL.Models.Domains
                  .WithMany(p => p.Grades)
                  .HasForeignKey(p => p.SectionID)
                  .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Grade>()
+                 .HasOne(p => p.UpgradeTo)
+                 .WithMany(p => p.UpgradeTos)
+                 .HasForeignKey(p => p.UpgradeToID)
+                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Classroom>()
                  .HasOne(p => p.Grade)

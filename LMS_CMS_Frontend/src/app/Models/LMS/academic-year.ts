@@ -5,6 +5,8 @@ export class AcademicYear {
         public insertedByUserId: number = 0,
         public dateFrom: string = '',
         public dateTo: string = '',
+        public summerCourseDateFrom: string = '',
+        public summerCourseDateTo: string = '',
         public isActive: boolean = false,
         public schoolName: string = '',
         public schoolID: number = 0,

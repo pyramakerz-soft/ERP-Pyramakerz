@@ -316,8 +316,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             {
                                 List<EmployeeClocks> employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
                                 if (employeeClocks != null && employeeClocks.Count > 0)
-                                {
-                                    Console.WriteLine(day + "/");
+                                { 
                                     TimeSpan totalWorked = TimeSpan.Zero;
 
                                     foreach (var clock in employeeClocks)
@@ -423,8 +422,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                 }
                                 else
                                 {
-                                    // No clock-in: Absent
-                                    Console.WriteLine(day + "/");
+                                    // No clock-in: Absent 
                                     monthlyAttendance.DayStatusId = 2; ///////////////////////////////////////////////////////////////////////////////////// Absent
                                     Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                     Unit_Of_Work.SaveChanges();

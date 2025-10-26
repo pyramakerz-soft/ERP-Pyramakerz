@@ -91,7 +91,7 @@ export class EmployeeClocksComponent {
   }
 
 
-  private showErrorAlert(errorMessage: string) {
+  private showErrorAlert(errorMessage: string) { 
   const translatedTitle = this.translate.instant('Error');
   const translatedButton = this.translate.instant('Okay');
   
@@ -150,12 +150,13 @@ GetAllData() {
   if (this.SelectedEmployeeId && this.year && this.month) {
     this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
       (data) => {
-        this.TableData = data;
-        console.log(this.TableData ,data);
+        this.TableData = data; 
       },
       (error) => {
-        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
-        this.showErrorAlert(errorMessage);
+        if(error.status!=404){
+          const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+          this.showErrorAlert(errorMessage);
+        }
       }
     );
   }
@@ -181,8 +182,7 @@ save(): void {
         this.GetAllData();
         this.showSuccessAlert(this.translate.instant('Saved Successfully'));
       },
-      (error) => {
-        console.log(error);
+      (error) => { 
         this.isLoadingWhenEdit = false;
         const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
         this.showErrorAlert(errorMessage);
@@ -217,8 +217,7 @@ AddClockIn() {
         this.closeModal();
         this.showSuccessAlert(this.translate.instant('Saved Successfully'));
       },
-      (error) => {
-        console.log(error);
+      (error) => { 
         this.isLoading = false;
         this.closeModal();
         const errorMessage = error.error?.message || this.translate.instant('Try Again Later');

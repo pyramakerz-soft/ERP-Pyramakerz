@@ -21,5 +21,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public long SchoolID { get; set; }
         public string? SchoolName { get; set; }
         public long? InsertedByUserId { get; set; }
+
+        public DateOnly? SummerCourseDateFrom { get; set; }
+        public DateOnly? SummerCourseDateTo { get; set; }
     }
 }

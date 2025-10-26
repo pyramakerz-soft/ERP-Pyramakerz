@@ -24,6 +24,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("Section")]
         public long SectionID { get; set; }
         public Section Section { get; set; }
+        
+        [ForeignKey("UpgradeTo")]
+        public long? UpgradeToID { get; set; }
+        public Grade? UpgradeTo { get; set; }
+        
         public int? SAT { get; set; }
         public int? SUN { get; set; }
         public int? MON { get; set; }
@@ -40,6 +45,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
         public ICollection<AppointmentGrade> AppointmentGrades { get; set; } = new HashSet<AppointmentGrade>();
+        public ICollection<Grade> UpgradeTos { get; set; } = new HashSet<Grade>();
 
     }
 }

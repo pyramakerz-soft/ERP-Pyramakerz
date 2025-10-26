@@ -20,6 +20,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public Grade Grade { get; set; }
         [ForeignKey("AcademicYear")]
         public long AcademicYearID { get; set; }
-        public AcademicYear AcademicYear { get; set; }
+        public AcademicYear AcademicYear { get; set; } 
     }
 }

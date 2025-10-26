@@ -1,7 +1,8 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToSection()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Sections' | translate }} & {{ 'Grade Levels' | translate }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Sections' | translate }} & {{ 'Grade Levels' |
+            translate }}</h1>
     </div>
 </div>
 
@@ -20,10 +21,10 @@
     <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Grade Levels' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-        
+
         <button (click)="openModal()"
-        class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            {{ 'Add' | translate }}  {{ 'Grade' | translate }}
+            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            {{ 'Add' | translate }} {{ 'Grade' | translate }}
         </button>
     </div>
 </div>
@@ -33,27 +34,31 @@
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'ID' | translate }}
+                    {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'Grade Name' | translate }}
+                    {{ 'Grade Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                       {{ 'From' | translate }}  {{ 'Birthdate' | translate }}
+                    {{ 'From' | translate }} {{ 'Birthdate' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                   {{ 'To' | translate }}  {{ 'Birthdate' | translate }}
+                    {{ 'To' | translate }} {{ 'Birthdate' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Actions' | translate }}
+                    {{ 'Upgrade To' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="gradeData.length === 0">
-                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                      {{ 'No Data Found' | translate }}
+                <td colspan="6"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -66,6 +71,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.dateFrom }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.dateTo }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.upgradeToName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
@@ -85,85 +91,133 @@
 
 <!-- Add-Edit Grade Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editGrade" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }}  {{ 'Grade' | translate }}</h1>
-            <h1 *ngIf="editGrade" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }}  {{ 'Grade' | translate }}</h1>
-            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+            <h1 *ngIf="!editGrade" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Grade' |
+                translate }}</h1>
+            <h1 *ngIf="editGrade" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Grade' |
+                translate }}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
-        
+
         <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="name">  {{ 'Grade Name' | translate }}</label>
-                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter' | translate }} {{ 'Grade Name' | translate }}"
-                [(ngModel)]="grade.name" 
-                (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
-                <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Grade Name' | translate }}</label>
+                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder=" {{ 'Enter' | translate }} {{ 'Grade Name' | translate }}" [(ngModel)]="grade.name"
+                    (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
+                <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name']
+                    }}</span>
             </div>
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="dateFrom">   {{ 'From' | translate }} {{ 'Birthdate' | translate }}</label>
-                <input id="dateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'From' | translate }} {{ 'Birthdate' | translate }}"
-                [(ngModel)]="grade.dateFrom" 
-                (ngModelChange)="onInputValueChange({ field: 'dateFrom', value: $event })"/>
-                <span *ngIf="validationErrors['dateFrom']" class="text-red-500 ml-3 font-normal">{{ validationErrors['dateFrom'] }}</span>
+                <label class="mb-2 primaryTxt" for="dateFrom"> {{ 'From' | translate }} {{ 'Birthdate' | translate
+                    }}</label>
+                <input id="dateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'From' | translate }} {{ 'Birthdate' | translate }}"
+                    [(ngModel)]="grade.dateFrom"
+                    (ngModelChange)="onInputValueChange({ field: 'dateFrom', value: $event })" />
+                <span *ngIf="validationErrors['dateFrom']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['dateFrom'] }}</span>
             </div>
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="dateTo">  {{ 'To' | translate }} {{ 'Birthdate' | translate }}</label>
-                <input id="dateTo" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'To' | translate }} {{ 'Birthdate' | translate }}"
-                [(ngModel)]="grade.dateTo" 
-                (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })"/>
-                <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{ validationErrors['dateTo'] }}</span>
-            </div>
+                <label class="mb-2 primaryTxt" for="dateTo"> {{ 'To' | translate }} {{ 'Birthdate' | translate
+                    }}</label>
+                <input id="dateTo" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'To' | translate }} {{ 'Birthdate' | translate }}"
+                    [(ngModel)]="grade.dateTo"
+                    (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })" />
+                <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['dateTo'] }}</span>
+            </div> 
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt"> {{ 'Periods' | translate }}  {{ 'Count' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="UpgradeToGrade">
+                    {{ 'Upgrade To' | translate }}
+                </label>
+
+                <div class="flex items-center gap-2"> 
+                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto flex-1"
+                        id="UpgradeToGrade" [(ngModel)]="grade.upgradeToID">
+                        <option [value]="null" disabled selected hidden>
+                            {{ 'Choose' | translate }} {{ 'Grade' | translate }}
+                        </option>
+                        <option *ngFor="let grade of UpgradeToGrade" [value]="grade.id">
+                            {{ grade.name }}
+                        </option>
+                        <option *ngIf="UpgradeToGrade.length === 0" disabled selected>
+                            {{ 'No Data Found' | translate }}
+                        </option>
+                    </select>
+ 
+                    <button type="button" (click)="grade.upgradeToID = null"
+                        class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-600">
+                        ✖
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt"> {{ 'Periods' | translate }} {{ 'Count' | translate }}</label>
                 <div class="flex flex-wrap justify-around">
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="SAT">{{ 'SAT' | translate }}</label>
-                        <input id="SAT" type="text" (input)="validateNumber($event, 'sat')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.sat"/> 
+                        <input id="SAT" type="text" (input)="validateNumber($event, 'sat')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.sat" />
                     </div>
                     <div class="flex flex-col mb-4">
-                        <label class="mb-2 primaryTxt" for="SUN">  {{ 'SUN' | translate }}</label>
-                        <input id="SUN" type="text" (input)="validateNumber($event, 'sun')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.sun" /> 
+                        <label class="mb-2 primaryTxt" for="SUN"> {{ 'SUN' | translate }}</label>
+                        <input id="SUN" type="text" (input)="validateNumber($event, 'sun')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.sun" />
                     </div>
                     <div class="flex flex-col mb-4">
-                        <label class="mb-2 primaryTxt" for="MON">  {{ 'MON' | translate }}</label>
-                        <input id="MON" type="text" (input)="validateNumber($event, 'mon')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.mon" /> 
+                        <label class="mb-2 primaryTxt" for="MON"> {{ 'MON' | translate }}</label>
+                        <input id="MON" type="text" (input)="validateNumber($event, 'mon')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.mon" />
                     </div>
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="TUS"> {{ 'TUS' | translate }}</label>
-                        <input id="TUS" type="text" (input)="validateNumber($event, 'tus')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.tus"/> 
+                        <input id="TUS" type="text" (input)="validateNumber($event, 'tus')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.tus" />
                     </div>
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="WED"> {{ 'WED' | translate }}</label>
-                        <input id="WED" type="text" (input)="validateNumber($event, 'wed')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.wed"/> 
+                        <input id="WED" type="text" (input)="validateNumber($event, 'wed')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.wed" />
                     </div>
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="THRU"> {{ 'THRU' | translate }}</label>
-                        <input id="THRU" type="text" (input)="validateNumber($event, 'thru')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.thru"/> 
+                        <input id="THRU" type="text" (input)="validateNumber($event, 'thru')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.thru" />
                     </div>
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="FRI">{{ 'FRI' | translate }}</label>
-                        <input id="FRI" type="text" (input)="validateNumber($event, 'fri')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
-                        [(ngModel)]="grade.fri"/> 
+                        <input id="FRI" type="text" (input)="validateNumber($event, 'fri')"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            placeholder="{{ 'Enter' | translate }} {{ 'Number' | translate }}"
+                            [(ngModel)]="grade.fri" />
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="flex justify-end">
-            <button
-            [disabled]="isLoading"
-            class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-            (click)="SaveGrade()">
-            <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
-            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-          </button>
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="SaveGrade()">
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
         </div>
     </div>
 </div>

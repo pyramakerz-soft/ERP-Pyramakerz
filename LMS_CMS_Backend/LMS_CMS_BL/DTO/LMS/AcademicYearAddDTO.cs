@@ -16,5 +16,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public DateOnly DateTo { get; set; }
         public bool IsActive { get; set; }
         public long SchoolID { get; set; }
+
+        public DateOnly? SummerCourseDateFrom { get; set; }
+        public DateOnly? SummerCourseDateTo { get; set; }
     }
 }

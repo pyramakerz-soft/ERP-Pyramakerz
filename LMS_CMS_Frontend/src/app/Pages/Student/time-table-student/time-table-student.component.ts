@@ -151,6 +151,8 @@ export class TimeTableStudentComponent {
             insertedByUserId: 0,
             sectionID: 0,
             sectionName: '',
+            upgradeToID: 0,
+            upgradeToName: '',
             sat: null,
             sun: null,
             mon: null,

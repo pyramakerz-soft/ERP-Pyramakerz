@@ -25,6 +25,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long SchoolID { get; set; }
         public School School { get; set; }
 
+        public DateOnly? SummerCourseDateFrom { get; set; }
+        public DateOnly? SummerCourseDateTo { get; set; }
+
         public ICollection<Semester> Semesters { get; set; } = new HashSet<Semester>();
         public ICollection<Classroom> Classrooms { get; set; } = new HashSet<Classroom>();
         public ICollection<Test> Tests { get; set; } = new HashSet<Test>();

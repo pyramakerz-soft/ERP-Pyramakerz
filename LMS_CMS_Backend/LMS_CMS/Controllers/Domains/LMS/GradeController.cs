@@ -357,6 +357,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
+            if (Newgrade.UpgradeToID == 0)
+            {
+                Newgrade.UpgradeToID = null;
+            }
+            else
+            {
+                Grade upgradedTo = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.ID == Newgrade.UpgradeToID && d.IsDeleted != true);
+                if (upgradedTo == null)
+                {
+                    return BadRequest("No Grade with this ID");
+                }
+            }
+
             Grade grade = mapper.Map<Grade>(Newgrade);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -520,6 +533,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (section.school.MaximumPeriodCountTimeTable < newGrade.FRI)
                 {
                     return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.UpgradeToID == 0)
+            {
+                newGrade.UpgradeToID = null;
+            }
+            else
+            {
+                if(newGrade.UpgradeToID == grade.ID)
+                {
+                    return BadRequest("You Can't upgrade to the same grade");
+                }
+                Grade upgradedTo = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.ID == newGrade.UpgradeToID && d.IsDeleted != true);
+                if (upgradedTo == null)
+                {
+                    return BadRequest("No Grade with this ID");
                 }
             }
 

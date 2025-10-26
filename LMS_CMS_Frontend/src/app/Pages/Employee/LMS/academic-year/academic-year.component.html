@@ -33,6 +33,12 @@
                       {{ 'Is Active' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'Summer Course' | translate }} {{ 'Date From' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'Summer Course' | translate }} {{ 'Date To' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                       {{ 'Actions' | translate }}
                 </th>
             </tr>
@@ -40,7 +46,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="academicYearData.length === 0">
-                <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                <td colspan="9" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                       {{ 'No Data Found' | translate }}
                 </td>
             </tr>
@@ -71,6 +77,8 @@
                         </div>
                     </div>
                 </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.summerCourseDateFrom }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.summerCourseDateTo }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
@@ -133,6 +141,20 @@
                 [(ngModel)]="academicYear.dateTo" 
                 (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })"/>
                 <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{ validationErrors['dateTo'] }}</span>
+            </div>
+
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="summerCourseDateFrom">  {{ 'Date From' | translate }}</label>
+                <input id="summerCourseDateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'From' | translate }}"
+                [(ngModel)]="academicYear.summerCourseDateFrom" 
+                (ngModelChange)="onInputValueChange({ field: 'summerCourseDateFrom', value: $event })"/> 
+            </div>
+
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="summerCourseDateTo">  {{ 'Date To' | translate }}</label>
+                <input id="summerCourseDateTo" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'To' | translate }}"
+                [(ngModel)]="academicYear.summerCourseDateTo" 
+                (ngModelChange)="onInputValueChange({ field: 'summerCourseDateTo', value: $event })"/> 
             </div>
 
             <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">

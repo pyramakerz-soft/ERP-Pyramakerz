@@ -32,6 +32,7 @@ export class GradeComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
   gradeData: Grade[] = []
+  UpgradeToGrade: Grade[] = []
   grade: Grade = new Grade()
   section: Section = new Section()
   editGrade: boolean = false
@@ -104,10 +105,19 @@ export class GradeComponent {
   }
 
   getGradeData() {
-    this.gradeData = []
+    this.gradeData = [] 
     this.gradeService.GetBySectionId(this.sectionId, this.DomainName).subscribe(
       (data) => {
-        this.gradeData = data;
+        this.gradeData = data; 
+      }
+    )
+  }
+
+  getUpgradeToGradeData() {
+    this.UpgradeToGrade = [] 
+    this.gradeService.Get(this.DomainName).subscribe(
+      (data) => { 
+        this.UpgradeToGrade = data.filter((g: any) => g.id !== this.grade.id);
       }
     )
   }
@@ -119,6 +129,7 @@ export class GradeComponent {
   }
 
   openModal(Id?: number) {
+    this.getUpgradeToGradeData()
     if (Id) {
       this.editGrade = true;
       this.GetGradeById(Id);

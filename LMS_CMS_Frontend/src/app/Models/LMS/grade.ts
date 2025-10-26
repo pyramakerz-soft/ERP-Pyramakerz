@@ -5,6 +5,8 @@ export class Grade {
         public dateFrom: string = '',
         public dateTo : string = '',
         public insertedByUserId: number = 0,
+        public upgradeToName : string = '',
+        public upgradeToID: number|null = null,
         public sectionID: number = 0,
         public sectionName: string = '',
         public sat: number|null = null,

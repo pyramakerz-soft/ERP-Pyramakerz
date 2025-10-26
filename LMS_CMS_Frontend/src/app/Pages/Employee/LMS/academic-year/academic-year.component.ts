@@ -271,50 +271,73 @@ export class AcademicYearComponent {
     return valid;
   }
 
+  checkSummerCourseFromToDate() {
+    let valid = true;
+
+    const fromDate: Date = new Date(this.academicYear.summerCourseDateFrom);
+    const toDate: Date = new Date(this.academicYear.summerCourseDateTo);
+    const diff: number = toDate.getTime() - fromDate.getTime();
+
+    if (diff < 0) {
+      valid = false;
+      Swal.fire({
+        title: 'From Date Must Be a Date Before To Date',
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: 'Ok',
+      });
+      this.isLoading = false;
+    }
+
+    return valid;
+  }
+
   Save() {
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.checkFromToDate()) {
-        if (this.editAcademicYear == false) {
-          this.acadimicYearServicea
-            .Add(this.academicYear, this.DomainName)
-            .subscribe(
-              (result: any) => {
-                this.closeModal();
-                this.isLoading = false;
-                this.getAcademicYearData();
-              },
-              (error) => {
-                this.isLoading = false;
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: error.error,
-                  confirmButtonText: 'Okay',
-                  customClass: { confirmButton: 'secondaryBg' },
-                });
-              }
-            );
-        } else {
-          this.acadimicYearServicea
-            .Edit(this.academicYear, this.DomainName)
-            .subscribe(
-              (result: any) => {
-                this.closeModal();
-                this.isLoading = false;
-                this.getAcademicYearData();
-              },
-              (error) => {
-                this.isLoading = false;
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: error.error,
-                  confirmButtonText: 'Okay',
-                  customClass: { confirmButton: 'secondaryBg' },
-                });
-              }
-            );
+        if(this.checkSummerCourseFromToDate()){
+          if (this.editAcademicYear == false) {
+            this.acadimicYearServicea
+              .Add(this.academicYear, this.DomainName)
+              .subscribe(
+                (result: any) => {
+                  this.closeModal();
+                  this.isLoading = false;
+                  this.getAcademicYearData();
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
+                }
+              );
+          } else {
+            this.acadimicYearServicea
+              .Edit(this.academicYear, this.DomainName)
+              .subscribe(
+                (result: any) => {
+                  this.closeModal();
+                  this.isLoading = false;
+                  this.getAcademicYearData();
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
+                }
+              );
+          }
         }
       }
     }
