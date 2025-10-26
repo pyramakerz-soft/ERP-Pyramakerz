@@ -14,7 +14,7 @@ import { RequestStateCount } from '../../../../Models/Dashboard/dashboard.models
       
       <div class="space-y-4">
         <!-- Progress Bar -->
-        <div class="relative h-8 bg-gray-200 rounded-full overflow-hidden">
+        <div class="relative h-4 bg-gray-200 rounded-full overflow-hidden">
           <div 
             class="absolute h-full bg-green-500 transition-all duration-500"
             [style.width.%]="acceptedPercentage"
@@ -71,10 +71,12 @@ export class RequestProgressComponent implements OnChanges {
   }
 
   private calculatePercentages(): void {
+    // Reset percentages
+    this.acceptedPercentage = 0;
+    this.pendingPercentage = 0;
+    this.declinedPercentage = 0;
+
     if (!this.requestStateCount) {
-      this.acceptedPercentage = 0;
-      this.pendingPercentage = 0;
-      this.declinedPercentage = 0;
       return;
     }
 
@@ -86,10 +88,6 @@ export class RequestProgressComponent implements OnChanges {
       this.acceptedPercentage = (this.requestStateCount.acceptedRequestCount / total) * 100;
       this.pendingPercentage = (this.requestStateCount.requestPending / total) * 100;
       this.declinedPercentage = (this.requestStateCount.declinedRequestCount / total) * 100;
-    } else {
-      this.acceptedPercentage = 0;
-      this.pendingPercentage = 0;
-      this.declinedPercentage = 0;
     }
   }
 }

@@ -13,7 +13,7 @@ import { StateService } from '../../../../Services/Employee/Inventory/state.serv
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import * as XLSX from 'xlsx';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -69,6 +69,8 @@ export class ElectronicInvoiceComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
+    
   ) {
     this.DomainName = this.apiService.GetHeader();
     this.route.data.subscribe((data) => {
@@ -91,6 +93,32 @@ export class ElectronicInvoiceComponent implements OnInit {
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
+  }
+
+    private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   private restoreState() {
@@ -146,20 +174,20 @@ export class ElectronicInvoiceComponent implements OnInit {
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
+        title: this.translate.instant('Invalid Date Range'),
+        text: this.translate.instant('Start date cannot be later than end date'),
         icon: 'warning',
-        confirmButtonText: 'OK',
+        confirmButtonText: this.translate.instant('OK'),
       });
       return;
     }
 
     if (!this.selectedSchoolId) {
       Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select a school',
+        title: this.translate.instant('Missing Information'),
+        text: this.translate.instant('Please select a school'),
         icon: 'warning',
-        confirmButtonText: 'OK',
+        confirmButtonText: this.translate.instant('OK'),
       });
       return;
     }
@@ -240,7 +268,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   downloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
+      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
     }
 
@@ -268,10 +296,10 @@ export class ElectronicInvoiceComponent implements OnInit {
   printSelectedInvoices() {
     if (this.selectedInvoices.length === 0) {
       Swal.fire({
-        title: 'No Selection',
-        text: 'Please select at least one invoice to print',
+        title: this.translate.instant('No Selection'),
+        text: this.translate.instant('Please select at least one invoice to print'),
         icon: 'warning',
-        confirmButtonText: 'OK',
+        confirmButtonText: this.translate.instant('OK'),
       });
       return;
     }
@@ -291,7 +319,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   private printAll() {
     if (this.transactionsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to print!', 'warning');
+      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
     }
 
@@ -337,7 +365,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   exportExcel() {
     if (this.transactions.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
+      Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
     }
 
@@ -426,13 +454,13 @@ export class ElectronicInvoiceComponent implements OnInit {
       await firstValueFrom(serviceCall);
 
       Swal.fire(
-        'Success',
-        `Invoice ${
-          this.currentSystem === 'zatca'
-            ? 'reported to ZATCA'
-            : 'submitted to ETA'
-        } successfully`,
-        'success'
+        this.translate.instant('Success'),
+        `${this.translate.instant('Invoice')} ${
+          this.currentSystem == 'zatca'
+            ? this.translate.instant('reported to ZATCA')
+            : this.translate.instant('submitted to ETA')
+        } ${this.translate.instant('successfully')}`,
+        this.translate.instant('success')
       );
       invoice.isValid = true;
     } catch (error) {
@@ -448,9 +476,9 @@ export class ElectronicInvoiceComponent implements OnInit {
       }
 
       this.handleError(
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
-        } invoice`,
+        `${this.translate.instant('Failed to')} ${
+          this.currentSystem == 'zatca' ? this.translate.instant('report') : this.translate.instant('submit')
+        } ${this.translate.instant('invoice')}`,
         error
       );
       Swal.fire('Error', errorMessage, 'error');

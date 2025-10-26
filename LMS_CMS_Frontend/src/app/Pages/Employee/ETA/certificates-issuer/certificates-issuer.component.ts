@@ -236,7 +236,7 @@ export class CertificatesIssuerComponent {
         const field = key as keyof CertificatesIssuer;
         if (!this.certificatesIssuer[field]) {
           if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            this.validationErrors[field] = `*${this.translate.instant('Name is required')}`;
             isValid = false;
           }
         } else {

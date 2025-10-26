@@ -12,10 +12,11 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { POSService } from '../../../../Services/Employee/ETA/pos.service';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-pos',
   standalone: true,
@@ -62,7 +63,8 @@ export class POSComponent {
     public posService: POSService, 
     public router: Router,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -93,11 +95,50 @@ export class POSComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
- ngOnDestroy(): void {
+  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      // Arabic: FieldName comes FIRST, then "مطلوب"
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      // English: FieldName comes FIRST, then "is required"  
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   GetAllData(pageNumber:number, pageSize:number){
@@ -235,7 +276,8 @@ export class POSComponent {
         const field = key as keyof POS;
         if (!this.pos[field]) {
           if (field == 'clientID' || field == 'clientSecret' || field == 'clientSecret2' || field == 'deviceSerialNumber') {
-            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+            // Use the helper method for properly formatted validation messages
+            this.validationErrors[field] = this.getRequiredErrorMessage(this.capitalizeField(field));
             isValid = false;
           }
         } else { 
@@ -255,16 +297,12 @@ export class POSComponent {
             this.closeModal();
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('POS added successfully'));
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            const errorMessage = error.error?.message || this.translate.instant('Failed to add POS');
+            this.showErrorAlert(errorMessage);
           }
         );
       } else {
@@ -273,16 +311,12 @@ export class POSComponent {
             this.closeModal();
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('POS updated successfully'));
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update POS');
+            this.showErrorAlert(errorMessage);
           }
         );
       }
@@ -290,19 +324,32 @@ export class POSComponent {
   }
 
   Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this POS?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+    const successMessage = this.translate.instant('POS deleted successfully');
+    
     Swal.fire({
-      title: 'Are you sure you want to delete this POS?',
+      title: deleteTitle,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton,
     }).then((result) => {
       if (result.isConfirmed) {
-        this.posService.Delete(id,this.DomainName).subscribe((D)=>{
-          this.GetAllData(this.CurrentPage, this.PageSize)
-        })
+        this.isDeleting = true;
+        this.posService.Delete(id,this.DomainName).subscribe({
+          next: () => {
+            this.GetAllData(this.CurrentPage, this.PageSize);
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete POS');
+            this.showErrorAlert(errorMessage);
+          }
+        });
       }
     });
   }

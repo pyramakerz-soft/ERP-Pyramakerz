@@ -1257,7 +1257,7 @@
   "Failed to delete official holiday": "فشل في حذف العطلة الرسمية",
   "Failed to create official holiday": "فشل في إنشاء العطلة الرسمية",
   "Failed to update official holiday": "فشل في تحديث العطلة الرسمية",
-  "Name is required": "الاسم مطلوب",
+  "Name is required": "مطلوب الاسم",
   "Start date is required": "تاريخ البدء مطلوب",
   "End date is required": "تاريخ الانتهاء مطلوب",
   "End date cannot be before start date": "تاريخ الانتهاء لا يمكن أن يكون قبل تاريخ البدء",
@@ -1412,7 +1412,9 @@
 "storeID" : "المدجر",
 "schoolPCId" : "حاسوب المدرسة",
 "Store Name" : "اسم المخزن",
-"&" : "و"
+"&" : "و",
+"Invalid Date Range": "نطاق تاريخ غير صالح",
+"Start date cannot be later than end date": "لا يمكن أن يكون تاريخ البدء لاحقًا لتاريخ الانتهاء"
 
 
 

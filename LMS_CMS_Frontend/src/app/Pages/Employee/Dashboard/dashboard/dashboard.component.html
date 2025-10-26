@@ -62,14 +62,18 @@
             <app-request-progress [requestStateCount]="dashboardData?.requestStateCount"></app-request-progress>
         </div>
 
-        <!-- Charts Row 2: Inventory Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <!-- Inventory Purchase -->
-            <app-revenue-chart [inventoryPurchase]="dashboardData?.inventoryPurchase"></app-revenue-chart>
-            
-            <!-- Inventory Sales -->
-            <app-revenue-chart-sales [inventorySales]="dashboardData?.inventorySales"></app-revenue-chart-sales>
-        </div>
+<!-- Charts Row 2: Inventory Charts - Dynamic layout based on month view -->
+<div [class]="isMonthView ? 'grid grid-cols-1 gap-4 mb-4' : 'grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4'">
+  <!-- Inventory Purchase -->
+  <app-revenue-chart 
+    [inventoryPurchase]="dashboardData?.inventoryPurchase">
+  </app-revenue-chart>
+  
+  <!-- Inventory Sales -->
+  <app-revenue-chart-sales 
+    [inventorySales]="dashboardData?.inventorySales">
+  </app-revenue-chart-sales>
+</div>
 
         <!-- Bottom Section: Category Rankings -->
         <div class="grid grid-cols-1 gap-4">
