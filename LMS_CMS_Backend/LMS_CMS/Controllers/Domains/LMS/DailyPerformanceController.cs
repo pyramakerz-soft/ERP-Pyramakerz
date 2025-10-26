@@ -184,11 +184,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(NewData);
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////////--77
+        ///////////////////////////////////////////////////////////////////////////////////////--77 
         [HttpGet("DailyPerformanceReport")]
         [Authorize_Endpoint_(
-               allowedTypes: new[] { "octa", "employee" },
-               pages: new[] { "Student Daily Performance Report" }
+            allowedTypes: new[] { "octa", "employee" , "parent"},    
+            pages: new[] { "Student Daily Performance Report" }
          )]
         public async Task<IActionResult> GetDailyPerformanceReport([FromQuery]long studentId, DateOnly fromDate, DateOnly toDate)
         {
@@ -253,7 +253,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         {
                             PerformanceTypeID = sp.PerformanceTypeID,
                             PerformanceTypeEn = sp.PerformanceType.EnglishName,
-                            PerformanceTypeAr = sp.PerformanceType.ArabicName
+                            PerformanceTypeAr = sp.PerformanceType.ArabicName,
+                            Stars = sp.Stars
+
                         });
                     }
                 }

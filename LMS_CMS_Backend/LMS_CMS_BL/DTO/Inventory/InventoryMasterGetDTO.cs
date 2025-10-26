@@ -21,7 +21,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public decimal Remaining { get; set; }
         public decimal Total { get; set; }
         public string Notes { get; set; }
-        public List<string>? Attachments { get; set; }
+        public List<string>? Attachments { get; set; } //7
         public long StoreID { get; set; }
         public long StudentID { get; set; }
         public long FlagId { get; set; }
