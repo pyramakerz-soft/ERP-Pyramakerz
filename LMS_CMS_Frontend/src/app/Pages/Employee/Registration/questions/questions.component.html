@@ -159,7 +159,8 @@
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> ({{ 'Max. File size' | translate }}:
                             25 MB)</p>
                     </label>
-                    <input id="imageForm" type="file" class="hidden" accept="image/*,video/*"
+                    <input id="imageForm" type="file" class="hidden"
+                        accept=".jpg,.jpeg,.png,.gif,,.mp4,.avi,.mkv,.mov"
                         (change)="onFileUpload($event)" />
                 </div>
             </div>

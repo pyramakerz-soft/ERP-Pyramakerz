@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -6,29 +8,53 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-revenue-chart-sales',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './revenue-chart-sales.component.html',
   styleUrl: './revenue-chart-sales.component.css'
 })
-export class RevenueChartSalesComponent {
-  ngAfterViewInit(): void {
-    const ctx = document.getElementById('revenueChartSales') as HTMLCanvasElement;
+export class RevenueChartSalesComponent implements AfterViewInit, OnChanges {
+  @Input() inventorySales?: { [key: string]: number };
+  
+  private chart?: Chart;
+  totalAmount: number = 0;
 
-    new Chart(ctx, {
+  ngAfterViewInit(): void {
+    setTimeout(() => this.createChart(), 0);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['inventorySales'] && !changes['inventorySales'].firstChange) {
+      this.updateChart();
+    }
+  }
+
+  private calculateTotal(): void {
+    if (!this.inventorySales) {
+      this.totalAmount = 0;
+      return;
+    }
+    
+    this.totalAmount = Object.values(this.inventorySales).reduce((sum, val) => sum + val, 0);
+  }
+
+  private createChart(): void {
+    this.calculateTotal();
+    const ctx = document.getElementById('revenueChartSales') as HTMLCanvasElement;
+    
+    if (!ctx) return;
+
+    const labels = this.inventorySales ? Object.keys(this.inventorySales) : [];
+    const data = this.inventorySales ? Object.values(this.inventorySales) : [];
+
+    this.chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        labels: labels,
         datasets: [
           {
-            label: 'Revenue',
-            data: [30, 50, 25, 45, 70, 55, 30],
-            backgroundColor: [
-              '#3B82F6', 
-              '#3B82F6',
-              '#3B82F6',
-              '#3B82F6',
-              '#3B82F6',
-            ],
+            label: 'Sales',
+            data: data,
+            backgroundColor: '#3B82F6',
             borderRadius: 6,
             barThickness: 24,
           },
@@ -42,7 +68,6 @@ export class RevenueChartSalesComponent {
           y: {
             beginAtZero: true,
             ticks: {
-              stepSize: 20,
               color: '#A0AEC0',
               font: { size: 10 },
             },
@@ -60,5 +85,18 @@ export class RevenueChartSalesComponent {
         maintainAspectRatio: false,
       },
     });
+  }
+
+  private updateChart(): void {
+    this.calculateTotal();
+    
+    if (this.chart && this.inventorySales) {
+      const labels = Object.keys(this.inventorySales);
+      const data = Object.values(this.inventorySales);
+      
+      this.chart.data.labels = labels;
+      this.chart.data.datasets[0].data = data;
+      this.chart.update();
+    }
   }
 }

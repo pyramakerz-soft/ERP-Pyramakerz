@@ -4,11 +4,10 @@
         <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Subjects' | translate }}</h1>
     </div>
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
-        <button [disabled]="isLoading" class="secondaryBg text-white rounded-lg px-4 py-3"
-            (click)="Generate()">
-            <span *ngIf="!isLoading"> {{ 'Generate' | translate }}</span>
+        <button [disabled]="isLoading" class="secondaryBg text-white rounded-lg px-4 py-3" (click)="Generate()">
+            <span *ngIf="!isLoading"> {{ 'Create' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
@@ -23,25 +22,25 @@
                         {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                       {{ 'Subject' | translate }}  {{ 'English Name' | translate }}
+                        {{ 'Subject' | translate }} {{ 'English Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Subject' | translate }}  {{ 'Arabic Name' | translate }}
+                        {{ 'Subject' | translate }} {{ 'Arabic Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Teacher' | translate }}  {{ 'English Name' | translate }}
+                        {{ 'Teacher' | translate }} {{ 'English Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Teacher' | translate }}  {{ 'Arabic Name' | translate }}
+                        {{ 'Teacher' | translate }} {{ 'Arabic Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Co-Teacher' | translate }}
-                    </th> 
+                    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Hide' | translate }}
-                    </th> 
+                        {{ 'Hide' | translate }}
+                    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Actions' | translate }}
+                        {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -50,7 +49,7 @@
                 <tr *ngIf="ClassSubjects.length === 0">
                     <td colspan="8"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                          {{ 'No Data Found' | translate }}
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -66,7 +65,7 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.subjectArabicName }}
-                    </td> 
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div *ngIf="row.teacherID != 0">
                             {{ row.teacherEnglishName }}
@@ -75,8 +74,8 @@
                             <div class="w-full p-2 bg-gray-200 rounded-md">
                                 <hr class="border-gray-300">
                             </div>
-                        </div> 
-                    </td> 
+                        </div>
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div *ngIf="row.teacherID != 0">
                             {{row.teacherArabicName}}
@@ -85,11 +84,12 @@
                             <div class="w-full p-2 bg-gray-200 rounded-md">
                                 <hr class="border-gray-300">
                             </div>
-                        </div> 
-                    </td> 
+                        </div>
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div *ngIf="row.classroomSubjectCoTeachers.length != 0">
-                            <div *ngFor="let co of row.classroomSubjectCoTeachers; let i = index" class="w-fit rounded-lg my-1 p-2 bg-gray-200">
+                            <div *ngFor="let co of row.classroomSubjectCoTeachers; let i = index"
+                                class="w-fit rounded-lg my-1 p-2 bg-gray-200">
                                 {{co.coTeacherEnglishName}}
                             </div>
                         </div>
@@ -98,31 +98,23 @@
                                 <hr class="border-gray-300">
                             </div>
                         </div>
-                    </td> 
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <label *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                [(ngModel)]="row.hide"
-                                (change)="onToggle(row)"
-                                class="sr-only peer" />
-                            
-                            <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-300 peer-checked:bg-green-500 relative transition-colors duration-300">
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                        <label class="inline-flex items-center cursor-pointer toggle-wrapper">
+                            <input
+                                type="checkbox"
+                                [(ngModel)]="row.hide" 
+                                (change)="AllowEdit && IsAllowEdit(row.insertedByUserId) ? onToggle(row) : null"
+                                [disabled]="!(AllowEdit && IsAllowEdit(row.insertedByUserId))" 
+                                class="peer absolute opacity-0 w-0 h-0 focus:outline-none"
+                            />
+                            <div class="w-11 h-6 bg-gray-200 rounded-full relative overflow-hidden transition-colors duration-300 peer-checked:bg-green-500">
                                 <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
                             </div>
                         </label>
-                        <label *ngIf="!AllowEdit && !IsAllowEdit(row.insertedByUserId)" class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                [(ngModel)]="row.hide"
-                                (change)="onToggleNotAllowed()"
-                                class="sr-only peer" />
-                            
-                            <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-300 peer-checked:bg-green-500 relative transition-colors duration-300">
-                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
-                            </div>
-                        </label>
-                    </td> 
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4 rtl:space-x-reverse"> 
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="OpenModal(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
@@ -139,16 +131,18 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] overflow-auto">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">{{ClassSubject.subjectEnglishName}}</h1> 
-            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+            <h1 class="font-semibold text-2xl leading-9">{{ClassSubject.subjectEnglishName}}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
-        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">  
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="teacher">{{ 'Teacher' | translate }}</label> 
+                <label class="mb-2 primaryTxt" for="teacher">{{ 'Teacher' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="teacher"
                     [(ngModel)]="ClassSubject.teacherID">
-                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Teacher' | translate }}</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Teacher' | translate }}
+                    </option>
                     <option *ngFor="let Teacher of Employees" [value]="Teacher.id">{{ Teacher.en_name }}</option>
                     <option *ngIf="Employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -156,51 +150,49 @@
             <div class="flex flex-col mb-4">
                 <label class="mb-2 primaryTxt"> {{ 'Co-Teacher' | translate }}</label>
                 <div>
-                    <div class="flex justify-between items-center rounded-lg border border-solid border-gray-300 px-4 py-3 cursor-pointer bg-white text-gray-400" 
-                    (click)="toggleDropdown($event)">
+                    <div class="flex justify-between items-center rounded-lg border border-solid border-gray-300 px-4 py-3 cursor-pointer bg-white text-gray-400"
+                        (click)="toggleDropdown($event)">
                         <span *ngIf="ChoosedCoTeacherIds.length == 0">
-                             {{ 'Choose' | translate }} {{ 'Co-Teacher' | translate }}
+                            {{ 'Choose' | translate }} {{ 'Co-Teacher' | translate }}
                         </span>
                         <div *ngIf="ChoosedCoTeacherIds.length != 0" class="flex flex-wrap">
                             <div *ngFor="let ChoosedCoTeacherId of ChoosedCoTeacherIds">
                                 <p *ngFor="let emp of Employees">
                                     @if(emp.id == ChoosedCoTeacherId){
-                                        <p class="p-2 rounded-md border bg-[#EBEBEB] text-[#6F6F6F] m-1">
-                                            {{emp.en_name}}
-                                            <i class="fa-solid fa-xmark text-red-600 ml-3" (click)="removeFromCoTeachers(ChoosedCoTeacherId, $event)"></i>
-                                        </p>
-                                    }
+                                <p class="p-2 rounded-md border bg-[#EBEBEB] text-[#6F6F6F] m-1">
+                                    {{emp.en_name}}
+                                    <i class="fa-solid fa-xmark text-red-600 ml-3"
+                                        (click)="removeFromCoTeachers(ChoosedCoTeacherId, $event)"></i>
+                                </p>
+                                }
                                 </p>
                             </div>
                         </div>
                         <i class="fa-solid fa-angle-down"></i>
                     </div>
-                
-                    <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-md bg-white mt-1 max-h-60 overflow-y-auto">
+
+                    <div *ngIf="isDropdownOpen"
+                        class=" w-full border border-[#E5E5EA] rounded-md bg-white mt-1 max-h-60 overflow-y-auto">
                         @if(Employees.length !==0 ) {
-                            <div class="p-2 hover:bg-gray-100 flex items-center space-x-3 rtl:space-x-reverse border-b">
-                                <input
-                                    type="checkbox"
-                                    id="selectAllCoTeachers"
-                                    class="mr-2"
-                                    (change)="toggleSelectAll($event)"
-                                    [checked]="ChoosedCoTeacherIds.length === Employees.length" />
-                                <label for="selectAllCoTeachers" class="text-xs md:text-sm w-full font-semibold">{{ 'Select' | translate }}  {{ 'All' | translate }}</label>
-                            </div>  
-                            <div *ngFor="let emp of Employees" class="p-2 hover:bg-gray-100 flex items-center space-x-3  rtl:space-x-reverse">
-                                <input type="checkbox" 
-                                id="emp{{emp.id}}" 
-                                class="mr-2" 
-                                [value]="emp.id" 
+                        <div class="p-2 hover:bg-gray-100 flex items-center space-x-3 rtl:space-x-reverse border-b">
+                            <input type="checkbox" id="selectAllCoTeachers" class="mr-2"
+                                (change)="toggleSelectAll($event)"
+                                [checked]="ChoosedCoTeacherIds.length === Employees.length" />
+                            <label for="selectAllCoTeachers" class="text-xs md:text-sm w-full font-semibold">{{ 'Select'
+                                | translate }} {{ 'All' | translate }}</label>
+                        </div>
+                        <div *ngFor="let emp of Employees"
+                            class="p-2 hover:bg-gray-100 flex items-center space-x-3  rtl:space-x-reverse">
+                            <input type="checkbox" id="emp{{emp.id}}" class="mr-2" [value]="emp.id"
                                 (change)="onCoTeacherChange(emp.id, $event)"
                                 [checked]="ChoosedCoTeacherIds.includes(emp.id)">
-                                <label for="emp{{emp.id}}" class="text-xs md:text-sm w-full">{{ emp.en_name }}</label>
-                            </div>
+                            <label for="emp{{emp.id}}" class="text-xs md:text-sm w-full">{{ emp.en_name }}</label>
+                        </div>
                         }@else {
-                            <div class="p-2">{{ 'No Data Found' | translate }}</div>
+                        <div class="p-2">{{ 'No Data Found' | translate }}</div>
                         }
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
 

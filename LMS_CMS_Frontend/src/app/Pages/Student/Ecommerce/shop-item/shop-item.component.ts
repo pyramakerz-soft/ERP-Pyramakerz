@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { StudentService } from '../../../../Services/student.service';
+import { Student } from '../../../../Models/student';
 
 @Component({
   selector: 'app-shop-item',
@@ -40,9 +42,10 @@ export class ShopItemComponent {
   CalculatedVat: number = 0;
   selectedColor: number = 0;
   selectedSize: number = 0;
+  students: Student[] = [];
   
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
-    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,
+    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService,
     private realTimeService: RealTimeNotificationServiceService,
   ){}
 
@@ -58,6 +61,10 @@ export class ShopItemComponent {
 
     if(this.User_Data_After_Login.type == 'student'){
       this.StuID = this.UserID
+    }
+
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.getStudentsByParent()
     }
 
     this.ShopItemId = Number(this.activeRoute.snapshot.paramMap.get('id'))
@@ -95,27 +102,41 @@ export class ShopItemComponent {
     )
   }
 
+  getStudentsByParent(){
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }
+
   moveToShop() {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/The Shop")
+    } else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/Shop")
     }else{
-      this.router.navigateByUrl("Student/Ecommerce/Shop")
+      this.router.navigateByUrl("Parent/Shop")
     }
   }
 
   goToCart() {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Cart")
+    } else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/Cart")
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Parent/Cart")
     }
   } 
 
   goToOrder() {
     if(this.User_Data_After_Login.type == "employee"){
       this.router.navigateByUrl("Employee/Order")
+    } else if(this.User_Data_After_Login.type == "student"){
+      this.router.navigateByUrl("Student/Order")
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Parent/Order")
     }
   } 
 
@@ -142,11 +163,9 @@ export class ShopItemComponent {
     )
   }
 
-  onAddToCartClick(event: MouseEvent, itemId: number, limit: number|null) {
-    event.stopPropagation(); 
-    if (limit && limit > 0) {
-        this.addShopItemToCart(itemId);
-    }
+  onAddToCartClick(event: MouseEvent, itemId: number) {
+    event.stopPropagation();  
+    this.addShopItemToCart(itemId);
   }
 
   ChooseColor(id: any) {

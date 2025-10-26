@@ -498,11 +498,11 @@ export class AccountingEntriesDetailsComponent {
   formatData(){
     this.accountingEntriesDetailsDataForPrint = this.accountingEntriesDetailsData.map(item => ({
       id: item.id,
-      'Debit Amount': item.debitAmount,
-      'CreditAmount': item.creditAmount,
-      'Note': item.note,
+      'Debit Amount': item.debitAmount || 0,
+      'Credit Amount': item.creditAmount || 0,
       'Account Name': item.accountingTreeChartName,
-      'sub Account': item.subAccountingName
+      'sub Account': item.subAccountingName,
+      'Note': item.note
     }));
   }
 

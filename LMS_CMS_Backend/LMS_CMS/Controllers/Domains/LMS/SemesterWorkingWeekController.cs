@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySemesterID/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Working Weeks" }
+            pages: new[] { "Working Weeks", "Lessons" }
          )]
         public async Task<IActionResult> GetAsync(long id)
         {

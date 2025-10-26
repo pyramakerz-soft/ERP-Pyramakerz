@@ -136,11 +136,11 @@ private showLoadingAlert(message: string) {
   }
 
   Create() {
-    this.router.navigateByUrl("Employee/Employee Create")
+    this.router.navigateByUrl("Employee/Employee/Create")
   }
 
   Edit(id: number) {
-    this.router.navigateByUrl(`Employee/Employee Edit/${id}`)
+    this.router.navigateByUrl(`Employee/Employee/Edit/${id}`)
 
   }
 
@@ -176,7 +176,7 @@ Delete(id: number) {
 }
 
   view(id: number) {
-    this.router.navigateByUrl(`Employee/Employee Details/${id}`)
+    this.router.navigateByUrl(`Employee/Employee/${id}`)
   }
 
 suspend(emp: Employee) {

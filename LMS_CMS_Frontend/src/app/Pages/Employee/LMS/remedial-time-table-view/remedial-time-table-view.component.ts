@@ -372,13 +372,13 @@ export class RemedialTimeTableViewComponent {
     const data = this.remedialTimeTable.groupDays.map((day: any) => {
       const row: any = { Day: day.dayName };
       for (let i = 0; i < this.remedialTimeTable.maximumPeriodCountRemedials; i++) {
-        const period = day.periods.find((p: any) => p.periodIndex === i);
+        // FIX: use i + 1 if periodIndex starts from 1
+        const period = day.periods.find((p: any) => p.periodIndex === i + 1);
         const classes = period?.remedialTimeTableClasses || [];
 
-        // Join multiple classes in same period
-        row[`Session ${i + 1}`] = classes.map((c: any) =>
-          `${c.remedialClassroomName} / ${c.teacherEnName}`
-        ).join(', ');
+        row[`Session ${i + 1}`] = classes
+          .map((c: any) => `${c.remedialClassroomName} / ${c.teacherEnName}`)
+          .join(', ');
       }
       return row;
     });

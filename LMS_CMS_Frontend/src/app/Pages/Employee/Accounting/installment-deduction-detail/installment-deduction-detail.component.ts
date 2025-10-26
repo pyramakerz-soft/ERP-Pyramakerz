@@ -251,6 +251,12 @@ export class InstallmentDeductionDetailComponent {
         this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
           this.GetMasterInfo()
           this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Done Succeessfully',
+            confirmButtonColor: '#089B41',
+          });
         },
           error => {
             this.isLoading = false

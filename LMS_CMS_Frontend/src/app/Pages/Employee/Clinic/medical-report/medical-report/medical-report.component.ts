@@ -9,7 +9,7 @@ import { GradeService } from '../../../../../Services/Employee/LMS/grade.service
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { MedicalReportService } from '../../../../../Services/Employee/Clinic/medical-report.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,6 +18,8 @@ import {  Subscription } from 'rxjs';
 import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
@@ -30,10 +32,10 @@ export class MedicalReportComponent implements OnInit {
   selectedTab = this.tabs[0];
 
   // Filter controls
-  selectedSchool: number | null = null;
-  selectedGrade: number | null = null;
-  selectedClass: number | null = null;
-  selectedStudent: number | null = null;
+  selectedSchool: number = 0;
+  selectedGrade: number = 0;
+  selectedClass: number = 0;
+  selectedStudent: number = 0;
 
   // Data sources
   schools: any[] = [];
@@ -61,6 +63,11 @@ export class MedicalReportComponent implements OnInit {
   pdfInfoRows: any[] = [];
   pdfTableHeaders: string[] = [];
   pdfTableData: any[] = [];
+  reportType: string = 'employee';
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  DomainName: string = '';
+  UserID: number = 0;
+  // Students: Student[] = [];
 
   constructor(
     private router: Router,
@@ -76,25 +83,44 @@ export class MedicalReportComponent implements OnInit {
     private studentService: StudentService,
     private stateService: StateService,
     private realTimeService: RealTimeNotificationServiceService,
-        private reportsService: ReportsService // Add this
-
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private route: ActivatedRoute,
+    private reportsService: ReportsService // Add this
   ) {}
 
   ngOnInit(): void {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    if(this.reportType == 'parent'){
+      this.GetStudentsData()
+    }
+
     this.loadSchools();
       this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
+
     this.isRtl = document.documentElement.dir === 'rtl';
         this.restoreState();
-  }
+    }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+        this.realTimeService.stopConnection(); 
+        if (this.subscription) {
+          this.subscription.unsubscribe();
+        }
   } 
+
+  GetStudentsData() {
+    this.students = []
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
+  }  
 
   async loadSchools() {
     try {
@@ -151,7 +177,23 @@ export class MedicalReportComponent implements OnInit {
     }
   }
 
+  OrCheck():boolean{
+    if(this.reportType === 'employee'){
+      return !this.selectedSchool || !this.selectedGrade || !this.selectedClass || !this.selectedStudent
+    }
+    else{
+      return !this.selectedStudent
+    }
+  }
 
+  AndCheck():boolean{
+    if(this.reportType === 'employee'){
+     return (!!this.selectedSchool && !!this.selectedGrade && !!this.selectedClass && !!this.selectedStudent )
+   }
+    else{
+     return (!!this.selectedStudent)
+    }
+  }
 
   async loadGrades() {
     if (this.selectedSchool) {
@@ -161,11 +203,11 @@ export class MedicalReportComponent implements OnInit {
           this.gradeService.GetBySchoolId(this.selectedSchool, domainName)
         );
         this.grades = data;
-        this.selectedGrade = null;
+        this.selectedGrade = 0;
         this.classes = [];
-        this.selectedClass = null;
+        this.selectedClass = 0;
         this.students = [];
-        this.selectedStudent = null;
+        this.selectedStudent = 0;
       } catch (error) {
         console.error('Error loading grades:', error);
       }
@@ -180,9 +222,9 @@ export class MedicalReportComponent implements OnInit {
           this.classroomService.GetByGradeId(this.selectedGrade, domainName)
         );
         this.classes = data;
-        this.selectedClass = null;
+        this.selectedClass = 0;
         this.students = [];
-        this.selectedStudent = null;
+        this.selectedStudent = 0;
       } catch (error) {
         console.error('Error loading classes:', error);
       }
@@ -200,13 +242,13 @@ export class MedicalReportComponent implements OnInit {
           id: student.id,
           name: student.en_name || 'Unknown',
         }));
-        this.selectedStudent = null; // Reset selected student when class changes
+        this.selectedStudent = 0; // Reset selected student when class changes
       } catch (error) {
         console.error('Error loading students:', error);
       }
     } else {
       this.students = [];
-      this.selectedStudent = null;
+      this.selectedStudent = 0;
     }
   }
 
@@ -240,21 +282,18 @@ selectTab(tab: string) {
   }
 
   async viewReport() {
-    if (
-      !this.selectedSchool ||
-      !this.selectedGrade ||
-      !this.selectedClass ||
-      !this.selectedStudent
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select School, Grade, Class and Student',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (
+    //  !this.selectedStudent
+    // ) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Missing Information',
+    //     text: 'Please select School, Grade, Class and Student',
+    //     confirmButtonColor: '#3085d6',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
@@ -265,94 +304,133 @@ selectTab(tab: string) {
 
       switch (this.selectedTab) {
         case 'MH By Parent':
-  data = await firstValueFrom(
-    this.medicalReportService.getAllMHByParent(
-      domainName,
-      this.selectedStudent,
-      this.selectedSchool,
-      this.selectedGrade,
-      this.selectedClass
-    )
-  );
-  this.tableData = data.map((item) => ({
-    id: item.id,  // Make sure to include this
-    date: new Date(item.insertedAt).toLocaleDateString(),
-    details: item.details || 'No details',
-    permanentDrug: item.permanentDrug || '-'
-  }));
-  console.log('MH By Parent data with IDs:', this.tableData);  // Debug log
-  break;
-
-case 'MH By Doctor':
-  data = await firstValueFrom(
-    this.medicalReportService.getAllMHByDoctor(
-      domainName,
-      this.selectedStudent,
-      this.selectedSchool,
-      this.selectedGrade,
-      this.selectedClass
-    )
-  );
-  this.tableData = data.map((item) => ({
-    id: item.id,  // Make sure to include this
-    date: new Date(item.insertedAt).toLocaleDateString(),
-    details: item.details || 'No details',
-    permanentDrug: item.permanentDrug || '-'
-  }));
-  console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
-  break;
-
-     case 'Hygiene Form':
-        data = await firstValueFrom(
-          this.medicalReportService.getAllHygieneForms(
-            domainName,
-            this.selectedStudent,
-            this.selectedSchool,
-            this.selectedGrade,
-            this.selectedClass
-          )
-        );
-        
-        this.tableData = data.flatMap((form) =>
-          form.studentHygieneTypes.map((studentHygiene: any) => {
-            const row: any = {
-              date: new Date(form.date).toLocaleDateString(),
-              attendance: studentHygiene.attendance ? 'Present' : 'Absent',
-              comment: studentHygiene.comment || '-',
-              actionTaken: studentHygiene.actionTaken || '-'
-            };
-
-            if (studentHygiene.hygieneTypes) {
-              studentHygiene.hygieneTypes.forEach((type: any) => {
-                row[type.type] = 'Yes'; // This will show as checkmark
-              });
-            }
-
-            return row;
-          })
-        );
+          if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByParentByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByParent(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
+          this.tableData = data.map((item) => ({
+            id: item.id,  // Make sure to include this
+            date: new Date(item.insertedAt).toLocaleDateString(),
+            details: item.details || 'No details',
+            permanentDrug: item.permanentDrug || '-'
+          }));
+          console.log('MH By Parent data with IDs:', this.tableData);  // Debug log
         break;
 
-case 'Follow Up':
-  data = await firstValueFrom(
-    this.medicalReportService.getAllFollowUps(
-      domainName,
-      this.selectedStudent,
-      this.selectedSchool,
-      this.selectedGrade,
-      this.selectedClass
-    )
-  );
-  this.tableData = data.map((item: any) => ({
-    date: new Date(item.insertedAt).toLocaleDateString(),
-    diagnosis: item.diagnosis || 'No diagnosis',
-    drug: item.followUpDrugs?.map((d: any) => d.drug).join(', ') || 'No drug',
-    dose: item.followUpDrugs?.map((d: any) => d.dose).join(', ') || 'No dose',
-    recommendations: item.recommendation || 'No recommendations',
-    complains: item.complains || 'No complains',
-    doctor: item.en_name || 'Unknown'
-  }));
-  break;
+        case 'MH By Doctor':
+          if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByDoctorByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByDoctor(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
+          this.tableData = data.map((item) => ({
+            id: item.id,  // Make sure to include this
+            date: new Date(item.insertedAt).toLocaleDateString(),
+            details: item.details || 'No details',
+            permanentDrug: item.permanentDrug || '-'
+          }));
+          console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
+        break;
+
+        case 'Hygiene Form':
+          if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllHygieneFormsByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllHygieneForms(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
+          this.tableData = data.flatMap((form) =>
+            form.studentHygieneTypes.map((studentHygiene: any) => {
+              const row: any = {
+                date: new Date(form.date).toLocaleDateString(),
+                attendance: studentHygiene.attendance ? 'Present' : 'Absent',
+                comment: studentHygiene.comment || '-',
+                actionTaken: studentHygiene.actionTaken || '-'
+              };
+
+              if (studentHygiene.hygieneTypes) {
+                studentHygiene.hygieneTypes.forEach((type: any) => {
+                  row[type.type] = 'Yes'; // This will show as checkmark
+                });
+              }
+
+              return row;
+            })
+          );
+        break;
+
+        case 'Follow Up':
+            if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllFollowUpsByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllFollowUps(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
+          this.tableData = data.map((item: any) => ({
+            date: new Date(item.insertedAt).toLocaleDateString(),
+            diagnosis: item.diagnosis || 'No diagnosis',
+            drug: item.followUpDrugs?.map((d: any) => d.drug).join(', ') || 'No drug',
+            dose: item.followUpDrugs?.map((d: any) => d.dose).join(', ') || 'No dose',
+            recommendations: item.recommendation || 'No recommendations',
+            complains: item.complains || 'No complains',
+            doctor: item.en_name || 'Unknown'
+          }));
+        break;
   
       }
 
@@ -449,7 +527,7 @@ prepareExportData() {
       
       this.pdfTableHeaders.push('Comment', 'Action Taken');
       break;
-    case 'Follow Up':
+      case 'Follow Up':
       this.pdfTableHeaders = [
         'Date',
         'Diagnosis',

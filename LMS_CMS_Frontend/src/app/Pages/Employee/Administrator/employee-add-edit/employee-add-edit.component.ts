@@ -109,11 +109,11 @@ export class EmployeeAddEditComponent {
     if (this.User_Data_After_Login.type === 'employee') {
       this.DomainName = this.ApiServ.GetHeader();
       this.activeRoute.url.subscribe((url) => {
-        this.path = url[0].path;
+      this.path = url.map(segment => segment.path).join('/');
 
-        if (this.path == 'Employee Create') {
+        if (this.path.endsWith("Employee/Create")) {
           this.mode = 'Create';
-        } else if (this.path == 'Employee Edit') {
+        }else{
           this.mode = 'Edit';
           this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
           this.EmpServ.Get_Employee_By_ID(

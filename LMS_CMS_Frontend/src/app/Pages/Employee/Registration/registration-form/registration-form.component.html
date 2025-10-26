@@ -2,11 +2,11 @@
     <div class="flex-grow flex-col space-y-8">
         <div class="flex justify-between items-center">
             <p *ngIf="this.path == 'Registration Form'" class="primaryTxt text-2xl font-semibold">{{ isRtl ? "استمارة التسجيل" : RegistrationFormData.name }}</p>
-            <div *ngIf="this.path == 'Edit Student'" class="flex justify-between items-center space-x-5 "> 
+            <div *ngIf="this.path.startsWith('Student/Edit')" class="flex justify-between items-center space-x-5 "> 
                 <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180"(click)="moveToStudents()"></i>
                 <p class="primaryTxt text-2xl font-semibold">{{ 'Edit' | translate }} {{ 'Student' | translate }}</p>
             </div>
-            <p *ngIf="this.path == 'Create Student'" class="primaryTxt text-2xl font-semibold">{{ 'Create' | translate }}  {{ 'Student' | translate }}</p>
+            <p *ngIf="this.path.startsWith('Student/Create')" class="primaryTxt text-2xl font-semibold">{{ 'Create' | translate }}  {{ 'Student' | translate }}</p>
             <div class="w-[500px] flec flex-col space-y-2">
                 <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{
                     'Completed' | translate }}</p>

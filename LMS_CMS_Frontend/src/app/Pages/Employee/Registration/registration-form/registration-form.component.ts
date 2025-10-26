@@ -128,14 +128,15 @@ export class RegistrationFormComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
+    this.path = url.map(segment => segment.path).join('/');
       this.RegistrationParentID = Number(
         this.activeRoute.snapshot.paramMap.get('RegisterationFormParentId')
       );
       this.StudentId = Number(
         this.activeRoute.snapshot.paramMap.get('StudentId')
       );
-      if (this.path == 'Edit Student') {
+      console.log(1234,this.path)
+      if (this.path.startsWith('Student/Edit')) {
         this.getRegisterationFormSubmittion();
         this.mode = 'Edit'
       }
@@ -637,7 +638,7 @@ export class RegistrationFormComponent {
         await this.CheckAgeForGrade();
         if (this.ageIsCompatibleWithGrade) {
           this.isLoading = true;
-          if (this.path == 'Create Student') {
+          if (this.path.startsWith('Student/Create')) {
             this.registrationForm.isStudent = true;
           }
           if (this.mode == 'Create') {
@@ -713,7 +714,7 @@ export class RegistrationFormComponent {
   }
 
   DoneSuccessfully() {
-    if (this.path == 'Create Student') {
+    if (this.path.startsWith('Student/Create')) {
       this.router.navigateByUrl(`Employee/Student`);
     }
     this.RegistrationFormData = new RegistrationForm();
@@ -735,8 +736,9 @@ export class RegistrationFormComponent {
     this.selectedOptions = [];
 
     //////
-
-    this.isSuccess = true;
+    if (this.path == 'Registration Form') {
+        this.isSuccess = true;
+    }
   }
 
   moveToStudents() {

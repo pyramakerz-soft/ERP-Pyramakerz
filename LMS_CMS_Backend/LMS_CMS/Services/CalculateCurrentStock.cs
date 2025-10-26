@@ -7,8 +7,7 @@ namespace LMS_CMS_PL.Services
     public class CalculateCurrentStock
     {
         public async Task<int> GetCurrentStock(LMS_CMS_Context db, long storeId, long shopItemId, DateOnly date)
-        {
-
+        { 
             var totalStock = await (from details in db.InventoryDetails
                                     join master in db.InventoryMaster on details.InventoryMasterId equals master.ID
                                     join flag in db.InventoryFlags on master.FlagId equals flag.ID
@@ -19,14 +18,26 @@ namespace LMS_CMS_PL.Services
                                           && details.IsDeleted != true
                                     select details.Quantity * flag.ItemInOut
                                    ).SumAsync();
+            return totalStock;
+        }
+        
+        public async Task<int> GetCurrentStockInAllStores(LMS_CMS_Context db, long shopItemId, DateOnly date)
+        { 
+            var totalStock = await (from details in db.InventoryDetails
+                                    join master in db.InventoryMaster on details.InventoryMasterId equals master.ID
+                                    join flag in db.InventoryFlags on master.FlagId equals flag.ID
+                                    where details.ShopItemID == shopItemId
+                                          && EF.Functions.DateDiffDay(master.Date, date) >= 0
+                                          && master.IsDeleted != true
+                                          && details.IsDeleted != true
+                                    select details.Quantity * flag.ItemInOut
+                                   ).SumAsync();
 
             return totalStock;
         }
-
-        //////
+         
         public async Task<int> GetCurrentStockInTransformedStore(LMS_CMS_Context db, long storeId, long shopItemId, DateOnly date)
-        {
-
+        { 
             var totalStock = await (from details in db.InventoryDetails
                                     join master in db.InventoryMaster on details.InventoryMasterId equals master.ID
                                     join flag in db.InventoryFlags on master.FlagId equals flag.ID
@@ -40,6 +51,21 @@ namespace LMS_CMS_PL.Services
 
             return totalStock;
         }
+         
+        public async Task<int> GetCurrentStockInTransformedStoreInAllStores(LMS_CMS_Context db, long shopItemId, DateOnly date)
+        { 
+            var totalStock = await (from details in db.InventoryDetails
+                                    join master in db.InventoryMaster on details.InventoryMasterId equals master.ID
+                                    join flag in db.InventoryFlags on master.FlagId equals flag.ID
+                                    where master.FlagId == 8
+                                          && details.ShopItemID == shopItemId
+                                          && EF.Functions.DateDiffDay(master.Date, date) >= 0
+                                          && master.IsDeleted != true
+                                          && details.IsDeleted != true
+                                    select details.Quantity * 1
+                                   ).SumAsync();
 
+            return totalStock;
+        } 
     }
 }

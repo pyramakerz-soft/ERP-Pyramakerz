@@ -17,6 +17,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { ActivatedRoute } from '@angular/router';
+import { AccountService } from '../../../../../Services/account.service';
+import { Student } from '../../../../../Models/student';
 @Component({
   selector: 'app-medical-history',
   standalone: true,
@@ -36,6 +40,12 @@ export class MedicalHistoryComponent implements OnInit {
   subscription!: Subscription;
   searchKey: string = 'id';
   searchValue: string = '';
+  students: Student[] = [];
+  
+  reportType: string = 'employee';
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  DomainName: string = '';
+  UserID: number = 0;
   
   constructor(
     private medicalHistoryService: MedicalHistoryService,
@@ -46,11 +56,23 @@ export class MedicalHistoryComponent implements OnInit {
     private studentService: StudentService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-      private translate: TranslateService
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private route: ActivatedRoute,
+    private translate: TranslateService
 
   ) {}
 
   ngOnInit(): void {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    console.log(12,this.reportType)
+    if(this.reportType == 'parent'){
+      this.GetStudentsData()
+    }
+
     this.loadMedicalHistories();
      this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -58,7 +80,7 @@ export class MedicalHistoryComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
+  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
@@ -66,30 +88,30 @@ export class MedicalHistoryComponent implements OnInit {
   } 
 
   private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async onSearchEvent(event: { key: string, value: any }) {
     this.searchKey = event.key;
@@ -103,6 +125,14 @@ private showSuccessAlert(message: string) {
         });
     }
   }
+
+  GetStudentsData() {
+    this.students = []
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
+  }  
 
   async loadMedicalHistories() {
     try {

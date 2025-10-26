@@ -5,7 +5,7 @@
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                {{ 'Create' | translate }}  {{ 'Store' | translate }}
+                {{ 'Create' | translate }} {{ 'Store' | translate }}
             </button>
         </div>
     </div>
@@ -25,11 +25,11 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Categories' | translate }}
+                            {{ 'Categories' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                              {{ 'Actions' | translate }}
+                            {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -38,7 +38,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="4"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                              {{ 'No Data Found' | translate }}
+                            {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -91,14 +91,14 @@
             <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
         <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-            {{ 'Create' | translate }}  {{ 'Store' | translate }}
+            {{ 'Create' | translate }} {{ 'Store' | translate }}
         </h1>
         <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-             {{ 'Edit' | translate }}  {{ 'Store' | translate }}
+            {{ 'Edit' | translate }} {{ 'Store' | translate }}
         </h1>
         <div class="mt-4 bg-[#F7F7F7] w-[573px] rounded-[24px] p-[16px_24px] gap-[20px]">
             <div class="flex flex-col mt-2 gap-2 items-start">
-                <h6 class="font-medium text-base leading-6">   {{ 'Store' | translate }}  {{ 'Name' | translate }}</h6>
+                <h6 class="font-medium text-base leading-6"> {{ 'Store' | translate }} {{ 'Name' | translate }}</h6>
                 <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                     [(ngModel)]="store.name" placeholder=" {{ 'Enter name' | translate }}" (ngModelChange)="
                   onInputValueChange({ field: 'name', value: $event })" />
@@ -108,12 +108,11 @@
             <div>
                 <div class="mt-4">
                     <div class="flex flex-col mb-1">
-                        <label class="mb-3" for="ac">  {{ 'Categories' | translate }}</label>
+                        <label class="mb-3" for="ac"> {{ 'Categories' | translate }}</label>
                         <div class="relative bg-white">
-                            <div 
-                                class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer flex justify-between items-center"
+                            <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer flex justify-between items-center"
                                 (click)="toggleDropdown()" tabindex="0">
-                                
+
                                 <div class="w-full">
                                     <div *ngIf="CategoriesSelected.length > 0; else placeholder">
                                         <div class="flex flex-wrap">
@@ -129,20 +128,24 @@
                                         </div>
                                     </div>
                                     <ng-template #placeholder>
-                                        <span class="text-gray-500">   {{ 'Choose' | translate }}  {{ 'Category' | translate }}</span>
+                                        <span class="text-gray-500"> {{ 'Choose' | translate }} {{ 'Category' |
+                                            translate }}</span>
                                     </ng-template>
                                 </div>
-            
+
                                 <!-- Dropdown Icon (SVG) -->
                                 <svg class="w-5 h-5 text-gray-500 ml-2 shrink-0" fill="none" stroke="currentColor"
                                     stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
-            
+
                             <div class="bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
                                 *ngIf="dropdownOpen">
                                 <ul>
+                                    <li *ngIf="Categories.length === 0" class="px-4 py-2 text-gray-500" disabled>
+                                        {{ 'No Data Found' | translate }}
+                                    </li>
                                     <li *ngFor="let cat of Categories"
                                         class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                         (click)="selectCategory(cat)">
@@ -157,7 +160,7 @@
             <div class="flex justify-end">
                 <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
                     (click)="CreateOREdit()">
-                    <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
+                    <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
                 </button>
             </div>

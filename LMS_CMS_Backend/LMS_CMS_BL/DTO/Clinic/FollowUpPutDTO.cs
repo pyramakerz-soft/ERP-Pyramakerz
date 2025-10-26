@@ -14,7 +14,7 @@ namespace LMS_CMS_BL.DTO.Clinic
         public ICollection<FollowUpDrugPutDTO> FollowUpDrugs { get; set; } = new HashSet<FollowUpDrugPutDTO>();
 
         public string? Recommendation { get; set; }
-        public bool? SendSMS { get; set; }
+        public bool SendSMS { get; set; }
         public DateOnly? Date { get; set; }
     }
 }

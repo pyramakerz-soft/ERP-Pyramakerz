@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee", "student" },
+           allowedTypes: new[] { "octa", "employee", "student" ,"parent"},
            pages: new[] { "Inventory Categories" }
         )]
         public async Task<IActionResult> GetAsync()

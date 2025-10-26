@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
           ,
-          pages: new[] { "Location" }
+          pages: new[] { "Location" , "Employee" }
          )]
         public async Task<IActionResult> GetAsync()
         {

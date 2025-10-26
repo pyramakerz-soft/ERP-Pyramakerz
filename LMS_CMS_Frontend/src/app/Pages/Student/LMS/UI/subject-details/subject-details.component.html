@@ -1,12 +1,13 @@
 <div class="p-6">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-<div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <!-- <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180 cursor-pointer" (click)="goBack()"></i> -->
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName |translate}}</h1>
-    </div>
-</div>        <div class="flex space-x-2 rtl:space-x-reverse">
+    <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+            <!-- <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180 cursor-pointer" (click)="goBack()"></i> -->
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName |translate}}</h1>
+        </div>
+    </div>        
+    <div class="flex space-x-2 rtl:space-x-reverse">
             <button
                 class="border border-[#089B41] text-[#089B41] text-xs px-3 py-2 rounded hover:bg-green-50 flex items-center"
                 (click)="setActiveTab('resources')">

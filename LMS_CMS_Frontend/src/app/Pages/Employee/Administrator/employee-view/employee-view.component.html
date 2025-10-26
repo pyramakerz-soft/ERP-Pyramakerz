@@ -193,11 +193,11 @@
     <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3"
         (click)="CancelUpdatePassword()">   {{ 'Cancel' | translate }}</button>
 
-    <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
+    <!-- <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
         (input)="onoldPasswordChange()" 
         placeholder="{{ 'Enter old password' | translate }}"
  [(ngModel)]="editpasss.oldPassword">
-    <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
+    <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span> -->
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
        
     placeholder="{{ 'Enter the password' | translate }}"

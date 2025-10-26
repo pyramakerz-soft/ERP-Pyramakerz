@@ -65,7 +65,10 @@ export class SubjectAssignmentComponent {
       this.SolvedAssignment = d.solvedAssignments
       this.UnSolvedAssignment = d.unsolvedAssignments
     }, error => {
-      this.router.navigateByUrl(`Student/Subject`)
+      console.log(12,error)
+      if(!error.error.includes("No Assignments For This Student For this Subject")){
+        this.router.navigateByUrl(`Student/Subject`)
+      }
     })
   }
 
@@ -89,12 +92,17 @@ export class SubjectAssignmentComponent {
     const today = new Date();
     const due = new Date(dueDate);
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= due || today >= cutoff;
   }
 
   isPastCutoff(cutOfDate: string): boolean {
     const today = new Date();
     const cutoff = new Date(cutOfDate);
+    today.setHours(0, 0, 0, 0);
+    cutoff.setHours(0, 0, 0, 0);
     return today >= cutoff;
   }
 }

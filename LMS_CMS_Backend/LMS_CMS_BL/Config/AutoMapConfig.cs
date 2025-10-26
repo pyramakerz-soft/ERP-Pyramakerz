@@ -144,7 +144,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Parent, ParentGetDTO>();
             CreateMap<ParentGetDTO, Parent>();
 
-            CreateMap<Student, StudentGetDTO>()
+             CreateMap<Student, StudentGetDTO>()
               .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name))
               .ForMember(dest => dest.GuardianName, opt => opt.MapFrom(src => src.Parent.en_name))
               .ForMember(dest => dest.GuardianPassportNo, opt => opt.MapFrom(src => src.Parent.PassportNo))
@@ -421,10 +421,11 @@ namespace LMS_CMS_BL.Config
               .ForMember(dest => dest.Video, opt => opt.MapFrom(src => src.Question.Video))
               .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Question.Image))
               .ForMember(dest => dest.CorrectAnswerID, opt => opt.MapFrom(src => src.Question.CorrectAnswerID))
-              .ForMember(dest => dest.CorrectAnswerName, opt => opt.MapFrom(src => src.Question.mCQQuestionOption.Name))
-              .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.Question.QuestionType.ID))
+              .ForMember(dest => dest.CorrectAnswerName, opt => opt.MapFrom(src => src.Question.mCQQuestionOption.Name)) 
               .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.Question.QuestionType.Name))
               .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.Question.QuestionType.ID))
+              .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Question.Image)) 
+              .ForMember(dest => dest.Video, opt => opt.MapFrom(src => src.Question.Video)) 
               .ForMember(dest => dest.AnswerName, opt => opt.MapFrom(src => src.MCQQuestionOption.Name));
 
             CreateMap<MCQQuestionOption, MCQQuestionOptionGetDto>();
@@ -1370,7 +1371,12 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
                 .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
 
+            CreateMap<AppointmentParentGetDTO, AppointmentParent>();
             CreateMap<AppointmentParent, AppointmentParentGetDTO>()
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Appointment.Date))
+                .ForMember(dest => dest.DueDateToParentToAccept, opt => opt.MapFrom(src => src.Appointment.DueDateToParentToAccept))
+                .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
                 .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
                 .ForMember(dest => dest.ParentArName, opt => opt.MapFrom(src => src.Parent.ar_name))
                 .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));

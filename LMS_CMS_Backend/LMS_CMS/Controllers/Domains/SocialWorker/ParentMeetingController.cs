@@ -1,12 +1,15 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
@@ -18,19 +21,26 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly IConfiguration _configuration;
+        private readonly DomainService _domainService;
+        private readonly SendNotificationService _sendNotificationService;
 
-        public ParentMeetingController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ParentMeetingController(DbContextFactoryService dbContextFactory, IMapper mapper, SendNotificationService sendNotificationService ,CheckPageAccessService checkPageAccessService, DomainService domainService  , IConfiguration configuration)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _domainService = domainService;
+            _configuration = configuration;
+            _sendNotificationService = sendNotificationService;
+
         }
 
         ////////////////////////////////
 
         [HttpGet]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
+        allowedTypes: new[] { "octa", "employee" ,"parent"},
         pages: new[] { "Parent Meeting" }
         )]
         public IActionResult Get()
@@ -131,6 +141,34 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             Unit_Of_Work.parentMeeting_Repository.Add(meeting);
             Unit_Of_Work.SaveChanges();
+
+            //
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+            string serverUrl = "";
+
+            bool isProduction = _configuration.GetValue<bool>("IsProduction");
+
+            if (isProduction)
+            {
+                var domain = _domainService.GetDomain(HttpContext);
+                string subDomain = HttpContext.Request.Headers["Domain-Name"].ToString();
+                string fullPath = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/Parent/Meetings";
+
+                AmazonS3Client s3Client = new AmazonS3Client();
+                S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
+                serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+            }
+            else
+            {
+                serverUrl = $"http://localhost:4200/Parent/Meetings";
+
+            }
+            List<Parent> parents = Unit_Of_Work.parent_Repository.FindBy(s=>s.IsDeleted != true );
+            foreach (var item in parents)
+            {
+              await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, item.ID, domainName);
+            }
+
             return Ok(NewMeeting);
         }
 

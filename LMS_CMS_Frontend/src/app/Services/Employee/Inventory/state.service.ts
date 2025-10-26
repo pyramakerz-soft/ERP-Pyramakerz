@@ -19,10 +19,10 @@ export class StateService {
 
   private medicalReportState: {
     selectedTab: string;
-    selectedSchool: number | null;
-    selectedGrade: number | null;
-    selectedClass: number | null;
-    selectedStudent: number | null;
+    selectedSchool: number;
+    selectedGrade: number;
+    selectedClass: number;
+    selectedStudent: number;
     tableData: any[];
     showTable: boolean;
     schools: any[];

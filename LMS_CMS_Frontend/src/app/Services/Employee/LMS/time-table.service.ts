@@ -92,6 +92,18 @@ export class TimeTableService {
     return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForClassAsync/${Tid}/${ClassId}`,{ headers });
   }
 
+  GetByIdForStudentIdAsync(studentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForStudentIdAsync/${studentId}`,{ headers });
+  }
+
   GetByIdForTeacherAsync(Tid: number, ClassId: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;

@@ -2,13 +2,13 @@
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
         <h1 *ngIf="mode=='Create'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'Create Installment Deduction' | translate }}
+            {{ 'Create' | translate }} {{'Installment Deduction' | translate }}
         </h1>
         <h1 *ngIf="mode=='Edit'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'Edit Installment Deduction' | translate }}
+            {{ 'Edit' | translate }} {{'Installment Deduction' | translate }}
         </h1>
         <h1 *ngIf="mode=='View'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'View Installment Deduction' | translate }}
+            {{ 'View' | translate }} {{'Installment Deduction' | translate }}
         </h1>
     </div>
 </div>
@@ -39,7 +39,7 @@
             [disabled]="mode=='View' " [(ngModel)]="Data.employeeID"
             (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })" (change)="onEmployeeChange()">
             <option [value]=0 disabled selected hidden> {{ 'Choose Employee' | translate }}</option>
-            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.user_Name }}</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.en_name }}</option>
             <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{

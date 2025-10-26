@@ -38,8 +38,9 @@ namespace LMS_CMS_PL.Services
                 _configuration["JWT:Issuer"],
                 _configuration["JWT:Audience"],
                 claims,
-                expires: DateTime.UtcNow.AddDays(30),
+                //expires: DateTime.UtcNow.AddDays(30),
                 //expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signIn
             );
 
@@ -48,10 +49,12 @@ namespace LMS_CMS_PL.Services
 
         public string GenerateRefreshToken()
         {
-            var randomBytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
+            var randomNumber = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
     }
 }

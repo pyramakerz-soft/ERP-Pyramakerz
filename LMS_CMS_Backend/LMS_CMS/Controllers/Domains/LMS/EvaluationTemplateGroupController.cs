@@ -74,7 +74,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetByTemplateID/{templateId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" } ,
-            pages: new[] { "EvaluationTemplateGroup" }
+            pages: new[] { "EvaluationTemplateGroup" , "Evaluation" }
         )]
         public IActionResult GetByTemplateID(long templateId)
         {

@@ -179,6 +179,13 @@ namespace LMS_CMS_PL.Controllers.Domains
                 StudentDTO.NationalityArName = nationality.ArName;
             }
 
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == StudentDTO.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                 query => query.Include(emp => emp.AcademicYear),
+                 query => query.Include(emp => emp.AcademicYear.School)
+                 );
+
+            StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+            StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
 
             return Ok(StudentDTO);
         }
@@ -343,7 +350,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         /////
 
         [HttpGet("Get_By_ParentID/{Id}")]
-        public IActionResult Get_By_ParentID(long Id)
+        public async Task<IActionResult> Get_By_ParentID(long Id)
         {
             if (Id == 0)
             {
@@ -374,8 +381,22 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("No students found.");
             }
-             
+
+
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in studentDTOs)
+            {
+                StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == item.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                   query => query.Include(emp => emp.AcademicYear),
+                   query => query.Include(emp => emp.AcademicYear.School)
+                   );
+
+                if(studentGrade != null)
+                {
+                    item.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                    item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+                }
+            }
 
             return Ok(studentDTOs);
         }
@@ -628,9 +649,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsID = 0;
             for (int i = 0; i < classrooms.Count; i++)
             {
-                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
                 StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
-                
+
                 if (stuAY != null)
                 {
                     clsID = stuAY.ClassID;
@@ -650,9 +670,30 @@ namespace LMS_CMS_PL.Controllers.Domains
                 studentDTO.NationalityArName = nationality.ArName;
             }
 
+            RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 16 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion2 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 17 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion3 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 18 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion4 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 19 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            if (registerationFormSubmittion != null)
+            {
+                studentDTO.GuardianPassportNo = registerationFormSubmittion.TextAnswer; 
+                studentDTO.GuardianNationalID = registerationFormSubmittion2.TextAnswer;
+                studentDTO.GuardianQualification = registerationFormSubmittion3.TextAnswer;
+                studentDTO.GuardianWorkPlace = registerationFormSubmittion4.TextAnswer;
+            }
+
+
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "Egypt Standard Time"
-                : "Africa/Cairo";
+            ? "Egypt Standard Time"
+            : "Africa/Cairo";
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
@@ -666,7 +707,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
-
         /////
 
         [HttpGet("GetStudentProofRegistrationAndSuccessForm")]

@@ -1,0 +1,81 @@
+<div class="rounded-lg">
+    <!-- <section class="hero primaryBg text-white py-9 px-8 rounded-t-lg">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-extrabold leading-tight">Welcome to ERP System Octa</h1>
+            <p class="mt-4 text-lg">Streamline your school operations with our all-in-one solution.</p>
+        </div>
+    </section> -->
+    <section class="hero bg-cover text-white py-9 px-8 rounded-t-lg" style="background-image: url('Images/rrr.jpg');">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-extrabold leading-tight">Welcome to ERP System Octa</h1>
+            <p class="mt-4 text-lg">Streamline your school operations with our all-in-one solution.</p>
+        </div>
+    </section>
+    
+    <div class="flex flex-col lg:flex-row justify-evenly items-center py-3 px-32 bg-[#e7e7e769]">
+        <div class="w-[40%]">
+            <p class="primaryTxt font-semibold text-3xl">ERP System Octa</p> 
+            <p class="mt-4 text-[#444444] font-normal text-sm">
+                The ERP system is a digital platform designed for schools to streamline and manage operations. It supports three user roles—Students, Parents, and Employees—each with tailored features.
+            </p> 
+        </div>
+        <div class="w-[50%] flex justify-center">
+            <img src="Images/ERPSystemOcta.jpg" alt="ERP System Octa" class="w-[75%] h-auto object-contain rounded-lg">
+        </div>
+    </div>
+</div>
+
+<div *ngIf="announcements.length > 0" class="relative w-full h-80 rounded-b-lg bg-[#e7e7e769]">
+    <!-- Carousel wrapper -->
+    <div class="h-full flex justify-center items-center">
+        <div *ngFor="let announcement of announcements; let i = index" class="h-full"
+            [ngClass]="{'hidden': selectedIndex !== i}">
+            <img [src]="announcement.imageLink" class="h-full rounded-b-lg" alt="ERP System Image">
+        </div>
+    </div>
+
+    <!-- Slider indicators -->
+   <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+        <button *ngFor="let announcement of announcements; let i = index" 
+                (click)="setSelectedIndex(i)"
+                [class.bg-[#089B41]]="selectedIndex === i"   
+                [class.bg-[#394b6e77]]="selectedIndex != i"   
+                [class.ring-2]="selectedIndex === i"    
+                [class.ring-[#089B41]]="selectedIndex === i"  
+                class="w-3 h-3 rounded-full cursor-pointer"
+                [attr.aria-label]="'Slide' + (i + 1)">
+        </button>
+    </div>
+
+
+    <!-- Slider controls (previous and next) -->
+    <button type="button"
+        class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+        (click)="prevSlide()" aria-label="Previous">
+        <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 
+            dark:bg-[#394B6E]/30 group-hover:bg-white/50 dark:group-hover:bg-[#394B6E]/60">
+            <svg class="w-4 h-4 text-[#394B6E] rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 1 1 5l4 4" />
+            </svg>
+            <span class="sr-only">Previous</span>
+        </span>
+    </button>
+
+    <button type="button"
+        class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+        (click)="nextSlide()" aria-label="Next">
+        <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 
+            dark:bg-[#394B6E]/30 group-hover:bg-white/50 dark:group-hover:bg-[#394B6E]/60">
+            <svg class="w-4 h-4 text-[#394B6E] rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m1 9 4-4-4-4" />
+            </svg>
+            <span class="sr-only">Next</span>
+        </span>
+    </button>
+</div>

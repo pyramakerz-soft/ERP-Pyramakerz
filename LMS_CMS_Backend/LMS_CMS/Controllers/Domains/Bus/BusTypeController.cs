@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bus Types" }
+            pages: new[] { "Bus Types" , "Bus Details" }
         )]
         public IActionResult Get()
         {

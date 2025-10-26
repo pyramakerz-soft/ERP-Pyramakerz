@@ -138,11 +138,11 @@ export class StudentsComponent {
   }
 
   Create() {
-    this.router.navigateByUrl(`Employee/Create Student`);
+    this.router.navigateByUrl(`Employee/Student/Create`);
   }
 
   Edit(StuId: number, Rid: number) {
-    this.router.navigateByUrl(`Employee/Edit Student/${Rid}/${StuId}`);
+    this.router.navigateByUrl(`Employee/Student/Edit/${Rid}/${StuId}`);
   }
 
 

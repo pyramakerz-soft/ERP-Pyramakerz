@@ -58,7 +58,7 @@ export class MaintenanceReportComponent implements OnInit {
   school = {
     reportHeaderOneEn: 'Conduct Report',
     reportHeaderTwoEn: 'Student Behavior Records',
-    reportHeaderOneAr: 'تقرير السلوك',
+    reportHeaderOneAr: 'تقرير الصيانة',
     reportHeaderTwoAr: 'سجلات سلوك الطلاب'
   };
 

@@ -50,6 +50,18 @@ export class GradeService {
     return this.http.get<Grade[]>(`${this.baseUrl}/Grade/GetBySchool/${schoolId}`, { headers })
   }
 
+  GetBySchoolAndStudent(schoolId:number,StudentId:number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Grade[]>(`${this.baseUrl}/Grade/GetBySchoolAndStudent/${schoolId}/${StudentId}`, { headers })
+  }
+
   GetByID(id: number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 

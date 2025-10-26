@@ -88,12 +88,14 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
   ngOnDestroy(): void { 
           this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }
+  
   GetAllData() {
     this.TableData = [];
     this.LessonLiveServ.GetByStudentID(this.UserID,this.DomainName).subscribe((d) => {

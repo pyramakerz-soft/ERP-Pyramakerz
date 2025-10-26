@@ -223,35 +223,35 @@ export class AcademicSequentialReportComponent {
     return date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  async DownloadAsExcel() {
-    // Transform DataToPrint into Excel tables
-    const tables = this.DataToPrint.map((section: { header: any; data: any[]; }) => ({
-      title: section.header,
-      headers: ['Field', 'Value'],
-      data: section.data.map((item: { key: any; value: any; }) => [item.key, item.value])
-    }));
+  // async DownloadAsExcel() {
+  //   // Transform DataToPrint into Excel tables
+  //   const tables = this.DataToPrint.map((section: { header: any; data: any[]; }) => ({
+  //     title: section.header,
+  //     headers: ['Field', 'Value'],
+  //     data: section.data.map((item: { key: any; value: any; }) => [item.key, item.value])
+  //   }));
   
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: this.school.reportHeaderOneEn,
-        ar: this.school.reportHeaderOneAr
-      },
-      subHeaders: [
-        {
-          en: this.school.reportHeaderTwoEn,
-          ar: this.school.reportHeaderTwoAr
-        }
-      ],
-      infoRows: [
-        { key: 'Date', value: this.CurrentDate },
-        { key: 'Student', value: this.SelectedStudent.user_Name },
-        { key: 'School', value:  this.school.name }
-      ],
-      reportImage: this.school.reportImage,
-      filename: "Student Information Report.xlsx",
-      tables: tables // ✅ dynamic table sections from your actual data
-    });
-  }
+  //   await this.reportsService.generateExcelReport({
+  //     mainHeader: {
+  //       en: this.school.reportHeaderOneEn,
+  //       ar: this.school.reportHeaderOneAr
+  //     },
+  //     subHeaders: [
+  //       {
+  //         en: this.school.reportHeaderTwoEn,
+  //         ar: this.school.reportHeaderTwoAr
+  //       }
+  //     ],
+  //     infoRows: [
+  //       { key: 'Date', value: this.CurrentDate },
+  //       { key: 'Student', value: this.SelectedStudent.user_Name },
+  //       { key: 'School', value:  this.school.name }
+  //     ],
+  //     // reportImage: this.school.reportImage,
+  //     filename: "Student Information Report.xlsx",
+  //     tables: tables // ✅ dynamic table sections from your actual data
+  //   });
+  // }
   
 
   GetData(): Promise<void> {

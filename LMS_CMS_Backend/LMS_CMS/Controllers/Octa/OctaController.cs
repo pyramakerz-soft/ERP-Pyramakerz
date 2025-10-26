@@ -165,11 +165,11 @@ namespace LMS_CMS_PL.Controllers.Octa
                 return NotFound("No Octa with this ID");
             }
 
-            bool isMatch = BCrypt.Net.BCrypt.Verify(editedAcc.OldPassword, octaExists.Password);
-            if (isMatch == false)
-            {
-                return BadRequest("Old Password isn't right");
-            } 
+            //bool isMatch = BCrypt.Net.BCrypt.Verify(editedAcc.OldPassword, octaExists.Password);
+            //if (isMatch == false)
+            //{
+            //    return BadRequest("Old Password isn't right");
+            //} 
 
             octaExists.Password = BCrypt.Net.BCrypt.HashPassword(editedAcc.Password);
             octaExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

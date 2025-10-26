@@ -41,7 +41,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Registration Form" }
+            pages: new[] { "Registration Form" , "Student" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -131,7 +131,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Registration Form" }
+            pages: new[] { "Registration Form", "Student" }
         )]
         public async Task<IActionResult> Add([FromForm] RegisterationFormParentAddDTO registerationFormParentAddDTO,
             [FromForm] List<RegisterationFormSubmittionForFiles> filesFieldCat = null)

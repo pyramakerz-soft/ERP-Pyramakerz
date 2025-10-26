@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { StudentService } from '../../../../Services/student.service';
+import { Student } from '../../../../Models/student';
 
 @Component({
   selector: 'app-cart',
@@ -36,6 +38,7 @@ export class CartComponent {
   cart:Cart = new Cart()
   totalSalesPrices: number = 0;
   totalVat: number = 0;
+  students: Student[] = [];
 
   cartShopItem:CartShopItem = new CartShopItem()
 
@@ -43,7 +46,7 @@ export class CartComponent {
   searchTerm: string = '';
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
-    private router: Router, private cartService: CartService, 
+    private router: Router, private cartService: CartService, public StudentService: StudentService,
     private orderService: OrderService, public cartShopItemService:CartShopItemService,
     private realTimeService: RealTimeNotificationServiceService,){}
   
@@ -60,6 +63,10 @@ export class CartComponent {
     if(this.User_Data_After_Login.type == 'student'){
       this.StuID = this.UserID
     }
+    
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.getStudentsByParent()
+    }
 
     this.getCart() 
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -75,6 +82,7 @@ export class CartComponent {
   }
 
   getStudents(){
+    this.emplyeeStudent = []
     this.employeeStudentService.Get(this.UserID, this.DomainName).subscribe(
       data => {
         this.emplyeeStudent = data
@@ -85,10 +93,21 @@ export class CartComponent {
   goToOrder() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Order")
-    } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+    } else if(this.User_Data_After_Login.type == 'student'){
+      this.router.navigateByUrl("Student/Order")
+    }else{
+      this.router.navigateByUrl("Parent/Order")
     }
   } 
+
+  getStudentsByParent(){ 
+    this.students = []
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }  
   
   getCart(){
     this.cart = new Cart()

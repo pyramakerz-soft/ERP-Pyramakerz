@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { DirectMark } from '../../../../Models/LMS/direct-mark';
 import { DirectMarkService } from '../../../../Services/Employee/LMS/direct-mark.service';
 import { CommonModule } from '@angular/common';
@@ -77,8 +77,8 @@ export class DirectMarkComponent {
   subjectsForCreate: Subject[] = [];
   subjectWeightsForCreate: SubjectWeight[] = [];
   classrooms: Classroom[] = [];
+  @ViewChild('classDropdown') classDropdown!: ElementRef;
   classDropdownOpen = false;
-
   IsView: boolean = false
 
   isLoading = false;
@@ -353,6 +353,17 @@ export class DirectMarkComponent {
     )
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    // if dropdown is open
+    if (this.classDropdownOpen) {
+      const clickedInside = this.classDropdown?.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.classDropdownOpen = false;
+      }
+    }
+  }
+
   getSubjectData() {
     this.subjectsForCreate = []
     this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
@@ -521,6 +532,12 @@ export class DirectMarkComponent {
       }
     });
   }
+
+  removeClass(classroom: number, event: MouseEvent) {
+    event.stopPropagation(); // Prevent the click event from bubbling up
+    this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom)
+    this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);  }  
 
   onSchoolModalChange() {
     this.directMark.subjectWeightTypeID = 0

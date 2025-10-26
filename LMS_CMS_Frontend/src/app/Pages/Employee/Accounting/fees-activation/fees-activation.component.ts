@@ -364,11 +364,15 @@ export class FeesActivationComponent {
 
   async Activate() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       this.FeesForAdd = [];
-      const distinctStudentIDs = Array.from(new Set(this.OriginalTableData.map(stu => stu.studentID)));
+
+      const distinctStudentIDs = Array.from(
+        new Set(this.OriginalTableData.map(stu => stu.studentID))
+      );
+
       distinctStudentIDs.forEach(stu => {
-        var fee: FeesActivationAddPut = new FeesActivationAddPut();
+        const fee = new FeesActivationAddPut();
         fee.academicYearId = this.YearId;
         fee.amount = this.Fees.amount;
         fee.date = this.Fees.date;
@@ -379,21 +383,26 @@ export class FeesActivationComponent {
         fee.studentID = stu;
         this.FeesForAdd.push(fee);
       });
+
       try {
         await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
-        this.GetAllFeesData();
-        this.Search()
-        this.Fees =new FeesActivationAddPut()
-        this.DiscountPercentage=null
-        Swal.fire({
+        this.Fees = new FeesActivationAddPut();
+        this.DiscountPercentage = null;
+
+        await this.GetAllFeesData();
+        await this.Search();
+
+        await Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',
           confirmButtonColor: '#089B41',
         });
-        this.isLoading = false
+
       } catch (error) {
         console.error("Error while activating fees:", error);
-        this.isLoading = false
+        this.isLoading = false;
+      } finally {
+        this.isLoading = false;
       }
     }
   }
@@ -415,7 +424,9 @@ export class FeesActivationComponent {
 
   async CalculateNet() {
     this.Fees.net = this.Fees.amount
-    await this.CalculateDiscountFromPercentage()
+    if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
+      this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+    }
     this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
   }
 

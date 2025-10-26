@@ -14,7 +14,7 @@ export class FollowUp {
     public diagnosis: string  = "",
     public followUpDrugs: { drugId: number, doseId: number }[] = [], 
     public recommendation: string = "",
-    public sendSMSToParent: boolean = false,
+    public sendSMS: boolean = false,
     public insertedAt: string = "",
     public insertedByUserId: number  = 0,
     public drugId: number = 0,

@@ -527,7 +527,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetEvaluation/{evaluationID}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Evaluation" }
+            pages: new[] { "Evaluation" , "Created Evaluations" }
         )]
         public async Task<IActionResult> GetEvaluationById(long evaluationID)
         {

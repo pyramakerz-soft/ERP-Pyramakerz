@@ -19,7 +19,6 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import html2pdf from 'html2pdf.js';
-// import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
 
 @Component({
   selector: 'app-transfered-from-kindergarten-report',
@@ -99,7 +98,7 @@ export class TransferedFromKindergartenReportComponent {
       }
     });
     this.getAllSchools()
-    this.getAllYears()
+    // Don't call getAllYears() here - wait for school selection
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -120,9 +119,23 @@ export class TransferedFromKindergartenReportComponent {
   }
 
   getAllYears() {
-    this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.academicYears = d
-    })
+    // Clear previous academic years immediately
+    this.academicYears = [];
+    
+    // Only call API if a school is selected
+    if (this.SelectedSchoolId && this.SelectedSchoolId > 0) {
+      this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe({
+        next: (d) => {
+          this.academicYears = d || [];
+        },
+        error: (err) => {
+          console.error('Error fetching academic years:', err);
+          this.academicYears = [];
+        }
+      });
+    } else {
+      this.academicYears = [];
+    }
   }
 
   toggleSearchMode() {
@@ -133,10 +146,54 @@ export class TransferedFromKindergartenReportComponent {
   }
 
   getAllStudents() {
-    this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
-      this.Students = d;
-      this.filteredStudents = d;
-    });
+    // Clear previous students immediately
+    this.Students = [];
+    this.filteredStudents = [];
+    
+    // Only call API if a year is selected
+    if (this.SelectedYearId && this.SelectedYearId > 0) {
+      this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe({
+        next: (d) => {
+          this.Students = d || [];
+          this.filteredStudents = d || [];
+        },
+        error: (err) => {
+          console.error('Error fetching students:', err);
+          this.Students = [];
+          this.filteredStudents = [];
+        }
+      });
+    } else {
+      this.Students = [];
+      this.filteredStudents = [];
+    }
+  }
+
+  onSchoolChange() {
+    console.log('School changed to:', this.SelectedSchoolId);
+    
+    // Reset all dependent fields
+    this.SelectedYearId = 0;
+    this.SelectedStudentId = 0;
+    this.Students = [];
+    this.filteredStudents = [];
+    this.showTable = false;
+    
+    // Get academic years for the selected school
+    this.getAllYears();
+  }
+
+  onYearChange() {
+    console.log('Year changed to:', this.SelectedYearId);
+    
+    // Reset dependent fields
+    this.SelectedStudentId = 0;
+    this.Students = [];
+    this.filteredStudents = [];
+    this.showTable = false;
+    
+    // Get students for the selected academic year
+    this.getAllStudents();
   }
 
   searchStudents() {
@@ -150,15 +207,19 @@ export class TransferedFromKindergartenReportComponent {
   }
 
   GetStudentById() {
-    this.studentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
-      this.SelectedStudent = d
-    })
+    if (this.SelectedStudentId && this.SelectedStudentId > 0) {
+      this.studentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
+        this.SelectedStudent = d
+      });
+    }
   }
 
   async ViewReport() {
-    await this.GetData()
-    this.showTable = true
-    this.GetStudentById()
+    if (this.SelectedSchoolId && this.SelectedYearId && this.SelectedStudentId) {
+      await this.GetData();
+      this.showTable = true;
+      this.GetStudentById();
+    }
   }
 
   DownloadAsPDF() {
@@ -307,6 +368,7 @@ export class TransferedFromKindergartenReportComponent {
   }
 
   formatDate(dateString: string, dir: string): string {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const locale = dir === 'rtl' ? 'ar-EG' : 'en-US';
     return date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -314,6 +376,12 @@ export class TransferedFromKindergartenReportComponent {
 
   GetData(): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Validate all required fields
+      if (!this.SelectedSchoolId || !this.SelectedYearId || !this.SelectedStudentId) {
+        reject(new Error('School, Year, and Student must be selected'));
+        return;
+      }
+
       this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
         .subscribe({
           next: (d) => {
@@ -330,6 +398,7 @@ export class TransferedFromKindergartenReportComponent {
             resolve();
           },
           error: (err) => {
+            console.error('Error fetching certificate data:', err);
             reject(err);
           }
         });
@@ -344,18 +413,6 @@ export class TransferedFromKindergartenReportComponent {
   getSchoolNameAr(): string {
     return this.school?.name || this.school?.reportHeaderOneAr || '-';
   }
-
-  // getCurriculumEn(): string {
-  //   return this.school?.curriculumEn || 'American Curriculum';
-  // }
-
-  // getCurriculumAr(): string {
-  //   return this.school?.curriculumAr || 'المنهج الأمريكي';
-  // }
-
-  // getLicenseNumber(): string {
-  //   return this.school?.licenseNumber || '620-1567';
-  // }
 
   getPromotedToGrade(): string {
     return this.DataToPrint?.student?.currentGradeName || '-';

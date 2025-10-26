@@ -679,7 +679,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         #region Delete
         [HttpDelete("id")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "parent" },
             pages: new[] { "Medical History" }
         )]
         public IActionResult DeleteAsync(long id)
@@ -688,27 +688,53 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
             if (userIdClaim == null || userTypeClaim == null)
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
             MedicalHistory medicalHistory = Unit_Of_Work.medicalHistory_Repository.First_Or_Default(m => m.IsDeleted != true && m.Id == id);
             if (medicalHistory == null)
             {
                 return NotFound();
             }
-            
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medical History", roleId, userId, medicalHistory);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+            else if (userTypeClaim == "parent")
+            {
+
+                if (medicalHistory.InsertedByParentID != userId)
+                {
+                    return Forbid("You can only delete medical history records that you created.");
+                }
+            }
+
+
             medicalHistory.IsDeleted = true;
-            
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            
+
             if (userTypeClaim == "octa")
             {
                 medicalHistory.DeletedByOctaId = userId;
                 if (medicalHistory.DeletedByUserId != null)
                 {
                     medicalHistory.DeletedByUserId = null;
+                }
+                if (medicalHistory.DeletedByParentID != null)
+                {
+                    medicalHistory.DeletedByParentID = null;
                 }
             }
             else if (userTypeClaim == "employee")
@@ -718,11 +744,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 {
                     medicalHistory.DeletedByOctaId = null;
                 }
+                if (medicalHistory.DeletedByParentID != null)
+                {
+                    medicalHistory.DeletedByParentID = null;
+                }
+            }
+            else if (userTypeClaim == "parent")
+            {
+                medicalHistory.DeletedByParentID = userId;
+                if (medicalHistory.DeletedByOctaId != null)
+                {
+                    medicalHistory.DeletedByOctaId = null;
+                }
+                if (medicalHistory.DeletedByUserId != null)
+                {
+                    medicalHistory.DeletedByUserId = null;
+                }
             }
 
-                Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
+            Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
             Unit_Of_Work.SaveChanges();
-            
+
             return Ok("Medical History Deleted Successfully");
         }
         #endregion

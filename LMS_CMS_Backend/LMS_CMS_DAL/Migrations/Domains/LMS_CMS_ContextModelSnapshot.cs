@@ -3380,7 +3380,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("SchoolId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool?>("SendSMS")
+                    b.Property<bool>("SendSMS")
                         .HasColumnType("bit");
 
                     b.Property<long>("StudentId")
