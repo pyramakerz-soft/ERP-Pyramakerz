@@ -24,12 +24,18 @@ export class ChartPieComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['registrationFormStateCount'] && !changes['registrationFormStateCount'].firstChange) {
+    if (changes['registrationFormStateCount']) {
       this.updateChart();
     }
   }
 
   private calculatePercentages(): void {
+    // Reset percentages
+    this.acceptedPercentage = 0;
+    this.declinedPercentage = 0;
+    this.pendingPercentage = 0;
+    this.waitingListPercentage = 0;
+
     if (!this.registrationFormStateCount) return;
     
     const total = this.registrationFormStateCount.acceptedCount + 
@@ -51,6 +57,7 @@ export class ChartPieComponent implements AfterViewInit, OnChanges {
     
     if (!ctx) return;
 
+    // Use zero data if no registration data
     const data = this.registrationFormStateCount ? [
       this.registrationFormStateCount.acceptedCount,
       this.registrationFormStateCount.declinedCount,
@@ -71,7 +78,20 @@ export class ChartPieComponent implements AfterViewInit, OnChanges {
       },
       options: {
         cutout: '65%',
-        plugins: { legend: { display: false } },
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.parsed;
+                const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        },
         responsive: true,
         maintainAspectRatio: false,
       }
@@ -81,13 +101,15 @@ export class ChartPieComponent implements AfterViewInit, OnChanges {
   private updateChart(): void {
     this.calculatePercentages();
     
-    if (this.chart && this.registrationFormStateCount) {
-      this.chart.data.datasets[0].data = [
+    if (this.chart) {
+      const data = this.registrationFormStateCount ? [
         this.registrationFormStateCount.acceptedCount,
         this.registrationFormStateCount.declinedCount,
         this.registrationFormStateCount.pending,
         this.registrationFormStateCount.waitingListCount
-      ];
+      ] : [0, 0, 0, 0];
+
+      this.chart.data.datasets[0].data = data;
       this.chart.update();
     }
   }

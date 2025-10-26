@@ -191,18 +191,25 @@ export class DiagnosisComponent implements OnInit {
     });
   }
 
-  validateForm(): boolean {
-    let isValid = true;
-    if (!this.diagnosis.name) {
-      this.validationErrors['name'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('name')}`;
-      isValid = false;
-    } else {
-      this.validationErrors['name'] = '';
-    }
-    return isValid;
+validateForm(): boolean {
+  this.validationErrors = {};
+  if (!this.diagnosis.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Diagnosis');
+    return false;
   }
+  return true;
+}
+
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;

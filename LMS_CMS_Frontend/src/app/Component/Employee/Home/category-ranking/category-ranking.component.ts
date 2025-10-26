@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models';
 
@@ -18,50 +18,48 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
 
       <hr class="my-4" />
 
-      <!-- Top Categories -->
+      <!-- Merged Categories & Products -->
       <h3 class="text-sm font-semibold text-gray-700 mb-2">
-        {{ 'Top' | translate }} {{ 'Categories' | translate }}
+        {{ 'Top' | translate }} {{ 'Categories' | translate }} & {{ 'Products' | translate }}
       </h3>
-      <div class="bg-gray-50 p-3 rounded-lg space-y-3 mb-4">
-        <div *ngFor="let category of categoryRankings?.categoryRanking; let i = index">
-          <div class="flex justify-between text-sm text-gray-700 font-medium mb-1">
-            <span>{{ category.categoryName }}</span>
-            <span>{{ 'EGP' | translate }} {{ category.totalCategoryCount }}</span>
+      <div class="bg-gray-50 p-3 rounded-lg space-y-4 mb-4">
+        <div *ngFor="let category of categoryRankings?.categoryRanking; let i = index" 
+             class="group cursor-pointer hover:bg-white p-2 rounded-lg transition-all duration-300">
+          <!-- Category Title with Total Sales -->
+          <div class="flex justify-between text-sm text-gray-700 font-medium mb-2">
+            <span class="font-semibold">{{ category.categoryName }}</span>
+            <span class="text-gray-600">{{ category.totalCategoryCount }} {{ 'sold' | translate }}</span>
           </div>
-          <div class="h-1.5 rounded-full" [ngClass]="getProgressBarBgClass(i)">
-            <div 
-              class="h-full rounded-full transition-all duration-500" 
-              [ngClass]="getProgressBarFgClass(i)"
-              [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount)"
-            ></div>
+          
+<div class="relative h-4 rounded-full overflow-hidden" [ngClass]="getProgressBarBgClass(i)">
+  <div 
+    class="absolute h-full rounded-full transition-all duration-500" 
+    [ngClass]="getProgressBarFgClass(i)"
+    [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount)"
+  ></div>
+  <div 
+    class="absolute h-full rounded-full transition-all duration-500 shadow-lg" 
+    [ngClass]="getTopItemBarClass(i)"
+    [style.width.%]="calculateItemPercentage(category.shopItem.totalQuantitySold)"
+  ></div>
+</div>
+          
+          <!-- Top Product Info (visible on hover) -->
+          <div class="mt-2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-2">
+            <div class="flex justify-between items-center">
+              <span>
+                <span class="font-medium text-gray-800">{{ 'Top Item' | translate }}:</span> 
+                {{ category.shopItem.itemName }}
+              </span>
+              <span class="font-semibold text-gray-700">{{ category.shopItem.totalQuantitySold }} {{ 'sold' | translate }}</span>
+            </div>
           </div>
         </div>
         
         <!-- Empty state -->
         <div *ngIf="!categoryRankings?.categoryRanking || categoryRankings?.categoryRanking?.length === 0" 
              class="text-center text-gray-400 py-4">
-          {{ 'No category data available' | translate }}
-        </div>
-      </div>
-
-      <!-- Top Products -->
-      <h3 class="text-sm font-semibold text-gray-700 mb-2">
-        {{ 'Top' | translate }} {{ 'Products' | translate }}
-      </h3>
-      <div class="bg-gray-50 p-3 rounded-lg space-y-3 mb-4">
-        <div *ngFor="let category of categoryRankings?.categoryRanking" 
-             class="flex justify-between items-center text-sm">
-          <div>
-            <p class="text-gray-800 font-medium">{{ category.shopItem.itemName }}</p>
-            <p class="text-gray-500">{{ 'Sold' | translate }} {{ category.shopItem.totalQuantitySold }}</p>
-          </div>
-          <p class="font-medium text-gray-700">{{ 'EGP' | translate }} {{ category.shopItem.totalQuantitySold }}</p>
-        </div>
-        
-        <!-- Empty state -->
-        <div *ngIf="!categoryRankings?.categoryRanking || categoryRankings?.categoryRanking?.length === 0" 
-             class="text-center text-gray-400 py-4">
-          {{ 'No product data available' | translate }}
+          {{ 'No data available' | translate }}
         </div>
       </div>
     </div>
@@ -92,13 +90,24 @@ export class CategoryRankingsComponent {
     return (value / this.maxCategoryValue) * 100;
   }
 
+  calculateItemPercentage(value: number): number {
+    if (this.maxCategoryValue === 0) return 0;
+    return (value / this.maxCategoryValue) * 100;
+  }
+
   getProgressBarBgClass(index: number): string {
     const colors = ['bg-blue-100', 'bg-yellow-100', 'bg-purple-100', 'bg-green-100', 'bg-red-100'];
     return colors[index % colors.length];
   }
 
   getProgressBarFgClass(index: number): string {
-    const colors = ['bg-blue-500', 'bg-yellow-400', 'bg-purple-400', 'bg-green-500', 'bg-red-500'];
+    const colors = ['bg-blue-300', 'bg-yellow-300', 'bg-purple-300', 'bg-green-300', 'bg-red-300'];
+    return colors[index % colors.length];
+  }
+
+  getTopItemBarClass(index: number): string {
+    // Brighter, more vibrant colors for the top item
+    const colors = ['bg-blue-600', 'bg-yellow-500', 'bg-purple-600', 'bg-green-600', 'bg-red-600'];
     return colors[index % colors.length];
   }
 }

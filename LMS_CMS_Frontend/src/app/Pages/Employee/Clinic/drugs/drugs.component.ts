@@ -66,6 +66,17 @@ export class DrugsComponent implements OnInit {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
   private showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
@@ -185,6 +196,23 @@ export class DrugsComponent implements OnInit {
   }
 
   deleteDrug(row: any) {
+      const translatedTitle = this.translate.instant('Are you sure?');
+      const translatedText = this.translate.instant('You will not be able to recover this item!');
+      const translatedConfirm = this.translate.instant('Yes, delete it!');
+      const translatedCancel = this.translate.instant('No, keep it');
+      const successMessage = this.translate.instant('Deleted successfully');
+    
+      Swal.fire({
+        title: translatedTitle,
+        text: translatedText,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: translatedConfirm,
+        cancelButtonText: translatedCancel,
+      }).then((result) => {
+        if (result.isConfirmed) {
     this.drugService.Delete(row.id, this.DomainName).subscribe({
       next: (response) => {
         this.getDrugs();
@@ -199,17 +227,17 @@ export class DrugsComponent implements OnInit {
       },
     });
   }
-
-  validateForm(): boolean {
-    let isValid = true;
-    if (!this.drug.name) {
-      this.validationErrors['name'] = `${this.translate.instant('Name is required')}`;
-      isValid = false;
-    } else {
-      this.validationErrors['name'] = '';
-    }
-    return isValid;
+    });
   }
+
+validateForm(): boolean {
+  this.validationErrors = {};
+  if (!this.drug.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Drug');
+    return false;
+  }
+  return true;
+}
 
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;

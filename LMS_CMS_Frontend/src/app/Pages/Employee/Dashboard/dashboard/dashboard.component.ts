@@ -56,13 +56,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isRtl: boolean = false;
   subscription!: Subscription;
 
-  // Data properties
   todaysData: TodaysData | null = null;
   dashboardData: DashboardData | null = null;
   isLoading: boolean = true;
-  errorMessage: string = ''; // Added error message
+  errorMessage: string = '';
 
-  // Current selection
   selectedYear: number = new Date().getFullYear();
   selectedMonth?: number;
 
@@ -79,7 +77,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.DomainName = this.ApiServ.GetHeader();
 
-    // Verify DomainName is set
     if (!this.DomainName) {
       console.error('DomainName is not set!');
       this.errorMessage = 'Domain configuration error';
@@ -132,59 +129,94 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.isLoading = false;
 
         // Log detailed error information
-        if (error.status === 404) {
-          console.error('404 Error - Check if endpoints are correct:');
-          console.error(
-            "- Today's Data Endpoint:",
-            `${this.ApiServ.BaseUrl}/Dashboard/GetTodaysData`
-          );
-          console.error(
-            '- Dashboard Data Endpoint:',
-            `${this.ApiServ.BaseUrl}/Dashboard`
-          );
-        }
+        // if (error.status === 404) {
+        //   console.error('404 Error - Check if endpoints are correct:');
+        //   console.error(
+        //     "- Today's Data Endpoint:",
+        //     `${this.ApiServ.BaseUrl}/Dashboard/GetTodaysData`
+        //   );
+        //   console.error(
+        //     '- Dashboard Data Endpoint:',
+        //     `${this.ApiServ.BaseUrl}/Dashboard`
+        //   );
+        // }
       },
     });
   }
 
-  onSelection(data: { year: number; month?: number }): void {
-    this.selectedYear = data.year;
-    this.selectedMonth = data.month;
-    this.errorMessage = '';
+  // onSelection(data: { year: number; month?: number }): void {
+  //   this.selectedYear = data.year;
+  //   this.selectedMonth = data.month;
+  //   this.errorMessage = '';
 
-    if (data.month) {
-      console.log(`Selected: ${data.year}-${data.month}`);
-    } else {
-      console.log(`Selected Year: ${data.year}`);
-    }
+  //   if (data.month) {
+  //     console.log(`Selected: ${data.year}-${data.month}`);
+  //   } else {
+  //     console.log(`Selected Year: ${data.year}`);
+  //   }
 
-    // Reload dashboard data with new filters
-    this.dashboardService
-      .getDashboardData(
-        {
-          year: this.selectedYear,
-          month: this.selectedMonth,
-        },
-        this.DomainName
-      )
-      .subscribe({
-        next: (result) => {
-          this.dashboardData = result;
-        },
-        error: (error) => {
-          console.error('Error loading filtered dashboard data:', error);
-          this.errorMessage = 'Failed to load filtered data';
-        },
-      });
-  }
+  //   // Reload dashboard data with new filters
+  //   this.dashboardService
+  //     .getDashboardData(
+  //       {
+  //         year: this.selectedYear,
+  //         month: this.selectedMonth,
+  //       },
+  //       this.DomainName
+  //     )
+  //     .subscribe({
+  //       next: (result) => {
+  //         this.dashboardData = result;
+  //       },
+  //       error: (error) => {
+  //         console.error('Error loading filtered dashboard data:', error);
+  //         this.errorMessage = 'Failed to load filtered data';
+  //       },
+  //     });
+  // }
 
-  // Helper method to calculate percentage for progress bars
   calculatePercentage(value: number, total: number): number {
     return total > 0 ? (value / total) * 100 : 0;
   }
 
-  // Retry method in case of errors
   retryLoadData(): void {
     this.loadDashboardData();
   }
+
+
+get isMonthView(): boolean {
+  return this.selectedMonth !== undefined && this.selectedMonth !== null;
+}
+
+onSelection(data: { year: number; month?: number }): void {
+  this.selectedYear = data.year;
+  this.selectedMonth = data.month;
+  this.errorMessage = '';
+
+  console.log(`Selected: ${data.year}${data.month ? '-' + data.month : ''}`);
+
+  this.dashboardData = null;
+  this.isLoading = true;
+
+  this.dashboardService
+    .getDashboardData(
+      {
+        year: this.selectedYear,
+        month: this.selectedMonth,
+      },
+      this.DomainName
+    )
+    .subscribe({
+      next: (result) => {
+        this.dashboardData = result;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading filtered dashboard data:', error);
+        this.errorMessage = 'Failed to load filtered data';
+        this.dashboardData = null;
+        this.isLoading = false;
+      },
+    });
+}
 }

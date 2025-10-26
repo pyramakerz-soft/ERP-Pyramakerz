@@ -51,12 +51,17 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['submissionsCount'] && !changes['submissionsCount'].firstChange) {
+    if (changes['submissionsCount']) {
       this.updateChart();
     }
   }
 
   private calculatePercentages(): void {
+    // Reset percentages
+    this.answerOnTimePercentage = 0;
+    this.answerLatePercentage = 0;
+    this.notAnsweredPercentage = 0;
+
     if (!this.submissionsCount) return;
     
     const total = this.submissionsCount.answeredOnTime + 
@@ -95,7 +100,20 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
       },
       options: {
         cutout: '65%',
-        plugins: { legend: { display: false } },
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.parsed;
+                const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        },
         responsive: true,
         maintainAspectRatio: false,
       }
@@ -105,12 +123,14 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
   private updateChart(): void {
     this.calculatePercentages();
     
-    if (this.chart && this.submissionsCount) {
-      this.chart.data.datasets[0].data = [
+    if (this.chart) {
+      const data = this.submissionsCount ? [
         this.submissionsCount.answeredOnTime,
         this.submissionsCount.answeredLate,
         this.submissionsCount.notAnswered
-      ];
+      ] : [0, 0, 0];
+
+      this.chart.data.datasets[0].data = data;
       this.chart.update();
     }
   }
