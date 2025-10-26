@@ -14,12 +14,15 @@ namespace LMS_CMS_BL.DTO.LMS
         public string ArabicNameStudent { get; set; }
         public List<StudentPerformanceDTOs> StudentPerformance { get; set; }
         public string Comment { get; set; }
+        
+
     }
     public class StudentPerformanceDTOs
     {
         public long PerformanceTypeID { get; set; }
         public string PerformanceTypeEn { get; set; }
         public string PerformanceTypeAr { get; set; }
+        public int Stars { get; set; }
 
     }
 }
