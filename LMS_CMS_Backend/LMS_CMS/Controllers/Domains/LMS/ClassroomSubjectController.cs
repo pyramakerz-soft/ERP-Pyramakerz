@@ -471,7 +471,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetClassBySubjectIDWithStudentsIncluded/{SubId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Classroom Students" }
+            pages: new[] { "Classroom Students", "Assignment" }
         )]
         public async Task<IActionResult> GetBySubjectIDWithStudentsIncluded(long SubId)
         {

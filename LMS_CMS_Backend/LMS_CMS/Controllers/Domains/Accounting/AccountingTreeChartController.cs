@@ -184,7 +184,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetBySubAndLinkFileId/{linkFileID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Accounting" }
+            pages: new[] { "Accounting" , "Debit" , "Credit" , "Bank", "Safe" , "Outcome", "Income" , "Asset" , "Tuition Fees Type", "Tuition Discount Type", "Accounting Entries Doc Type", "Accounting Entries Doc Type" }
         )]
         public async Task<IActionResult> GetBySubAndLinkFileId(long linkFileID)
         {

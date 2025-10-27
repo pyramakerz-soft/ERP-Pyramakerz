@@ -27,7 +27,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpGet]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Registration Form Field" }
+         pages: new[] { "Registration Form Field" , "Question" }
          )]
         public async Task<IActionResult> GetAsync()
         {

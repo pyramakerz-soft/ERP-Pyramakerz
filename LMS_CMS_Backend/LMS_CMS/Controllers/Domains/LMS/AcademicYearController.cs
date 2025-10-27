@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" , "student" },
-            pages: new[] { "Academic Years" , "Bus Students", "Classroom" , "Student" }
+            pages: new[] { "Academic Years" , "Bus Students", "Classroom" , "Student", "Lesson Live" , "Registration Confirmation" , "Interview Time Table" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -69,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolIdAndDate/{id}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" },
-            pages: new[] { "Academic Years" , "Fees Activation" }
+            pages: new[] { "Academic Years" , "Fees Activation"  }
         )]
         public async Task<IActionResult> GetBySchoolIdAndDateAsync(long id, DateOnly DateFrom, DateOnly DateTo)
         {
@@ -104,7 +104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolId/{id}/")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" },
-            pages: new[] { "Academic Years", "Fees Activation", "Bus Students" , "Classroom" , "Remedial Classes" , "Lessons" }
+            pages: new[] { "Academic Years", "Fees Activation", "Bus Students" , "Classroom" , "Remedial Classes" , "Lessons" , "Lesson Live" , "Certificate" , "Assignment Report" , "Admission Test" , "Classroom Accommodation", "Student Names In Class" , "Student Information", "Proof Registration And Success Form" , "Proof Registration", "Students Information Form Report" , "Transferred  From Kindergarten Report" }
         )]
         public async Task<IActionResult> GetBySchoolIdAsync(long id)
         {

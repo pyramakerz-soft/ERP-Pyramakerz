@@ -8,7 +8,7 @@
 <div class="flex justify-between mt-5 items-end space-x-5 rtl:space-x-reverse">
     <div class="w-1/3">
         <label for="school" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'School' | translate }}</label>
-        <select id="school" [(ngModel)]="selectedSchool"
+        <select id="school" [(ngModel)]="selectedSchool" (ngModelChange)="FilterData()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of SchoolData" [value]="school.id">
@@ -18,7 +18,7 @@
     </div>
     <div class="w-1/3">
         <label for="academicYear" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'Academic Year' | translate }}</label>
-        <select id="academicYear" [(ngModel)]="selectedYear"
+        <select id="academicYear" [(ngModel)]="selectedYear" (ngModelChange)="FilterData()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
             <option *ngFor="let academicYear of AcademicYearData" [value]="academicYear.id">
@@ -28,7 +28,7 @@
     </div>
     <div class="w-1/3">
         <label for="state" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'State' | translate }}</label>
-        <select id="state" [(ngModel)]="selectedState"
+        <select id="state" [(ngModel)]="selectedState" (ngModelChange)="FilterData()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'State' | translate }}</option>
             <option *ngFor="let state of StateData" [value]="state.id">
@@ -38,9 +38,9 @@
     </div>
 
     <div class="flex space-x-4 rtl:space-x-reverse items-center">
-        <button class="secondaryBg text-white font-medium px-4 py-3 rounded-lg text-xl" (click)="Search()">
+        <!-- <button class="secondaryBg text-white font-medium px-4 py-3 rounded-lg text-xl" (click)="Search()">
             {{ 'SearchBTN' | translate }}
-        </button>
+        </button> -->
         <div class="rounded-full p-2 border-4" (click)="ResetFilter()">
             <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
         </div>

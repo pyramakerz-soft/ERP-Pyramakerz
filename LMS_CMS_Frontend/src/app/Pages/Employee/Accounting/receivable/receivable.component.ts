@@ -231,12 +231,12 @@ export class ReceivableComponent {
   Create(id?: number, isEdit?: boolean) {
     if (id) {
       if (isEdit) {
-        this.router.navigateByUrl(`Employee/Receivable Details/${id}`)
+        this.router.navigateByUrl(`Employee/Receivable/${id}`)
       } else {
-        this.router.navigateByUrl(`Employee/Receivable Details/View/${id}`)
+        this.router.navigateByUrl(`Employee/Receivable/View/${id}`)
       }
     } else {
-      this.router.navigateByUrl("Employee/Receivable Details")
+      this.router.navigateByUrl("Employee/Receivable/Create")
     }
   }
 

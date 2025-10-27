@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Payable Doc Type" }
+           pages: new[] { "Payable Doc Type" , "Payable" }
            )]
         public async Task<IActionResult> GetAsync()
         {

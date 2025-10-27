@@ -40,7 +40,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" , "student", "parent" },
-            pages: new[] { "Classroom" }
+            pages: new[] { "Classroom", "Lesson Live" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -166,7 +166,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByRegistrationFormParentId/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee","parent" },
-           pages: new[] { "Classroom" }
+           pages: new[] { "Classroom", "Classroom Accommodation" }
        )]
         public async Task<IActionResult> GetByRFPId(long id)
         {
@@ -210,7 +210,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByGradeID/{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] {"octa", "employee", "student", "parent" },
-          pages: new[] { "Classroom" , "Enter Daily Performance" , "Student Daily Performance Report" , "Classroom Daily Performance Report" }
+          pages: new[] { "Classroom" , "Enter Daily Performance" , "Student Daily Performance Report" , "Classroom Daily Performance Report" , "Assignment Student"}
         )]
         public async Task<IActionResult> GetByGradeIdAsync(long id)
         {
@@ -238,7 +238,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySubject/{SubjectId}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
-             pages: new[] { "Classroom Subject" }
+             pages: new[] { "Classroom Subject" , "Direct Mark" }
          )]
         public async Task<IActionResult> GetBySubject(long SubjectId)
         {
@@ -269,7 +269,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" ,"parent" , "student" },
-          pages: new[] { "Classroom", "Bus Students" }
+          pages: new[] { "Classroom", "Bus Students" , "Certificate" , "Student Names In Class", "Students Information Form Report", "Fees Activation" }
         )]
         public async Task<IActionResult> GetByGradeAnAcYearIdAsync(long GradeId, long AcYeaId)
         {
@@ -330,7 +330,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByAcademicYearID/{AcYeaId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Classroom" }
+          pages: new[] { "Classroom", "Lesson Live" }
         )]
         public async Task<IActionResult> GetByAcYearIdAsync(long AcYeaId)
         {

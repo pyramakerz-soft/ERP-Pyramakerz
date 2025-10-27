@@ -228,12 +228,12 @@ export class PayableComponent {
   Create(id?: number, isEdit?: boolean) {
     if (id) {
       if (isEdit) {
-        this.router.navigateByUrl(`Employee/Payable Details/${id}`)
+        this.router.navigateByUrl(`Employee/Payable/${id}`)
       } else {
-        this.router.navigateByUrl(`Employee/Payable Details/View/${id}`)
+        this.router.navigateByUrl(`Employee/Payable/View/${id}`)
       }
     } else {
-      this.router.navigateByUrl("Employee/Payable Details")
+      this.router.navigateByUrl("Employee/Payable/Create")
     }
   }
 

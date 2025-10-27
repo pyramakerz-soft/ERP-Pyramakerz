@@ -400,7 +400,7 @@ export class PayableDetailsComponent {
         this.payableService.Add(this.payable, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
-            this.router.navigateByUrl(`Employee/Payable Details/${id}`);
+            this.router.navigateByUrl(`Employee/Payable/${id}`);
             this.isSaveLoading = false;
 
             Swal.fire({

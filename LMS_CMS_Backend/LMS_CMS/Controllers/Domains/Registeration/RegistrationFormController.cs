@@ -41,7 +41,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Registration Form" , "Student" }
+            pages: new[] { "Registration Form" , "Student", "Registration Confirmation" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
