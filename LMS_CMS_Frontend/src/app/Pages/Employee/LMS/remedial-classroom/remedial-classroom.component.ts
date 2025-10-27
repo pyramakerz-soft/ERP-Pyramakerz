@@ -222,7 +222,7 @@ export class RemedialClassroomComponent {
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Updatedd Successfully',
+            text: 'Updated Successfully',
             confirmButtonColor: '#089B41',
           });
         }, error => {

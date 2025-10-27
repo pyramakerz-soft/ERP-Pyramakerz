@@ -343,7 +343,7 @@ export class LeaveRequestComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Updatedd Successfully',
+              text: 'Updated Successfully',
               confirmButtonColor: '#089B41',
             });
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)

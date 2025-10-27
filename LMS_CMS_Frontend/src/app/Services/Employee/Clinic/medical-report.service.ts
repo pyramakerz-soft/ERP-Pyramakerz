@@ -88,8 +88,9 @@ export class MedicalReportService {
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
+      console.log(`${this.baseUrl}/MedicalReport/GetAllMHByParentByStudentId/${studentId}`)
     return this.http.get<any[]>(
-      `${this.baseUrl}/MedicalReport/GetAllMHByParentByStudentId/${studentId}}`,
+      `${this.baseUrl}/MedicalReport/GetAllMHByParentByStudentId/${studentId}`,
       { headers }
     );
   }

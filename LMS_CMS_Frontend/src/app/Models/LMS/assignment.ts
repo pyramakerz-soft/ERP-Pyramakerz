@@ -13,6 +13,7 @@ export class Assignment {
         public cutOfDate: string = '',
         public isSpecificStudents: boolean = false,
         public isVisibleToStudent: boolean = false,
+        public isSummerCourse: boolean = false,
         public linkFile: string = '',
         public fileFile: File | null = null,
         public subjectEnglishName: string = '',

@@ -25,6 +25,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string SubjectWeightTypeArabicName { get; set; }
         public long? InsertedByUserId { get; set; }
         public string? InsertedByUserName { get; set; }
+        public bool IsSummerCourse { get; set; }
         public List<DirectMarkClassesStudentGetDTO> DirectMarkClassesStudent { get; set; } = new List<DirectMarkClassesStudentGetDTO>();
         public List<DirectMarkClassesGetDTO> DirectMarkClasses { get; set; } = new List<DirectMarkClassesGetDTO>();
 

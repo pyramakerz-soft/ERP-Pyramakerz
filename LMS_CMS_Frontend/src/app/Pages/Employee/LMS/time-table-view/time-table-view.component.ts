@@ -254,7 +254,7 @@ export class TimeTableViewComponent {
             let sessionText = '';
 
             if (session?.subjects?.length) {
-              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join('\n');
+              sessionText += session.subjects.map(sub => `${sub.subjectName}${sub.teacherName ? ` (${sub.teacherName})` : ''}`).join('\n');
             }
 
             if (session?.dutyTeacherName) {
@@ -285,57 +285,57 @@ export class TimeTableViewComponent {
   }
 
   async DownloadAsPDF() {
-  this.isLoading = true;
+    this.isLoading = true;
 
-  try {
-  const tables: any[] = [];
+    try {
+    const tables: any[] = [];
 
-  this.TimeTable.forEach(day => {
-  const data: any[] = [];
+    this.TimeTable.forEach(day => {
+    const data: any[] = [];
 
-  day.grades.forEach(grade => {
-    grade.classrooms.forEach(classroom => {
-      const row: any = {};
+    day.grades.forEach(grade => {
+      grade.classrooms.forEach(classroom => {
+        const row: any = {};
 
-      row['Grade'] = grade.gradeName;
-      row['Class'] = classroom.classroomName;
+        row['Grade'] = grade.gradeName;
+        row['Class'] = classroom.classroomName;
 
-      for (let i = 0; i < this.MaxPeriods; i++) {
-        const session = classroom.sessions[i];
+        for (let i = 0; i < this.MaxPeriods; i++) {
+          const session = classroom.sessions[i];
 
-        let sessionText = '';
+          let sessionText = '';
 
-        if (session?.subjects?.length) {
-          sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join(', ');
+          if (session?.subjects?.length) {
+            sessionText += session.subjects.map(sub => `${sub.subjectName}${sub.teacherName ? ` (${sub.teacherName})` : ''}`).join(', ');
+          }
+
+          if (session?.dutyTeacherName) {
+            sessionText += ` | Duty: ${session.dutyTeacherName}`;
+          }
+
+          row[`Session ${i + 1}`] = sessionText || '--';
         }
 
-        if (session?.dutyTeacherName) {
-          sessionText += ` | Duty: ${session.dutyTeacherName}`;
-        }
-
-        row[`Session ${i + 1}`] = sessionText || '--';
-      }
-
-      data.push(row);
+        data.push(row);
+      });
     });
-  });
 
-  const headers = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
+    const headers = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
 
-  tables.push({
-    title: day.dayName,
-    headers: headers,
-    data: data
-  });
-  });
+    tables.push({
+      title: day.dayName,
+      headers: headers,
+      data: data
+    });
+    });
 
-  await this.generatePDFWithSplitTables(tables);
-  } catch (error) {
-  console.error('PDF generation error:', error);
-  alert('Error generating PDF. Please try again.');
-  } finally {
-  this.isLoading = false;
-  }
+    await this.generatePDFWithSplitTables(tables);
+    } catch (error) {
+    console.error('PDF generation error:', error);
+    alert('Error generating PDF. Please try again.');
+    } finally {
+    this.isLoading = false;
+    }
   }
 
   private generatePDFWithSplitTables(tables: any[]) {
@@ -478,7 +478,7 @@ export class TimeTableViewComponent {
 
         if (session?.subjects?.length) {
           sessionText += session.subjects
-            .map(sub => `${sub.subjectName} (${sub.teacherName || 'N/A'})`)
+            .map(sub => `${sub.subjectName} (${sub.teacherName || ''})`)
             .join(', ');
         }
 
