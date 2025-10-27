@@ -92,8 +92,7 @@ export class InterviewTimeTableComponent {
     });
 
     this.getTimeTableData()
-    this.getSchools()
-    this.getYears()
+    this.getSchools() 
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -289,13 +288,13 @@ export class InterviewTimeTableComponent {
       }
     )
   }
-
-  getYears() {
-    this.yearService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.AcademicYearData = data;
-      }
-    )
+ 
+  GetAllAcademicYearBySchool() {
+    this.AcademicYearData = [];
+    this.selectedYear = 0
+    this.yearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe((data) => {
+      this.AcademicYearData = data;
+    });
   }
 
   getYearsForModal() {
@@ -441,7 +440,8 @@ export class InterviewTimeTableComponent {
           this.interviewTimeTableService.Add(this.interviewTimeTable, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
-              this.getTimeTableData()
+              // this.getTimeTableData()
+              this.Search()
               this.isLoading = false
             },
             error => {
@@ -467,7 +467,8 @@ export class InterviewTimeTableComponent {
           this.interviewTimeTableService.Edit(this.interviewTimeTable, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
-              this.getTimeTableData()
+              // this.getTimeTableData()
+              this.Search()
               this.isLoading = false
             },
             error => {
@@ -548,7 +549,7 @@ export class InterviewTimeTableComponent {
         this.interviewTimeTableService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.interviewTimeTableData = []
-            this.getTimeTableData()
+            this.Search()
           }
         )
       }
