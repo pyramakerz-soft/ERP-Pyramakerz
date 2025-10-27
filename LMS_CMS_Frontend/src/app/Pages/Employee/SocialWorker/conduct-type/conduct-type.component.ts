@@ -52,7 +52,7 @@ export class ConductTypeComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'ar_name' ,'en_name'];
 
   conductType: ConductType = new ConductType();
 
@@ -318,7 +318,7 @@ export class ConductTypeComponent {
           }
         }
         if (this.conductType.sectiondids.length == 0) {
-          this.validationErrors["sectiondids"] = `Sectionds is required`;
+          this.validationErrors["sectiondids"] = `Section Id is required`;
           isValid = false;
         }
       }

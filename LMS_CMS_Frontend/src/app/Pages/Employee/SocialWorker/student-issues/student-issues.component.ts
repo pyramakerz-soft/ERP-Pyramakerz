@@ -53,7 +53,7 @@ export class StudentIssuesComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'studentEnName' , 'issuesTypeName'];
 
   studentIssue: StudentIssue = new StudentIssue();
   isRtl: boolean = false;

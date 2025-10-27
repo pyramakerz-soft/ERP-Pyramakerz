@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Installment Deduction Details" }
+           pages: new[] { "Installment Deduction" }
        )]
         public async Task<IActionResult> GetAsync()
         {
@@ -56,7 +56,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetByMaster/{id}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
-             pages: new[] { "Installment Deduction Details" }
+             pages: new[] { "Installment Deduction" }
          )]
         public async Task<IActionResult> GetByMasterAsync(long id)
         {
@@ -81,7 +81,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Installment Deduction Details" }
+           pages: new[] { "Installment Deduction" }
          )]
         public IActionResult Add(InstallmentDeductionDetailsAddDTO NewDetails)
         {
@@ -137,7 +137,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Installment Deduction Details" }
+           pages: new[] { "Installment Deduction" }
        )]
         public IActionResult Edit(InstallmentDeductionDetailsGetDTO NewDetails)
         {
@@ -174,7 +174,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Installment Deduction Details", roleId, userId, detail);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Installment Deduction", roleId, userId, detail);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -212,7 +212,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-           pages: new[] { "Installment Deduction Details" }
+           pages: new[] { "Installment Deduction" }
         )]
         public IActionResult Delete(long id)
         {
@@ -243,7 +243,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Installment Deduction Details", roleId, userId, detail);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Installment Deduction", roleId, userId, detail);
                 if (accessCheck != null)
                 {
                     return accessCheck;

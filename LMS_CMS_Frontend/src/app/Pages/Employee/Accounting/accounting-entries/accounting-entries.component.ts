@@ -230,12 +230,12 @@ export class AccountingEntriesComponent {
   Create(id?: number, isEdit?: boolean) {
     if (id) {
       if (isEdit) {
-        this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`)
+        this.router.navigateByUrl(`Employee/Accounting Entries/${id}`)
       } else {
-        this.router.navigateByUrl(`Employee/Accounting Entries Details/View/${id}`)
+        this.router.navigateByUrl(`Employee/Accounting Entries/View/${id}`)
       }
     } else {
-      this.router.navigateByUrl("Employee/Accounting Entries Details")
+      this.router.navigateByUrl("Employee/Accounting Entries/Create")
     }
   }
 

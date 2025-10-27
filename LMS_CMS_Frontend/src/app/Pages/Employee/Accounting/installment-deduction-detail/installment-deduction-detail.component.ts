@@ -234,7 +234,7 @@ export class InstallmentDeductionDetailComponent {
             confirmButtonColor: '#089B41',
           });
 
-          this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
+          this.router.navigateByUrl(`Employee/Installment Deduction/Edit/${this.MasterId}`)
         },
           error => {
             this.isLoading = false
@@ -321,7 +321,7 @@ export class InstallmentDeductionDetailComponent {
 
   Delete(id: number) {
      Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Details')+ this.translate.instant('?'),
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction/Create')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

@@ -302,7 +302,7 @@ export class AccountingEntriesDetailsComponent {
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`);
+            this.router.navigateByUrl(`Employee/Accounting Entries/${id}`);
             this.isSaveLoading = false;
 
             Swal.fire({
@@ -319,7 +319,7 @@ export class AccountingEntriesDetailsComponent {
         this.accountingEntriesService.Edit(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
             this.GetAccountingEntriesByID();
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`);
+            this.router.navigateByUrl(`Employee/Accounting Entries/${this.AccountingEntriesID}`);
             this.isSaveLoading = false;
 
             Swal.fire({

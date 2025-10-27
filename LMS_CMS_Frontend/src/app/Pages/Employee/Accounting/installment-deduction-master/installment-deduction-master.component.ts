@@ -103,7 +103,7 @@ export class InstallmentDeductionMasterComponent {
 
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/Installment Deduction Details`)
+    this.router.navigateByUrl(`Employee/Installment Deduction/Create`)
   }
 
   Delete(id: number) {
@@ -125,7 +125,7 @@ export class InstallmentDeductionMasterComponent {
   }
 
   Edit(row: InstallmentDeductionMaster) {
-    this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${row.id}`)
+    this.router.navigateByUrl(`Employee/Installment Deduction/Edit/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -244,7 +244,7 @@ export class InstallmentDeductionMasterComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Installment Deduction Details/View/${id}`)
+    this.router.navigateByUrl(`Employee/Installment Deduction/View/${id}`)
   }
 
   validateNumber(event: any): void {

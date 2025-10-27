@@ -51,7 +51,7 @@ export class ConductComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'studentEnName' ,'conductTypeEnName'];
   schools: School[] = [];
   isLoading = false;
 

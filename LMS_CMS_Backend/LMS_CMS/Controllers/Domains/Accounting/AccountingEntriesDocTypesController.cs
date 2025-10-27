@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet]
         [Authorize_Endpoint_(
        allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Accounting Entries Doc Type" }
+       pages: new[] { "Accounting Entries Doc Type", "Installment Deduction" , "Accounting Entries" }
        )]
         public async Task<IActionResult> GetAsync()
         {
@@ -54,6 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         }
 
         //////////////////////////////////////////////////////////////////////////////
+       
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
@@ -75,6 +76,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             return Ok(dto);
         }
+
         //////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
