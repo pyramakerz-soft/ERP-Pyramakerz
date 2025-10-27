@@ -22,6 +22,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { DrugClass } from '../../../../Models/Clinic/drug-class';
+import { consumerPollProducersForChange } from '@angular/core/primitives/signals';
 @Component({
   selector: 'app-follow-up',
   standalone: true,
@@ -248,7 +249,7 @@ export class FollowUpComponent implements OnInit {
         this.gradeService.GetBySchoolId(schoolId, domainName)
       );
     } catch (error) {
-      Swal.fire('Error', 'Failed to load grades.', 'error');
+console.log(error);
     }
   }
 
@@ -259,7 +260,7 @@ export class FollowUpComponent implements OnInit {
         this.classroomService.GetByGradeId(gradeId, domainName)
       );
     } catch (error) {
-      Swal.fire('Error', 'Failed to load classes.', 'error');
+      console.log(error);
     }
   }
 
@@ -274,7 +275,7 @@ export class FollowUpComponent implements OnInit {
         name: student.en_name,
       }));
     } catch (error) {
-      Swal.fire('Error', 'Failed to load students.', 'error');
+console.log(error);
     }
   }
 
