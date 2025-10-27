@@ -30,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySubjectId/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Subject" }
+            pages: new[] { "Subject", "Assignment" , "Direct Mark" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {

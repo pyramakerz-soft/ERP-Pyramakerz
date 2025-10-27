@@ -43,9 +43,10 @@ export class RegistrationConfirmationComponent {
   path: string = ""
 
   registerationFormParentData: RegisterationFormParent[] = []
-  registerationFormParentDataByYear: RegisterationFormParent[] = []
-  registerationFormParentDataBySchool: RegisterationFormParent[] = []
-  registerationFormParentDataByState: RegisterationFormParent[] = []
+  OriginalregisterationFormParentData: RegisterationFormParent[] = []
+  // registerationFormParentDataByYear: RegisterationFormParent[] = []
+  // registerationFormParentDataBySchool: RegisterationFormParent[] = []
+  // registerationFormParentDataByState: RegisterationFormParent[] = []
   SchoolData: School[] = []
   AcademicYearData: AcademicYear[] = []
   StateData: RegistrationFormState[] = []
@@ -144,6 +145,7 @@ export class RegistrationConfirmationComponent {
     return new Promise((resolve, reject) => {
       this.registerationFormParentServicea.Get(this.DomainName).subscribe(
         (data) => {  
+          this.OriginalregisterationFormParentData = data;
           this.registerationFormParentData = data;
           resolve();  // Resolve the promise when data is received
         },
@@ -178,86 +180,90 @@ export class RegistrationConfirmationComponent {
       }
     )
   }
-  
-  async Search() {
 
-    this.registerationFormParentDataByYear = []
-    this.registerationFormParentDataBySchool = []
-    this.registerationFormParentDataByState = []
-
-    await this.getRegisterationFormParentData()
-
-    if (this.selectedSchool !== 0) {
-      try {
-        this.registerationFormParentDataBySchool = await firstValueFrom(
-          this.registerationFormParentServicea.GetBySchoolId(this.selectedSchool, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching school data:", error);
-      }
-    }
-  
-    if (this.selectedYear !== 0) {
-      try {
-        
-        this.registerationFormParentDataByYear = await firstValueFrom(
-          this.registerationFormParentServicea.GetByYearId(this.selectedYear, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching year data:", error);
-      }
-    }
-    
-    if (this.selectedState !== 0) {
-      try {
-        
-        this.registerationFormParentDataByState = await firstValueFrom(
-          this.registerationFormParentServicea.GetByStateId(this.selectedState, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching year data:", error);
-      }
-    }
-    
-    let filteredData = [...this.registerationFormParentData];
-
-    if (this.selectedSchool !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataBySchool.some(schoolItem => schoolItem.id === item.id)
-      );
-    }
-
-    if (this.selectedYear !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataByYear.some(yearItem => yearItem.id === item.id)
-      );
-
-    }
-
-    if (this.selectedState !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataByState.some(stateItem => stateItem.id === item.id)
-      );
-    }
-
-    if((this.selectedSchool != 0 && this.registerationFormParentDataBySchool.length == 0) ||
-    (this.selectedYear != 0 && this.registerationFormParentDataByYear.length == 0) ||
-    (this.selectedState != 0 && this.registerationFormParentDataByState.length == 0)){
-      filteredData = []
-    }
-    
-    this.registerationFormParentData = filteredData;
+  FilterData(){
+    this.registerationFormParentData =[]
+    this.registerationFormParentData = this.OriginalregisterationFormParentData.filter(s => 
+        (this.selectedSchool == 0 || s.schoolID == this.selectedSchool) &&
+        (this.selectedYear == 0 || s.academicYearID == this.selectedYear) &&
+        (this.selectedState == 0 || s.registerationFormStateID == this.selectedState)
+    );
   }
+  
+  // async Search() {
+
+  //   this.registerationFormParentDataByYear = []
+  //   this.registerationFormParentDataBySchool = []
+  //   this.registerationFormParentDataByState = []
+
+  //   await this.getRegisterationFormParentData()
+
+  //   if (this.selectedSchool !== 0) {
+  //     try {
+  //       this.registerationFormParentDataBySchool = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetBySchoolId(this.selectedSchool, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching school data:", error);
+  //     }
+  //   }
+  
+  //   if (this.selectedYear !== 0) {
+  //     try {
+        
+  //       this.registerationFormParentDataByYear = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetByYearId(this.selectedYear, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching year data:", error);
+  //     }
+  //   }
+    
+  //   if (this.selectedState !== 0) {
+  //     try {
+        
+  //       this.registerationFormParentDataByState = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetByStateId(this.selectedState, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching year data:", error);
+  //     }
+  //   }
+    
+  //   let filteredData = [...this.registerationFormParentData];
+
+  //   if (this.selectedSchool !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataBySchool.some(schoolItem => schoolItem.id === item.id)
+  //     );
+  //   }
+
+  //   if (this.selectedYear !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataByYear.some(yearItem => yearItem.id === item.id)
+  //     );
+
+  //   }
+
+  //   if (this.selectedState !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataByState.some(stateItem => stateItem.id === item.id)
+  //     );
+  //   }
+
+  //   if((this.selectedSchool != 0 && this.registerationFormParentDataBySchool.length == 0) ||
+  //   (this.selectedYear != 0 && this.registerationFormParentDataByYear.length == 0) ||
+  //   (this.selectedState != 0 && this.registerationFormParentDataByState.length == 0)){
+  //     filteredData = []
+  //   }
+    
+  //   this.registerationFormParentData = filteredData;
+  // }
 
   ResetFilter(){
     this.selectedYear = 0
     this.selectedSchool = 0
     this.selectedState = 0
-
-    this.registerationFormParentDataByYear = []
-    this.registerationFormParentDataBySchool = []
-    this.registerationFormParentDataByState = []
-
     this.getRegisterationFormParentData()
   }
 

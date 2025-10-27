@@ -107,7 +107,7 @@ export class AccountingStudentComponent {
 
 
   Edit(row: Student) {
-    this.router.navigateByUrl(`Employee/Student Edit Accounting/${row.id}`)
+    this.router.navigateByUrl(`Employee/Student Accounting/${row.id}`)
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

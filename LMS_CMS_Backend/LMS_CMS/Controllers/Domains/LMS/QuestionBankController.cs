@@ -165,7 +165,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost("GetByLessonTagType/{LessonId}/{TypeID}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
-             pages: new[] { "Question Bank" }
+             pages: new[] { "Question Bank" , "Assignment" }
          )]
         public async Task<IActionResult> GetByTypes([FromBody] List<long>? TagsId,long? LessonId, long TypeID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {

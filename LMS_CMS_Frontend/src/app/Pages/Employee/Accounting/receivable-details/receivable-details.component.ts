@@ -360,7 +360,7 @@ export class ReceivableDetailsComponent {
         this.receivableService.Add(this.receivable, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
-            this.router.navigateByUrl(`Employee/Receivable Details/${id}`);
+            this.router.navigateByUrl(`Employee/Receivable/${id}`);
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',

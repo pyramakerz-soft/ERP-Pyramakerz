@@ -54,7 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee" , "Employee Accounting" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -1329,7 +1329,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("getByAccountingEmployee/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Employee Accounting" }
         )]
         public async Task<IActionResult> GetByAccounting(long id)
         {

@@ -1233,7 +1233,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Student Edit Accounting" }
+            pages: new[] { "Student Edit Accounting" , "Student Accounting" }
         )]
         public async Task<IActionResult> EditStudentAccountingAsync(AccountingStudentPutDTO newStudent)
         {
