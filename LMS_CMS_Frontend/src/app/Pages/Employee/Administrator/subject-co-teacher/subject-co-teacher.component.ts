@@ -84,7 +84,7 @@ export class SubjectCoTeacherComponent {
     } 
 
   moveToEmployee() {
-    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectCoTeacher.coTeacherID}`)
+    this.router.navigateByUrl(`Employee/Employee/${this.SupjectCoTeacher.coTeacherID}`)
   }
 
   GetData() {

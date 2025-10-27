@@ -113,7 +113,7 @@ private showSuccessAlert(message: string) {
 }
 
   moveToEmployee() {
-    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectTeacher.teacherID}`)
+    this.router.navigateByUrl(`Employee/Employee/${this.SupjectTeacher.teacherID}`)
   }
 
   GetData() {
