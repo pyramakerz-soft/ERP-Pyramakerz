@@ -240,16 +240,17 @@ export class StudentMedalReportComponent implements OnInit {
 
       this.prepareExportData();
       this.showTable = true;
-    } catch (error) {
-      console.error('Error loading medal reports:', error);
+    } catch (error: any) { 
       this.medalReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load medal reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      if(error.status !== 404){
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to load medal reports',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
     } finally {
       this.isLoading = false;
     }

@@ -23,6 +23,7 @@ export class DirectMark {
             public directMarkClasses: DirectMarkClasses[] = [],
             public classids: number[] = [],
             public insertedByUserId: number = 0,
+            public isSummerCourse: boolean = false, 
             public insertedByUserName: string = ''
         ) { }
 }

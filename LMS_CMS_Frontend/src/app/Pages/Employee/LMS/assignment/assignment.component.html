@@ -342,6 +342,11 @@
                 <label for="isVisibleToStudent" class="text-sm">  {{ 'Is Visible To Student?' | translate }}</label>
             </div>
             <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
+                <input type="checkbox" id="Summer" class="w-5 h-5"
+                    [(ngModel)]="assignment.isSummerCourse">
+                <label for="Summer" class="text-sm">  {{ 'Summer Course' | translate }}</label>
+            </div>
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                 <input type="checkbox" id="specific" class="w-5 h-5" (change)="onIsSpecificChange($event)"
                     [checked]="assignment.isSpecificStudents">
                 <label for="specific" class="text-sm">  {{ 'Is The Assignment For specific students?' | translate }}</label>

@@ -248,30 +248,26 @@ export class CertificateStudentReportComponent implements OnInit {
           this.selectedStudentId,
           domainName
         )
-      );
-
-      console.log('API Response:', response);
-      
+      ); 
       if (Array.isArray(response)) {
-        this.certificateReports = response;
-        console.log('Certificate reports loaded:', this.certificateReports.length);
-      } else {
-        console.log('Response is not an array:', response);
+        this.certificateReports = response; 
+      } else { 
         this.certificateReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
-    } catch (error) {
-      console.error('Error loading certificate reports:', error);
+    } catch (error: any) { 
       this.certificateReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load certificate reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      if(error.status !== 404){
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to load certificate reports',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
     } finally {
       this.isLoading = false;
     }
