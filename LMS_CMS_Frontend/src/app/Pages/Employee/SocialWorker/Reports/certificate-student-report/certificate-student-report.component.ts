@@ -406,65 +406,104 @@ private prepareExportData(): void {
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExcel.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
+  async exportExcel() {
+    if (this.reportsForExcel.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+    
+    try {
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Certificate Student Report',
+          ar: 'تقرير شهادات الطالب'
+        },
+        subHeaders: [
+          {
+            en: 'Student Certificate Records',
+            ar: 'سجلات شهادات الطالب'
+          }
+        ],
+        infoRows: this.getInfoRowsExcel(),
+        tables: [
+          {
+            // title: 'Certificate Report Data',
+            headers: [ 'Medal Name', 'Added By'],
+            data: this.reportsForExcel
+          }
+        ],
+        filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
 
-  this.isExporting = true;
-  
-  try {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Certificate Student Report',
-        ar: 'تقرير شهادات الطالب'
-      },
-      subHeaders: [
-        {
-          en: 'Student Certificate Records',
-          ar: 'سجلات شهادات الطالب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          // title: 'Certificate Report Data',
-          headers: [ 'Medal Name', 'Added By'],
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  } finally {
-    this.isExporting = false;
-  }
-}
+  // downloadCertificate(row: CertificateStudent) {
+  //   const canvas = document.createElement('canvas');
+  //   const ctx = canvas.getContext('2d')!;
+  //   const img = new Image();
+  //   img.crossOrigin = 'anonymous';
+  //   img.src = encodeURI(row.certificateTypeFile);
+  //   console.log(row.certificateTypeFile)
+  //   img.onload = () => {
+  //     canvas.width = img.width;
+  //     canvas.height = img.height;
+  //     ctx.drawImage(img, 0, 0);
+  //     const leftPx = (row.leftSpace / 100) * img.width;
+  //     const topPx = (row.topSpace / 100) * img.height;
+  //     const fontSize = Math.floor(img.height * 0.05);
+  //     ctx.font = `${fontSize}px Arial`;
+  //     ctx.fillStyle = 'black';
+  //     ctx.textBaseline = 'top';
+  //     ctx.fillText(row.studentEnName, leftPx, topPx);
+  //     const link = document.createElement('a');
+  //     link.download = `${row.studentEnName}-certificate.png`;
+  //     link.href = canvas.toDataURL('image/png');
+  //     link.click();
+  //   };
+  // }
 
   downloadCertificate(row: CertificateStudent) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = encodeURI(row.certificateTypeFile);
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      const leftPx = (row.leftSpace / 100) * img.width;
-      const topPx = (row.topSpace / 100) * img.height;
-      const fontSize = Math.floor(img.height * 0.05);
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = 'black';
-      ctx.textBaseline = 'top';
-      ctx.fillText(row.studentEnName, leftPx, topPx);
-      const link = document.createElement('a');
-      link.download = `${row.studentEnName}-certificate.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    };
-  }
+    const imageUrl = row.certificateTypeFile;
+    
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          const img = new Image();
+          img.src = base64data;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const leftPx = (row.leftSpace / 100) * img.width;
+            const topPx = (row.topSpace / 100) * img.height;
+            const fontSize = Math.floor(img.height * 0.05);
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.fillText(row.studentEnName, leftPx, topPx);
+
+            const link = document.createElement('a');
+            link.download = `${row.studentEnName}-certificate.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => console.error('Error loading image:', err));    
+   }
+
+  
 }

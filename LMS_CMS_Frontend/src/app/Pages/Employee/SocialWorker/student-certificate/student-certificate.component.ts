@@ -303,29 +303,65 @@ export class StudentCertificateComponent {
     }
   }
 
-  downloadCertificate(row: CertificateStudent) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = encodeURI(row.certificateTypeFile);
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      const leftPx = (row.leftSpace / 100) * img.width;
-      const topPx = (row.topSpace / 100) * img.height;
-      const fontSize = Math.floor(img.height * 0.05);
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = 'black';
-      ctx.textBaseline = 'top';
-      ctx.fillText(row.studentEnName, leftPx, topPx);
-      const link = document.createElement('a');
-      link.download = `${row.studentEnName}-certificate.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    };
-  }
+  // downloadCertificate(row: CertificateStudent) {
+  //   const canvas = document.createElement('canvas');
+  //   const ctx = canvas.getContext('2d')!;
+  //   const img = new Image();
+  //   img.crossOrigin = 'anonymous';
+  //   img.src = encodeURI(row.certificateTypeFile);
+  //   img.onload = () => {
+  //     canvas.width = img.width;
+  //     canvas.height = img.height;
+  //     ctx.drawImage(img, 0, 0);
+  //     const leftPx = (row.leftSpace / 100) * img.width;
+  //     const topPx = (row.topSpace / 100) * img.height;
+  //     const fontSize = Math.floor(img.height * 0.05);
+  //     ctx.font = `${fontSize}px Arial`;
+  //     ctx.fillStyle = 'black';
+  //     ctx.textBaseline = 'top';
+  //     ctx.fillText(row.studentEnName, leftPx, topPx);
+  //     const link = document.createElement('a');
+  //     link.download = `${row.studentEnName}-certificate.png`;
+  //     link.href = canvas.toDataURL('image/png');
+  //     link.click();
+  //   };
+  // }
+
+   downloadCertificate(row: CertificateStudent) {
+    const imageUrl = row.certificateTypeFile;
+    
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          const img = new Image();
+          img.src = base64data;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const leftPx = (row.leftSpace / 100) * img.width;
+            const topPx = (row.topSpace / 100) * img.height;
+            const fontSize = Math.floor(img.height * 0.05);
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.fillText(row.studentEnName, leftPx, topPx);
+
+            const link = document.createElement('a');
+            link.download = `${row.studentEnName}-certificate.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => console.error('Error loading image:', err));    
+   }
 
   ViewCertificate(row: CertificateStudent) {
     const canvas = document.createElement('canvas');

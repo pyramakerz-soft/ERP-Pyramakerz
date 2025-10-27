@@ -257,7 +257,7 @@ export class TimeTableReplaceComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Target session teachers conflict with other sessions in the dragged session day/period',
+        text: 'Some teachers in the target session already have another class at this time',
         confirmButtonColor: '#089B41',
       });
       return;
@@ -267,7 +267,7 @@ export class TimeTableReplaceComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: ' Dragged session teachers conflict with other sessions in the target session day/period',
+        text: ' Some teachers are already assigned to another session at this time',
         confirmButtonColor: '#089B41',
       });
       return;
@@ -284,7 +284,7 @@ export class TimeTableReplaceComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'One or more subjects in the dragged session do not exist in the target classroom.',
+        text: 'Subjects in the dragged session don’t match the target classroom’s subjects.',
         confirmButtonColor: '#089B41',
       });
       return;

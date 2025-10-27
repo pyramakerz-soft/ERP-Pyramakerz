@@ -183,7 +183,7 @@ export class RemedialTimeTableViewComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: ' Dragged session teachers conflict with other sessions in the target session day/period',
+        text: ' Some teachers in the dragged session already have another class in the target session’s time',
         confirmButtonColor: '#089B41',
       });
       return;
