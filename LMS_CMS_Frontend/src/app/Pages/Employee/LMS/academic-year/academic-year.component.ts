@@ -28,11 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 export class AcademicYearComponent {
   keysArray: string[] = [
     'id',
-    'name',
-    'dateFrom',
-    'dateTo',
-    'schoolName',
-    'isActive'
+    'name', 
+    'schoolName', 
   ];
   key: string = 'id';
   value: any = '';

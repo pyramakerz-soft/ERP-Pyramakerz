@@ -92,8 +92,9 @@ export class CertificateComponent {
   tableHeadersForPDF: any[] = [];
   tableDataForPDF: any[] = [];
   infoRows: any[] = [];
-  SearchType: string[] = ['Academic Year', 'Month', 'Semester'];
+  SearchType: string[] = ['Academic Year', 'Month', 'Semester', 'Summer Course'];
   SelectedSearchType: string = '';
+  isSummerCourse: boolean = false;
 
   constructor(
     private router: Router,
@@ -122,8 +123,7 @@ export class CertificateComponent {
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
-      console.log("path", this.path)
+      this.path = url[0].path; 
       if (this.User_Data_After_Login.type == 'student') {
         this.mode = 'student'
         this.SelectedStudentId = this.UserID
@@ -196,7 +196,6 @@ export class CertificateComponent {
     if(this.User_Data_After_Login.type == 'parent'){
       this.Grades=[]
       this.student = this.studentOfParent.find(s=>s.id==this.SelectedStudentId) || null
-      console.log(this.studentOfParent)
       if(this.student){
        this.SelectedSchoolId = this.student.currentSchoolId
        this.GradeServ.GetBySchoolAndStudent(this.SelectedSchoolId,this.SelectedStudentId,this.DomainName).subscribe((d=>{
@@ -221,11 +220,11 @@ export class CertificateComponent {
     this.SelectedSemesterId = 0
     this.DateFrom = ''
     this.DateTo = ''
-    if (this.SelectedSearchType == 'Academic Year') {
+    if (this.SelectedSearchType == 'Academic Year' || this.SelectedSearchType == 'Summer Course' || this.SelectedSearchType == 'Semester') {
       this.getAcadimicYearsBySchool();
     }
-    else if (this.SelectedSearchType == 'Semester') {
-      this.getAcadimicYearsBySchool();
+    if (this.SelectedSearchType == 'Summer Course') {
+      this.isSummerCourse = true
     }
   }
 
@@ -236,9 +235,24 @@ export class CertificateComponent {
     this.DateTo = ''
     const year = this.academicYears.find(y => y.id == this.SelectedAcademicYearId);
     if (year) {
-      this.DateFrom = year.dateFrom;
-      this.DateTo = year.dateTo;
+      if(this.SelectedSearchType == 'Summer Course'){
+        this.DateFrom = year.summerCourseDateFrom;
+        this.DateTo = year.summerCourseDateTo; 
+      }else{
+        this.DateFrom = year.dateFrom;
+        this.DateTo = year.dateTo;
+      }
     }
+
+    if(this.DateFrom == null || this.DateTo == null){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "This Academic Year Doesn't have Dates For Summer Course",
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    } 
   }
 
   SelectSemester() {
@@ -276,9 +290,7 @@ export class CertificateComponent {
 
       this.DateFrom = formatDate(startDate);
       this.DateTo = formatDate(endDate);
-
-      console.log('DateFrom:', this.DateFrom);
-      console.log('DateTo:', this.DateTo);
+ 
       this.getAcademicYearByDateAndSchool()
     }
   }
@@ -366,14 +378,11 @@ export class CertificateComponent {
   GetAllData() {
     this.TableData = []
     this.LastColumn = []
-    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedClassId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
-      console.log(d)
+    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedClassId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.isSummerCourse, this.DomainName).subscribe((d) => {
       this.subjects = d.subjectDTO
       this.TableData = d.cells
       this.weightTypes = d.header
       this.LastColumn = d.lastColumn
-    }, error => {
-      console.log(error)
     })
   }
 
@@ -487,9 +496,7 @@ export class CertificateComponent {
     totalRow['Total'] = this.getSum();
     totalRow['Percentage'] = this.getSumPercentage();
 
-    this.tableDataForPDF.push(totalRow);
-
-    console.log('Prepared PDF data:', this.tableDataForPDF);
+    this.tableDataForPDF.push(totalRow); 
   }
 
   async Print() {
@@ -498,8 +505,7 @@ export class CertificateComponent {
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
-      if (!printContents) {
-        console.error('Element not found!');
+      if (!printContents) { 
         return;
       }
 
@@ -552,8 +558,7 @@ export class CertificateComponent {
     await this.getInfoData()
     this.showPDF = true;
     setTimeout(() => {
-      if (this.pdfComponentRef) {
-        console.log('PDF Component is ready');
+      if (this.pdfComponentRef) { 
         this.pdfComponentRef.downloadPDF();
         setTimeout(() => (this.showPDF = false), 2000);
       } else {
@@ -562,8 +567,7 @@ export class CertificateComponent {
     }, 800); // Slight delay to ensure render is complete
   }
 
-  async DownloadAsExcel() {
-    console.log(this.mode)
+  async DownloadAsExcel() { 
     await this.getInfoData()
     const headerKeyMap = [
       { key: 'subject', header: 'Subjects' },

@@ -14,7 +14,7 @@
     <div class="w-1/2">
         <label for="school" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'School' | translate
             }}</label>
-        <select id="school" [(ngModel)]="selectedSchool"
+        <select id="school" [(ngModel)]="selectedSchool" (ngModelChange)="GetAllAcademicYearBySchool();"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of SchoolData" [value]="school.id">
@@ -25,7 +25,7 @@
     <div class="w-1/2">
         <label for="academicYear" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'Academic Year'
             | translate }}</label>
-        <select id="academicYear" [(ngModel)]="selectedYear"
+        <select id="academicYear" [(ngModel)]="selectedYear" [disabled]="!selectedSchool"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
             </option>

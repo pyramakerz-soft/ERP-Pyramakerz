@@ -43,7 +43,7 @@
         </select>
     </div>
 
-    <div *ngIf="SelectedSearchType=='Academic Year'" class="w-[24%]">
+    <div *ngIf="SelectedSearchType=='Academic Year' || SelectedSearchType=='Summer Course'" class="w-[24%]">
         <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Academic Year' |
             translate }}</label>
         <select id="SelectedAcademicYearId"

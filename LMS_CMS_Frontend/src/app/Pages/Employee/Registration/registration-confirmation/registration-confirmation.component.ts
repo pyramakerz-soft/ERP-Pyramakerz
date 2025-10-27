@@ -73,8 +73,7 @@ export class RegistrationConfirmationComponent {
     });
 
     this.getRegisterationFormParentData()
-    this.getSchools()
-    this.getYears()
+    this.getSchools() 
     this.getState()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -164,13 +163,13 @@ export class RegistrationConfirmationComponent {
       }
     )
   }
-
-  getYears(){
-    this.yearService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.AcademicYearData = data;
-      }
-    )
+ 
+  GetAllAcademicYearBySchool() {
+    this.AcademicYearData = [];
+    this.selectedYear = 0
+    this.yearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe((data) => {
+      this.AcademicYearData = data;
+    });
   }
 
   getState(){
