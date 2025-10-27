@@ -5,7 +5,7 @@
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="openModal()"
                 class="primaryTxt rounded-lg secondaryBorder secondaryTxt px-5 py-3 flex items-center justify-center gap-2 font-medium">
-                {{ 'Follow Up' | translate }}
+                {{'Create' | translate}} {{ 'Follow Up' | translate }}
             </button>
         </div>
     </div>
@@ -32,9 +32,9 @@
                     <label class="mb-1 primaryTxt" for="school">{{ 'School' | translate }}</label>
                     <select id="school" [(ngModel)]="followUp.schoolId" (change)="onSchoolChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate
-                            }}</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                         <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                        <option *ngIf="schools?.length === 0" disabled>{{ 'No Schools Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['schoolId'] }}
@@ -46,9 +46,9 @@
                     <select id="grade" [(ngModel)]="followUp.gradeId" (change)="onGradeChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
                         [disabled]="!followUp.schoolId">
-                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate
-                            }}</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate}}</option>
                         <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                        <option *ngIf="grades?.length === 0" disabled>{{ 'No Grade Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['gradeId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['gradeId'] }}
@@ -62,9 +62,9 @@
                     <select id="class" [(ngModel)]="followUp.classroomId" (change)="onClassChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
                         [disabled]="!followUp.gradeId">
-                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate
-                            }}</option>
-                        <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+                        <option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</option>
+                        <option *ngIf="classes?.length === 0" disabled>{{ 'No Classes Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['classroomId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['classroomId'] }}
@@ -76,9 +76,9 @@
                     <select id="student" [(ngModel)]="followUp.studentId" (change)="onStudentChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
                         [disabled]="!followUp.classroomId">
-                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate
-                            }}</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
                         <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
+                        <option *ngIf="students?.length === 0" disabled>{{ 'No Students Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['studentId'] }}
@@ -107,8 +107,7 @@
                 <label class="mb-1 primaryTxt" for="diagnosis"> {{ 'Diagnosis' | translate }}</label>
                 <select id="diagnosis" [(ngModel)]="followUp.diagnosisId" (change)="onDiagnosisChange($event)"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-                    <option [value]=null disabled selected hidden>{{ 'Choose' | translate }} {{ 'Diagnosis' | translate
-                        }}</option>
+                    <option [value]=null disabled selected hidden>{{ 'Choose' | translate }} {{ 'Diagnosis' | translate }}</option>
                     <option *ngFor="let diagnosis of diagnoses" [value]="diagnosis.id">{{ diagnosis.name }}</option>
                 </select>
                 <span *ngIf="validationErrors['diagnosisId']" class="text-red-500 ml-3 font-normal text-sm">

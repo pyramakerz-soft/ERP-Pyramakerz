@@ -142,11 +142,17 @@ export class ViolationService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    const params = new HttpParams()
-      .set('employeeTypeId', employeeTypeId.toString())
-      .set('violationTypeId', violationTypeId.toString())
+    let params = new HttpParams()
       .set('fromDate', fromDate)
       .set('toDate', toDate);
+
+    if (employeeTypeId && employeeTypeId !== 0) {
+      params = params.set('employeeTypeId', employeeTypeId.toString());
+    }
+
+    if (violationTypeId && violationTypeId !== 0) {
+      params = params.set('violationTypeId', violationTypeId.toString());
+    }
 
     return this.http.get<ViolationReport[]>(
       `${this.baseUrl}/Violation/ViolationReport`,

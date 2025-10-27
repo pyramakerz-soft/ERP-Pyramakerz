@@ -3,6 +3,17 @@
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+        <div class="w-full md:w-1/4">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <div class="w-full md:w-1/4">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
 
     <div class="w-full md:w-1/4">
         <label for="employeeType" class="block mb-2 text-sm font-medium text-gray-900">{{'Employee Type'| translate
@@ -22,33 +33,22 @@
             [disabled]="!SelectedEmployeeTypeId">
             <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
             <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Violation Type'| translate }}</option>
-
             <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
                 {{ violationType.name }}
             </option>
         </select>
     </div>
 
-    <div class="w-full md:w-1/4">
-        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
-        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-    </div>
 
-    <div class="w-full md:w-1/4">
-        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
-        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-    </div>
 
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
 
-        [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId"
+        [disabled]="!SelectedStartDate || !SelectedEndDate "
         
             [ngClass]="{
-             'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId,
-             'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedEmployeeTypeId && SelectedViolationTypeId
+             'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate ,
+             'secondaryBg text-white': SelectedStartDate && SelectedEndDate
              
              }">
             {{'View Report'| translate }}

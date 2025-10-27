@@ -194,9 +194,11 @@ private showSuccessAlert(message: string) {
         const data = await firstValueFrom(this.studentService.GetByClassID(this.selectedClass, domainName));
         console.log('Loaded students:', data);
         if (data.length === 0) {
-          this.errorMessage = 'No students found for the selected class.';
+          // show a friendly "no students" message (translated)
+          this.errorMessage = this.translate.instant('No students found for the selected class.');
           this.students = [];
         } else {
+          this.errorMessage = null; // clear any previous message
           this.students = data.map((student) => ({
             ...student,
             attendance: null,
@@ -206,7 +208,7 @@ private showSuccessAlert(message: string) {
         }
       } catch (error) {
         console.error('Error loading students: ', error);
-        this.errorMessage = 'Failed to load students.';
+        this.errorMessage = this.translate.instant('No students found for the selected class.');
       }
     }
   }
@@ -234,6 +236,7 @@ private showSuccessAlert(message: string) {
   onClassChange() {
     this.students = [];
     delete this.validationErrors['class'];
+    delete this.validationErrors['students'];
     this.errorMessage = null; // Always clear error message
     this.loadStudents();
   }
@@ -272,6 +275,15 @@ validateForm(): boolean {
   }
   if (!this.selectedDate) {
     this.validationErrors['date'] = this.getRequiredErrorMessage('Date');
+    isValid = false;
+  }
+
+  // Prevent saving when there are no students loaded for the selected class
+  if (!this.students || this.students.length === 0) {
+    // show a clear message and mark validation so UI can react
+    const msg = this.translate.instant('No students found for the selected class.');
+    this.errorMessage = msg;
+    this.validationErrors['students'] = msg;
     isValid = false;
   }
 
