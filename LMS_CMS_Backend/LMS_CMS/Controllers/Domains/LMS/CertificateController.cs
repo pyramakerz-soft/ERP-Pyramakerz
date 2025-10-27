@@ -63,7 +63,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 // All Subjects for this student
                 var studentClassroomSubjects = await Unit_Of_Work.studentClassroomSubject_Repository
                     .Select_All_With_IncludesById<StudentClassroomSubject>(
-                        f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true && f.Subject.HideFromGradeReport == false && !f.Hide);
+                        f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true 
+                        && f.Subject.HideFromGradeReport == false && !f.Hide);
 
                 if (studentClassroomSubjects == null || !studentClassroomSubjects.Any())
                     return NotFound("No subjects found for this student.");
