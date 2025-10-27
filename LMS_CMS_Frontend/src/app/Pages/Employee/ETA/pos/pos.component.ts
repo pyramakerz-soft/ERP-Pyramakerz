@@ -107,10 +107,8 @@ export class POSComponent {
     const requiredTranslated = this.translate.instant('Is Required');
     
     if (this.isRtl) {
-      // Arabic: FieldName comes FIRST, then "مطلوب"
       return `${requiredTranslated} ${fieldTranslated}`;
     } else {
-      // English: FieldName comes FIRST, then "is required"  
       return `${fieldTranslated} ${requiredTranslated}`;
     }
   }

@@ -112,7 +112,7 @@
     </div>
 
     <!-- Student Report Table -->
-    <div *ngIf="tableData.length > 0 && reportType === 'student'" class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <div *ngIf="tableData.length > 0 && (reportType === 'student' || reportType === 'parent')" class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
@@ -125,8 +125,10 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Name' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Performance Type' | translate }}
+                    <!-- Dynamic Performance Type Columns -->
+                    <th *ngFor="let type of performanceTypes" 
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ isRtl ? type.arabicName : type.englishName }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Comment' | translate }}
@@ -146,15 +148,24 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.englishNameStudent }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.performanceTypeEn || data.performanceTypeAr  }}
+                    <!-- Dynamic Performance Type Stars -->
+                    <td *ngFor="let type of performanceTypes" 
+                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                        <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                            <i class="fa-star text-xl" 
+                               [ngClass]="{
+                                 'fa-solid text-yellow-400': star <= getStars(data.studentPerformance, type.id),
+                                 'fa-regular text-gray-400': star > getStars(data.studentPerformance, type.id)
+                               }">
+                            </i>
+                        </ng-container>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.comment || '-' }}
                     </td>
                 </tr>
             </tbody>
-</table>
+        </table>
     </div>
 
     <!-- Classroom Report Table -->
@@ -165,15 +176,10 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Date' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Performance Type' | translate }}
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Avg Score' | translate }}
-                    </th>
-
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Comment' | translate }}
+                    <!-- Dynamic Performance Type Columns -->
+                    <th *ngFor="let type of performanceTypes" 
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ isRtl ? type.arabicName : type.englishName }}
                     </th>
                 </tr>
             </thead>
@@ -184,14 +190,26 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.date }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.performanceTypeEn || data.performanceTypeAr  }}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.averageScore || '-' }}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.comment || '-' }}
+                    <!-- Dynamic Performance Type Average Scores with Stars -->
+                    <td *ngFor="let type of performanceTypes" 
+                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                        <div class="flex flex-col items-center gap-2">
+                            <!-- Stars Display -->
+                            <div class="flex gap-1">
+                                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                                    <i class="fa-star text-xl" 
+                                       [ngClass]="{
+                                         'fa-solid text-yellow-400': star <= getAverageScore(data.studentPerformance, type.id),
+                                         'fa-regular text-gray-400': star > getAverageScore(data.studentPerformance, type.id)
+                                       }">
+                                    </i>
+                                </ng-container>
+                            </div>
+                            <!-- Average Score Number -->
+                            <span class="text-sm font-medium">
+                                {{ getAverageScore(data.studentPerformance, type.id).toFixed(2) }}
+                            </span>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -201,12 +219,14 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" 
+        <app-pdf-print 
+            *ngIf="showPDF" 
+            [school]="school" 
+            [fileName]="fileName"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="reportType === 'student' 
-                ? ['Date', 'Name','Student ID', 'Performance Type', 'Comment']
-                : ['Date', 'Avg Score', 'Performance Type', 'Comment']"
-            [tableData]="tableDataForExport" #pdfComponentRef>
+            [tableHeaders]="getTableHeaders()"
+            [tableData]="getTableDataForPDF()"
+            #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

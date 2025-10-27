@@ -308,24 +308,17 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 if (isProduction)
                 {
                     var domain = _domainService.GetDomain(HttpContext);
-                    string subDomain = HttpContext.Request.Headers["Domain-Name"].ToString();
-                    string fullPath = $"{_configuration["AWS:Folder"]}{domain}/{subDomain}/Parent/Appointment";
-
-                    AmazonS3Client s3Client = new AmazonS3Client();
-                    S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                    //serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
-                    serverUrl = $"{subDomain}.{domain}/Parent/Appointment";
-                    Console.WriteLine("----------------------------------------------------------------------------------------------------");
-                    Console.WriteLine(serverUrl, domain, subDomain);
+                    string subDomain = HttpContext.Request.Headers["Domain-Name"].ToString();   
+                    string protocol = HttpContext.Request.Scheme; 
+                    serverUrl = $"{protocol}://{subDomain}.{domain}/Parent/Appointment";
 
                 }
                 else
                 {
                     serverUrl = $"http://localhost:4200/Parent/Appointment";
-
                 }
 
-                await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "A new appointment has been scheduled for your child. Tap to View Link to check the appointment details.", serverUrl, 3, ParentId, domainName);
+                await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "A new appointment has been scheduled for your child. Tap the link to check the appointment details.", serverUrl, 3, ParentId, domainName);
 
             }
 

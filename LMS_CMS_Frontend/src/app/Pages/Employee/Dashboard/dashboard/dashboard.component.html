@@ -1,14 +1,5 @@
 <div class="min-h-screen">
-    <!-- Filter Header -->
-    <app-filter-header (selectionChanged)="onSelection($event)"></app-filter-header>
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>
-
-    <div *ngIf="!isLoading">
-        <!-- Top Row: Today's Data -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <!-- Total Students -->
             <div class="bg-white p-4 rounded-xl shadow">
@@ -28,6 +19,17 @@
                 <h2 class="text-2xl font-bold">{{ todaysData?.inventoryLowItemsToday || 0 }}</h2>
             </div>
         </div>
+
+    <!-- Filter Header -->
+    <div class ="mb-4">
+    <app-filter-header (selectionChanged)="onSelection($event)"></app-filter-header>
+    </div>
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading">
 
         <!-- Second Row: Dashboard Data Summary -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -58,8 +60,14 @@
             <!-- Registration Chart -->
             <app-chart-pie [registrationFormStateCount]="dashboardData?.registrationFormStateCount"></app-chart-pie>
             
-            <!-- Request Status Progress Bar -->
-            <app-request-progress [requestStateCount]="dashboardData?.requestStateCount"></app-request-progress>
+            <!-- Request Status + Category Rankings grouped so they share the same column width -->
+            <div class="flex flex-col gap-4">
+                <!-- Request Status Progress Bar -->
+                <app-request-progress [requestStateCount]="dashboardData?.requestStateCount"></app-request-progress>
+
+                <!-- Bottom Section: Category Rankings (now directly under request status, same width) -->
+                <app-category-rankings [categoryRankings]="dashboardData?.categoryRankings"></app-category-rankings>
+            </div>
         </div>
 
 <!-- Charts Row 2: Inventory Charts - Dynamic layout based on month view -->
@@ -75,9 +83,6 @@
   </app-revenue-chart-sales>
 </div>
 
-        <!-- Bottom Section: Category Rankings -->
-        <div class="grid grid-cols-1 gap-4">
-            <app-category-rankings [categoryRankings]="dashboardData?.categoryRankings"></app-category-rankings>
-        </div>
+
     </div>
 </div>

@@ -190,7 +190,7 @@
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Subject"> {{ 'School' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="School"> {{ 'School' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
                     [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 }" [disabled]="directMark.id != 0"
                     (change)="onSchoolModalChange()" [(ngModel)]="directMark.schoolID"
@@ -227,8 +227,8 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt"
                     [ngClass]="{ 'text-gray-400': !directMark.gradeID, 'primaryTxt': directMark.gradeID }"
-                    for="Subject"> {{ 'Subject' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    for="subj"> {{ 'Subject' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subj"
                     [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.gradeID  }"
                     [disabled]="(!directMark.gradeID) || directMark.id != 0" (change)="onSubjectModalChange()"
                     [(ngModel)]="directMark.subjectID"
@@ -249,7 +249,7 @@
                 <label class="mb-2" for="Subjectweight"
                     [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
                     {{ 'Subject Weight Type' | translate }} </label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subjectweight"
                     [disabled]="!directMark.subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !directMark.subjectID }"
                     [(ngModel)]="directMark.subjectWeightTypeID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectWeightTypeID', value: $event })">
@@ -302,16 +302,16 @@
                         *ngIf="directMark.directMarkClasses && directMark.subjectID && classDropdownOpen">
                         <ul>
                             <li class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                <input type="checkbox" class="mr-2" [checked]="directMark.allClasses"
+                                <input id="all" type="checkbox" class="mr-2" [checked]="directMark.allClasses"
                                     (change)="toggleSelectAll($event)">
-                                {{ 'Choose All' | translate }}
+                                <label for="all">{{ 'Choose All' | translate }}</label>
                             </li>
 
                             <li *ngFor="let c of classrooms"
                                 class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                <input type="checkbox" class="mr-2" [checked]="IfClassExist(c.id)"
+                                <input [id]="c.id" type="checkbox" class="mr-2" [checked]="IfClassExist(c.id)"
                                     (change)="toggleClass($event,c)">
-                                {{ c.name }}
+                                <label [for]="c.id"> {{ c.name }}</label> 
                             </li>
 
                             <li *ngIf="classrooms.length === 0" class="px-4 py-2 text-gray-400 cursor-not-allowed">
@@ -361,6 +361,11 @@
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['date'] }}</span>
+            </div>
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
+                <input type="checkbox" id="Summer" class="w-5 h-5"
+                    [(ngModel)]="directMark.isSummerCourse">
+                <label for="Summer" class="text-sm">  {{ 'Summer Course' | translate }}</label>
             </div>
         </div>
         <div class="flex justify-end">

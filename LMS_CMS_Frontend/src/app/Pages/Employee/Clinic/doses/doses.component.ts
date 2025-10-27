@@ -198,6 +198,51 @@ deleteDose(row: Dose) {
   });
 }
 
+
+// deleteDose(row: Dose) {
+//   const translatedTitle = this.translate.instant('Are you sure?');
+//   const translatedText = this.getDeleteMessage('dose');
+//   const translatedConfirm = this.translate.instant('Yes, delete it!');
+//   const translatedCancel = this.translate.instant('No, keep it');
+//   const successMessage = this.translate.instant('Deleted successfully');
+
+//   Swal.fire({
+//     title: translatedTitle,
+//     text: translatedText,
+//     icon: 'warning',
+//     showCancelButton: true,
+//     confirmButtonColor: '#089B41',
+//     cancelButtonColor: '#17253E',
+//     confirmButtonText: translatedConfirm,
+//     cancelButtonText: translatedCancel,
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       this.doseService.Delete(row.id, this.DomainName).subscribe({
+//         next: () => {
+//           this.getDoses();
+//           this.showSuccessAlert(successMessage);
+//         },
+//         error: (error) => {
+//           console.error('Error deleting dose:', error);
+//           const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
+//           this.showErrorAlert(errorMessage);
+//         },
+//       });
+//     }
+//   });
+// }
+
+// private getDeleteMessage(itemType: string): string {
+//   const itemTranslated = this.translate.instant(itemType);
+//   const messagePartTranslated = this.translate.instant('You will not be able to recover this');
+  
+//   if (this.isRtl) {
+//     return `${itemTranslated} ${messagePartTranslated}!`;
+//   } else {
+//     return `${messagePartTranslated} ${itemTranslated}!`;
+//   }
+// }
+
 validateForm(): boolean {
   this.validationErrors = {};
   if (!this.dose.doseTimes) {

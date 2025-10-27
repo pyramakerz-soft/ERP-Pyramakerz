@@ -15,7 +15,7 @@ import { SubmissionsCount } from '../../../../Models/Dashboard/dashboard.models'
       <div class="relative flex flex-col md:flex-row justify-center items-center gap-6">
         <div class="flex flex-col items-end gap-4 text-sm w-40">
           <div>
-            <span class="text-green-500 font-bold">{{ answerOnTimePercentage }}%</span>
+            <span class="text-[#72CA3D] font-bold">{{ answerOnTimePercentage }}%</span>
             <span class="text-gray-700 ml-2">{{ 'Answered On Time' | translate }}</span>
           </div>
           <div>
@@ -30,7 +30,7 @@ import { SubmissionsCount } from '../../../../Models/Dashboard/dashboard.models'
 
         <div class="flex flex-col items-start gap-4 text-sm w-40">
           <div>
-            <span class="text-red-500 font-bold">{{ notAnsweredPercentage }}%</span>
+            <span class="text-[#FF4906] font-bold">{{ notAnsweredPercentage }}%</span>
             <span class="text-gray-700 ml-2">{{ 'Not Answered' | translate }}</span>
           </div>
         </div>
@@ -57,7 +57,6 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
   }
 
   private calculatePercentages(): void {
-    // Reset percentages
     this.answerOnTimePercentage = 0;
     this.answerLatePercentage = 0;
     this.notAnsweredPercentage = 0;
@@ -93,9 +92,9 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
         labels: ['Answered On Time', 'Answered Late', 'Not Answered'],
         datasets: [{
           data: data,
-          backgroundColor: ['#22C55E', '#EAB308', '#EF4444'],
+          backgroundColor: ['#72CA3D', '#EAB308', '#FF4906'],
           borderRadius: 10,
-          spacing: 5,
+          spacing: 2,
         }]
       },
       options: {

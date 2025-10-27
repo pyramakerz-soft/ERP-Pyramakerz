@@ -20,6 +20,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public long SubjectWeightTypeID { get; set; }
         public bool AllClasses { get; set; }
         public List<long>? classids { get; set; }
+        public bool IsSummerCourse { get; set; }
 
     }
 }
