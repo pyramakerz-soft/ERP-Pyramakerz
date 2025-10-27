@@ -305,6 +305,7 @@ selectTab(tab: string) {
       switch (this.selectedTab) {
         case 'MH By Parent':
           if(this.reportType === 'parent'){
+            console.log(this.selectedStudent)
             data = await firstValueFrom(
               this.medicalReportService.getAllMHByParentByStudentId(
                 domainName,

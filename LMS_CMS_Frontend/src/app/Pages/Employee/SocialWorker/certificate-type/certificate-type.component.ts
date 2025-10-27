@@ -326,33 +326,68 @@ export class CertificateTypeComponent {
   }
 
 
-  downloadCertificate(imageUrl: string) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imageUrl;
+  // downloadCertificate(imageUrl: string) {
+  //   const canvas = document.createElement('canvas');
+  //   const ctx = canvas.getContext('2d')!;
+  //   const img = new Image();
+  //   img.crossOrigin = 'anonymous';
+  //   img.src = imageUrl;
 
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+  //   img.onload = () => {
+  //     canvas.width = img.width;
+  //     canvas.height = img.height;
+  //     ctx.drawImage(img, 0, 0);
 
-      const leftPx = (this.certificateType.leftSpace / 100) * img.width;
-      const topPx = (this.certificateType.topSpace / 100) * img.height;
-      const fontSize = Math.floor(img.height * 0.05);
+  //     const leftPx = (this.certificateType.leftSpace / 100) * img.width;
+  //     const topPx = (this.certificateType.topSpace / 100) * img.height;
+  //     const fontSize = Math.floor(img.height * 0.05);
 
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = 'black';
-      ctx.textBaseline = 'top';
-      ctx.fillText("Student Name Will Be Here", leftPx, topPx);
+  //     ctx.font = `${fontSize}px Arial`;
+  //     ctx.fillStyle = 'black';
+  //     ctx.textBaseline = 'top';
+  //     ctx.fillText("Student Name Will Be Here", leftPx, topPx);
 
-      const link = document.createElement('a');
-      link.download = `Student Name Will Be Here-certificate.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    };
-  }
+  //     const link = document.createElement('a');
+  //     link.download = `Student Name Will Be Here-certificate.png`;
+  //     link.href = canvas.toDataURL('image/png');
+  //     link.click();
+  //   };
+  // }
+
+   downloadCertificate(imageUrl: string) {
+    // const imageUrl = row.certificateTypeFile;
+    
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          const img = new Image();
+          img.src = base64data;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const leftPx = (this.certificateType.leftSpace / 100) * img.width;
+            const topPx = (this.certificateType.topSpace / 100) * img.height;
+            const fontSize = Math.floor(img.height * 0.05);
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = 'black';
+            ctx.fillText(`Student Name Will Be Here-certificate.png`, leftPx, topPx);
+
+            const link = document.createElement('a');
+            link.download = `${`Student Name Will Be Here-certificate.png`}-certificate.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => console.error('Error loading image:', err));    
+   }
 
   isFormValid(): boolean {
     let isValid = true;

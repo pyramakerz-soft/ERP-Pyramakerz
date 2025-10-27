@@ -313,7 +313,11 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
                     AmazonS3Client s3Client = new AmazonS3Client();
                     S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                    serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                    //serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                    serverUrl = $"{subDomain}.{domain}/Parent/Appointment";
+                    Console.WriteLine("----------------------------------------------------------------------------------------------------");
+                    Console.WriteLine(serverUrl, domain, subDomain);
+
                 }
                 else
                 {
@@ -321,7 +325,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
                 }
 
-                await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, ParentId, domainName);
+                await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "A new appointment has been scheduled for your child. Tap to View Link to check the appointment details.", serverUrl, 3, ParentId, domainName);
 
             }
 
@@ -501,7 +505,11 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
                         AmazonS3Client s3Client = new AmazonS3Client();
                         S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                        serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                        //serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+
+                        serverUrl = $"{subDomain}.{domain}/Parent/Appointment";
+                        Console.WriteLine("----------------------------------------------------------------------------------------------------");
+                        Console.WriteLine(serverUrl, domain, subDomain);
                     }
                     else
                     {
@@ -509,7 +517,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
                     }
 
-                    await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, ParentId, domainName);
+                    await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "A new appointment has been scheduled for your child. Tap to view link to check the appointment details.", serverUrl, 3, ParentId, domainName);
 
                 }
             }

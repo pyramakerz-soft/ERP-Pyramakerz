@@ -156,7 +156,9 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
                 AmazonS3Client s3Client = new AmazonS3Client();
                 S3Service s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
-                serverUrl = s3Service.GetFileUrl(fullPath, _configuration);
+                serverUrl = $"{subDomain}.{domain}/Parent/Appointment";
+                Console.WriteLine("----------------------------------------------------------------------------------------------------");
+                Console.WriteLine(serverUrl, domain, subDomain);
             }
             else
             {
@@ -166,7 +168,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             List<Parent> parents = Unit_Of_Work.parent_Repository.FindBy(s=>s.IsDeleted != true );
             foreach (var item in parents)
             {
-              await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "", serverUrl, 3, item.ID, domainName);
+              await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, "New parent meeting available. Tap to view details.", serverUrl, 3, item.ID, domainName);
             }
 
             return Ok(NewMeeting);
