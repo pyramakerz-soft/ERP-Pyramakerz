@@ -54,7 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
                     sem => sem.IsDeleted != true && sem.Section.IsDeleted != true,
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -86,7 +86,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
                     sem => sem.IsDeleted != true&&sem.SectionID== id && sem.Section.IsDeleted != true,
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -132,7 +132,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
                     sem => sem.IsDeleted != true && sem.Section.SchoolID == id && sem.Section.IsDeleted!= true,
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -189,7 +189,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
                     sem => sem.IsDeleted != true && sem.Section.SchoolID == SchoolId && sem.Section.IsDeleted != true && gradesIds.Contains(sem.ID),
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -223,7 +223,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             Grade grade = await Unit_Of_Work.grade_Repository.FindByIncludesAsync(
                     sem => sem.IsDeleted != true && sem.ID == id,
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (grade == null)
             {

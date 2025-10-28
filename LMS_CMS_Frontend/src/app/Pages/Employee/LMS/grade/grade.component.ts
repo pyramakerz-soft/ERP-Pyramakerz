@@ -26,7 +26,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './grade.component.css'
 })
 export class GradeComponent {
-  keysArray: string[] = ['id', 'name', 'dateFrom', 'dateTo'];
+  keysArray: string[] = ['id', 'name'];
   key: string = "id";
   value: any = "";
   isRtl: boolean = false;
