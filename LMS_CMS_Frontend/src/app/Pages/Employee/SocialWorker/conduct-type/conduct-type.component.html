@@ -131,9 +131,9 @@
                 <div class="flex flex-col mb-1">
                     <label class="mb-3" for="ac"> {{ 'Sections' | translate }}</label>
                     <div class="relative">
-                        <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
-                            (click)="toggleDropdown()" tabindex="0" [class.opacity-50]="!conductType.schoolID"
-                            [class.pointer-events-none]="!conductType.schoolID">
+                       <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
+                            (click)="toggleDropdown($event)" tabindex="0"
+                            [class.opacity-50]="!conductType.schoolID" [class.pointer-events-none]="!conductType.schoolID">
                             <div *ngIf="conductType.conductTypeSections.length > 0; else placeholder">
                                 <div class="flex flex-wrap">
                                     <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -150,7 +150,7 @@
                                 <span class="text-gray-400"> {{ 'Choose' | translate }} {{ 'Section' | translate }}</span>
                             </ng-template>
                         </div>
-                        <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                        <div #classDropdown class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
                             *ngIf="dropdownOpen">
                             <ul>
                                 <li *ngFor="let section of sections" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"

@@ -1111,24 +1111,33 @@ export class StockingDetailsComponent {
   }
 
   validateNumberRow(event: any, field: keyof StockingDetails, row: StockingDetails): void {
-    const value = event.target.value;
-    const numValue = Number(value);
-    if (field === 'actualStock') {
-      const integerRegex = /^\d+$/;
-
-      if (!integerRegex.test(value) || numValue <= 0) {
-        // Invalid input (decimal, letters, negative, etc.)
-        row[field] = '';
-        event.target.value = 0;
-      } else {
-        // Valid integer value
-        row[field] = numValue;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;  
       }
-      this.onStockChangeWhenEditRow(row);
-      return;
     }
+    // const numValue = Number(value);
+    // if (field === 'actualStock') {
+    //   const integerRegex = /^\d+$/;
+
+    //   if (!integerRegex.test(value) || numValue <= 0) {
+    //     // Invalid input (decimal, letters, negative, etc.)
+    //     row[field] = '';
+    //     event.target.value = 0;
+    //   } else {
+    //     // Valid integer value
+    //     row[field] = numValue;
+    //   }
+    //   this.onStockChangeWhenEditRow(row);
+    //   return;
+    // }
   }
 
+  
 }
 
 

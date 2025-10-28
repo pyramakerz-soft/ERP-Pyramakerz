@@ -20,6 +20,7 @@
             <option *ngFor="let school of Schools" [value]="school.id">
                 {{ school.name }}
             </option>
+            <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="w-[49%]">
@@ -30,6 +31,7 @@
             <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="AcademicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="w-[49%]">
@@ -40,6 +42,7 @@
             <option *ngFor="let grade of Grades" [value]="grade.id">
                 {{ grade.name }}
             </option>
+            <option *ngIf="Grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="w-[49%]">
@@ -50,6 +53,7 @@
             <option *ngFor="let class of Classes" [value]="class.id">
                 {{ class.name }}
             </option>
+            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="mt-7 ml-2">
@@ -58,6 +62,9 @@
             [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedAcademicYearId || !SelectedGradeId || !SelectedClassId, 'secondaryBg text-white': SelectedSchoolId && SelectedAcademicYearId && SelectedGradeId && SelectedClassId }">
              {{ 'View' | translate }}
         </button>
+    </div>
+    <div *ngIf="SelectedSchoolId" class="rounded-full p-2 border-4 cursor-pointer" (click)="ResetFilter(); IsViewTable=false">
+            <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
     </div>
 </div>
 

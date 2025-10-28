@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
@@ -84,6 +84,12 @@ export class EmployeeAddEditComponent {
     '.mp4', '.avi', '.mkv', '.mov'
   ];
 
+    // Dropdown element references
+  @ViewChild('locationDropdown') locationDropdown!: ElementRef;
+  @ViewChild('floorDropdown') floorDropdown!: ElementRef;
+  @ViewChild('gradeDropdown') gradeDropdown!: ElementRef;
+  @ViewChild('subjectDropdown') subjectDropdown!: ElementRef;
+  
   constructor(
     public RoleServ: RoleService,
     public empTypeServ: EmployeeTypeService,
@@ -557,7 +563,8 @@ export class EmployeeAddEditComponent {
   
   //////////////////////////////////////////////////// floor
 
-  toggleDropdown(): void {
+  toggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.dropdownOpen = !this.dropdownOpen;
   }
 
@@ -602,7 +609,8 @@ export class EmployeeAddEditComponent {
 
   //////////////////////////////////////////////////// Locations
 
-  LocationtoggleDropdown(): void {
+  LocationtoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.LocationdropdownOpen = !this.LocationdropdownOpen;
   }
 
@@ -647,7 +655,8 @@ export class EmployeeAddEditComponent {
 
   //////////////////////////////////////////////////// Grade
 
-  GradetoggleDropdown(): void {
+  GradetoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.GradedropdownOpen = !this.GradedropdownOpen;
   }
 
@@ -691,7 +700,8 @@ export class EmployeeAddEditComponent {
   }
   //////////////////////////////////////////////////// Subject
 
-  SubjecttoggleDropdown(): void {
+  SubjecttoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
   }
 
@@ -732,6 +742,21 @@ export class EmployeeAddEditComponent {
       this.subjectSelected = [];
     }
     this.SubjectdropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    const clickedInsideLocation = this.locationDropdown?.nativeElement.contains(target);
+    const clickedInsideFloor = this.floorDropdown?.nativeElement.contains(target);
+    const clickedInsideGrade = this.gradeDropdown?.nativeElement.contains(target);
+    const clickedInsideSubject = this.subjectDropdown?.nativeElement.contains(target);
+
+    if (!clickedInsideLocation) this.LocationdropdownOpen = false;
+    if (!clickedInsideFloor) this.dropdownOpen = false;
+    if (!clickedInsideGrade) this.GradedropdownOpen = false;
+    if (!clickedInsideSubject) this.SubjectdropdownOpen = false;
   }
 
 }
