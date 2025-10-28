@@ -175,6 +175,18 @@ export class AttendanceComponent {
     })
   }
 
+  ResetFilter(){
+    this.IsViewTable=false
+    this.Grades = []
+    this.Classes = []
+    this.AcademicYears = []
+    this.TableData =[]
+    this.SelectedSchoolId = 0
+    this.SelectedGradeId = 0
+    this.SelectedClassId = 0
+    this.SelectedAcademicYearId = 0
+  }
+
   GetAllAttendance(pageNumber: number, pageSize: number) {
     this.TableData = []
     this.IsViewTable = true
@@ -197,7 +209,7 @@ export class AttendanceComponent {
               } else {
                 this.CurrentPage = Math.ceil(lastPage)
               }
-              this.GetAllAttendance(this.CurrentPage, this.PageSize)
+              // this.GetAllAttendance(this.CurrentPage, this.PageSize)
             }
           }
         }

@@ -174,9 +174,9 @@
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion" >
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Location' | translate }}</label>
-            <div class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="LocationtoggleDropdown()" tabindex="0">
+            <div #locationDropdown class="relative">
+                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]" 
+                    (click)="LocationtoggleDropdown($event)" tabindex="0">
                     <ng-container *ngIf="locationsSelected.length > 0; else placeholder">
                         <div class="flex flex-wrap">
                             <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -215,7 +215,7 @@
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Floors' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="toggleDropdown()" tabindex="0">
+                    (click)="toggleDropdown($event)" tabindex="0">
                     <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
                         <div class="flex flex-wrap">
                             <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -253,7 +253,7 @@
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Grades' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="GradetoggleDropdown()" tabindex="0">
+                    (click)="GradetoggleDropdown($event)" tabindex="0">
                     <ng-container *ngIf="gradeSelected.length > 0; else placeholder">
                         <div class="flex flex-wrap">
                             <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -291,7 +291,7 @@
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Subjects' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="SubjecttoggleDropdown()" tabindex="0">
+                    (click)="SubjecttoggleDropdown($event)" tabindex="0">
                     <ng-container *ngIf="subjectSelected.length > 0; else placeholder">
                         <div class="flex flex-wrap">
                             <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"

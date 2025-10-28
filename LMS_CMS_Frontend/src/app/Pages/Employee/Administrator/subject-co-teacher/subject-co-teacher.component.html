@@ -75,6 +75,7 @@
                     <option *ngFor="let ac of Classrooms" [value]="ac.id">
                         {{ ac.name }}
                     </option>
+                    <option *ngIf="Classrooms.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
                     IsSelectedClassId}}</span>
@@ -89,6 +90,7 @@
                     <option *ngFor="let ac of subject" [value]="ac.id">
                         {{ ac.subjectEnglishName }}
                     </option>
+                    <option *ngIf="subject.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['classroomSubjectID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['classroomSubjectID'] }}</span>
