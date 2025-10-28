@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public DateOnly Date { get; set; }
         public bool IsSendSMSToParent { get; set; }
         public string? File { get; set; }
+        public string? DeletedFile { get; set; }
         public IFormFile? NewFile { get; set; }
         public long StudentID { get; set; }
         public long ConductTypeID { get; set; }

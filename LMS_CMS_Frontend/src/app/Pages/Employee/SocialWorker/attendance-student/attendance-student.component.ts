@@ -245,6 +245,10 @@ export class AttendanceStudentComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  moveToBack(){
+    this.router.navigateByUrl('Employee/Attendance');
+  }
+
   Save() {
     if (this.isFormValid()) {
       this.isLoading = true

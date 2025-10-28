@@ -289,6 +289,17 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 NewConduct.File = conduct.File;
             }
+
+            if((NewConduct.DeletedFile != null || NewConduct.DeletedFile != "") && NewConduct.NewFile == null)
+            {
+                await _fileService.DeleteFileAsync(
+                    conduct.File,
+                    "SocialWorker/Conduct",
+                    NewConduct.ID,
+                    HttpContext
+                );
+            }
+
             mapper.Map(NewConduct, conduct);
              
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

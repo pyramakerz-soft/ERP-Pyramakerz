@@ -673,7 +673,7 @@ export const routes: Routes = [
             { path: "Lessons", component: ParentLessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }  },
             { path: 'Students Medal', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }   },
             { path: 'Time Table', component: TimeTableStudentComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],data: { reportType: 'student' }   },
-            { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] }, 
+            // { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] }, 
         ]
     },
     {

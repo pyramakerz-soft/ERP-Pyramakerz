@@ -47,7 +47,7 @@ namespace LMS_CMS_PL.Services.FileValidations
                 return $"Invalid file format. Allowed formats are: {string.Join(", ", allowedMimeTypes)}";
 
             if (IsPotentialMaliciousFile(fileName, extension))
-                return "File appears to be potentially malicious.";
+                return "The uploaded file may contain unsafe content.";
 
             return null;
         }
