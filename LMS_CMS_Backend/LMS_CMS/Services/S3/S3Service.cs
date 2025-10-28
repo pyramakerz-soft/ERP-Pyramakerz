@@ -6,7 +6,7 @@ using Amazon.SecretsManager;
 using Newtonsoft.Json;
 using Amazon;
 
-namespace LMS_CMS_PL.Services
+namespace LMS_CMS_PL.Services.S3
 {
     public class S3Service
     {
@@ -188,7 +188,7 @@ namespace LMS_CMS_PL.Services
 
             return false;
         }
-         
+
         public string GetFileUrl(string key, IConfiguration config)
         {
             key = key.TrimStart('/');
@@ -309,14 +309,14 @@ namespace LMS_CMS_PL.Services
 
             return contentType;
         }
-         
+
         public async Task<bool> CopyFileAsync(string sourceKey, string destinationKey, string domainPath)
         {
             try
             {
                 var fullSourceKey = $"{_folder}/{domainPath}/{sourceKey}".Replace("//", "/");
                 var fullDestinationKey = $"{_folder}/{domainPath}/{destinationKey}".Replace("//", "/");
-                 
+
                 var copyRequest = new CopyObjectRequest
                 {
                     SourceBucket = _bucketName,
