@@ -14,6 +14,7 @@ using LMS_CMS_PL.Services.FileValidations;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {

@@ -15,6 +15,7 @@ using LMS_CMS_BL.DTO.Administration;
 using Microsoft.EntityFrameworkCore;
 using LMS_CMS_PL.Services.SignalR;
 using LMS_CMS_PL.Services.FileValidations;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {

@@ -2,7 +2,7 @@
 using Amazon.S3;
 using Microsoft.AspNetCore.Http;
 
-namespace LMS_CMS_PL.Services
+namespace LMS_CMS_PL.Services.S3
 {
     public class FileUploadsService
     {
@@ -150,7 +150,7 @@ namespace LMS_CMS_PL.Services
                 var domain = _domainService.GetDomain(httpContext);
                 string subDomain = httpContext.Request.Headers["Domain-Name"].ToString();
                 string domainPath = $"{domain}/{subDomain}".Trim('/');
-                  
+
                 var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]));
 
                 var s3Service = new S3Service(s3Client, _configuration, "AWS:Bucket", "AWS:Folder");
@@ -164,7 +164,7 @@ namespace LMS_CMS_PL.Services
                 {
                     sourceKey = sourceKey.Substring($"{_configuration["AWS:Folder"]}{domainPath}/".Length);
                 }
-                 
+
                 bool copied = await s3Service.CopyFileAsync(sourceKey, destinationKey, domainPath);
 
                 return copied ? destinationKey : string.Empty;
@@ -175,7 +175,7 @@ namespace LMS_CMS_PL.Services
                 var normalizedSource = sourceFilePath.Replace('\\', Path.DirectorySeparatorChar);
                 var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedSource);
 
-                if (!System.IO.File.Exists(originalFilePath))
+                if (!File.Exists(originalFilePath))
                     throw new FileNotFoundException("File not found.", originalFilePath);
 
                 var destinationFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", basePath, entityId.ToString());
@@ -186,11 +186,11 @@ namespace LMS_CMS_PL.Services
                 var fileName = Path.GetFileName(sourceFilePath);
                 var destinationFilePath = Path.Combine(destinationFolder, fileName);
 
-                System.IO.File.Copy(originalFilePath, destinationFilePath, overwrite: true);
+                File.Copy(originalFilePath, destinationFilePath, overwrite: true);
 
                 return Path.Combine("Uploads", basePath, entityId.ToString(), fileName);
             }
-        } 
+        }
 
         public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long entityId, HttpContext httpContext)
         {
@@ -219,9 +219,9 @@ namespace LMS_CMS_PL.Services
                     var normalizedPath = filePath.Replace('\\', Path.DirectorySeparatorChar);
                     var fullFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedPath);
 
-                    if (System.IO.File.Exists(fullFilePath))
+                    if (File.Exists(fullFilePath))
                     {
-                        System.IO.File.Delete(fullFilePath);
+                        File.Delete(fullFilePath);
                     }
 
                     var folderPath = Path.GetDirectoryName(fullFilePath);

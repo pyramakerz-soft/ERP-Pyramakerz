@@ -27,7 +27,6 @@ using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Hubs;
 using LMS_CMS_PL.Middleware;
-using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -48,6 +47,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS
 {

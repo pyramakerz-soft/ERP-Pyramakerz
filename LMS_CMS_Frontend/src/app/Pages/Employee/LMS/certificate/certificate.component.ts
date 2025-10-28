@@ -236,8 +236,8 @@ export class CertificateComponent {
     const year = this.academicYears.find(y => y.id == this.SelectedAcademicYearId);
     if (year) {
       if(this.SelectedSearchType == 'Summer Course'){
-        this.DateFrom = year.summerCourseDateFrom;
-        this.DateTo = year.summerCourseDateTo; 
+        this.DateFrom = year.summerCourseDateFrom? year.summerCourseDateFrom : '';
+        this.DateTo = year.summerCourseDateTo?  year.summerCourseDateTo: ''; 
       }else{
         this.DateFrom = year.dateFrom;
         this.DateTo = year.dateTo;

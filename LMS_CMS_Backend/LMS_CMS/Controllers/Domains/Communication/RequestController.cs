@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net;
 using LMS_CMS_PL.Services.FileValidations;
 using System;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {

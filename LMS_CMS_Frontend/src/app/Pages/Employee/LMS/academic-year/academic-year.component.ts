@@ -271,8 +271,8 @@ export class AcademicYearComponent {
   checkSummerCourseFromToDate() {
     let valid = true;
 
-    const fromDate: Date = new Date(this.academicYear.summerCourseDateFrom);
-    const toDate: Date = new Date(this.academicYear.summerCourseDateTo);
+    const fromDate: Date = new Date(this.academicYear.summerCourseDateFrom? this.academicYear.summerCourseDateFrom : "");
+    const toDate: Date = new Date(this.academicYear.summerCourseDateTo? this.academicYear.summerCourseDateTo : "");
     const diff: number = toDate.getTime() - fromDate.getTime();
 
     if (diff < 0) {
@@ -294,6 +294,12 @@ export class AcademicYearComponent {
       this.isLoading = true;
       if (this.checkFromToDate()) {
         if(this.checkSummerCourseFromToDate()){
+          if(this.academicYear.summerCourseDateFrom == ""){
+            this.academicYear.summerCourseDateFrom = null; 
+          }
+          if(this.academicYear.summerCourseDateTo == ""){
+            this.academicYear.summerCourseDateTo = null; 
+          }
           if (this.editAcademicYear == false) {
             this.acadimicYearServicea
               .Add(this.academicYear, this.DomainName)

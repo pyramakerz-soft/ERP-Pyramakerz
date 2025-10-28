@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS_PL.Services
 {
