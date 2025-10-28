@@ -24,7 +24,8 @@ namespace LMS_CMS_PL.Services
             InterviewTime interviewTime = Unit_Of_Work.interviewTime_Repository.First_Or_Default(d=>d.IsDeleted != true && d.ID == interviewID);
 
             List<RegisterationFormInterview> registerationFormInterviews = await Unit_Of_Work.registerationFormInterview_Repository.Select_All_With_IncludesById<RegisterationFormInterview>(
-                    f => f.IsDeleted != true && f.InterviewTimeID == interviewID && f.InterviewStateID == 1 && 
+                    f => f.IsDeleted != true && f.InterviewTimeID == interviewID && f.InterviewStateID == 1 &&
+                    f.RegisterationFormParent.IsDeleted != true &&
                     (f.RegisterationFormParent.RegisterationFormStateID == 1 || f.RegisterationFormParent.RegisterationFormStateID == 4)
                     && f.RegisterationFormParent.ParentID != null,
                     query => query.Include(emp => emp.RegisterationFormParent)
