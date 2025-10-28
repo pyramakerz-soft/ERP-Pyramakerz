@@ -400,6 +400,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
             }
 
+            _cancelInterviewDayMessage.CancelInterviewDayMessage(id, HttpContext);
+
             interviewTime.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             interviewTime.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -422,9 +424,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             Unit_Of_Work.interviewTime_Repository.Update(interviewTime);
             Unit_Of_Work.SaveChanges();
-
-            _cancelInterviewDayMessage.CancelInterviewDayMessage(id, HttpContext);
-
+             
             List<RegisterationFormInterview> registerationFormInterviewToBeCanceled = Unit_Of_Work.registerationFormInterview_Repository.FindBy(
                 r => r.IsDeleted != true && r.InterviewTimeID == id
                 );

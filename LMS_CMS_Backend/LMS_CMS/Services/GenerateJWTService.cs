@@ -38,9 +38,9 @@ namespace LMS_CMS_PL.Services
                 _configuration["JWT:Issuer"],
                 _configuration["JWT:Audience"],
                 claims,
-                //expires: DateTime.UtcNow.AddDays(30),
-                //expires: DateTime.UtcNow.AddMinutes(30),
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(30),
+                //expires: DateTime.UtcNow.AddMinutes(4),
+                //expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signIn
             );
 
