@@ -83,8 +83,8 @@ export class CertificateStudentReportComponent implements OnInit {
     private route: ActivatedRoute,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-    public CertificateStudentServ: CertificateStudentService,
     private reportsService: ReportsService 
+
   ) {}
 
   ngOnInit() {
@@ -470,9 +470,11 @@ private prepareExportData(): void {
   // }
 
   downloadCertificate(row: CertificateStudent) {
-    const imageUrl = encodeURIComponent(row.certificateTypeFile);
-    this.CertificateStudentServ.ProxyImage(imageUrl, this.DomainName)
-      .subscribe((blob: Blob) => {
+    const imageUrl = row.certificateTypeFile;
+    
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64data = reader.result as string;
@@ -484,7 +486,7 @@ private prepareExportData(): void {
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
-
+            
             const leftPx = (row.leftSpace / 100) * img.width;
             const topPx = (row.topSpace / 100) * img.height;
             const fontSize = Math.floor(img.height * 0.05);
@@ -492,7 +494,6 @@ private prepareExportData(): void {
             ctx.fillStyle = 'black';
             ctx.fillText(row.studentEnName, leftPx, topPx);
 
-            // ✅ Trigger browser download
             const link = document.createElement('a');
             link.download = `${row.studentEnName}-certificate.png`;
             link.href = canvas.toDataURL('image/png');
@@ -500,9 +501,9 @@ private prepareExportData(): void {
           };
         };
         reader.readAsDataURL(blob);
-      }, error => {
-        console.error('Error downloading certificate:', error);
-    });
-  }
+      })
+      .catch(err => console.error('Error loading image:', err));    
+   }
+
   
 }

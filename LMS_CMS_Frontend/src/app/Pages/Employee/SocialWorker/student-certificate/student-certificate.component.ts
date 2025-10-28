@@ -327,10 +327,12 @@ export class StudentCertificateComponent {
   //   };
   // }
 
-  downloadCertificate(row: CertificateStudent) {
-    const imageUrl = encodeURIComponent(row.certificateTypeFile);
-    this.CertificateStudentServ.ProxyImage(imageUrl, this.DomainName)
-      .subscribe((blob: Blob) => {
+   downloadCertificate(row: CertificateStudent) {
+    const imageUrl = row.certificateTypeFile;
+    
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64data = reader.result as string;
@@ -342,7 +344,7 @@ export class StudentCertificateComponent {
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
-
+            
             const leftPx = (row.leftSpace / 100) * img.width;
             const topPx = (row.topSpace / 100) * img.height;
             const fontSize = Math.floor(img.height * 0.05);
@@ -350,7 +352,6 @@ export class StudentCertificateComponent {
             ctx.fillStyle = 'black';
             ctx.fillText(row.studentEnName, leftPx, topPx);
 
-            // ✅ Trigger browser download
             const link = document.createElement('a');
             link.download = `${row.studentEnName}-certificate.png`;
             link.href = canvas.toDataURL('image/png');
@@ -358,81 +359,68 @@ export class StudentCertificateComponent {
           };
         };
         reader.readAsDataURL(blob);
-      }, error => {
-        console.error('Error downloading certificate:', error);
-    });
-  }
+      })
+      .catch(err => console.error('Error loading image:', err));    
+   }
 
   ViewCertificate(row: CertificateStudent) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
     const img = new Image();
 
-    // Allow cross-origin images
     img.crossOrigin = 'anonymous';
+    img.src = encodeURI(row.certificateTypeFile);
 
-    // Call your proxy endpoint to get the image
-    this.CertificateStudentServ.ProxyImage(encodeURIComponent(row.certificateTypeFile), this.DomainName)
-      .subscribe((blob: Blob) => {
-        const objectUrl = URL.createObjectURL(blob);
-        img.src = objectUrl;
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
 
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
+      // Draw background
+      ctx.drawImage(img, 0, 0);
 
-          // Draw the image background
-          ctx.drawImage(img, 0, 0);
+      // Convert % to pixels
+      const leftPx = (row.leftSpace / 100) * img.width;
+      const topPx = (row.topSpace / 100) * img.height;
 
-          // Convert % to pixels
-          const leftPx = (row.leftSpace / 100) * img.width;
-          const topPx = (row.topSpace / 100) * img.height;
+      // Draw student name
+      ctx.font = `${Math.floor(img.height * 0.05)}px Arial`; // font size = 5% of image height
+      ctx.fillStyle = 'black';
+      ctx.textBaseline = 'top';
+      ctx.fillText(row.studentEnName, leftPx, topPx);
 
-          // Draw student name
-          ctx.font = `${Math.floor(img.height * 0.05)}px Arial`;
-          ctx.fillStyle = 'black';
-          ctx.textBaseline = 'top';
-          ctx.fillText(row.studentEnName, leftPx, topPx);
+      // Get image URL
+      const dataUrl = canvas.toDataURL('image/png');
 
-          // Convert canvas to image URL
-          const dataUrl = canvas.toDataURL('image/png');
-
-          // Open result in new tab
-          const win = window.open('', '_blank');
-          if (win) {
-            win.document.write(`
-              <html>
-                <head>
-                  <style>
-                    body {
-                      margin: 0;
-                      height: 100vh;
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      background: #f0f0f0;
-                    }
-                    img {
-                      max-width: 100%;
-                      height: auto;
-                      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                    }
-                  </style>
-                </head>
-                <body>
-                  <img src="${dataUrl}">
-                </body>
-              </html>
-            `);
-            win.document.close();
-          }
-
-          // Clean up the object URL
-          URL.revokeObjectURL(objectUrl);
-        };
-      }, error => {
-        console.error('Error loading certificate image:', error);
-    });
+      // Open centered in new tab
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.write(`
+        <html>
+        <head>
+          <style>
+            body {
+              margin: 0;
+              height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background: #f0f0f0;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}">
+        </body>
+        </html>
+      `);
+        win.document.close();
+      }
+    };
   }
 
   IsAllowDelete(InsertedByID: number) {

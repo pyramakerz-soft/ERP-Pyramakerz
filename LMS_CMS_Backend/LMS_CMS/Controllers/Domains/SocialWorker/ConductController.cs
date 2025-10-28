@@ -291,12 +291,15 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if((NewConduct.DeletedFile != null || NewConduct.DeletedFile != "") && NewConduct.NewFile == null)
             {
+                Console.WriteLine("---------------------------------------");
+                Console.WriteLine(NewConduct.DeletedFile);
                 await _fileService.DeleteFileAsync(
-                    conduct.File,
+                    NewConduct.DeletedFile,
                     "SocialWorker/Conduct",
                     NewConduct.ID,
                     HttpContext
                 );
+                NewConduct.File = null;
             }
 
             mapper.Map(NewConduct, conduct);
