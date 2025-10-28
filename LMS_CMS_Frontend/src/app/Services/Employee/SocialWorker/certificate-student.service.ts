@@ -43,6 +43,20 @@ export class CertificateStudentService {
     return this.http.get<CertificateStudent[]>(`${this.baseUrl}/CertificateStudent/GetByStudentId/${id}`, { headers })
   }
 
+  ProxyImage(url: string, domainName: string) {
+    const token = localStorage.getItem("current_token");
+
+    const headers = new HttpHeaders()
+      .set('domain-name', domainName || '')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Accept', 'image/*');
+
+    return this.http.get(`${this.baseUrl}/CertificateStudent/ProxyImage?url=${url}`, {
+      headers,
+      responseType: 'blob' 
+    });
+  }
+
   Delete(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

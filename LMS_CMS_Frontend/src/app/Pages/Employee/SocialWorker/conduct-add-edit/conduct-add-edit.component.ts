@@ -313,6 +313,16 @@ export class ConductAddEditComponent {
     }
   }
 
+  deleteFileWhenEdit(){
+    this.Data.deletedFile=this.Data.file
+    this.Data.file=""
+  }
+
+  deleteFileWhenCreate(){
+    this.Data.newFile = null;
+    this.Data.file=""
+  }
+
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;

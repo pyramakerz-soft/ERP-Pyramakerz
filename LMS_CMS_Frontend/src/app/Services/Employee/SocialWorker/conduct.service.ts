@@ -51,6 +51,7 @@ export class ConductService {
       .set('Authorization', `Bearer ${token}`);
 
     const formData = new FormData();
+    formData.append('deletedFile', Conduct.deletedFile ?? '');
     formData.append('details', Conduct.details ?? '');
     formData.append('date', Conduct.date ?? '');
     formData.append('isSendSMSToParent', Conduct.isSendSMSToParent.toString());
@@ -79,6 +80,7 @@ export class ConductService {
     const formData = new FormData();
     formData.append('id', Conduct.id.toString());
     formData.append('details', Conduct.details ?? '');
+    formData.append('deletedFile', Conduct.deletedFile ?? '');
     formData.append('date', Conduct.date ?? '');
     formData.append('isSendSMSToParent', Conduct.isSendSMSToParent.toString());
     formData.append('conductTypeID', Conduct.conductTypeID?.toString() ?? '');

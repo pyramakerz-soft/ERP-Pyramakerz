@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
@@ -254,6 +255,41 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             var reportData = mapper.Map<List<CertificateStudentReportDTO>>(certificateStudents);
 
             return Ok(reportData);
+        }
+
+        ////////////////////////////
+
+        [HttpGet("ProxyImage")]
+        public async Task<IActionResult> ProxyImage(string url)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(url))
+                    return BadRequest("URL parameter is required.");
+
+                string decodedUrl = System.Web.HttpUtility.UrlDecode(url);
+
+                using var httpClient = new HttpClient();
+
+                // Copy the Bearer token from the current request
+                var authHeader = Request.Headers["Authorization"].ToString();
+                if (!string.IsNullOrEmpty(authHeader))
+                {
+                    httpClient.DefaultRequestHeaders.Add("Authorization", authHeader);
+                }
+
+                var response = await httpClient.GetAsync(decodedUrl);
+                response.EnsureSuccessStatusCode();
+
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+
+                return File(bytes, contentType);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(502, $"Error fetching image: {ex.Message}");
+            }
         }
 
 

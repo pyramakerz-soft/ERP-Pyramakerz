@@ -102,7 +102,9 @@
                 </p>
             </div>
         </div>
-        <p class="text-sm font-medium text-gray-700 mb-4"> {{'bytes'| translate }}</p>
+        <button (click)="deleteFileWhenCreate()" >
+            <i class="fa-solid fa-trash"></i>
+        </button>
         <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="openFile(Data.newFile)">
              {{ 'Click to' | translate }} {{ 'View' | translate }}
         </p>
@@ -117,6 +119,9 @@
                     {{ Data.file}}
                 </p>
             </div>
+            <button (click)="deleteFileWhenEdit()" >
+                <i class="fa-solid fa-trash"></i>
+            </button>
         </div>
         <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="openUrl(Data.file)">
              {{ 'Click to' | translate }} {{ 'View' | translate }}

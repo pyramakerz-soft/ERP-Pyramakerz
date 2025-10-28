@@ -23,6 +23,7 @@ export class Conduct {
         public procedureTypeName: string = '',
         public newFile: File | null = null,
         public file: string = "",
+        public deletedFile: string = "",
         public insertedByUserId: number = 0,
         public insertedAt: string = '',
     ) { }

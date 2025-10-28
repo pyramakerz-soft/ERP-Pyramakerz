@@ -1,5 +1,10 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }}</h1>
+        <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">
+           {{ 'Attendance' | translate }}
+        </h1>
+    </div>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <button (click)="Save()"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
