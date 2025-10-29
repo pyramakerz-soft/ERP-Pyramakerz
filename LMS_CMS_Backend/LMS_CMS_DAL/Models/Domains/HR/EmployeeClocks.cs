@@ -14,8 +14,8 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         [Key]
         public long ID { get; set; }
         public DateOnly Date { get; set; }
-        public TimeSpan? ClockIn { get; set; }
-        public TimeSpan? ClockOut { get; set; }
+        public DateTime? ClockIn { get; set; }
+        public DateTime? ClockOut { get; set; }
 
         [ForeignKey("Location")]
         public long? LocationID { get; set; }

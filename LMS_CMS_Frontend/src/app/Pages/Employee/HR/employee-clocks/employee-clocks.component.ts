@@ -125,42 +125,44 @@ private showSuccessAlert(message: string) {
     });
   }
 
-  formatTime(value: string | null): string {
-    if (!value || value === '00:00:00') {
-      return ''; // will show --:-- in input
-    }
+  formatDateTime(value: string | null): string {
+    if (!value) return '';
 
-    // keep only HH:mm part
-    const [hour, minute] = value.split(':');
-    return `${hour}:${minute}`;
+    const date = new Date(value);
+
+    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
+    const localISOTime = new Date(date.getTime() - tzOffset).toISOString();
+
+    return localISOTime.slice(0, 16); // "YYYY-MM-DDTHH:mm"
   }
 
-  onTimeChange(row: any, field: 'clockIn' | 'clockOut', event: string) {
-    if (!event) {
-      row[field] = '00:00:00'; // reset to default
-      return;
+  onTimeChange(row: any, field: string, value: string) {
+    if (value) {
+      row[field] = value; // keep '2025-10-26T23:02' as-is
+    } else {
+      row[field] = null;
     }
-
-    // ensure it's always saved in HH:mm:ss format
-    row[field] = event.length === 5 ? `${event}:00` : event;
+    if(field == 'clockIn'){
+      row.date=value.slice(0,10)
+    }
   }
 
-GetAllData() {
-  this.TableData = [];
-  if (this.SelectedEmployeeId && this.year && this.month) {
-    this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
-      (data) => {
-        this.TableData = data; 
-      },
-      (error) => {
-        if(error.status!=404){
-          const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
-          this.showErrorAlert(errorMessage);
+  GetAllData() {
+    this.TableData = [];
+    if (this.SelectedEmployeeId && this.year && this.month) {
+      this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
+        (data) => {
+          this.TableData = data; 
+        },
+        (error) => {
+          if(error.status!=404){
+            const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+            this.showErrorAlert(errorMessage);
+          }
         }
-      }
-    );
+      );
+    }
   }
-}
 
   Apply() {
     this.IsShowTabls = true;
@@ -172,60 +174,60 @@ GetAllData() {
     this.TableData = [];
   }
 
-save(): void {
-  if (this.isFormValidForCreate()) {
-    this.isLoadingWhenEdit = true;
-    console.log(this.TableData);
-    this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe(
-      (d) => {
-        this.isLoadingWhenEdit = false;
-        this.GetAllData();
-        this.showSuccessAlert(this.translate.instant('Saved Successfully'));
-      },
-      (error) => { 
-        this.isLoadingWhenEdit = false;
-        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
-        this.showErrorAlert(errorMessage);
-      }
-    );
+  save(): void {
+    if (this.isFormValidForCreate()) {
+      this.isLoadingWhenEdit = true;
+      console.log(this.TableData);
+      this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe(
+        (d) => {
+          this.isLoadingWhenEdit = false;
+          this.GetAllData();
+          this.showSuccessAlert(this.translate.instant('Saved Successfully'));
+        },
+        (error) => { 
+          this.isLoadingWhenEdit = false;
+          const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
   }
-}
 
-AddClockIn() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    if (
-      this.employeeClocks.clockIn &&
-      this.employeeClocks.clockIn.length === 5
-    ) {
-      this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
+  AddClockIn() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      // if (
+      //   this.employeeClocks.clockIn &&
+      //   this.employeeClocks.clockIn.length === 5
+      // ) {
+      //   this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
+      // }
+      // if (
+      //   this.employeeClocks.clockOut &&
+      //   this.employeeClocks.clockOut.length === 5
+      // ) {
+      //   this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
+      // }
+      console.log(this.employeeClocks);
+      this.EmployeeClocksServ.Add(
+        this.employeeClocks,
+        this.DomainName
+      ).subscribe(
+        (d) => {
+          this.isLoading = false;
+          this.GetAllData();
+          this.closeModal();
+          this.showSuccessAlert(this.translate.instant('Saved Successfully'));
+        },
+        (error) => { 
+          this.isLoading = false;
+          this.closeModal();
+          const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
+          this.showErrorAlert(errorMessage);
+        }
+      );
     }
-    if (
-      this.employeeClocks.clockOut &&
-      this.employeeClocks.clockOut.length === 5
-    ) {
-      this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
-    }
-    console.log(this.employeeClocks);
-    this.EmployeeClocksServ.Add(
-      this.employeeClocks,
-      this.DomainName
-    ).subscribe(
-      (d) => {
-        this.isLoading = false;
-        this.GetAllData();
-        this.closeModal();
-        this.showSuccessAlert(this.translate.instant('Saved Successfully'));
-      },
-      (error) => { 
-        this.isLoading = false;
-        this.closeModal();
-        const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
-        this.showErrorAlert(errorMessage);
-      }
-    );
   }
-}
 
   closeModal() {
     this.isModalVisible = false;
@@ -248,28 +250,30 @@ AddClockIn() {
           isValid = false;
           }
         }
+        if(this.employeeClocks.clockIn){
+          this.employeeClocks.date=this.employeeClocks.clockIn.slice(0,10)
+        }
       }
     }
-    if (
-      this.employeeClocks.clockOut &&
-      this.employeeClocks.clockIn &&
-      this.employeeClocks.clockOut < this.employeeClocks.clockIn
-    ) {
-      this.validationErrors['clockOut'] =
-        'Clock out time cannot be earlier than clock in time.';
-      isValid = false;
-    }
+    // if (
+    //   this.employeeClocks.clockOut &&
+    //   this.employeeClocks.clockIn &&
+    //   this.employeeClocks.clockOut < this.employeeClocks.clockIn
+    // ) {
+    //   this.validationErrors['clockOut'] =
+    //     'Clock out time cannot be earlier than clock in time.';
+    //   isValid = false;
+    // }
     return isValid;
   }
 
   isFormValidForCreate(): boolean {
     let isValid = true;
-    isValid = !this.TableData.some(
-      (element) =>
-        element.clockIn &&
-        element.clockOut &&
-        element.clockOut < element.clockIn
-    );
+    // isValid = !this.TableData.some(
+    //   (element) =>
+    //     element.clockIn &&
+    //     element.clockOut
+    // );
     return isValid;
   }
 

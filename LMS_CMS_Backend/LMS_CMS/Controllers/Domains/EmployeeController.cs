@@ -620,7 +620,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             EmployeeClocks lastClock = Unit_Of_Work.employeeClocks_Repository
               .FindBy(e => e.IsDeleted != true && e.EmployeeID == employee.ID)
-              .OrderByDescending(e => e.Date)
+              .OrderByDescending(e => e.ClockIn)
               .ThenByDescending(e => e.ClockIn)
               .FirstOrDefault();
 

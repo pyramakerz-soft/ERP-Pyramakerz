@@ -194,10 +194,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(x => x.InsertedByEmployee),
-                    query => query.Include(h => h.StudentHygieneTypes).ThenInclude(h => h.HygieneTypes)
+                    query => query.Include(x => x.InsertedByEmployee), 
+                    query => query.Include(x => x.StudentHygieneTypes.Where(d => d.StudentId == studentId))?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
+                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(sht => sht.Student)
                 );
-
+             
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
                 return NotFound("No hygiene forms found");

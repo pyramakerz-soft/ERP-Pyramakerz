@@ -520,15 +520,15 @@ export class AccountingEmployeeEditComponent {
           this.departureTime.period
         );
 
-        if (attendanceMins === departureMins) {
-          this.validationErrors['departureTime'] = 'Attendance Time and Departure Time cannot be the same.';
-          isValid = false;
-        }
+        // if (attendanceMins === departureMins) {
+        //   this.validationErrors['departureTime'] = 'Attendance Time and Departure Time cannot be the same.';
+        //   isValid = false;
+        // }
 
-        if (departureMins < attendanceMins) {
-          this.validationErrors['departureTime'] = 'Departure Time cannot be before Attendance Time.';
-          isValid = false;
-        }
+        // if (departureMins < attendanceMins) {
+        //   this.validationErrors['departureTime'] = 'Departure Time cannot be before Attendance Time.';
+        //   isValid = false;
+        // }
 
       }
     }
