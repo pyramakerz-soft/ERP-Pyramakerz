@@ -30,6 +30,6 @@ namespace LMS_CMS_BL.DTO.Administration
         public string Address { get; set; }
 
         // For I am Not a Robot
-        public string RecaptchaToken { get; set; }
+        //public string RecaptchaToken { get; set; }
     }
 }

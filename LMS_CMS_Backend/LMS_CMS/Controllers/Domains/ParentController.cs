@@ -90,11 +90,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Data Can't be null");
             }
-            bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(UserInfo.RecaptchaToken);
-            if (!isValidCaptcha)
-            {
-                return BadRequest("You must confirm you are not a robot.");
-            }
+            //bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(UserInfo.RecaptchaToken);
+            //if (!isValidCaptcha)
+            //{
+            //    return BadRequest("You must confirm you are not a robot.");
+            //}
             if (UserInfo.Email == null)
             {
                 return BadRequest("Email Can't be null");

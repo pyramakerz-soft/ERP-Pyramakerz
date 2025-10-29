@@ -47,7 +47,7 @@ export class SignUpComponent {
   isLoading = false;
 
   IsConfimPassEmpty = false
-  @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
+  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
   constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
   ngOnInit() {
@@ -81,14 +81,14 @@ export class SignUpComponent {
     this.IsConfimPassEmpty = false
   }
 
-  onCaptchaResolved(token: string | null): void {
-    if (token) {
-      this.parentInfo.recaptchaToken = token;
-      this.validationErrors['recaptchaToken'] = ''
-    } else {
-      this.parentInfo.recaptchaToken = '';
-    }
-  }
+  // onCaptchaResolved(token: string | null): void {
+  //   if (token) {
+  //     this.parentInfo.recaptchaToken = token;
+  //     this.validationErrors['recaptchaToken'] = ''
+  //   } else {
+  //     this.parentInfo.recaptchaToken = '';
+  //   }
+  // }
 
   SignUp() {
     if (this.isFormValid()) {
@@ -167,11 +167,11 @@ export class SignUpComponent {
           }
         );
       }, (error) => {
-        this.parentInfo.recaptchaToken = '';
-        this.isLoading = false;
-        if (this.captchaRef) {
-          this.captchaRef.reset();
-        }
+        // this.parentInfo.recaptchaToken = '';
+        // this.isLoading = false;
+        // if (this.captchaRef) {
+        //   this.captchaRef.reset();
+        // }
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -224,12 +224,12 @@ export class SignUpComponent {
         }
       }
 
-      if (this.parentInfo.recaptchaToken == "") {
-        this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-        isValid = false;
-      } else {
-        this.validationErrors['recaptchaToken'] = '';
-      }
+      // if (this.parentInfo.recaptchaToken == "") {
+      //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+      //   isValid = false;
+      // } else {
+      //   this.validationErrors['recaptchaToken'] = '';
+      // }
     }
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.parentInfo.email && !emailPattern.test(this.parentInfo.email)) {
