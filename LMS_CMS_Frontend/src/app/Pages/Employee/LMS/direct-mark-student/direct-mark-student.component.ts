@@ -118,8 +118,7 @@ export class DirectMarkStudentComponent {
         this.PageSize = data.pagination.pageSize
         this.TotalPages = data.pagination.totalPages
         this.TotalRecords = data.pagination.totalRecords
-        this.TableData = data.data
-        console.log(this.TableData)
+        this.TableData = data.data 
         this.directMark = data.directMark
       },
       (error) => {

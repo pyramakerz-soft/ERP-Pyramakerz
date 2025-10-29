@@ -24,8 +24,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }
         public bool IsSpecificStudents { get; set; }
-        public bool IsVisibleToStudent { get; set; }
-        public bool IsSummerCourse { get; set; }
+        public bool IsVisibleToStudent { get; set; } 
         public string? LinkFile{ get; set; }
 
         [ForeignKey("Subject")]
