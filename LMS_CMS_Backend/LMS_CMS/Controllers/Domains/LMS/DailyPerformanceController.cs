@@ -200,20 +200,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or type does not exist");
-            }
+                return Unauthorized("The user ID or type does not exist.");
 
-
-            if (fromDate == default(DateOnly) || toDate == default(DateOnly))
-            {
+            if (fromDate == default || toDate == default)
                 return BadRequest("The start date (fromDate) and end date (toDate) must be provided.");
-            }
 
             if (toDate < fromDate)
-            {
                 return BadRequest("The end date must be after the start date.");
-            }
 
             var student = await Unit_Of_Work.student_Repository
                 .FindByIncludesAsync(
@@ -370,7 +363,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             reportItems = reportItems.OrderBy(r => r.Date).ToList();
             return Ok(reportItems);
-        }
+        } 
 
     }
 }
