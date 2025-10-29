@@ -5,7 +5,7 @@ export class ParentAdd {
         public ar_name: string = '',
         public password: string = '',
         public email: string = '',
-        public recaptchaToken: string = ''
+        // public recaptchaToken: string = ''
     ) {}
 }
 
