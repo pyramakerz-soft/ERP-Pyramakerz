@@ -362,45 +362,69 @@ selectTab(tab: string) {
           console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
         break;
 
-        case 'Hygiene Form':
-          if(this.reportType === 'parent'){
-            data = await firstValueFrom(
-              this.medicalReportService.getAllHygieneFormsByStudentId(
-                domainName,
-                this.selectedStudent,
-              )
-            );
-          }
-          else{
-            data = await firstValueFrom(
-              this.medicalReportService.getAllHygieneForms(
-                domainName,
-                this.selectedStudent,
-                this.selectedSchool,
-                this.selectedGrade,
-                this.selectedClass
-              )
-            );
-          }
-          this.tableData = data.flatMap((form) =>
-            form.studentHygieneTypes.map((studentHygiene: any) => {
-              const row: any = {
-                date: new Date(form.date).toLocaleDateString(),
-                attendance: studentHygiene.attendance ? 'Present' : 'Absent',
-                comment: studentHygiene.comment || '-',
-                actionTaken: studentHygiene.actionTaken || '-'
-              };
+case 'Hygiene Form':
+  if(this.reportType === 'parent'){
+    data = await firstValueFrom(
+      this.medicalReportService.getAllHygieneFormsByStudentId(
+        domainName,
+        this.selectedStudent,
+      )
+    );
+  }
+  else{
+    data = await firstValueFrom(
+      this.medicalReportService.getAllHygieneForms(
+        domainName,
+        this.selectedStudent,
+        this.selectedSchool,
+        this.selectedGrade,
+        this.selectedClass
+      )
+    );
+  }
+  
+  this.tableData = data.flatMap((form) => {
+    // Find the student hygiene record for the selected student
+    const studentHygiene = form.studentHygieneTypes?.find(
+      (sht: any) => sht.studentId === this.selectedStudent
+    );
+    
+    if (!studentHygiene) return [];
+    
+    // Create a row with basic info
+    const row: any = {
+      date: new Date(form.date).toLocaleDateString(),
+      attendance: studentHygiene.attendance ? 'Present' : 'Absent',
+      comment: studentHygiene.comment || '-',
+      actionTaken: studentHygiene.actionTaken || '-'
+    };
 
-              if (studentHygiene.hygieneTypes) {
-                studentHygiene.hygieneTypes.forEach((type: any) => {
-                  row[type.type] = 'Yes'; // This will show as checkmark
-                });
-              }
+    // Get all possible hygiene types from the form data
+    // This assumes all forms have the same hygiene types available
+    const allHygieneTypes = new Set<string>();
+    data.forEach((f: any) => {
+      f.studentHygieneTypes?.forEach((sht: any) => {
+        sht.hygieneTypes?.forEach((type: any) => {
+          allHygieneTypes.add(type.type);
+        });
+      });
+    });
 
-              return row;
-            })
-          );
-        break;
+    // Initialize all hygiene types as 'No'
+    allHygieneTypes.forEach(type => {
+      row[type] = 'No';
+    });
+
+    // Mark selected hygiene types as 'Yes'
+    if (studentHygiene.hygieneTypes && studentHygiene.hygieneTypes.length > 0) {
+      studentHygiene.hygieneTypes.forEach((type: any) => {
+        row[type.type] = 'Yes';
+      });
+    }
+
+    return row;
+  });
+break;
 
         case 'Follow Up':
             if(this.reportType === 'parent'){
