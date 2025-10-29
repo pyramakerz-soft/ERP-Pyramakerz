@@ -346,7 +346,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         PerformanceTypeID = g.Key,
                         PerformanceTypeEn = g.First().PerformanceType.EnglishName,
                         PerformanceTypeAr = g.First().PerformanceType.ArabicName,
-                        AverageScore = g.Average(sp => sp.Stars)
+                        AverageScore = g.Average(sp => sp.Stars) * 0.2 // Convert to a 1-5 scale
                     })
                     .ToList();
 
