@@ -29,7 +29,7 @@ export class SignUpEmployeeComponent {
   isLoading = false;
   IsConfimPassEmpty = false
 
-  @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
+  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
   constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
 
@@ -48,14 +48,14 @@ export class SignUpEmployeeComponent {
     }
   }
 
-  onCaptchaResolved(token: string | null): void {
-    if (token) {
-      this.employee.recaptchaToken = token;
-      this.validationErrors['recaptchaToken'] = ''
-    } else {
-      this.employee.recaptchaToken = '';
-    }
-  }
+  // onCaptchaResolved(token: string | null): void {
+  //   if (token) {
+  //     this.employee.recaptchaToken = token;
+  //     this.validationErrors['recaptchaToken'] = ''
+  //   } else {
+  //     this.employee.recaptchaToken = '';
+  //   }
+  // }
 
   validateNumber(event: any, field: keyof RegisteredEmployee): void {
     let value = event.target.value;
@@ -104,12 +104,12 @@ export class SignUpEmployeeComponent {
       isValid = false;
     }
 
-    if (this.employee.recaptchaToken == "") {
-      this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-      isValid = false;
-    } else {
-      this.validationErrors['recaptchaToken'] = '';
-    }
+    // if (this.employee.recaptchaToken == "") {
+    //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+    //   isValid = false;
+    // } else {
+    //   this.validationErrors['recaptchaToken'] = '';
+    // }
 
     return isValid;
   }
@@ -145,14 +145,15 @@ export class SignUpEmployeeComponent {
 
           this.employee = new RegisteredEmployee()
           this.confirmPassword = ''
-          this.captchaRef.reset();
+          this.isLoading = false;
+          // this.captchaRef.reset();
         },
         error => {
           this.employee.recaptchaToken = '';
           this.isLoading = false;
-          if (this.captchaRef) {
-            this.captchaRef.reset();
-          }
+          // if (this.captchaRef) {
+          //   this.captchaRef.reset();
+          // }
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
