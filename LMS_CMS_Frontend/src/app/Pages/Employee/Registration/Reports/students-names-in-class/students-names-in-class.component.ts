@@ -264,7 +264,7 @@ export class StudentsNamesInClassComponent {
   return this.StudentData.map((student) => ({
     'ID': student.id,
     'Name': student.en_name,
-    'Mobile': student.mobile,
+    // 'Mobile': student.mobile,
     'Nationality': student.nationalityEnName,
     'Gender': student.genderName
   }));
@@ -302,11 +302,22 @@ DownloadAsPDF() {
       tables: [
         {
           // title: "Students List",
-          headers: ['id', 'en_name', 'mobile', 'Nationality', 'genderName'],
-          data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
+          headers: ['id', 'en_name', 'Nationality', 'genderName'],
+          data: this.StudentData.map((row) => [row.id, row.en_name, row.nationalityEnName, row.genderName])
         }
       ]
     });
   }
 
+inforows() {
+  return [
+          { keyEn: 'Class : ' + (this.class?.name || this.Classrooms.find(c => c.id == this.ClassId)?.name || '')},
+          { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
+          { keyEn: 'School : ' + (this.school?.name || this.Schools.find(s => s.id == this.SchoolId)?.name || '') },
+          { keyEn: 'Year : ' + this.AcademicYearName },
+          { keyEn: 'Grade : ' + this.GradeName },
+          { keyEn: 'Generated On : ' + (this.date || this.formatDate(new Date().toISOString(), this.direction)) },
+
+      ];
+    }
 }

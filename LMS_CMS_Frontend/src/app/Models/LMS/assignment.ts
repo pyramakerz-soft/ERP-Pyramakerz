@@ -45,6 +45,8 @@ export class AssignmentReportItem {
     public subjectName: string = '',
     public attendanceNumber: number = 0,
     public numberSuccessful: number = 0,
-    public numberFailed: number = 0
+    public numberFailed: number = 0,
+    public assigned: number = 0,
+    public absent: number = 0
   ) {}
 }
