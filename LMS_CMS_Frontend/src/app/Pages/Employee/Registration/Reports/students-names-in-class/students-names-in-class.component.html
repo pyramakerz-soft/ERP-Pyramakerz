@@ -87,9 +87,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Name' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Mobile' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Nationality' | translate }}
                 </th>
@@ -115,9 +115,9 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.en_name }}
                 </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.mobile }}
-                </td>
+                </td> -->
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.nationalityEnName }}
                 </td>
@@ -130,15 +130,8 @@
 </div>
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
-                { keyEn: 'Class : ' + this.class.name},
-                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
-                { keyEn: 'Date : ' + this.date },
-                { keyEn: 'School : ' +  this.school.name },
-                { keyEn: 'Year : ' + this.AcademicYearName },
-                { keyEn: 'Grade : ' + this.GradeName }
-            ]" 
-            [tableHeaders]="['ID', 'Name', 'Mobile', 'Nationality', 'Gender']" 
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="inforows()" 
+            [tableHeaders]="['ID', 'Name', 'Nationality', 'Gender']" 
             [tableData]="preparePDFData()"
             #pdfComponentRef>
         </app-pdf-print>

@@ -143,7 +143,11 @@ export class DeductionReportComponent  implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
+    // Enable View Report when both dates are selected.
+    // Keep previous full-selection behavior as well (optional).
+    const datesSelected = !!this.dateFrom && !!this.dateTo;
+    const fullSelection = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
+    this.showViewReportBtn = datesSelected || fullSelection;
     this.deductionReports = [];
   }
 
@@ -174,12 +178,13 @@ export class DeductionReportComponent  implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
+        // pass undefined for filters that are not selected so service omits them
         this.deductionService.GetDeductionReport(
-          this.selectedJobCategoryId || 0,
-          this.selectedJobId || 0,
-          this.selectedEmployeeId || 0,
-          this.dateFrom,
-          this.dateTo,
+          this.selectedJobCategoryId || undefined,
+          this.selectedJobId || undefined,
+          this.selectedEmployeeId || undefined,
+          this.dateFrom || undefined,
+          this.dateTo || undefined,
           domainName
         )
       );
