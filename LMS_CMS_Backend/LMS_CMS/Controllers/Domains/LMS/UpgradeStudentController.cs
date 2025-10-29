@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Octa;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -116,65 +117,78 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
                 else
                 {
-                    //foreach (StudentClassroomSubject studentClassroomSubject in studentClassroomSubjects)
-                    //{
-                    //    List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(
-                    //        s => s.SubjectID == studentClassroomSubject.SubjectID && s.IsDeleted != true && s.WeightType.IsDeleted != true,
-                    //        query => query.Include(d => d.WeightType));
+                    foreach (StudentClassroomSubject studentClassroomSubject in studentClassroomSubjects)
+                    {
+                        // Get all the Weight Type for this subject
+                        List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(
+                            s => s.SubjectID == studentClassroomSubject.SubjectID && s.IsDeleted != true && s.WeightType.IsDeleted != true,
+                            query => query.Include(d => d.WeightType));
 
-                    //    foreach (SubjectWeightType subjectWeightType in subjectWeightTypes)
-                    //    {
-                    //        List<Assignment> allAssignments = await Unit_Of_Work.assignment_Repository
-                    //           .Select_All_With_IncludesById<Assignment>(
-                    //               d => d.IsDeleted != true &&
-                    //                    d.SubjectWeightTypeID == subjectWeightType.WeightTypeID &&
-                    //                    d.SubjectID == subjectWeightType.SubjectID && 
-                    //                    d.OpenDate >= academicYearFrom.DateFrom &&
-                    //                    d.OpenDate <= academicYearFrom.DateTo);
+                        float TotalDegreesForOneSubject = 0f;
 
-                    //        List<Assignment> myAssignments = allAssignments.Where(d => d.IsSpecificStudents == false).ToList();
+                        foreach (SubjectWeightType subjectWeightType in subjectWeightTypes)
+                        {
+                            List<Assignment> allAssignments = await Unit_Of_Work.assignment_Repository
+                               .Select_All_With_IncludesById<Assignment>(
+                                   d => d.IsDeleted != true &&
+                                        d.SubjectWeightTypeID == subjectWeightType.WeightTypeID &&
+                                        d.SubjectID == subjectWeightType.SubjectID &&
+                                        d.OpenDate >= academicYearFrom.DateFrom &&
+                                        d.OpenDate <= academicYearFrom.DateTo);
 
-                    //        List<Assignment> assignmentsIsSpecific = allAssignments.Where(d => d.IsSpecificStudents).ToList();
-                    //        foreach (Assignment assignment in assignmentsIsSpecific)
-                    //        {
-                    //            AssignmentStudentIsSpecific assignmentStudentIsSpecific = Unit_Of_Work.assignmentStudentIsSpecific_Repository.First_Or_Default(
-                    //                d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID);
-                    //            if(assignmentsIsSpecific != null)
-                    //            {
-                    //                myAssignments.Add(assignment);
-                    //            }
-                    //        }
+                            List<Assignment> myAssignments = allAssignments.Where(d => d.IsSpecificStudents == false).ToList();
 
-                    //        List<AssignmentStudentIsSpecific> specificAssignments = await Unit_Of_Work.assignmentStudentIsSpecific_Repository
-                    //           .Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
-                    //               d => d.IsDeleted != true &&
-                    //                    d.StudentClassroomID == studentClassroom.ID &&
-                    //                    d.Assignment != null &&
-                    //                    d.Assignment.IsDeleted != true &&
-                    //                    d.Assignment.SubjectID == subject.ID &&
-                    //                    d.Assignment.SubjectWeightTypeID == swt.WeightTypeID &&
-                    //               d.Assignment.OpenDate >= DateFrom &&
-                    //                    d.Assignment.OpenDate <= DateTo);
+                            List<Assignment> assignmentsIsSpecific = allAssignments.Where(d => d.IsSpecificStudents).ToList();
+                            foreach (Assignment assignment in assignmentsIsSpecific)
+                            {
+                                AssignmentStudentIsSpecific assignmentStudentIsSpecific = Unit_Of_Work.assignmentStudentIsSpecific_Repository.First_Or_Default(
+                                    d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID);
+                                if (assignmentsIsSpecific != null)
+                                {
+                                    myAssignments.Add(assignment);
+                                }
+                            }
 
-                    //        List<Assignment> normalAssignments = await Unit_Of_Work.assignment_Repository
-                    //            .Select_All_With_IncludesById<Assignment>(
-                    //                d => d.IsDeleted != true &&
-                    //                     d.SubjectID == subject.ID &&
-                    //                     !d.IsSpecificStudents &&
-                    //                d.OpenDate >= DateFrom &&
-                    //                     d.OpenDate <= DateTo);
+                            foreach (Assignment assignment in myAssignments)
+                            {
+                                LMS_CMS_DAL.Models.Domains.LMS.AssignmentStudent assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
+                                    .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
+                                                           a.AssignmentID == assignment.ID &&
+                                                           a.Degree != null &&
+                                                           a.IsDeleted != true);
 
-                    //        var allAssignments = specificAssignments
-                    //            .Where(a => a.Assignment != null)
-                    //            .Select(a => a.Assignment)
-                    //            .Concat(normalAssignments)
-                    //            .Where(a => a != null)
-                    //            .GroupBy(a => a.ID)
-                    //            .Select(g => g.First())
-                    //            .ToList();
+                                if (assignmentStudent != null)
+                                {
+                                    TotalDegreesForOneSubject += (assignmentStudent.Degree.Value/assignment.Mark);
+                                }
+                            }
 
-                    //    }
-                    //}
+                            List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
+                                .FindBy(a => a.SubjectID == subjectWeightType.SubjectID &&
+                                             a.IsDeleted != true &&
+                                             a.SubjectWeightTypeID == subjectWeightType.WeightTypeID &&
+                                             a.Date >= academicYearFrom.DateFrom &&
+                                             a.Date <= academicYearFrom.DateTo).ToList();
+
+                            foreach (DirectMark mark in directMarks)
+                            {
+                                DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
+                                    .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
+                                                           a.DirectMarkID == mark.ID &&
+                                                           a.IsDeleted != true);
+
+                                if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
+                                {
+                                    TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                                }
+                            }
+                        }
+
+                        if(studentClassroomSubject.Subject.PassByDegree > TotalDegreesForOneSubject * (studentClassroomSubject.Subject.TotalMark))
+                        {
+                            // Failed in this subject
+                        } 
+                    }
                     //foreach (var subjectId in subjectIds)
                     //{
                     //    var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
