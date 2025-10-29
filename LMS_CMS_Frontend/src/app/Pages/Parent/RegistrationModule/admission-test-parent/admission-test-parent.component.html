@@ -6,7 +6,7 @@
         <option *ngFor="let s of Students" [value]="s.id">
             {{ s.studentEnName }}
         </option>
-        <option *ngIf="Students.length == 0"> {{ 'No Data Found' | translate }}</option>
+        <option *ngIf="Students.length == 0" disabled> {{ 'No Data Found' | translate }}</option>
     </select>
 </div>
 

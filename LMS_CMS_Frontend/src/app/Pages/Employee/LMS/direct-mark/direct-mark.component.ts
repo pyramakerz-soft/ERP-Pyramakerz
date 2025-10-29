@@ -325,6 +325,8 @@ export class DirectMarkComponent {
     this.subjectWeightsForCreate = [];
     this.viewStudents = false
     this.viewClassStudents = false
+
+    this.directMark = new DirectMark();
   }
 
   viewTable() {
@@ -547,9 +549,12 @@ export class DirectMarkComponent {
     this.subjectsForCreate = []
     this.directMark.gradeID = 0
     this.directMark.subjectID = 0
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false;
     this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
-    })
+    }) 
   }
 
   onGradeModalChange() {
@@ -558,6 +563,9 @@ export class DirectMarkComponent {
     this.viewClassStudents = false
     this.subjectsForCreate = []
     this.directMark.subjectID = 0
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false;
     this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
       this.subjectsForCreate = d
     })
