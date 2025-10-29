@@ -24,28 +24,38 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
       </h3>
       <div class="bg-gray-50 p-3 rounded-lg space-y-4 mb-4">
         <div *ngFor="let category of categoryRankings?.categoryRanking; let i = index" 
-             class="group cursor-pointer hover:bg-white p-2 rounded-lg transition-all duration-300">
+             class="cursor-pointer hover:bg-white p-2 rounded-lg transition-all duration-300">
           <!-- Category Title with Total Sales -->
           <div class="flex justify-between text-sm text-gray-700 font-medium mb-2">
             <span class="font-semibold">{{ category.categoryName }}</span>
             <span class="text-gray-600">{{ category.totalCategoryCount }} {{ 'sold' | translate }}</span>
           </div>
           
-<div class="relative h-4 rounded-full overflow-hidden" [ngClass]="getProgressBarBgClass(i)">
-  <div 
-    class="absolute h-full rounded-full transition-all duration-500" 
-    [ngClass]="getProgressBarFgClass(i)"
-    [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount)"
-  ></div>
-  <div 
-    class="absolute h-full rounded-full transition-all duration-500 shadow-lg" 
-    [ngClass]="getTopItemBarClass(i)"
-    [style.width.%]="calculateItemPercentage(category.shopItem.totalQuantitySold)"
-  ></div>
-</div>
+          <!-- Progress Bar with Hover Tooltips -->
+          <div class="relative h-4 rounded-full overflow-hidden" [ngClass]="getProgressBarBgClass(i)">
+            <!-- Category Bar (Background) -->
+            <div 
+              class="absolute h-full rounded-full transition-all duration-500 group" 
+              [ngClass]="getProgressBarFgClass(i)"
+              [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount)"
+              (mouseenter)="showTooltip($event, 'other', category, i)"
+              (mousemove)="updateTooltipPosition($event)"
+              (mouseleave)="hideTooltip()">
+            </div>
+            
+            <!-- Top Item Bar (Foreground) -->
+            <div 
+              class="absolute h-full rounded-full transition-all duration-500 shadow-lg group z-10" 
+              [ngClass]="getTopItemBarClass(i)"
+              [style.width.%]="calculateItemPercentage(category.shopItem.totalQuantitySold)"
+              (mouseenter)="showTooltip($event, 'topItem', category, i)"
+              (mousemove)="updateTooltipPosition($event)"
+              (mouseleave)="hideTooltip()">
+            </div>
+          </div>
           
-          <!-- Top Product Info (visible on hover) -->
-          <div class="mt-2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-2">
+          <!-- Permanently Visible Info -->
+          <div class="mt-2 text-xs text-gray-600 pl-2">
             <div class="flex justify-between items-center">
               <span>
                 <span class="font-medium text-gray-800">{{ 'Top Item' | translate }}:</span> 
@@ -62,13 +72,37 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
           {{ 'No data available' | translate }}
         </div>
       </div>
+
+      <!-- Custom Tooltip -->
+      <div 
+        *ngIf="tooltipData.visible"
+        class="fixed pointer-events-none z-50 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-sm"
+        [style.left.px]="tooltipData.x"
+        [style.top.px]="tooltipData.y"
+        [style.transform]="'translate(-50%, -120%)'">
+        <div class="font-semibold">{{ tooltipData.label }}</div>
+        <div>{{ tooltipData.value }} {{ 'sold' | translate }}</div>
+      </div>
     </div>
-  `
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
 export class CategoryRankingsComponent {
   @Input() categoryRankings?: CategoryRankings;
   
   private maxCategoryValue: number = 0;
+  
+  tooltipData = {
+    visible: false,
+    x: 0,
+    y: 0,
+    label: '',
+    value: 0
+  };
 
   ngOnChanges(): void {
     this.calculateMaxValue();
@@ -106,8 +140,41 @@ export class CategoryRankingsComponent {
   }
 
   getTopItemBarClass(index: number): string {
-    // Brighter, more vibrant colors for the top item
     const colors = ['bg-blue-600', 'bg-yellow-500', 'bg-purple-600', 'bg-green-600', 'bg-red-600'];
     return colors[index % colors.length];
+  }
+
+  showTooltip(event: MouseEvent, type: 'topItem' | 'other', category: any, index: number): void {
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    
+    if (type === 'topItem') {
+      this.tooltipData = {
+        visible: true,
+        x: event.clientX,
+        y: event.clientY,
+        label: category.shopItem.itemName,
+        value: category.shopItem.totalQuantitySold
+      };
+    } else {
+      const otherItemsCount = category.totalCategoryCount - category.shopItem.totalQuantitySold;
+      this.tooltipData = {
+        visible: true,
+        x: event.clientX,
+        y: event.clientY,
+        label: 'Other Items',
+        value: otherItemsCount
+      };
+    }
+  }
+
+  updateTooltipPosition(event: MouseEvent): void {
+    if (this.tooltipData.visible) {
+      this.tooltipData.x = event.clientX;
+      this.tooltipData.y = event.clientY;
+    }
+  }
+
+  hideTooltip(): void {
+    this.tooltipData.visible = false;
   }
 }
