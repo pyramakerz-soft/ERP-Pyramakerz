@@ -345,7 +345,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         c.IsDeleted != true &&
                                         (
                                             // 1️⃣ ClockIn is within the day
-                                            (c.ClockIn >= startOfDay && c.ClockIn < endOfDay)
+                                            (c.ClockIn >= startOfDay && c.ClockIn < endOfDay )
                                             ||
                                             // 2️⃣ ClockOut is within the day
                                             (c.ClockOut >= startOfDay && c.ClockOut < endOfDay)
