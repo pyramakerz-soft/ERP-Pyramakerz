@@ -150,10 +150,30 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 TimeSpan departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
                 TimeSpan allowedStart = attendanceTime.Add(TimeSpan.FromMinutes((double)employee.DelayAllowance));
 
-                TimeSpan fullDayHours = departureTime - attendanceTime;
-                TimeSpan halfDayHours = TimeSpan.FromHours(fullDayHours.TotalHours / 2);
+                TimeSpan fullDayHours;
+                TimeSpan halfDayHours;
 
-                List<EmployeeDays> employeeDays =await Unit_Of_Work.employeeDays_Repository.Select_All_With_IncludesById<EmployeeDays>(d => d.EmployeeID == employee.ID && d.IsDeleted != true,
+                // Check if the shift ends on the same date or next day
+                if (departureTime < attendanceTime)
+                {
+                    Console.WriteLine($"attendanceTime: {attendanceTime}");
+                    Console.WriteLine($"departureTime: {departureTime}");
+                    // Example: 11 PM → 7 AM
+                    fullDayHours = (TimeSpan.FromHours(24) - attendanceTime) + departureTime;
+                }
+                else
+                {
+                    // Example: 8 AM → 4 PM
+                    fullDayHours = departureTime - attendanceTime;
+                }
+
+                // Calculate half-day hours
+                halfDayHours = TimeSpan.FromHours(fullDayHours.TotalHours / 2);
+
+                Console.WriteLine($"Full day hours: {fullDayHours}");
+                Console.WriteLine($"Half day hours: {halfDayHours}");
+
+                List<EmployeeDays> employeeDays = await Unit_Of_Work.employeeDays_Repository.Select_All_With_IncludesById<EmployeeDays>(d => d.EmployeeID == employee.ID && d.IsDeleted != true,
                 query => query.Include(Master => Master.Day));
 
                 List<string> dayNames = employeeDays.Select(s=>s.Day.Name).Distinct().ToList();
@@ -314,7 +334,32 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             }
                             else // he should be present
                             {
-                                List<EmployeeClocks> employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                                if (departureTime < attendanceTime)
+                                {
+                                    var startOfDay = day.ToDateTime(new TimeOnly(0, 0, 0));       // 2025-10-29 00:00:00
+                                    var endOfDay = startOfDay.AddDays(1);                         // 2025-10-30 00:00:00
+
+                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                                        c.EmployeeID == employee.ID &&
+                                        c.IsDeleted != true &&
+                                        (
+                                            // 1️⃣ ClockIn is within the day
+                                            (c.ClockIn >= startOfDay && c.ClockIn < endOfDay)
+                                            ||
+                                            // 2️⃣ ClockOut is within the day
+                                            (c.ClockOut >= startOfDay && c.ClockOut < endOfDay)
+                                            ||
+                                            // 3️⃣ Clock spans across this day (started before midnight, ended after)
+                                            (c.ClockIn < startOfDay && c.ClockOut > endOfDay)
+                                        )
+                                    ).ToList();
+                                }
+                                else
+                                {
+                                  employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                }
+
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 { 
                                     TimeSpan totalWorked = TimeSpan.Zero;
@@ -375,7 +420,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                                         if (firstClockIn.HasValue)
                                         {
-                                            TimeSpan actualStart = firstClockIn.Value;
+                                            TimeSpan actualStart = firstClockIn.Value.TimeOfDay;
 
                                             if (actualStart > allowedStart)
                                             {
@@ -447,7 +492,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                     totalWorked += clock.ClockOut.Value - clock.ClockIn.Value;
                                 }
                             }
-
+                            monthlyAttendance.WorkingHours = totalWorked.Hours;
+                            monthlyAttendance.WorkingMinutes = totalWorked.Minutes;
                             monthlyAttendance.OvertimeHours = (int)totalWorked.TotalHours;
                             monthlyAttendance.OvertimeMinutes = totalWorked.Minutes;
 
@@ -533,7 +579,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 {
                      attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
                      departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
-                     fullDayHours = departureTime - attendanceTime;
+
+                    // Check if the shift ends on the same date or next day
+                    if (departureTime < attendanceTime)
+                    {
+                        // Example: 11 PM → 7 AM
+                        fullDayHours = (TimeSpan.FromHours(24) - attendanceTime) + departureTime;
+                    }
+                    else
+                    {
+                        // Example: 8 AM → 4 PM
+                        fullDayHours = departureTime - attendanceTime;
+                    }
+
                      totalDayHours = fullDayHours.TotalHours;
                      dailyRate = (double)employee.MonthSalary.Value / 30 ;
                      hourlyRate = (double)employee.MonthSalary.Value / 30 / totalDayHours;
