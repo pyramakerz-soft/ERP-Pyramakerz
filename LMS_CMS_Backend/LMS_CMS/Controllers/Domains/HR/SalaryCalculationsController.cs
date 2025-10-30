@@ -335,23 +335,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             else // he should be present
                             {
                                 List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                                if (departureTime < attendanceTime)
+                                if (departureTime < attendanceTime)  // if the day is 2025-10-30
                                 {
-                                    var startOfDay = day.ToDateTime(new TimeOnly(0, 0, 0));       // 2025-10-29 00:00:00
-                                    var endOfDay = startOfDay.AddDays(1);                         // 2025-10-30 00:00:00
+                                    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                                    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+
+                                    var startOfRange = day.ToDateTime(departureTimeOnly);
+                                    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);             
 
                                     employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
                                         c.EmployeeID == employee.ID &&
                                         c.IsDeleted != true &&
                                         (
-                                            // 1️⃣ ClockIn is within the day
-                                            (c.ClockIn >= startOfDay && c.ClockIn < endOfDay )
-                                            ||
-                                            // 2️⃣ ClockOut is within the day
-                                            (c.ClockOut >= startOfDay && c.ClockOut < endOfDay)
-                                            ||
-                                            // 3️⃣ Clock spans across this day (started before midnight, ended after)
-                                            (c.ClockIn < startOfDay && c.ClockOut > endOfDay)
+                                            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
                                         )
                                     ).ToList();
                                 }
@@ -418,7 +414,28 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                                         TimeSpan lateTime = TimeSpan.Zero;
 
-                                        if (firstClockIn.HasValue)
+                                        if (firstClockIn.HasValue && departureTime < attendanceTime) // midnight shift
+                                        {
+                                            TimeOnly attendanceTimeOnly = TimeOnly.FromTimeSpan(attendanceTime);
+
+                                            DateTime allowedStartDateTime = day.ToDateTime(attendanceTimeOnly); // previous day
+                                            allowedStartDateTime = allowedStartDateTime.AddMinutes(employee.DelayAllowance ?? 0);
+                                            DateTime attendanceDateTime = day.ToDateTime(attendanceTimeOnly);
+                                            DateTime actualStart = firstClockIn.Value;
+
+                                            if (actualStart > allowedStartDateTime)
+                                            {
+                                                // Employee came late
+                                                lateTime = actualStart - allowedStartDateTime;
+                                                monthlyAttendance.DeductionHours = lateTime.Hours;
+                                                monthlyAttendance.DeductionMinutes = lateTime.Minutes;
+                                            }
+                                            else if (actualStart < allowedStartDateTime && actualStart > attendanceDateTime)
+                                            {
+                                                lateTime = actualStart - attendanceDateTime;
+                                            }
+                                        }
+                                        else
                                         {
                                             TimeSpan actualStart = firstClockIn.Value.TimeOfDay;
 
@@ -434,7 +451,11 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                             {
                                                 lateTime = actualStart - attendanceTime;
                                             }
+
                                         }
+                                        Console.WriteLine($"allowedStart: {allowedStart}");
+                                        Console.WriteLine($"firstClockIn: {firstClockIn}");
+                                        Console.WriteLine($"lateTime: {lateTime}");
 
                                         TimeSpan requiredWork = fullDayHours - lateTime;
 
