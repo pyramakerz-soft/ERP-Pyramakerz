@@ -167,7 +167,7 @@ saveDose() {
 
 deleteDose(row: Dose) {
   const translatedTitle = this.translate.instant('Are you sure?');
-  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedText = this.translate.instant('You will not be able to recover this dose!');
   const translatedConfirm = this.translate.instant('Yes, delete it!');
   const translatedCancel = this.translate.instant('No, keep it');
   const successMessage = this.translate.instant('Deleted successfully');

@@ -181,7 +181,7 @@ export class MedicalHistoryComponent implements OnInit {
 
 deleteMedicalHistory(row: any) {
   const translatedTitle = this.translate.instant('Are you sure?');
-  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedText = this.translate.instant('You will not be able to recover this medical history!');
   const translatedConfirm = this.translate.instant('Yes, delete it!');
   const translatedCancel = this.translate.instant('No, keep it');
   const successMessage = this.translate.instant('Deleted successfully');
