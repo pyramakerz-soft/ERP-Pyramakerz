@@ -46,6 +46,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
         public ICollection<AppointmentGrade> AppointmentGrades { get; set; } = new HashSet<AppointmentGrade>();
         public ICollection<Grade> UpgradeTos { get; set; } = new HashSet<Grade>();
+        public ICollection<FailedStudents> FailedStudents { get; set; } = new HashSet<FailedStudents>();
 
     }
 }

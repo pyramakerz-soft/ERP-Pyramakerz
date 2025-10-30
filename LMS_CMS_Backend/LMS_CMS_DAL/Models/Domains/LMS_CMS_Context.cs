@@ -268,7 +268,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<DayStatus> DayStatus { get; set; }
         public DbSet<MonthlyAttendance> MonthlyAttendance { get; set; }
         public DbSet<SalaryHistory> SalaryHistory { get; set; }
-        public DbSet<EmployeeLoans> EmployeeLoans { get; set; }
+        public DbSet<EmployeeLoans> EmployeeLoans { get; set; } 
+        public DbSet<EmployeeLoans> FailedStudents { get; set; } 
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -2421,6 +2422,30 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.EmployeeLoans)
                 .HasForeignKey(m => m.loanId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Student)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Grade)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.GradeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Subject)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.AcademicYear)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict); 
 
 
 

@@ -9,7 +9,6 @@ namespace LMS_CMS_BL.DTO.LMS
     public class UpgradeDTO
     {
         public long FromAcademicYearID { get; set; }
-        public long ToAcademicYearID { get; set; }
-        public bool IsUpgradeAfterSummerCourse{ get; set; }
+        public long ToAcademicYearID { get; set; } 
     }
 }

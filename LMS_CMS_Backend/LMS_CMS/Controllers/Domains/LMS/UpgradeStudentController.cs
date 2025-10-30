@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
@@ -28,6 +29,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public class StudentGradeSubjectAcademicYear
+        {
+            public long StudentID { get; set; }
+            public long GradeID { get; set; }
+            public long SubjectID { get; set; } 
+            public long AcademicYearID { get; set; } 
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
@@ -61,26 +74,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("This Academic Year is not found");
             }
-
-            if (upgradeDTO.IsUpgradeAfterSummerCourse)
-            {
-                if (academicYearFrom.SummerCourseDateFrom == null || academicYearFrom.SummerCourseDateTo == null)
-                {
-                    return BadRequest("This Academic Year Doesn't have Summer Course Date");
-                }
-            }
              
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                 d => d.IsDeleted != true && d.Student.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYearID == academicYearFrom.ID,
                 query => query.Include(d => d.Classroom),
                 query => query.Include(d => d.Student));
 
-            if(studentClassrooms == null ||  studentClassrooms.Count() == 0)
+            if(studentClassrooms == null ||  !studentClassrooms.Any())
             {
                 return NotFound("No Students To Upgrade");
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+             
+            List<StudentGradeSubjectAcademicYear> studentsFailed = new List<StudentGradeSubjectAcademicYear>();
 
             foreach (StudentClassroom studentClassroom in studentClassrooms)
             {
@@ -92,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(d=> d.ID == studentClassroom.Classroom.GradeID);
                 
                 // If He Doesn't have any subjects that need to be checked so upgrade him anyway else see the assignments and direct marks
-                if(studentClassroomSubjects == null || studentClassroomSubjects.Count() == 0)
+                if(studentClassroomSubjects == null || !studentClassroomSubjects.Any())
                 {
                     StudentGrade student = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
                         d => d.IsDeleted != true && d.StudentID == studentClassroom.StudentID && d.GradeID == grade.UpgradeToID && d.AcademicYearID == academicYearTo.ID);
@@ -143,7 +150,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             {
                                 AssignmentStudentIsSpecific assignmentStudentIsSpecific = Unit_Of_Work.assignmentStudentIsSpecific_Repository.First_Or_Default(
                                     d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID);
-                                if (assignmentsIsSpecific != null)
+                                if (assignmentStudentIsSpecific != null)
                                 {
                                     myAssignments.Add(assignment);
                                 }
@@ -187,144 +194,214 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         if(studentClassroomSubject.Subject.PassByDegree > TotalDegreesForOneSubject * (studentClassroomSubject.Subject.TotalMark))
                         {
                             // Failed in this subject
+                            StudentGradeSubjectAcademicYear failed = new StudentGradeSubjectAcademicYear();
+                            failed.StudentID = studentClassroom.StudentID;
+                            failed.GradeID = grade.ID;
+                            failed.SubjectID = studentClassroomSubject.SubjectID;
+                            failed.AcademicYearID = academicYearFrom.ID;
+
+                            studentsFailed.Add(failed);
                         } 
                     }
-                    //foreach (var subjectId in subjectIds)
-                    //{
-                    //    var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
-                    //    if (subject == null) continue;
 
-                    //    var subjectTotalMark = new CertificateSubjectTotalMark();
-                    //    subjectTotalMark.SubjectID = subject.ID;
-                    //    subjectTotalMark.SubjectEn_name = subject.en_name;
-                    //    subjectTotalMark.SubjectAr_name = subject.ar_name;
-                    //    subjectTotalMark.Degree = 0;
-                    //    subjectTotalMark.Mark = 0;
+                    // If He Didn't Fail at any subject so upgrade him, if not so put him in the failed table
+                    List<StudentGradeSubjectAcademicYear> matchingStudent = studentsFailed.FindAll(s => s.StudentID == studentClassroom.StudentID && s.GradeID == grade.ID);
 
-                    //    // Weight types for this subject
-                    //    List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(s => s.SubjectID == subjectId && s.IsDeleted != true && s.WeightType.IsDeleted != true,
-                    //            query => query.Include(d => d.WeightType));
+                    if (matchingStudent == null || !matchingStudent.Any())
+                    {
+                        StudentGrade student = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                        d => d.IsDeleted != true && d.StudentID == studentClassroom.StudentID && d.GradeID == grade.UpgradeToID && d.AcademicYearID == academicYearTo.ID);
+                        if (student == null)
+                        {
+                            StudentGrade studentGrade = new StudentGrade();
+                            studentGrade.GradeID = grade.UpgradeToID.Value;
+                            studentGrade.AcademicYearID = academicYearTo.ID;
+                            studentGrade.StudentID = studentClassroom.StudentID;
 
-                    //    foreach (var swt in subjectWeightTypes)
-                    //    {
-                    //        float sumPercentageDegree = 0;
+                            studentGrade.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            if (userTypeClaim == "octa")
+                            {
+                                studentGrade.InsertedByOctaId = userId;
+                            }
+                            else if (userTypeClaim == "employee")
+                            {
+                                studentGrade.InsertedByUserId = userId;
+                            }
+                            Unit_Of_Work.studentGrade_Repository.Add(studentGrade);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var item in matchingStudent)
+                        {
+                            FailedStudents failedStudents = Unit_Of_Work.failedStudents_Repository.First_Or_Default(
+                                d => d.IsDeleted != true && d.StudentID == studentClassroom.StudentID && 
+                                d.GradeID == grade.ID && d.AcademicYearID == academicYearFrom.ID && d.SubjectID == item.SubjectID);
 
-                    //        // Get Assignments for this subject & weight type
-                    //        var specificAssignments = await Unit_Of_Work.assignmentStudentIsSpecific_Repository
-                    //            .Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
-                    //                d => d.IsDeleted != true &&
-                    //                     d.StudentClassroomID == studentClassroom.ID &&
-                    //                     d.Assignment != null &&
-                    //                     d.Assignment.IsDeleted != true &&
-                    //                     d.Assignment.SubjectID == subject.ID &&
-                    //                     d.Assignment.SubjectWeightTypeID == swt.WeightTypeID &&
-                    //                d.Assignment.OpenDate >= DateFrom &&
-                    //                     d.Assignment.OpenDate <= DateTo);
+                            if (failedStudents == null)
+                            {
+                                FailedStudents stu = new FailedStudents();
+                                stu.GradeID = grade.ID;
+                                stu.AcademicYearID = academicYearFrom.ID;
+                                stu.StudentID = studentClassroom.StudentID;
+                                stu.SubjectID = item.SubjectID;
 
-                    //        var normalAssignments = await Unit_Of_Work.assignment_Repository
-                    //            .Select_All_With_IncludesById<Assignment>(
-                    //                d => d.IsDeleted != true &&
-                    //                     d.SubjectID == subject.ID &&
-                    //                     !d.IsSpecificStudents &&
-                    //                d.OpenDate >= DateFrom &&
-                    //                     d.OpenDate <= DateTo);
-
-                    //        var allAssignments = specificAssignments
-                    //            .Where(a => a.Assignment != null)
-                    //            .Select(a => a.Assignment)
-                    //            .Concat(normalAssignments)
-                    //            .Where(a => a != null)
-                    //            .GroupBy(a => a.ID)
-                    //            .Select(g => g.First())
-                    //            .ToList();
-
-                    //        // Sum assignment marks
-                    //        foreach (var assignment in allAssignments.Where(a => a != null))
-                    //        {
-                    //            var assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
-                    //                .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
-                    //                                       a.AssignmentID == assignment.ID &&
-                    //                                       a.Degree != null &&
-                    //                                       a.IsDeleted != true);
-
-                    //            if (assignmentStudent?.Degree != null && assignment?.Mark != null && assignment.Mark > 0)
-                    //            {
-                    //                sumPercentageDegree += ((float)assignmentStudent.Degree / assignment.Mark);
-                    //            }
-                    //        }
-
-                    //        // Get direct marks
-                    //        var directMarks = Unit_Of_Work.directMark_Repository
-                    //            .FindBy(a => a.SubjectID == subjectId &&
-                    //                         a.IsDeleted != true &&
-                    //                         a.SubjectWeightTypeID == swt.WeightTypeID &&
-                    //            a.Date >= DateFrom &&
-                    //                         a.Date <= DateTo).ToList();
-
-                    //        foreach (var mark in directMarks)
-                    //        {
-                    //            var studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
-                    //                .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
-                    //                                       a.DirectMarkID == mark.ID &&
-                    //                                       a.IsDeleted != true);
-
-                    //            if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
-                    //            {
-                    //                sumPercentageDegree += ((float)studentDirectMark.Degree / mark.Mark);
-                    //            }
-                    //        }
-
-                    //        int totalItems = directMarks.Count + allAssignments.Count;
-                    //        float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
-
-
-                    //        var certificateSubjectObject = new CertificateSubject();
-                    //        certificateSubjectObject.Mark = swt.Weight;
-
-                    //        float weight = avgDegree;
-                    //        int integerPart = (int)Math.Floor(weight);
-                    //        float decimalPart = weight - integerPart;
-
-                    //        if (decimalPart > 0.5)
-                    //        {
-                    //            certificateSubjectObject.Degree = integerPart + 1;
-                    //        }
-                    //        else if (decimalPart < 0.5)
-                    //        {
-                    //            certificateSubjectObject.Degree = integerPart;
-                    //        }
-                    //        else // decimalPart == 0.5
-                    //        {
-                    //            certificateSubjectObject.Degree = integerPart + 0.5f;
-                    //        }
-                    //        //certificateSubjectObject.Degree = avgDegree;
-
-                    //        certificateSubjectObject.WeightTypeArName = swt.WeightType.ArabicName;
-                    //        certificateSubjectObject.WeightTypeEnName = swt.WeightType.EnglishName;
-                    //        certificateSubjectObject.WeightTypeId = swt.WeightType.ID;
-                    //        certificateSubjectObject.SubjectID = subject.ID;
-                    //        certificateSubjectObject.SubjectAr_name = subject.ar_name;
-                    //        certificateSubjectObject.SubjectEn_name = subject.en_name;
-
-                    //        certificateSubjects.Add(certificateSubjectObject);
-                    //        subjectTotalMark.Mark += certificateSubjectObject.Mark;
-                    //        subjectTotalMark.Degree += certificateSubjectObject.Degree;
-                    //    }
-                    //    certificateSubjectTotalMark.Add(subjectTotalMark);
-                    //}
-
-                    //foreach (var percentage in certificateSubjectTotalMark)
-                    //{
-                    //    if (percentage.Mark == 0)
-                    //        percentage.Percentage = 0;
-                    //    else
-                    //        percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
-                    //}
+                                stu.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                if (userTypeClaim == "octa")
+                                {
+                                    stu.InsertedByOctaId = userId;
+                                }
+                                else if (userTypeClaim == "employee")
+                                {
+                                    stu.InsertedByUserId = userId;
+                                }
+                                Unit_Of_Work.failedStudents_Repository.Add(stu);
+                            }
+                        }
+                    } 
                 } 
             }
              
             Unit_Of_Work.SaveChanges();
             
+            return Ok();
+        }
+         
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("AfterSummerCourse")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Upgrade Student" }
+        )]
+        public IActionResult UpgradeAfterSummerCourse(UpgradeDTO upgradeDTO)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            AcademicYear academicYearFrom = Unit_Of_Work.academicYear_Repository.First_Or_Default(
+                s => s.ID == upgradeDTO.FromAcademicYearID && s.IsDeleted != true);
+            if (academicYearFrom == null)
+            {
+                return BadRequest("This Academic Year is not found");
+            }
+
+            AcademicYear academicYearTo = Unit_Of_Work.academicYear_Repository.First_Or_Default(
+                s => s.ID == upgradeDTO.ToAcademicYearID && s.IsDeleted != true);
+            if (academicYearTo == null)
+            {
+                return BadRequest("This Academic Year is not found");
+            }
+             
+            List<FailedStudents> failedStudents = Unit_Of_Work.failedStudents_Repository.FindBy(
+                d => d.IsDeleted != true && d.Student.IsDeleted != true && d.Grade.IsDeleted != true && d.Subject.IsDeleted != true && d.AcademicYearID == academicYearFrom.ID);
+
+            if (failedStudents == null || !failedStudents.Any())
+            {
+                return NotFound("No Students To Upgrade");
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            var groupedFailedStudents = failedStudents
+                .GroupBy(fs => fs.StudentID)
+                .ToList();
+             
+            foreach (var studentGroup in groupedFailedStudents)
+            {
+                long studentId = studentGroup.Key;
+                List<long> failedSubjects = studentGroup.Select(fs => fs.SubjectID).ToList();
+                bool isStudentFailInAtLeastOneSubject = false;
+                long gradeId = studentGroup.First().GradeID;
+                Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == gradeId);
+                long academicYearId = studentGroup.First().AcademicYearID;
+
+                foreach (long subjectID in failedSubjects)
+                {
+                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.ID == subjectID);
+                    float TotalDegreesForOneSubject = 0f;
+
+                    List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
+                               .FindBy(a => a.SubjectID == subjectID &&
+                                            a.IsDeleted != true &&
+                                            a.IsSummerCourse == true &&
+                                            a.SubjectWeightTypeID == null &&
+                                            a.Date >= academicYearFrom.SummerCourseDateFrom &&
+                                            a.Date <= academicYearFrom.SummerCourseDateTo).ToList();
+
+                    foreach (DirectMark mark in directMarks)
+                    {
+                        DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
+                            .First_Or_Default(a => a.StudentClassroom.StudentID == studentId &&
+                                                    a.DirectMarkID == mark.ID &&
+                                                    a.IsDeleted != true);
+
+                        if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
+                        {
+                            TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                        }
+                    }
+
+                    if (subject.PassByDegree < TotalDegreesForOneSubject * (subject.TotalMark))
+                    { 
+                        FailedStudents failedRecord = studentGroup.FirstOrDefault(fs => fs.SubjectID == subjectID);
+
+                        if (failedRecord != null)
+                        { 
+                            failedRecord.IsDeleted = true;
+                            failedRecord.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                            if (userTypeClaim == "octa")
+                                failedRecord.DeletedByOctaId = userId;
+                            else if (userTypeClaim == "employee")
+                                failedRecord.DeletedByUserId = userId;
+
+                            Unit_Of_Work.failedStudents_Repository.Update(failedRecord);
+                        }
+                    }
+                    else
+                    {
+                        // Failed in this subject
+                        isStudentFailInAtLeastOneSubject = true;
+                    }
+                }
+
+                if (isStudentFailInAtLeastOneSubject == false)
+                {
+                    StudentGrade student = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.StudentID == studentId && d.GradeID == grade.UpgradeToID && d.AcademicYearID == academicYearTo.ID);
+                    if (student == null)
+                    {
+                        StudentGrade studentGrade = new StudentGrade();
+                        studentGrade.GradeID = grade.UpgradeToID.Value;
+                        studentGrade.AcademicYearID = academicYearTo.ID;
+                        studentGrade.StudentID = studentId;
+
+                        studentGrade.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                        if (userTypeClaim == "octa")
+                        {
+                            studentGrade.InsertedByOctaId = userId;
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            studentGrade.InsertedByUserId = userId;
+                        }
+                        Unit_Of_Work.studentGrade_Repository.Add(studentGrade);
+                    }
+                }
+            } 
+
+            Unit_Of_Work.SaveChanges(); 
+             
             return Ok();
         }
     }

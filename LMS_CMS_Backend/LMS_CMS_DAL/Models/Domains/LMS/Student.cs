@@ -134,6 +134,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<StudentIssue> StudentIssues { get; set; } = new HashSet<StudentIssue>();
         public ICollection<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; } = new HashSet<SocialWorkerMedalStudent>();
         public ICollection<CertificateStudent> CertificateStudent { get; set; } = new HashSet<CertificateStudent>();
+        public ICollection<FailedStudents> FailedStudents { get; set; } = new HashSet<FailedStudents>();
 
     }
 }

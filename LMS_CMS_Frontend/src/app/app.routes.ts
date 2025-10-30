@@ -296,7 +296,7 @@ export const routes: Routes = [
         component: MainLayoutComponent,
         title: "Employee Home",
         canActivate: [navigateIfEmployeeGuard, noNavigateWithoutLoginGuard],
-         children: [
+        children: [
             { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" },
             { path: "Dashboard", component: DashboardComponent, title: "Dashboard", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

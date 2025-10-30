@@ -28,12 +28,12 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
 
 
         [ForeignKey("SubjectWeightType")]
-        public long SubjectWeightTypeID { get; set; }
-        public SubjectWeightType SubjectWeightType { get; set; }
+        public long? SubjectWeightTypeID { get; set; }
+        public SubjectWeightType? SubjectWeightType { get; set; }
 
         public bool IsSummerCourse { get; set; }
 
         public ICollection<DirectMarkClasses> DirectMarkClasses { get; set; } = new HashSet<DirectMarkClasses>();
-        public ICollection<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; } = new HashSet<DirectMarkClassesStudent>();
+        public ICollection<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; } = new HashSet<DirectMarkClassesStudent>(); 
     }
 }
