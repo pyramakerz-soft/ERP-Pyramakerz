@@ -5281,11 +5281,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<TimeSpan?>("ClockIn")
-                        .HasColumnType("time");
+                    b.Property<DateTime?>("ClockIn")
+                        .HasColumnType("datetime2");
 
-                    b.Property<TimeSpan?>("ClockOut")
-                        .HasColumnType("time");
+                    b.Property<DateTime?>("ClockOut")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
@@ -7144,9 +7144,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("IsSpecificStudents")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsSummerCourse")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVisibleToStudent")
                         .HasColumnType("bit");
 
@@ -7993,7 +7990,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("SubjectID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("SubjectWeightTypeID")
+                    b.Property<long?>("SubjectWeightTypeID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -8846,6 +8843,75 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("EvaluationTemplateGroupQuestion");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.FailedStudents", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("AcademicYearID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GradeID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("StudentID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SubjectID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AcademicYearID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("GradeID");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("StudentID");
+
+                    b.HasIndex("SubjectID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("FailedStudents");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.Floor", b =>
@@ -18694,8 +18760,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.SubjectWeightType", "SubjectWeightType")
                         .WithMany("DirectMarks")
                         .HasForeignKey("SubjectWeightTypeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
@@ -19122,6 +19187,59 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("EvaluationTemplateGroup");
 
                     b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.FailedStudents", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.AcademicYear", "AcademicYear")
+                        .WithMany("FailedStudents")
+                        .HasForeignKey("AcademicYearID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Grade", "Grade")
+                        .WithMany("FailedStudents")
+                        .HasForeignKey("GradeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Student", "Student")
+                        .WithMany("FailedStudents")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Subject", "Subject")
+                        .WithMany("FailedStudents")
+                        .HasForeignKey("SubjectID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("AcademicYear");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("Grade");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -22562,6 +22680,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("Classrooms");
 
+                    b.Navigation("FailedStudents");
+
                     b.Navigation("InterviewTimes");
 
                     b.Navigation("RemedialClassrooms");
@@ -22707,6 +22827,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("AppointmentGrades");
 
                     b.Navigation("Classrooms");
+
+                    b.Navigation("FailedStudents");
 
                     b.Navigation("GradeSupervisors");
 
@@ -22864,6 +22986,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("EvaluationEmployeeStudentBookCorrections");
 
+                    b.Navigation("FailedStudents");
+
                     b.Navigation("FeesActivations");
 
                     b.Navigation("InstallmentDeductionMasters");
@@ -22916,6 +23040,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DailyPerformanceMaster");
 
                     b.Navigation("DirectMarks");
+
+                    b.Navigation("FailedStudents");
 
                     b.Navigation("LessonLives");
 

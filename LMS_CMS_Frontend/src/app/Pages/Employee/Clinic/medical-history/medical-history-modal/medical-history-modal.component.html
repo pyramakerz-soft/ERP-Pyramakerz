@@ -19,6 +19,7 @@
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                 <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                    <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
             <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['schoolId'] }}
@@ -34,6 +35,7 @@
                 [disabled]="!medicalHistory.schoolId">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                 <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                <option *ngIf="grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
             <span *ngIf="validationErrors['gradeId']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['gradeId'] }}
@@ -49,6 +51,7 @@
                 [disabled]="!medicalHistory.gradeId">
                 <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                 <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
+                <option *ngIf="classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
             <span *ngIf="validationErrors['classRoomID']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['classRoomID'] }}
@@ -66,6 +69,7 @@
             <option *ngFor="let student of students" [value]="student.id" [selected]="medicalHistory.studentId === student.id">
                 {{ student.name }}
             </option>
+            <option *ngIf="students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
             <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['studentId'] }}

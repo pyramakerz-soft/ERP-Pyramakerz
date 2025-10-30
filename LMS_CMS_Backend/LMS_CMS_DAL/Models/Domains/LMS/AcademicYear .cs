@@ -37,6 +37,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<RemedialTimeTable> RemedialTimeTables { get; set; } = new HashSet<RemedialTimeTable>();
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
         public ICollection<Attendance> Attendances { get; set; } = new HashSet<Attendance>();
+        public ICollection<FailedStudents> FailedStudents { get; set; } = new HashSet<FailedStudents>();
 
     }
 }

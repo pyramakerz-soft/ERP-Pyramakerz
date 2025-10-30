@@ -171,9 +171,15 @@ export class DirectMarkComponent {
 
   GetClassroomsData() {
     this.classrooms = []
-    this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
-      this.classrooms = d
-    })
+    if (!this.directMark.isSummerCourse && this.directMark.subjectID) {
+      this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+        this.classrooms = d
+      })
+    }else if (this.directMark.isSummerCourse && this.directMark.date && this.directMark.subjectID) {
+      this.ClassroomServ.GetFailedClassesBySubject(this.directMark.subjectID, this.directMark.date!, this.DomainName).subscribe((d) => {
+        this.classrooms = d
+      })
+    }
   }
 
   toggleClassDropdown() {
@@ -325,6 +331,8 @@ export class DirectMarkComponent {
     this.subjectWeightsForCreate = [];
     this.viewStudents = false
     this.viewClassStudents = false
+
+    this.directMark = new DirectMark();
   }
 
   viewTable() {
@@ -537,7 +545,8 @@ export class DirectMarkComponent {
     event.stopPropagation(); // Prevent the click event from bubbling up
     this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom)
     this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
-    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);  }  
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);  
+  }  
 
   onSchoolModalChange() {
     this.directMark.subjectWeightTypeID = 0
@@ -547,9 +556,12 @@ export class DirectMarkComponent {
     this.subjectsForCreate = []
     this.directMark.gradeID = 0
     this.directMark.subjectID = 0
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false;
     this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
-    })
+    }) 
   }
 
   onGradeModalChange() {
@@ -558,6 +570,9 @@ export class DirectMarkComponent {
     this.viewClassStudents = false
     this.subjectsForCreate = []
     this.directMark.subjectID = 0
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false;
     this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
       this.subjectsForCreate = d
     })
@@ -569,6 +584,25 @@ export class DirectMarkComponent {
     this.GetClassroomsData()
     this.viewStudents = false
     this.viewClassStudents = false
+  }
+
+  onSummerChange(){
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false;
+    if(this.directMark.isSummerCourse){
+      this.directMark.subjectWeightTypeID = 0
+    }
+    this.GetClassroomsData()
+  }
+
+  onDateChange(){
+    if (this.directMark.isSummerCourse && this.directMark.date) {
+      this.directMark.directMarkClasses = [];
+      this.directMark.classids = [];
+      this.directMark.allClasses = false;
+      this.GetClassroomsData()
+    }
   }
 
   validateNumber(event: any, field: keyof DirectMark): void {

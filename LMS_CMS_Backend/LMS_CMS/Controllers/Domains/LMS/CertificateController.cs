@@ -111,8 +111,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                      d.StudentClassroomID == studentClassroom.ID &&
                                      d.Assignment != null &&
                                      d.Assignment.IsDeleted != true &&
-                                     d.Assignment.SubjectID == subject.ID &&
-                                     ((IsSummerCourse == true && d.Assignment.IsSummerCourse == true) || (IsSummerCourse != true && d.Assignment.IsSummerCourse == false)) &&
+                                     d.Assignment.SubjectID == subject.ID && 
                                      d.Assignment.SubjectWeightTypeID == swt.WeightTypeID &&
                                      d.Assignment.OpenDate >= DateFrom &&
                                      d.Assignment.OpenDate <= DateTo);
@@ -121,8 +120,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .Select_All_With_IncludesById<Assignment>(
                                 d => d.IsDeleted != true &&
                                      d.SubjectID == subject.ID &&
-                                     !d.IsSpecificStudents &&
-                                     ((IsSummerCourse == true && d.IsSummerCourse == true) || (IsSummerCourse != true && d.IsSummerCourse == false)) &&
+                                     !d.IsSpecificStudents && 
                                      d.OpenDate >= DateFrom &&
                                      d.OpenDate <= DateTo);
 
@@ -154,8 +152,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         var directMarks = Unit_Of_Work.directMark_Repository
                             .FindBy(a => a.SubjectID == subjectId &&
                                          a.IsDeleted != true &&
-                                         a.SubjectWeightTypeID == swt.WeightTypeID &&
-                                        ((IsSummerCourse == true && a.IsSummerCourse == true) || (IsSummerCourse != true && a.IsSummerCourse == false)) &&
+                                         a.SubjectWeightTypeID == swt.WeightTypeID && 
                                          a.Date >= DateFrom &&
                                          a.Date <= DateTo).ToList();
 

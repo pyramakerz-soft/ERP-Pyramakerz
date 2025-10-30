@@ -357,7 +357,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            if (Newgrade.UpgradeToID == 0)
+            if (Newgrade.UpgradeToID == 0 || Newgrade.UpgradeToID == null)
             {
                 Newgrade.UpgradeToID = null;
             }
@@ -536,7 +536,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            if (newGrade.UpgradeToID == 0)
+            if (newGrade.UpgradeToID == 0 || newGrade.UpgradeToID == null)
             {
                 newGrade.UpgradeToID = null;
             }

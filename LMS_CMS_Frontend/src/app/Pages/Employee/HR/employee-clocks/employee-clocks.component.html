@@ -23,8 +23,7 @@
         <select id="SelectedEmployeeId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedEmployeeId" (change)="EmployeeChanged()">
-            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' | translate }}
-            </option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
             <option *ngFor="let c of employees" [value]="c.id">{{ c.en_name }}</option>
             <option *ngIf="employees.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
@@ -82,18 +81,18 @@
                         {{ row.id }}
                     </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="date" [(ngModel)]="row.date"
-                            class="w-[80%] px-2 py-1 border border-gray-300 rounded" />
+                          <span class="px-2 py-1">{{ row.date }}</span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="time" [ngModel]="formatTime(row.clockIn )"
+                          <input type="datetime-local"
+                            [ngModel]="formatDateTime(row.clockIn)"
                             (ngModelChange)="onTimeChange(row, 'clockIn', $event)"
-                            class="w-[80%] px-2 py-1 border border-gray-300 rounded" />
+                            class="w-[80%] px-2 py-1 border border-gray-300 rounded"/>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="time" [ngModel]="formatTime(row.clockOut )"
+                        <input type="datetime-local" [ngModel]="formatDateTime(row.clockOut )"
                             (ngModelChange)="onTimeChange(row, 'clockOut', $event)" class="border rounded p-1 w-full" />
-                        <span *ngIf=" row.clockOut!=null && row.clockIn!=null && row.clockOut < row.clockIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span>
+                        <!-- <span *ngIf=" row.clockOut!=null && row.clockIn!=null && row.clockOut < row.clockIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span> -->
                     </td>
                 </tr>
             </tbody>
@@ -123,23 +122,23 @@
                 </select>
                 <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{validationErrors['employeeID']}}</span>
             </div>
-            <div class="flex flex-col mb-4 w-full">
+            <!-- <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter date' | translate }}" [(ngModel)]="employeeClocks.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
-            </div>
+            </div> -->
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="clockIn"> {{ 'Check In' | translate }}</label>
-                <input id="clockIn" type="time" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="clockIn" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Check In' | translate }}" [(ngModel)]="employeeClocks.clockIn"
                     (ngModelChange)="onInputValueChange({ field: 'clockIn', value: $event })" />
                 <span *ngIf="validationErrors['clockIn']" class="text-red-500 ml-3 font-normal">{{validationErrors['clockIn']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="clockOut"> {{ 'Check Out' | translate }}</label>
-                <input id="clockOut" type="time" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="clockOut" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Check Out' | translate }}" [(ngModel)]="employeeClocks.clockOut"
                     (ngModelChange)="onInputValueChange({ field: 'clockOut', value: $event })" />
                 <span *ngIf="validationErrors['clockOut']" class="text-red-500 ml-3 font-normal">{{validationErrors['clockOut']}}</span>

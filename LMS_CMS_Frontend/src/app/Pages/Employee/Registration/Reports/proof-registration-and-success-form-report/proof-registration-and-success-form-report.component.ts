@@ -103,11 +103,11 @@ export class ProofRegistrationAndSuccessFormReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {
@@ -117,6 +117,7 @@ export class ProofRegistrationAndSuccessFormReportComponent {
   }
 
   getAllYears() {
+    this.academicYears = []
     this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.academicYears = d
     })
@@ -130,12 +131,14 @@ export class ProofRegistrationAndSuccessFormReportComponent {
     }
   }
 
-getAllStudents() {
-  this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
-    this.Students = d || [];
-    this.filteredStudents = d || []; 
-  });
-}
+  getAllStudents() {
+    this.Students = [];
+    this.filteredStudents = []; 
+    this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe((d) => {
+      this.Students = d || [];
+      this.filteredStudents = d || []; 
+    });
+  }
 
   onSchoolChange() {
   this.SelectedYearId = 0;

@@ -84,6 +84,17 @@ export class ViolationReportComponent {
     }
   }
 
+  ResetFilter() {
+  this.SelectedEmployeeTypeId = 0;
+  this.SelectedViolationTypeId = 0;
+  this.SelectedStartDate = '';
+  this.SelectedEndDate = '';
+  this.violationTypes = [];
+  this.showTable = false;
+  this.showViewReportBtn = false;
+  this.tableData = [];
+}
+
   GetEmployeeTypes() {
     this.employeeTypeService.Get(this.DomainName).subscribe((data) => {
       this.empTypes = data;

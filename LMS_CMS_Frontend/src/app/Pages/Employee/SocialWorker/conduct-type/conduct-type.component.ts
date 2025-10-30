@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { ConductType } from '../../../../Models/SocialWorker/conduct-type';
 import { ConductService } from '../../../../Services/Employee/SocialWorker/conduct.service';
 import { ConductTypeService } from '../../../../Services/Employee/SocialWorker/conduct-type.service';
@@ -63,6 +63,7 @@ export class ConductTypeComponent {
   sections: Section[] = [];
   conductLevels: ConductLevel[] = [];
   dropdownOpen = false;
+  @ViewChild('classDropdown') classDropdown!: ElementRef;
 
   constructor(
     private router: Router,
@@ -144,7 +145,11 @@ export class ConductTypeComponent {
     })
   }
 
-  toggleDropdown(): void {
+  toggleDropdown(event?: MouseEvent) {
+    // prevent this click from propagating to the document listener
+    if (event) {
+      event.stopPropagation();
+    }
     this.dropdownOpen = !this.dropdownOpen;
   }
 
@@ -230,6 +235,17 @@ export class ConductTypeComponent {
       this.AllowEditForOthers
     );
     return IsAllow;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (this.dropdownOpen) {
+      // if dropdown reference exists
+      const clickedInside = this.classDropdown?.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.dropdownOpen = false;
+      }
+    }
   }
 
   CreateOREdit() {

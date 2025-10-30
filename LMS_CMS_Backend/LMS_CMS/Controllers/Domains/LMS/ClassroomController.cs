@@ -244,7 +244,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
                     f => f.IsDeleted != true && f.SubjectID == SubjectId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true && f.Teacher.IsDeleted != true,
                     q => q.Include(cs => cs.Classroom)
@@ -256,6 +256,61 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<Classroom?> classrooms = classroomSubjects.Select(s => s.Classroom).Distinct().ToList();
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+            List<ClassroomGetDTO> DTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+            return Ok(DTO);
+        }
+        
+        [HttpGet("GetFailedClassesBySubject/{SubjectId}/{date}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject" , "Direct Mark" }
+         )]
+        public async Task<IActionResult> GetFailedClassesBySubject(long SubjectId, DateOnly date)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.SummerCourseDateFrom <= date && d.SummerCourseDateTo >= date);
+            if( academicYear == null)
+            {
+                return NotFound(); 
+            }
+
+            List<FailedStudents> failedStudents = Unit_Of_Work.failedStudents_Repository.FindBy(d => d.IsDeleted != true && d.AcademicYearID == academicYear.ID && d.SubjectID == SubjectId && d.Student.IsDeleted != true);
+            if (failedStudents == null || !failedStudents.Any())
+            {
+                return NotFound();
+            }
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYearID == academicYear.ID,
+                q => q.Include(cs => cs.Classroom)
+                );
+
+            if (studentClassrooms == null || !studentClassrooms.Any())
+            {
+                return NotFound();
+            }
+
+            List<StudentClassroom> matchingStudentClassrooms = studentClassrooms
+                .Where(sc =>
+                    failedStudents.Any(fs =>
+                        fs.StudentID == sc.StudentID &&
+                        fs.GradeID == sc.Classroom.GradeID
+                    )
+                )
+                .ToList();
+
+            if (matchingStudentClassrooms == null || !matchingStudentClassrooms.Any())
+            {
+                return NotFound();
+            }
+             
+            List<Classroom?> classrooms = matchingStudentClassrooms.Select(s => s.Classroom).Distinct().ToList();
 
             if (classrooms == null || classrooms.Count == 0)
             {

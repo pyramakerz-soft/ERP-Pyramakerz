@@ -245,7 +245,12 @@
                 <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['subjectID'] }}</span>
             </div>
-            <div class="flex flex-col mb-4 w-full">
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
+                <input type="checkbox" id="Summer" class="w-5 h-5" (change)="onSummerChange()"
+                    [(ngModel)]="directMark.isSummerCourse" [disabled]="directMark.id != 0" />
+                <label for="Summer" class="text-sm">  {{ 'Summer Course' | translate }}</label>
+            </div>
+            <div *ngIf="!directMark.isSummerCourse" class="flex flex-col mb-4 w-full">
                 <label class="mb-2" for="Subjectweight"
                     [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
                     {{ 'Subject Weight Type' | translate }} </label>
@@ -264,19 +269,47 @@
                 <span *ngIf="validationErrors['subjectWeightTypeID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['subjectWeightTypeID'] }}</span>
             </div>
-
+            <div *ngIf="directMark.isSummerCourse" class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="date"> {{ ' Date' | translate }}</label>
+                <input id="Date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="directMark.date" (change)="onDateChange()"
+                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+                <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['date'] }}</span>
+            </div> 
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2" for="classids"
-                    [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
+                    [ngClass]="{
+                        'text-gray-400':
+                        (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
+                        (!directMark.isSummerCourse && !directMark.subjectID),
+                        'primaryTxt':
+                        (!directMark.isSummerCourse && directMark.subjectID) ||
+                        (directMark.isSummerCourse && directMark.date && directMark.subjectID)
+                    }"
+                    >
                     {{ 'Classes' | translate }}
                 </label>
 
                 <div class="relative">
-                    <!-- Main box -->
+                    <!-- Main box --> 
                     <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
-                        [class.opacity-50]="!directMark.subjectID" [class.cursor-not-allowed]="!directMark.subjectID"
-                        (click)="directMark.subjectID && toggleClassDropdown();  $event.stopPropagation()" tabindex="0">
-
+                        [class.opacity-50]="
+                            (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
+                            (!directMark.isSummerCourse && !directMark.subjectID)
+                        "
+                        [class.cursor-not-allowed]="
+                            (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
+                            (!directMark.isSummerCourse && !directMark.subjectID)
+                        "
+                        (click)="
+                            ((directMark.isSummerCourse && directMark.date && directMark.subjectID) ||
+                            (!directMark.isSummerCourse && directMark.subjectID)) &&
+                            toggleClassDropdown();
+                            $event.stopPropagation()
+                        "
+                        tabindex="0"
+                        >
                         <!-- Selected classes -->
                         <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder"
                             class="flex flex-wrap gap-2">
@@ -299,9 +332,15 @@
 
                     <!-- Dropdown -->
                     <div #classDropdown class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
-                        *ngIf="directMark.directMarkClasses && directMark.subjectID && classDropdownOpen">
+                        *ngIf="
+                            directMark.directMarkClasses &&
+                            (
+                            (directMark.isSummerCourse && directMark.date && classDropdownOpen) ||
+                            (!directMark.isSummerCourse && directMark.subjectID && classDropdownOpen)
+                            )
+                        ">
                         <ul>
-                            <li class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            <li *ngIf="classrooms.length !== 0" class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                 <input id="all" type="checkbox" class="mr-2" [checked]="directMark.allClasses"
                                     (change)="toggleSelectAll($event)">
                                 <label for="all">{{ 'Choose All' | translate }}</label>
@@ -354,19 +393,14 @@
                 <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mark']
                     }}</span>
             </div>
-            <div class="flex flex-col mb-4 w-[49%]">
+            <div *ngIf="!directMark.isSummerCourse" class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="date"> {{ ' Date' | translate }}</label>
                 <input id="Date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="directMark.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['date'] }}</span>
-            </div>
-            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
-                <input type="checkbox" id="Summer" class="w-5 h-5"
-                    [(ngModel)]="directMark.isSummerCourse">
-                <label for="Summer" class="text-sm">  {{ 'Summer Course' | translate }}</label>
-            </div>
+            </div> 
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading"

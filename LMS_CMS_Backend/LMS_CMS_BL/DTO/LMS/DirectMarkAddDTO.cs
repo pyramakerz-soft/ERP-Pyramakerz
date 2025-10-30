@@ -17,7 +17,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public DateOnly Date { get; set; }
         public long SchoolID { get; set; }
         public long SubjectID { get; set; }
-        public long SubjectWeightTypeID { get; set; }
+        public long? SubjectWeightTypeID { get; set; }
         public bool AllClasses { get; set; }
         public List<long>? classids { get; set; }
         public bool IsSummerCourse { get; set; }

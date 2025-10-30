@@ -12,8 +12,7 @@ export class Assignment {
         public dueDate: string | null = null,
         public cutOfDate: string = '',
         public isSpecificStudents: boolean = false,
-        public isVisibleToStudent: boolean = false,
-        public isSummerCourse: boolean = false,
+        public isVisibleToStudent: boolean = false, 
         public linkFile: string = '',
         public fileFile: File | null = null,
         public subjectEnglishName: string = '',
@@ -46,6 +45,8 @@ export class AssignmentReportItem {
     public subjectName: string = '',
     public attendanceNumber: number = 0,
     public numberSuccessful: number = 0,
-    public numberFailed: number = 0
+    public numberFailed: number = 0,
+    public assigned: number = 0,
+    public absent: number = 0
   ) {}
 }

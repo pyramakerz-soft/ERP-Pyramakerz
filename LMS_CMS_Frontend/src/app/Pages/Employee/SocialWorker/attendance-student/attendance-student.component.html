@@ -18,13 +18,14 @@
     <div class="w-[33%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="attendance.schoolID"
+            [(ngModel)]="attendance.schoolID" [disabled]="mode == 'Edit' "
             (change)="GetAllAcademicYearsBySchool(); GetAllGradesBySchool(); IsViewTable=false"
             (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">
                 {{ school.name }}
             </option>
+            <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["schoolID"]}}</span>
@@ -34,13 +35,14 @@
             translate }}</label>
         <select id="attendance.academicYearID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="attendance.academicYearID" (change)="IsViewTable=false" [disabled]="!attendance.schoolID"
+            [(ngModel)]="attendance.academicYearID" (change)="IsViewTable=false" [disabled]=" !attendance.schoolID || mode == 'Edit' "
             (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Academic Year' | translate }}
             </option>
             <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="AcademicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['academicYearID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["academicYearID"]}}</span>
@@ -51,11 +53,12 @@
         <select id="attendance.gradeID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="attendance.gradeID" (change)="GetAllclassesBygrade(); IsViewTable=false"
-            [disabled]="!attendance.schoolID" (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
+            [disabled]="!attendance.schoolID || this.mode == 'Edit' " (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
             <option *ngFor="let grade of Grades" [value]="grade.id">
                 {{ grade.name }}
             </option>
+            <option *ngIf="Grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["gradeID"]}}</span>
@@ -65,13 +68,14 @@
             translate}}</label>
         <select id="attendance.classroomID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="attendance.classroomID" (change)="IsViewTable=false" [disabled]="!attendance.gradeID"
+            [(ngModel)]="attendance.classroomID" (change)="IsViewTable=false" [disabled]="!attendance.gradeID || mode == 'Edit'"
             (change)="GetStudentsByClass();"
             (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Classroom' | translate }}</option>
             <option *ngFor="let class of Classes" [value]="class.id">
                 {{ class.name }}
             </option>
+            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["classroomID"]}}</span>

@@ -465,9 +465,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       this.tableDataForExport = this.tableData.map((item) => {
         const row: any = {
           Date: item.date,
-          Name: item.englishNameStudent,
-          'Ar Name': item.arabicNameStudent,
-          'Student ID': item.studentId,
+          // Name: item.englishNameStudent,
+          // 'Ar Name': item.arabicNameStudent,
+          // 'Student ID': item.studentId,
         };
         
         this.performanceTypes.forEach((type) => {
@@ -512,8 +512,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             data: this.tableData.map((item) => {
               const row: any = {
                 Date: item.date,
-                Name: item.englishNameStudent,
-                'Student ID': item.studentId,
+                // Name: item.englishNameStudent,
+                // 'Student ID': item.studentId,
               };
               
               this.performanceTypes.forEach((type) => {
@@ -648,15 +648,15 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       }
 
       const headers = (this.reportType === 'student' || this.reportType === 'parent')
-        ? ['Date', 'Name', 'Student ID', ...this.performanceTypes.map(t => t.englishName), 'Comment']
+        ? ['Date', ...this.performanceTypes.map(t => t.englishName), 'Comment']
         : ['Date', ...this.performanceTypes.map(t => t.englishName)];
 
       const tableData = this.tableData.map((item) => {
         if (this.reportType === 'student' || this.reportType === 'parent') {
           const row = [
             item.date,
-            item.englishNameStudent,
-            item.studentId,
+            // item.englishNameStudent,
+            // item.studentId,
           ];
           
           this.performanceTypes.forEach((type) => {
@@ -720,16 +720,16 @@ getTableDataWithHeaderForPDF(): any[] {
         })),
         tableHeaders: [
           'Date',
-          'Student ID', 
-          'Name',
+          // 'Student ID', 
+          // 'Name',
           ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName),
           'Comment'
         ],
         tableData: this.tableData.map((item) => {
           const row: any = {
             'Date': item.date,
-            'Student ID': item.studentId,
-            'Name': item.englishNameStudent,
+            // 'Student ID': item.studentId,
+            // 'Name': item.englishNameStudent,
           };
           
           // Add performance type columns with star representation only (no numbers)
@@ -778,12 +778,11 @@ getTableDataWithHeaderForPDF(): any[] {
     ];
   }
 }
+
 getTableHeaders(): string[] {
   if (this.reportType === 'student' || this.reportType === 'parent') {
     return [
       'Date',
-      'Student ID', 
-      'Name',
       ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName),
       'Comment'
     ];
@@ -800,8 +799,8 @@ getTableDataForPDF(): any[] {
     return this.tableData.map((item) => {
       const row: any = {
         'Date': item.date,
-        'Student ID': item.studentId,
-        'Name': item.englishNameStudent,
+        // 'Student ID': item.studentId,
+        // 'Name': item.englishNameStudent,
       };
       
       // Add performance type columns with star representation only (no numbers)

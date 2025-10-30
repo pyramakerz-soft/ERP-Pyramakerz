@@ -73,9 +73,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                  periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
             }
 
+            // Convert DateOnly to DateTime for comparison with ClockIn (which is DateTime)
+            DateTime periodStartDateTime = periodStart.ToDateTime(TimeOnly.MinValue);
+            DateTime periodEndDateTime = periodEnd.ToDateTime(TimeOnly.MaxValue);
+
             var employeeClocks = Unit_Of_Work.employeeClocks_Repository
-                .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId )
-                .OrderBy(t => t.Date)
+                .FindBy(t =>
+                    t.IsDeleted != true &&
+                    t.ClockIn >= periodStartDateTime &&
+                    t.ClockIn <= periodEndDateTime &&
+                    t.EmployeeID == EmpId)
+                .OrderBy(t => t.ClockIn)
                 .ToList();
 
             if (employeeClocks == null || employeeClocks.Count == 0)
@@ -178,11 +186,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             if(NewClock.ClockIn == null || NewClock.ClockOut== null)
-            {
-                return BadRequest("ClockIn and ClockOut are required");
-            }
-
-            if (NewClock.ClockIn > NewClock.ClockOut)
             {
                 return BadRequest("ClockIn and ClockOut are required");
             }
@@ -393,7 +396,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
 
             clock.Date = DateOnly.FromDateTime(DateTime.Now);   // today
-            clock.ClockIn = DateTime.Now.TimeOfDay;             // current time
+            clock.ClockIn = DateTime.Now;             // current time
             clock.ClockOut = null;                              // default until they clock out
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -455,7 +458,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest(new { error = "this user already clock out" });
             }
 
-            clock.ClockOut = DateTime.Now.TimeOfDay;
+            clock.ClockOut = DateTime.Now;
 
             if (employee.IsRestrictedForLoctaion)
             {

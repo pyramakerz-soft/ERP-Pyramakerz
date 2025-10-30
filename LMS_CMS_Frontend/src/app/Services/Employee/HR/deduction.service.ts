@@ -76,26 +76,37 @@ export class DeductionService {
     return this.http.delete(`${this.baseUrl}/Deduction/${id}`, { headers })
   }
 
-GetDeductionReport(jobCategoryId: number, jobId: number, employeeId: number, dateFrom: string, dateTo: string, DomainName: string) {
-  if (DomainName != null) {
-    this.header = DomainName;
+  GetDeductionReport(jobCategoryId?: number, jobId?: number, employeeId?: number, dateFrom?: string, dateTo?: string, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    const requestBody: any = {};
+
+    // only include params that are actually selected/passed
+    if (typeof jobCategoryId === 'number' && jobCategoryId > 0) {
+      requestBody.jobCategoryId = jobCategoryId;
+    }
+    if (typeof jobId === 'number' && jobId > 0) {
+      requestBody.jobId = jobId;
+    }
+    if (typeof employeeId === 'number' && employeeId > 0) {
+      requestBody.employeeId = employeeId;
+    }
+    if (dateFrom) {
+      requestBody.dateFrom = dateFrom;
+    }
+    if (dateTo) {
+      requestBody.dateTo = dateTo;
+    }
+
+    return this.http.post<any[]>(`${this.baseUrl}/Deduction/report`, requestBody, { headers });
   }
-  
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
-  
-  const requestBody = {
-    jobCategoryId: jobCategoryId,
-    jobId: jobId,
-    employeeId: employeeId,
-    dateFrom: dateFrom,
-    dateTo: dateTo
-  };
-  
-  return this.http.post<any[]>(`${this.baseUrl}/Deduction/report`, requestBody, { headers });
-}
 
 }

@@ -104,11 +104,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 return BadRequest("Employee data is required.");
             }
 
-            bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(NewRegistrationEmployee.RecaptchaToken);
-            if (!isValidCaptcha)
-            {
-                return BadRequest("You must confirm you are not a robot.");
-            }
+            //bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(NewRegistrationEmployee.RecaptchaToken);
+            //if (!isValidCaptcha)
+            //{
+            //    return BadRequest("You must confirm you are not a robot.");
+            //}
 
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             if (!Regex.IsMatch(NewRegistrationEmployee.Email, pattern))
