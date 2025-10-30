@@ -285,9 +285,11 @@ import { LoansStatusComponent } from './Pages/Employee/HR/Reports/loans-status/l
 import { DashboardComponent } from './Pages/Employee/Dashboard/dashboard/dashboard.component';
 import { ParentLessonComponent } from './Pages/Parent/LMS/parent-lesson/parent-lesson.component';
 import { TimeTableStudentComponent } from './Pages/Student/time-table-student/time-table-student.component';
+import { PrivacyHrComponent } from './Pages/privacy-hr/privacy-hr.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
+    { path: "privacy_hr", component: PrivacyHrComponent, title: "privacy_hr" },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "SignUp", component: SignUpComponent, title: "SignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "EmployeeSignUp", component: SignUpEmployeeComponent, title: "EmployeeSignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
