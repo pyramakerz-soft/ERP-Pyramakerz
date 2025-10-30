@@ -140,11 +140,11 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     return BadRequest($"Invalid DepartureTime for employee {employee.ID}: {employee.DepartureTime}");
                 }
 
-                List<EmployeeClocks> AllemployeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date.Month == month && c.Date.Year == year && c.IsDeleted != true);
-                if (AllemployeeClocks.Any(a => a.ClockOut == null))
-                {
-                    return BadRequest($"Employee {employee.ID} has days without clock out.");
-                }
+                //List<EmployeeClocks> AllemployeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date.Month == month && c.Date.Year == year && c.IsDeleted != true);
+                //if (AllemployeeClocks.Any(a => a.ClockOut == null))
+                //{
+                //    return BadRequest($"Employee {employee.ID} has days without clock out.");
+                //}
 
                 TimeSpan attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
                 TimeSpan departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
@@ -156,8 +156,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 // Check if the shift ends on the same date or next day
                 if (departureTime < attendanceTime)
                 {
-                    Console.WriteLine($"attendanceTime: {attendanceTime}");
-                    Console.WriteLine($"departureTime: {departureTime}");
                     // Example: 11 PM → 7 AM
                     fullDayHours = (TimeSpan.FromHours(24) - attendanceTime) + departureTime;
                 }
@@ -169,9 +167,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 // Calculate half-day hours
                 halfDayHours = TimeSpan.FromHours(fullDayHours.TotalHours / 2);
-
-                Console.WriteLine($"Full day hours: {fullDayHours}");
-                Console.WriteLine($"Half day hours: {halfDayHours}");
 
                 List<EmployeeDays> employeeDays = await Unit_Of_Work.employeeDays_Repository.Select_All_With_IncludesById<EmployeeDays>(d => d.EmployeeID == employee.ID && d.IsDeleted != true,
                 query => query.Include(Master => Master.Day));
@@ -188,6 +183,29 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     DayOfWeek dayOfWeek = day.DayOfWeek;
                     string currentDayName = dayOfWeek.ToString();
 
+                    List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                    if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                    {
+                        TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                        TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+
+                        var startOfRange = day.ToDateTime(departureTimeOnly);
+                        var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
+
+                        employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                            c.EmployeeID == employee.ID &&
+                            c.ClockOut != null &&
+                            c.IsDeleted != true &&
+                            (
+                                c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                            )
+                        ).ToList();
+                    }
+                    else
+                    {
+                        employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.ClockOut != null &&  c.Date == day && c.IsDeleted != true);
+                    }
+
 
                     if (dayNames.Contains(currentDayName))
                     {
@@ -197,27 +215,27 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             monthlyAttendance.DayStatusId = 4; ///////////////////////////////////////////////////////////////////////////////////// OfficialHolidays
 
                             // check if he work in OfficialHolidays 
-                            List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                            if (departureTime < attendanceTime)  // if the day is 2025-10-30
-                            {
-                                TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
-                                TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+                            //List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                            //if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                            //{
+                            //    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                            //    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
 
-                                var startOfRange = day.ToDateTime(departureTimeOnly);
-                                var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
+                            //    var startOfRange = day.ToDateTime(departureTimeOnly);
+                            //    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
 
-                                employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
-                                    c.EmployeeID == employee.ID &&
-                                    c.IsDeleted != true &&
-                                    (
-                                        c.ClockIn >= startOfRange && c.ClockIn < endOfRange
-                                    )
-                                ).ToList();
-                            }
-                            else
-                            {
-                                employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
-                            }
+                            //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                            //        c.EmployeeID == employee.ID &&
+                            //        c.IsDeleted != true &&
+                            //        (
+                            //            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                            //        )
+                            //    ).ToList();
+                            //}
+                            //else
+                            //{
+                            //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                            //}
                             if (employeeClocks != null && employeeClocks.Count > 0)
                             {
                                 TimeSpan totalWorked = TimeSpan.Zero;
@@ -244,27 +262,27 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             if (vacationEmployee != null && vacationEmployee.HalfDay == true) // half day vacation
                             {
                                 monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation without deduction
-                                List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                                if (departureTime < attendanceTime)  // if the day is 2025-10-30
-                                {
-                                    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
-                                    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+                                //List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                                //if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                                //{
+                                //    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                                //    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
 
-                                    var startOfRange = day.ToDateTime(departureTimeOnly);
-                                    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
+                                //    var startOfRange = day.ToDateTime(departureTimeOnly);
+                                //    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
 
-                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
-                                        c.EmployeeID == employee.ID &&
-                                        c.IsDeleted != true &&
-                                        (
-                                            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
-                                        )
-                                    ).ToList();
-                                }
-                                else
-                                {
-                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
-                                }
+                                //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                                //        c.EmployeeID == employee.ID &&
+                                //        c.IsDeleted != true &&
+                                //        (
+                                //            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                                //        )
+                                //    ).ToList();
+                                //}
+                                //else
+                                //{
+                                //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                //}
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 {
                                     TimeSpan totalWorked = TimeSpan.Zero;
@@ -351,27 +369,27 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             else if(vacationEmployee != null && vacationEmployee.HalfDay == false)
                             {
                                 monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation with out deduction
-                                List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                                if (departureTime < attendanceTime)  // if the day is 2025-10-30
-                                {
-                                    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
-                                    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+                                //List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                                //if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                                //{
+                                //    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                                //    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
 
-                                    var startOfRange = day.ToDateTime(departureTimeOnly);
-                                    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
+                                //    var startOfRange = day.ToDateTime(departureTimeOnly);
+                                //    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
 
-                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
-                                        c.EmployeeID == employee.ID &&
-                                        c.IsDeleted != true &&
-                                        (
-                                            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
-                                        )
-                                    ).ToList();
-                                }
-                                else
-                                {
-                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
-                                }
+                                //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                                //        c.EmployeeID == employee.ID &&
+                                //        c.IsDeleted != true &&
+                                //        (
+                                //            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                                //        )
+                                //    ).ToList();
+                                //}
+                                //else
+                                //{
+                                //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                //}
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 {
                                     TimeSpan totalWorked = TimeSpan.Zero;
@@ -394,27 +412,28 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                             }
                             else // he should be present
                             {
-                                List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                                if (departureTime < attendanceTime)  // if the day is 2025-10-30
-                                {
-                                    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
-                                    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+                                //List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                                //if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                                //{
+                                //    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                                //    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
 
-                                    var startOfRange = day.ToDateTime(departureTimeOnly);
-                                    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);             
+                                //    var startOfRange = day.ToDateTime(departureTimeOnly);
+                                //    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);             
 
-                                    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
-                                        c.EmployeeID == employee.ID &&
-                                        c.IsDeleted != true &&
-                                        (
-                                            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
-                                        )
-                                    ).ToList();
-                                }
-                                else
-                                {
-                                  employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
-                                }
+                                //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                                //        c.EmployeeID == employee.ID &&
+                                //        c.ClockOut != null &&
+                                //        c.IsDeleted != true &&
+                                //        (
+                                //            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                                //        )
+                                //    ).ToList();
+                                //}
+                                //else
+                                //{
+                                //  employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                //}
 
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 { 
@@ -560,27 +579,27 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     {
                         monthlyAttendance.DayStatusId = 5; ///////////////////////////////////////////////////////////////////////////////////// weekend
 
-                        List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
-                        if (departureTime < attendanceTime)  // if the day is 2025-10-30
-                        {
-                            TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
-                            TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
+                        //List<EmployeeClocks> employeeClocks = new List<EmployeeClocks>();
+                        //if (departureTime < attendanceTime)  // if the day is 2025-10-30
+                        //{
+                        //    TimeOnly attendanceTimeOnly = TimeOnly.Parse(employee.AttendanceTime);
+                        //    TimeOnly departureTimeOnly = TimeOnly.Parse(employee.DepartureTime);
 
-                            var startOfRange = day.ToDateTime(departureTimeOnly);
-                            var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
+                        //    var startOfRange = day.ToDateTime(departureTimeOnly);
+                        //    var endOfRange = day.AddDays(1).ToDateTime(departureTimeOnly);
 
-                            employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
-                                c.EmployeeID == employee.ID &&
-                                c.IsDeleted != true &&
-                                (
-                                    c.ClockIn >= startOfRange && c.ClockIn < endOfRange
-                                )
-                            ).ToList();
-                        }
-                        else
-                        {
-                            employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
-                        }
+                        //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c =>
+                        //        c.EmployeeID == employee.ID &&
+                        //        c.IsDeleted != true &&
+                        //        (
+                        //            c.ClockIn >= startOfRange && c.ClockIn < endOfRange
+                        //        )
+                        //    ).ToList();
+                        //}
+                        //else
+                        //{
+                        //    employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                        //}
 
                         // check if he work in weekend 
                         if (employeeClocks != null && employeeClocks.Count > 0)
