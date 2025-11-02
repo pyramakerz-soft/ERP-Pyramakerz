@@ -85,15 +85,15 @@ export class ViolationReportComponent {
   }
 
   ResetFilter() {
-  this.SelectedEmployeeTypeId = 0;
-  this.SelectedViolationTypeId = 0;
-  this.SelectedStartDate = '';
-  this.SelectedEndDate = '';
-  this.violationTypes = [];
-  this.showTable = false;
-  this.showViewReportBtn = false;
-  this.tableData = [];
-}
+    this.SelectedEmployeeTypeId = 0;
+    this.SelectedViolationTypeId = 0;
+    this.SelectedStartDate = '';
+    this.SelectedEndDate = '';
+    this.violationTypes = [];
+    this.showTable = false;
+    this.showViewReportBtn = false;
+    this.tableData = [];
+  }
 
   GetEmployeeTypes() {
     this.employeeTypeService.Get(this.DomainName).subscribe((data) => {
@@ -181,14 +181,14 @@ export class ViolationReportComponent {
     const empType = this.empTypes.find(
       (e) => e.id == this.SelectedEmployeeTypeId
     );
-    return empType ? empType.name : 'Undefined';
+    return empType ? empType.name : 'All Employees';
   }
 
   get violationTypeName(): string {
     const violType = this.violationTypes.find(
       (v) => v.id == this.SelectedViolationTypeId
     );
-    return violType ? violType.name : 'Undefined';
+    return violType ? violType.name : 'All Violation Types';
   }
 
   getInfoRows(): any[] {
@@ -342,29 +342,21 @@ export class ViolationReportComponent {
       const tableData = this.tableData.map((item) => [
         item.id,
         item.date,
-
+        item.violationType,
+        item.employeeType,
         item.employeeEnglishName,
         item.details || '-',
       ]);
 
-      // Prepare info rows
-      const selectedEmpType = this.empTypes.find(
-        (e) => e.id == this.SelectedEmployeeTypeId
-      );
-      const selectedViolationType = this.violationTypes.find(
-        (v) => v.id == this.SelectedViolationTypeId
-      );
-
       const infoRows = [
-        { key: 'Employee Type', value: selectedEmpType?.name || 'All' },
-        { key: 'Violation Type', value: selectedViolationType?.name || 'All' },
+        { key: 'Employee Type', value: this.employeeTypeName || 'All' },
+        { key: 'Violation Type', value: this.violationTypeName || 'All' },
         { key: 'Start Date', value: this.SelectedStartDate },
         { key: 'End Date', value: this.SelectedEndDate },
         { key: 'Generated On', value: new Date().toLocaleDateString() },
       ];
 
-      // Prepare headers
-      const headers = ['ID', 'Date', 'Employee Name', 'Details'];
+      const headers = ['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details'];
 
       // Generate the Excel report using the service - skip the image to avoid the error
       await this.reportsService.generateExcelReport({
@@ -379,7 +371,7 @@ export class ViolationReportComponent {
           },
         ],
         infoRows: infoRows,
-        reportImage: undefined, // Skip the image to avoid the "Unsupported media" error
+        reportImage: undefined,
         tables: [
           {
             // title: 'Violation Data',
@@ -400,5 +392,9 @@ export class ViolationReportComponent {
         confirmButtonText: 'OK',
       });
     }
+  }
+
+  get generatedOn(): string {
+    return new Date().toLocaleDateString();
   }
 }
