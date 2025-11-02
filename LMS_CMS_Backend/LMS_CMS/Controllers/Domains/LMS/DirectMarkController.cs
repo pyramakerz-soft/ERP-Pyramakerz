@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -167,7 +168,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewDirectMark == null)
             {
-                return BadRequest("NewDirectMark cannot be null");
+                return BadRequest("Direct Mark cannot be null");
             }
 
             Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(g => g.ID == NewDirectMark.SubjectID && g.IsDeleted != true);
@@ -210,50 +211,73 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<long> classids = classroomSubjects.Select(a=>a.ClassroomID).Distinct().ToList();
 
-            if (NewDirectMark.AllClasses)
+            //if (NewDirectMark.AllClasses)
+            //{
+
+            //    foreach (var claaId in classids)
+            //    {
+            //        DirectMarkClasses directMarkClasses = new DirectMarkClasses();
+            //        directMarkClasses.ClassroomID = claaId;
+            //        directMarkClasses.DirectMarkID = directMark.ID;
+            //        Unit_Of_Work.directMarkClasses_Repository.Add(directMarkClasses);
+            //        Unit_Of_Work.SaveChanges();
+
+            //        List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(a => a.SubjectID == NewDirectMark.SubjectID && a.Hide != true 
+            //        && a.StudentClassroom.ClassID == claaId && a.StudentClassroom.Classroom.AcademicYear.IsActive == true && a.StudentClassroom.Classroom.AcademicYear.SchoolID==NewDirectMark.SchoolID);
+
+            //        List<long> studentClassroomids = studentClassroomSubjects.Select(a=>a.StudentClassroomID).Distinct().ToList();
+
+            //        foreach (var studentClassroomId in studentClassroomids)
+            //        {
+            //            DirectMarkClassesStudent directMarkClassesStudent = new DirectMarkClassesStudent();
+            //            directMarkClassesStudent.StudentClassroomID = studentClassroomId;
+            //            directMarkClassesStudent.DirectMarkID = directMark.ID;
+            //            directMarkClassesStudent.Degree = 0;
+            //            Unit_Of_Work.directMarkClassesStudent_Repository.Add(directMarkClassesStudent);
+            //            Unit_Of_Work.SaveChanges();
+            //        }
+            //    }
+
+            //}
+            //else
+            //{
+            //}
+            foreach (var claaId in NewDirectMark.classids)
             {
-
-                foreach (var claaId in classids)
+                if (!classids.Contains(claaId))
                 {
-                    DirectMarkClasses directMarkClasses = new DirectMarkClasses();
-                    directMarkClasses.ClassroomID = claaId;
-                    directMarkClasses.DirectMarkID = directMark.ID;
-                    Unit_Of_Work.directMarkClasses_Repository.Add(directMarkClasses);
-                    Unit_Of_Work.SaveChanges();
-
-                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(a => a.SubjectID == NewDirectMark.SubjectID && a.Hide != true 
-                    && a.StudentClassroom.ClassID == claaId && a.StudentClassroom.Classroom.AcademicYear.IsActive == true && a.StudentClassroom.Classroom.AcademicYear.SchoolID==NewDirectMark.SchoolID);
-
-                    List<long> studentClassroomids = studentClassroomSubjects.Select(a=>a.StudentClassroomID).Distinct().ToList();
-
-                    foreach (var studentClassroomId in studentClassroomids)
-                    {
-                        DirectMarkClassesStudent directMarkClassesStudent = new DirectMarkClassesStudent();
-                        directMarkClassesStudent.StudentClassroomID = studentClassroomId;
-                        directMarkClassesStudent.DirectMarkID = directMark.ID;
-                        directMarkClassesStudent.Degree = 0;
-                        Unit_Of_Work.directMarkClassesStudent_Repository.Add(directMarkClassesStudent);
-                        Unit_Of_Work.SaveChanges();
-                    }
+                    return BadRequest("class should take this subject");
                 }
 
-            }
-            else
-            {
-                foreach (var claaId in NewDirectMark.classids)
+                DirectMarkClasses directMarkClasses = new DirectMarkClasses();
+                directMarkClasses.ClassroomID = claaId;
+                directMarkClasses.DirectMarkID = directMark.ID;
+                Unit_Of_Work.directMarkClasses_Repository.Add(directMarkClasses);
+
+                if (NewDirectMark.IsSummerCourse)
                 {
-                    if (!classids.Contains(claaId))
+                    List<FailedStudents> failedStudents = Unit_Of_Work.failedStudents_Repository.FindBy(a => a.SubjectID == NewDirectMark.SubjectID && a.IsDeleted != true
+                    && a.AcademicYear.SummerCourseDateFrom <= NewDirectMark.Date && a.AcademicYear.SummerCourseDateTo >= NewDirectMark.Date);
+
+                    if (failedStudents.Any())
                     {
-                        return BadRequest("class should take this subject");
-                    }
-
-                    DirectMarkClasses directMarkClasses = new DirectMarkClasses();
-                    directMarkClasses.ClassroomID = claaId;
-                    directMarkClasses.DirectMarkID = directMark.ID;
-                    Unit_Of_Work.directMarkClasses_Repository.Add(directMarkClasses);
-                    Unit_Of_Work.SaveChanges();
-
-                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(a => a.SubjectID == NewDirectMark.SubjectID && a.Hide != true
+                        foreach (var failed in failedStudents)
+                        {
+                            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                                d => d.IsDeleted != true && d.StudentID == failed.StudentID && d.Classroom.GradeID == failed.GradeID && d.Classroom.AcademicYearID == failed.AcademicYearID
+                                );
+                        
+                            DirectMarkClassesStudent directMarkClassesStudent = new DirectMarkClassesStudent();
+                            directMarkClassesStudent.StudentClassroomID = studentClassroom.ID;
+                            directMarkClassesStudent.DirectMarkID = directMark.ID;
+                            directMarkClassesStudent.Degree = 0;
+                            Unit_Of_Work.directMarkClassesStudent_Repository.Add(directMarkClassesStudent);
+                        }
+                    } 
+                }
+                else
+                {
+                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(a => a.SubjectID == NewDirectMark.SubjectID && a.IsDeleted != true && a.Hide != true
                     && a.StudentClassroom.ClassID == claaId && a.StudentClassroom.Classroom.AcademicYear.IsActive == true && a.StudentClassroom.Classroom.AcademicYear.SchoolID == NewDirectMark.SchoolID);
 
                     List<long> studentClassroomids = studentClassroomSubjects.Select(a => a.StudentClassroomID).Distinct().ToList();
@@ -265,11 +289,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         directMarkClassesStudent.DirectMarkID = directMark.ID;
                         directMarkClassesStudent.Degree = 0;
                         Unit_Of_Work.directMarkClassesStudent_Repository.Add(directMarkClassesStudent);
-                        Unit_Of_Work.SaveChanges();
                     }
                 }
             }
 
+            Unit_Of_Work.SaveChanges();
             return Ok(NewDirectMark);
         }
 
@@ -357,7 +381,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             var classesToAdd = updatedClassIds.Except(existingClassIds).ToList();
             var classesToDelete = existingClassIds.Except(updatedClassIds).ToList();
-
+             
             // Add new classes and related students
             foreach (var classId in classesToAdd)
             {
@@ -366,28 +390,50 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     ClassroomID = classId,
                     DirectMarkID = directMark.ID
                 };
-                Unit_Of_Work.directMarkClasses_Repository.Add(newClass);
-                Unit_Of_Work.SaveChanges();
+                Unit_Of_Work.directMarkClasses_Repository.Add(newClass); 
 
-                List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
-                    a => a.SubjectID == directMark.SubjectID &&
-                         a.Hide != true &&
-                         a.StudentClassroom.ClassID == classId &&
-                         a.StudentClassroom.Classroom.AcademicYear.IsActive == true &&
-                         a.StudentClassroom.Classroom.AcademicYear.SchoolID == NewDirectMark.SchoolID
-                );
-
-                foreach (var studentClassroomId in studentClassroomSubjects.Select(a => a.StudentClassroomID).Distinct())
+                if (NewDirectMark.IsSummerCourse)
                 {
-                    DirectMarkClassesStudent student = new DirectMarkClassesStudent
+                    List<FailedStudents> failedStudents = Unit_Of_Work.failedStudents_Repository.FindBy(a => a.SubjectID == directMark.SubjectID && a.IsDeleted != true
+                    && a.AcademicYear.SummerCourseDateFrom <= NewDirectMark.Date && a.AcademicYear.SummerCourseDateTo >= NewDirectMark.Date);
+
+                    if (failedStudents.Any())
                     {
-                        StudentClassroomID = studentClassroomId,
-                        DirectMarkID = directMark.ID,
-                        Degree = 0
-                    };
-                    Unit_Of_Work.directMarkClassesStudent_Repository.Add(student);
+                        foreach (var failed in failedStudents)
+                        {
+                            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                                d => d.IsDeleted != true && d.StudentID == failed.StudentID && d.Classroom.GradeID == failed.GradeID && d.Classroom.AcademicYearID == failed.AcademicYearID
+                                );
+
+                            DirectMarkClassesStudent directMarkClassesStudent = new DirectMarkClassesStudent();
+                            directMarkClassesStudent.StudentClassroomID = studentClassroom.ID;
+                            directMarkClassesStudent.DirectMarkID = directMark.ID;
+                            directMarkClassesStudent.Degree = 0;
+                            Unit_Of_Work.directMarkClassesStudent_Repository.Add(directMarkClassesStudent); 
+                        }
+                    }
                 }
-                Unit_Of_Work.SaveChanges();
+                else
+                {
+                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                        a => a.SubjectID == directMark.SubjectID &&
+                             a.Hide != true &&
+                             a.StudentClassroom.ClassID == classId &&
+                             a.StudentClassroom.Classroom.AcademicYear.IsActive == true &&
+                             a.StudentClassroom.Classroom.AcademicYear.SchoolID == NewDirectMark.SchoolID
+                    );
+
+                    foreach (var studentClassroomId in studentClassroomSubjects.Select(a => a.StudentClassroomID).Distinct())
+                    {
+                        DirectMarkClassesStudent student = new DirectMarkClassesStudent
+                        {
+                            StudentClassroomID = studentClassroomId,
+                            DirectMarkID = directMark.ID,
+                            Degree = 0
+                        };
+                        Unit_Of_Work.directMarkClassesStudent_Repository.Add(student);
+                    }
+                } 
             }
 
 
@@ -410,11 +456,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     student.IsDeleted = true;
                     Unit_Of_Work.directMarkClassesStudent_Repository.Update(student);
-                }
-
-                Unit_Of_Work.SaveChanges();
+                } 
             }
 
+            Unit_Of_Work.SaveChanges();
             return Ok(NewDirectMark);
         }
 
