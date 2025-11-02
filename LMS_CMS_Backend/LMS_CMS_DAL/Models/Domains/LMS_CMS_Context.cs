@@ -306,9 +306,9 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(p => p.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<ViolationType>()
-                .HasIndex(p => p.Name)
-                .IsUnique();
+            //modelBuilder.Entity<ViolationType>()
+            //    .HasIndex(p => p.Name)
+            //    .IsUnique();
 
             modelBuilder.Entity<EmployeeType>()
                 .HasIndex(p => p.Name)
