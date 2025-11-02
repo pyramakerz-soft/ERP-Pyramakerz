@@ -123,10 +123,8 @@
             <option *ngFor="let c of Students" [value]="c.id">{{ c.en_name }}</option>
             <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
-    </div>
-
-
-
+    </div> 
+    
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" [disabled]="ValidateViewOr()" (click)="Apply()"
             [ngClass]="{ 'bg-gray-100 text-gray-300':ValidateViewOr(), 'secondaryBg text-white': ValidateViewAnd()}">

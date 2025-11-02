@@ -326,13 +326,15 @@ export class ClassroomComponent {
         const field = key as keyof Classroom;
         if (!this.classroom[field]) {
           if(field == "name" || field == "number" || field == "gradeID" || field == "floorID" || field == "academicYearID"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(field as string)}`;
             isValid = false;
           }
         } else {
           if(field == "name"){
             if(this.classroom.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant('cannot be longer than 100 characters');
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
           } else{
@@ -344,6 +346,17 @@ export class ClassroomComponent {
     return isValid;
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+ 
   onInputValueChange(event: { field: keyof Classroom, value: any }) {
     const { field, value } = event;
     

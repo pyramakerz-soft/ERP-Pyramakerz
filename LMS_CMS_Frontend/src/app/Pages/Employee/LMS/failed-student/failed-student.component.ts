@@ -7,11 +7,14 @@ import { ApiService } from '../../../../Services/api.service';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-failed-student',
   standalone: true,
-  imports: [CommonModule, SearchComponent],
+  imports: [CommonModule, SearchComponent, FormsModule],
   templateUrl: './failed-student.component.html',
   styleUrl: './failed-student.component.css'
 })
@@ -20,30 +23,39 @@ export class FailedStudentComponent {
   key: string = 'id';
   value: any = ''; 
   FailedStudentsData: FailedStudents[] = []; 
-  path: string = '';
-
+  yearID: number = 0; 
+  AcademicYearsData: AcademicYear[] = []; 
+  isView: boolean = false
+  
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
- 
+  
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,  
     public failedStudentsService: FailedStudentsService, 
+    public acadimicYearService: AcadimicYearService 
   ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
-    this.DomainName = this.ApiServ.GetHeader();
- 
-    this.getFailedStudentData(); 
+    this.DomainName = this.ApiServ.GetHeader(); 
+    this.getAcademicYear()
   }
  
-  getFailedStudentData() {
+  getAcademicYear() {
+    this.AcademicYearsData = []
+    this.acadimicYearService.Get(this.DomainName).subscribe((data) => {
+      this.AcademicYearsData = data;
+    });
+  }
+ 
+  getFailedStudentDataByAcademicYear() {
     this.FailedStudentsData = []
-    this.failedStudentsService.Get(this.DomainName).subscribe((data) => {
+    this.failedStudentsService.GetByAcademicYearID(this.yearID, this.DomainName).subscribe((data) => {
       this.FailedStudentsData = data;
     });
   }
@@ -53,7 +65,7 @@ export class FailedStudentComponent {
     this.value = event.value;
     try {
       const data: FailedStudents[] = await firstValueFrom(
-        this.failedStudentsService.Get(this.DomainName)
+        this.failedStudentsService.GetByAcademicYearID(this.yearID, this.DomainName)
       );
       this.FailedStudentsData = data || [];
 

@@ -5,7 +5,16 @@
     </div>
 </div>
 
-<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+<div class="mt-5 flex w-full flex-col mb-4">     
+    <select class="rounded-lg border border-solid border-gray-300 p-3 overflow-y-auto" id="ACY" 
+    [(ngModel)]="yearID" (ngModelChange)="getFailedStudentDataByAcademicYear(); isView = true">
+        <option [value]="0" disabled selected hidden>Choose Academic Year</option>
+        <option *ngFor="let s of AcademicYearsData" [value]="s.id">{{ s.name }}</option>
+        <option *ngIf="AcademicYearsData.length === 0" disabled selected>No Data Found</option>
+    </select> 
+</div>
+
+<div *ngIf="isView" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>

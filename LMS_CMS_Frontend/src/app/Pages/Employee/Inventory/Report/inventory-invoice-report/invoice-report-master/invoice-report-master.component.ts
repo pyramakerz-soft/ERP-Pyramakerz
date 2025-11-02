@@ -46,9 +46,6 @@ export class InventoryTransactionReportComponent implements OnInit {
   selectedFlagId: number = -1;
   selectedFlagIds: number[] = [];
 
-
-  
-
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
 
   showPDF = false;

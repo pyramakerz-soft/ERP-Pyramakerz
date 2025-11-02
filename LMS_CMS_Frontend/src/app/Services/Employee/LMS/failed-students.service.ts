@@ -14,7 +14,7 @@ export class FailedStudentsService {
     this.baseUrl = ApiServ.BaseUrl
   } 
 
-  Get(DomainName:string) {
+  GetByAcademicYearID(yeaID:number, DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -23,6 +23,6 @@ export class FailedStudentsService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<FailedStudents[]>(`${this.baseUrl}/FailedStudent`, { headers })
+    return this.http.get<FailedStudents[]>(`${this.baseUrl}/FailedStudent/GetByAcademicYearID/${yeaID}`, { headers })
   }
 }

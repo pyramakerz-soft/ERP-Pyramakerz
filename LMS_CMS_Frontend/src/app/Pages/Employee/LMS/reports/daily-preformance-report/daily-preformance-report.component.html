@@ -168,54 +168,57 @@
         </table>
     </div>
 
-    <!-- Classroom Report Table -->
-    <div *ngIf="tableData.length > 0 && reportType === 'classroom'" class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-                <tr>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Date' | translate }}
-                    </th>
-                    <!-- Dynamic Performance Type Columns -->
-                    <th *ngFor="let type of performanceTypes" 
-                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ isRtl ? type.arabicName : type.englishName }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of tableData; let i = index"
-                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-                    class="border-t border-gray-300 text-xs md:text-sm">
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.date }}
-                    </td>
-                    <!-- Dynamic Performance Type Average Scores with Stars -->
-                    <td *ngFor="let type of performanceTypes" 
-                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
-                        <div class="flex flex-col items-center gap-2">
-                            <!-- Stars Display -->
-                            <div class="flex gap-1">
-                                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-                                    <i class="fa-star text-xl" 
-                                       [ngClass]="{
-                                         'fa-solid text-yellow-400': star <= getAverageScore(data.studentPerformance, type.id),
-                                         'fa-regular text-gray-400': star > getAverageScore(data.studentPerformance, type.id)
-                                       }">
-                                    </i>
-                                </ng-container>
-                            </div>
-                            <!-- Average Score Number -->
-                            <span class="text-sm font-medium">
-                                {{ getAverageScore(data.studentPerformance, type.id).toFixed(2) }}
-                            </span>
+
+<!-- Classroom Report Table with Precise Star Rating -->
+<div *ngIf="tableData.length > 0 && reportType === 'classroom'" class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Date' | translate }}
+                </th>
+                <th *ngFor="let type of performanceTypes" 
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ isRtl ? type.arabicName : type.englishName }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of tableData; let i = index"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ data.date }}
+                </td>
+                <td *ngFor="let type of performanceTypes" 
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <!-- Precise Stars Display -->
+                        <div class="flex gap-1">
+                            <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                                <div class="relative inline-block" style="width: 24px; height: 24px;">
+                                    <!-- Background empty star -->
+                                    <i class="fa-regular fa-star absolute top-0 left-0 text-xl text-gray-400" style="margin: 0; padding: 0;"></i>
+                                    <!-- Filled portion based on percentage -->
+                                    <div class="absolute top-0 left-0 overflow-hidden" 
+                                         style="height: 24px;"
+                                         [style.width.%]="getStarFillPercentage(data.studentPerformance, type.id, star)">
+                                        <i class="fa-solid fa-star text-xl text-yellow-400" style="margin: 0; padding: 0; display: block; width: 24px;"></i>
+                                    </div>
+                                </div>
+                            </ng-container>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                        <!-- Average Score as Percentage -->
+                        <span class="text-sm font-medium">
+                            {{ getAverageScorePercentage(data.studentPerformance, type.id).toFixed(0) }}%
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
+
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">

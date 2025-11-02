@@ -44,10 +44,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            //AcademicYear academicYear = Unit_Of_Work.academicYear_Repository
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == yearID);
+            if (academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            }
 
             List<FailedStudents> failedStudents = await Unit_Of_Work.failedStudents_Repository.Select_All_With_IncludesById<FailedStudents>(
-                    d => d.IsDeleted != true,
+                    d => d.IsDeleted != true && d.AcademicYearID == yearID,
                     query => query.Include(d => d.Grade),
                     query => query.Include(d => d.Student),
                     query => query.Include(d => d.AcademicYear),
