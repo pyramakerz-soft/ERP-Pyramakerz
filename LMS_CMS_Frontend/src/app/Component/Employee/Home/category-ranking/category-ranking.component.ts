@@ -31,11 +31,10 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
             <span class="text-gray-600">{{ category.totalCategoryCount }} {{ 'sold' | translate }}</span>
           </div>
           
-          <!-- Progress Bar with Hover Tooltips -->
+          <!-- Progress Bar Container -->
           <div class="relative h-4 rounded-full overflow-hidden" [ngClass]="getProgressBarBgClass(i)">
-            <!-- Category Bar (Background) -->
             <div 
-              class="absolute h-full rounded-full transition-all duration-500 group" 
+              class="absolute h-full rounded-full transition-all duration-500"
               [ngClass]="getProgressBarFgClass(i)"
               [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount)"
               (mouseenter)="showTooltip($event, 'other', category, i)"
@@ -43,12 +42,22 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
               (mouseleave)="hideTooltip()">
             </div>
             
-            <!-- Top Item Bar (Foreground) -->
+            <!-- Top Item Bar (Foreground) - Only covers its portion -->
             <div 
-              class="absolute h-full rounded-full transition-all duration-500 shadow-lg group z-10" 
+              class="absolute h-full rounded-full transition-all duration-500 shadow-lg z-10" 
               [ngClass]="getTopItemBarClass(i)"
               [style.width.%]="calculateItemPercentage(category.shopItem.totalQuantitySold)"
               (mouseenter)="showTooltip($event, 'topItem', category, i)"
+              (mousemove)="updateTooltipPosition($event)"
+              (mouseleave)="hideTooltip()">
+            </div>
+
+            <!-- Invisible overlay for the remaining part of "other items" -->
+            <div 
+              class="absolute h-full rounded-full transition-all duration-500 opacity-0"
+              [style.left.%]="calculateItemPercentage(category.shopItem.totalQuantitySold)"
+              [style.width.%]="calculateCategoryPercentage(category.totalCategoryCount) - calculateItemPercentage(category.shopItem.totalQuantitySold)"
+              (mouseenter)="showTooltip($event, 'other', category, i)"
               (mousemove)="updateTooltipPosition($event)"
               (mouseleave)="hideTooltip()">
             </div>

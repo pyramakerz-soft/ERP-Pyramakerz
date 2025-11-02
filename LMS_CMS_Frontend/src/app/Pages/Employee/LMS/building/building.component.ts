@@ -187,17 +187,19 @@ export class BuildingComponent {
         const field = key as keyof Building;
         if (!this.building[field]) {
           if (field == 'name' || field == 'schoolID') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(
+              field as string
+            )}`;
             isValid = false;
           }
         } else {
           if (field == 'name') {
             if (this.building.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} cannot be longer than 100 characters`;
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant(
+                'cannot be longer than 100 characters'
+              );
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
           } else {
@@ -207,6 +209,17 @@ export class BuildingComponent {
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof Building; value: any }) {

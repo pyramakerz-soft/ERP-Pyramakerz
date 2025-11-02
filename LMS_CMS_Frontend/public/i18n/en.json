@@ -503,6 +503,7 @@
   "National Id": "National Id",
   "Add Child": "Add Child",
   "Name": "Name",
+  "the Name": "Name",
   "Children`s": "Children`s",
   "Note": "Note",
   "Select working days...": " Select working days...",
@@ -744,6 +745,7 @@
   "Number Of": "Number Of",
   "Difficulty": "Difficulty",
   "Number": "Number",
+  "number": "Number",
   "Assignment Name": "Assignment Name",
   "Assignment Type": "Assignment Type",
   "Open Date": "Open Date",
@@ -1407,7 +1409,11 @@
   "schoolPCId" : "School PC" ,
   "Store Name" : "Store Name",
   "Invalid Date Range": "Invalid Date Range",
-  "Start date cannot be later than end date" : "Start date cannot be later than end date"
+  "Start date cannot be later than end date" : "Start date cannot be later than end date",
+  "schoolID" : "School",
+  "academicYearID" : "Academic Year",
+  "gradeID" : "Grade",
+  "floorID" : "Floor"
 
 
 
