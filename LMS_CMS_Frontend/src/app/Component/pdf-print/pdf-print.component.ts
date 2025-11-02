@@ -277,37 +277,39 @@ export class PdfPrintComponent implements OnChanges {
     }
   }
 
-  printPDF() {
-    const opt = {
-      margin: [0.5, 0.5, 0.5, 0.5],
-      filename: `${this.fileName}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait', compress: true },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    };
+printPDF() {
+  const element = this.printContainer.nativeElement;
+  
+  // Simple, clean configuration
+  const options = {
+    margin: 0.5,
+    filename: `${this.fileName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      logging: false
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait' 
+    }
+  };
 
-    const printContainer = this.printContainer.nativeElement;
-    const originalStyle = printContainer.style.cssText;
-    
-    printContainer.style.cssText += `
-      font-size: 12px !important;
-      line-height: 1.4 !important;
-      color: #000 !important;
-    `;
-
-    html2pdf()
-      .from(printContainer)
-      .set(opt)
-      .save()
-      .then(() => {
-        printContainer.style.cssText = originalStyle;
-      })
-      .catch((error: any) => {
-        console.error('PDF generation failed:', error);
-        printContainer.style.cssText = originalStyle;
-      });
-  }
+  const elementClone = element.cloneNode(true);
+  document.body.appendChild(elementClone);
+  
+  // Generate PDF
+  html2pdf()
+    .from(elementClone)
+    .set(options)
+    .save()
+    .finally(() => {
+      // Clean up
+      document.body.removeChild(elementClone);
+    });
+}
 
   getColumnWidth(header: string, totalColumns: number): any {
     const headerLower = header.toLowerCase();
