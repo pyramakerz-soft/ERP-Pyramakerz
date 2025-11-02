@@ -24,5 +24,6 @@ namespace LMS_CMS_DAL.Models.Domains.ClinicModule
         public bool Attendance { get; set; }
         public string? Comment { get; set; }
         public string? ActionTaken { get; set; }
+        public DateTime? Date { get; set; }
     }
 }

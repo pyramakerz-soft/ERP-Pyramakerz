@@ -53,7 +53,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
+                    query => query.Include(h => h.StudentHygieneTypes.Where(x => x.Attendance != false))?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
                     query => query.Include(h => h.StudentHygieneTypes).ThenInclude(sht => sht.Student),
                     query => query.Include(x => x.InsertedByEmployee)
             );
@@ -61,6 +61,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
                 return NotFound();
+            }
+
+            List<StudentHygienes> sh = await Unit_Of_Work.studentHygiens_Repository.Select_All_With_IncludesById<StudentHygienes>(
+                h => h.IsDeleted != true
+            );
+
+            foreach (var item in sh)
+            {
+                foreach (var c in hygieneForms)
+                {
+                    foreach (var b in c.StudentHygieneTypes)
+                    {
+                        if (item.StudentId == b.StudentId)
+                        {
+                            b.HygieneTypes.Add(Unit_Of_Work.hygieneType_Repository.First_Or_Default(x => x.Id == item.HygieneTypeId));
+                        }
+                    }
+                }
             }
 
             List<HygieneFormGetDTO> hygieneFormsDto = _mapper.Map<List<HygieneFormGetDTO>>(hygieneForms);
@@ -95,10 +113,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 query => query.Include(x => x.Classroom),
                 query => query.Include(x => x.School),
                 query => query.Include(x => x.Grade),
-                query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
-                query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(sht => sht.Student),
+                query => query.Include(x => x.StudentHygieneTypes)?
+                .ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
+                query => query.Include(h => h.StudentHygieneTypes)?
+                .ThenInclude(sht => sht.Student),
                 query => query.Include(x => x.InsertedByEmployee)
             );
+
+            //StudentHygiens 
 
             if (hygieneForm == null)
             {
@@ -152,13 +174,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
                     hygieneTypes.Add(hygieneType);
 
-                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(sh => sh.StudentId == hfd.StudentId && sh.HygieneTypeId == ht);
+                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(sh => sh.StudentId == hfd.StudentId && sh.HygieneTypeId == ht && sh.Date == hygieneFormDTO.Date);
 
                     if (studentHygiene == null)
                     {
                         StudentHygienes studentHygieneObject = new();
                         studentHygieneObject.StudentId = hfd.StudentId;
                         studentHygieneObject.HygieneTypeId = ht;
+                        studentHygieneObject.Date = hygieneFormDTO.Date;
                         Unit_Of_Work.studentHygiens_Repository.Add(studentHygieneObject);
                     }
                 }

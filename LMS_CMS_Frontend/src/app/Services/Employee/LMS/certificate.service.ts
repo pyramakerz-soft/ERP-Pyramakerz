@@ -28,6 +28,7 @@ export class CertificateService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
+      console.log(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${DateFrom}/${DateTo}?IsSummerCourse=${isSummerCourse}`)
       return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] ,lastColumn :CertificateSubjectTotalMark[] }>(`
         ${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${DateFrom}/${DateTo}?IsSummerCourse=${isSummerCourse}`, { headers });
   }
