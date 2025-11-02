@@ -460,6 +460,11 @@ export class DirectMarkComponent {
         }
       }
     }
+
+    if(this.directMark.classids.length === 0){
+      this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
+      isValid = false;
+    }
     return isValid;
   }
 
