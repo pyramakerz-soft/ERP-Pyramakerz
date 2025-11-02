@@ -199,15 +199,7 @@ export class ViolationTypesComponent {
           });
         }, error => {
           this.isLoading = false
-          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'This Name Already Exists',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          } else {
+          {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -232,15 +224,6 @@ export class ViolationTypesComponent {
           });
         }, error => {
           this.isLoading = false
-          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'This Name Already Exists',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          } else {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -248,7 +231,6 @@ export class ViolationTypesComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
-          }
         })
       }
     }

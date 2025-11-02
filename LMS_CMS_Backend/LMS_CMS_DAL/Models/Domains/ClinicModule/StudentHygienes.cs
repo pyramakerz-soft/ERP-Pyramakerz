@@ -5,5 +5,6 @@
         public long ID { get; set; }
         public long StudentId { get; set; }
         public long HygieneTypeId { get; set; }
+        public DateTime? Date { get; set; }
     }
 }

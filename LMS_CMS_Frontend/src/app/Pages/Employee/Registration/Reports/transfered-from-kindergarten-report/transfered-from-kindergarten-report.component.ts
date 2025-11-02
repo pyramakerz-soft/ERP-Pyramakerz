@@ -62,6 +62,9 @@ export class TransferedFromKindergartenReportComponent {
   CurrentDate: any = new Date()
   ArabicCurrentDate: any = new Date()
   direction: string = "";
+  
+  // Add this property to match student-information component
+  showViewReportBtn: boolean = false;
 
   @ViewChild('kindergartenContainer') kindergartenContainer!: ElementRef;
 
@@ -86,6 +89,8 @@ export class TransferedFromKindergartenReportComponent {
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
+      this.showTable = false;
+      this.showViewReportBtn = false;
     });
     this.direction = document.dir || 'ltr';
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -169,6 +174,7 @@ export class TransferedFromKindergartenReportComponent {
     }
   }
 
+  // Updated change handlers to match student-information component
   onSchoolChange() {
     console.log('School changed to:', this.SelectedSchoolId);
     
@@ -178,6 +184,7 @@ export class TransferedFromKindergartenReportComponent {
     this.Students = [];
     this.filteredStudents = [];
     this.showTable = false;
+    this.showViewReportBtn = this.SelectedSchoolId !== 0;
     
     // Get academic years for the selected school
     this.getAllYears();
@@ -191,9 +198,18 @@ export class TransferedFromKindergartenReportComponent {
     this.Students = [];
     this.filteredStudents = [];
     this.showTable = false;
+    this.showViewReportBtn = this.SelectedSchoolId !== 0 && this.SelectedYearId !== 0;
     
     // Get students for the selected academic year
     this.getAllStudents();
+  }
+
+  onStudentChange() {
+    this.showTable = false;
+    this.showViewReportBtn =
+      this.SelectedSchoolId !== 0 &&
+      this.SelectedYearId !== 0 &&
+      this.SelectedStudentId !== 0;
   }
 
   searchStudents() {
@@ -405,7 +421,6 @@ export class TransferedFromKindergartenReportComponent {
     });
   }
 
-  // Helper methods for certificate data
   getSchoolNameEn(): string {
     return this.school?.name || this.school?.reportHeaderOneEn || '-';
   }

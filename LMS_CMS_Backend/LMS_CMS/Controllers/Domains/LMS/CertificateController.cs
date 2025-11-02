@@ -112,7 +112,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                      d.Assignment != null &&
                                      d.Assignment.IsDeleted != true &&
                                      d.Assignment.SubjectID == subject.ID && 
-                                     d.Assignment.SubjectWeightTypeID == swt.WeightTypeID &&
+                                     d.Assignment.SubjectWeightTypeID == swt.ID &&
                                      d.Assignment.OpenDate >= DateFrom &&
                                      d.Assignment.OpenDate <= DateTo);
 
@@ -142,19 +142,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                        a.Degree != null &&
                                                        a.IsDeleted != true);
 
-                            if (assignmentStudent?.Degree != null && assignment?.Mark != null && assignment.Mark > 0)
+                            // If student has no record or degree is null => 0 mark
+                            float studentDegree = assignmentStudent?.Degree ?? 0;
+
+                            if (assignment?.Mark != null && assignment.Mark > 0)
                             {
-                                sumPercentageDegree += ((float)assignmentStudent.Degree / assignment.Mark);
+                                sumPercentageDegree += (studentDegree / assignment.Mark);
                             }
                         }
+
 
                         // Get direct marks
                         var directMarks = Unit_Of_Work.directMark_Repository
                             .FindBy(a => a.SubjectID == subjectId &&
                                          a.IsDeleted != true &&
-                                         a.SubjectWeightTypeID == swt.WeightTypeID && 
+                                         a.SubjectWeightTypeID == swt.ID && 
                                          a.Date >= DateFrom &&
                                          a.Date <= DateTo).ToList();
+
+
 
                         foreach (var mark in directMarks)
                         {

@@ -26,7 +26,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="jobCategory"
             [(ngModel)]="selectedJobCategoryId" (change)="loadJobs()">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
-<option *ngIf="jobCategories.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="jobCategories.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="jobCategories.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let category of jobCategories" [value]="category.id">
                 {{ category.name || category.ar_name }}
@@ -40,7 +40,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="job"
             [(ngModel)]="selectedJobId" (change)="loadEmployees()" [disabled]="!selectedJobCategoryId">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job' | translate }}</option>
-<option *ngIf="jobs.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="jobs.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="jobs.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let job of jobs" [value]="job.id">
                 {{ job.name || job.ar_name }}
@@ -54,7 +54,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
             [(ngModel)]="selectedEmployeeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedJobId">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
-<option *ngIf="employees.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="employees.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="employees.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let employee of employees" [value]="employee.id">
                 {{ employee.en_name || employee.ar_name || 'Unknown' }}
@@ -90,33 +90,15 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Employee ID' | translate }}
                 </th>
-                <!-- tmm -->
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Employee Name' | translate }}
-                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
-                <!-- tmm -->
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Loan ID' | translate }}
-                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Loan Date' | translate }}
                 </th> 
-                <!-- tmm -->
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Deduction Start' | translate }}
-                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Loan Amount' | translate }}
                 </th>
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Number of Deductions' | translate }}
-                </th> -->
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Safe Name' | translate }}
-                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Notes' | translate }}
                 </th>
@@ -136,47 +118,26 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ employeeLoan.employeeId }}
                     </td>
-                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
-                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ employeeLoan.totalAmount }}
                     </td>
-                    <!-- <td colspan="7" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
-                        {{ 'No loans found' | translate }}
-                    </td> -->
                 </tr>
                 
                 <ng-container *ngFor="let loan of employeeLoan.loans; let j = index">
-                    <tr [ngClass]="{ 'bg-[#F7F7F7]': (i + j) % 2 === 1, 'bg-white': (i + j) % 2 !== 1 }"
+                    <tr [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                         class="border-t border-gray-300 text-xs md:text-sm">
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.employeeId }}
                         </td>
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
-                            {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
-                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.totalAmount }}
                         </td>
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ loan.id }}
-                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.date | date:'mediumDate' }}
                         </td>
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ loan.deductionStartMonth | date:'mediumDate' }}
-                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.amount }}
                         </td>
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ loan.numberOfDeduction }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ loan.saveName }}
-                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.notes || '-' }}
                         </td>
@@ -209,11 +170,3 @@
         </app-pdf-print>
     </div>
 </div>
-
-<!--
-'Employee Name', 
-'Loan ID', 
-'Deduction Start', 
-'Number of Deductions', 
-'Safe Name', 
- -->

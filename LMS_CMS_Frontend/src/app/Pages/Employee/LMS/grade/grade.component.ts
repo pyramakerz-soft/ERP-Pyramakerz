@@ -115,7 +115,7 @@ export class GradeComponent {
 
   getUpgradeToGradeData() {
     this.UpgradeToGrade = [] 
-    this.gradeService.Get(this.DomainName).subscribe(
+    this.gradeService.GetBySchoolId(this.section.schoolID, this.DomainName).subscribe(
       (data) => { 
         this.UpgradeToGrade = data.filter((g: any) => g.id !== this.grade.id);
       }

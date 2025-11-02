@@ -45,7 +45,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Upgrade Student" }
+            pages: new[] { "Upgrade Students" }
         )]
         public async Task<IActionResult> Upgrade(UpgradeDTO upgradeDTO)
         {
@@ -272,7 +272,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost("AfterSummerCourse")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Upgrade Student" }
+            pages: new[] { "Upgrade Students" }
         )]
         public IActionResult UpgradeAfterSummerCourse(UpgradeDTO upgradeDTO)
         {

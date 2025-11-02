@@ -453,13 +453,24 @@ export class DirectMarkComponent {
       if (this.directMark.hasOwnProperty(key)) {
         const field = key as keyof DirectMark;
         if (!this.directMark[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'subjectID' || field == 'subjectWeightTypeID') {
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'subjectID') {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
         }
       }
     }
+
+    if(this.directMark.classids.length === 0){
+      this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
+      isValid = false;
+    }
+
+    if(this.directMark.isSummerCourse == false && this.directMark.subjectWeightTypeID == 0){
+      this.validationErrors['subjectWeightTypeID'] = `*Weight Type is required`;
+      isValid = false;
+    } 
+    
     return isValid;
   }
 
