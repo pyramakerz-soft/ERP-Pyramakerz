@@ -63,6 +63,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
 
+            List<StudentHygienes> sh = await Unit_Of_Work.studentHygiens_Repository.Select_All_With_IncludesById<StudentHygienes>(
+                h => h.IsDeleted != true
+            );
+
+            foreach (var item in sh)
+            {
+                foreach (var c in hygieneForms)
+                {
+                    foreach (var b in c.StudentHygieneTypes)
+                    {
+                        if (item.StudentId == b.StudentId)
+                        {
+                            b.HygieneTypes.Add(Unit_Of_Work.hygieneType_Repository.First_Or_Default(x => x.Id == item.HygieneTypeId));
+                        }
+                    }
+                }
+            }
+
             List<HygieneFormGetDTO> hygieneFormsDto = _mapper.Map<List<HygieneFormGetDTO>>(hygieneForms);
 
             return Ok(hygieneFormsDto);

@@ -198,8 +198,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(x => x.StudentHygieneTypes.Where(d => d.StudentId == studentId))?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
                     query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(sht => sht.Student)
                 );
-
-            //hygieneForms = hygieneForms.Where(h => h.)
              
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
