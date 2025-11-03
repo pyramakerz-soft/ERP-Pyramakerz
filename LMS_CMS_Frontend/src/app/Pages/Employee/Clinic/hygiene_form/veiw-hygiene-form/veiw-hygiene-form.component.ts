@@ -113,17 +113,16 @@ private prepareStudentData(hygieneForm: HygieneForm) {
         actionTaken: studentHygieneType.actionTaken,
       };
 
-      // Initialize all hygiene types as null (empty) instead of false
       this.hygieneTypes.forEach((hygieneType) => {
-        studentData[`hygieneType_${hygieneType.id}`] = null;
+        if (studentHygieneType.attendance === true) {
+          const hasHygieneType = studentHygieneType.hygieneTypes?.some(
+            ht => ht.id === hygieneType.id
+          );
+          studentData[`hygieneType_${hygieneType.id}`] = hasHygieneType ? true : false;
+        } else {
+          studentData[`hygieneType_${hygieneType.id}`] = null;
+        }
       });
-
-      // Set the hygiene types that exist in the student's data
-      if (studentHygieneType.hygieneTypes && studentHygieneType.attendance) {
-        studentHygieneType.hygieneTypes.forEach((hygieneType) => {
-          studentData[`hygieneType_${hygieneType.id}`] = true;
-        });
-      }
 
       return studentData;
     }

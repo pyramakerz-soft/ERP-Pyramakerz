@@ -96,9 +96,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Leave Request ID' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Leave Date' | translate }}
                 </th>
@@ -159,9 +159,9 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLeaveRequestCount(employeeLeaveRequest)">
                             {{ employeeLeaveRequest.totalAmount }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.id }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.date | date:'mediumDate' }}
                         </td>
@@ -199,7 +199,6 @@
                 'Employee ID', 
                 'Employee Name', 
                 'Total Amount', 
-                'Leave Request ID', 
                 'Leave Date', 
                 'Hours',
                 'Minutes',

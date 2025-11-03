@@ -15,11 +15,11 @@ import { SubmissionsCount } from '../../../../Models/Dashboard/dashboard.models'
       <div class="relative flex flex-col md:flex-row justify-center items-center gap-6">
         <div class="flex flex-col items-end gap-4 text-sm w-40">
           <div>
-            <span class="text-[#72CA3D] font-bold">{{ answerOnTimePercentage }}%</span>
+            <span class="text-[#2D8A39] font-bold">{{ answerOnTimePercentage }}%</span>
             <span class="text-gray-700 ml-2">{{ 'Answered On Time' | translate }}</span>
           </div>
           <div>
-            <span class="text-yellow-500 font-bold">{{ answerLatePercentage }}%</span>
+            <span class="text-[#F6A723] font-bold">{{ answerLatePercentage }}%</span>
             <span class="text-gray-700 ml-2">{{ 'Answered Late' | translate }}</span>
           </div>
         </div>
@@ -30,7 +30,7 @@ import { SubmissionsCount } from '../../../../Models/Dashboard/dashboard.models'
 
         <div class="flex flex-col items-start gap-4 text-sm w-40">
           <div>
-            <span class="text-[#FF4906] font-bold">{{ notAnsweredPercentage }}%</span>
+            <span class="text-[#E2341D] font-bold">{{ notAnsweredPercentage }}%</span>
             <span class="text-gray-700 ml-2">{{ 'Not Answered' | translate }}</span>
           </div>
         </div>
@@ -92,7 +92,7 @@ export class AssignmentPieComponent implements AfterViewInit, OnChanges {
         labels: ['Answered On Time', 'Answered Late', 'Not Answered'],
         datasets: [{
           data: data,
-          backgroundColor: ['#72CA3D', '#EAB308', '#FF4906'],
+          backgroundColor: ['#2D8A39', '#F6A723', '#E2341D'],
           borderRadius: 10,
           spacing: 2,
         }]
