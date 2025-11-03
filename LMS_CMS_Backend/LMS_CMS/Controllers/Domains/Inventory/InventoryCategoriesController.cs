@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "student" ,"parent"},
-           pages: new[] { "Inventory Categories" }
+           pages: new[] { "Inventory Categories" , "Stores" , "Shop Item", "Store Items Balance" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -59,7 +59,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("ByStoreId/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Inventory Categories" }
+           pages: new[] { "Inventory Categories", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order", "Purchases", "Opening Balances"
+               , "Addition", "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment", "Stocking"
+               , "Inventory Transaction Report", "Sales Transaction Report", "Purchase Transaction Report", "Inventory Transaction Detailed Report"
+               , "Purchase Transaction Detailed Report", "Sales Transaction Detailed Report" ,"Store Items Balance" }
         )]
         public async Task<IActionResult> GetByStoreIdAsync(long id)
         {

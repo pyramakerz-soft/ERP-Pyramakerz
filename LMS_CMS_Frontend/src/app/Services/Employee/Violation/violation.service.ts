@@ -98,6 +98,7 @@ export class ViolationService {
     formData.append('employeeID', Violation.employeeID.toString() ?? '');
     formData.append('date', Violation.date ?? '');
     formData.append('details', Violation.details ?? '');
+    formData.append('deletedAttach', Violation.deletedAttach ?? '');
 
     if (Violation.attachFile) {
       formData.append(

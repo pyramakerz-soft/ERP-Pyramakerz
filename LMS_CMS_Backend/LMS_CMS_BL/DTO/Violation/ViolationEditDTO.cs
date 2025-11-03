@@ -11,6 +11,7 @@ namespace LMS_CMS_BL.DTO.Violation
     {
         public long ID { get; set; }
         public string? Details { get; set; }
+        public string? DeletedFile { get; set; }
         public IFormFile? AttachFile { get; set; }
         public DateOnly Date { get; set; }
         public long ViolationTypeID { get; set; }

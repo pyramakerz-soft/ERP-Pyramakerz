@@ -157,6 +157,10 @@
                         <input id="imageForm" type="file" class="hidden" (change)="onImageFileSelected($event)"
                             accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" />
                     </div>
+                    <!-- ❌ Delete Icon (only visible when file exists) -->
+                    <!-- <button  (click)="removeAttachment()" type="button" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition">
+                       <i class="fa-solid fa-trash text-lg"></i>
+                    </button> -->
                 </div>
                 <span *ngIf="validationErrors['attachFile']" class="text-red-500  font-normal text-xs md:text-sm">{{validationErrors['attachFile'] }}</span>
             </div>

@@ -106,7 +106,7 @@ export class InventoryMasterComponent {
 
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/${this.FlagId}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/${this.FlagId}`)
   }
 
   Delete(id: number) {
@@ -128,7 +128,7 @@ export class InventoryMasterComponent {
   }
 
   Edit(row: InventoryMaster) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/Edit/${row.flagId}/${row.id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/Edit/${row.flagId}/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -261,7 +261,7 @@ export class InventoryMasterComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/View/${id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/View/${id}`)
   }
 
   validateNumber(event: any): void {

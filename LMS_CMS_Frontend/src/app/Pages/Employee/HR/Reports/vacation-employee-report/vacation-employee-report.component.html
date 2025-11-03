@@ -96,9 +96,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Vacation ID' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Vacation Type' | translate }}
                 </th>
@@ -114,12 +114,12 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Date To' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Balance' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Used' | translate }}
-                </th>
+                </th> -->
                 <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Remains' | translate }}
                 </th> -->
@@ -162,10 +162,10 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getVacationEmployeeCount(employee)">
                             {{ employee.totalAmount }}
-                        </td>
+                        <!-- </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.id }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.vacationTypesName }}
                         </td>
@@ -181,12 +181,12 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.dateTo || '-' }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.balance }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.used }}
-                        </td>
+                        </td> -->
                         <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.remains }}
                         </td> -->
@@ -209,14 +209,12 @@
                 'Employee ID',
                 'Employee Name',
                 'Total Amount',
-                'Vacation ID',
+
                 'Vacation Type',
                 'Date',
                 'Half Day',
                 'Date From',
                 'Date To',
-                'Balance',
-                'Used',
 
                 'Notes'
             ]"

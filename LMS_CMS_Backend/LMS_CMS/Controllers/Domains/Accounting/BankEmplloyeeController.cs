@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetByEmployeeID/{EmpId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bank", "Receivable", "Payable" }
+            pages: new[] { "Bank", "Receivable", "Payable", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order", "Purchases", "Opening Balances", "Addition", "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment" }
         )]
         public async Task<IActionResult> GetByEmployeeID(long EmpId)
         {

@@ -208,6 +208,7 @@
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="reportType + ' Transactions Report'"
         [infoRows]="[
       { keyEn: 'From Date: ' + this.dateFrom },
+      { keyAr: this.dateFrom + ' : من تاريخ' },
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + this.getStoreName() },
       { keyEn: 'Transaction Types: ' + this.getSelectedFlagNames() }
