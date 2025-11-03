@@ -75,15 +75,16 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     private apiService: ApiService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-      private translate: TranslateService // Add this
-
-  ) { }
+    private translate: TranslateService // Add this
+  ) {}
 
   async ngOnInit() {
     await this.loadSchools();
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
@@ -95,41 +96,41 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 
   private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async ngOnChanges(changes: SimpleChanges) {
     if (changes['medicalHistoryData']) {
@@ -145,7 +146,8 @@ private showSuccessAlert(message: string) {
               await this.loadStudents(this.medicalHistory.classRoomID); // Load students
               // Give time for async operations to complete
               setTimeout(() => {
-                this.medicalHistory.studentId = this.medicalHistoryData?.studentId || 0;
+                this.medicalHistory.studentId =
+                  this.medicalHistoryData?.studentId || 0;
               }, 100);
             }
           }
@@ -158,33 +160,33 @@ private showSuccessAlert(message: string) {
     }
   }
 
-private resetForm() {
-  this.editMode = false;
-  this.medicalHistory = new DoctorMedicalHistory(
-    0,
-    0,
-    '',
-    0,
-    '',
-    0,
-    '',
-    0,
-    '',
-    '',
-    null,
-    '',
-    null,
-    null,
-    new Date().toISOString(),
-    0,
-    ''
-  );
-  this.firstReportPreview = null;
-  this.secReportPreview = null;
-  this.grades = [];
-  this.classes = [];
-  this.students = [];
-}
+  private resetForm() {
+    this.editMode = false;
+    this.medicalHistory = new DoctorMedicalHistory(
+      0,
+      0,
+      '',
+      0,
+      '',
+      0,
+      '',
+      0,
+      '',
+      '',
+      null,
+      '',
+      null,
+      null,
+      new Date().toISOString(),
+      0,
+      ''
+    );
+    this.firstReportPreview = null;
+    this.secReportPreview = null;
+    this.grades = [];
+    this.classes = [];
+    this.students = [];
+  }
 
   async loadSchools() {
     try {
@@ -268,116 +270,125 @@ private resetForm() {
     }
   }
 
-onFileUpload(event: any, field: 'firstReport' | 'secReport') {
-  const fileToEmpty: File = event.target.files[0];
-  const input = event.target as HTMLInputElement;
-  this.validationErrors[field] = '';
-  console.log("fansedbhaDESf");
+  onFileUpload(event: any, field: 'firstReport' | 'secReport') {
+    const fileToEmpty: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+    this.validationErrors[field] = '';
+    console.log('fansedbhaDESf');
 
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    const fileType = file.type;
-    const maxSize = 25 * 1024 * 1024; // 25MB
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const fileType = file.type;
+      const maxSize = 25 * 1024 * 1024; // 25MB
 
-    // Clear previous file
-    this.medicalHistory[field] = null;
+      // Clear previous file
+      this.medicalHistory[field] = null;
 
-    // Validate file type - match the accept attribute
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const isValidType = validImageTypes.includes(fileType);
+      // Validate file type - match the accept attribute
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const isValidType = validImageTypes.includes(fileType);
 
-    if (!isValidType) {
-      this.validationErrors[field] = this.translate.instant('Invalid file type. Please upload JPEG, PNG, JPG images or videos.');
-      return;
-    }
-
-    // Validate file size
-    if (file.size > maxSize) {
-      this.validationErrors[field] = this.translate.instant('File size exceeds maximum limit of 25MB.');
-      return;
-    }
-
-    // Process valid file
-    this.medicalHistory[field] = file;
-
-    // Create preview for both images and videos
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      if (field === 'firstReport') {
-        this.firstReportPreview = fileToEmpty;
-      } else {
-        this.secReportPreview = fileToEmpty;
+      if (!isValidType) {
+        this.validationErrors[field] = this.translate.instant(
+          'Invalid file type. Please upload JPEG, PNG, JPG images or videos.'
+        );
+        return;
       }
-    };
-    reader.readAsDataURL(fileToEmpty);
-  }
-}
 
-isFormValid(): boolean {
-  this.validationErrors = {};
-  let isValid = true;
+      // Validate file size
+      if (file.size > maxSize) {
+        this.validationErrors[field] = this.translate.instant(
+          'File size exceeds maximum limit of 25MB.'
+        );
+        return;
+      }
 
-  if (!this.medicalHistory.schoolId || this.medicalHistory.schoolId === 0) {
-    this.validationErrors['schoolId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('school')}`;
-    isValid = false;
-  }
+      // Process valid file
+      this.medicalHistory[field] = file;
 
-  if (!this.medicalHistory.gradeId || this.medicalHistory.gradeId === 0) {
-    this.validationErrors['gradeId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('grade')}`;
-    isValid = false;
-  }
-
-  if (!this.medicalHistory.classRoomID || this.medicalHistory.classRoomID === 0) {
-    this.validationErrors['classRoomID'] = `${this.translate.instant('Field is required')} ${this.translate.instant('class')}`;
-    isValid = false;
-  }
-
-  if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
-    this.validationErrors['studentId'] = `${this.translate.instant('Field is required')} ${this.translate.instant('Student')}`;
-    isValid = false;
+      // Create preview for both images and videos
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (field === 'firstReport') {
+          this.firstReportPreview = fileToEmpty;
+        } else {
+          this.secReportPreview = fileToEmpty;
+        }
+      };
+      reader.readAsDataURL(fileToEmpty);
+    }
   }
 
-  return isValid;
-}
+  isFormValid(): boolean {
+    this.validationErrors = {};
+    let isValid = true;
+
+    if (!this.medicalHistory.schoolId || this.medicalHistory.schoolId === 0) {
+      this.validationErrors['schoolId'] =
+        this.getRequiredErrorMessage('school');
+      isValid = false;
+    }
+
+    if (!this.medicalHistory.gradeId || this.medicalHistory.gradeId === 0) {
+      this.validationErrors['gradeId'] = this.getRequiredErrorMessage('grade');
+      isValid = false;
+    }
+
+    if (
+      !this.medicalHistory.classRoomID ||
+      this.medicalHistory.classRoomID === 0
+    ) {
+      this.validationErrors['classRoomID'] =
+        this.getRequiredErrorMessage('class');
+      isValid = false;
+    }
+
+    if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
+      this.validationErrors['studentId'] =
+        this.getRequiredErrorMessage('Student');
+      isValid = false;
+    }
+
+    return isValid;
+  }
 
   isSaving: boolean = false;
 
+  async saveMedicalHistory() {
+    if (this.isFormValid()) {
+      try {
+        this.isSaving = true;
+        const domainName = this.apiService.GetHeader();
 
-async saveMedicalHistory() {
-  if (this.isFormValid()) {
-    try {
-      this.isSaving = true;
-      const domainName = this.apiService.GetHeader();
+        if (this.editMode) {
+          await firstValueFrom(
+            this.medicalHistoryService.UpdateByDoctorAsync(
+              this.medicalHistory,
+              domainName
+            )
+          );
+          this.showSuccessAlert(this.translate.instant('Updated successfully'));
+        } else {
+          await firstValueFrom(
+            this.medicalHistoryService.AddByDoctor(
+              this.medicalHistory,
+              domainName
+            )
+          );
+          this.showSuccessAlert(this.translate.instant('Created successfully'));
+        }
 
-      if (this.editMode) {
-        await firstValueFrom(
-          this.medicalHistoryService.UpdateByDoctorAsync(
-            this.medicalHistory,
-            domainName
-          )
-        );
-        this.showSuccessAlert(this.translate.instant('Updated successfully'));
-      } else {
-        await firstValueFrom(
-          this.medicalHistoryService.AddByDoctor(
-            this.medicalHistory,
-            domainName
-          )
-        );
-        this.showSuccessAlert(this.translate.instant('Created successfully'));
+        this.onSave.emit();
+        this.closeModal();
+      } catch (error) {
+        console.error('Error saving medical history:', error);
+        const errorMessage = this.translate.instant('Failed to save the item');
+        this.showErrorAlert(errorMessage);
+      } finally {
+        this.isSaving = false;
       }
-
-      this.onSave.emit();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving medical history:', error);
-      const errorMessage = this.translate.instant('Failed to save the item');
-      this.showErrorAlert(errorMessage);
-    } finally {
-      this.isSaving = false;
     }
   }
-}
 
   // Add this method to clear validation error for a field
   clearValidationError(field: string) {
@@ -386,79 +397,91 @@ async saveMedicalHistory() {
     }
   }
 
-closeModal() {
-  this.isVisible = false;
-  this.isVisibleChange.emit(false);
-  this.resetForm();
-  this.validationErrors = {};
-  
-  // Reset file inputs
-  const firstReportInput = document.getElementById('firstReportUpload') as HTMLInputElement;
-  const secReportInput = document.getElementById('secReportUpload') as HTMLInputElement;
-  
-  if (firstReportInput) firstReportInput.value = '';
-  if (secReportInput) secReportInput.value = '';
-}
+  closeModal() {
+    this.isVisible = false;
+    this.isVisibleChange.emit(false);
+    this.resetForm();
+    this.validationErrors = {};
 
-onFirstReportFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  const input = event.target as HTMLInputElement;
-  
-  if (file) {
-    if (file.size > 25 * 1024 * 1024) {
-      this.validationErrors['firstReport'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
-      this.medicalHistory.firstReport = null;
-      this.firstReportPreview = null;
-      return; 
-    }
-    if (file.type === 'image/jpeg' || file.type === 'image/png') {
-      this.medicalHistory.firstReport = file; 
-      this.validationErrors['firstReport'] = ''; 
+    // Reset file inputs
+    const firstReportInput = document.getElementById(
+      'firstReportUpload'
+    ) as HTMLInputElement;
+    const secReportInput = document.getElementById(
+      'secReportUpload'
+    ) as HTMLInputElement;
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.firstReportPreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.validationErrors['firstReport'] = this.translate.instant('Invalid file type. Only JPEG, JPG and PNG are allowed');
-      this.medicalHistory.firstReport = null;
-      this.firstReportPreview = null;
-      return; 
-    }
+    if (firstReportInput) firstReportInput.value = '';
+    if (secReportInput) secReportInput.value = '';
   }
-  
-  input.value = '';
-}
 
-onSecReportFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  const input = event.target as HTMLInputElement;
-  
-  if (file) {
-    if (file.size > 25 * 1024 * 1024) {
-      this.validationErrors['secReport'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
-      this.medicalHistory.secReport = null;
-      this.secReportPreview = null;
-      return; 
-    }
-    if (file.type === 'image/jpeg' || file.type === 'image/png') {
-      this.medicalHistory.secReport = file; 
-      this.validationErrors['secReport'] = ''; 
+  onFirstReportFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.secReportPreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.validationErrors['secReport'] = this.translate.instant( 'Invalid file type. Only JPEG, JPG and PNG are allowed');
-      this.medicalHistory.secReport = null;
-      this.secReportPreview = null;
-      return; 
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['firstReport'] = this.translate.instant(
+          'The file size exceeds the maximum limit of 25 MB'
+        );
+        this.medicalHistory.firstReport = null;
+        this.firstReportPreview = null;
+        return;
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        this.medicalHistory.firstReport = file;
+        this.validationErrors['firstReport'] = '';
+
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.firstReportPreview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['firstReport'] = this.translate.instant(
+          'Invalid file type. Only JPEG, JPG and PNG are allowed'
+        );
+        this.medicalHistory.firstReport = null;
+        this.firstReportPreview = null;
+        return;
+      }
     }
+
+    input.value = '';
   }
-  
-  input.value = '';
-}
+
+  onSecReportFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['secReport'] = this.translate.instant(
+          'The file size exceeds the maximum limit of 25 MB'
+        );
+        this.medicalHistory.secReport = null;
+        this.secReportPreview = null;
+        return;
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        this.medicalHistory.secReport = file;
+        this.validationErrors['secReport'] = '';
+
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.secReportPreview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['secReport'] = this.translate.instant(
+          'Invalid file type. Only JPEG, JPG and PNG are allowed'
+        );
+        this.medicalHistory.secReport = null;
+        this.secReportPreview = null;
+        return;
+      }
+    }
+
+    input.value = '';
+  }
 }

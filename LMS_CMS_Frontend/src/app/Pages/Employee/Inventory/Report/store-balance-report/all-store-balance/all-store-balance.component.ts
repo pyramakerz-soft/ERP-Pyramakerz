@@ -390,12 +390,7 @@ preparePdfTableSections(): any[] {
   // First section: Item Details
   const itemDetailsSection = {
     header: 'ITEM DETAILS',
-    data: [
-      // { key: 'Report Type', value: this.pageTitle },
-      // { key: 'Date To', value: this.getDateInfo() },
-      // { key: 'Category', value: this.getCategoryName() },
-      // { key: 'Filters', value: this.getBalanceFiltersInfo() }
-    ],
+    data: [],
     tableHeaders: ['Item Code', 'Item Name'],
     tableData: this.reportData.data.map(item => ({
       'Item Code': item.itemCode,
@@ -415,9 +410,9 @@ preparePdfTableSections(): any[] {
     const storeSection = {
       header: `${store}`,
       data: [
-        // { key: 'Store', value: store },
-        { key: 'Total Quantity', value: this.getStoreTotalQuantity(store) },
-        { key: 'Total Value', value: this.showPriceColumn() ? this.getStoreTotalValue(store) : '-' }
+        // Fix: Extract the value property from the returned object
+        { key: 'Total Quantity', value: this.getStoreTotalQuantity(store).value },
+        { key: 'Total Value', value: this.showPriceColumn() ? this.getStoreTotalValue(store).value : '-' }
       ],
       tableHeaders: storeHeaders,
       tableData: this.reportData!.data.map(item => {
@@ -443,6 +438,7 @@ preparePdfTableSections(): any[] {
     const grandTotalSection = {
       header: 'GRAND TOTALS',
       data: [
+        // Fix: Use primitive values directly
         { key: 'Total Quantity', value: this.reportData.grandTotals.TotalQuantity },
         { key: 'Total Value', value: this.reportData.grandTotals.TotalValue }
       ],

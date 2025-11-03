@@ -287,6 +287,7 @@ import { ParentLessonComponent } from './Pages/Parent/LMS/parent-lesson/parent-l
 import { TimeTableStudentComponent } from './Pages/Student/time-table-student/time-table-student.component';
 import { PrivacyHrComponent } from './Pages/privacy-hr/privacy-hr.component';
 import { UpgradeStudentComponent } from './Pages/Employee/LMS/upgrade-student/upgrade-student.component';
+import { FailedStudentComponent } from './Pages/Employee/LMS/failed-student/failed-student.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -616,6 +617,7 @@ export const routes: Routes = [
             { path: "My Salary Detailed", component: EmployeeSalaryDetailedByTokenComponent, title: "My Salary Detailed", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Loans Status", component: LoansStatusComponent, title: "Loans Status", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Upgrade Students", component: UpgradeStudentComponent, title: "Upgrade Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Failed Students", component: FailedStudentComponent, title: "Failed Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
         ]
     },
     {

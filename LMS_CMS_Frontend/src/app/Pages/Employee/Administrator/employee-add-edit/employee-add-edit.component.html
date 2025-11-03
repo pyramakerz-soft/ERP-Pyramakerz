@@ -1,6 +1,8 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
+        <i class="fa-solid fa-chevron-left cursor-pointer"
+        [class.rotate-180]="isRtl"
+ (click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">
           {{ mode === 'Create' ? ('Create Employee' | translate) : ('Edit Employee' | translate) }}
         </h1>
@@ -152,22 +154,22 @@
         </select>
     </div>
 
-    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full space-x-3 rtl:space-x-reverse">
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
         <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequest">
         <label class="mb-2" for="canReceiveRequest">  {{ 'Can Receive Request' | translate }}</label>
     </div>  
 
-    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
+    <div class="flex align-middle space-x-2 mb-4 w-full  rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveRequestFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequestFromParent">
         <label class="mb-2" for="canReceiveRequestFromParent">  {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
     </div>
 
-    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 rtl:space-x-reverse">
+    <div class="flex align-middle space-x-2 mb-4 w-full rtl:space-x-reverse">
         <input type="checkbox" id="canReceiveMessageFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessageFromParent">
         <label class="mb-2" for="canReceiveMessageFromParent">  {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
     </div>
 
-    <div class="flex align-middle space-x-2 mb-4 w-full space-x-2 items-center justify-between">
+    <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" (change)="onLocationChange()">
             <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Loctaion' | translate }}</label>

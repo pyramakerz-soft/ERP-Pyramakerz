@@ -110,7 +110,10 @@
         <div class="mt-6 mb-4 rounded-3xl p-[16px_24px] bg-[#F7F7F7] ">
             <div class="flex flex-col mb-4">
                 <label class="mb-2 primaryTxt" for="name">   {{ 'Academic Year' | translate }}  {{ 'Name' | translate }}</label>
-                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter' | translate }} {{ 'Academic Year' | translate }}  {{ 'Name' | translate }}"
+                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"  
+                    [placeholder]="isRtl 
+                        ? ('Enter' | translate) + ' ' + ('Name' | translate) + ' ' + ('Academic Year' | translate)
+                        : ('Enter' | translate) + ' ' + ('Academic Year' | translate) + ' ' + ('Name' | translate)" 
                 [(ngModel)]="academicYear.name" 
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>

@@ -21,33 +21,33 @@ import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { PerformanceTypeService } from '../../../../../Services/Employee/LMS/performance-type.service';
 
-interface PerformanceType {
-  id: number;
-  englishName: string;
-  arabicName: string;
+class PerformanceType {
+  id: number = 0;
+  englishName: string = '';
+  arabicName: string = '';
 }
 
-interface StudentPerformanceData {
-  performanceTypeID: number;
-  performanceTypeEn: string;
-  performanceTypeAr: string;
-  stars?: number;
-  averageScore?: number;
+class StudentPerformanceData {
+  performanceTypeID: number = 0;
+  performanceTypeEn: string = '';
+  performanceTypeAr: string = '';
+  stars?: number = 0;
+  averageScore?: number = 0;
 }
 
-interface StudentReportRow {
-  date: string;
-  studentId: number;
-  englishNameStudent: string;
-  arabicNameStudent: string;
-  studentPerformance: StudentPerformanceData[];
-  comment: string;
+class StudentReportRow {
+  date: string = '';
+  studentId: number = 0;
+  englishNameStudent: string = '';
+  arabicNameStudent: string = '';
+  studentPerformance: StudentPerformanceData[] = [];
+  comment: string = '';
 }
 
-interface ClassroomReportRow {
-  date: string;
-  classroomName: string;
-  studentPerformance: StudentPerformanceData[];
+class ClassroomReportRow {
+  date: string = '';
+  classroomName: string = '';
+  studentPerformance: StudentPerformanceData[] = [];
 }
 
 @Component({
@@ -88,6 +88,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     reportHeaderTwoEn: 'Detailed Daily Performance Summary',
     reportHeaderOneAr: 'تقرير الأداء اليومي',
     reportHeaderTwoAr: 'ملخص الأداء اليومي التفصيلي',
+    reportImage: '' // Add this if you have school logo
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -406,7 +407,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }
   }
 
-
   getInfoRows(): any[] {
     const baseInfo = [
       {
@@ -444,7 +444,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
 
     return baseInfo;
   }
-  
+
   getStars(performanceData: StudentPerformanceData[], typeId: number): number {
     const perf = performanceData.find((p) => p.performanceTypeID === typeId);
     return perf?.stars ?? 0;
@@ -453,6 +453,24 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   getAverageScore(performanceData: StudentPerformanceData[], typeId: number): number {
     const perf = performanceData.find((p) => p.performanceTypeID === typeId);
     return perf?.averageScore ?? 0;
+  }
+
+  getAverageScorePercentage(performanceData: StudentPerformanceData[], typeId: number): number {
+    const avgScore = this.getAverageScore(performanceData, typeId);
+    return avgScore * 100;
+  }
+
+  getStarFillPercentage(performanceData: StudentPerformanceData[], typeId: number, starPosition: number): number {
+    const percentage = this.getAverageScorePercentage(performanceData, typeId);
+    const stars = percentage / 20;
+    
+    if (starPosition <= Math.floor(stars)) {
+      return 100;
+    } else if (starPosition === Math.ceil(stars) && stars % 1 !== 0) {
+      return (stars % 1) * 100;
+    } else {
+      return 0;
+    }
   }
 
   getPerformanceTypeName(typeId: number): string {
@@ -465,9 +483,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       this.tableDataForExport = this.tableData.map((item) => {
         const row: any = {
           Date: item.date,
-          // Name: item.englishNameStudent,
-          // 'Ar Name': item.arabicNameStudent,
-          // 'Student ID': item.studentId,
         };
         
         this.performanceTypes.forEach((type) => {
@@ -485,8 +500,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         };
         
         this.performanceTypes.forEach((type) => {
-          const avgScore = this.getAverageScore(item.studentPerformance, type.id);
-          row[type.englishName] = avgScore > 0 ? avgScore.toFixed(2) : 0;
+          const percentage = this.getAverageScorePercentage(item.studentPerformance, type.id);
+          row[type.englishName] = percentage > 0 ? percentage.toFixed(0) + '%' : '0%';
         });
         
         return row;
@@ -494,73 +509,57 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }
   }
 
-
-  getTableDataWithHeader(): any[] {
-    if (this.reportType === 'student') {
-      const headers = ['Date', 'Name', 'Student ID'];
-      this.performanceTypes.forEach((type) => {
-        headers.push(type.englishName);
-      });
-      headers.push('Comment');
-
+  getTableHeaders(): string[] {
+    if (this.reportType === 'student' || this.reportType === 'parent') {
       return [
-        {
-          // header: 'Student Daily Performance Report',
-          // summary: this.getInfoRows(),
-          table: {
-            headers: headers,
-            data: this.tableData.map((item) => {
-              const row: any = {
-                Date: item.date,
-                // Name: item.englishNameStudent,
-                // 'Student ID': item.studentId,
-              };
-              
-              this.performanceTypes.forEach((type) => {
-                const perf = item.studentPerformance.find(
-                  (p: StudentPerformanceData) => p.performanceTypeID === type.id
-                );
-                row[type.englishName] = perf?.stars || '-';
-              });
-              
-              row['Comment'] = item.comment;
-              return row;
-            }),
-          },
-        },
+        'Date',
+        ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName),
+        'Comment'
       ];
     } else {
-      const headers = ['Date'];
-      this.performanceTypes.forEach((type) => {
-        headers.push(type.englishName);
-      });
-
       return [
-        {
-          header: 'Classroom Daily Performance Report',
-          summary: this.getInfoRows(),
-          table: {
-            headers: headers,
-            data: this.tableData.map((item) => {
-              const row: any = {
-                Date: item.date,
-              };
-              
-              this.performanceTypes.forEach((type) => {
-                const perf = item.studentPerformance.find(
-                  (p: StudentPerformanceData) => p.performanceTypeID === type.id
-                );
-                row[type.englishName] = perf?.averageScore?.toFixed(2) || '-';
-              });
-              
-              return row;
-            }),
-          },
-        },
+        'Date',
+        ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName)
       ];
     }
   }
 
+  getTableDataForPDF(): any[] {
+    if (this.reportType === 'student' || this.reportType === 'parent') {
+      return this.tableData.map((item) => {
+        const row: any = {
+          'Date': item.date,
+        };
+        
+        this.performanceTypes.forEach((type) => {
+          const stars = this.getStars(item.studentPerformance, type.id);
+          const starDisplay = '★'.repeat(stars) + '☆'.repeat(5 - stars);
+          const columnName = this.isRtl ? type.arabicName : type.englishName;
+          row[columnName] = stars > 0 ? starDisplay : '-';
+        });
+        
+        row['Comment'] = item.comment || '-';
+        return row;
+      });
+    } else {
+      // Classroom report - show percentage only in PDF/Print
+      return this.tableData.map((item) => {
+        const row: any = {
+          'Date': item.date,
+        };
+        
+        this.performanceTypes.forEach((type) => {
+          const percentage = this.getAverageScorePercentage(item.studentPerformance, type.id);
+          const columnName = this.isRtl ? type.arabicName : type.englishName;
+          row[columnName] = percentage > 0 ? `${percentage.toFixed(0)}%` : '0%';
+        });
+        
+        return row;
+      });
+    }
+  }
+
+  // Improved Print function
   Print() {
     if (this.tableDataForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
@@ -572,13 +571,14 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
         console.error('Element not found!');
+        this.showPDF = false;
         return;
       }
 
       const printStyle = `
         <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
+          @page { size: auto; margin: 10mm; }
+          body { margin: 0; font-family: Arial, sans-serif; }
           @media print {
             body > *:not(#print-container) { display: none !important; }
             #print-container {
@@ -588,6 +588,20 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
               height: auto !important;
               background: white !important;
               margin: 0 !important;
+              padding: 20px !important;
+            }
+            .print-table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+            }
+            .print-table th, .print-table td {
+              border: 1px solid #ddd !important;
+              padding: 8px !important;
+              text-align: center !important;
+            }
+            .print-table th {
+              background-color: #f5f5f5 !important;
+              font-weight: bold !important;
             }
           }
         </style>
@@ -607,6 +621,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
+  // Improved PDF Download function
   DownloadAsPDF() {
     if (this.tableDataForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
@@ -620,8 +635,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
-
-  // Update Excel export to show stars as numbers
   async DownloadAsExcel() {
     if (!this.tableData || this.tableData.length === 0) {
       Swal.fire({
@@ -655,8 +668,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         if (this.reportType === 'student' || this.reportType === 'parent') {
           const row = [
             item.date,
-            // item.englishNameStudent,
-            // item.studentId,
           ];
           
           this.performanceTypes.forEach((type) => {
@@ -670,8 +681,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           const row = [item.date];
           
           this.performanceTypes.forEach((type) => {
-            const avgScore = this.getAverageScore(item.studentPerformance, type.id);
-            row.push(avgScore > 0 ? avgScore.toFixed(2) : 0);
+            const percentage = this.getAverageScorePercentage(item.studentPerformance, type.id);
+            row.push(percentage > 0 ? percentage.toFixed(0) + '%' : '0%');
           });
           
           return row;
@@ -706,133 +717,4 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       });
     }
   }
-
-  
-
-getTableDataWithHeaderForPDF(): any[] {
-  if (this.reportType === 'student' || this.reportType === 'parent') {
-    return [
-      {
-        header: this.isRtl ? 'تقرير أداء الطالب اليومي' : 'Student Daily Performance Report',
-        data: this.getInfoRows().map(info => ({
-          key: this.isRtl ? info.keyAr : info.keyEn,
-          value: this.isRtl ? info.keyAr?.split(':')[1]?.trim() || '' : info.keyEn?.split(':')[1]?.trim() || ''
-        })),
-        tableHeaders: [
-          'Date',
-          // 'Student ID', 
-          // 'Name',
-          ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName),
-          'Comment'
-        ],
-        tableData: this.tableData.map((item) => {
-          const row: any = {
-            'Date': item.date,
-            // 'Student ID': item.studentId,
-            // 'Name': item.englishNameStudent,
-          };
-          
-          // Add performance type columns with star representation only (no numbers)
-          this.performanceTypes.forEach((type) => {
-            const stars = this.getStars(item.studentPerformance, type.id);
-            const starDisplay = '★'.repeat(stars) + '☆'.repeat(5 - stars);
-            const columnName = this.isRtl ? type.arabicName : type.englishName;
-            row[columnName] = stars > 0 ? starDisplay : '-';
-          });
-          
-          row['Comment'] = item.comment || '-';
-          return row;
-        }),
-      },
-    ];
-  } else {
-    // Classroom report
-    return [
-      {
-        header: this.isRtl ? 'تقرير أداء الفصل اليومي' : 'Classroom Daily Performance Report',
-        data: this.getInfoRows().map(info => ({
-          key: this.isRtl ? info.keyAr : info.keyEn,
-          value: this.isRtl ? info.keyAr?.split(':')[1]?.trim() || '' : info.keyEn?.split(':')[1]?.trim() || ''
-        })),
-        tableHeaders: [
-          'Date',
-          ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName)
-        ],
-        tableData: this.tableData.map((item) => {
-          const row: any = {
-            'Date': item.date,
-          };
-          
-          // Add performance type columns with average scores and star representation only (no numbers)
-          this.performanceTypes.forEach((type) => {
-            const avgScore = this.getAverageScore(item.studentPerformance, type.id);
-            const roundedScore = Math.round(avgScore);
-            const starDisplay = '★'.repeat(roundedScore) + '☆'.repeat(5 - roundedScore);
-            const columnName = this.isRtl ? type.arabicName : type.englishName;
-            row[columnName] = avgScore > 0 ? starDisplay : '-';
-          });
-          
-          return row;
-        }),
-      },
-    ];
-  }
-}
-
-getTableHeaders(): string[] {
-  if (this.reportType === 'student' || this.reportType === 'parent') {
-    return [
-      'Date',
-      ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName),
-      'Comment'
-    ];
-  } else {
-    return [
-      'Date',
-      ...this.performanceTypes.map(t => this.isRtl ? t.arabicName : t.englishName)
-    ];
-  }
-}
-
-getTableDataForPDF(): any[] {
-  if (this.reportType === 'student' || this.reportType === 'parent') {
-    return this.tableData.map((item) => {
-      const row: any = {
-        'Date': item.date,
-        // 'Student ID': item.studentId,
-        // 'Name': item.englishNameStudent,
-      };
-      
-      // Add performance type columns with star representation only (no numbers)
-      this.performanceTypes.forEach((type) => {
-        const stars = this.getStars(item.studentPerformance, type.id);
-        const starDisplay = '★'.repeat(stars) + '☆'.repeat(5 - stars);
-        const columnName = this.isRtl ? type.arabicName : type.englishName;
-        row[columnName] = stars > 0 ? starDisplay : '-';
-      });
-      
-      row['Comment'] = item.comment || '-';
-      return row;
-    });
-  } else {
-    // Classroom report
-    return this.tableData.map((item) => {
-      const row: any = {
-        'Date': item.date,
-      };
-      
-      // Add performance type columns with average scores and star representation only (no numbers)
-      this.performanceTypes.forEach((type) => {
-        const avgScore = this.getAverageScore(item.studentPerformance, type.id);
-        const roundedScore = Math.round(avgScore);
-        const starDisplay = '★'.repeat(roundedScore) + '☆'.repeat(5 - roundedScore);
-        const columnName = this.isRtl ? type.arabicName : type.englishName;
-        row[columnName] = avgScore > 0 ? starDisplay : '-';
-      });
-      
-      return row;
-    });
-  }
-}
-
 }

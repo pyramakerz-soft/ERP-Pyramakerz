@@ -121,24 +121,28 @@
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
             [infoRows]="[
       {
-        keyEn: 'Employee Type: ' + this.employeeTypeName ,
-        keyAr:  this.employeeTypeName + ' :نوع الموظف' ,
+        keyEn: 'Employee Type: ' + employeeTypeName,
+        keyAr: employeeTypeName + ' :نوع الموظف',
       },
       {
-        keyEn: 'Violation Type: ' + this.violationTypeName ,
-        keyAr: this.violationTypeName +  ' :نوع المخالفة' ,
+        keyEn: 'Violation Type: ' + violationTypeName,
+        keyAr: violationTypeName + ' :نوع المخالفة',
       },
       {
-        keyEn: 'Start Date: ' + this.SelectedStartDate,
-        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+        keyEn: 'Start Date: ' + SelectedStartDate,
+        keyAr: 'تاريخ البدء: ' + SelectedStartDate,
       },
       {
-        keyEn: 'End Date: ' + this.SelectedEndDate,
-        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+        keyEn: 'End Date: ' + SelectedEndDate,
+        keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate,
       },
-      ]"
-            [tableHeaders]="['ID', 'Date', 'Employee Name', 'Details']"
-            [tableData]="tableDataForExport" #pdfComponentRef>
-        </app-pdf-print>
+      {
+        keyEn: 'Generated On: ' + generatedOn,
+        keyAr: 'تم الإنشاء في: ' + generatedOn,
+      }
+    ]"
+    [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+    [tableData]="tableDataForExport" #pdfComponentRef>
+  </app-pdf-print>
     </div>
 </div>

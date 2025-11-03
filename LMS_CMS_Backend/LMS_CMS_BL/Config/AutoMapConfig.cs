@@ -1508,9 +1508,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<LocationAddDTO, Location>();
 
 
-
             CreateMap<Employee, EmployeeReportDto>();
-
 
 
             CreateMap<EmployeeClocks, EmployeeClocksGetDTO>();
@@ -1534,8 +1532,17 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.DayStatusName, opt => opt.MapFrom(src => src.DayStatus.Name))
                 .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
-
             CreateMap<EmployeeLoans, EmployeeLoansGetDTO>();
+            
+
+            CreateMap<FailedStudents, FailedStudentsGet>()
+                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
+
         }
     } 
 }

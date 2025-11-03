@@ -62,6 +62,9 @@ export class TransferedFromKindergartenReportComponent {
   CurrentDate: any = new Date()
   ArabicCurrentDate: any = new Date()
   direction: string = "";
+  
+  // Add this property to match student-information component
+  showViewReportBtn: boolean = false;
 
   @ViewChild('kindergartenContainer') kindergartenContainer!: ElementRef;
 
@@ -86,6 +89,8 @@ export class TransferedFromKindergartenReportComponent {
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
+      this.showTable = false;
+      this.showViewReportBtn = false;
     });
     this.direction = document.dir || 'ltr';
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -169,6 +174,7 @@ export class TransferedFromKindergartenReportComponent {
     }
   }
 
+  // Updated change handlers to match student-information component
   onSchoolChange() {
     console.log('School changed to:', this.SelectedSchoolId);
     
@@ -178,6 +184,7 @@ export class TransferedFromKindergartenReportComponent {
     this.Students = [];
     this.filteredStudents = [];
     this.showTable = false;
+    this.showViewReportBtn = this.SelectedSchoolId !== 0;
     
     // Get academic years for the selected school
     this.getAllYears();
@@ -191,9 +198,18 @@ export class TransferedFromKindergartenReportComponent {
     this.Students = [];
     this.filteredStudents = [];
     this.showTable = false;
+    this.showViewReportBtn = this.SelectedSchoolId !== 0 && this.SelectedYearId !== 0;
     
     // Get students for the selected academic year
     this.getAllStudents();
+  }
+
+  onStudentChange() {
+    this.showTable = false;
+    this.showViewReportBtn =
+      this.SelectedSchoolId !== 0 &&
+      this.SelectedYearId !== 0 &&
+      this.SelectedStudentId !== 0;
   }
 
   searchStudents() {
@@ -276,44 +292,55 @@ export class TransferedFromKindergartenReportComponent {
     const opt = {
       margin: [0.3, 0.3, 0.3, 0.3],
       filename: `Kindergarten-Transfer-Certificate-${this.SelectedStudent?.en_name || 'student'}.pdf`,
-      image: {
-        type: 'jpeg',
-        quality: 0.98
-      },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        allowTaint: false
-      },
-      jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait',
-        compress: true
-      }
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
     };
 
-    const container = this.kindergartenContainer.nativeElement;
-    const originalStyle = container.style.cssText;
+    const container = this.kindergartenContainer.nativeElement as HTMLElement;
 
-    container.style.cssText += `
-      font-size: 12px !important;
-      line-height: 1.4 !important;
-      color: #000 !important;
-    `;
+    // Create a visible clone so html2canvas can render it reliably (not positioned off-screen)
+    const clone = container.cloneNode(true) as HTMLElement;
+
+    // Apply styles to clone to match print layout and ensure it's visible in DOM
+    clone.style.position = 'static';
+    clone.style.top = 'auto';
+    clone.style.left = 'auto';
+    clone.style.right = 'auto';
+    clone.style.bottom = 'auto';
+    clone.style.display = 'block';
+    clone.style.width = '210mm';
+    clone.style.maxWidth = '210mm';
+    clone.style.margin = '0 auto';
+    clone.style.background = 'white';
+    clone.style.padding = '40px';
+    clone.style.boxSizing = 'border-box';
+    clone.style.color = '#000';
+    clone.style.fontFamily = 'Arial, sans-serif';
+
+    // If images are relative or base64 they will render; ensure useCORS true in options above
+    const wrapper = document.createElement('div');
+    wrapper.style.width = '100%';
+    wrapper.style.display = 'block';
+    wrapper.style.background = 'white';
+    wrapper.style.padding = '0';
+    wrapper.className = 'pdf-clone-wrapper';
+    wrapper.appendChild(clone);
+
+    document.body.appendChild(wrapper);
 
     html2pdf()
-      .from(container)
+      .from(clone)
       .set(opt)
       .save()
       .then(() => {
-        container.style.cssText = originalStyle;
+        // cleanup
+        document.body.removeChild(wrapper);
         this.showPDF = false;
       })
       .catch((error: any) => {
         console.error('PDF generation failed:', error);
-        container.style.cssText = originalStyle;
+        document.body.removeChild(wrapper);
         this.showPDF = false;
       });
   }
@@ -405,7 +432,6 @@ export class TransferedFromKindergartenReportComponent {
     });
   }
 
-  // Helper methods for certificate data
   getSchoolNameEn(): string {
     return this.school?.name || this.school?.reportHeaderOneEn || '-';
   }
