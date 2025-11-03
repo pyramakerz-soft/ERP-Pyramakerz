@@ -177,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No subject with this ID");
             }
 
-            if (NewDirectMark.SubjectWeightTypeID != null || NewDirectMark.SubjectWeightTypeID != 0)
+            if (NewDirectMark.SubjectWeightTypeID != null && NewDirectMark.SubjectWeightTypeID != 0)
             {
                 SubjectWeightType subjectWeightType = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(g => g.ID == NewDirectMark.SubjectWeightTypeID && g.IsDeleted != true);
                 if (subjectWeightType == null)
@@ -189,6 +189,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     return BadRequest("This Subject isn't assigned to this Subject Weight Type");
                 }
+            }
+            else
+            {
+                NewDirectMark.SubjectWeightTypeID = null;
             }
 
             DirectMark directMark = mapper.Map<DirectMark>(NewDirectMark);
@@ -327,7 +331,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No directMark with this ID");
             }
 
-            if(NewDirectMark.SubjectWeightTypeID != null || NewDirectMark.SubjectWeightTypeID == 0)
+            if(NewDirectMark.SubjectWeightTypeID != null && NewDirectMark.SubjectWeightTypeID != 0)
             {
                 SubjectWeightType subjectWeightType = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(g => g.ID == NewDirectMark.SubjectWeightTypeID && g.IsDeleted != true);
                 if (subjectWeightType == null)
@@ -339,6 +343,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     return BadRequest("This Subject isn't assigned to this Subject Weight Type");
                 }
+            }
+            else
+            {
+                NewDirectMark.SubjectWeightTypeID = null;
             }
 
             if (userTypeClaim == "employee")
