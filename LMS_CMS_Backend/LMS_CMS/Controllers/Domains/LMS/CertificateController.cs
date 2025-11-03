@@ -129,6 +129,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
                     if (subject == null) continue;
 
+                    // Cell For the last column
                     CertificateSubjectTotalMark subjectTotalMark = new CertificateSubjectTotalMark();
                     subjectTotalMark.SubjectID = subject.ID;
                     subjectTotalMark.SubjectEn_name = subject.en_name;
@@ -215,6 +216,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             }
 
                             int totalItems = directMarks.Count + allAssignments.Count;
+                            
+                            // AVG for one Weight type for one subject (Student's degree in this subject weight type)
                             float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
 
 
@@ -263,31 +266,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                     else
                     {
-                        //float sumPercentageDegree = 0;
+                        float sumPercentageDegree = 0;
                         //// Get direct marks
-                        //List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
-                        //    .FindBy(a => a.SubjectID == subjectId &&
-                        //                 a.IsDeleted != true &&
-                        //                 a.IsSummerCourse == true &&
-                        //                 a.Date >= DateFrom &&
-                        //                 a.Date <= DateTo).ToList();
+                        List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
+                            .FindBy(a => a.SubjectID == subjectId &&
+                                         a.IsDeleted != true &&
+                                         a.IsSummerCourse == true &&
+                                         a.Date >= DateFrom &&
+                                         a.Date <= DateTo).ToList();
 
-                        //foreach (DirectMark mark in directMarks)
-                        //{
-                        //    DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
-                        //        .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
-                        //                               a.DirectMarkID == mark.ID &&
-                        //                               a.IsDeleted != true);
+                        foreach (DirectMark mark in directMarks)
+                        {
+                            subjectTotalMark.Mark += mark.Mark;
 
-                        //    if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
-                        //    {
-                        //        sumPercentageDegree += ((float)studentDirectMark.Degree / mark.Mark);
-                        //    }
-                        //}
+                            DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
+                                .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
+                                                       a.DirectMarkID == mark.ID &&
+                                                       a.IsDeleted != true);
 
-                        //int totalItems = directMarks.Count + allAssignments.Count;
-                        //float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
-
+                            if (studentDirectMark?.Degree != null)
+                            {
+                                sumPercentageDegree += studentDirectMark.Degree.Value / mark.Mark;
+                            }
+                        }
+                        subjectTotalMark.Degree = sumPercentageDegree * subjectTotalMark.Mark;
+                        certificateSubjectTotalMark.Add(subjectTotalMark);
                     }
                 }
 

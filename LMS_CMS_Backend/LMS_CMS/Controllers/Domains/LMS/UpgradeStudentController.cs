@@ -173,7 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
                                 .FindBy(a => a.SubjectID == subjectWeightType.SubjectID &&
                                              a.IsDeleted != true &&
-                                             a.SubjectWeightTypeID == subjectWeightType.WeightTypeID &&
+                                             a.SubjectWeightTypeID == subjectWeightType.ID &&
                                              a.Date >= academicYearFrom.DateFrom &&
                                              a.Date <= academicYearFrom.DateTo).ToList();
 

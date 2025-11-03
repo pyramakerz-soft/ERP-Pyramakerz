@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +21,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public StudentMedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public StudentMedalController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileUploadsService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;  
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileUploadsService;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -63,6 +66,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<StudentMedalGetDTO> Dto = mapper.Map<List<StudentMedalGetDTO>>(types);
+
+            foreach (var d in Dto)
+            {
+                d.ImageLink = _fileService.GetFileUrl(d.ImageLink, Request, HttpContext);
+            }
 
             return Ok(Dto);
         }

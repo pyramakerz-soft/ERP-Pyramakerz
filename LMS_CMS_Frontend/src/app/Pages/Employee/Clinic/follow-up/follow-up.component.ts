@@ -47,6 +47,7 @@ export class FollowUpComponent implements OnInit {
     'Complaints',
     'Diagnosis',
     'Recommendation',
+    'Date',
     'Actions',
   ];
   followUps: any[] = [];
@@ -59,7 +60,7 @@ export class FollowUpComponent implements OnInit {
     'studentName',
     'complaints',
     'diagnosisName',
-    'recommendation',
+    'recommendation'
   ];
   followUp: FollowUp = new FollowUp();
   schools: any[] = [];
@@ -677,6 +678,7 @@ console.log(error);
         'Student',
         'Diagnosis',
         'Recommendation',
+        'Date',
         'Actions',
       ];
     } else {
@@ -688,6 +690,7 @@ console.log(error);
         'الطالب',
         'التشخيص',
         'التوصية',
+        'التاريخ',
         'الإجراءات',
       ];
     }
