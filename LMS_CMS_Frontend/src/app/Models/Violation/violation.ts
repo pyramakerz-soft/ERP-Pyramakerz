@@ -5,6 +5,7 @@ export class Violation {
         public id: number = 0,
         public details: string = '',
         public attach: string = '',
+        public deletedAttach: string = '',
         public attachFile:  File|null = null,
         public date: string = '',
         public violationTypeID: number = 0,

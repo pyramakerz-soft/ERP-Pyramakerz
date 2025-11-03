@@ -46,7 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Shop Item", "Shop" }
+           pages: new[] { "Shop Item", "Shop" , "Items", "Stocking" , "Item Card Report" , "Item Card Report With Average" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -331,7 +331,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("BySubCategoryId/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Inventory" }
+            pages: new[] { "Inventory", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order", "Purchases", "Opening Balances", "Addition", "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment" }
          )]
         public async Task<IActionResult> GetBySubCategoryAsync(long id)
         {
@@ -447,7 +447,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("ByBarcode/{BarCode}/{StoreId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Shop Item", "Shop" }
+            pages: new[] { "Shop Item", "Shop", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order", "Purchases", "Opening Balances", "Addition", "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment" }
          )]
         public async Task<IActionResult> GetbyIdAsync(string BarCode,long StoreId)
         {

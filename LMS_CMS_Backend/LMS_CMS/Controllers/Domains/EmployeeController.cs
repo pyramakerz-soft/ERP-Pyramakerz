@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace LMS_CMS_PL.Controllers.Domains
@@ -70,6 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
             List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(
                     sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.BusCompany),
@@ -159,8 +161,9 @@ namespace LMS_CMS_PL.Controllers.Domains
 
                 // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
                 employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
-
             }
+
+            EmployeesDTO = EmployeesDTO.OrderBy(t => t.en_name).ToList();
 
             return Ok(EmployeesDTO);
         }
@@ -211,6 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
             }
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -240,7 +244,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
-             
+
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
             return Ok(employeeDTOs);
         }
         
@@ -267,8 +272,9 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
 
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
             return Ok(employeeDTOs);
         }
 
@@ -294,7 +300,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept requests");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -321,7 +328,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept requests");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -348,7 +356,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept messages");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -441,6 +450,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && teacherIDs.Contains(d.ID));
 
             List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }

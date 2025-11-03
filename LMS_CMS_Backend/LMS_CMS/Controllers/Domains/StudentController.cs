@@ -1493,7 +1493,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                         else
                         {
                             dto.ClassName = student.StudentClassrooms
-                                .Where(c => c.Classroom?.AcademicYear != null &&
+                                .Where(c => c.Classroom?.AcademicYear != null && c.IsDeleted != true && c.Classroom.IsDeleted != true &&
                                             c.Classroom.AcademicYear.IsActive && c.Classroom.AcademicYear.IsDeleted != true)
                                 .OrderByDescending(c => c.ClassID)
                                 .Select(c => c.Classroom.Name)

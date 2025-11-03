@@ -306,7 +306,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 violation.Attach = violation.Attach;
             }
 
+
             mapper.Map(Newviolation, violation);
+            if ((Newviolation.DeletedFile != null || Newviolation.DeletedFile != "") && Newviolation.AttachFile == null)
+            {
+                await _fileService.DeleteFileAsync(
+                    Newviolation.DeletedFile,
+                    "Violation/Violation",
+                    Newviolation.ID,
+                    HttpContext
+                );
+                violation.Attach = null;
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             violation.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

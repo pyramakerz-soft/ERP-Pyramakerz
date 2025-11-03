@@ -63,18 +63,7 @@ import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
   styleUrl: './inventory-details.component.css',
 })
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -1293,6 +1282,7 @@ export class InventoryDetailsComponent {
   }
 
   ////////////////////////////// search
+
   SearchToggle() {
     this.IsSearchOpen = true;
     setTimeout(() => {
@@ -1314,8 +1304,22 @@ export class InventoryDetailsComponent {
     this.shopitemServ
       .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
       .subscribe(
-        (d) => {
+        async (item) => {
           // ... existing success logic
+          this.SelectedSopItem = item;
+          this.ShopItem = item;
+          this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
+          if (this.FlagId === 11 || this.FlagId === 12) {
+            this.Item.price = item.salesPrice ?? 0;
+          } else {
+            this.Item.price = item.purchasePrice ?? 0;
+          }
+          this.Item.shopItemID = item.id;
+          this.Item.shopItemName = item.enName;
+          this.Item.barCode = item.barCode;
+          this.Item.quantity = 1;
+          this.Item.totalPrice = this.Item.price;
+          await this.SaveRow();
         },
         (error) => {
           this.showErrorAlert(this.translate.instant('Item not found'));
@@ -1388,33 +1392,29 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(
-    event: any,
-    field: keyof InventoryDetails,
-    row: InventoryDetails
-  ): void {
+  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
     const value = event.target.value;
     const numValue = Number(value);
-    if (field === 'quantity' || field === 'price') {
-      const integerRegex = /^\d+$/;
-
-      if (!integerRegex.test(value) || numValue <= 0) {
-        // Invalid input (decimal, letters, negative, etc.)
-        row[field] = 0;
-        event.target.value = 0;
-      } else {
-        // Valid integer value
-        row[field] = numValue;
-      }
-      this.CalculateTotalPrice(row);
-      return;
-    }
-    if (isNaN(numValue) || value === '') {
+   
+    if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof row[field] === 'string') {
         row[field] = '' as never;
       }
-      row.totalPrice = 0;
+    }
+
+    if (field === 'quantity') {
+      let value = event.target.value;
+      value = value.replace(/[^0-9]/g, '')
+      event.target.value = value;
+      if (isNaN(value) || value === '') {
+        event.target.value = '';
+        if (typeof row[field] === 'string') {
+          row[field] = '' as never;
+        }
+      }
+      this.CalculateTotalPrice(row);
+      return;
     }
   }
 

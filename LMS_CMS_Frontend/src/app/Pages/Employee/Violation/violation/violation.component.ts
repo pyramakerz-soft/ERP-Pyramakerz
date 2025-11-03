@@ -181,6 +181,17 @@ export class ViolationComponent {
     this.openModal();
   }
 
+  removeAttachment(){
+    if(this.mode == 'Edit'){
+      this.violation.deletedAttach = this.violation.attach
+      this.violation.attach = ""
+    }
+    else{
+      this.violation.attachFile = null;
+      this.violation.attach = ""
+    }
+  }
+
   Delete(id: number) {
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Violation')+ this.translate.instant('?'),
