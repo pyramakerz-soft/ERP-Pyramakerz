@@ -230,7 +230,7 @@ export class InstallmentDeductionDetailComponent {
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Done Succeessfully',
+            text: 'Done Successfully',
             confirmButtonColor: '#089B41',
           });
 
@@ -254,7 +254,7 @@ export class InstallmentDeductionDetailComponent {
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Done Succeessfully',
+            text: 'Done Successfully',
             confirmButtonColor: '#089B41',
           });
         },
@@ -335,7 +335,7 @@ export class InstallmentDeductionDetailComponent {
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Installment Deduction Details Deleted Succeessfully',
+            text: 'Installment Deduction Details Deleted Successfully',
             confirmButtonColor: '#089B41',
           });
         })

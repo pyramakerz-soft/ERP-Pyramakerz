@@ -1300,31 +1300,48 @@ export class InventoryDetailsComponent {
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-
-    this.shopitemServ
-      .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
-      .subscribe(
-        async (item) => {
-          // ... existing success logic
-          this.SelectedSopItem = item;
-          this.ShopItem = item;
-          this.Item.id = Date.now() + Math.floor(Math.random() * 10000);
-          if (this.FlagId === 11 || this.FlagId === 12) {
-            this.Item.price = item.salesPrice ?? 0;
-          } else {
-            this.Item.price = item.purchasePrice ?? 0;
-          }
-          this.Item.shopItemID = item.id;
-          this.Item.shopItemName = item.enName;
-          this.Item.barCode = item.barCode;
-          this.Item.quantity = 1;
-          this.Item.totalPrice = this.Item.price;
-          await this.SaveRow();
-        },
-        (error) => {
-          this.showErrorAlert(this.translate.instant('Item not found'));
+    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
+      (d) => {
+        let price = 0;
+        if (this.FlagId === 11 || this.FlagId === 12) {
+          price = d.salesPrice ?? 0;
+        } else {
+          price = d.purchasePrice ?? 0;
         }
-      );
+        const detail: InventoryDetails = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          insertedAt: '',
+          insertedByUserId: 0,
+          shopItemID: d.id,
+          shopItemName: d.enName,
+          barCode: d.barCode,
+          quantity: 1,
+          salesId: 0,
+          price: price,
+          totalPrice: price,
+          name: '',
+          inventoryMasterId: this.MasterId,
+          salesName: '',
+          notes: '',
+        };
+        if (this.mode == 'Create') {
+          this.Data.inventoryDetails.push(detail);
+        } else if (this.mode == 'Edit') {
+          this.TableData.push(detail);
+          this.NewDetailsWhenEdit.push(detail);
+        }
+        this.TotalandRemainingCalculate();
+        this.BarCode = ''; 
+      },
+      (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Item not found',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
+    );
   }
 
   getStoreNameById(id: number | string): string {

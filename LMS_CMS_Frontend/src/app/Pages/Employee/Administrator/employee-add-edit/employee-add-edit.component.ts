@@ -410,7 +410,7 @@ export class EmployeeAddEditComponent {
               Swal.fire({
                 icon: 'success',
                 title: 'Done',
-                text: 'Employee Added Succeessfully',
+                text: 'Employee Added Successfully',
                 confirmButtonColor: '#089B41',
               });
               this.moveToEmployee();
@@ -475,7 +475,7 @@ export class EmployeeAddEditComponent {
               Swal.fire({
                 icon: 'success',
                 title: 'Done',
-                text: 'Employee Edited Succeessfully',
+                text: 'Employee Edited Successfully',
                 confirmButtonColor: '#089B41',
               });
               this.moveToEmployee();

@@ -3,8 +3,8 @@ export class Location {
         public id: number = 0,
         public name: string = '',
         public zoom: number = 13,
-        public range: number = 0,
-        public latitude: number = 0,
-        public longitude: number = 0,
+        public range: number | null = null,
+        public latitude: number| null = null,
+        public longitude: number | null = null,
     ) { }
 }

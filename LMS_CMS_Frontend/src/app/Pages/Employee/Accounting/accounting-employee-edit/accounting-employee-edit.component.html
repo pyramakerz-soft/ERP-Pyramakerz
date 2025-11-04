@@ -52,20 +52,20 @@
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="passportNumber"> {{ 'Passport Number' | translate }}</label>
     <input id="passportNumber" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter User passportNumber' | translate }}" [(ngModel)]="Data.passportNumber" />
+      placeholder="{{ 'Enter User Passport Number' | translate }}" [(ngModel)]="Data.passportNumber" />
   </div>
 
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="residenceNumber"> {{ 'Residence number' | translate }}</label>
     <input id="residenceNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter User residenceNumber' | translate }}" [(ngModel)]="Data.residenceNumber" />
+      placeholder="{{ 'Enter User Residence number' | translate }}" [(ngModel)]="Data.residenceNumber" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="birthdayDate"> {{ 'BirthDay Date' | translate }}</label>
     <input id="birthdayDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter User birthdayDate' | translate }}" [(ngModel)]="Data.birthdayDate" />
+      placeholder="{{ 'Enter User BirthDay Date' | translate }}" [(ngModel)]="Data.birthdayDate" />
   </div>
 
   <div class="flex flex-col w-[49%] mb-4">
@@ -111,7 +111,7 @@
     <div class="flex flex-col w-[73%]">
       <label class="mb-2 primaryTxt" for="monthSalary"> {{ 'Month Salary' | translate }}</label>
       <input id="monthSalary" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-        (input)="validateNumber($event,'monthSalary')" placeholder="{{ 'Enter monthSalary' | translate }}"
+        (input)="validateNumber($event,'monthSalary')" placeholder="{{ 'Enter Month Salary' | translate }}"
         [(ngModel)]="Data.monthSalary" />
     </div>
 
@@ -164,7 +164,7 @@
     <label class="mb-2 primaryTxt" for="delayAllowance">{{ 'Delay Allowance (in minutes)' | translate }}</label>
     <input id="delayAllowance" (input)="validateNumber($event, 'delayAllowance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter delayAllowance' | translate }}" [(ngModel)]="Data.delayAllowance" />
+      placeholder="{{ 'Enter Delay Allowance' | translate }}" [(ngModel)]="Data.delayAllowance" />
   </div>
 
   <div class="flex flex-col w-full mb-4">
@@ -181,20 +181,20 @@
     <label class="mb-2 primaryTxt" for="annualLeaveBalance"> {{ 'Annual Leave Balance' | translate }}</label>
     <input id="annualLeaveBalance" (input)="validateNumber($event, 'annualLeaveBalance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter annualLeaveBalance' | translate }}" [(ngModel)]="Data.annualLeaveBalance" />
+      placeholder="{{ 'Enter Annual Leave Balance' | translate }}" [(ngModel)]="Data.annualLeaveBalance" />
   </div>
   <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="casualLeavesBalance"> {{ 'Casual Leaves Balance' | translate }}</label>
     <input id="casualLeavesBalance" (input)="validateNumber($event, 'casualLeavesBalance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter casualLeavesBalance' | translate }}" [(ngModel)]="Data.casualLeavesBalance" />
+      placeholder="{{ 'Enter Casual Leaves Balance' | translate }}" [(ngModel)]="Data.casualLeavesBalance" />
   </div>
   <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="monthlyLeaveRequestBalance"> {{ 'Monthly Leave Request Balance' | translate
       }}</label>
     <input id="monthlyLeaveRequestBalance" (input)="validateNumber($event, 'monthlyLeaveRequestBalance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter monthlyLeaveRequestBalance' | translate }}"
+      placeholder="{{ 'Enter Monthly Leave Request Balance' | translate }}"
       [(ngModel)]="Data.monthlyLeaveRequestBalance" />
   </div>
 
@@ -286,12 +286,12 @@
   </div>
 
   <div class="flex flex-col w-full mb-4">
-    <label class="mb-2 cursor-pointer" (click)="toggleDropdown()">
+    <label class="mb-2 cursor-pointer" (click)="toggleDropdown($event)">
       {{ 'Working Days' | translate }}
     </label>
     <div class="relative">
       <div class="flex flex-wrap gap-2 mb-2 border border-solid border-gray-300 rounded-lg px-4 py-3"
-        (click)="toggleDropdown()">
+        (click)="toggleDropdown($event)">
         <span *ngFor="let selected of selectedDays"
           class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center">
           {{ selected.name }}
@@ -305,7 +305,7 @@
         </span>
       </div>
 
-      <div
+      <div #DaysDropDown
         class="absolute bg-white border border-solid border-gray-300 rounded-lg shadow-md w-full mt-1 max-h-48 overflow-y-auto z-10"
         *ngIf="isDropdownOpen">
         <ul>
