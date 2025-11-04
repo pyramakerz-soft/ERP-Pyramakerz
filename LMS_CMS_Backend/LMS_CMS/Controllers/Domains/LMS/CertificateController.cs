@@ -219,10 +219,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             
                             // AVG for one Weight type for one subject (Student's degree in this subject weight type)
                             float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
-
+                            /////////////////////////////////// swt.Weight
 
                             var certificateSubjectObject = new CertificateSubject();
-                            certificateSubjectObject.Mark = swt.Weight;
+                            certificateSubjectObject.Mark = swt.Weight; /////////////////////////////////// swt.Weight
 
                             float weight = avgDegree;
                             int integerPart = (int)Math.Floor(weight);
