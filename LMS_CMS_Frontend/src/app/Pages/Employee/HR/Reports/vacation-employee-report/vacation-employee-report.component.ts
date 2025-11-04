@@ -223,7 +223,7 @@ async viewReport() {
           this.reportsForExport.push({
             'Employee ID': employee.employeeId,
             'Employee Name': employee.employeeEnName || employee.employeeArName || 'Unknown',
-            'Total Amount': employee.totalAmount,
+            // 'Total Amount'  
             'Vacation ID': vac.id,
             'Vacation Type': vac.vacationTypesName,
             'Date': vac.date,
@@ -240,7 +240,7 @@ async viewReport() {
         this.reportsForExport.push({
           'Employee ID': employee.employeeId,
           'Employee Name': employee.employeeEnName || employee.employeeArName || 'Unknown',
-          'Total Amount': employee.totalAmount,
+          // 'Total Amount'  
           'Vacation ID': '-',
           'Vacation Type': '-',
           'Date': '-',
@@ -254,6 +254,7 @@ async viewReport() {
         });
       }
     });
+    // rebuild excel rows from reportsForExport (now without Total Amount)
     this.reportsForExcel = this.reportsForExport.map(obj => Object.values(obj));
   }
 
@@ -353,12 +354,6 @@ async viewReport() {
           en: 'Vacation Employee Report',
           ar: 'تقرير اجازات الموظفين'
         },
-        // subHeaders: [
-        //   {
-        //     en: 'Employee Vacation Records',
-        //     ar: 'سجلات اجازات الموظفين'
-        //   }
-        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },
@@ -368,11 +363,10 @@ async viewReport() {
         ],
         tables: [
           {
-            // title: 'Vacation Employee Report Data',
             headers: [
               'Employee ID',
               'Employee Name',
-              'Total Amount',
+              // 'Total Amount'  
               'Vacation ID',
               'Vacation Type',
               'Date',

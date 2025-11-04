@@ -93,9 +93,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Employee Name' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
-                </th>
+                </th> -->
                 <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Vacation ID' | translate }}
                 </th> -->
@@ -160,9 +160,9 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getVacationEmployeeCount(employee)">
                             {{ employee.employeeEnName || employee.employeeArName || 'Unknown' }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getVacationEmployeeCount(employee)">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getVacationEmployeeCount(employee)">
                             {{ employee.totalAmount }}
-                        <!-- </td>
+                        </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ vac.id }}
                         </td> -->
@@ -208,7 +208,6 @@
             [tableHeaders]="[
                 'Employee ID',
                 'Employee Name',
-                'Total Amount',
 
                 'Vacation Type',
                 'Date',

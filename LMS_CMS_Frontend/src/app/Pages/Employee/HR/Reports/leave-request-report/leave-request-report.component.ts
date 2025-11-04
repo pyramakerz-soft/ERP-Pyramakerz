@@ -234,14 +234,14 @@ async viewReport() {
           this.reportsForExport.push({
             'Employee ID': employeeLeaveRequest.employeeId,
             'Employee Name': employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
-            'Total Amount': employeeLeaveRequest.totalAmount,
+            // 'Total Amount'  
             'Leave Request ID': leaveRequest.id,
             'Leave Date': new Date(leaveRequest.date).toLocaleDateString(),
             'Hours': leaveRequest.hours || '-',
             'Minutes': leaveRequest.minutes || '-',
             'Monthly Balance': leaveRequest.monthlyLeaveRequestBalance || '-',
-            'Used': leaveRequest.used || '-',
-            'Remains': leaveRequest.remains || '-',
+            // 'Used'  
+            // 'Remains'  
             'Notes': leaveRequest.notes || '-'
           });
         });
@@ -250,14 +250,14 @@ async viewReport() {
         this.reportsForExport.push({
           'Employee ID': employeeLeaveRequest.employeeId,
           'Employee Name': employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
-          'Total Amount': employeeLeaveRequest.totalAmount,
+          // 'Total Amount'  
           'Leave Request ID': '-',
           'Leave Date': '-',
           'Hours': '-',
           'Minutes': '-',
           'Monthly Balance': '-',
-          'Used': '-',
-          'Remains': '-',
+          // 'Used'  
+          // 'Remains'  
           'Notes': '-'
         });
       }
@@ -271,14 +271,14 @@ async viewReport() {
           this.reportsForExcel.push([
             employeeLeaveRequest.employeeId,
             employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
-            employeeLeaveRequest.totalAmount,
+            //   totalAmount
             leaveRequest.id,
             new Date(leaveRequest.date).toLocaleDateString(),
             leaveRequest.hours || '-',
             leaveRequest.minutes || '-',
             leaveRequest.monthlyLeaveRequestBalance || '-',
-            leaveRequest.used || '-',
-            leaveRequest.remains || '-',
+            //   used
+            //   remains
             leaveRequest.notes || '-'
           ]);
         });
@@ -286,14 +286,14 @@ async viewReport() {
         this.reportsForExcel.push([
           employeeLeaveRequest.employeeId,
           employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
-          employeeLeaveRequest.totalAmount,
+          //   totalAmount
           '-',
           '-',
           '-',
           '-',
           '-',
-          '-',
-          '-',
+          //   used
+          //   remains
           '-'
         ]);
       }
@@ -404,12 +404,6 @@ async viewReport() {
           en: 'Leave Request Report',
           ar: 'تقرير طلبات الإجازة'
         },
-        // subHeaders: [
-        //   {
-        //     en: 'Employee Leave Request Records',
-        //     ar: 'سجلات طلبات إجازة الموظفين'
-        //   }
-        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },
@@ -419,19 +413,18 @@ async viewReport() {
         ],
         tables: [
           {
-            // title: 'Leave Request Report Data',
             headers: [
               'Employee ID', 
-              'Employee Name', 
-              'Total Amount', 
+              'Employee Name',
+              // 'Total Amount'  
               'Leave Request ID', 
               'Leave Date', 
               'Hours',
               'Minutes',
-              'Monthly Balance', 
-              'Used', 
-              'Remains', 
-              'Notes'
+              'Monthly Balance'
+              // 'Used'  
+              // 'Remains'  
+              , 'Notes'
             ],
             data: this.reportsForExcel
           }

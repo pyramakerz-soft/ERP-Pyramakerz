@@ -222,8 +222,10 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'" [infoRows]="getInfoData()"
-            [tableHeaders]="tableHeadersForPDF" [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'"
+        [infoRows]="infoRows"
+            [tableHeaders]="tableHeadersForPDF"
+             [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

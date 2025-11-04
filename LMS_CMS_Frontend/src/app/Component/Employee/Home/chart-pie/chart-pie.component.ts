@@ -71,7 +71,7 @@ export class ChartPieComponent implements AfterViewInit, OnChanges {
         labels: ['Approved Students', 'Rejected Students', 'Pending Students', 'Waiting List'],
         datasets: [{
           data: data,
-          backgroundColor: ['#2D8A39', '#E2341D', '#F6A723', '#A9A9A9'],
+          backgroundColor: ['#2D8A39', '#E2341D', '#F6A723', '#3B82F6'],
           borderRadius: 10,
           spacing: 2,
         }]
