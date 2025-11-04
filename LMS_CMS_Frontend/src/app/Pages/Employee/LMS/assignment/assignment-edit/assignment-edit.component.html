@@ -245,7 +245,7 @@
 
                         <ng-template #placeholder>
                             <span class="text-gray-400">
-                                <span *ngIf="!SelectedLessonID">{{ 'Select Lesson First' | translate }}</span>
+                                <span *ngIf="!SelectedLessonID">{{ 'Select' | translate }} {{'Lesson' | translate}} {{'First' | translate}}</span>
                                 <span *ngIf="SelectedLessonID">{{ 'Choose' | translate }} {{ 'Tags' | translate
                                     }}</span>
                             </span>
@@ -281,7 +281,7 @@
                 </label>
                 <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
                     [value]="getFormattedQuestionTypes()" disabled
-                    placeholder="{{ 'Enter' | translate }} {{ 'From' | translate }}" />
+                    placeholder="{{ 'Number' | translate }}" />
             </div>
 
             <!-- Question Type -->
@@ -290,7 +290,7 @@
                     translate }}</label>
                 <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     (change)="GetQuestionBank(this.CurrentPage, this.PageSize)" [(ngModel)]="SelectedTypeID">
-                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Lesson' | translate }}
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Type' | translate }}
                     </option>
                     <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
                     <option *ngIf="QuestionBankType .length === 0" disabled selected>{{ 'No Data Found' | translate }}
@@ -463,7 +463,7 @@
 
                         <ng-template #placeholder>
                             <span class="text-gray-400">
-                                <span *ngIf="!SelectedLessonID">{{ 'Select Lesson First' | translate }}</span>
+                                {{ 'Select' | translate }} {{'Lesson' | translate}} {{'First' | translate}}
                                 <span *ngIf="SelectedLessonID">{{ 'Choose' | translate }} {{ 'Tags' | translate
                                     }}</span>
                             </span>
