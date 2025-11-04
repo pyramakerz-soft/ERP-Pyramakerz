@@ -1294,7 +1294,7 @@
 
   "Deduction End Month": "Deduction End Month",
   "new time table": "new time table",
-  "is Restricted For Loctaion": "is Restricted For Loctaion",
+  "is Restricted For Loctaion": "is Restricted For Location",
   "Subject is required": "Subject is required",
   "Classroom is required": "Classroom is required",
   "Suspend": "Suspend",
@@ -1376,7 +1376,7 @@
   "dateFrom": "dateFrom",
   "dateTo": "dateTo",
   "Edit Attendance": "Edit Attendance",
-  "Attendence": "Attendence",
+  "Attendance": "Attendance",
   "clockOut": "clockOut",
   "clockIn": "clockIn",
   "date": "date",

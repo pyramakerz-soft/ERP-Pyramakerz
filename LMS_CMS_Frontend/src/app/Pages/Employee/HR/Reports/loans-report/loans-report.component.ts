@@ -230,10 +230,19 @@ async viewReport() {
     // For PDF (object format) - Only include visible columns
     this.reportsForExport = [];
     this.loansReports.forEach(employeeLoan => {
+      const employeeName =
+        employeeLoan.employeeEnName ||
+        employeeLoan.employeeName ||
+        employeeLoan.employeeArName ||
+        employeeLoan.en_name ||
+        employeeLoan.ar_name ||
+        '-';
+
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExport.push({
-            'Employee ID': employeeLoan.employeeId,
+            'ID': employeeLoan.employeeId,
+            'Employee Name': employeeName,
             'Total Amount': employeeLoan.totalAmount,
             'Loan Date': new Date(loan.date).toLocaleDateString(),
             'Loan Amount': loan.amount,
@@ -243,7 +252,8 @@ async viewReport() {
       } else {
         // If no loans, still show employee summary
         this.reportsForExport.push({
-          'Employee ID': employeeLoan.employeeId,
+          'ID': employeeLoan.employeeId,
+          'Employee Name': employeeName,
           'Total Amount': employeeLoan.totalAmount,
           'Loan Date': '-',
           'Loan Amount': '-',
@@ -252,13 +262,22 @@ async viewReport() {
       }
     });
 
-    // For Excel (array format) - Only include visible columns
+    // For Excel (array format) - include Employee Name (same visible columns)
     this.reportsForExcel = [];
     this.loansReports.forEach(employeeLoan => {
+      const employeeName =
+        employeeLoan.employeeEnName ||
+        employeeLoan.employeeName ||
+        employeeLoan.employeeArName ||
+        employeeLoan.en_name ||
+        employeeLoan.ar_name ||
+        '-';
+
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExcel.push([
             employeeLoan.employeeId,
+            employeeName,
             employeeLoan.totalAmount,
             new Date(loan.date).toLocaleDateString(),
             loan.amount,
@@ -268,6 +287,7 @@ async viewReport() {
       } else {
         this.reportsForExcel.push([
           employeeLoan.employeeId,
+          employeeName,
           employeeLoan.totalAmount,
           '-',
           '-',
@@ -398,10 +418,11 @@ async viewReport() {
           {
             // title: 'Loans Report Data',
             headers: [
-              'Employee ID', 
-              'Total Amount', 
-              'Loan Date', 
-              'Loan Amount', 
+              'ID',
+              'Employee Name',
+              'Total Amount',
+              'Loan Date',
+              'Loan Amount',
               'Notes'
             ],
             data: this.reportsForExcel
