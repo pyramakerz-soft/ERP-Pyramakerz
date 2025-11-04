@@ -93,9 +93,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Employee Name' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
-                </th>
+                </th> -->
                 <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Leave Request ID' | translate }}
                 </th> -->
@@ -111,12 +111,12 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Monthly Balance' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Used' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Remains' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Notes' | translate }}
                 </th>
@@ -156,9 +156,9 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLeaveRequestCount(employeeLeaveRequest)">
                             {{ employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown' }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLeaveRequestCount(employeeLeaveRequest)">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLeaveRequestCount(employeeLeaveRequest)">
                             {{ employeeLeaveRequest.totalAmount }}
-                        </td>
+                        </td> -->
                         <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.id }}
                         </td> -->
@@ -174,12 +174,12 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.monthlyLeaveRequestBalance || '-' }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.used || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.remains || '-' }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ leaveRequest.notes || '-' }}
                         </td>
@@ -198,13 +198,10 @@
             [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 
-                'Total Amount', 
                 'Leave Date', 
                 'Hours',
                 'Minutes',
                 'Monthly Balance', 
-                'Used', 
-                'Remains', 
                 'Notes'
             ]"
             [tableData]="reportsForExport" #pdfComponentRef>

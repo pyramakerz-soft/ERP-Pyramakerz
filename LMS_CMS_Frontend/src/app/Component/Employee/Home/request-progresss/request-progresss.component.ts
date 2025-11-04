@@ -16,16 +16,16 @@ import { RequestStateCount } from '../../../../Models/Dashboard/dashboard.models
         <!-- Progress Bar -->
         <div class="relative h-4 bg-gray-200 rounded-full overflow-hidden">
           <div 
-            class="absolute h-full bg-green-500 transition-all duration-500"
+            class="absolute h-full bg-[#2D8A39] transition-all duration-500"
             [style.width.%]="acceptedPercentage"
           ></div>
           <div 
-            class="absolute h-full bg-yellow-500 transition-all duration-500"
+            class="absolute h-full bg-[#F6A723] transition-all duration-500"
             [style.left.%]="acceptedPercentage"
             [style.width.%]="pendingPercentage"
           ></div>
           <div 
-            class="absolute h-full bg-red-500 transition-all duration-500"
+            class="absolute h-full bg-[#E2341D] transition-all duration-500"
             [style.left.%]="acceptedPercentage + pendingPercentage"
             [style.width.%]="declinedPercentage"
           ></div>
@@ -34,21 +34,21 @@ import { RequestStateCount } from '../../../../Models/Dashboard/dashboard.models
         <!-- Legend -->
         <div class="grid grid-cols-3 gap-4 text-sm">
           <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-green-500 rounded"></div>
+            <div class="w-4 h-4 bg-[#2D8A39] rounded"></div>
             <div>
               <p class="font-semibold">{{ requestStateCount?.acceptedRequestCount || 0 }}</p>
               <p class="text-gray-500">{{ 'Accepted' | translate }}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+            <div class="w-4 h-4 bg-[#F6A723] rounded"></div>
             <div>
               <p class="font-semibold">{{ requestStateCount?.requestPending || 0 }}</p>
               <p class="text-gray-500">{{ 'Pending' | translate }}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-red-500 rounded"></div>
+            <div class="w-4 h-4 bg-[#E2341D] rounded"></div>
             <div>
               <p class="font-semibold">{{ requestStateCount?.declinedRequestCount || 0 }}</p>
               <p class="text-gray-500">{{ 'Declined' | translate }}</p>

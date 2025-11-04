@@ -118,6 +118,9 @@ export class CertificateComponent {
     private realTimeService: RealTimeNotificationServiceService
   ) { }
 
+isInfoRowsLoading: boolean = false;
+
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -205,28 +208,97 @@ export class CertificateComponent {
     }
   }
 
-  OnSearchTypeChange() {
-    if(this.User_Data_After_Login.type == 'employee'){
-      this.Students = []
-      this.SelectedStudentId = 0
+  loadInfoRows(): void {
+  this.isInfoRowsLoading = true;
+  
+  // Use setTimeout to make it asynchronous and avoid blocking the UI
+  setTimeout(() => {
+    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
+
+    this.infoRows = [
+      { keyEn: 'School : ' + this.SelectedSchoolName },
+    ];
+
+    if (this.mode == 'employee') {
+      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
+      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
+      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+      this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
+      this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
+      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+    } else if (this.mode == 'student') {
+      this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
+    } else if (this.mode == 'parent') {
+      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
     }
-    this.academicYears = []
-    this.Classes = []
-    this.semester = []
-    this.SelectedClassId = 0
-    this.IsShowTabls = false
-    this.TableData = []
-    this.SelectedAcademicYearId = 0
-    this.SelectedSemesterId = 0
-    this.DateFrom = ''
-    this.DateTo = ''
-    if (this.SelectedSearchType == 'Academic Year' || this.SelectedSearchType == 'Summer Course' || this.SelectedSearchType == 'Semester') {
-      this.getAcadimicYearsBySchool();
+
+    if (this.SelectedSearchType === 'Academic Year') {
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
     }
-    if (this.SelectedSearchType == 'Summer Course') {
-      this.isSummerCourse = true
+
+    if (this.SelectedSearchType === 'Semester') {
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
+      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+      this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
     }
+
+    if (this.SelectedSearchType === 'Month') {
+      this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
+      this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
+    }
+
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
+      `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+        .toString()
+        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+    this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+    
+    this.isInfoRowsLoading = false;
+    this.cdr.detectChanges(); // Trigger change detection
+  }, 0);
+}
+
+  Apply() {
+  this.IsShowTabls = true;
+  this.GetAllData();
+  this.loadInfoRows(); // Load info rows when view is applied
+}
+
+clearAndReloadInfoRows(): void {
+  this.infoRows = []; // Clear existing info rows
+  this.loadInfoRows(); // Reload with new data
+}
+
+OnSearchTypeChange() {
+  if(this.User_Data_After_Login.type == 'employee'){
+    this.Students = []
+    this.SelectedStudentId = 0
   }
+  this.academicYears = []
+  this.Classes = []
+  this.semester = []
+  this.SelectedClassId = 0
+  this.IsShowTabls = false
+  this.TableData = []
+  this.SelectedAcademicYearId = 0
+  this.SelectedSemesterId = 0
+  this.DateFrom = ''
+  this.DateTo = ''
+  if (this.SelectedSearchType == 'Academic Year' || this.SelectedSearchType == 'Summer Course' || this.SelectedSearchType == 'Semester') {
+    this.getAcadimicYearsBySchool();
+  }
+  if (this.SelectedSearchType == 'Summer Course') {
+    this.isSummerCourse = true
+  }
+  this.clearAndReloadInfoRows(); // Add this line
+}
 
   SelectAcadimicYear() {
     this.IsShowTabls = false
@@ -319,30 +391,31 @@ export class CertificateComponent {
     })
   }
 
-  getAllGradesBySchoolId() {
-    this.DateFrom = ''
-    this.DateTo = ''
-    this.IsShowTabls = false
-    this.Grades = []
-    this.Classes = []
-    this.SelectedGradeId = 0
-    this.SelectedClassId = 0
-    var sc = this.schools.find(s => s.id == this.SelectedSchoolId);
-    if (sc) {
-      this.SelectedSchool = sc
-    }
-    if (this.mode == 'employee') {
-      this.Students = []
-      this.SelectedStudentId = 0
-    }
-    else if (this.mode == 'parent') {
-      this.Students = []
-      this.SelectedStudentId = 0
-    }
-    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.Grades = d
-    })
+getAllGradesBySchoolId() {
+  this.DateFrom = ''
+  this.DateTo = ''
+  this.IsShowTabls = false
+  this.Grades = []
+  this.Classes = []
+  this.SelectedGradeId = 0
+  this.SelectedClassId = 0
+  var sc = this.schools.find(s => s.id == this.SelectedSchoolId);
+  if (sc) {
+    this.SelectedSchool = sc
   }
+  if (this.mode == 'employee') {
+    this.Students = []
+    this.SelectedStudentId = 0
+  }
+  else if (this.mode == 'parent') {
+    this.Students = []
+    this.SelectedStudentId = 0
+  }
+  this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+    this.Grades = d
+    this.clearAndReloadInfoRows(); // Add this line after data is loaded
+  })
+}
 
   getAllClassByGradeIdAndAcYearId() {
     if(this.User_Data_After_Login.type == 'employee'){
@@ -386,10 +459,10 @@ export class CertificateComponent {
     })
   }
 
-  Apply() {
-    this.IsShowTabls = true
-    this.GetAllData()
-  }
+  // Apply() {
+  //   this.IsShowTabls = true
+  //   this.GetAllData()
+  // }
 
   ValidateViewOr() {
     if (this.mode === 'employee') {
@@ -498,205 +571,188 @@ export class CertificateComponent {
 
     this.tableDataForPDF.push(totalRow); 
   }
-
-  async Print() {
-    await this.getPDFData();
-    await this.getInfoData()
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById('Data')?.innerHTML;
-      if (!printContents) { 
-        return;
-      }
-
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
+// Update your print/PDF methods to use the pre-loaded infoRows
+async Print() {
+  // If info rows aren't loaded yet, wait for them
+  if (this.isInfoRowsLoading) {
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
-
-  async DownloadAsPDF() {
-    await this.getPDFData();
-    await this.getInfoData()
-    this.showPDF = true;
-    setTimeout(() => {
-      if (this.pdfComponentRef) { 
-        this.pdfComponentRef.downloadPDF();
-        setTimeout(() => (this.showPDF = false), 2000);
-      } else {
-        console.error('PDF Component not found at the time of generation');
-      }
-    }, 800); // Slight delay to ensure render is complete
-  }
-
-  async DownloadAsExcel() { 
-    await this.getInfoData()
-    const headerKeyMap = [
-      { key: 'subject', header: 'Subjects' },
-      ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
-      { key: 'total', header: 'Total' },
-      { key: 'percentage', header: 'Percentage' }
-    ];
-
-    const dataMatrix = this.subjects.map(subject => {
-      const row: any[] = [];
-      row.push(subject.en_name);
-      this.weightTypes.forEach(wt => {
-        row.push(this.getDegree(subject.id, wt.id) || '-');
-      });
-      row.push(this.getTotal(subject.id));
-      row.push(this.getPercentage(subject.id)); // ✅ new column data
-      return row;
-    });
-
-    const totalRow: any[] = [];
-    totalRow.push('Total');
-    this.weightTypes.forEach(() => totalRow.push('-')); // leave weight type columns blank
-    totalRow.push(this.getSum());
-    totalRow.push(this.getSumPercentage()); // ✅ percentage in last column
-    dataMatrix.push(totalRow);
-
-    const infoRows = [
-      { key: 'School', value: this.SelectedSchoolName },
-    ];
-    if (this.mode == 'employee') {
-      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
-      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
-      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
-      infoRows.push({ key: 'Grade ', value: this.SelectedGradeName });
-      infoRows.push({ key: 'Class ', value: this.SelectedClassName });
-      infoRows.push({ key: 'Student ', value: this.SelectedStudentName });
-    }
-    else if (this.mode == 'student') {
-      infoRows.push({ key: 'Student ', value: this.student.en_name });
-    }
-    else if (this.mode == 'parent') {
-      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)!.en_name || ''
-      infoRows.push({ key: 'Student ', value: this.SelectedStudentName });
-    }
-    if (this.SelectedSearchType === 'Academic Year') {
-      infoRows.push({ key: 'Academic Year ', value: this.SelectedAcademicYearName });
-    }
-    if (this.SelectedSearchType === 'Semester') {
-      infoRows.push({ key: 'Academic Year ', value: this.SelectedAcademicYearName });
-      infoRows.push({ key: 'Semester ', value: this.SelectedSemesterName });
-    }
-    if (this.SelectedSearchType === 'Month') {
-      infoRows.push({ key: 'DateFrom ', value: this.DateFrom });
-      infoRows.push({ key: 'DateTo ', value: this.DateTo });
+  
+  await this.getPDFData();
+  // Remove the getInfoData() call here - use pre-loaded this.infoRows
+  this.showPDF = true;
+  setTimeout(() => {
+    const printContents = document.getElementById('Data')?.innerHTML;
+    if (!printContents) { 
+      return;
     }
 
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
-      + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
-        .toString()
-        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    infoRows.push({ key: 'Printed At ', value: formattedDate });
-
-
-    await this.reportsService.generateExcelReport({
-      infoRows: infoRows,
-      filename: 'Certificate.xlsx',
-      reportImage: this.SelectedSchool.reportImage,
-      tables: [
-        {
-          // title: '',
-          headers: headerKeyMap.map(h => h.header),
-          data: dataMatrix
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { 
+          margin: 0; 
         }
-      ]
+
+        @media print {
+          body > *:not(#print-container) {
+            display: none !important;
+          }
+          #print-container {
+            display: block !important;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+
+    document.body.appendChild(printContainer);
+    window.print();
+
+    setTimeout(() => {
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
+    }, 100);
+  }, 500);
+}
+
+async DownloadAsPDF() {
+  // If info rows aren't loaded yet, wait for them
+  if (this.isInfoRowsLoading) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  await this.getPDFData();
+  // Remove the getInfoData() call here - use pre-loaded this.infoRows
+  this.showPDF = true;
+  setTimeout(() => {
+    if (this.pdfComponentRef) { 
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    } else {
+      console.error('PDF Component not found at the time of generation');
+    }
+  }, 800);
+}
+
+async DownloadAsExcel() { 
+  // If info rows aren't loaded yet, wait for them
+  if (this.isInfoRowsLoading) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  // Use pre-loaded this.infoRows instead of calling getInfoData()
+  const headerKeyMap = [
+    { key: 'subject', header: 'Subjects' },
+    ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
+    { key: 'total', header: 'Total' },
+    { key: 'percentage', header: 'Percentage' }
+  ];
+
+  const dataMatrix = this.subjects.map(subject => {
+    const row: any[] = [];
+    row.push(subject.en_name);
+    this.weightTypes.forEach(wt => {
+      row.push(this.getDegree(subject.id, wt.id) || '-');
     });
-  }
+    row.push(this.getTotal(subject.id));
+    row.push(this.getPercentage(subject.id));
+    return row;
+  });
 
-  getInfoData() {
-    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
+  const totalRow: any[] = [];
+  totalRow.push('Total');
+  this.weightTypes.forEach(() => totalRow.push('-'));
+  totalRow.push(this.getSum());
+  totalRow.push(this.getSumPercentage());
+  dataMatrix.push(totalRow);
 
-    this.infoRows = [
-      { keyEn: 'School : ' + this.SelectedSchoolName },
-    ];
-
-    if (this.mode == 'employee') {
-      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
-      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
-      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
-      this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
-      this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
-      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
-    } else if (this.mode == 'student') {
-      this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
-    } else if (this.mode == 'parent') {
-      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
-      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
-    }
-
-    if (this.SelectedSearchType === 'Academic Year') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
-      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
-    }
-
-    if (this.SelectedSearchType === 'Semester') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
-      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
-      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
-      this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
-    }
-
-    if (this.SelectedSearchType === 'Month') {
-      this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
-      this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
-    }
-
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+  const now = new Date();
+  const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+    .toString()
+    .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
+    + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
       .toString()
-      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
-      `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
-        .toString()
-        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
+      .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  
+  // Add printed at to info rows if not already there
+  if (!this.infoRows.some(row => row.keyEn.includes('Printed At'))) {
     this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
-
-    return this.infoRows;
   }
+
+  await this.reportsService.generateExcelReport({
+    infoRows: this.infoRows, // Use pre-loaded infoRows
+    filename: 'Certificate.xlsx',
+    reportImage: this.SelectedSchool.reportImage,
+    tables: [
+      {
+        headers: headerKeyMap.map(h => h.header),
+        data: dataMatrix
+      }
+    ]
+  });
+}
+
+  // getInfoData() {
+  //   this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
+
+  //   this.infoRows = [
+  //     { keyEn: 'School : ' + this.SelectedSchoolName },
+  //   ];
+
+  //   if (this.mode == 'employee') {
+  //     this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
+  //     this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
+  //     this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+  //     this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
+  //     this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
+  //     this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+  //   } else if (this.mode == 'student') {
+  //     this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
+  //   } else if (this.mode == 'parent') {
+  //     this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+  //     this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+  //   }
+
+  //   if (this.SelectedSearchType === 'Academic Year') {
+  //     this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+  //     this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+  //   }
+
+  //   if (this.SelectedSearchType === 'Semester') {
+  //     this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+  //     this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
+  //     this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+  //     this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
+  //   }
+
+  //   if (this.SelectedSearchType === 'Month') {
+  //     this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
+  //     this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
+  //   }
+
+  //   const now = new Date();
+  //   const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+  //     .toString()
+  //     .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
+  //     `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+  //       .toString()
+  //       .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+  //   this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+
+  //   return this.infoRows;
+  // }
 
 }

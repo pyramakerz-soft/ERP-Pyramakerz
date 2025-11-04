@@ -91,6 +91,9 @@
                     {{ 'Employee ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Employee Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -130,6 +133,9 @@
                             {{ employeeLoan.employeeId }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
+                            {{ employeeLoan.employeeEnName }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.totalAmount }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -152,15 +158,16 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Loans Report'"
-            [infoRows]="[
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ]"
+        [infoRows]="[
+          { keyEn: 'Date From: ' + this.dateFrom,        keyAr: this.dateFrom + ': من تاريخ' },
+          { keyEn: 'Date To: ' + this.dateTo,            keyAr: this.dateTo + ': إلى تاريخ' },
+          { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
+          { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
+          { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getEmployeeName() + ': الموظف' }
+        ]"
             [tableHeaders]="[
-                'Employee ID', 
+                'ID', 
+                'Employee Name', 
                 'Total Amount', 
                 'Loan Date', 
                 'Loan Amount', 
