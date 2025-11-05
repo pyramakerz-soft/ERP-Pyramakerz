@@ -471,6 +471,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
+            if (NewClassroom.HomeroomTeacherID == 0)
+            {
+                NewClassroom.HomeroomTeacherID = null;
+            }
+
             if (NewClassroom.FloorID != 0)
             {
                 Floor Floor = Unit_Of_Work.floor_Repository.First_Or_Default(g => g.ID == NewClassroom.FloorID && g.IsDeleted != true);
@@ -537,6 +542,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("the name cannot be null");
             } 
+
+            if(EditedClassroom.HomeroomTeacherID == 0)
+            {
+                EditedClassroom.HomeroomTeacherID = null;
+            }
 
             if (EditedClassroom.FloorID != 0)
             {

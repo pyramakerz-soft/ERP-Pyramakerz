@@ -131,10 +131,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             s => s.SubjectID == studentClassroomSubject.SubjectID && s.IsDeleted != true && s.WeightType.IsDeleted != true,
                             query => query.Include(d => d.WeightType));
 
-                        float TotalDegreesForOneSubject = 0f;
+                        float TotalDegreesForOneSubject = 0f; 
 
                         foreach (SubjectWeightType subjectWeightType in subjectWeightTypes)
                         {
+                            float sumDegree = 0;
+                            float sumMark = 0;
+
                             List<Assignment> allAssignments = await Unit_Of_Work.assignment_Repository
                                .Select_All_With_IncludesById<Assignment>(
                                    d => d.IsDeleted != true &&
@@ -166,7 +169,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                                 if (assignmentStudent != null)
                                 {
-                                    TotalDegreesForOneSubject += (assignmentStudent.Degree.Value/assignment.Mark);
+                                    //TotalDegreesForOneSubject += (assignmentStudent.Degree.Value/assignment.Mark);
+                                    float studentDegree = assignmentStudent?.Degree ?? 0; 
+                                    sumDegree += studentDegree;
+                                    sumMark += assignment.Mark;
                                 }
                             }
 
@@ -186,12 +192,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                                 if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
                                 {
-                                    TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                                    //TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                                    sumDegree += (float)studentDirectMark.Degree;
+                                    sumMark += mark.Mark;
                                 }
                             }
+                            float weightSubjectDegreeForThisType = (subjectWeightType.Weight * studentClassroomSubject.Subject.TotalMark) / 100;
+                            TotalDegreesForOneSubject += (sumDegree / sumMark) * weightSubjectDegreeForThisType;
                         }
 
-                        if(studentClassroomSubject.Subject.PassByDegree > TotalDegreesForOneSubject * (studentClassroomSubject.Subject.TotalMark))
+                        if(studentClassroomSubject.Subject.PassByDegree > TotalDegreesForOneSubject)
                         {
                             // Failed in this subject
                             StudentGradeSubjectAcademicYear failed = new StudentGradeSubjectAcademicYear();
@@ -325,10 +335,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == gradeId);
                 long academicYearId = studentGroup.First().AcademicYearID;
 
+
                 foreach (long subjectID in failedSubjects)
                 {
-                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.ID == subjectID);
                     float TotalDegreesForOneSubject = 0f;
+                    float sumDegree = 0;
+                    float sumMark = 0;
+
+                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.ID == subjectID);
 
                     List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
                                .FindBy(a => a.SubjectID == subjectID &&
@@ -347,11 +361,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                         if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
                         {
-                            TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                            //TotalDegreesForOneSubject += (studentDirectMark.Degree.Value / mark.Mark);
+                            sumDegree += (float)studentDirectMark.Degree;
+                            sumMark += mark.Mark;
                         }
                     }
 
-                    if (subject.PassByDegree < TotalDegreesForOneSubject * (subject.TotalMark))
+                    TotalDegreesForOneSubject = (sumDegree / sumMark) * subject.TotalMark;
+
+                    if (subject.PassByDegree < TotalDegreesForOneSubject)
                     { 
                         FailedStudents failedRecord = studentGroup.FirstOrDefault(fs => fs.SubjectID == subjectID);
 

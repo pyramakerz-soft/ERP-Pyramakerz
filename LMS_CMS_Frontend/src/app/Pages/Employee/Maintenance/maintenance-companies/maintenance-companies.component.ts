@@ -15,6 +15,7 @@ import { MaintenanceCompanies } from '../../../../Models/Maintenance/maintenance
 import { MaintenanceCompaniesService } from '../../../../Services/Employee/Maintenance/maintenance-companies.service';
 import { ApiService } from '../../../../Services/api.service';
 import { ActivatedRoute } from '@angular/router';
+import { MenuService } from '../../../../Services/shared/menu.service';
 
 @Component({
   selector: 'app-maintenance-companies',
@@ -58,6 +59,7 @@ constructor(
   private deleteEditPermissionServ: DeleteEditPermissionService,
   private realTimeService: RealTimeNotificationServiceService,
   private activeRoute: ActivatedRoute,
+  private menuService: MenuService,
   private translate: TranslateService
 
 ) {}
@@ -74,13 +76,22 @@ constructor(
       });
       this.mainServ.Get(this.DomainName).subscribe({
       next: (data:any) => {
-        this.TableData = data;
-        console.log(this.TableData)
+        this.TableData = data; 
       },
       error: (err:any) => {
         console.error('Error fetching companies:', err);
       }
     });}
+
+    this.menuService.menuItemsForEmployee$.subscribe((items) => {
+      const settingsPage = this.menuService.findByPageName(this.path, items);
+      if (settingsPage) {
+        this.AllowEdit = settingsPage.allow_Edit;
+        this.AllowDelete = settingsPage.allow_Delete;
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
+      }
+    });
 
       this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';

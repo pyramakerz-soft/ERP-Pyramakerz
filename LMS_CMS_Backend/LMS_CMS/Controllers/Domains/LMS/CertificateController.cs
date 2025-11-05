@@ -257,8 +257,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         } 
                     }
                     else
-                    {
-                        float sumPercentageDegree = 0;
+                    { 
+                        float sumDegree = 0;
+                        float sumMark = 0;
+
                         //// Get direct marks
                         List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
                             .FindBy(a => a.SubjectID == subjectId &&
@@ -268,9 +270,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                          a.Date <= DateTo).ToList();
 
                         foreach (DirectMark mark in directMarks)
-                        {
-                            subjectTotalMark.Mark += mark.Mark;
-
+                        { 
                             DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
                                 .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
                                                        a.DirectMarkID == mark.ID &&
@@ -278,11 +278,41 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                             if (studentDirectMark?.Degree != null)
                             {
-                                sumPercentageDegree += studentDirectMark.Degree.Value / mark.Mark;
+                                //sumPercentageDegree += studentDirectMark.Degree.Value / mark.Mark;
+                                sumDegree += (float)studentDirectMark.Degree;
+                                sumMark += mark.Mark;
                             }
-                        }
-                        subjectTotalMark.Degree = sumPercentageDegree * subjectTotalMark.Mark;
+                        } 
+                        float studentDegreeInWeightType = (sumDegree / sumMark) * subject.TotalMark;
+
+                        CertificateSubject certificateSubjectObject = new CertificateSubject();
+                        certificateSubjectObject.Mark = subject.TotalMark;
+
+                        float fractional = studentDegreeInWeightType - (int)studentDegreeInWeightType;
+
+                        if (fractional > 0.5f)
+                            certificateSubjectObject.Degree = (float)Math.Ceiling(studentDegreeInWeightType);
+                        else if (fractional < 0.5f)
+                            certificateSubjectObject.Degree = (float)Math.Floor(studentDegreeInWeightType);
+                        else
+                            certificateSubjectObject.Degree = studentDegreeInWeightType;
+                         
+                        certificateSubjectObject.SubjectID = subject.ID;
+                        certificateSubjectObject.SubjectAr_name = subject.ar_name;
+                        certificateSubjectObject.SubjectEn_name = subject.en_name;
+
+                        certificateSubjects.Add(certificateSubjectObject); 
+
+                        subjectTotalMark.Degree = studentDegreeInWeightType;
                         certificateSubjectTotalMark.Add(subjectTotalMark);
+
+                        foreach (var percentage in certificateSubjectTotalMark)
+                        {
+                            if (percentage.Mark == 0)
+                                percentage.Percentage = 0;
+                            else
+                                percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
+                        }
                     }
                 }
 

@@ -16,6 +16,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { AccountService } from '../../../../Services/account.service';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
 import { Employee } from '../../../../Models/Employee/employee';
+import { MenuService } from '../../../../Services/shared/menu.service';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -56,7 +57,8 @@ export class MaintenanceEmployeesComponent {
       public EmpServ: EmployeeService,
       private activeRoute: ActivatedRoute,
       private realTimeService: RealTimeNotificationServiceService,
-        private translate: TranslateService
+      private menuService: MenuService,  
+      private translate: TranslateService
 ){}
 
   ngOnInit() {
@@ -71,7 +73,14 @@ export class MaintenanceEmployeesComponent {
       });
     this.GetTableData()
     }
-    this.GetSelectData()
+
+    this.menuService.menuItemsForEmployee$.subscribe((items) => {
+      const settingsPage = this.menuService.findByPageName(this.path, items);
+      if (settingsPage) { 
+        this.AllowDelete = settingsPage.allow_Delete;
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others; 
+      }
+    });
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -146,7 +155,7 @@ async GetSelectData() {
     const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
     // Filter out employees that are already in maintenance
     this.employees = data.filter(emp => 
-      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+      !this.TableData.some(maintenanceEmp => maintenanceEmp.employeeID === emp.id)
     );
   } catch (error) {
     this.employees = [];
@@ -246,6 +255,7 @@ isFormValid(): boolean {
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
+    this.GetSelectData()
   }
 
   closeModal() {

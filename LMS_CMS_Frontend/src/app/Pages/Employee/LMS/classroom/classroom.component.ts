@@ -539,13 +539,13 @@ export class ClassroomComponent {
     this.isLoading=true
     if(this.copyClassroom.fromAcademicYearID == this.copyClassroom.toAcademicYearID){
       this.closeCopyModal()
-      this.getClassroomData()
+      this.getClassroomDataByYearID()
       this.isLoading=false
     } else{
       this.classroomService.CopyClassroom(this.copyClassroom, this.DomainName).subscribe(
         (result: any) => {
           this.closeCopyModal()
-          this.getClassroomData()
+          this.getClassroomDataByYearID()
           this.isLoading=false
         },
         error => {
