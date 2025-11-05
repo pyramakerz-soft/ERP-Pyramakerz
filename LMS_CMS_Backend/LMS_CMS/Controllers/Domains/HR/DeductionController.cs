@@ -53,7 +53,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
 
-            int totalRecords = await Unit_Of_Work.bouns_Repository
+            int totalRecords = await Unit_Of_Work.deduction_Repository
                .CountAsync(f => f.IsDeleted != true);
 
             List<Deduction> deductions = await Unit_Of_Work.deduction_Repository.Select_All_With_IncludesById_Pagination<Deduction>(
