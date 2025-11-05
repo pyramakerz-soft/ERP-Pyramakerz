@@ -425,7 +425,63 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (!Deductions.Any())
                 return NotFound("No deductions found");
 
+
             var DeductionDtos = mapper.Map<List<DeductionGetDTO>>(Deductions);
+
+            foreach (var DeductionDto in DeductionDtos)
+            {
+                var deduction = Deductions.First(d => d.ID == DeductionDto.ID);
+                var employee = deduction.Employee;
+                double salary = (double)(employee.MonthSalary ?? 0);
+                if (salary == 0)
+                {
+                    deduction.Amount = 0;
+                    continue;
+                }
+
+                TimeSpan attendanceTime = TimeSpan.Zero;
+                TimeSpan departureTime = TimeSpan.Zero;
+                double totalDayHours = 8; // default
+
+                if (!string.IsNullOrEmpty(employee.AttendanceTime) && !string.IsNullOrEmpty(employee.DepartureTime))
+                {
+                    attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
+                    departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
+
+                    if (departureTime < attendanceTime)
+                    {
+                        totalDayHours = (TimeSpan.FromHours(24) - attendanceTime + departureTime).TotalHours;
+                    }
+                    else
+                    {
+                        totalDayHours = (departureTime - attendanceTime).TotalHours;
+                    }
+                }
+
+                double dailyRate = salary / 30;
+                double hourlyRate = dailyRate / totalDayHours;
+                double minuteRate = hourlyRate / 60;
+
+
+                if (deduction.DeductionTypeID == 1) // Hours
+                {
+                    DeductionDto.Amount = Math.Round((decimal)((hourlyRate * deduction.Hours) + (minuteRate * deduction.Minutes)), 2);
+                }
+                else if (deduction.DeductionTypeID == 2) // Days
+                {
+                    DeductionDto.Amount = Math.Round((decimal)(dailyRate * deduction.NumberOfDeductionDays), 2);
+                }
+                else if (deduction.DeductionTypeID == 3) // Amount
+                {
+                    DeductionDto.Amount = Math.Round((decimal)deduction.Amount, 2);
+                }
+                else
+                {
+                    DeductionDto.Amount = Math.Round((decimal)deduction.Amount, 2); 
+                }
+
+
+            }
 
             var report = DeductionDtos
                 .GroupBy(b => new { b.EmployeeID, b.EmployeeEnName, b.EmployeeArName })
