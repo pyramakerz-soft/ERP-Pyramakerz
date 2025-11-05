@@ -1414,13 +1414,17 @@ namespace LMS_CMS_BL.Config
             CreateMap<Bouns, BounsGetDTO>()
                 .ForMember(dest => dest.BounsTypeName, opt => opt.MapFrom(src => src.BounsType.Name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
-                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => (decimal)src.Amount));
+
             CreateMap<BounsAddDTO, Bouns>();
 
             CreateMap<Deduction, DeductionGetDTO>()
                 .ForMember(dest => dest.DeductionTypeName, opt => opt.MapFrom(src => src.DeductionType.Name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
-                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => (decimal)src.Amount));
+
             CreateMap<DeductionAddDTO, Deduction>();
 
             CreateMap<DirectMarkClasses, DirectMarkClassesGetDTO>()

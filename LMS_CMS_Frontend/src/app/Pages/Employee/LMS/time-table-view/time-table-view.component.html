@@ -9,7 +9,7 @@
         <input type="date" [(ngModel)]="date" (change)="GetDutyByDate()" class="border p-2 rounded " />
         <button (click)="Replace()"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-             {{ 'Replace' | translate }}
+             {{ 'Edit' | translate }}
         </button>
     </div>
 </div>
@@ -261,10 +261,19 @@
                                 <td class="border p-2 font-medium">
                                     {{ classroom.classroomName }}
                                 </td>
-                                <td class="border p-2" *ngFor="let session of classroom.sessions">
-                                    <div *ngFor="let subject of session.subjects">
-                                        <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
-                                        <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                                <td class="border p-2 " *ngFor="let session of classroom.sessions">
+                                    <div
+                                        class="rounded-lg border-l-8 border-blue-500 bg-blue-50 px-4 py-2 text-lg font-medium text-gray-800 shadow mb-2">
+                                        <div *ngFor="let subject of session.subjects">
+                                            <div class="text-gray-500 text-xs">{{ subject.subjectName }}</div>
+                                            <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- Duty Teacher -->
+                                    <div *ngIf="session.dutyTeacherName"
+                                        class="rounded-lg border-l-8 border-red-500 bg-red-100 px-4 py-2 text-lg font-medium text-gray-800 shadow">
+                                        <div> {{ 'Duty' | translate }}</div>
+                                        <div>{{ session.dutyTeacherName }}</div>
                                     </div>
                                     <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
                                 </td>

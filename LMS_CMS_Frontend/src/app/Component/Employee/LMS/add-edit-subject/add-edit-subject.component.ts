@@ -67,39 +67,39 @@ export class AddEditSubjectComponent {
 
   GetSubjectById(subjectId: number) {
     this.subjectService.GetByID(subjectId, this.DomainName).subscribe((data) => {
-      this.subject = data;
-      this.getSections()
-      this.getGrades()
+        this.subject = data;
+        this.getSections()
+        this.getGrades()
+      });
+    }
+
+    private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
     });
   }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
-
-  closeDialog(): void {
+  closeDialog(NotRenderData ?:boolean): void {
     this.subject= new Subject()
     this.subjectCategories = []
     this.Schools = []
@@ -114,8 +114,11 @@ private showSuccessAlert(message: string) {
       this.editSubject = false
     }
     this.validationErrors = {}; 
-
-    this.dialogRef.close();
+    if(NotRenderData && NotRenderData == true){
+      this.dialogRef.close(true);
+    }else{
+      this.dialogRef.close();
+    }
   }
 
   getSubjectCategoryData(){

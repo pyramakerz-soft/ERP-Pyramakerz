@@ -122,12 +122,11 @@ export class TimeTableComponent {
 
   GetAllData() {
     this.TableData = [];
-    this.TimeTableServ.GetBySchoolId(
-      this.SelectedSchoolId,
-      this.DomainName
-    ).subscribe((d) => {
-      this.TableData = d;
-    });
+    if(this.SelectedSchoolId != 0){
+      this.TimeTableServ.GetBySchoolId(this.SelectedSchoolId,this.DomainName).subscribe((d) => {
+        this.TableData = d;
+      });
+    }
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -249,7 +248,8 @@ export class TimeTableComponent {
         });
         this.closeModal();
         this.isLoading = false
-        this.SelectedSchoolId = 0;
+        this.GetAllData()
+        // this.SelectedSchoolId = 0;
       }, error => {
         Swal.fire({
           icon: 'error',

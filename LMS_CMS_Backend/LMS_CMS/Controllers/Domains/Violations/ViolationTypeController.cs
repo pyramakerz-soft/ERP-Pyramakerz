@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Violation;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Octa;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_PL.Attribute;
@@ -51,20 +52,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<EmployeeTypeViolation> employeeTypeViolations = await Unit_Of_Work.employeeTypeViolation_Repository
-                    .Select_All_With_IncludesById<EmployeeTypeViolation>(e => e.EmployeeTypeID == EmployeeTypeId && e.IsDeleted!= true,
-                    query => query.Include(emp => emp.EmployeeType));
+            List<ViolationType> violationTypess =new List<ViolationType>();
 
-            List<long> violationTypeIds = employeeTypeViolations.Select(s=>s.ViolationTypeID).ToList();
-
-            List<ViolationType> violationTypess = await Unit_Of_Work.violationType_Repository.Select_All_With_IncludesById<ViolationType>(
-                sem => sem.IsDeleted != true && violationTypeIds.Contains(sem.ID));
-
-            if (violationTypess == null || violationTypess.Count == 0)
+            if (EmployeeTypeId == 0)
             {
-                return NotFound();
-            }
+                violationTypess = await Unit_Of_Work.violationType_Repository.Select_All_With_IncludesById<ViolationType>(
+                    sem => sem.IsDeleted != true);
 
+                if (violationTypess == null || violationTypess.Count == 0)
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+
+                List<EmployeeTypeViolation> employeeTypeViolations = await Unit_Of_Work.employeeTypeViolation_Repository
+                            .Select_All_With_IncludesById<EmployeeTypeViolation>(e => e.EmployeeTypeID == EmployeeTypeId && e.IsDeleted != true,
+                            query => query.Include(emp => emp.EmployeeType));
+
+                List<long> violationTypeIds = employeeTypeViolations.Select(s=>s.ViolationTypeID).ToList();
+
+                violationTypess = await Unit_Of_Work.violationType_Repository.Select_All_With_IncludesById<ViolationType>(
+                    sem => sem.IsDeleted != true && violationTypeIds.Contains(sem.ID));
+
+                if (violationTypess == null || violationTypess.Count == 0)
+                {
+                    return NotFound();
+                }
+
+            }
             List<ViolationTypeGetDTO> violationDTOs = mapper.Map<List<ViolationTypeGetDTO>>(violationTypess);
 
             foreach (var item in violationDTOs)

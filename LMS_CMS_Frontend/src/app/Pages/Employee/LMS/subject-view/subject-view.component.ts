@@ -424,7 +424,7 @@ SaveSubjectWeight() {
         },
         error => {
           this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to add weight');
+          const errorMessage = error.error || this.translate.instant('Failed to update weight');
           this.showErrorAlert(errorMessage);
         }
       );
@@ -438,7 +438,7 @@ SaveSubjectWeight() {
         },
         error => {
           this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update weight');
+          const errorMessage = error.error || this.translate.instant('Failed to update weight');
           this.showErrorAlert(errorMessage);
         }
       );

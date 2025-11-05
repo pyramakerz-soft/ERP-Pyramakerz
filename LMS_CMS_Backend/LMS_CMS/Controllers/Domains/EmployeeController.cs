@@ -811,6 +811,18 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Unit_Of_Work.SaveChanges();
             }
 
+            //// Create EmployeeVacationType
+            List<VacationTypes> vacationTypes = Unit_Of_Work.vacationTypes_Repository.FindBy(a => a.IsDeleted != true);
+            foreach (var type in vacationTypes)
+            {
+                var annualVacation = new AnnualVacationEmployee();
+                annualVacation.EmployeeID = employee.ID;
+                annualVacation.VacationTypesID = type.ID;
+                Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
+                Unit_Of_Work.SaveChanges();
+            }
+
+
             if (files != null && files.Any())
             {
                 foreach (var file in files)
