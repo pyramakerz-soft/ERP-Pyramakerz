@@ -724,7 +724,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("You can't send the request to yourself");
             }
 
-            if (NewRequest.FileFile == null || NewRequest.Message == "")
+            if (NewRequest.FileFile == null && NewRequest.Message == "")
             {
                 return BadRequest("You have to insert Message");
             }
