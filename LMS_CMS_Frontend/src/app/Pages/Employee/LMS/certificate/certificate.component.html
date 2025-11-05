@@ -90,6 +90,19 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             (change)="onMonthChange($event)" />
     </div>
+ 
+    <div *ngIf="IsMonthChoosen" class="w-[24%]">
+        <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Academic Year' |
+            translate }}</label>
+        <select id="SelectedAcademicYearId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedAcademicYearId" (change)="getAllClassByGradeIdAndAcYearId()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
+            </option>
+            <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
 
     <div class="w-[24%]">
         <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Grade' | translate }}</label>
@@ -180,7 +193,7 @@
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <!-- Subject Column -->
                     <td class="py-2 px-4 border border-[#EAECF0] font-medium">
-                        {{ subject.en_name }}
+                        {{ subject.subjectEnglishNameInCertificate ? subject.subjectEnglishNameInCertificate : subject.en_name }}
                     </td>
 
                     <!-- Cells per weight type -->

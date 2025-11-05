@@ -128,7 +128,7 @@
                                     <div class="flex-shrink-0">
                                         <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                                     </div>
-                                    <div class="ml-4 text-start w-full"> 
+                                    <div class="ml-4 text-start w-[80%]"> 
                                         <p *ngIf="request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.forwardedFromEnglishName }} ({{ 'Employee' | translate }})</span> {{ 'Forwarded You This Request From' | translate }} <span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
                                         <p *ngIf="!request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span> {{ 'Requested From You' | translate }}</p>
                                         <div class="mt-4 flex flex-col space-y-3">

@@ -426,7 +426,68 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (!bonuses.Any())
                 return NotFound("No bonuses found");
 
+
             var bonusDtos = mapper.Map<List<BounsGetDTO>>(bonuses);
+
+            foreach (var bonusDto in bonusDtos)
+            {
+                var bonus = bonuses.First(b => b.ID == bonusDto.ID);
+                var employee = bonus.Employee;
+                double salary = (double)(employee.MonthSalary ?? 0);
+                if (salary == 0)
+                {
+                    bonus.Amount = 0;
+                    continue;
+                }
+
+               
+                TimeSpan attendanceTime = TimeSpan.Zero;
+                TimeSpan departureTime = TimeSpan.Zero;
+                double totalDayHours = 8; // default 
+
+                if (!string.IsNullOrEmpty(employee.AttendanceTime) && !string.IsNullOrEmpty(employee.DepartureTime))
+                {
+                    attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
+                    departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
+
+                    if (departureTime < attendanceTime)
+                    {
+                        totalDayHours = (TimeSpan.FromHours(24) - attendanceTime + departureTime).TotalHours;
+                    }
+                    else
+                    {
+                        totalDayHours = (departureTime - attendanceTime).TotalHours;
+                    }
+                }
+
+                double dailyRate = salary / 30;
+                double hourlyRate = dailyRate / totalDayHours;
+                double minuteRate = hourlyRate / 60;
+
+
+
+                //string typeName = bonus.BounsType?.Name?.ToLower() ?? string.Empty;
+
+                if (bonus.BounsTypeID == 1) // Hours
+                {
+                    bonusDto.Amount = Math.Round((decimal)((hourlyRate * bonus.Hours) + (minuteRate * bonus.Minutes)), 2);
+                }
+                else if (bonus.BounsTypeID == 2) // Days
+                {
+                    bonusDto.Amount = Math.Round((decimal)(dailyRate * bonus.NumberOfBounsDays), 2);
+                }
+                else if (bonus.BounsTypeID == 3) // Amount
+                {
+                    bonusDto.Amount = Math.Round((decimal)bonus.Amount, 2);
+                }
+                else
+                {
+                    bonusDto.Amount = Math.Round((decimal)bonus.Amount, 2); 
+                }
+
+
+
+            }
 
             var report = bonusDtos
                 .GroupBy(b => new { b.EmployeeID, b.EmployeeEnName, b.EmployeeArName })

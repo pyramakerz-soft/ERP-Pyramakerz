@@ -85,16 +85,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            AcademicYear academicYear = await Unit_Of_Work.academicYear_Repository.FindByIncludesAsync(
+            List<AcademicYear> academicYears = await Unit_Of_Work.academicYear_Repository.Select_All_With_IncludesById<AcademicYear>(
                     sem => sem.IsDeleted != true && sem.SchoolID==id && sem.DateFrom <= DateFrom && sem.DateTo >= DateTo ,
                     query => query.Include(emp => emp.School));
 
-            if (academicYear == null )
+            if (academicYears == null || !academicYears.Any())
             {
                 return NotFound();
             }
 
-           AcademicYearGet AcademicYearDTOs = mapper.Map<AcademicYearGet>(academicYear);
+           List<AcademicYearGet> AcademicYearDTOs = mapper.Map<List<AcademicYearGet>>(academicYears);
 
             return Ok(AcademicYearDTOs);
         }

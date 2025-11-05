@@ -75,10 +75,9 @@ update(maintenance: Maintenance, DomainName: string): Observable<any> {
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Domain-Name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('accept', '*/*');
+      .set('Authorization', `Bearer ${token}`) 
 
-    return this.http.delete(`${this.baseUrl}/Maintenance`, { headers });
+    return this.http.delete(`${this.baseUrl}/Maintenance/${id}`, { headers });
   }
 
   

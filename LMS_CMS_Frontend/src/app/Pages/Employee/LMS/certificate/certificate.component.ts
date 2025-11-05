@@ -95,6 +95,7 @@ export class CertificateComponent {
   SearchType: string[] = ['Academic Year', 'Month', 'Semester', 'Summer Course'];
   SelectedSearchType: string = '';
   isSummerCourse: boolean = false;
+  IsMonthChoosen: boolean = false;
 
   constructor(
     private router: Router,
@@ -194,6 +195,7 @@ isInfoRowsLoading: boolean = false;
   }
 
   OnStudentChange() {
+    this.IsMonthChoosen = false 
     this.IsShowTabls = false
     this.TableData = []
     if(this.User_Data_After_Login.type == 'parent'){
@@ -209,96 +211,99 @@ isInfoRowsLoading: boolean = false;
   }
 
   loadInfoRows(): void {
-  this.isInfoRowsLoading = true;
-  
-  // Use setTimeout to make it asynchronous and avoid blocking the UI
-  setTimeout(() => {
-    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
-
-    this.infoRows = [
-      { keyEn: 'School : ' + this.SelectedSchoolName },
-    ];
-
-    if (this.mode == 'employee') {
-      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
-      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
-      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
-      this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
-      this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
-      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
-    } else if (this.mode == 'student') {
-      this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
-    } else if (this.mode == 'parent') {
-      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
-      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
-    }
-
-    if (this.SelectedSearchType === 'Academic Year') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
-      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
-    }
-
-    if (this.SelectedSearchType === 'Semester') {
-      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
-      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
-      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
-      this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
-    }
-
-    if (this.SelectedSearchType === 'Month') {
-      this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
-      this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
-    }
-
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
-      `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
-        .toString()
-        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-    this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+    this.isInfoRowsLoading = true;
     
-    this.isInfoRowsLoading = false;
-    this.cdr.detectChanges(); // Trigger change detection
-  }, 0);
-}
+    // Use setTimeout to make it asynchronous and avoid blocking the UI
+    setTimeout(() => {
+      this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
+
+      this.infoRows = [
+        { keyEn: 'School : ' + this.SelectedSchoolName },
+      ];
+
+      if (this.mode == 'employee') {
+        this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)?.name || '';
+        this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)?.name || '';
+        this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+        this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
+        this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
+        this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+      } else if (this.mode == 'student') {
+        this.infoRows.push({ keyEn: 'Student : ' + (this.student?.en_name || '') });
+      } else if (this.mode == 'parent') {
+        this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)?.en_name || '';
+        this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+      }
+
+      if (this.SelectedSearchType === 'Academic Year') {
+        this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+        this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+      }
+
+      if (this.SelectedSearchType === 'Semester') {
+        this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)?.name || '';
+        this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)?.name || '';
+        this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+        this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
+      }
+
+      if (this.SelectedSearchType === 'Month') {
+        this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
+        this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
+      }
+
+      const now = new Date();
+      const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
+        `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+          .toString()
+          .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+      this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+      
+      this.isInfoRowsLoading = false;
+      this.cdr.detectChanges(); // Trigger change detection
+    }, 0);
+  }
 
   Apply() {
-  this.IsShowTabls = true;
-  this.GetAllData();
-  this.loadInfoRows(); // Load info rows when view is applied
-}
+    this.IsShowTabls = true;
+    this.GetAllData();
+    this.loadInfoRows(); // Load info rows when view is applied
+  }  
 
-clearAndReloadInfoRows(): void {
-  this.infoRows = []; // Clear existing info rows
-  this.loadInfoRows(); // Reload with new data
-}
+  clearAndReloadInfoRows(): void {
+    this.infoRows = []; // Clear existing info rows
+    this.loadInfoRows(); // Reload with new data
+  }
 
-OnSearchTypeChange() {
-  if(this.User_Data_After_Login.type == 'employee'){
-    this.Students = []
-    this.SelectedStudentId = 0
+  OnSearchTypeChange() {
+    this.IsMonthChoosen = false
+    if(this.User_Data_After_Login.type == 'employee'){
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
+    this.academicYears = []
+    this.Classes = []
+    this.semester = []
+    this.SelectedClassId = 0
+    this.IsShowTabls = false
+    this.TableData = []
+    this.SelectedAcademicYearId = 0
+    this.SelectedSemesterId = 0
+    this.DateFrom = ''
+    this.DateTo = ''
+    if (this.SelectedSearchType == 'Academic Year' || this.SelectedSearchType == 'Summer Course' || this.SelectedSearchType == 'Semester') {
+      this.getAcadimicYearsBySchool();
+    }
+    if (this.SelectedSearchType == 'Summer Course') {
+      this.isSummerCourse = true
+    }else{
+      this.isSummerCourse = false
+    }
+    this.clearAndReloadInfoRows(); // Add this line
   }
-  this.academicYears = []
-  this.Classes = []
-  this.semester = []
-  this.SelectedClassId = 0
-  this.IsShowTabls = false
-  this.TableData = []
-  this.SelectedAcademicYearId = 0
-  this.SelectedSemesterId = 0
-  this.DateFrom = ''
-  this.DateTo = ''
-  if (this.SelectedSearchType == 'Academic Year' || this.SelectedSearchType == 'Summer Course' || this.SelectedSearchType == 'Semester') {
-    this.getAcadimicYearsBySchool();
-  }
-  if (this.SelectedSearchType == 'Summer Course') {
-    this.isSummerCourse = true
-  }
-  this.clearAndReloadInfoRows(); // Add this line
-}
 
   SelectAcadimicYear() {
     this.IsShowTabls = false
@@ -340,6 +345,7 @@ OnSearchTypeChange() {
   }
 
   onMonthChange(event: any): void {
+    this.IsMonthChoosen = true
     this.IsShowTabls = false
     this.TableData = []
     this.DateFrom = ''
@@ -377,7 +383,7 @@ OnSearchTypeChange() {
     this.SelectedAcademicYearId = 0
     this.SelectedClassId = 0
     this.AcadimicYearServ.GetBySchoolIdAndDate(this.SelectedSchoolId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
-      this.SelectedAcademicYearId = d.id
+      this.academicYears = d
       this.getAllClassByGradeIdAndAcYearId()
 
     }, error => {
@@ -391,31 +397,33 @@ OnSearchTypeChange() {
     })
   }
 
-getAllGradesBySchoolId() {
-  this.DateFrom = ''
-  this.DateTo = ''
-  this.IsShowTabls = false
-  this.Grades = []
-  this.Classes = []
-  this.SelectedGradeId = 0
-  this.SelectedClassId = 0
-  var sc = this.schools.find(s => s.id == this.SelectedSchoolId);
-  if (sc) {
-    this.SelectedSchool = sc
+  getAllGradesBySchoolId() {
+    this.IsMonthChoosen = false
+    this.isSummerCourse = false
+    this.DateFrom = ''
+    this.DateTo = ''
+    this.IsShowTabls = false
+    this.Grades = []
+    this.Classes = []
+    this.SelectedGradeId = 0
+    this.SelectedClassId = 0
+    var sc = this.schools.find(s => s.id == this.SelectedSchoolId);
+    if (sc) {
+      this.SelectedSchool = sc
+    }
+    if (this.mode == 'employee') {
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
+    else if (this.mode == 'parent') {
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
+    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+      this.Grades = d
+      this.clearAndReloadInfoRows(); // Add this line after data is loaded
+    })
   }
-  if (this.mode == 'employee') {
-    this.Students = []
-    this.SelectedStudentId = 0
-  }
-  else if (this.mode == 'parent') {
-    this.Students = []
-    this.SelectedStudentId = 0
-  }
-  this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-    this.Grades = d
-    this.clearAndReloadInfoRows(); // Add this line after data is loaded
-  })
-}
 
   getAllClassByGradeIdAndAcYearId() {
     if(this.User_Data_After_Login.type == 'employee'){

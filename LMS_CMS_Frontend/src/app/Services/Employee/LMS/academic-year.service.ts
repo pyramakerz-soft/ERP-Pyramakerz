@@ -48,7 +48,7 @@ export class AcadimicYearService {
    .set('domain-name', this.header)
    .set('Authorization', `Bearer ${token}`)
    .set('Content-Type', 'application/json');
-   return this.http.get<AcademicYear>(`${this.baseUrl}/AcademicYear/BySchoolIdAndDate/${id}/${DateFrom}/${DateTo}`, { headers })
+   return this.http.get<AcademicYear[]>(`${this.baseUrl}/AcademicYear/BySchoolIdAndDate/${id}/${DateFrom}/${DateTo}`, { headers })
   } 
 
   GetByID(id: number,DomainName:string) {

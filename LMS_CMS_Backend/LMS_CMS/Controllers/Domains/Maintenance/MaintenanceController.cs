@@ -214,7 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             if (hasEmployee)
             {
-                var emp = uow.employee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
+                var emp = uow.maintenanceEmployee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
                 if (emp == null) return NotFound("Employee not found");
             }
             else if (hasCompany)

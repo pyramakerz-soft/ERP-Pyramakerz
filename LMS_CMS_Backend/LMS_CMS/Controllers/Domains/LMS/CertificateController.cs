@@ -77,13 +77,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     List<StudentClassroomSubject> studentClassroomSubjects = await Unit_Of_Work.studentClassroomSubject_Repository
                         .Select_All_With_IncludesById<StudentClassroomSubject>(
                             f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true
-                            && f.Subject.HideFromGradeReport == false && !f.Hide);
+                            && f.Subject.HideFromGradeReport == false && !f.Hide, 
+                            query => query.Include(d => d.Subject));
 
                     if (studentClassroomSubjects == null || !studentClassroomSubjects.Any())
                         return NotFound("No subjects found for this student.");
 
                     subjectIds = studentClassroomSubjects.Select(s => s.SubjectID).Distinct().ToList();
-                    List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID));
+                    List<Subject> subjects = studentClassroomSubjects.Select(s => s.Subject).Distinct().ToList();
                     
                     SubjectDTO = mapper.Map<List<SubjectGetDTO>>(subjects);  // first column
 
@@ -91,8 +92,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     List<SubjectWeightType> AllsubjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository
                         .Select_All_With_IncludesById<SubjectWeightType>(s => subjectIds.Contains(s.SubjectID) && s.IsDeleted != true && s.WeightType.IsDeleted != true,
                             query => query.Include(d => d.WeightType));
-                    List<long> WeightTypeIds = AllsubjectWeightTypes.Select(a => a.WeightTypeID).Distinct().ToList();
-                    List<WeightType> AllWeightType = Unit_Of_Work.weightType_Repository.FindBy(w => WeightTypeIds.Contains(w.ID));
+                     
+                    List<WeightType> AllWeightType = AllsubjectWeightTypes.Select(s => s.WeightType).Distinct().ToList(); 
                     WeightTypeDTO = mapper.Map<List<WeightTypeGetDTO>>(AllWeightType);     //Header
                 }
                 else
@@ -113,17 +114,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         return BadRequest("This student is not enrolled in a classroom for the current academic year.");
 
                     List<DirectMarkClassesStudent> directMarkClassesStudents = await Unit_Of_Work.directMarkClassesStudent_Repository.Select_All_With_IncludesById<DirectMarkClassesStudent>(
-                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && 
+                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID &&
+                        d.DirectMark.Subject.HideFromGradeReport == false &&
                         d.DirectMark.IsDeleted != true && d.DirectMark.IsSummerCourse == true && d.DirectMark.Date >= DateFrom && d.DirectMark.Date <= DateTo,
-                        query => query.Include(d => d.DirectMark)
+                        query => query.Include(d => d.DirectMark).ThenInclude(d => d.Subject)
                         );
 
-                    subjectIds = directMarkClassesStudents.Select(s => s.DirectMark.SubjectID).Distinct().ToList();
-                    List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID));
+                    subjectIds = directMarkClassesStudents.Select(s => s.DirectMark.SubjectID).Distinct().ToList(); 
+                    List<Subject> subjects = directMarkClassesStudents.Select(s => s.DirectMark.Subject).Distinct().ToList();
 
-                    SubjectDTO = mapper.Map<List<SubjectGetDTO>>(subjects);  // first column
+                    SubjectDTO = mapper.Map<List<SubjectGetDTO>>(subjects);  // first column 
                 }
-                 
+
+                SubjectDTO = SubjectDTO.OrderBy(d => d.OrderInCertificate).ToList();
+
                 foreach (long subjectId in subjectIds)
                 {
                     Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
@@ -135,17 +139,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     subjectTotalMark.SubjectEn_name = subject.en_name;
                     subjectTotalMark.SubjectAr_name = subject.ar_name;
                     subjectTotalMark.Degree = 0;
-                    subjectTotalMark.Mark = 0;
+                    subjectTotalMark.Mark = subject.TotalMark;
 
                     if (IsSummerCourse == null || IsSummerCourse == false)
                     { 
                         // Weight types for this subject
-                        List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(s => s.SubjectID == subjectId && s.IsDeleted != true && s.WeightType.IsDeleted != true,
+                        List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(
+                            s => s.SubjectID == subjectId && s.IsDeleted != true && s.WeightType.IsDeleted != true,
                                 query => query.Include(d => d.WeightType));
 
                         foreach (var swt in subjectWeightTypes)
                         {
-                            float sumPercentageDegree = 0;
+                            float sumDegree = 0;
+                            float sumMark = 0;
 
                             // Get Assignments for this subject & weight type
                             List<AssignmentStudentIsSpecific> specificAssignments = await Unit_Of_Work.assignmentStudentIsSpecific_Repository
@@ -159,15 +165,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                          d.Assignment.OpenDate >= DateFrom &&
                                          d.Assignment.OpenDate <= DateTo);
 
-                            var normalAssignments = await Unit_Of_Work.assignment_Repository
+                            List<Assignment> normalAssignments = await Unit_Of_Work.assignment_Repository
                                 .Select_All_With_IncludesById<Assignment>(
                                     d => d.IsDeleted != true &&
                                          d.SubjectID == subject.ID &&
+                                         d.SubjectWeightTypeID == swt.ID &&
                                          !d.IsSpecificStudents && 
                                          d.OpenDate >= DateFrom &&
                                          d.OpenDate <= DateTo);
 
-                            var allAssignments = specificAssignments
+                            List<Assignment> allAssignments = specificAssignments
                                 .Where(a => a.Assignment != null)
                                 .Select(a => a.Assignment)
                                 .Concat(normalAssignments)
@@ -177,9 +184,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 .ToList();
 
                             // Sum assignment marks
-                            foreach (var assignment in allAssignments.Where(a => a != null))
+                            foreach (Assignment assignment in allAssignments.Where(a => a != null))
                             {
-                                var assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
+                                AssignmentStudent assignmentStudent = Unit_Of_Work.assignmentStudent_Repository
                                     .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
                                                            a.AssignmentID == assignment.ID &&
                                                            a.Degree != null &&
@@ -187,61 +194,47 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                                 // If student has no record or degree is null => 0 mark
                                 float studentDegree = assignmentStudent?.Degree ?? 0;
-
-                                if (assignment?.Mark != null && assignment.Mark > 0)
-                                {
-                                    sumPercentageDegree += (studentDegree / assignment.Mark);
-                                }
+                                //sumPercentageDegree += (studentDegree / assignment.Mark); 
+                                sumDegree += studentDegree;
+                                sumMark += assignment.Mark;
                             }
 
                             // Get direct marks
-                            var directMarks = Unit_Of_Work.directMark_Repository
+                            List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
                                 .FindBy(a => a.SubjectID == subjectId &&
                                              a.IsDeleted != true &&
                                              a.SubjectWeightTypeID == swt.ID && 
                                              a.Date >= DateFrom &&
                                              a.Date <= DateTo).ToList();
 
-                            foreach (var mark in directMarks)
+                            foreach (DirectMark mark in directMarks)
                             {
-                                var studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
+                               DirectMarkClassesStudent studentDirectMark = Unit_Of_Work.directMarkClassesStudent_Repository
                                     .First_Or_Default(a => a.StudentClassroomID == studentClassroom.ID &&
                                                            a.DirectMarkID == mark.ID &&
                                                            a.IsDeleted != true);
 
-                                if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
-                                {
-                                    sumPercentageDegree += ((float)studentDirectMark.Degree / mark.Mark);
-                                }
+                                //sumPercentageDegree += (studentDirectMark.Degree / mark.Mark);
+                                sumDegree += (float)studentDirectMark.Degree; 
+                                sumMark += mark.Mark;
                             }
 
-                            int totalItems = directMarks.Count + allAssignments.Count;
-                            
-                            // AVG for one Weight type for one subject (Student's degree in this subject weight type)
-                            float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
-                            /////////////////////////////////// swt.Weight
+                            // Student's degree in this subject weight type
+                            float weightSubjectDegreeForThisType = (swt.Weight * subject.TotalMark) / 100;
+                            float studentDegreeInWeightType = (sumDegree / sumMark) * weightSubjectDegreeForThisType;
 
-                            var certificateSubjectObject = new CertificateSubject();
-                            certificateSubjectObject.Mark = swt.Weight; /////////////////////////////////// swt.Weight
+                            CertificateSubject certificateSubjectObject = new CertificateSubject();
+                            certificateSubjectObject.Mark = weightSubjectDegreeForThisType;
 
-                            float weight = avgDegree;
-                            int integerPart = (int)Math.Floor(weight);
-                            float decimalPart = weight - integerPart;
+                            float fractional = studentDegreeInWeightType - (int)studentDegreeInWeightType;
 
-                            if (decimalPart > 0.5)
-                            {
-                                certificateSubjectObject.Degree = integerPart + 1;
-                            }
-                            else if (decimalPart < 0.5)
-                            {
-                                certificateSubjectObject.Degree = integerPart;
-                            }
-                            else // decimalPart == 0.5
-                            {
-                                certificateSubjectObject.Degree = integerPart + 0.5f;
-                            }
-                            //certificateSubjectObject.Degree = avgDegree;
-
+                            if (fractional > 0.5f)
+                                certificateSubjectObject.Degree = (float)Math.Ceiling(studentDegreeInWeightType);
+                            else if (fractional < 0.5f)
+                                certificateSubjectObject.Degree = (float)Math.Floor(studentDegreeInWeightType);
+                            else
+                                certificateSubjectObject.Degree = studentDegreeInWeightType;
+                             
                             certificateSubjectObject.WeightTypeArName = swt.WeightType.ArabicName;
                             certificateSubjectObject.WeightTypeEnName = swt.WeightType.EnglishName;
                             certificateSubjectObject.WeightTypeId = swt.WeightType.ID;
@@ -249,8 +242,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             certificateSubjectObject.SubjectAr_name = subject.ar_name;
                             certificateSubjectObject.SubjectEn_name = subject.en_name;
 
-                            certificateSubjects.Add(certificateSubjectObject);
-                            subjectTotalMark.Mark += certificateSubjectObject.Mark;
+                            certificateSubjects.Add(certificateSubjectObject); 
                             subjectTotalMark.Degree += certificateSubjectObject.Degree;
                         }
 
