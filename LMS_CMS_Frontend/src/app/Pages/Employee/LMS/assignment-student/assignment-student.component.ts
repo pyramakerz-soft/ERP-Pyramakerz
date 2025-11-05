@@ -95,7 +95,7 @@ export class AssignmentStudentComponent {
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment();
     this.GetAllData(this.CurrentPage, this.PageSize);
-    this.getAllSchools();
+    // this.getAllSchools();
 
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
@@ -117,35 +117,36 @@ export class AssignmentStudentComponent {
       .GetByID(this.AssignmentId, this.DomainName)
       .subscribe((d) => {
         this.assignment = d;
+        this.getAllClassByGradeId()
       });
   }
 
-  getAllSchools() {
-    this.schools = [];
-    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d;
-    });
-  }
+  // getAllSchools() {
+  //   this.schools = [];
+  //   this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+  //     this.schools = d;
+  //   });
+  // }
 
-  getAllGradesBySchoolId() {
-    this.Grades = [];
-    this.IsShowTabls = false;
-    this.SelectedGradeId = 0;
-    this.ClassId = 0;
-    this.GradeServ.GetBySchoolId(
-      this.SelectedSchoolId,
-      this.DomainName
-    ).subscribe((d) => {
-      this.Grades = d;
-    });
-  }
+  // getAllGradesBySchoolId() {
+  //   this.Grades = [];
+  //   this.IsShowTabls = false;
+  //   this.SelectedGradeId = 0;
+  //   this.ClassId = 0;
+  //   this.GradeServ.GetBySchoolId(
+  //     this.SelectedSchoolId,
+  //     this.DomainName
+  //   ).subscribe((d) => {
+  //     this.Grades = d;
+  //   });
+  // }
 
   getAllClassByGradeId() {
     this.classes = [];
     this.ClassId = 0;
     this.IsShowTabls = false;
     this.classServ
-      .GetByGradeId(this.SelectedGradeId, this.DomainName)
+      .GetBySubjectId(this.assignment.subjectID, this.DomainName)
       .subscribe((d) => {
         this.classes = d;
       });

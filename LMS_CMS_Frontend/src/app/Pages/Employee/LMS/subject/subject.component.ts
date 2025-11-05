@@ -162,8 +162,10 @@ export class SubjectComponent {
         },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.GetDate()
+    dialogRef.afterClosed().subscribe((shouldRefresh) => {
+      if (!shouldRefresh) { //  Only call if user saved or closed normally
+        this.GetDate();
+      }
     });
   }
 

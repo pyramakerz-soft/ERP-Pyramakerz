@@ -72,9 +72,9 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.NationalityArName = nationality.ArName;
                 }
 
-                StudentGrade studentGrade =await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
-                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true ,
-                    s => s.Include(stu => stu.Grade) ,
+                StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true,
+                    s => s.Include(stu => stu.Grade),
                     s => s.Include(stu => stu.AcademicYear)
                     );
 
@@ -89,6 +89,73 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             }
             return Ok(StudentDTO);
+        }
+
+        [HttpGet("WithPaginnation")]
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.student_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById_Pagination<Student>(
+                sem => sem.IsDeleted != true,
+                query => query.Include(stu => stu.AccountNumber),
+                query => query.Include(stu => stu.AccountNumber),
+                query => query.Include(stu => stu.Gender))
+               .Skip((pageNumber - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
+
+            if (students == null || students.Count == 0)
+            {
+                return NotFound("No Student found");
+            }
+
+            List<StudentGetDTO> StudentDTO = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in StudentDTO)
+            {
+                Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(item.Nationality);
+                if (nationality != null)
+                {
+                    item.NationalityEnName = nationality.Name;
+                    item.NationalityArName = nationality.ArName;
+                }
+
+                StudentGrade studentGrade =await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true ,
+                    s => s.Include(stu => stu.Grade) ,
+                    s => s.Include(stu => stu.AcademicYear).ThenInclude(a=>a.School)
+                    );
+
+                if (studentGrade != null)
+                {
+                    item.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                    item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+                    if (studentGrade.Grade != null)
+                        item.CurrentGradeName = studentGrade.Grade.Name;
+
+                    if (studentGrade.AcademicYear != null)
+                        item.CurrentAcademicYear = studentGrade.AcademicYear.Name;
+                }
+
+            }
+
+            StudentDTO = StudentDTO.OrderBy(t => t.en_name).ToList();
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = StudentDTO, Pagination = paginationMetadata });
         }
 
         [HttpGet("SearchBySchoolId/{SchoolId}")]
@@ -144,6 +211,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.NationalityArName = nationality.ArName;
                 }
             }
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             // Return with optional pagination info
             return Ok(new
@@ -234,6 +302,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -294,6 +363,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(filteredStudents);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -343,6 +413,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -397,6 +468,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
                 }
             }
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -462,6 +534,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -577,6 +650,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
             School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(new
             {
@@ -1026,6 +1100,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
             School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(new
             {
