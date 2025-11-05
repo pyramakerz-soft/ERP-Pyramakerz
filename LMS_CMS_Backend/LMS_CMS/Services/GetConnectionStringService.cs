@@ -17,11 +17,7 @@
 
         public string BuildConnectionString(string domainName)
         {  
-<<<<<<< HEAD
-            var dataSource = ".";  
-=======
-            var dataSource = "SW-13\\SQLEXPRESS";  
->>>>>>> 811c70a1bafc6dffb7aa9b600d4c722be5d57a9e
+            var dataSource = "DESKTOP-3BNN4KG";  
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";
