@@ -205,7 +205,7 @@ export class RegistraionTestComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Added Succeessfully',
+          text: 'Added Successfully',
           confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Parent/Admission Test`);

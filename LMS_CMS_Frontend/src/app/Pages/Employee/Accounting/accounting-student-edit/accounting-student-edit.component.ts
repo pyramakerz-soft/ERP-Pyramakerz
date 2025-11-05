@@ -164,7 +164,7 @@ export class AccountingStudentEditComponent {
       Swal.fire({
         icon: 'success',
         title: 'Done',
-        text: 'Student Edited Succeessfully',
+        text: 'Student Edited Successfully',
         confirmButtonColor: '#089B41',
       });
       this.router.navigateByUrl(`Employee/Student Accounting`)

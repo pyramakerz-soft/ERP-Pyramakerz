@@ -519,7 +519,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Stocking Added Succeessfully',
+              text: 'Stocking Added Successfully',
               confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);
@@ -564,7 +564,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Stocking Edited Succeessfully',
+              text: 'Stocking Edited Successfully',
               confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);

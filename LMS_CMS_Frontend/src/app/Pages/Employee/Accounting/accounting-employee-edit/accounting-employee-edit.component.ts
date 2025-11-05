@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -84,6 +84,7 @@ export class AccountingEmployeeEditComponent {
   subscription!: Subscription;
   selectedDays: { id: number; name: string }[] = [];
   isLoading = false
+  @ViewChild('DaysDropDown') DaysDropDown!: ElementRef;
 
   isDropdownOpen = false;
 
@@ -266,7 +267,7 @@ export class AccountingEmployeeEditComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Employee Edited Succeessfully',
+          text: 'Employee Edited Successfully',
           confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Employee/Employee Accounting`)
@@ -325,7 +326,8 @@ export class AccountingEmployeeEditComponent {
     this.Data.days = this.Data.days.filter((id) => id !== dayId);
   }
 
-  toggleDropdown() {
+  toggleDropdown(event: MouseEvent): void {
+    event.stopPropagation(); // prevent document click from triggering immediately
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
@@ -548,5 +550,18 @@ export class AccountingEmployeeEditComponent {
     return h * 60 + m;
   }
 
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (this.isDropdownOpen && this.DaysDropDown) {
+      const clickedInside = this.DaysDropDown.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.isDropdownOpen = false;
+      }
+    }
+  }
 }
 

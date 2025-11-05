@@ -360,7 +360,7 @@ export class DailyPerformanceComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Saved Succeessfully',
+          text: 'Saved Successfully',
           confirmButtonColor: '#089B41',
         }).then(() => {
           window.location.reload();

@@ -250,6 +250,7 @@ CreateOREdit() {
 
   closeModal() {
     this.isModalVisible = false;
+    this.location = new Location();
   }
 
   openModal() {
@@ -269,7 +270,7 @@ CreateOREdit() {
       if (this.location.hasOwnProperty(key)) {
         const field = key as keyof Location;
         if (!this.location[field]) {
-          if (field == 'name') {
+          if (field == 'name' || field == 'latitude' || field == 'longitude' || field == 'range') {
           this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
           isValid = false;
           }
