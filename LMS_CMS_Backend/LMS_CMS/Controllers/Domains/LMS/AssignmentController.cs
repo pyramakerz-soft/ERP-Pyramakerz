@@ -362,6 +362,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<AssignmentForStudentGetDTO> assignmentStudentsSolvedGetDTOs = mapper.Map<List<AssignmentForStudentGetDTO>>(assignmentStudentsSolved);
             List<AssignmentGetDTO> unsolvedAssignmentsGetDTOs = mapper.Map<List<AssignmentGetDTO>>(unsolvedAssignments);
 
+            assignmentStudentsSolvedGetDTOs = assignmentStudentsSolvedGetDTOs.OrderByDescending(t => t.OpenDate).ToList();
+            unsolvedAssignmentsGetDTOs = unsolvedAssignmentsGetDTOs.OrderByDescending(t => t.OpenDate).ToList();
+
             return Ok(new { SolvedAssignments = assignmentStudentsSolvedGetDTOs, UnsolvedAssignments = unsolvedAssignmentsGetDTOs });
         }
 

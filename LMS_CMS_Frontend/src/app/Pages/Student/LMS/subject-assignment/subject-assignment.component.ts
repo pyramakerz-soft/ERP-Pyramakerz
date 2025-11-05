@@ -30,9 +30,10 @@ export class SubjectAssignmentComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
-  mode: string = "solved";
+  mode: string = "all";
   SolvedAssignment: AssignmentStudent[] = []
   UnSolvedAssignment: Assignment[] = []
+  AllAssignment: any[] = []
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
     public activeRoute: ActivatedRoute, private menuService: MenuService,
@@ -61,15 +62,23 @@ export class SubjectAssignmentComponent {
   }
 
   GetAssignments() {
-    this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe((d) => {
-      this.SolvedAssignment = d.solvedAssignments
-      this.UnSolvedAssignment = d.unsolvedAssignments
-    }, error => {
-      console.log(12,error)
-      if(!error.error.includes("No Assignments For This Student For this Subject")){
-        this.router.navigateByUrl(`Student/Subject`)
+    this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe(
+      (d) => {
+        this.SolvedAssignment = d.solvedAssignments.map((a: any) => ({ ...a, isSolved: true }));
+        this.UnSolvedAssignment = d.unsolvedAssignments.map((a: any) => ({ ...a, isSolved: false }));
+
+        // Merge and sort by openDate descending
+        this.AllAssignment = [...this.SolvedAssignment, ...this.UnSolvedAssignment].sort((a, b) => {
+          return new Date(b.openDate).getTime() - new Date(a.openDate).getTime();
+        });
+      },
+      (error) => {
+        console.log('Error:', error);
+        if (!error.error.includes("No Assignments For This Student For this Subject")) {
+          this.router.navigateByUrl(`Student/Subject`);
+        }
       }
-    })
+    );
   }
 
   moveToBack() {
