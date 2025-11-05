@@ -6,7 +6,7 @@
 </div>
 
 <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
-    <div class="w-[49%]">
+    <!-- <div class="w-[49%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId(); IsShowTabls = false">
@@ -29,12 +29,12 @@
             </option>
             <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
-    </div>
+    </div> -->
 
-    <div class="w-[49%]">
+    <div class="w-full">
         <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Class' | translate }}</label>
         <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="ClassId" [disabled]="!SelectedGradeId" (change)="classChanged()">
+            [(ngModel)]="ClassId" (change)="classChanged()">
              <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
             <option *ngFor="let c of classes" [value]="c.id">{{ c.name }}</option>
             <option *ngIf="classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
@@ -43,9 +43,9 @@
 
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg"
-            [disabled]="!SelectedSchoolId || !SelectedGradeId || !ClassId"
+            [disabled]=" !ClassId"
             (click)="Apply()"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !ClassId, 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && ClassId }">
+            [ngClass]="{ 'bg-gray-100 text-gray-300':  !ClassId, 'secondaryBg text-white': ClassId }">
              {{ 'View' | translate }}
         </button>
     </div>

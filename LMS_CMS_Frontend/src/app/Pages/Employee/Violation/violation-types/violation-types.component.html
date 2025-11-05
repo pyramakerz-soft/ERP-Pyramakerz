@@ -19,7 +19,7 @@
       <select id="SelectedEmployeeType"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
         [(ngModel)]="SelectedEmployeeType" (change)="GetViolation();">
-        <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee Type' | translate }}</option>
+        <option value=0  selected > {{ 'Select' | translate }} {{ 'All' | translate }}</option>
         <option *ngFor="let stu of empTypes" [value]="stu.id">
           {{ stu.name|translate}}
         </option>
@@ -29,7 +29,7 @@
   </div>
 
 
-  <div *ngIf="SelectedEmployeeType!=0" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
       <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
         <tr>

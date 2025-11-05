@@ -53,6 +53,11 @@ export class StudentsComponent {
   preSelectedYear: number | null = null;
   preSelectedGrade: number | null = null;
   preSelectedClassroom: number | null = null;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(public account: AccountService, 
     public buildingService: BuildingService, 
@@ -83,7 +88,7 @@ export class StudentsComponent {
       this.path = url[0].path
     });
 
-    this.getStudentData()
+    this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -121,20 +126,75 @@ export class StudentsComponent {
     return IsAllow;
   }
 
-  getStudentData() {
+  // getStudentData() {
+  //   this.OriginStudentData = []
+  //   this.StudentsData = []
+  //   this.StudentService.GetAll(this.DomainName).subscribe(
+  //     (data: Student[]) => { 
+  //       this.OriginStudentData = data;
+  //       this.StudentsData = data;
+
+  //     }
+  //   )
+  // }
+
+  getStudentData(DomainName: string, pageNumber: number, pageSize: number) {
     this.OriginStudentData = []
     this.StudentsData = []
-    this.StudentService.GetAll(this.DomainName).subscribe(
-      (data: Student[]) => { 
-        this.OriginStudentData = data;
-        this.StudentsData = data;
-
+    this.StudentService.GetAllWithPaginnation(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.OriginStudentData = data.data;
+        this.StudentsData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+        // else {
+        //   const errorMessage =
+        //     error.error ||
+        //     this.translate.instant('Failed to load Students');
+        //   this.showErrorAlert(errorMessage);
+        // }
       }
-    )
+    );
   }
 
   OpenModal() {
     this.isModalOpen = true;
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   Create() {
@@ -162,7 +222,7 @@ export class StudentsComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.StudentService.Delete(id, this.DomainName).subscribe((d) => {
-          this.getStudentData();
+        this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -199,7 +259,7 @@ export class StudentsComponent {
               text: doneMessage,
               confirmButtonColor: '#089B41',
             });
-            this.getStudentData();
+            this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
           },
           error: (error) => {
             const errorMessage = error?.error || 'An unexpected error occurred.';
@@ -223,5 +283,49 @@ export class StudentsComponent {
     document.getElementById("Hide_Modal")?.classList.add("hidden");
 
     this.isModalOpen = false;
+  }
+
+   changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
   }
 }

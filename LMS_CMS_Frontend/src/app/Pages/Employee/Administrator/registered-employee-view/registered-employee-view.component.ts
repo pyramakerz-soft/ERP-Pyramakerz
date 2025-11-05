@@ -84,7 +84,7 @@ export class RegisteredEmployeeViewComponent {
 
   reject() {
     Swal.fire({
-      title: 'Are you sure you want to Reject This Employee?',
+      title: 'Are you sure you want to Reject And Delete This Employee?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

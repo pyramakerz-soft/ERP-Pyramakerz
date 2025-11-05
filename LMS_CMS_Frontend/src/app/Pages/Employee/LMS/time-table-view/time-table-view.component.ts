@@ -63,8 +63,8 @@ export class TimeTableViewComponent {
 
   TimeTable2: TimeTableDayGroupDTO[] = []
   TimeTablePrint: any = []
-  types = ['All', 'Class', 'Teacher'];
-  PrintType = 'All'; // default value
+  types = [ 'Current Screen','All' , 'Class', 'Teacher'];
+  PrintType = 'Current Screen'; // default value
   SelectedClassId: number = 0
   SelectedTeacherId: number = 0
   TeacherName: string = '';
@@ -621,7 +621,7 @@ export class TimeTableViewComponent {
   openPrintModal() {
     document.getElementById('Print_Modal')?.classList.remove('hidden');
     document.getElementById('Print_Modal')?.classList.add('flex');
-    this.PrintType = 'All'
+    this.PrintType = 'Current Screen'
   }
 
   GetTypes() {
@@ -665,6 +665,9 @@ export class TimeTableViewComponent {
         this.MaxPeriods = d.maxPeriods;
         this.triggerPrint();
       });
+    } else if (this.PrintType === "Current Screen") {
+        this.TimeTable2 = this.TimeTable;
+        this.triggerPrint();
     }
   }
 

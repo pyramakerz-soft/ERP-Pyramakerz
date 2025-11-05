@@ -85,6 +85,7 @@ export class ViolationTypesComponent {
       this.path = url[0].path;
     });
     this.GetEmployeeType();
+    this.GetViolation();
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -109,11 +110,9 @@ export class ViolationTypesComponent {
 
   GetViolation() {
     this.Data = []
-    if (this.SelectedEmployeeType != 0) {
-      this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
-        this.Data = data;
-      });
-    }
+    this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
+      this.Data = data;
+    });
   }
 
   GetEmployeeType() {

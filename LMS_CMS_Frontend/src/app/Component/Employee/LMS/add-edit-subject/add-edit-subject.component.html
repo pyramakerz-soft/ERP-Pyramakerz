@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <h1 *ngIf="!editSubject" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Subject' | translate }}</h1>
             <h1 *ngIf="editSubject" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Subject' | translate }}</h1>
-            <button (click)="closeDialog()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+            <button (click)="closeDialog(true)" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
