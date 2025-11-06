@@ -49,7 +49,7 @@ export class DeductionComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'deductionTypeName'];
 
   deduction: Deduction = new Deduction();
 
@@ -290,7 +290,7 @@ export class DeductionComponent {
       }
     }
     if (field == 'minutes') {
-      if (this.deduction.minutes > 60) {
+      if (this.deduction.minutes &&this.deduction.minutes > 60) {
         this.deduction.minutes = 0
       }
     }

@@ -47,7 +47,7 @@ export class LeaveRequestComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName'];
 
   leaveRequest: LeaveRequest = new LeaveRequest();
   OldleaveRequest: LeaveRequest = new LeaveRequest();
@@ -248,10 +248,14 @@ export class LeaveRequestComponent {
     }
   }
 
-  formatHours(value: number): string {
-    const hours = Math.floor(value);
-    const minutes = Math.round((value - hours) * 60);
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  formatHours(value: number | null): string {
+    if(value){
+      const hours = Math.floor(value);
+      const minutes = Math.round((value - hours) * 60);
+      return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }else{
+      return ``;
+    }
   }
 
   validateNumber(event: any, field: keyof LeaveRequest): void {
@@ -410,8 +414,8 @@ export class LeaveRequestComponent {
       isValid = false;
     }
     // validate tha not give him more than this.leaveRequest.remains
-    if (this.leaveRequest.used > this.leaveRequest.monthlyLeaveRequestBalance) {
-      this.validationErrors['hours'] = "You Can not exceed MonthlyLeaveRequestBalance"
+    if (this.leaveRequest.used && this.leaveRequest.used > this.leaveRequest.monthlyLeaveRequestBalance) {
+      this.validationErrors['hours'] = "You Can not exceed Monthly Leave Request Balance"
       isValid = false;
     }
     if (this.MonthlyLeaveRequestBalanceError) {

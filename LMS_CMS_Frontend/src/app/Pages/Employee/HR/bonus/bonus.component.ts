@@ -29,18 +29,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './bonus.component.css',
 })
 export class BonusComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -58,7 +47,7 @@ export class BonusComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'bounsTypeName'];
 
   bouns: Bonus = new Bonus();
 
@@ -265,7 +254,7 @@ export class BonusComponent {
             console.log(error);
             this.isLoading = false;
             const errorMessage =
-              error.error?.message ||
+              error.error ||
               this.translate.instant('Failed to create bonus');
             this.showErrorAlert(errorMessage);
           }
@@ -284,7 +273,7 @@ export class BonusComponent {
           (error) => {
             this.isLoading = false;
             const errorMessage =
-              error.error?.message ||
+              error.error ||
               this.translate.instant('Failed to update bonus');
             this.showErrorAlert(errorMessage);
           }
@@ -326,7 +315,7 @@ export class BonusComponent {
       }
     }
     if (field == 'minutes') {
-      if (this.bouns.minutes > 60) {
+      if (this.bouns.minutes &&this.bouns.minutes > 60) {
         this.bouns.minutes = 0;
       }
     }

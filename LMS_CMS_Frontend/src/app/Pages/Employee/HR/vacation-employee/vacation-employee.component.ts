@@ -49,7 +49,7 @@ export class VacationEmployeeComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'vacationTypeName'];
 
   vacationEmployee: VacationEmployee = new VacationEmployee();
   OldVacationEmployee: VacationEmployee = new VacationEmployee();
@@ -413,7 +413,9 @@ export class VacationEmployeeComponent {
         if (!this.vacationEmployee[field]) {
           if (
             field == 'date' ||
-            field == 'employeeID'
+            field == 'employeeID' ||
+            field == 'vacationTypesID' ||
+            field == 'dateFrom' 
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
