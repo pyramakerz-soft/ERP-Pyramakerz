@@ -489,6 +489,7 @@ export class AccountingEmployeeEditComponent {
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
+  
   onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;

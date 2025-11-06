@@ -15,5 +15,8 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long PayableDocTypeID { get; set; }
         public long LinkFileID { get; set; }
         public long BankOrSaveID { get; set; }
+
+        public List<PayableDetailsPutDTO>  UpdatedDetails { get; set; }
+        public List<PayableDetailsAddDTO> NewDetails { get; set; }
     }
 }

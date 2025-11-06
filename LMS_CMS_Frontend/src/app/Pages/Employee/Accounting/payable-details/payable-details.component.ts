@@ -39,18 +39,7 @@ import { BankEmployeeService } from '../../../../Services/Employee/Accounting/ba
   styleUrl: './payable-details.component.css',
 })
 export class PayableDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -77,7 +66,7 @@ export class PayableDetailsComponent {
   banksData: BankEmployee[] = [];
   safesData: SafeEmployee[] = [];
   bankOrSafe: string = '';
-  payableDetailsData: PayableDetails[] = [];
+  // payableDetailsData: PayableDetails[] = [];
   newDetails: PayableDetails = new PayableDetails();
   linkFilesData: LinkFile[] = [];
   linkFileTypesData: any[] = [];
@@ -91,6 +80,8 @@ export class PayableDetailsComponent {
 
   isLoading = false;
   isSaveLoading = false;
+
+  
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
@@ -130,7 +121,8 @@ export class PayableDetailsComponent {
       this.getSaveData();
     } else {
       this.GetPayableByID();
-      this.GetPayableDetails();
+      this.GetLinkFiles();
+      // this.GetPayableDetails();
     }
 
     this.activeRoute.url.subscribe((url) => {
@@ -310,10 +302,7 @@ export class PayableDetailsComponent {
     }
   }
 
-  onInputValueChangeForDetails(event: {
-    field: keyof PayableDetails;
-    value: any;
-  }) {
+  onInputValueChangeForDetails(event: {field: keyof PayableDetails;value: any;}) {
     const { field, value } = event;
     (this.newDetails as any)[field] = value;
     if (value) {
@@ -434,19 +423,19 @@ export class PayableDetailsComponent {
     }
   }
 
-  GetPayableDetails() {
-    this.payableDetailsData = [];
-    this.payableDetailsService
-      .Get(this.DomainName, this.PayableID)
-      .subscribe((data) => {
-        this.payableDetailsData = data;
-        let total = 0;
-        this.payableDetailsData.forEach((element) => {
-          total = total + (element.amount ? element.amount : 0);
-        });
-        this.totalAmount = total;
-      });
-  }
+  // GetPayableDetails() {
+  //   this.payable = [];
+  //   this.payableDetailsService
+  //     .Get(this.DomainName, this.PayableID)
+  //     .subscribe((data) => {
+  //       this.payableDetailsData = data;
+  //       let total = 0;
+  //       this.payableDetailsData.forEach((element) => {
+  //         total = total + (element.amount ? element.amount : 0);
+  //       });
+  //       this.totalAmount = total;
+  //     });
+  // }
 
   GetLinkFiles() {
     this.linkFileService.Get(this.DomainName).subscribe((data) => {
@@ -479,7 +468,7 @@ export class PayableDetailsComponent {
           this.isLoading = false;
           this.isNewDetails = false;
           this.newDetails = new PayableDetails();
-          this.GetPayableDetails();
+          this.GetPayableByID();
           this.editingRowId = null;
           this.editedRowData = new PayableDetails();
           this.isDetailsValid = false;
@@ -517,7 +506,7 @@ export class PayableDetailsComponent {
           this.isDetailsValid = false;
           this.isNewDetails = false;
           this.newDetails = new PayableDetails();
-          this.GetPayableDetails();
+          this.GetPayableByID();
         });
     }
   }
@@ -544,7 +533,7 @@ export class PayableDetailsComponent {
         this.payableDetailsService
           .Delete(id, this.DomainName)
           .subscribe((data) => {
-            this.GetPayableDetails();
+          this.GetPayableByID();
           });
       }
     });
@@ -658,7 +647,7 @@ export class PayableDetailsComponent {
             'linkFileTypeName',
             'notes',
           ],
-          data: this.payableDetailsData.map((row) => [
+          data: this.payable.payableDetails.map((row) => [
             row.id || 0,
             row.amount || 0,
             row.linkFileName || '',

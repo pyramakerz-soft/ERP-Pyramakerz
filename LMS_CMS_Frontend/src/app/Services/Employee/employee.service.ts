@@ -237,6 +237,18 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee`, { headers });
   }
 
+  GeTWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Employee[], pagination: any }>(`${this.baseUrl}/Employee/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   Get_Employee_By_ID(id: number, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName
