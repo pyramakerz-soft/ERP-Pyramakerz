@@ -326,9 +326,8 @@ export class ViolationComponent {
             field == 'employeeTypeId' ||
             field == 'employeeID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
@@ -398,5 +397,27 @@ export class ViolationComponent {
 
   view(Id: number) {
     this.router.navigateByUrl('Employee/violation/' + Id);
+  }
+
+  private getFieldDisplayName(field: keyof Violation): string {
+    // map technical field names to user-facing labels (these keys will be translated by translate.instant)
+    const map: { [key in keyof Violation]?: string } = {
+      date: 'Date',
+      violationTypeID: 'Violation Type',
+      employeeTypeId: 'Employee Type',
+      employeeID: 'Employee',
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 }

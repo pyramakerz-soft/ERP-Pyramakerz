@@ -22,7 +22,7 @@ import { MotionType } from '../../../../Models/Accounting/motion-type';
 import { SubType } from '../../../../Models/Accounting/sub-type';
 import { EndType } from '../../../../Models/Accounting/end-type';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -83,7 +83,8 @@ export class AccountingTreeComponent {
     public subTypeService: SubTypeService,
     public endTypeService: EndTypeService,
      private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+      private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService,
 
   ) { }
 
@@ -248,44 +249,65 @@ export class AccountingTreeComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.accountingTreeChart) {
-      if (this.accountingTreeChart.hasOwnProperty(key)) {
-        const field = key as keyof AccountingTreeChart;
-        if (!this.accountingTreeChart[field]) {
-          if (field == "name" || field == "subTypeID" || field == "id"
-            || (this.accountingTreeChart.subTypeID == 2 && (field == "mainAccountNumberID" || field == "linkFileID"))
-            || ((this.accountingTreeChart.mainAccountNumberID == 0) && (field == "motionTypeID" || field == "endTypeID"))) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          if (field == "name") {
-            if (this.accountingTreeChart.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else {
-            this.validationErrors[field] = '';
-          }
-
-          if (field == "id") {
-            if (this.accountingTreeChart.id != null) {
-              if (isNaN(this.accountingTreeChart.id)) {
-                this.validationErrors["id"] = 'Id Can Only Contain Numbers'
-                isValid = false;
-              } else {
-                this.validationErrors["id"] = ''
-              }
-            }
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  if (!this.accountingTreeChart.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
+  }
+  
+  if (!this.accountingTreeChart.subTypeID) {
+    this.validationErrors['subTypeID'] = this.getRequiredErrorMessage('Sub Type');
+    isValid = false;
+  }
+  
+  if (!this.accountingTreeChart.id) {
+    this.validationErrors['id'] = this.getRequiredErrorMessage('ID');
+    isValid = false;
   }
 
+  if (this.accountingTreeChart.subTypeID == 2) {
+    if (!this.accountingTreeChart.mainAccountNumberID) {
+      this.validationErrors['mainAccountNumberID'] = this.getRequiredErrorMessage('Main Account Number');
+      isValid = false;
+    }
+    
+    if (!this.accountingTreeChart.linkFileID) {
+      this.validationErrors['linkFileID'] = this.getRequiredErrorMessage('Link File');
+      isValid = false;
+    }
+  }
+
+  if (!this.accountingTreeChart.mainAccountNumberID) {
+    if (!this.accountingTreeChart.motionTypeID) {
+      this.validationErrors['motionTypeID'] = this.getRequiredErrorMessage('Motion Type');
+      isValid = false;
+    }
+    
+    if (!this.accountingTreeChart.endTypeID) {
+      this.validationErrors['endTypeID'] = this.getRequiredErrorMessage('End Type');
+      isValid = false;
+    }
+  }
+
+  if (this.accountingTreeChart.name && this.accountingTreeChart.name.length > 100) {
+    this.validationErrors['name'] = `*Name cannot be longer than 100 characters`;
+    isValid = false;
+  }
+
+  if (this.accountingTreeChart.id != null) {
+    if (isNaN(this.accountingTreeChart.id)) {
+      this.validationErrors["id"] = 'ID can only contain numbers';
+      isValid = false;
+    } else {
+      this.validationErrors["id"] = '';
+    }
+  }
+  
+  return isValid;
+}
   onInputValueChange(event: { field: keyof AccountingTreeChart, value: any }) {
     const { field, value } = event;
 
@@ -374,4 +396,15 @@ export class AccountingTreeComponent {
       }
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

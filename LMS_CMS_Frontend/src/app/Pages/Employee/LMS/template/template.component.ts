@@ -228,9 +228,10 @@ export class TemplateComponent {
             field == 'afterCount' ||
             field == 'weight'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = field === 'englishTitle' ? 'English Title'
+              : field === 'arabicTitle' ? 'Arabic Title'
+              : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
@@ -306,5 +307,16 @@ export class TemplateComponent {
 
   moveToGroups(Id: number) {
     this.router.navigateByUrl('Employee/EvaluationTemplateGroup' + '/' + Id);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 }

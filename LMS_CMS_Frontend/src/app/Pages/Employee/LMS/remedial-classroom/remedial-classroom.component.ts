@@ -390,29 +390,48 @@ export class RemedialClassroomComponent {
     return IsAllow;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.remedialClassroom) {
-      if (this.remedialClassroom.hasOwnProperty(key)) {
-        const field = key as keyof RemedialClassroom;
-        if (!this.remedialClassroom[field]) {
-          if (
-            field == 'name' ||
-            field == 'numberOfSession' ||
-            field == 'gradeID' ||
-            field == 'subjectID' ||
-            field == 'teacherID' ||
-            field == 'academicYearID' ||
-            field == 'schoolID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.remedialClassroom.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.remedialClassroom.numberOfSession) {
+    this.validationErrors['numberOfSession'] = this.getRequiredErrorMessage('Number Of Sessions');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.gradeID) {
+    this.validationErrors['gradeID'] = this.getRequiredErrorMessage('Grade');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.subjectID) {
+    this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.teacherID) {
+    this.validationErrors['teacherID'] = this.getRequiredErrorMessage('Teacher');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.academicYearID) {
+    this.validationErrors['academicYearID'] = this.getRequiredErrorMessage('Academic Year');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.schoolID) {
+    this.validationErrors['schoolID'] = this.getRequiredErrorMessage('School');
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   Edit(id: number) {
     this.mode = "Edit"
@@ -450,4 +469,15 @@ export class RemedialClassroomComponent {
     this.GetAllTeachers()
     this.openModal()
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

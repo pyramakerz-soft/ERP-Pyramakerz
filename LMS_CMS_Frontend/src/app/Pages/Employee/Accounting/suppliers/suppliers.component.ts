@@ -240,44 +240,72 @@ export class SuppliersComponent {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.Supplier) {
-      if (this.Supplier.hasOwnProperty(key)) {
-        const field = key as keyof Supplier;
-        if (!this.Supplier[field]) {
-          if (
-            field == 'name' ||
-            field == 'countryID' ||
-            field == 'email' ||
-            field == 'website' ||
-            field == 'phone1' ||
-            field == 'taxCard' ||
-            field == 'commercialRegister' ||
-            field == 'accountNumberID' ||
-            field == 'address'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
-      isValid = false;
-      this.validationErrors['email'] = 'Email is not valid.'
-    }
-
-    if (this.Supplier.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
-    }
-
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  if (!this.Supplier.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.Supplier.countryID) {
+    this.validationErrors['countryID'] = this.getRequiredErrorMessage('Country');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.email) {
+    this.validationErrors['email'] = this.getRequiredErrorMessage('Email');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.website) {
+    this.validationErrors['website'] = this.getRequiredErrorMessage('Website');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.phone1) {
+    this.validationErrors['phone1'] = this.getRequiredErrorMessage('Phone');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.taxCard) {
+    this.validationErrors['taxCard'] = this.getRequiredErrorMessage('Tax Card');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.commercialRegister) {
+    this.validationErrors['commercialRegister'] = this.getRequiredErrorMessage('Commercial Register');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.accountNumberID) {
+    this.validationErrors['accountNumberID'] = this.getRequiredErrorMessage('Account Number');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.address) {
+    this.validationErrors['address'] = this.getRequiredErrorMessage('Address');
+    isValid = false;
+  }
+
+  // Validate email format
+  const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
+    isValid = false;
+    this.validationErrors['email'] = this.translate.instant('Email is not valid');
+  }
+
+  // Validate name length
+  if (this.Supplier.name && this.Supplier.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters');
+  }
+
+  return isValid;
+}
+
+
   capitalizeField(field: keyof Supplier): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -318,4 +346,15 @@ export class SuppliersComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

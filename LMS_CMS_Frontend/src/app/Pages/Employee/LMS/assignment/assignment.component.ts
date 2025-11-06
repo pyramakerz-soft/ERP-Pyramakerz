@@ -626,8 +626,9 @@ export class AssignmentComponent {
         const field = key as keyof Assignment;
         if (!this.assignment[field]) {
           if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'passMark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         } else {
           if (field == 'englishName' || field == 'arabicName') {
@@ -784,6 +785,34 @@ export class AssignmentComponent {
       }
     } catch (error) {
       this.assignmentData = [];
+    }
+  }
+
+  private getFieldDisplayName(field: keyof Assignment): string {
+    const map: { [key in keyof Assignment]?: string } = {
+      englishName: 'English Name',
+      arabicName: 'Arabic Name',
+      mark: 'Mark',
+      passMark: 'Pass Mark',
+      assignmentTypeID: 'Assignment Type',
+      subjectID: 'Subject',
+      subjectWeightTypeID: 'Subject Weight Type',
+      openDate: 'Open Date',
+      dueDate: 'Due Date',
+      cutOfDate: 'Cut Off Date',
+      studentClassroomIDs: 'Students'
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

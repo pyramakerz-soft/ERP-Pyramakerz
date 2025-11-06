@@ -290,13 +290,14 @@ export class ViolationTypesComponent {
             field == 'employeeTypeIds' ||
             field == 'name'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
+            const fieldName = field === 'employeeTypeIds' ? 'Employee Type' : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(fieldName);
+             isValid = false;
           }
         }
         if (this.violationType.employeeTypeIds.length == 0) {
-          this.validationErrors["employeeTypeIds"] = `employee Type is required`;
-          isValid = false;
+          this.validationErrors["employeeTypeIds"] = this.getRequiredErrorMessage('Employee Type');
+           isValid = false;
         }
       }
     }
@@ -338,6 +339,17 @@ export class ViolationTypesComponent {
       }
     } catch (error) {
       this.Data = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 

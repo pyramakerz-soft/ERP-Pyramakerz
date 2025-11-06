@@ -219,31 +219,31 @@ export class DebitsComponent {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.debit) {
-      if (this.debit.hasOwnProperty(key)) {
-        const field = key as keyof Debit;
-        if (!this.debit[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-
-    if (this.debit.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.debit.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.debit.accountNumberID) {
+    this.validationErrors['accountNumberID'] = this.getRequiredErrorMessage('Account Number');
+    isValid = false;
+  }
+
+  // Validate name length
+  if (this.debit.name && this.debit.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters');
+  }
+  
+  return isValid;
+}
+
+
   capitalizeField(field: keyof Debit): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -285,4 +285,15 @@ export class DebitsComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

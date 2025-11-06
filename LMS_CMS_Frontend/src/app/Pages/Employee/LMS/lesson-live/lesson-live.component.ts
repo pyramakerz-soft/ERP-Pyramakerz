@@ -354,15 +354,30 @@ export class LessonLiveComponent {
             field == 'classroomID' ||
             field == 'subjectID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+            const displayName =
+              field === 'weekDayID' ? 'Week Day' :
+              field === 'classroomID' ? 'Classroom' :
+              field === 'subjectID' ? 'Subject' :
+              field === 'liveLink' ? 'Live Link' :
+              this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   capitalizeField(field: keyof LessonLive): string {

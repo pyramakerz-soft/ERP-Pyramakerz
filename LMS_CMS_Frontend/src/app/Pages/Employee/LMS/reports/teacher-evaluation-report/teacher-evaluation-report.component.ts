@@ -38,6 +38,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
   isLoading: boolean = false;
   hasData: boolean = false;
   isExporting: boolean = false;
+  reportGenerated: boolean = false;
 
   @ViewChild('chartCanvas') chartCanvas!: ElementRef;
   @ViewChild('reportContent') reportContent!: ElementRef;
@@ -87,7 +88,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
     );
   }
 
-  generateReport() {
+ generateReport() {
     if (!this.filterParams.fromDate || !this.filterParams.toDate) {
       Swal.fire('Warning', 'Please select both start and end dates', 'warning');
       return;
@@ -101,6 +102,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
     this.isLoading = true;
     this.evaluationData = [];
     this.hasData = false;
+    this.reportGenerated = true;
 
     this.evaluationService.getTeacherEvaluationReport(
       this.filterParams.fromDate,
@@ -129,6 +131,25 @@ export class TeacherEvaluationReportComponent implements OnInit {
         this.hasData = false;
       }
     );
+  }
+
+    clearFilters() {
+    this.filterParams = {
+      fromDate: '',
+      toDate: '',
+      employeeId: null,
+      departmentId: null
+    };
+    this.employees = [];
+    this.reportGenerated = false; // Reset flag when clearing filters
+    
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
+    
+    this.evaluationData = [];
+    this.hasData = false;
   }
 
   createChart() {
@@ -260,23 +281,6 @@ export class TeacherEvaluationReportComponent implements OnInit {
     return orderedColors[index % orderedColors.length];
   }
 
-  clearFilters() {
-    this.filterParams = {
-      fromDate: '',
-      toDate: '',
-      employeeId: null,
-      departmentId: null
-    };
-    this.employees = [];
-    
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
-    }
-    
-    this.evaluationData = [];
-    this.hasData = false;
-  }
 
   // ========== EXPORT METHODS ==========
 

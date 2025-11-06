@@ -226,10 +226,10 @@ export class BookCorrectionComponent {
             field == 'englishName' ||
             field == 'arabicName'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+            const displayName =
+              field === 'englishName' ? 'English Name' : 'Arabic Name';
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
@@ -276,6 +276,17 @@ export class BookCorrectionComponent {
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 
