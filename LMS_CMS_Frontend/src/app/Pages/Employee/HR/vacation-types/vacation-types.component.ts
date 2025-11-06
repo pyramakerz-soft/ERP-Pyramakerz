@@ -236,7 +236,7 @@ CreateOREdit() {
           if (
             field == 'name'
           ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
           }
         }

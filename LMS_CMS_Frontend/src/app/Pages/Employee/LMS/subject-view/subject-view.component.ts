@@ -326,7 +326,7 @@ isFormValidForSubjectWeight(): boolean {
       const field = key as keyof SubjectWeight;
       if (!this.subjectWeightElement[field]) {
         if (field == "weightTypeID" || field == "weight") {
-          this.validationErrorsForWeights[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`; 
+          this.validationErrorsForWeights[field] =`${this.translate.instant(field)} ${this.translate.instant('Field is required')} `; 
           isValid = false;
         }
       } else {
@@ -344,7 +344,7 @@ isFormValidForSubjectResource(): boolean {
       const field = key as keyof SubjectResource;
       if (!this.SubjectResourceElement[field]) {
         if (field == "file" || field == "englishName" || field == 'arabicName') {
-          this.validationErrorsForResources[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrorsForResources[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
         }
       } else {
