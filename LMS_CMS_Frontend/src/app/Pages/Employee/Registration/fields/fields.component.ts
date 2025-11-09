@@ -79,8 +79,7 @@ export class FieldsComponent {
     private translate: TranslateService,
     public CategoryServ: RegistrationCategoryService,
     public fieldServ: FieldsService,
-    public fieldTypeServ: FieldTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public fieldTypeServ: FieldTypeService, 
     private languageService: LanguageService,
   ) { }
 
@@ -114,11 +113,10 @@ export class FieldsComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToEmployee() {

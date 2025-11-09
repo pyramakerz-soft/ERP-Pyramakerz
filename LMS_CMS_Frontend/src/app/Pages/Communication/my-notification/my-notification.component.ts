@@ -29,8 +29,7 @@ export class MyNotificationComponent {
     public ApiServ: ApiService,  
     public activeRoute: ActivatedRoute, 
     public notificationService: NotificationService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -48,8 +47,7 @@ export class MyNotificationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+    ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

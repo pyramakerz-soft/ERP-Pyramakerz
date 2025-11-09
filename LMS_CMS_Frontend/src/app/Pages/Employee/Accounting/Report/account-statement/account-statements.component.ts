@@ -64,8 +64,7 @@ export class AccountStatementsComponent {
     public reportsService: ReportsService,
     private router: Router,
     private languageService: LanguageService,
-    private supplierService: SupplierService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private supplierService: SupplierService, 
   ) {}
 
   ngOnInit() {
@@ -97,8 +96,7 @@ export class AccountStatementsComponent {
     this.loadSuppliers();
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

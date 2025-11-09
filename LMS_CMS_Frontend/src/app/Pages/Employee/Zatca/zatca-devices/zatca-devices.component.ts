@@ -70,8 +70,7 @@ export class ZatcaDevicesComponent implements OnInit {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     private datePipe: DatePipe,
-    private zatcaService: ZatcaService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private zatcaService: ZatcaService, 
     private translate: TranslateService,
   ) {}
 
@@ -112,8 +111,7 @@ export class ZatcaDevicesComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

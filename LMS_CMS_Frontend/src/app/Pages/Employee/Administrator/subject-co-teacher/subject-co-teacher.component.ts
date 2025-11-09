@@ -55,7 +55,7 @@ export class SubjectCoTeacherComponent {
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
+      private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -76,12 +76,11 @@ export class SubjectCoTeacherComponent {
     this.isRtl = document.documentElement.dir === 'rtl';   
   }
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Employee/${this.SupjectCoTeacher.coTeacherID}`)

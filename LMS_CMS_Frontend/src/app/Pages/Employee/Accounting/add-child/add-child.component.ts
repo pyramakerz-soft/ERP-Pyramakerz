@@ -68,8 +68,7 @@ export class AddChildComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmplyeeStudentServ: EmployeeStudentService,
-    public StudentServ: StudentService,
-    private realTimeService: RealTimeNotificationServiceService
+    public StudentServ: StudentService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,8 +97,7 @@ export class AddChildComponent {
     this.GetAllData();
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

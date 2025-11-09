@@ -72,8 +72,7 @@ export class AppointmentComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
-    public AppointmentServ: AppointmentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public AppointmentServ: AppointmentService, 
     private translate: TranslateService,
     private languageService: LanguageService,
   ) { }
@@ -102,11 +101,10 @@ export class AppointmentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {

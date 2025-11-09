@@ -39,8 +39,7 @@ export class InterviewRegistrationComponent {
 
   isLoading=false
 
-  constructor(public ApiServ: ApiService,
-    private realTimeService: RealTimeNotificationServiceService,
+  constructor(public ApiServ: ApiService, 
     private languageService: LanguageService, public activeRoute: ActivatedRoute, public router:Router, public interviewStateService: InterviewStateService,
     public interviewTimeTableService: InterviewTimeTableService, public registrationFormInterviewService: RegistrationFormInterviewService ){}
   
@@ -57,11 +56,10 @@ export class InterviewRegistrationComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getRegistrationFormInterviewData(){

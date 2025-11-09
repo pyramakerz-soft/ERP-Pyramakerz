@@ -62,7 +62,6 @@ export class AccountingEntriesComponent {
     public ApiServ: ApiService,
     public accountingEntriesService: AccountingEntriesService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -92,8 +91,7 @@ export class AccountingEntriesComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

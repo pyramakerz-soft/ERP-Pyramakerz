@@ -10,7 +10,7 @@
             <img src="Icons/Live.png" />
             <h1 class="text-lg font-bold text-[#004279] ">{{meeting.title}}</h1>
         </div>
-        <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse text-[#6F6F6F] cursor-pointer" (click)="openLink(meeting.url)">
+        <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse text-[#6F6F6F] cursor-pointer p-3 rounded hover:border" (click)="openLink(meeting.url)">
             <p class="text-small"> {{meeting.date}}</p>
         </div>
         <div *ngIf="isPastdueDate(meeting.date)" class="flex justify-start items-center space-x-2 rtl:space-x-reverse text-[#6F6F6F] cursor-pointer" (click)="openLink(meeting.url)">

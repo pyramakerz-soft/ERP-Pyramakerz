@@ -28,7 +28,7 @@ export class AccountComponent {
   editAccount:boolean = false
   validationErrors: { [key in keyof Account]?: string } = {};
 
-  constructor(private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,public octaService: OctaService){}
+  constructor(private languageService: LanguageService,public octaService: OctaService){}
   
   ngOnInit(){
     this.getAccountData()
@@ -38,11 +38,10 @@ export class AccountComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {   
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAccountData(){

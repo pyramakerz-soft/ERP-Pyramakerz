@@ -44,7 +44,6 @@ export class SchoolConfigurationComponent {
    
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,private menuService: MenuService, 
     public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router,
-    private realTimeService: RealTimeNotificationServiceService,
     private languageService: LanguageService,) {}
 
   ngOnInit(): void { 
@@ -79,11 +78,10 @@ export class SchoolConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchoolData() {

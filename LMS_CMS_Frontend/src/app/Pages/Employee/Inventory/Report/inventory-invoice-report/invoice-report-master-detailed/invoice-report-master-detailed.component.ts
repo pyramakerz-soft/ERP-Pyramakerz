@@ -97,8 +97,7 @@ school = {
     private categoryService: InventoryCategoryService,
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService
 
   ) {}
@@ -160,11 +159,10 @@ school = {
   }
 }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+ ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 loadCategories() {

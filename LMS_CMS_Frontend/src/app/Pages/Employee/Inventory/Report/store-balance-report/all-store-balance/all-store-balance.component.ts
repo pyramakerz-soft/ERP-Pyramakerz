@@ -59,8 +59,7 @@ cachedTableDataForPDF: any[] = [];
     private inventoryDetailsService: InventoryDetailsService,
     private categoryService: InventoryCategoryService,
     private route: ActivatedRoute,    
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
       private reportsService: ReportsService
   ) {}
 
@@ -75,9 +74,8 @@ cachedTableDataForPDF: any[] = [];
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

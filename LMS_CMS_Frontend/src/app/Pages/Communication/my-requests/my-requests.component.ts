@@ -95,8 +95,7 @@ export class MyRequestsComponent {
     public parentService: ParentService,
     public subjectService: SubjectService,
     public requestService: RequestService,    
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -125,8 +124,7 @@ export class MyRequestsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -63,7 +63,6 @@ export class SocialWorkerMedalComponent {
     public ApiServ: ApiService,
     public SocialWorkerMedalServ: SocialWorkerMedalService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,8 +89,7 @@ export class SocialWorkerMedalComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -67,8 +67,7 @@ export class AssignmentDetailComponent {
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
     public assignmentServ: AssignmentService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -85,8 +84,7 @@ export class AssignmentDetailComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

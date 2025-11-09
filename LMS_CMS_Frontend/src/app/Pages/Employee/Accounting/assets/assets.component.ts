@@ -68,8 +68,7 @@ export class AssetsComponent {
     public ApiServ: ApiService,
     public AssetServ: AssetService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -101,8 +100,7 @@ export class AssetsComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

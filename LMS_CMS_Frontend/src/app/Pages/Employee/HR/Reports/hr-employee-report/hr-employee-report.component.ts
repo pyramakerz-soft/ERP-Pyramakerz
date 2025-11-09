@@ -75,8 +75,7 @@ export class HrEmployeeReportComponent {
     public JobCategoriesServ: JobCategoriesService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private cdr: ChangeDetectorRef, 
   ) { }
 
   ngOnInit() {
@@ -94,8 +93,7 @@ export class HrEmployeeReportComponent {
     this.getJobsCategory()
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

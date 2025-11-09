@@ -56,8 +56,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     private medicalHistoryService: MedicalHistoryService,
     private studentService: StudentService,
     private languageService: LanguageService,
-    private apiService: ApiService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private apiService: ApiService, 
     private translate: TranslateService
   ) {}
 
@@ -69,8 +68,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     this.loadParentStudents();
   }
 
-  ngOnDestroy(): void { 
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void {  
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

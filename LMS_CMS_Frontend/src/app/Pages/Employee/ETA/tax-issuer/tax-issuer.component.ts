@@ -41,8 +41,7 @@ export class TaxIssuerComponent {
     public countryService: CountryService,     
     public taxTypeService: TaxTypeService,     
     public taxIssuerService: TaxIssuerService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -60,11 +59,10 @@ export class TaxIssuerComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+ ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetById(){

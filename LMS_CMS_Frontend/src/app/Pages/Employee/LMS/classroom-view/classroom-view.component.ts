@@ -32,8 +32,7 @@ export class ClassroomViewComponent {
     public classroomService: ClassroomService, 
     public activeRoute: ActivatedRoute,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,  
   ) {}
 
   ngOnInit() {
@@ -52,9 +51,8 @@ export class ClassroomViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
+  ngOnDestroy(): void { 
+      if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }

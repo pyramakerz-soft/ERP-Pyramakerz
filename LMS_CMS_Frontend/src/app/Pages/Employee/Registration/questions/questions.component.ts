@@ -83,8 +83,7 @@ export class QuestionsComponent {
     public testServ: TestService,
     private translate: TranslateService,
     public QuestionServ: QuestionService,
-    public QuestionTypeServ: QuestionTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public QuestionTypeServ: QuestionTypeService, 
     private languageService: LanguageService,
   ) { }
 
@@ -116,11 +115,10 @@ export class QuestionsComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToEmployee() {

@@ -187,8 +187,7 @@ export class InventoryDetailsComponent {
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   async ngOnInit() {
@@ -318,8 +317,7 @@ export class InventoryDetailsComponent {
     this.validationErrors = translatedErrors;
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

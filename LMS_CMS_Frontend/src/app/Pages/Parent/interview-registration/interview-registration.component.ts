@@ -54,8 +54,7 @@ export class InterviewRegistrationComponent {
   currentMonthDays: DayWithInterviews[] = [];
 
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
-    public interviewTimeTableService:InterviewTimeTableService,
-    private realTimeService: RealTimeNotificationServiceService, public registrationFormInterview: RegistrationFormInterviewService){}
+    public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -70,11 +69,10 @@ export class InterviewRegistrationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   
   trackByInterview(index: number, interview: InterviewTimeTable): number {

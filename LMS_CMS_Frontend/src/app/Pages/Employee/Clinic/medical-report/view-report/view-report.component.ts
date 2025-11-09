@@ -30,8 +30,7 @@ export class ViewReportComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit(): void {
@@ -47,8 +46,7 @@ export class ViewReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

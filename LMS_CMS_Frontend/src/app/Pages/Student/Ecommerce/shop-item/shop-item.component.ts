@@ -45,8 +45,7 @@ export class ShopItemComponent {
   students: Student[] = [];
   
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
-    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService, 
   ){}
 
   ngOnInit(){
@@ -77,10 +76,9 @@ export class ShopItemComponent {
   }
 
   ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){

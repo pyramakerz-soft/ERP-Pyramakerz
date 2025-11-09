@@ -94,8 +94,7 @@ export class StudentMedalComponent {
     private ClassroomServ: ClassroomService,
     public studentMedalServ : StudentMedalService ,
     public MedalServ : MedalService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -121,11 +120,10 @@ export class StudentMedalComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
 

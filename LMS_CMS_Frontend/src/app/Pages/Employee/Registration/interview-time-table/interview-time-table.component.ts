@@ -74,8 +74,7 @@ export class InterviewTimeTableComponent {
 
   isLoading = false
 
-  constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,private translate: TranslateService,
+  constructor(public account: AccountService, private translate: TranslateService,
     private languageService: LanguageService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router,
     public yearService: AcadimicYearService, public interviewTimeTableService: InterviewTimeTableService,
@@ -110,11 +109,10 @@ export class InterviewTimeTableComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

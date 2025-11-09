@@ -36,7 +36,7 @@ export class DosesComponent implements OnInit {
 
   constructor(private doseService: DoseService, 
     private apiService: ApiService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService , 
+      private languageService: LanguageService,
       private translate: TranslateService
 ) {}
 
@@ -48,12 +48,12 @@ export class DosesComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   private getRequiredErrorMessage(fieldName: string): string {
     const fieldTranslated = this.translate.instant(fieldName);

@@ -36,8 +36,7 @@ export class SubjectComponent {
   private intervalId: any;
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService,
-    private realTimeService: RealTimeNotificationServiceService,private announcementService: AnnouncementService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService,private announcementService: AnnouncementService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -55,11 +54,10 @@ export class SubjectComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSubjectData() {

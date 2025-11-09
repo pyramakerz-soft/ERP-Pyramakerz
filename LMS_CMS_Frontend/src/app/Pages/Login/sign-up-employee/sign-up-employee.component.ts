@@ -31,7 +31,7 @@ export class SignUpEmployeeComponent {
 
   // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
-  constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
+  constructor(private router: Router, private languageService: LanguageService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
 
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader();
@@ -41,8 +41,7 @@ export class SignUpEmployeeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -47,8 +47,7 @@ export class HygieneFormComponent implements OnInit {
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService
   ) {}
 
@@ -63,8 +62,7 @@ export class HygieneFormComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

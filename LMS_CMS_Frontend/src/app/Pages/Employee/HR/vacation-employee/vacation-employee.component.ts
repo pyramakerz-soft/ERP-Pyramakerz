@@ -80,8 +80,7 @@ export class VacationEmployeeComponent {
     public VacationEmployeeServ: VacationEmployeeService,
     public EmployeeServ: EmployeeService,
     private translate: TranslateService,
-    public VacationTypesServ: VacationTypesService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public VacationTypesServ: VacationTypesService, 
   ) { }
 
   ngOnInit() {
@@ -109,8 +108,7 @@ export class VacationEmployeeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

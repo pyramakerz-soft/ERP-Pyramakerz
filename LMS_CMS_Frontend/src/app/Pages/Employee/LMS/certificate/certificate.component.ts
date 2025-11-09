@@ -115,8 +115,7 @@ export class CertificateComponent {
     public CertificateServ: CertificateService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private cdr: ChangeDetectorRef, 
   ) { }
 
 isInfoRowsLoading: boolean = false;
@@ -157,8 +156,7 @@ isInfoRowsLoading: boolean = false;
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

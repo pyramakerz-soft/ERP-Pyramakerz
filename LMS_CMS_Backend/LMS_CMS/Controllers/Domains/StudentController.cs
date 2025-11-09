@@ -252,8 +252,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                  query => query.Include(emp => emp.AcademicYear.School)
                  );
 
-            StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
-            StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            if (studentGrade != null)
+            {
+                StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            }
 
             return Ok(StudentDTO);
         }

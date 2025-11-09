@@ -79,8 +79,7 @@ export class LessonResourceComponent {
     private sanitizer: DomSanitizer,
     private classroomService: ClassroomService,
     public lessonResourceTypeService:LessonResourceTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -114,11 +113,10 @@ export class LessonResourceComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
   IsAllowDelete(InsertedByID: number) {

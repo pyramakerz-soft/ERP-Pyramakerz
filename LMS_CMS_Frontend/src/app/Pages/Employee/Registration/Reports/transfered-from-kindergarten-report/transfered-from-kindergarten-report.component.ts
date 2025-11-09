@@ -79,8 +79,7 @@ export class TransferedFromKindergartenReportComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public reportsService: ReportsService, 
   ) { }
 
   ngOnInit() {
@@ -110,8 +109,7 @@ export class TransferedFromKindergartenReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

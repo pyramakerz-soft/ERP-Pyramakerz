@@ -145,8 +145,7 @@ export class QuestionBankComponent {
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService, 
   ) { }
 
   ngOnInit() {
@@ -177,8 +176,7 @@ export class QuestionBankComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

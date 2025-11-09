@@ -47,8 +47,7 @@ export class SubjectCategoryComponent {
   isLoading = false;
   
   constructor( 
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     public account: AccountService, 
     public subjectCategoryService: SubjectCategoryService, 
     private translate: TranslateService, 
@@ -86,8 +85,7 @@ export class SubjectCategoryComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -89,8 +89,7 @@ export class AssignmentEditComponent {
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
     public QuestionBankTypeServ: QuestionBankTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -112,8 +111,7 @@ export class AssignmentEditComponent {
     document.addEventListener('click', this.handleClickOutside);
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

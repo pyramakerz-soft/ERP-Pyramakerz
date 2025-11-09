@@ -68,8 +68,7 @@ export class DutyComponent {
     private SchoolServ: SchoolService,
     private DutyServ: DutyService,
     private translate: TranslateService,
-    private ClassroomServ: ClassroomService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private ClassroomServ: ClassroomService, 
   ) { }
 
   ngOnInit() {
@@ -99,11 +98,10 @@ export class DutyComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

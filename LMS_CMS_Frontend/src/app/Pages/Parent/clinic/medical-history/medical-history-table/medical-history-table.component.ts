@@ -36,10 +36,8 @@ export class ParentMedicalHistoryComponent implements OnInit {
   constructor(
     private medicalHistoryService: MedicalHistoryService,
     private languageService: LanguageService,
-    private apiService: ApiService,
-    private realTimeService: RealTimeNotificationServiceService,
-      private translate: TranslateService // Add this
-
+    private apiService: ApiService, 
+    private translate: TranslateService // Add this 
   ) {}
 
   ngOnInit(): void {
@@ -50,11 +48,10 @@ export class ParentMedicalHistoryComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private showErrorAlert(errorMessage: string) {

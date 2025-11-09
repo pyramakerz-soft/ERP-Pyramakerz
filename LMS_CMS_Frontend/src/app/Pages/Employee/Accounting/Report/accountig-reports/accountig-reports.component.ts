@@ -68,8 +68,7 @@ export class AccountigReportsComponent {
     private router: Router,
     public bankService: BankService,
     public saveService: SaveService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -96,9 +95,8 @@ export class AccountigReportsComponent {
   }
 
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

@@ -73,8 +73,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     private studentService: StudentService,
     private medicalHistoryService: MedicalHistoryService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService // Add this
   ) {}
 
@@ -88,8 +87,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

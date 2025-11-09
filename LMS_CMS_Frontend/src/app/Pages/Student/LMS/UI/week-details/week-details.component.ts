@@ -45,8 +45,7 @@ export class WeekDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private languageService: LanguageService,
-    private router: Router,
-    private realTimeService: RealTimeNotificationServiceService,
+    private router: Router, 
   ) {}
 
   ngOnInit() {
@@ -67,11 +66,10 @@ export class WeekDetailsComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+    ngOnDestroy(): void {   
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   formatName(name: string): string {
     return name.split('-')

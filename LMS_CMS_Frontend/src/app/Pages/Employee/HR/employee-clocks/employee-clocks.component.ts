@@ -62,8 +62,7 @@ export class EmployeeClocksComponent {
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
     public EmployeeClocksServ: EmployeeClocksService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService,
     
   ) {}
@@ -83,8 +82,7 @@ export class EmployeeClocksComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

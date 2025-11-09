@@ -60,8 +60,7 @@ export class ViolationReportComponent {
     public violationTypeService: ViolationTypeService,
     public apiService: ApiService,
     public accountService: AccountService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private reportsService: ReportsService // Add this line
   ) {}
 
@@ -77,8 +76,7 @@ export class ViolationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

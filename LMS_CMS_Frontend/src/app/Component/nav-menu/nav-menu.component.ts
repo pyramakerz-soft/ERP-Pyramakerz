@@ -43,6 +43,7 @@ import { ChatMessage } from '../../Models/Communication/chat-message';
 import { ConnectionStatus } from '../../Models/connection-status';
 import { ConnectionStatusServiceService } from '../../Services/shared/connection-status-service.service';
 import { RoleDetailsService } from '../../Services/Employee/role-details.service';
+import { RealTimeServiceService } from '../../Services/shared/real-time-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -129,10 +130,16 @@ export class NavMenuComponent {
 
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public roleDetailsService:RoleDetailsService,
-    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
+    private notificationService: NotificationService, public realTimeService:RealTimeServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
     public subjectService: SubjectService, public chatMessageService:ChatMessageService, public connectionStatusService:ConnectionStatusServiceService) { }
+  // constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
+  //   private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public roleDetailsService:RoleDetailsService,
+  //   private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
+  //   public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
+  //   public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
+  //   public subjectService: SubjectService, public chatMessageService:ChatMessageService, public connectionStatusService:ConnectionStatusServiceService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -361,7 +368,7 @@ export class NavMenuComponent {
     this.destroy$.complete();
     document.removeEventListener('click', this.onDocumentClick);
     this.realTimeService.stopConnection();
-    this.realTimeRequestService.stopConnection();
+    // this.realTimeRequestService.stopConnection();
   } 
 
   ChangeAccount(id: number): void {
@@ -371,7 +378,7 @@ export class NavMenuComponent {
     if (tokenObject && token != tokenObject.value) {
       // First stop any existing SignalR connection
       this.realTimeService.stopConnection();
-      this.realTimeRequestService.stopConnection();
+      // this.realTimeRequestService.stopConnection();
 
       localStorage.removeItem("current_token");
       localStorage.setItem("current_token", tokenObject.value);
@@ -381,7 +388,7 @@ export class NavMenuComponent {
       // Restart SignalR connection for the new account
       setTimeout(() => {
         this.realTimeService.startConnection();
-        this.realTimeRequestService.startRequestConnection();
+        // this.realTimeRequestService.startRequestConnection();
       }, 100);
       
       this.communicationService.sendAction(true);

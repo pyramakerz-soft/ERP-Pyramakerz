@@ -124,8 +124,7 @@ export class AccountingEmployeeEditComponent {
     public jobCategoryServ: JobCategoriesService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -161,8 +160,7 @@ export class AccountingEmployeeEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

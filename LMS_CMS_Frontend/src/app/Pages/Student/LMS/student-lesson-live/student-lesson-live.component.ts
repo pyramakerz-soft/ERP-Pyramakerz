@@ -61,8 +61,7 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     public ApiServ: ApiService,
     public LessonLiveServ: LessonLiveService ,
     public ClassroomServ :ClassroomService , 
-    public SubjectServ : SubjectService ,
-    private realTimeService: RealTimeNotificationServiceService,
+    public SubjectServ : SubjectService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,11 +88,10 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   
   GetAllData() {

@@ -69,8 +69,7 @@ export class DiscussionRoomComponent {
     public discussionRoomService: DiscussionRoomService,
     public classroomStudentService: ClassroomStudentService,
     public SchoolService: SchoolService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -99,11 +98,10 @@ export class DiscussionRoomComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

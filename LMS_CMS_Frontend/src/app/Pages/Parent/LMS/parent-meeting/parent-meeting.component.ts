@@ -33,8 +33,7 @@ export class ParentMeetingComponent {
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
   constructor(public account: AccountService, private languageService: LanguageService,public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public ParentMeetingServ: ParentMeetingService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public ParentMeetingServ: ParentMeetingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -51,11 +50,10 @@ export class ParentMeetingComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetSubjectLessonLiveData() {

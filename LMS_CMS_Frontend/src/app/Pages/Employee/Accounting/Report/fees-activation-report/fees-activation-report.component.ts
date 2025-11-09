@@ -48,8 +48,7 @@ export class FeesActivationReportComponent {
     public ApiServ: ApiService,  
     public reportsService: ReportsService, 
     public sharedReportsService: SharedReportsService ,
-      private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() { 
@@ -63,9 +62,8 @@ export class FeesActivationReportComponent {
   }  
 
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

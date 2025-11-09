@@ -50,8 +50,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
     public ApiServ: ApiService,
     public reportsService: ReportsService,
     public sharedReportsService: SharedReportsService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -65,13 +64,9 @@ export class AccountigConstraintsComponent implements OnDestroy {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
-  // ngOnDestroy() {
-  //   this.subscription.unsubscribe();
-  // }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

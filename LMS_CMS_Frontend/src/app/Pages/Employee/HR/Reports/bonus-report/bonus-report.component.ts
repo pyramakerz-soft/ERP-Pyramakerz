@@ -63,8 +63,7 @@ export class BonusReportComponent implements OnInit {
     private jobService: JobService,
     private employeeService: EmployeeService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private reportsService: ReportsService
   ) {}
 
@@ -77,8 +76,7 @@ export class BonusReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

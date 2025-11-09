@@ -68,7 +68,7 @@ export class BusCompaniesComponent {
     private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
+    private languageService: LanguageService) { }
 
   ngOnInit() {
 
@@ -108,8 +108,7 @@ export class BusCompaniesComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

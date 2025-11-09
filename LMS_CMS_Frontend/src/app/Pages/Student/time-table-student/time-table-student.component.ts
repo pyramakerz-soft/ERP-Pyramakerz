@@ -86,7 +86,6 @@ export class TimeTableStudentComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     public timetableServ: TimeTableService,
-    private realTimeService: RealTimeNotificationServiceService,
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,11 +102,10 @@ export class TimeTableStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+   ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
 

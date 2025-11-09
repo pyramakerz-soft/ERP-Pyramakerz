@@ -39,8 +39,7 @@ export class RegisteredEmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService, 
     public registeredEmployeeService: RegisteredEmployeeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() { 
@@ -55,13 +54,12 @@ export class RegisteredEmployeeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData(){
     this.TableData = [];

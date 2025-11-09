@@ -74,8 +74,7 @@ export class LoansComponent {
     private translate: TranslateService,
     public LoansServ: LoansService,
     public SafeEmployeeServ: SafeEmployeeService,
-    public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    public EmployeeServ: EmployeeService, 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -104,8 +103,7 @@ export class LoansComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

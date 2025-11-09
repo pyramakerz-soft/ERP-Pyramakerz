@@ -90,8 +90,7 @@ export class RemedialClassroomComponent {
     public SubjectServ: SubjectService,
     public EmployeeServ: EmployeeService,
     public ClassroomSubjectServ: ClassroomSubjectService,
-    private cdRef: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService,
+    private cdRef: ChangeDetectorRef, 
     private languageService: LanguageService,
     private translate: TranslateService,
   ) { }
@@ -118,8 +117,7 @@ export class RemedialClassroomComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

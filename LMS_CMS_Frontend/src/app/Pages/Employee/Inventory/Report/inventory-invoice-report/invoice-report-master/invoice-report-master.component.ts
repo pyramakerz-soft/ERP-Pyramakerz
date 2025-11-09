@@ -118,8 +118,7 @@ school = {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService,
-    private reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService
+    private reportsService: ReportsService, 
   ) {}
 
 ngOnInit() {
@@ -180,11 +179,10 @@ onStoreSelected() {
   }
 }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

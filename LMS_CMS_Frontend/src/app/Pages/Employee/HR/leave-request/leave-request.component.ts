@@ -77,8 +77,7 @@ export class LeaveRequestComponent {
     public ApiServ: ApiService,
     public LeaveRequestServ: LeaveRequestService,
     public BounsTypeServ: BounsTypeService,
-    public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public EmployeeServ: EmployeeService, 
   ) { }
 
   ngOnInit() {
@@ -106,8 +105,8 @@ export class LeaveRequestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

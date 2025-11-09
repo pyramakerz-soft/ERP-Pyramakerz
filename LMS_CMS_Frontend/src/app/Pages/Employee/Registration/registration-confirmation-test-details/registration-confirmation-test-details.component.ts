@@ -62,8 +62,7 @@ export class RegistrationConfirmationTestDetailsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public testServ: TestService,
-    public registrationserv: RegisterationFormTestService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public registrationserv: RegisterationFormTestService, 
   ) { }
 
   ngOnInit() {
@@ -95,11 +94,10 @@ export class RegistrationConfirmationTestDetailsComponent {
 
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   validateNumber(event: any, field: keyof RegisterationFormTest): void {

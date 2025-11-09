@@ -63,8 +63,7 @@ export class AccountingStudentComponent {
     public ApiServ: ApiService,
     public StudentServ: StudentService,
     public accountServ:AccountingTreeChartService ,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -92,8 +91,7 @@ export class AccountingStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -83,8 +83,7 @@ export class ClassroomsAccommodationComponent {
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
     public registrationFormStateService: RegistrationFormStateService,
-    public YearServ: AcadimicYearService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public YearServ: AcadimicYearService, 
     private languageService: LanguageService,
   ) { }
 
@@ -115,11 +114,10 @@ export class ClassroomsAccommodationComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   GetAllData() {
     this.Data = []

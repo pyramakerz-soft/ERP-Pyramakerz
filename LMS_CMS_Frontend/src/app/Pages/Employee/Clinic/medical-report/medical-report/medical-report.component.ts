@@ -81,8 +81,7 @@ export class MedicalReportComponent implements OnInit {
     private gradeService: GradeService,
     private classroomService: ClassroomService,
     private studentService: StudentService,
-    private stateService: StateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private stateService: StateService, 
     public account: AccountService,
     public ApiServ: ApiService,
     private route: ActivatedRoute,
@@ -107,11 +106,10 @@ export class MedicalReportComponent implements OnInit {
         this.restoreState();
     }
 
-  ngOnDestroy(): void {
-        this.realTimeService.stopConnection(); 
-        if (this.subscription) {
-          this.subscription.unsubscribe();
-        }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   GetStudentsData() {

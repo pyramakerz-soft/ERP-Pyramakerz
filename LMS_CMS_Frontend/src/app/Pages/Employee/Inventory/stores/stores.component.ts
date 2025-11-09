@@ -82,8 +82,7 @@ export class StoresComponent {
     private router: Router,
     public StoresServ: StoresService,
     public CategoryServ: InventoryCategoryService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -143,8 +142,7 @@ export class StoresComponent {
     this.validationErrors = translatedErrors;
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

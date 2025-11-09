@@ -58,8 +58,7 @@ export class RegistrationConfirmationComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
         private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, 
         public registerationFormParentServicea:RegisterationFormParentService, public yearService: AcadimicYearService, 
-        public schoolService: SchoolService, public stateService: RegistrationFormStateService,
-    private realTimeService: RealTimeNotificationServiceService,
+        public schoolService: SchoolService, public stateService: RegistrationFormStateService, 
     private languageService: LanguageService,){}
 
   ngOnInit(){
@@ -90,11 +89,10 @@ export class RegistrationConfirmationComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   IsAllowEdit(InsertedByID: number) {

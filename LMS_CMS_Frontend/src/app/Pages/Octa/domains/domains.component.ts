@@ -34,7 +34,7 @@ export class DomainsComponent {
   isDropdownOpen = false;
   isSaved = false
 
-  constructor(public domainService:DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public roleDetailsService:RoleDetailsService){}
+  constructor(public domainService:DomainService,private languageService: LanguageService, public roleDetailsService:RoleDetailsService){}
 
   ngOnInit(){ 
     this.getDomainData()
@@ -44,11 +44,10 @@ export class DomainsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getDomainData(){

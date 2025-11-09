@@ -36,8 +36,7 @@ export class SubjectAssignmentComponent {
   AllAssignment: any[] = []
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -54,8 +53,7 @@ export class SubjectAssignmentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

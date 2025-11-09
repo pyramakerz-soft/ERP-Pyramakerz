@@ -68,8 +68,7 @@ export class TuitionDiscountTypesComponent {
     public ApiServ: ApiService,
     public tuitionServ: TuitionDiscountTypeService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,8 +97,7 @@ export class TuitionDiscountTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -81,8 +81,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     public ApiServ: ApiService,
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
-    private etaService: EtaService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private etaService: EtaService, 
   ) {}
 
   ngOnInit() {
@@ -99,11 +98,10 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   // Update the loadInvoice() method in electronic-invoice-detail.component.ts

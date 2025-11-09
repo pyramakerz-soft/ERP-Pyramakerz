@@ -100,8 +100,7 @@ export class EvaluationReportComponent {
     public classroomService: ClassroomService,
     public employeeService: EmployeeService,
     public SchoolServ: SchoolService,
-    public templateServ: EvaluationTemplateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public templateServ: EvaluationTemplateService, 
     private reportsService: ReportsService
 
   ) {}
@@ -127,8 +126,7 @@ export class EvaluationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

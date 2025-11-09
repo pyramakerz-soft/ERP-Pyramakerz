@@ -37,7 +37,7 @@ export class RealTimeNotificationServiceService {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.ApiServ.BaseUrlSignalR}notificationHub`, {
+      .withUrl(`${this.ApiServ.BaseUrlSignalR}appHub`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => localStorage.getItem("current_token") || '',
@@ -49,6 +49,20 @@ export class RealTimeNotificationServiceService {
           Math.min(retryContext.previousRetryCount * 1000, 10000)
       })
       .build();
+
+    // this.hubConnection = new signalR.HubConnectionBuilder()
+    //   .withUrl(`${this.ApiServ.BaseUrlSignalR}notificationHub`, {
+    //     skipNegotiation: true,
+    //     transport: signalR.HttpTransportType.WebSockets,
+    //     accessTokenFactory: () => localStorage.getItem("current_token") || '',
+    //     headers: { "Domain-Name": this.DomainName }
+    //   })
+    //   .configureLogging(signalR.LogLevel.Debug)
+    //   .withAutomaticReconnect({
+    //     nextRetryDelayInMilliseconds: retryContext => 
+    //       Math.min(retryContext.previousRetryCount * 1000, 10000)
+    //   })
+    //   .build();
 
     // Connection state handlers
     this.hubConnection.onreconnecting(() => {
@@ -77,7 +91,7 @@ export class RealTimeNotificationServiceService {
 
     this.hubConnection.on('ReceiveNotification', (data: any) => { 
       this.showNotificationModal(data);
-    });
+    }); 
   }
 
   stopConnection(): void {

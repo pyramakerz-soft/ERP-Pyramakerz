@@ -71,8 +71,7 @@ export class RemedialClassroomStudentComponent {
     public activeRoute: ActivatedRoute,
     public router: Router,
     private translate: TranslateService,
-    public RemedialClassroomServ: RemedialClassroomService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public RemedialClassroomServ: RemedialClassroomService,   
     private languageService: LanguageService,
   ) { }
 
@@ -104,8 +103,7 @@ export class RemedialClassroomStudentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

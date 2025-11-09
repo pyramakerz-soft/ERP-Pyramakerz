@@ -70,8 +70,7 @@ export class EmployeeViewComponent {
     public GradeServ: GradeService,
     public LocationServ: LocationService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -150,12 +149,11 @@ export class EmployeeViewComponent {
   }
 
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToEmployee() {
     this.router.navigateByUrl("Employee/Employee")

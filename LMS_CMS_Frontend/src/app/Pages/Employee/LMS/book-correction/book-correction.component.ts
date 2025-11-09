@@ -61,8 +61,7 @@ export class BookCorrectionComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public BookCorrectionServ: EvaluationBookCorrectionService,
-    private realTimeService: RealTimeNotificationServiceService
+    public BookCorrectionServ: EvaluationBookCorrectionService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -91,11 +90,10 @@ export class BookCorrectionComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

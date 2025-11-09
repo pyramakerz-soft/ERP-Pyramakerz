@@ -105,8 +105,7 @@ export class EmployeeAddEditComponent {
     public LocationServ: LocationService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -186,8 +185,7 @@ export class EmployeeAddEditComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

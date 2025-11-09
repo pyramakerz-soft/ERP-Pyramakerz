@@ -58,10 +58,8 @@ export class SalaryConfigurationComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public SalaryConfigurationServ: SalaryConfigurationService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
-
+    public SalaryConfigurationServ: SalaryConfigurationService, 
+    private translate: TranslateService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,8 +87,7 @@ export class SalaryConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

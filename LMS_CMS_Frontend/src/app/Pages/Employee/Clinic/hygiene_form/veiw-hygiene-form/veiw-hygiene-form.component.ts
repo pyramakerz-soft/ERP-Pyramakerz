@@ -43,8 +43,7 @@ export class ViewHygieneFormComponent implements OnInit {
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private hygieneTypesService: HygieneTypesService,
-    private realTimeService: RealTimeNotificationServiceService
+    private hygieneTypesService: HygieneTypesService, 
 
   ) {}
 
@@ -61,11 +60,10 @@ export class ViewHygieneFormComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
 

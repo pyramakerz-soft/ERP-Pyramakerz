@@ -86,8 +86,7 @@ constructor(
   private studentService: StudentService,
   private apiService: ApiService,
   private languageService: LanguageService,   
-  public account: AccountService,   
-  private realTimeService: RealTimeNotificationServiceService,
+  public account: AccountService,    
   private route: ActivatedRoute,
   private reportsService: ReportsService 
 ) {}
@@ -99,7 +98,6 @@ constructor(
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
-    console.log(this.reportType)
     if(this.reportType == 'parent'){
       this.getStudentsByParentId()
     }
@@ -110,8 +108,7 @@ constructor(
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

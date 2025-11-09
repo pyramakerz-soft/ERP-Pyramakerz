@@ -44,8 +44,7 @@ export class DailyPerformanceViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public DailyPerformanceServ: DailyPerformanceService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -62,11 +61,10 @@ export class DailyPerformanceViewComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToBack() {

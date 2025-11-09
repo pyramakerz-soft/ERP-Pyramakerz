@@ -93,8 +93,7 @@ export class StudentCertificateComponent {
     private ClassroomServ: ClassroomService,
     public CertificateStudentServ: CertificateStudentService,
     public CertificateTypeServ: CertificateTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -120,8 +119,7 @@ export class StudentCertificateComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

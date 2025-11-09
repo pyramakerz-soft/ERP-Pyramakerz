@@ -34,7 +34,6 @@ Sheets: string[] = [
     private route: ActivatedRoute,
     private languageService: LanguageService,
     private router: Router,
-    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -49,11 +48,10 @@ Sheets: string[] = [
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   formatSubjectName(subjectId: string): string {
     return subjectId.split('-')

@@ -46,8 +46,7 @@ export class OrderItemsComponent {
   subscription!: Subscription;
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
-    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,){}
+    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -75,11 +74,10 @@ export class OrderItemsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   goToCart() {

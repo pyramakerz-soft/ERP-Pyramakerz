@@ -68,8 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public account: AccountService,
     public employeeService: EmployeeService,
     public ApiServ: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private dashboardService: DashboardService
   ) {}
 
@@ -94,8 +93,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

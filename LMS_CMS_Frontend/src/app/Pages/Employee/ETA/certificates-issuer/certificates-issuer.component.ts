@@ -62,8 +62,7 @@ export class CertificatesIssuerComponent {
     public certificatesIssuerService: CertificatesIssuerService,
     public router: Router,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService
+    private translate: TranslateService, 
   ) { }
 
   ngOnInit() {
@@ -94,8 +93,7 @@ export class CertificatesIssuerComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

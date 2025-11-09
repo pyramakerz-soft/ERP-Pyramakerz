@@ -67,7 +67,7 @@ export class BusStatusComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -104,12 +104,13 @@ export class BusStatusComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-            ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   Create() {
     this.mode = 'add';
     this.openModal();
