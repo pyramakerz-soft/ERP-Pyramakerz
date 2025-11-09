@@ -55,8 +55,7 @@ export class MaintenanceItemsComponent {
     private apiService: ApiService,
     public account: AccountService, 
     private mainServ: MaintenanceItemService,
-    private deleteEditPermissionServ: DeleteEditPermissionService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private deleteEditPermissionServ: DeleteEditPermissionService, 
     private activeRoute: ActivatedRoute,
     private menuService: MenuService,
     private translate: TranslateService
@@ -98,8 +97,7 @@ export class MaintenanceItemsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

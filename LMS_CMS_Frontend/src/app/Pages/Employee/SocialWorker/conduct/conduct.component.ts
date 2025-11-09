@@ -69,8 +69,7 @@ export class ConductComponent {
     public ConductLevelServ: ConductLevelService,
     public SectionServ: SectionService,
     public ConductServ: ConductService,
-    public ConductTypeServ: ConductTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public ConductTypeServ: ConductTypeService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,11 +96,10 @@ export class ConductComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {

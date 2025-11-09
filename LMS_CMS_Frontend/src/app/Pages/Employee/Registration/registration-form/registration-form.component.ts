@@ -118,8 +118,7 @@ export class RegistrationFormComponent {
     public gradeServce: GradeService,
     public sectionServce: SectionService,
     private languageService: LanguageService,
-    public GenderServ: GenderService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public GenderServ: GenderService, 
   ) { }
 
   ngOnInit() {
@@ -161,8 +160,7 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
       if (this.subscription) {
       this.subscription.unsubscribe();
     }

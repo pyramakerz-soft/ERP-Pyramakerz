@@ -111,8 +111,7 @@ export class FeesActivationComponent {
     public studentService: StudentService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
     public FeesDiscountTypeServ: TuitionDiscountTypeService,
-    public AcademicYearServ: AcadimicYearService,
-        private realTimeService: RealTimeNotificationServiceService
+    public AcademicYearServ: AcadimicYearService, 
   ) { }
 
   ngOnInit() {
@@ -142,9 +141,8 @@ export class FeesActivationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

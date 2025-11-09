@@ -74,8 +74,7 @@ export class EvaluationComponent {
     public evaluationBookCorrectionService: EvaluationBookCorrectionService,
     public studentService: StudentService,
     public evaluationEmployeeService: EvaluationEmployeeService,
-    private languageService: LanguageService ,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService , 
   ) {}
 
   ngOnInit() {
@@ -94,9 +93,8 @@ export class EvaluationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-      if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }

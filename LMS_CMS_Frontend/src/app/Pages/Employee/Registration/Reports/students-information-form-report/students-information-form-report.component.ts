@@ -68,8 +68,7 @@ export class StudentsInformationFormReportComponent {
     private studentServ: StudentService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
-    public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public reportsService: ReportsService, 
   ) {}
 
   ngOnInit() {
@@ -87,11 +86,10 @@ export class StudentsInformationFormReportComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {

@@ -50,7 +50,7 @@ export class RegistrationConfirmationDetailsComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public stateService: RegistrationFormStateService,
     public registrationFormSubmissionService: RegistrationFormSubmissionService, public registrationFormParentService: RegisterationFormParentService
-    , public registrationFormService: RegistrationFormService, private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,){}
+    , public registrationFormService: RegistrationFormService, private languageService: LanguageService ){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,11 +83,10 @@ export class RegistrationConfirmationDetailsComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   IsAllowEdit(InsertedByID: number) {

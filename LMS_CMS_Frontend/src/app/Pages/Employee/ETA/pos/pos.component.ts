@@ -62,8 +62,7 @@ export class POSComponent {
     public activeRoute: ActivatedRoute, 
     public posService: POSService, 
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService
   ) {}
 
@@ -95,11 +94,10 @@ export class POSComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
-  ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private getRequiredErrorMessage(fieldName: string): string {

@@ -65,8 +65,7 @@ export class AdmissionTestParentComponent {
     private router: Router,
     public testServ: TestService,
     public RegisterationFormParentServ :RegisterationFormParentService,
-    public registrationserv: RegisterationFormTestService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public registrationserv: RegisterationFormTestService, 
   ) { }
 
   ngOnInit() {
@@ -94,11 +93,10 @@ export class AdmissionTestParentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllStudents() {

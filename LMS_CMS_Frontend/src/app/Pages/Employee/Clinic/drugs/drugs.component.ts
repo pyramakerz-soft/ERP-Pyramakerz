@@ -42,8 +42,7 @@ export class DrugsComponent implements OnInit {
   constructor(
     private drugService: DrugService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService
   ) {}
 
@@ -59,8 +58,7 @@ export class DrugsComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

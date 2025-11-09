@@ -95,8 +95,7 @@ export class ParentLessonComponent {
     public SemesterServ: SemesterService,
     public SemesterWorkingWeekServ: SemesterWorkingWeekService,
     public acadimicYearService: AcadimicYearService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,  
+    private languageService: LanguageService,   
     private reportsService: ReportsService 
     
   ) { }
@@ -131,8 +130,7 @@ export class ParentLessonComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -61,8 +61,7 @@ export class ProcedureTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public ProcedureTypeServ: ProcedureTypeService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,8 +89,7 @@ export class ProcedureTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

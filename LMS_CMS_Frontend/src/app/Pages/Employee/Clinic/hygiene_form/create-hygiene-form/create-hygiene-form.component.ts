@@ -55,8 +55,7 @@ export class CreateHygieneFormComponent implements OnInit {
     private gradeService: GradeService,
     private classroomService: ClassroomService,
     private studentService: StudentService,
-    private languageService: LanguageService, 
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,  
     private translate: TranslateService,
     private hygieneFormService: HygieneFormService
 
@@ -91,11 +90,10 @@ export class CreateHygieneFormComponent implements OnInit {
     }
   }
 
-  ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   private getRequiredErrorMessage(fieldName: string): string {

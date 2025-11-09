@@ -132,11 +132,15 @@ namespace LMS_CMS
 
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                 (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
                             {
                                 context.Token = accessToken;
-                            }
+                            } 
+                            //if (!string.IsNullOrEmpty(accessToken) &&
+                            //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+                            //{
+                            //    context.Token = accessToken;
+                            //}
                             return Task.CompletedTask;
                         }
                     };
@@ -238,8 +242,9 @@ namespace LMS_CMS
             //builder.Services.AddSignalR();
             builder.Services.AddSignalR(hubOptions =>
             {
-                hubOptions.EnableDetailedErrors = true;
-                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+                hubOptions.EnableDetailedErrors = true; 
+                hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // send ping every 15s
+                hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // allow up to 60s silence
             });
 
             var app = builder.Build();
@@ -274,10 +279,10 @@ namespace LMS_CMS
 
             app.MapControllers();
             // 2) SignalR
-            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
-            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
-            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
-
+            //app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+            //app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            //app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+            app.MapHub<AppHub>("/appHub").RequireAuthorization();
 
             app.MapFallbackToFile("index.html");
 

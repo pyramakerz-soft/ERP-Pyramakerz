@@ -49,7 +49,7 @@ export class SignUpComponent {
   IsConfimPassEmpty = false
   // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
-  constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
+  constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader();
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -58,8 +58,7 @@ export class SignUpComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

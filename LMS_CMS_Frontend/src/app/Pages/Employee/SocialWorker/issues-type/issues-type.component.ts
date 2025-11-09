@@ -61,8 +61,7 @@ export class IssuesTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     private translate: TranslateService,
-    public IssueTypeServ: IssueTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public IssueTypeServ: IssueTypeService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,8 +88,7 @@ export class IssuesTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

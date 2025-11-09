@@ -23,7 +23,7 @@ export class RealTimeChatServiceService {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
   
     this.chatMessageHubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.ApiServ.BaseUrlSignalR}chatMessageHub`, {
+      .withUrl(`${this.ApiServ.BaseUrlSignalR}appHub`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => localStorage.getItem("current_token") || '',
@@ -35,6 +35,20 @@ export class RealTimeChatServiceService {
           Math.min(retryContext.previousRetryCount * 1000, 10000)
       })
       .build();
+  
+    // this.chatMessageHubConnection = new signalR.HubConnectionBuilder()
+    //   .withUrl(`${this.ApiServ.BaseUrlSignalR}chatMessageHub`, {
+    //     skipNegotiation: true,
+    //     transport: signalR.HttpTransportType.WebSockets,
+    //     accessTokenFactory: () => localStorage.getItem("current_token") || '',
+    //     headers: { "Domain-Name": this.DomainName }
+    //   })
+    //   .configureLogging(signalR.LogLevel.Debug)
+    //   .withAutomaticReconnect({
+    //     nextRetryDelayInMilliseconds: retryContext => 
+    //       Math.min(retryContext.previousRetryCount * 1000, 10000)
+    //   })
+    //   .build();
 
     // Connection state handlers
     this.chatMessageHubConnection.onreconnecting(() => {
@@ -60,9 +74,13 @@ export class RealTimeChatServiceService {
         setTimeout(() => this.startChatMessageConnection(), 5000);
       });
 
-    this.chatMessageHubConnection.on('ReceiveMessage', (data: any) => { 
+    this.chatMessageHubConnection.on('ReceiveChatMessage', (data: any) => { 
       this.chatMessageService.notifyMessageOpened(); 
     }); 
+
+    // this.chatMessageHubConnection.on('ReceiveMessage', (data: any) => { 
+    //   this.chatMessageService.notifyMessageOpened(); 
+    // }); 
   } 
 
   private joinChatMessageGroup() { 

@@ -32,7 +32,7 @@ export class SubjectResourcesComponent {
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService,private realTimeService: RealTimeNotificationServiceService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public SubjectResourceServ: SubjectResourceService) { }
 
   ngOnInit() {
@@ -50,11 +50,10 @@ export class SubjectResourcesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   GetSubjectResourceData() {
     this.SubjectResourceServ.GetBySubjectId(this.SubjectID, this.DomainName).subscribe((d) => {

@@ -30,7 +30,7 @@ export class SchoolTypeComponent {
 
   isSaved = false
 
-  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService,private realTimeService: RealTimeNotificationServiceService,){}
+  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService){}
 
   ngOnInit(){
     this.getSchoolTypeData()
@@ -40,11 +40,10 @@ export class SchoolTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

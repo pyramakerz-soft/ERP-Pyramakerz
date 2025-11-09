@@ -82,8 +82,7 @@ export class ConductAddEditComponent {
     private StudentServ: StudentService,
     private ConductTypeServ: ConductTypeService,
     private ProcedureTypeServ: ProcedureTypeService,
-    private ConductServ: ConductService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private ConductServ: ConductService, 
   ) { }
 
   ngOnInit() {
@@ -141,9 +140,8 @@ export class ConductAddEditComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
+  ngOnDestroy(): void { 
+      if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }

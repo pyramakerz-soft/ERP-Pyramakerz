@@ -34,7 +34,7 @@ export class SubjectWeeksComponent {
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService,private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public SemesterWorkingWeekServ: SemesterWorkingWeekService) { }
 
   ngOnInit() {
@@ -53,8 +53,7 @@ export class SubjectWeeksComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void {  
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

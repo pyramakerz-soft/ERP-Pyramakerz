@@ -79,8 +79,7 @@ export class SavesComponent {
     public ApiServ: ApiService,
     public SaveServ: SaveService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private employeeService: EmployeeService,
     private safeEmployeeService: SafeEmployeeService
   ) { }
@@ -110,11 +109,10 @@ export class SavesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+    this.subscription.unsubscribe();
+  }
   } 
 
 

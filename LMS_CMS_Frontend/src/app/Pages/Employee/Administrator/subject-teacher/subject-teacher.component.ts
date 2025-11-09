@@ -55,9 +55,8 @@ export class SubjectTeacherComponent {
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService,
-        private translate: TranslateService
-
+    private languageService: LanguageService,
+    private translate: TranslateService 
   ) { }
 
   ngOnInit() {
@@ -79,12 +78,11 @@ export class SubjectTeacherComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
 private showErrorAlert(errorMessage: string) {
   const translatedTitle = this.translate.instant('Error');

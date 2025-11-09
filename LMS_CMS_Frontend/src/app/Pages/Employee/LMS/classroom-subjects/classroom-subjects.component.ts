@@ -58,8 +58,7 @@ export class ClassroomSubjectsComponent {
     private classroomSubjectService: ClassroomSubjectService,
     private employeeService: EmployeeService,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -90,11 +89,10 @@ export class ClassroomSubjectsComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

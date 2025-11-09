@@ -75,8 +75,7 @@ export class RegistraionTestComponent {
     public registrationserv: RegisterationFormTestService,
     public testService: TestService,
     public registerationFormParentService: RegisterationFormParentService,
-    public questionServ: QuestionService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public questionServ: QuestionService, 
   ) {}
 
   ngOnInit() {
@@ -112,11 +111,10 @@ export class RegistraionTestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {

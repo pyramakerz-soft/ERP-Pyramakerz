@@ -36,8 +36,7 @@ export class OrderComponent {
   searchTerm: string = '';
   students: Student[] = [];
 
-  constructor(public account: AccountService,private languageService: LanguageService,public StudentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
+  constructor(public account: AccountService,private languageService: LanguageService,public StudentService: StudentService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -64,11 +63,10 @@ export class OrderComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){

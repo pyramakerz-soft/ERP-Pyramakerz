@@ -75,8 +75,7 @@ export class BonusComponent {
     public ApiServ: ApiService,
     public BonusServ: BonusService,
     public BounsTypeServ: BounsTypeService,
-    public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    public EmployeeServ: EmployeeService, 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -105,8 +104,7 @@ export class BonusComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -252,8 +252,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                  query => query.Include(emp => emp.AcademicYear.School)
                  );
 
-            StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
-            StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            if (studentGrade != null)
+            {
+                StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            }
 
             return Ok(StudentDTO);
         }
@@ -292,6 +295,54 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                 query => query.IsDeleted != true && query.ClassID == Id && query.Student.IsDeleted != true && query.Classroom.AcademicYear.IsActive == true,
+                query => query.Include(stu => stu.Student)
+            );
+
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
+            {
+                return NotFound("No students found.");
+            }
+
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(studentDTOs);
+        }
+
+        [HttpGet("GetByClassNotInActiveYear/{Id}")]
+        public async Task<IActionResult> GetByClassNotInActiveYear(long Id)
+        {
+            if (Id == 0)
+            {
+                return BadRequest("ID can't e null");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(d => d.ID == Id && d.IsDeleted != true);
+            if (cls == null)
+            {
+                return NotFound("No Class with this Id");
+            }
+
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //    query => query.IsDeleted != true && query.ClassID == Id,
+            //    query => query.Include(stu => stu.Student)
+            //);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                query => query.IsDeleted != true && query.ClassID == Id && query.Student.IsDeleted != true,
                 query => query.Include(stu => stu.Student)
             );
 

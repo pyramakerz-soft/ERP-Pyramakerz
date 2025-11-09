@@ -74,8 +74,7 @@ export class ShopItemsAddEditComponent {
     public inventoryCategoryService: InventoryCategoryService,
     public genderService: GenderService,
     public shopItemService: ShopItemService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -100,11 +99,10 @@ export class ShopItemsAddEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl'; 
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+ ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetShopItemData() {

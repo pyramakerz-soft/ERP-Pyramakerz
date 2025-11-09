@@ -68,10 +68,7 @@ export class AccountingEmployeeComponent {
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
     public accountServ:AccountingTreeChartService ,
-    private languageService: LanguageService ,
-    private realTimeService: RealTimeNotificationServiceService
-
-
+    private languageService: LanguageService ,  
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,9 +95,8 @@ export class AccountingEmployeeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

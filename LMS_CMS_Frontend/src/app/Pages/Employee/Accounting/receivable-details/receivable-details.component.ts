@@ -99,8 +99,7 @@ export class ReceivableDetailsComponent {
     public reportsService: ReportsService,
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
-    private BankEmployeeServ: BankEmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    private BankEmployeeServ: BankEmployeeService, 
   ) {}
 
   ngOnInit() {
@@ -150,8 +149,7 @@ export class ReceivableDetailsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

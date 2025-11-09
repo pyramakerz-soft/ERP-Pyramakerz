@@ -32,9 +32,8 @@ Test() {
   subscription!: Subscription;
 
   constructor(
-     private languageService: LanguageService,
-    private router: Router,
-    private realTimeService: RealTimeNotificationServiceService,) {}
+    private languageService: LanguageService,
+    private router: Router) {}
 
   ngOnInit() {
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -42,18 +41,17 @@ Test() {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
-navigateToSubject(subjectName: string) {
-  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Student/Subject-Details-UI', subjectId]);
-}
-  navigateToLessonRes(subjectName: string) {
-  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Student/Lesson-Resources-UI', subjectId]);
-}
+  navigateToSubject(subjectName: string) {
+    const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+    this.router.navigate(['/Student/Subject-Details-UI', subjectId]);
+  }
+    navigateToLessonRes(subjectName: string) {
+    const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+    this.router.navigate(['/Student/Lesson-Resources-UI', subjectId]);
+  }
 }

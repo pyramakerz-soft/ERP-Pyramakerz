@@ -60,8 +60,7 @@ export class WeightTypeComponent {
     public weightTypeService: WeightTypeService,
     public ApiServ: ApiService ,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -89,11 +88,10 @@ export class WeightTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

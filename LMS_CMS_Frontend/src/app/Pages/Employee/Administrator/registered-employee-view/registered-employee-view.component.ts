@@ -41,8 +41,7 @@ export class RegisteredEmployeeViewComponent {
     public registeredEmployeeService: RegisteredEmployeeService,
     public employeeTypeService: EmployeeTypeService,
     public roleService: RoleService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() { 
@@ -62,12 +61,11 @@ export class RegisteredEmployeeViewComponent {
   }
 
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetRegisteredEmployee(){
     this.employee = new RegisteredEmployee()

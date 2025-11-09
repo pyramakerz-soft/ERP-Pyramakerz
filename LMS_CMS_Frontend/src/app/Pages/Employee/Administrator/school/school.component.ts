@@ -56,8 +56,7 @@ export class SchoolComponent {
     public schoolService: SchoolService,
     public DaysServ: DaysService,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -87,12 +86,11 @@ export class SchoolComponent {
   }
 
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   getSchoolData() {
     this.schoolData = []

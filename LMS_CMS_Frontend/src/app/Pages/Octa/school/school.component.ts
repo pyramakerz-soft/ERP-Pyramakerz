@@ -36,7 +36,7 @@ export class SchoolComponent {
   subscription!: Subscription;
   validationErrors: { [key in keyof School]?: string } = {};
 
-  constructor(public DomainServ: DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService , private translate: TranslateService){}
+  constructor(public DomainServ: DomainService,private languageService: LanguageService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService , private translate: TranslateService){}
 
   ngOnInit(){
     this.getAllDomains();
@@ -47,11 +47,10 @@ export class SchoolComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllDomains() {

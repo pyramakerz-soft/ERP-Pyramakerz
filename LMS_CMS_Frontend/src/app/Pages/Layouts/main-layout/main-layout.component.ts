@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { RealTimeRequestServiceService } from '../../../Services/shared/real-time-request-service.service';
 import { RealTimeChatServiceService } from '../../../Services/shared/real-time-chat-service.service';
+import { RealTimeServiceService } from '../../../Services/shared/real-time-service.service';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
@@ -33,8 +34,10 @@ export class MainLayoutComponent {
 
   isLanguageInitialized = false
   constructor(public accountService: AccountService, private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService,
-    private communicationService: NewTokenService, private translate: TranslateService, private realTimeService: RealTimeNotificationServiceService,
-    private realTimeRequestService: RealTimeRequestServiceService, private realTimeChatServiceService: RealTimeChatServiceService) { }
+    private communicationService: NewTokenService, private translate: TranslateService, public realTimeService:RealTimeServiceService) { }
+  // constructor(public accountService: AccountService, private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService,
+  //   private communicationService: NewTokenService, private translate: TranslateService, private realTimeService: RealTimeNotificationServiceService,
+  //   private realTimeRequestService: RealTimeRequestServiceService, private realTimeChatServiceService: RealTimeChatServiceService) { }
 
   ngOnInit() {
     const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
@@ -57,16 +60,16 @@ export class MainLayoutComponent {
     );
 
     this.realTimeService.startConnection();
-    this.realTimeRequestService.startRequestConnection();
-    this.realTimeChatServiceService.startChatMessageConnection();
+    // this.realTimeRequestService.startRequestConnection();
+    // this.realTimeChatServiceService.startChatMessageConnection();
 
     this.GetInfo();
   }
 
   ngOnDestroy(): void {
     this.realTimeService.stopConnection();
-    this.realTimeRequestService.stopConnection();
-    this.realTimeChatServiceService.stopConnection();
+    // this.realTimeRequestService.stopConnection();
+    // this.realTimeChatServiceService.stopConnection();
 
     if (this.subscriptions) {
       this.subscriptions.unsubscribe();

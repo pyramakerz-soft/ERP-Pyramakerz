@@ -69,8 +69,7 @@ export class LessonActivityComponent {
     public lessonService: LessonService,
     private sanitizer: DomSanitizer,
     public lessonActivityTypeService: LessonActivityTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -105,8 +104,7 @@ export class LessonActivityComponent {
 
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

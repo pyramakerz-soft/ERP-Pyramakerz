@@ -64,8 +64,7 @@ export class DepartmentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public DepartmentServ: DepartmentService,
-     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+     private languageService: LanguageService, 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,12 +91,11 @@ export class DepartmentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.TableData = [];

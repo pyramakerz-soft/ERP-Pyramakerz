@@ -55,8 +55,7 @@ export class ReportItemCardComponent implements OnInit {
     private storesService: StoresService,
     private shopItemService: ShopItemService,
     private route: ActivatedRoute,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -69,11 +68,10 @@ export class ReportItemCardComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   loadStores() {

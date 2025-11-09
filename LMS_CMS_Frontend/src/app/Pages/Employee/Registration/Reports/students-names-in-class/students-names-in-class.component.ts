@@ -69,8 +69,7 @@ export class StudentsNamesInClassComponent {
     public classroomService: ClassroomService,
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
-    public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public reportsService: ReportsService, 
   ) { }
 
   ngOnInit() {
@@ -87,11 +86,10 @@ export class StudentsNamesInClassComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchool() {

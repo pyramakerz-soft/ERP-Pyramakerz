@@ -65,8 +65,7 @@ export class LocationComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     private translate: TranslateService,
-    public LocationServ: LocationService,
-    private realTimeService: RealTimeNotificationServiceService
+    public LocationServ: LocationService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,8 +94,7 @@ export class LocationComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

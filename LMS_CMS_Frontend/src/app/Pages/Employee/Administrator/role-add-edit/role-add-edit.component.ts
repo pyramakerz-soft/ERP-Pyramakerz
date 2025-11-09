@@ -67,8 +67,7 @@ export class RoleAddEditComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public RoleServ: RoleService,
     private router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService
   ) { }
 
@@ -105,8 +104,7 @@ export class RoleAddEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

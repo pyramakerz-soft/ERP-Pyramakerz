@@ -69,8 +69,7 @@ export class CertificateTypeComponent {
     public ApiServ: ApiService,
     public CertificateTypeServ: CertificateTypeService,
     private sanitizer: DomSanitizer,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService,
   ) { }
   ngOnInit() {
@@ -99,8 +98,7 @@ export class CertificateTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

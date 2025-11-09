@@ -57,8 +57,7 @@ export class EmployeeJobReportComponent  implements OnInit {
     private jobCategoriesService: JobCategoriesService,
     private jobService: JobService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private reportsService: ReportsService
   ) {}
 
@@ -71,8 +70,7 @@ export class EmployeeJobReportComponent  implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

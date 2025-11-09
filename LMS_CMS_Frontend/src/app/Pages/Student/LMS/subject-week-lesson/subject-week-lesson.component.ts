@@ -42,7 +42,7 @@ export class SubjectWeekLessonComponent {
   toggledIndexesActivity: Set<number> = new Set();
   toggledIndexesResource: Set<number> = new Set();
 
-  constructor(public account: AccountService,private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonActivityServ: LessonActivityService, public LessonResourceServ: LessonResourceService) { }
 
   ngOnInit() {
@@ -60,11 +60,10 @@ export class SubjectWeekLessonComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   GetActivityData() {
     this.mode = "Activity";

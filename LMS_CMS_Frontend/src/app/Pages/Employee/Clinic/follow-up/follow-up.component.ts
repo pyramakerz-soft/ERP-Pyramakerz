@@ -114,7 +114,6 @@ export class FollowUpComponent implements OnInit {
     private doseService: DoseService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
     private translate: TranslateService
   ) {}
 
@@ -129,8 +128,7 @@ export class FollowUpComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

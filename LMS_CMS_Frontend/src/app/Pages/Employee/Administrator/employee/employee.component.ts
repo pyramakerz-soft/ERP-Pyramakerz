@@ -59,8 +59,7 @@ export class EmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public EmpServ: EmployeeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -91,8 +90,7 @@ export class EmployeeComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

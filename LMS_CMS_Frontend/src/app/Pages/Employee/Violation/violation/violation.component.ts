@@ -80,8 +80,7 @@ export class ViolationComponent {
     public violationServ: ViolationService,
     public violationTypeServ: ViolationTypeService,
     public EmployeeServ: EmployeeService,
-    public EmployeeTypeServ: EmployeeTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public EmployeeTypeServ: EmployeeTypeService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -108,8 +107,7 @@ export class ViolationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

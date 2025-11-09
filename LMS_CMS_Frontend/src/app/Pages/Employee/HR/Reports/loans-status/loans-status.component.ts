@@ -80,8 +80,7 @@ export class LoansStatusComponent {
     public LoansServ: LoansService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private cdr: ChangeDetectorRef, 
   ) { }
 
   ngOnInit() {
@@ -99,8 +98,7 @@ export class LoansStatusComponent {
     this.getEmployee()
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

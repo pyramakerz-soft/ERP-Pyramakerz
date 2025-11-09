@@ -74,8 +74,7 @@ export class StudentsComponent {
     public acadimicYearService: AcadimicYearService, 
     public floorService: FloorService, 
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
     ) { }
 
   ngOnInit() {
@@ -102,18 +101,14 @@ export class StudentsComponent {
        this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
-
-
+    this.isRtl = document.documentElement.dir === 'rtl'; 
   }
-
-
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
 
   IsAllowDelete(InsertedByID: number) {

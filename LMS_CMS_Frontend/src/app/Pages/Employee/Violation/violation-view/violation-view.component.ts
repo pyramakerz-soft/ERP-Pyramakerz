@@ -37,8 +37,7 @@ export class ViolationViewComponent {
 
 
   constructor(public account: AccountService,private languageService: LanguageService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute,
-    public router: Router, private menuService: MenuService, public ViolationServ: ViolationService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    public router: Router, private menuService: MenuService, public ViolationServ: ViolationService) { }
 
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader();
@@ -56,11 +55,10 @@ export class ViolationViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToViolation() {

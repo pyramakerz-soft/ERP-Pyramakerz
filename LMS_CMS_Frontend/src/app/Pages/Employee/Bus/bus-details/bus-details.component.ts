@@ -66,10 +66,9 @@ export class BusDetailsComponent {
   isLoading = false;
 
   constructor(public busService:BusService,
-      private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
+    private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
-    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService
-  , private realTimeService: RealTimeNotificationServiceService){}
+    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -110,9 +109,8 @@ export class BusDetailsComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-      if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

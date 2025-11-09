@@ -83,8 +83,7 @@ export class StudentIssueReportComponent  implements OnInit {
     private apiService: ApiService,
     private languageService: LanguageService,
     public account: AccountService,   
-    private route: ActivatedRoute,
-    private realTimeService: RealTimeNotificationServiceService,
+    private route: ActivatedRoute, 
     private reportsService: ReportsService
   ) {}
 
@@ -105,8 +104,7 @@ export class StudentIssueReportComponent  implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

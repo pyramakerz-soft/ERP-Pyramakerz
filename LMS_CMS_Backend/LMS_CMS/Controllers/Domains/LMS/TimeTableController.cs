@@ -763,6 +763,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 query => query.Include(stu => stu.Classroom.AcademicYear.School)
             );
 
+            if (studentClassrooms == null)
+            {
+                return NotFound();
+            }
+
             School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == studentClassrooms.Classroom.AcademicYear.SchoolID && s.IsDeleted != true);
             if (school == null)
             {

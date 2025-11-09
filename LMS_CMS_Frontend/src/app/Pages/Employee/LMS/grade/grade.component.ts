@@ -52,7 +52,7 @@ export class GradeComponent {
 
   constructor(public account: AccountService,
     private languageService: LanguageService, public sectionService: SectionService, public gradeService: GradeService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, private translate: TranslateService,private realTimeService: RealTimeNotificationServiceService,) { }
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, private translate: TranslateService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,8 +87,7 @@ export class GradeComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

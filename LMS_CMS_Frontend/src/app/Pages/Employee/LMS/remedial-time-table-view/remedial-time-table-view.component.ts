@@ -91,8 +91,7 @@ export class RemedialTimeTableViewComponent {
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
     public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -109,8 +108,7 @@ export class RemedialTimeTableViewComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

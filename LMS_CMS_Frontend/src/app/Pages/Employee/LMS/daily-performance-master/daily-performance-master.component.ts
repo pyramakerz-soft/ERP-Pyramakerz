@@ -84,8 +84,7 @@ export class DailyPerformanceMasterComponent {
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
     public DailyPerformanceServ: DailyPerformanceService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -113,11 +112,10 @@ export class DailyPerformanceMasterComponent {
 
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

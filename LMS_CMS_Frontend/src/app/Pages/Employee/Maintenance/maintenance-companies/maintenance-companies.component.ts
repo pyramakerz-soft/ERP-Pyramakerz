@@ -56,8 +56,7 @@ constructor(
   private apiService: ApiService,
   public account: AccountService, 
   private mainServ: MaintenanceCompaniesService,
-  private deleteEditPermissionServ: DeleteEditPermissionService,
-  private realTimeService: RealTimeNotificationServiceService,
+  private deleteEditPermissionServ: DeleteEditPermissionService, 
   private activeRoute: ActivatedRoute,
   private menuService: MenuService,
   private translate: TranslateService
@@ -101,9 +100,8 @@ constructor(
 
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }

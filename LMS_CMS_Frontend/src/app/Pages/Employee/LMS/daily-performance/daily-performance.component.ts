@@ -108,8 +108,7 @@ export class DailyPerformanceComponent {
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
     public StudentPerformanceServ: DailyPerformanceService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -137,8 +136,7 @@ export class DailyPerformanceComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

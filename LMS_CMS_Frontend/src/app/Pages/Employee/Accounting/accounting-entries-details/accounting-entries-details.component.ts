@@ -95,8 +95,7 @@ export class AccountingEntriesDetailsComponent {
     public linkFileService: LinkFileService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
     public accountingTreeChartService: AccountingTreeChartService,
-    public reportsService: ReportsService, private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    public reportsService: ReportsService, private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -145,8 +144,7 @@ export class AccountingEntriesDetailsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

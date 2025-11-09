@@ -60,8 +60,7 @@ export class RegistrationFormFieldComponent {
     private router: Router,
     public CategoryServ: RegistrationCategoryService,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService, 
   ) { }
 
   ngOnInit() {
@@ -92,11 +91,10 @@ export class RegistrationFormFieldComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {

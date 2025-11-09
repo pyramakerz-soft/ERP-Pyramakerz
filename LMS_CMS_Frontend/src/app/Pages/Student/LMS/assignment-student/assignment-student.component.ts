@@ -70,8 +70,7 @@ export class AssignmentStudentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    public assignmentServ: AssignmentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public assignmentServ: AssignmentService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,8 +93,7 @@ export class AssignmentStudentComponent {
     })
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

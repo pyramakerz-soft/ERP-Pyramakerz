@@ -61,8 +61,7 @@ export class OfficialHolidaysComponent {
     private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public OfficialHolidaysServ: OfficialHolidaysService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public OfficialHolidaysServ: OfficialHolidaysService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,11 +88,10 @@ export class OfficialHolidaysComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
     private showErrorAlert(errorMessage: string) {

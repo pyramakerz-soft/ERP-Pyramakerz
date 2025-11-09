@@ -61,8 +61,7 @@ export class VacationTypesComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private translate: TranslateService,
     public ApiServ: ApiService,
-    public VacationTypesServ: VacationTypesService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public VacationTypesServ: VacationTypesService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,11 +89,10 @@ export class VacationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private showErrorAlert(errorMessage: string) {

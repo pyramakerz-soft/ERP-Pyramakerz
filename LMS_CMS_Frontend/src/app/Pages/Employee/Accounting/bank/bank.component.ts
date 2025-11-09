@@ -76,8 +76,7 @@ export class BankComponent {
     public ApiServ: ApiService,
     public BankServ: BankService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private employeeService: EmployeeService,
     private bankEmployeeService: BankEmployeeService
   ) { }
@@ -109,8 +108,7 @@ export class BankComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

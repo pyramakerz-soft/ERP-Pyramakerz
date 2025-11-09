@@ -57,8 +57,7 @@ export class SemesterComponent {
 
   constructor(public account: AccountService,
     private languageService: LanguageService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, public DaysServ: DaysService,private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, public DaysServ: DaysService,private translate: TranslateService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,8 +93,7 @@ export class SemesterComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

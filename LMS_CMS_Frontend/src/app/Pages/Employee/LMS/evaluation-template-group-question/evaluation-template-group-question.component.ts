@@ -65,8 +65,7 @@ export class EvaluationTemplateGroupQuestionComponent {
     public questionsServ: EvaluationTemplateGroupQuestionService,
     public GroupServ: EvaluationTemplateGroupService,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,8 +94,7 @@ export class EvaluationTemplateGroupQuestionComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

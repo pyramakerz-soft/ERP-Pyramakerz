@@ -92,8 +92,7 @@ export class LessonLiveComponent {
     public schoolService: SchoolService,
     public SubjectServ: SubjectService,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -121,11 +120,10 @@ export class LessonLiveComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
 

@@ -60,8 +60,7 @@ export class BuildingComponent {
     public schoolService: SchoolService,
     private translate: TranslateService,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -93,11 +92,10 @@ export class BuildingComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getBuildingData() {

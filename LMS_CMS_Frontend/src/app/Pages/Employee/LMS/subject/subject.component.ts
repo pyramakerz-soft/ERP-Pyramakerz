@@ -67,8 +67,7 @@ export class SubjectComponent {
   grades: Grade[] = []
   IsView: boolean = false;
 
-  constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,private translate: TranslateService,
+  constructor(public account: AccountService, private translate: TranslateService,
     private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
     public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog) { }
@@ -103,11 +102,10 @@ export class SubjectComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
   // getSubjectData() {

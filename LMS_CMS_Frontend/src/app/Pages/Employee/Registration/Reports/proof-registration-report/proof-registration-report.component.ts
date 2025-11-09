@@ -75,8 +75,7 @@ export class ProofRegistrationReportComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public reportsService: ReportsService, 
   ) { }
 
   ngOnInit() {
@@ -104,11 +103,10 @@ export class ProofRegistrationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {

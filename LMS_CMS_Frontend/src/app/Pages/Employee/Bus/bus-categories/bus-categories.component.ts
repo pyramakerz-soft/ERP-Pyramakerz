@@ -66,7 +66,7 @@ export class BusCategoriesComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
+    private languageService: LanguageService) { }
 
   ngOnInit() {
 
@@ -106,8 +106,7 @@ export class BusCategoriesComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

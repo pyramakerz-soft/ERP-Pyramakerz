@@ -75,8 +75,7 @@ export class AccountingStudentEditComponent {
     public accountServ: AccountingTreeChartService,
     public StudentServ: StudentService,
     public NationalityServ: NationalityService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -107,9 +106,8 @@ export class AccountingStudentEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

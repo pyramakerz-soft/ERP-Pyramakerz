@@ -77,8 +77,7 @@ export class DeductionComponent {
     public DeductionServ: DeductionService,
     public DeductionTypeServ: DeductionTypeService,
     private translate: TranslateService,
-    public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public EmployeeServ: EmployeeService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -105,8 +104,7 @@ export class DeductionComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

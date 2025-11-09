@@ -68,8 +68,7 @@ export class DebitsComponent {
     public ApiServ: ApiService,
     public DebitServ: DebitService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -99,8 +98,7 @@ export class DebitsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

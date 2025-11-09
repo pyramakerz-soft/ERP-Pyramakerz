@@ -86,8 +86,7 @@ export class NotificationComponent {
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
-    public studentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public studentService: StudentService, 
     private translate: TranslateService
 
   ) { }
@@ -117,11 +116,10 @@ export class NotificationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   private showErrorAlert(errorMessage: string) {

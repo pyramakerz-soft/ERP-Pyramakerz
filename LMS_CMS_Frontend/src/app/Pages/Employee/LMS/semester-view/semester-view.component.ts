@@ -49,8 +49,7 @@ export class SemesterViewComponent {
   validationErrors: { [key in keyof SemesterWorkingWeek]?: string } = {};
   isLoading = false; 
 
-  constructor(private languageService: LanguageService,public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, private translate: TranslateService,
+  constructor(private languageService: LanguageService,public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, private translate: TranslateService,
     public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
 
   ngOnInit(){
@@ -81,11 +80,10 @@ export class SemesterViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
   IsAllowDelete(InsertedByID: number) { 

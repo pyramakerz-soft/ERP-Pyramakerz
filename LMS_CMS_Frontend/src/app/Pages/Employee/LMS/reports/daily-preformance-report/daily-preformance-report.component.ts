@@ -101,8 +101,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     public schoolService: SchoolService,
     public gradeService: GradeService,
     public performanceTypeService: PerformanceTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private route: ActivatedRoute,
     public account: AccountService,
     private reportsService: ReportsService
@@ -137,8 +136,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void {  
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

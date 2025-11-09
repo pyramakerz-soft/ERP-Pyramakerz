@@ -127,8 +127,7 @@ export class StockingDetailsComponent {
     private cdr: ChangeDetectorRef,
     public printservice: ReportsService,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService
+    private translate: TranslateService, 
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -172,8 +171,7 @@ export class StockingDetailsComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

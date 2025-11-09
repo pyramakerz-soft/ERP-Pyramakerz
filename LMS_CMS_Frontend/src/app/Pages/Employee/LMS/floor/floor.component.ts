@@ -64,8 +64,7 @@ export class FloorComponent {
     public floorService: FloorService,
     public employeeService: EmployeeService,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -103,11 +102,10 @@ export class FloorComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 

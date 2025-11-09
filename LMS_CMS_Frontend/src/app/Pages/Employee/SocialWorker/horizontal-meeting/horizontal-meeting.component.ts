@@ -59,8 +59,7 @@ export class HorizontalMeetingComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public HorizontalMeetingServ: HorizontalMeetingService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public HorizontalMeetingServ: HorizontalMeetingService, 
     private languageService: LanguageService,
     private translate: TranslateService,
 
@@ -89,9 +88,8 @@ export class HorizontalMeetingComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

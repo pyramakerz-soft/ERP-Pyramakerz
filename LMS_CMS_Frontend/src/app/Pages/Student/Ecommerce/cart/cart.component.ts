@@ -47,8 +47,7 @@ export class CartComponent {
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
     private router: Router, private cartService: CartService, public StudentService: StudentService,
-    private orderService: OrderService, public cartShopItemService:CartShopItemService,
-    private realTimeService: RealTimeNotificationServiceService,){}
+    private orderService: OrderService, public cartShopItemService:CartShopItemService ){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -74,11 +73,10 @@ export class CartComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {  
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){

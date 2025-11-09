@@ -55,8 +55,7 @@ export class MaintenanceEmployeesComponent {
       private deleteEditPermissionServ: DeleteEditPermissionService,
       public account: AccountService,
       public EmpServ: EmployeeService,
-      private activeRoute: ActivatedRoute,
-      private realTimeService: RealTimeNotificationServiceService,
+      private activeRoute: ActivatedRoute, 
       private menuService: MenuService,  
       private translate: TranslateService
 ){}
@@ -88,8 +87,7 @@ export class MaintenanceEmployeesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) this.subscription.unsubscribe();
   }
 

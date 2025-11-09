@@ -72,8 +72,7 @@ export class SuppliersComponent {
     public SupplierServ: SupplierService,
     public accountServ: AccountingTreeChartService,
     public countryServ: CountryService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,8 +102,7 @@ export class SuppliersComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

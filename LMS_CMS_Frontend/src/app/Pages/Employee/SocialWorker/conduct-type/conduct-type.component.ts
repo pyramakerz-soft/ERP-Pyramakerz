@@ -77,8 +77,7 @@ export class ConductTypeComponent {
     public SchoolServ: SchoolService,
     public ConductLevelServ: ConductLevelService,
     public SectionServ: SectionService,
-    public ConductTypeServ: ConductTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public ConductTypeServ: ConductTypeService, 
     private translate: TranslateService,
   ) { }
   ngOnInit() {
@@ -107,11 +106,10 @@ export class ConductTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
