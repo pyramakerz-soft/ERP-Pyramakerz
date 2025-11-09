@@ -38,6 +38,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
            pages: new[] { "Inventory Categories" , "Stores" , "Shop Item", "Store Items Balance"
                , "Store Items Balance with Purchase" , "Store Items Balance with Sales"  ,"Store Items Balance with Average Cost" 
                ,"Store Limited Items" ,"All Stores Item Balance","All Stores Item Balance with Purchase","All Stores Item Balance with Sales","All Stores Item Balance with Average Cost"
+               ,"The Shop"
            }
         )]
         public async Task<IActionResult> GetAsync()

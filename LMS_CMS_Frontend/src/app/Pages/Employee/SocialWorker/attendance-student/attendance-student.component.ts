@@ -297,4 +297,11 @@ export class AttendanceStudentComponent {
     }
   }
 
+  IsLateChanged(event: Event, row: AttendanceStudent): void {
+    // const isChecked = (event.target as HTMLInputElement).checked;
+    if(!row.isLate){
+      row.lateTimeInMinutes=0
+    }
+  }
+
 }

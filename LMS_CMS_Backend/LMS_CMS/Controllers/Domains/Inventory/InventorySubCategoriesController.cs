@@ -60,7 +60,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("ByCategoryId/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "student", "parent" },
-           pages: new[] { "Inventory Sub Categories", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order", "Purchases", "Opening Balances", "Addition", "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment" , "Shop Item", "Stocking", "Inventory Transaction Report", "Sales Transaction Report" , "Purchase Transaction Report" , "Inventory Transaction Detailed Report" , "Purchase Transaction Detailed Report" , "Sales Transaction Detailed Report" }
+           pages: new[] { "Inventory Sub Categories", "Sales Returns", "Sales", "Purchase Returns", "Purchase Order"
+               , "Purchases", "Opening Balances", "Addition", "Damaged", "Transfer to Store", "Gifts"
+               , "Disbursement Adjustment", "Disbursement", "Addition Adjustment" , "Shop Item", "Stocking"
+               , "Inventory Transaction Report", "Sales Transaction Report" , "Purchase Transaction Report"
+               , "Inventory Transaction Detailed Report" , "Purchase Transaction Detailed Report" , "Sales Transaction Detailed Report","The Shop" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {

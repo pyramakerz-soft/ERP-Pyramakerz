@@ -38,7 +38,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" ,"parent" , "student"},
-            pages: new[] { "Add Medal To Student" }
+            pages: new[] { "Add Medal To Student", "Medal To Student Report" }
         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
         {

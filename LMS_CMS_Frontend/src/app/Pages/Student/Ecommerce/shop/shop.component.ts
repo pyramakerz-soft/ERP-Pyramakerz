@@ -227,13 +227,13 @@ export class ShopComponent {
   
   goToShopItem(id: number) {  
     if(this.User_Data_After_Login.type == "employee"){
-      this.router.navigateByUrl("Employee/ShopItem/" + id)
+      this.router.navigateByUrl("Employee/The Shop/" + id)
     } 
     else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/ShopItem/" + id)
+      this.router.navigateByUrl("Student/The Shop/" + id)
     }
     else{
-      this.router.navigateByUrl("Parent/ShopItem/" + id)
+      this.router.navigateByUrl("Parent/The Shop/" + id)
     }
   }
 

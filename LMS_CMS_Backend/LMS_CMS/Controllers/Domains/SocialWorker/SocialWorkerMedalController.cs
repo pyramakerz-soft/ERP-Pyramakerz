@@ -42,7 +42,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Medal Types" }
+         pages: new[] { "Medal Types", "Add Medal To Student" }
        )]
         public async Task<IActionResult> Get()
         {

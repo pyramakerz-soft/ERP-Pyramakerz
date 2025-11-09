@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Conduct Level" }
+        pages: new[] { "Conduct Level" , "Conduct Types" }
         )]
         public IActionResult Get()
         {
