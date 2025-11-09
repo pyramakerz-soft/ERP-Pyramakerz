@@ -84,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (monthlyAttendances == null || monthlyAttendances.Count == 0)
             {
-                return NotFound();
+                monthlyAttendances = new List<MonthlyAttendance>();
             }
 
             SalaryHistory AllSalaryHistory =await Unit_Of_Work.salaryHistory_Repository.FindByIncludesAsync(m => m.Month == month && m.Year == year && m.EmployeeId == EmpId && m.IsDeleted!= true,
@@ -92,7 +92,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (AllSalaryHistory == null )
             {
-                return NotFound();
+                AllSalaryHistory = new SalaryHistory();
             }
 
             List<MonthlyAttendanceGetDTO> MonthlyAttendanceGetDTO = mapper.Map<List<MonthlyAttendanceGetDTO>>(monthlyAttendances);
@@ -248,6 +248,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             List<SalaryHistoryGetDTO> SalaryHistoryGetDTO = mapper.Map<List<SalaryHistoryGetDTO>>(AllSalaryHistory);
 
+            SalaryHistoryGetDTO = SalaryHistoryGetDTO.OrderBy(t => t.EmployeeArName).ToList();
             return Ok(SalaryHistoryGetDTO);
         }
 
@@ -308,7 +309,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (monthlyAttendances == null || monthlyAttendances.Count == 0)
             {
-                return NotFound();
+                monthlyAttendances = new List<MonthlyAttendance>();
             }
 
             SalaryHistory AllSalaryHistory = await Unit_Of_Work.salaryHistory_Repository.FindByIncludesAsync(m => m.Month == month && m.Year == year && m.EmployeeId == EmpId && m.IsDeleted != true,
@@ -316,7 +317,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (AllSalaryHistory == null)
             {
-                return NotFound();
+                AllSalaryHistory = new SalaryHistory();
             }
 
             List<MonthlyAttendanceGetDTO> MonthlyAttendanceGetDTO = mapper.Map<List<MonthlyAttendanceGetDTO>>(monthlyAttendances);
