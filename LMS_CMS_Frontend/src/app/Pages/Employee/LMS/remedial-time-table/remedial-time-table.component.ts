@@ -156,15 +156,15 @@ export class RemedialTimeTableComponent {
     }
   }
 
-  openModal() {
-    if (this.SelectedSchoolId == 0) {
-      this.validationErrors["schoolID"] = "School is required"
-    } else {
-      document.getElementById('Add_Modal')?.classList.remove('hidden');
-      document.getElementById('Add_Modal')?.classList.add('flex');
-      this.remedialTimeTable = new RemedialTimeTable();
-    }
+openModal() {
+  if (this.SelectedSchoolId == 0) {
+    this.validationErrors["schoolID"] = this.getRequiredErrorMessage('School');
+  } else {
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+    this.remedialTimeTable = new RemedialTimeTable();
   }
+}
 
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
@@ -177,35 +177,24 @@ export class RemedialTimeTableComponent {
     })
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.remedialTimeTable) {
-      if (this.remedialTimeTable.hasOwnProperty(key)) {
-        const field = key as keyof RemedialTimeTable;
-        if (!this.remedialTimeTable[field]) {
-          if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        } else {
-          if (field == 'name'
-          ) {
-            if (this.remedialTimeTable.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} cannot be longer than 100 characters`;
-              isValid = false;
-            }
-          } else {
-            this.validationErrors[field] = '';
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.remedialTimeTable.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+
+  // Validate field length
+  if (this.remedialTimeTable.name && this.remedialTimeTable.name.length > 100) {
+    this.validationErrors['name'] = `*Name cannot be longer than 100 characters`;
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof TimeTable): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -221,31 +210,22 @@ export class RemedialTimeTableComponent {
     }
   }
 
-  Generate() {
-    this.remedialTimeTable.schoolID = this.SelectedSchoolId;
-    if (this.isFormValid()) {
-      this.isLoading = true
-      this.RemedialTimeTableServ.Add(this.remedialTimeTable, this.DomainName).subscribe((d) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Generated Successfully',
-          confirmButtonColor: '#089B41',
-        });
-        this.closeModal();
-        this.GetAllData();
-        this.isLoading = false
-      }, error => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'An unexpected error occurred',
-          confirmButtonColor: '#089B41',
-        });
-        this.isLoading = false
-      });
-    }
+Generate() {
+  this.remedialTimeTable.schoolID = this.SelectedSchoolId;
+  if (this.isFormValid()) {
+    this.isLoading = true
+    this.RemedialTimeTableServ.Add(this.remedialTimeTable, this.DomainName).subscribe((d) => {
+      this.showSuccessAlert(this.translate.instant('Generated successfully'));
+      this.closeModal();
+      this.GetAllData();
+      this.isLoading = false
+    }, error => {
+      const errorMessage = error.error || this.translate.instant('An unexpected error occurred');
+      this.showErrorAlert(errorMessage);
+      this.isLoading = false
+    });
   }
+}
 
   delete(id: number) {
     Swal.fire({
@@ -268,4 +248,41 @@ export class RemedialTimeTableComponent {
   View(id: number) {
     this.router.navigateByUrl('Employee/Remedial TimeTable/' + id);
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 }

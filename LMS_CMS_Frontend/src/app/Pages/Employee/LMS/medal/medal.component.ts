@@ -225,10 +225,12 @@ export class MedalComponent {
             field == 'arabicName' ||
             field == 'englishName' || (this.medal.id == 0 && field == "imageForm")
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+            const displayName =
+              field === 'arabicName' ? 'Arabic Name' :
+              field === 'englishName' ? 'English Name' :
+              'Image';
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
@@ -303,5 +305,16 @@ export class MedalComponent {
     }
 
     input.value = '';
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 }

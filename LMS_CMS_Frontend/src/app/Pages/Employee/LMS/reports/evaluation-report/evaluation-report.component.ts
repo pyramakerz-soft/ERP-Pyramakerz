@@ -233,18 +233,16 @@ export class EvaluationReportComponent {
     if (this.filterParams.classroomId && +this.filterParams.classroomId !== 0)
       params.classroomId = this.filterParams.classroomId;
 
-    console.log(params)
     this.EvaluationEmployeeServ.GetEvaluationReport(
       params,
       this.DomainName
     ).subscribe(
       (data: any) => {
+        console.log('Fetched report data:', data);
         this.reportData = Array.isArray(data) ? data : [];
-        // Expand all employees by default after filtering
         this.collapsedEmployees.clear();
         this.reportData.forEach((_, index) => this.collapsedEmployees.add(index));
 
-        // Prepare data for export
         this.prepareExportData();
 
         this.isLoading = false;

@@ -447,32 +447,44 @@ export class DirectMarkComponent {
     }
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.directMark) {
-      if (this.directMark.hasOwnProperty(key)) {
-        const field = key as keyof DirectMark;
-        if (!this.directMark[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'subjectID') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-
-    if(this.directMark.classids.length === 0){
-      this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
-      isValid = false;
-    }
-
-    if(this.directMark.isSummerCourse == false && this.directMark.subjectWeightTypeID == 0){
-      this.validationErrors['subjectWeightTypeID'] = `*Weight Type is required`;
-      isValid = false;
-    } 
-    
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  if (!this.directMark.englishName) {
+    this.validationErrors['englishName'] = this.getRequiredErrorMessage('English Name');
+    isValid = false;
   }
+  
+  if (!this.directMark.arabicName) {
+    this.validationErrors['arabicName'] = this.getRequiredErrorMessage('Arabic Name');
+    isValid = false;
+  }
+  
+  if (!this.directMark.mark) {
+    this.validationErrors['mark'] = this.getRequiredErrorMessage('Mark');
+    isValid = false;
+  }
+  
+  if (!this.directMark.subjectID) {
+    this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
+    isValid = false;
+  }
+
+  // Validate class selection
+  if(this.directMark.classids.length === 0){
+    this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
+    isValid = false;
+  }
+
+  // Validate weight type for non-summer courses
+  if(this.directMark.isSummerCourse == false && this.directMark.subjectWeightTypeID == 0){
+    this.validationErrors['subjectWeightTypeID'] = this.getRequiredErrorMessage('Weight Type');
+    isValid = false;
+  } 
+  
+  return isValid;
+}
 
   capitalizeField(field: keyof DirectMark): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -625,4 +637,15 @@ export class DirectMarkComponent {
       }
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

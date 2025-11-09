@@ -359,40 +359,57 @@ export class DiscussionRoomComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.discussionRoom) {
-      if (this.discussionRoom.hasOwnProperty(key)) {
-        const field = key as keyof DiscussionRoom;
-        if (!this.discussionRoom[field]) {
-          if (field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
-        }
-      }
-    }
-
-    if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
-      const start = new Date(this.discussionRoom.startDate);
-      const end = new Date(this.discussionRoom.endDate);
-
-      if (end < start) {
-        this.validationErrors['endDate'] = '*End date cannot be before start date';
-        isValid = false;
-      }
-    }
-
-    if (this.choosedStudentsClass.length == 0) {
-      this.validationErrors['studentClassrooms'] = '*Students are required'
-    } else {
-      this.validationErrors['studentClassrooms'] = ''
-    }
-
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  // Validate required fields with translation
+  if (!this.discussionRoom.title) {
+    this.validationErrors['title'] = this.getRequiredErrorMessage('Title');
+    isValid = false;
   }
+  
+  if (!this.discussionRoom.startDate) {
+    this.validationErrors['startDate'] = this.getRequiredErrorMessage('Start Date');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.endDate) {
+    this.validationErrors['endDate'] = this.getRequiredErrorMessage('End Date');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.time) {
+    this.validationErrors['time'] = this.getRequiredErrorMessage('Time');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.meetingLink) {
+    this.validationErrors['meetingLink'] = this.getRequiredErrorMessage('Meeting Link');
+    isValid = false;
+  }
+
+  // Validate date logic
+  if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
+    const start = new Date(this.discussionRoom.startDate);
+    const end = new Date(this.discussionRoom.endDate);
+
+    if (end < start) {
+      this.validationErrors['endDate'] = '*End date cannot be before start date';
+      isValid = false;
+    }
+  }
+
+  // Validate students selection
+  if (this.choosedStudentsClass.length == 0) {
+    this.validationErrors['studentClassrooms'] = this.getRequiredErrorMessage('Students');
+    isValid = false;
+  } else {
+    this.validationErrors['studentClassrooms'] = '';
+  }
+
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof DiscussionRoom, value: any }) {
     const { field, value } = event;
@@ -559,5 +576,15 @@ export class DiscussionRoomComponent {
     }
   }
 
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
    
 }

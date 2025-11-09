@@ -298,8 +298,17 @@ export class AdmissionTestComponent {
       if (this.test.hasOwnProperty(key)) {
         const field = key as keyof Test;
         if (!this.test[field]) {
-          if (field == "title" || field == "totalMark" || field == "subjectID" || field == "gradeID" || field == "academicYearID") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          // required fields for Test
+          if (
+            field === 'title' ||
+            field === 'totalMark' ||
+            field === 'subjectID' ||
+            field === 'academicYearID' ||
+            field === 'gradeID' ||
+            field === 'schoolID'
+          ) {
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
@@ -361,4 +370,28 @@ export class AdmissionTestComponent {
       }
     }
   }
+
+  private getFieldDisplayName(field: keyof Test): string {
+    const map: { [key in keyof Test]?: string } = {
+      title: 'Title',
+      totalMark: 'Total Mark',
+      subjectID: 'Subject',
+      academicYearID: 'Academic Year',
+      gradeID: 'Grade',
+      schoolID: 'School',
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+  
 }

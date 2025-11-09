@@ -55,7 +55,6 @@
   "Enter Password": "أدخل كلمة المرور",
   "Enter Academic Degree": "أدخل الدرجة العلمية",
   "Enter English Name": "أدخل الاسم بالإنجليزية",
-  "Enter Arabic Name": "أدخل الاسم بالعربية",
   "Enter website": "أدخل الموقع الإلكتروني'",
   "Enter Phone 1": "أدخل رقم الهاتف 1",
   "Enter Phone 2": "أدخل رقم الهاتف 2",
@@ -84,7 +83,6 @@
   "Enter annualLeaveBalance": "أدخل رصيد الإجازات السنوية'",
   "Enter delayAllowance": "أدخل بدل التأخير",
   "Enter date Of Leaving Work": "أدخل تاريخ ترك العمل",
-  "Enter User birthdayDate": "أدخل تاريخ الميلاد",
   "Enter User residenceNumber": "أدخل رقم الإقامة",
   "Enter User passportNumber": "أدخل رقم جواز السفر",
   "Enter the password again": "أعد إدخال كلمة المرور",
@@ -1213,16 +1211,9 @@
   "Classroom Daily Performance Report": "تقرير الأداء اليومي للفصل",
   "Transferred From Kindergarten": "منقول من الروضة",
   "Student Names In Class": "أسماء الطلاب في الفصل",
-  "General Information": "معلومات عامة",
-  "Student Full Name": "الاسم الكامل للطالب",
-  "Admission Date": "تاريخ القبول",
   "Alternative Mobile": "جوال بديل",
   "Date of Birth": "تاريخ الميلاد",
-  "Student' Passport Number": "رقم جواز سفر الطالب",
-  "Student's Id Number": "رقم هوية الطالب",
-  "Religion": "الديانة",
   "Place To Birth": "مكان الولادة",
-  "Pre-School": "مرحلة ما قبل المدرسة",
   "Inventory Transaction Report Detailed": "تقرير حركة المخزون مفصل",
   "Opening Balances": "الأرصدة الافتتاحية",
   "Total Price": "السعر الإجمالي",
@@ -1385,7 +1376,6 @@
   "dateFrom": "من تاريخ",
   "dateTo": "إلى تاريخ",
   "Edit Attendance": "تعديل الحضور",
-  "Attendance": "الحضور",
   "clockOut": "وقت الخروج",
   "clockIn": "وقت الدخول",
   "date": "التاريخ",
@@ -1424,7 +1414,29 @@
   "schoolID": "المدرسة",
   "academicYearID": "السنه الدراسية",
   "gradeID": "الصف",
-  "floorID": "الطابق"
+  "floorID": "الطابق",
+  "OrderInForm": "طلب داخل النموذج",
+  "TotalMark": "الدرجة الكلية",
+  "AcademicYearID": "السنة الدراسية",
+  "GradeID": "الصف",
+  "SubjectID": "المادة",
+  "Pass By Degree": "النجاح بالدرجة",
+  "AfterCount": "بعد العدد",
+  "Teacher Evaluation Report": "تقرير تقييم المعلم",
+  "Pass Mark": "درجة النجاح",
+  "Cut Off Date": "تاريخ الإغلاق",
+    "Meeting Link": "رابط الاجتماع",
+      "Number Of Sessions": "عدد الجلسات",
+        "At least one class must be selected": "يجب اختيار فصل واحد على الأقل",
+  "Tax Card": "بطاقة ضريبية"
+
+
+
+
+
+
+
+
 
 
 

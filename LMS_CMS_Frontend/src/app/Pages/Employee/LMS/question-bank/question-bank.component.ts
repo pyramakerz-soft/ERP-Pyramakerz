@@ -602,9 +602,8 @@ export class QuestionBankComponent {
             field == 'lessonID' ||
             field == 'questionTypeID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         } else {
@@ -717,6 +716,28 @@ export class QuestionBankComponent {
       }
     }
     return isValid;
+  }
+
+  private getFieldDisplayName(field: keyof QuestionBank): string {
+    const map: { [key in keyof QuestionBank]?: string } = {
+      gradeID: 'Grade',
+      schoolID: 'School',
+      subjectID: 'Subject',
+      lessonID: 'Lesson',
+      questionTypeID: 'Question Type'
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof QuestionBank; value: any }) {

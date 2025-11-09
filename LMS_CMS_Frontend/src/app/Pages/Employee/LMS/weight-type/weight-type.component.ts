@@ -137,30 +137,28 @@ export class WeightTypeComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.weightType) {
-      if (this.weightType.hasOwnProperty(key)) {
-        const field = key as keyof WeightType;
-        if (!this.weightType[field]) {
-          if(field == "englishName" || field == "arabicName"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          if(field == "englishName" || field == 'arabicName'){
-            if(this.weightType.englishName.length > 100 || this.weightType.arabicName.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  if (!this.weightType.englishName) {
+    this.validationErrors['englishName'] = this.getRequiredErrorMessage('English Name');
+    isValid = false;
+  } else if (this.weightType.englishName.length > 100) {
+    this.validationErrors['englishName'] = `*English Name cannot be longer than 100 characters`;
+    isValid = false;
   }
+  
+  if (!this.weightType.arabicName) {
+    this.validationErrors['arabicName'] = this.getRequiredErrorMessage('Arabic Name');
+    isValid = false;
+  } else if (this.weightType.arabicName.length > 100) {
+    this.validationErrors['arabicName'] = `*Arabic Name cannot be longer than 100 characters`;
+    isValid = false;
+  }
+  
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof WeightType, value: any }) {
     const { field, value } = event;
@@ -272,4 +270,16 @@ export class WeightTypeComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

@@ -1203,15 +1203,9 @@
   "Transferred From Kindergarten": "Transferred From Kindergarten",
   "Student Names In Class": "Student Names In Class",
   "General Information": "General Information",
-  "Student Full Name": "Student Full Name",
-  "Admission Date": "Admission Date",
   "Alternative Mobile": "Alternative Mobile",
   "Date of Birth": "Date of Birth",
-  "Student' Passport Number": "Student' Passport Number",
-  "Student's Id Number": "Student's Id Number",
-  "Religion": "Religion",
   "Place To Birth": "Place Of Birth",
-  "Pre-School": "Pre-School",
   "Inventory Transaction Report Detailed": "Inventory Transaction Report Detailed",
   "Opening Balances": "Opening Balances",
   "Total Price": "Total Price",
@@ -1376,7 +1370,6 @@
   "dateFrom": "dateFrom",
   "dateTo": "dateTo",
   "Edit Attendance": "Edit Attendance",
-  "Attendance": "Attendance",
   "clockOut": "clockOut",
   "clockIn": "clockIn",
   "date": "date",
@@ -1415,7 +1408,29 @@
   "schoolID" : "School",
   "academicYearID" : "Academic Year",
   "gradeID" : "Grade",
-  "floorID" : "Floor"
+  "floorID" : "Floor",
+  "OrderInForm": "Order In Form",
+  "TotalMark": "Total Mark",
+  "AcademicYearID": "Academic Year",
+  "GradeID": "Grade",
+  "SubjectID": "Subject",
+  "Pass By Degree": "Pass By Degree",
+  "AfterCount": "After Count",
+  "Teacher Evaluation Report": "Teacher Evaluation Report",
+  "Pass Mark": "Pass Mark",
+  "Cut Off Date": "Cut Off Date",
+    "Meeting Link": "Meeting Link",
+      "Number Of Sessions": "Number Of Sessions",
+        "At least one class must be selected": "At least one class must be selected",
+          "Tax Card": "Tax Card"
+
+
+
+
+
+
+
+
 
 
 
