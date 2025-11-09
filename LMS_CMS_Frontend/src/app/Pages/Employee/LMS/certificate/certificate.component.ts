@@ -450,7 +450,7 @@ isInfoRowsLoading: boolean = false;
     if(this.User_Data_After_Login.type == 'employee'){
       this.Students = []
       this.SelectedStudentId = 0
-      this.StudentServ.GetByClassID(this.SelectedClassId, this.DomainName).subscribe((d) => {
+      this.StudentServ.GetByClassNotInActiveYear(this.SelectedClassId, this.DomainName).subscribe((d) => {
         this.Students = d
       })
     }

@@ -104,6 +104,15 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ClassID/${id}`, { headers });
   }
 
+  GetByClassNotInActiveYear(id: number, DomainName: string): Observable<Student[]> {
+    const headers = new HttpHeaders()
+      .set('Domain-Name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/GetByClassNotInActiveYear/${id}`, { headers });
+  }
+
   GetByClassIDAndThoseWhoWishesToUseSchoolTransportation(id: number, DomainName: string): Observable<Student[]> {
     const headers = new HttpHeaders()
       .set('Domain-Name', DomainName)
