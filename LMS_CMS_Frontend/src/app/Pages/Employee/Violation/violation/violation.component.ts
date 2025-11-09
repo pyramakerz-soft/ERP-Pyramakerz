@@ -331,6 +331,23 @@ export class ViolationComponent {
         }
       }
     }
+ if (this.violation.date) {
+    const dateValue = new Date(this.violation.date);
+
+    // Invalid date check
+    if (isNaN(dateValue.getTime())) {
+      this.validationErrors['date'] ='Please enter a valid date';
+      isValid = false;
+    }
+
+    const dateStr = this.violation.date.toString(); // original input, e.g., "222222-11-09"
+      // ✅ Extract year part and check its length
+    const yearPart = dateStr.split('-')[0]; // "222222" from "222222-11-09"
+    if (yearPart.length > 5 ) {
+      this.validationErrors['date'] = 'Please enter a valid date.';
+      isValid = false;
+    }
+  }
     return isValid;
   }
 

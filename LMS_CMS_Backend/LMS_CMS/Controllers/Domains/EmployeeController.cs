@@ -190,7 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" }
+            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -359,7 +359,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByJobId/{JobId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Loans Report" , "Bonus Report" , "Deduction Report" , "Vacation Report" , "Leave Request Report" , "Hr Employees Report" , "Employee Salary Detailed Report" , "Salary Summary Report" , "HR Attendance Report" }
         )]
         public IActionResult GetByJobId(long JobId)
         {

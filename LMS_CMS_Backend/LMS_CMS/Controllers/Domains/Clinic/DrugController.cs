@@ -30,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Drugs" }
+            pages: new[] { "Drugs", "Follow Up" }
         )]
         public async Task<IActionResult> Get()
         {
@@ -102,7 +102,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Drugs" }
+            pages: new[] { "Drugs", "Follow Up" }
         )]
         public IActionResult Add(DrugAddDTO drugDto)
         {

@@ -329,7 +329,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("LoansStatus")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Loans" }
+            pages: new[] { "Loans" , "Loans Status" }
           )]
         public async Task<IActionResult> GetLoansStatus(long EmpId)
         {

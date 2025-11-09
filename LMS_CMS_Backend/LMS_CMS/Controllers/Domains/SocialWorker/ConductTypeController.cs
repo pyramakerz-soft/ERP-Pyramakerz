@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("BySchool/{SchoolId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Types" }
+            pages: new[] { "Conduct Types", "Conducts", "Conducts Report" }
         )]
         public async Task<IActionResult> GetBySchool(long SchoolId)
         {
