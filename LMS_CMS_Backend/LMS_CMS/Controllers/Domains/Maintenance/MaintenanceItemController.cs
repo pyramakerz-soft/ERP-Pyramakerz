@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }, 
-            pages: new[] { "Maintenance Items" }
+            pages: new[] { "Maintenance Items", "Maintenance" , "Maintenance Report" }
         )]
         public IActionResult GetAll()
         {

@@ -578,7 +578,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
                 else
                 {
-                   assignmentStudent.Degree= newData.Degree;
+                   assignmentStudent.Degree= newData.Degree; ///////////////////////
                 }
             }
             else
@@ -656,6 +656,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         return accessCheck2;
                     }
                 }
+            }
+
+            if (assignmentStudent.Degree.HasValue)
+            {
+                float degreeValue = assignmentStudent.Degree.Value;
+                float integerPart = (float)Math.Floor(degreeValue);
+                float decimalPart = degreeValue - integerPart;
+
+                if (decimalPart < 0.25f)
+                    assignmentStudent.Degree = integerPart;               // round down
+                else if (decimalPart < 0.75f)
+                    assignmentStudent.Degree = integerPart + 0.5f;         // round to .5
+                else
+                    assignmentStudent.Degree = integerPart + 1.0f;         // round up
+            }
+            else
+            {
+                assignmentStudent.Degree = 0;
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

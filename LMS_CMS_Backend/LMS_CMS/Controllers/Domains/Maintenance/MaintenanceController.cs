@@ -303,7 +303,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok();
         }
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance", "Maintenance Report" })]
         public async Task<IActionResult> GetReport([FromBody] MaintenanceReportRequestDto request)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);

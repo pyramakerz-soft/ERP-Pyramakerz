@@ -213,7 +213,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
           pages: new[] { "Classroom" , "Enter Daily Performance" , "Student Daily Performance Report" , "Classroom Daily Performance Report"
               , "Assignment Student" , "Hygiene Form" ,"Follow Up" ,"Medical History" ,"Medical Report"
            , "Conducts" , "Attendance", "Student Issues" ,"Add Medal To Student" ,"Add Certificate To Student" , "Conducts Report","Attendance Report" 
-              ,"Student Issue Report" ,"Certificate To Student Report" ,"Medal To Student Report"}
+              ,"Student Issue Report" ,"Certificate To Student Report" ,"Medal To Student Report", "Notification" }
         )]
         public async Task<IActionResult> GetByGradeIdAsync(long id)
         {

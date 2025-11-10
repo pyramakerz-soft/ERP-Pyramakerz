@@ -190,7 +190,8 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status" }
+            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" 
+                , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status"  ,"Maintenance Employees"}
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -388,7 +389,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Teacher Evaluation Report" }
+            pages: new[] { "Employee" , "Teacher Evaluation Report", "Notification" }
         )]
         public IActionResult GetByDepartmentId(long DepartmentId)
         {

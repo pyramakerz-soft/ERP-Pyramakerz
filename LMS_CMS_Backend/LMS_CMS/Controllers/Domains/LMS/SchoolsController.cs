@@ -81,7 +81,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "student", "parent" },
-             pages: new[] { "School" }
+             pages: new[] { "School" , "Zatca School Configuration" , "ETA School Configuration" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
