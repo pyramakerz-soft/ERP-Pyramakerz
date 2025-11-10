@@ -38,7 +38,18 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   styleUrl: './receivable-details.component.css',
 })
 export class ReceivableDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -99,7 +110,7 @@ export class ReceivableDetailsComponent {
     public reportsService: ReportsService,
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
-    private BankEmployeeServ: BankEmployeeService, 
+    private BankEmployeeServ: BankEmployeeService
   ) {}
 
   ngOnInit() {
@@ -112,7 +123,7 @@ export class ReceivableDetailsComponent {
 
     if (!this.ReceivableID) {
       this.isCreate = true;
-      this.receivable.linkFileID=5
+      this.receivable.linkFileID = 5;
       this.getSaveData();
     } else {
       this.GetReceivableByID();
@@ -149,7 +160,7 @@ export class ReceivableDetailsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -182,7 +193,10 @@ export class ReceivableDetailsComponent {
   getBankData() {
     this.banksData = [];
     this.bankOrSafe = 'bank';
-    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((data) => {
+    this.BankEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((data) => {
       this.banksData = data;
     });
   }
@@ -190,7 +204,10 @@ export class ReceivableDetailsComponent {
   getSaveData() {
     this.safesData = [];
     this.bankOrSafe = 'safe';
-    this.SafeEmployeeServ.GetByEmployeeId( this.UserID,this.DomainName).subscribe((data) => {
+    this.SafeEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((data) => {
       this.safesData = data;
     });
   }
@@ -230,12 +247,12 @@ export class ReceivableDetailsComponent {
             field == 'date' ||
             field == 'docNumber'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
-              this.validationErrors[field] = `*bankOrSafeID is required`;
-            }
+            // Handle the specific case for bankOrSaveID field name correction
+            const displayFieldName =
+              field === 'bankOrSaveID' ? 'bankOrSafeID' : field;
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(displayFieldName as keyof Receivable)
+            );
             isValid = false;
           }
         } else {
@@ -244,6 +261,17 @@ export class ReceivableDetailsComponent {
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   DetailsCapitalizeField(field: keyof ReceivableDetails): string {
