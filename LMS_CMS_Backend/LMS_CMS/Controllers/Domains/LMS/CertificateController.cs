@@ -92,6 +92,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     List<SubjectWeightType> AllsubjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository
                         .Select_All_With_IncludesById<SubjectWeightType>(s => subjectIds.Contains(s.SubjectID) && s.IsDeleted != true && s.WeightType.IsDeleted != true,
                             query => query.Include(d => d.WeightType));
+
+                    if(AllsubjectWeightTypes == null || !AllsubjectWeightTypes.Any())
+                    {
+                        return NotFound();
+                    }
                      
                     List<WeightType> AllWeightType = AllsubjectWeightTypes.Select(s => s.WeightType).Distinct().ToList(); 
                     WeightTypeDTO = mapper.Map<List<WeightTypeGetDTO>>(AllWeightType);     //Header
@@ -119,6 +124,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         d.DirectMark.IsDeleted != true && d.DirectMark.IsSummerCourse == true && d.DirectMark.Date >= DateFrom && d.DirectMark.Date <= DateTo,
                         query => query.Include(d => d.DirectMark).ThenInclude(d => d.Subject)
                         );
+
+                    if (directMarkClassesStudents == null || !directMarkClassesStudents.Any())
+                    {
+                        return NotFound();
+                    }
 
                     subjectIds = directMarkClassesStudents.Select(s => s.DirectMark.SubjectID).Distinct().ToList(); 
                     List<Subject> subjects = directMarkClassesStudents.Select(s => s.DirectMark.Subject).Distinct().ToList();
