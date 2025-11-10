@@ -420,11 +420,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                                 lateTime = actualStart - attendanceDateTime;
                                                 monthlyAttendance.DeductionHours = lateTime.Hours;
                                                 monthlyAttendance.DeductionMinutes = lateTime.Minutes;
-                                                Console.WriteLine($"actualStart: {actualStart}");
-                                                Console.WriteLine($"lateTime: {lateTime}");
-                                                Console.WriteLine($"attendanceDateTime: {attendanceDateTime}");
                                             }
-                                            else if (actualStart < allowedStartDateTime && actualStart > attendanceDateTime)
+                                            else if (actualStart <= allowedStartDateTime && actualStart > attendanceDateTime)
                                             {
                                                 lateTime = actualStart - attendanceDateTime;
                                             }
@@ -432,17 +429,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         else if(firstClockIn.HasValue && departureTime > attendanceTime) // morning shift
                                         {
                                             TimeSpan actualStart = firstClockIn.Value.TimeOfDay;
-
                                             if (actualStart > allowedStart)
                                             {
                                                 // Employee came late
                                                 lateTime = actualStart - attendanceTime;
                                                 monthlyAttendance.DeductionHours = lateTime.Hours;
                                                 monthlyAttendance.DeductionMinutes = lateTime.Minutes;
-                                                Console.WriteLine($"actualStart: {actualStart}");
-                                                Console.WriteLine($"lateTime: {lateTime}");
                                             }
-                                            else if (actualStart < allowedStart && actualStart > attendanceTime)
+                                            else if (actualStart <= allowedStart && actualStart > attendanceTime)
                                             {
                                                 lateTime = actualStart - attendanceTime;
                                             }
@@ -616,6 +610,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     TimeSpan sunDeduction = TimeSpan.FromHours(totalDeductionHours) + TimeSpan.FromMinutes(totalDeductionMinutes);
                     salaryHistory.TotalDeductions =(decimal)((hourlyRate * sunDeduction.Hours) + (minuteRate * sunDeduction.Minutes));
 
+
                     int totalOverTimeHours = monthlyAttendances.Select(m => m.OvertimeHours).Sum();
                     int totalOverTimeMinutes = monthlyAttendances.Select(m => m.OvertimeMinutes).Sum();
                     TimeSpan sunOverTime = TimeSpan.FromHours(totalOverTimeHours) + TimeSpan.FromMinutes(totalOverTimeMinutes);
@@ -624,6 +619,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     int totalAbsentDays = monthlyAttendances.Count(m => m.DayStatusId == 2);
                     salaryHistory.TotalDeductions += (decimal)(dailyRate * totalAbsentDays);
 
+                    Console.WriteLine($"hourlyRate: {hourlyRate} :{sunOverTime.Hours}");
+                    Console.WriteLine($"sunOverTime: {sunOverTime} :{salaryHistory.TotalOvertime}");
                 }
 
                 /// bouns
