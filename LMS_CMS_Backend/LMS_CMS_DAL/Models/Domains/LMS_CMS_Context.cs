@@ -2795,7 +2795,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<ReceivableDetails>()
                 .HasIndex(e => e.LinkFileTypeID)
-                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID");
+                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID"); 
         }
     }
 }

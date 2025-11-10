@@ -151,7 +151,7 @@
                 <span *ngIf="validationErrors['clientSecret']" class="text-red-500 ml-3 font-normal">{{ validationErrors['clientSecret'] }}</span>
             </div> 
             <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="clientSecret2"> {{ 'Client ID' | translate }} </label>
+                <label class="mb-2 primaryTxt" for="clientSecret2"> {{ 'Client Secret 2' | translate }} </label>
                 <input id="clientSecret2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="  {{ 'Enter' | translate }} {{ 'Client Secret 2' | translate }}"
                 [(ngModel)]="pos.clientSecret2" 
                 (ngModelChange)="onInputValueChange({ field: 'clientSecret2', value: $event })"/>

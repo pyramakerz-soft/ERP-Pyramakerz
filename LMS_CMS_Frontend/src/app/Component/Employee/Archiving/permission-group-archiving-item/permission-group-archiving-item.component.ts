@@ -16,6 +16,10 @@ export class PermissionGroupArchivingItemComponent {
   @Output() Selected: EventEmitter<{ data: PermissionGroupDetails; selected: boolean }> = new EventEmitter<{ data: PermissionGroupDetails; selected: boolean }>();
   @Input() permissionGroupID: number = 0;
 
+  ngOnInit() {
+    this.archivingData[0].isOpen = true;
+  }
+
   toggleChildren(archiving: ArchivingTree) {
     archiving.isOpen = !archiving.isOpen;
   }

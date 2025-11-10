@@ -378,9 +378,8 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
 
         this.onSave.emit();
         this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        const errorMessage = this.translate.instant('Failed to save the item');
+      } catch (error:any) { 
+        const errorMessage = error.error?.message || error.error || this.translate.instant('Failed to save the item');
         this.showErrorAlert(errorMessage);
       } finally {
         this.isSaving = false;

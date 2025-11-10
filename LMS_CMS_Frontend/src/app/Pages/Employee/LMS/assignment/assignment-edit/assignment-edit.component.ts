@@ -452,8 +452,7 @@ export class AssignmentEditComponent {
           this.closeModal();
           this.getAssignmentData();
         },
-        error: (err) => {
-          console.error('Error adding questions:', err);
+        error: (err) => { 
           this.isLoading = false;
           this.closeModal();
 

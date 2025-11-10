@@ -133,8 +133,7 @@ export class RegistrationFormComponent {
       );
       this.StudentId = Number(
         this.activeRoute.snapshot.paramMap.get('StudentId')
-      );
-      console.log(1234,this.path)
+      ); 
       if (this.path.startsWith('Student/Edit')) {
         this.getRegisterationFormSubmittion();
         this.mode = 'Edit'

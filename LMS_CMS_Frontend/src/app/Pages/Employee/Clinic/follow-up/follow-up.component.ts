@@ -571,8 +571,7 @@ console.log(error);
 
       this.loadFollowUps();
       this.closeModal();
-    } catch (error) {
-      console.error('Error saving follow-up:', error);
+    } catch (error) { 
       const errorMessage = this.translate.instant('Failed to save the item');
       this.showErrorAlert(errorMessage);
     } finally {

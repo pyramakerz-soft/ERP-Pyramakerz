@@ -15,7 +15,7 @@ import { SearchComponent } from '../../../../../Component/search/search.componen
 import { MedicalHistoryModalComponent } from "../medical-history-modal/medical-history-modal.component";
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { ActivatedRoute } from '@angular/router';
@@ -24,7 +24,7 @@ import { Student } from '../../../../../Models/student';
 @Component({
   selector: 'app-medical-history',
   standalone: true,
-  imports: [FormsModule, CommonModule, TableComponent, SearchComponent, MedicalHistoryModalComponent, TranslateModule ],
+  imports: [FormsModule, CommonModule, TableComponent, SearchComponent, MedicalHistoryModalComponent, TranslateModule],
   templateUrl: './medical-history.component.html',
   styleUrls: ['./medical-history.component.css'],
 })
@@ -41,49 +41,46 @@ export class MedicalHistoryComponent implements OnInit {
   searchKey: string = 'id';
   searchValue: string = '';
   students: Student[] = [];
-  
+
   reportType: string = 'employee';
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   DomainName: string = '';
   UserID: number = 0;
-  
+
   constructor(
     private medicalHistoryService: MedicalHistoryService,
-    private apiService: ApiService,
-    private schoolService: SchoolService,
-    private gradeService: GradeService,
-    private classroomService: ClassroomService,
+    private apiService: ApiService, 
     private studentService: StudentService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     public account: AccountService,
     public ApiServ: ApiService,
     private route: ActivatedRoute,
     private translate: TranslateService
 
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
-    console.log(12,this.reportType)
-    if(this.reportType == 'parent'){
+    console.log(12, this.reportType)
+    if (this.reportType == 'parent') {
       this.GetStudentsData()
     }
 
     this.loadMedicalHistories();
-     this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   private showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
@@ -115,12 +112,12 @@ export class MedicalHistoryComponent implements OnInit {
     this.searchKey = event.key;
     this.searchValue = event.value;
     await this.loadMedicalHistories();
-    
+
     if (this.searchValue) {
-        this.medicalHistories = this.medicalHistories.filter(mh => {
-            const fieldValue = mh[this.searchKey as keyof typeof mh]?.toString().toLowerCase() || '';
-            return fieldValue.includes(this.searchValue.toString().toLowerCase());
-        });
+      this.medicalHistories = this.medicalHistories.filter(mh => {
+        const fieldValue = mh[this.searchKey as keyof typeof mh]?.toString().toLowerCase() || '';
+        return fieldValue.includes(this.searchValue.toString().toLowerCase());
+      });
     }
   }
 
@@ -128,9 +125,8 @@ export class MedicalHistoryComponent implements OnInit {
     this.students = []
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
-      console.log(this.students)
     })
-  }  
+  }
 
   async loadMedicalHistories() {
     try {
@@ -148,19 +144,24 @@ export class MedicalHistoryComponent implements OnInit {
           return fieldValue.includes(this.searchValue.toString().toLowerCase());
         });
       }
-    } catch (error) {
-      console.error('Error loading medical histories:', error);
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: error.error,
+        confirmButtonColor: '#d33',
+      });
     }
   }
-  
-  onModalVisibilityChange(visible: boolean) {
-  this.isModalVisible = visible;
-  if (!visible) {
-    this.selectedMedicalHistory = null;
-  }
-}
 
-   selectedMedicalHistory: DoctorMedicalHistory | null = null;
+  onModalVisibilityChange(visible: boolean) {
+    this.isModalVisible = visible;
+    if (!visible) {
+      this.selectedMedicalHistory = null;
+    }
+  }
+
+  selectedMedicalHistory: DoctorMedicalHistory | null = null;
   @ViewChild(MedicalHistoryModalComponent) medicalHistoryModal!: MedicalHistoryModalComponent;
 
   openModal(row?: DoctorMedicalHistory) {
@@ -177,52 +178,51 @@ export class MedicalHistoryComponent implements OnInit {
     this.isModalVisible = false;
   }
 
-deleteMedicalHistory(row: any) {
-  const translatedTitle = this.translate.instant('Are you sure?');
-  const translatedText = this.translate.instant('You will not be able to recover this medical history!');
-  const translatedConfirm = this.translate.instant('Yes, delete it!');
-  const translatedCancel = this.translate.instant('No, keep it');
-  const successMessage = this.translate.instant('Deleted successfully');
+  deleteMedicalHistory(row: any) {
+    const translatedTitle = this.translate.instant('Are you sure?');
+    const translatedText = this.translate.instant('You will not be able to recover this medical history!');
+    const translatedConfirm = this.translate.instant('Yes, delete it!');
+    const translatedCancel = this.translate.instant('No, keep it');
+    const successMessage = this.translate.instant('Deleted successfully');
 
-  Swal.fire({
-    title: translatedTitle,
-    text: translatedText,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#2E3646',
-    confirmButtonText: translatedConfirm,
-    cancelButtonText: translatedCancel,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const domainName = this.apiService.GetHeader();
-      this.medicalHistoryService.Delete(row.id, domainName).subscribe({
-        next: () => {
-          if (this.medicalHistories.length === 1) {
-            this.medicalHistories = [];
-          }
-          this.loadMedicalHistories();
-          this.showSuccessAlert(successMessage);
-        },
-        error: (error) => {
-          console.error('Error deleting medical history:', error);
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
-          this.showErrorAlert(errorMessage);
-        },
-      });
+    Swal.fire({
+      title: translatedTitle,
+      text: translatedText,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#2E3646',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const domainName = this.apiService.GetHeader();
+        this.medicalHistoryService.Delete(row.id, domainName).subscribe({
+          next: () => {
+            if (this.medicalHistories.length === 1) {
+              this.medicalHistories = [];
+            }
+            this.loadMedicalHistories();
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || error.error || this.translate.instant('Failed to delete the item');
+            this.showErrorAlert(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+
+  GetTableHeaders() {
+
+    if (!this.isRtl) {
+      return this.headers
+    } else {
+      return this.headersarabic
     }
-  });
-}
-
-
-GetTableHeaders(){
-   
-if(!this.isRtl){
-  return this.headers
-}else{
-  return this.headersarabic
-}
-}
+  }
 
 
 
