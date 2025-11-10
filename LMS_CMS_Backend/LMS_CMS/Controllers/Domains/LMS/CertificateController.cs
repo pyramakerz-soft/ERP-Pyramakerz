@@ -225,13 +225,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                            a.IsDeleted != true);
 
                                 //sumPercentageDegree += (studentDirectMark.Degree / mark.Mark);
-                                sumDegree += (float)studentDirectMark.Degree; 
+                                //sumDegree += (float)studentDirectMark.Degree;
+                                if (studentDirectMark?.Degree != null)
+                                    sumDegree += (float)studentDirectMark.Degree;
                                 sumMark += mark.Mark;
                             }
 
                             // Student's degree in this subject weight type
                             float weightSubjectDegreeForThisType = (swt.Weight * subject.TotalMark) / 100;
-                            float studentDegreeInWeightType = (sumDegree / sumMark) * weightSubjectDegreeForThisType;
+                            float studentDegreeInWeightType = 0;
+                            if (sumMark > 0)
+                            {
+                                studentDegreeInWeightType = (sumDegree / sumMark) * weightSubjectDegreeForThisType;
+                            }
+                            //float studentDegreeInWeightType = (sumDegree / sumMark) * weightSubjectDegreeForThisType;
 
                             CertificateSubject certificateSubjectObject = new CertificateSubject();
                             certificateSubjectObject.Mark = weightSubjectDegreeForThisType;
@@ -258,13 +265,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                         certificateSubjectTotalMark.Add(subjectTotalMark);
                         
+                        //foreach (var percentage in certificateSubjectTotalMark)
+                        //{
+                        //    if (percentage.Mark == 0)
+                        //        percentage.Percentage = 0;
+                        //    else
+                        //        percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
+                        //}
                         foreach (var percentage in certificateSubjectTotalMark)
                         {
-                            if (percentage.Mark == 0)
-                                percentage.Percentage = 0;
-                            else
+                            if (percentage.Mark > 0)
                                 percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
-                        } 
+                            else
+                                percentage.Percentage = 0;
+                        }
                     }
                     else
                     { 
@@ -289,11 +303,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             if (studentDirectMark?.Degree != null)
                             {
                                 //sumPercentageDegree += studentDirectMark.Degree.Value / mark.Mark;
-                                sumDegree += (float)studentDirectMark.Degree;
+                                //sumDegree += (float)studentDirectMark.Degree;
+                                if (studentDirectMark?.Degree != null)
+                                    sumDegree += (float)studentDirectMark.Degree;
                                 sumMark += mark.Mark;
                             }
-                        } 
-                        float studentDegreeInWeightType = (sumDegree / sumMark) * subject.TotalMark;
+                        }
+                        float studentDegreeInWeightType = 0;
+                        if (sumMark > 0)
+                        {
+                            studentDegreeInWeightType = (sumDegree / sumMark) * subject.TotalMark;
+                        }
+                        //float studentDegreeInWeightType = (sumDegree / sumMark) * subject.TotalMark;
 
                         CertificateSubject certificateSubjectObject = new CertificateSubject();
                         certificateSubjectObject.Mark = subject.TotalMark;
@@ -316,12 +337,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         subjectTotalMark.Degree = studentDegreeInWeightType;
                         certificateSubjectTotalMark.Add(subjectTotalMark);
 
+                        //foreach (var percentage in certificateSubjectTotalMark)
+                        //{
+                        //    if (percentage.Mark == 0)
+                        //        percentage.Percentage = 0;
+                        //    else
+                        //        percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
+                        //}
                         foreach (var percentage in certificateSubjectTotalMark)
                         {
-                            if (percentage.Mark == 0)
-                                percentage.Percentage = 0;
-                            else
+                            if (percentage.Mark > 0)
                                 percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
+                            else
+                                percentage.Percentage = 0;
                         }
                     }
                 }
