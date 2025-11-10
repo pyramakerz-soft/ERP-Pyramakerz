@@ -51,6 +51,7 @@ export class AttendanceStudentComponent {
   mode: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  today: string = new Date().toISOString().split('T')[0]; // Get today's date in yyyy-MM-dd format
 
   Schools: School[] = []
   AcademicYears: AcademicYear[] = []
@@ -233,6 +234,11 @@ export class AttendanceStudentComponent {
             isValid = false;
           }
         });
+
+        if (this.attendance.date > this.today) {
+          this.validationErrors['date'] = 'Date cannot be after today.';
+          isValid = false;
+        }
       }
     }
 

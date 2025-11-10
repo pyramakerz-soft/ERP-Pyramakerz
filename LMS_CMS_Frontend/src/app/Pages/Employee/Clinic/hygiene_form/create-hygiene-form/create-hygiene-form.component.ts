@@ -361,6 +361,6 @@ if (hasHygieneTypeErrors) {
 }
 
   onView(row: any) {
-    this.router.navigate(['/Hygiene Form', row.id]);
+    this.router.navigate(['/Hygiene Form Medical Report/', row.id]);
   }
 }

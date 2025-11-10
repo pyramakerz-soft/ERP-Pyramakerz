@@ -150,7 +150,7 @@ export class HygieneFormComponent implements OnInit {
   // }
 
   navigateToCreateHygieneForm() {
-    this.router.navigate(['/Employee/Hygiene Form']);
+    this.router.navigate(['/Employee/Hygiene Form Medical Report/Create']);
   }
 
   openModal(id?: number) {
@@ -263,7 +263,7 @@ export class HygieneFormComponent implements OnInit {
   }
 
   onView(row: any) {
-    this.router.navigate(['/Employee/Hygiene Form', row.id]);
+    this.router.navigate(['/Employee/Hygiene Form Medical Report', row.id]);
   }
 
   GetTableHeaders() {

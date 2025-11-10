@@ -11,6 +11,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Org.BouncyCastle.Ocsp;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -604,23 +605,21 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                      minuteRate = hourlyRate / 60;
 
                     List<MonthlyAttendance> monthlyAttendances = Unit_Of_Work.monthlyAttendance_Repository.FindBy(m => m.EmployeeId == employee.ID && m.Day >= periodStart && m.Day <= periodEnd);
-                 
+
                     int totalDeductionHours = monthlyAttendances.Select(m => m.DeductionHours).Sum();
                     int totalDeductionMinutes = monthlyAttendances.Select(m => m.DeductionMinutes).Sum();
                     TimeSpan sunDeduction = TimeSpan.FromHours(totalDeductionHours) + TimeSpan.FromMinutes(totalDeductionMinutes);
-                    salaryHistory.TotalDeductions =(decimal)((hourlyRate * sunDeduction.Hours) + (minuteRate * sunDeduction.Minutes));
+                    salaryHistory.TotalDeductions = (decimal)(hourlyRate * sunDeduction.TotalHours);
 
 
                     int totalOverTimeHours = monthlyAttendances.Select(m => m.OvertimeHours).Sum();
                     int totalOverTimeMinutes = monthlyAttendances.Select(m => m.OvertimeMinutes).Sum();
                     TimeSpan sunOverTime = TimeSpan.FromHours(totalOverTimeHours) + TimeSpan.FromMinutes(totalOverTimeMinutes);
-                    salaryHistory.TotalOvertime = (decimal)((hourlyRate * sunOverTime.Hours) + (minuteRate * sunOverTime.Minutes));
+                    salaryHistory.TotalOvertime = (decimal)(hourlyRate * sunOverTime.TotalHours);
 
                     int totalAbsentDays = monthlyAttendances.Count(m => m.DayStatusId == 2);
                     salaryHistory.TotalDeductions += (decimal)(dailyRate * totalAbsentDays);
 
-                    Console.WriteLine($"hourlyRate: {hourlyRate} :{sunOverTime.Hours}");
-                    Console.WriteLine($"sunOverTime: {sunOverTime} :{salaryHistory.TotalOvertime}");
                 }
 
                 /// bouns

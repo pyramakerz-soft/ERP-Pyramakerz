@@ -248,7 +248,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             List<SalaryHistoryGetDTO> SalaryHistoryGetDTO = mapper.Map<List<SalaryHistoryGetDTO>>(AllSalaryHistory);
 
-            SalaryHistoryGetDTO = SalaryHistoryGetDTO.OrderBy(t => t.EmployeeArName).ToList();
+            SalaryHistoryGetDTO = SalaryHistoryGetDTO.OrderBy(t => t.EmployeeEnName).ToList();
             return Ok(SalaryHistoryGetDTO);
         }
 
