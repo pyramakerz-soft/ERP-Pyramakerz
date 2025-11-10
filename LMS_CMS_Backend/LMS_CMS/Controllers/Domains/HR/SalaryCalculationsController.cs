@@ -609,7 +609,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     int totalDeductionHours = monthlyAttendances.Select(m => m.DeductionHours).Sum();
                     int totalDeductionMinutes = monthlyAttendances.Select(m => m.DeductionMinutes).Sum();
                     TimeSpan sunDeduction = TimeSpan.FromHours(totalDeductionHours) + TimeSpan.FromMinutes(totalDeductionMinutes);
-                    salaryHistory.TotalDeductions =(decimal)((hourlyRate * sunDeduction.Hours) + (minuteRate * sunDeduction.Minutes));
+                    salaryHistory.TotalDeductions = (decimal)(hourlyRate * sunDeduction.TotalHours);
 
 
                     int totalOverTimeHours = monthlyAttendances.Select(m => m.OvertimeHours).Sum();
@@ -617,16 +617,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     TimeSpan sunOverTime = TimeSpan.FromHours(totalOverTimeHours) + TimeSpan.FromMinutes(totalOverTimeMinutes);
                     salaryHistory.TotalOvertime = (decimal)(hourlyRate * sunOverTime.TotalHours);
 
-                    var sunOverTime2 = (decimal)((hourlyRate * sunOverTime.Hours) + (minuteRate * sunOverTime.Minutes));
-
-
                     int totalAbsentDays = monthlyAttendances.Count(m => m.DayStatusId == 2);
                     salaryHistory.TotalDeductions += (decimal)(dailyRate * totalAbsentDays);
 
-                    Console.WriteLine($"totalOverTimeHours: {totalOverTimeHours} : {totalOverTimeMinutes}");
-                    Console.WriteLine($"hourlyRate: {hourlyRate}");
-                    Console.WriteLine($"sunOverTime1: {sunOverTime} :{salaryHistory.TotalOvertime}");
-                    Console.WriteLine($"sunOverTime2: {sunOverTime2} ");
                 }
 
                 /// bouns
