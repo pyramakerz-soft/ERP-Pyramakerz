@@ -192,8 +192,7 @@ isInfoRowsLoading: boolean = false;
     })
   }
 
-  OnStudentChange() {
-    this.IsMonthChoosen = false 
+  OnStudentChange() { 
     this.IsShowTabls = false
     this.TableData = []
     if(this.User_Data_After_Login.type == 'parent'){

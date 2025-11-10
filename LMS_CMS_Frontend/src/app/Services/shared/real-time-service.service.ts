@@ -24,7 +24,7 @@ export class RealTimeServiceService {
 
   private notificationDialogRef: MatDialogRef<NotificationPopUpComponent> | null = null
 
-   constructor(
+  constructor(
     private apiServ: ApiService,
     private account: AccountService,
     private chatMessageService: ChatMessageService,
