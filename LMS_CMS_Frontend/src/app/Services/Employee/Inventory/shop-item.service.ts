@@ -73,7 +73,7 @@ export class ShopItemService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<ShopItem>(`${this.baseUrl}/The Shop/${id}`, { headers })
+    return this.http.get<ShopItem>(`${this.baseUrl}/ShopItem/${id}`, { headers })
   }
 
   GetByBarcode(StoreId : number ,barcode: string, DomainName: string) {

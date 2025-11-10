@@ -256,7 +256,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Inventory" }
+              pages: new[] { "Inventory" , "Zatca Electronic-Invoice" , "ETA Electronic-Invoice" }
         )]
         public async Task<IActionResult> GetById(long id)
         {

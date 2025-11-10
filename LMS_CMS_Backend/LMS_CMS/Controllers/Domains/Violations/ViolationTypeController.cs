@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet("ByEmployeeType/{EmployeeTypeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "Violation Types" , "violation Report" }
         )]
         public async Task<IActionResult> GetByEmployeeTypeAsync(long EmployeeTypeId)
         {

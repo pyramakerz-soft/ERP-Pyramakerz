@@ -70,7 +70,7 @@ export class RegisteredEmployeeComponent {
 
   Delete(id: number){
     Swal.fire({
-      title: 'Are you sure you want to Reject This Employee?',
+      title: 'Are you sure you want to Reject and Delete This Employee?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

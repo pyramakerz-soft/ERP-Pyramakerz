@@ -124,6 +124,7 @@
                             <option [value]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Drug' | translate }}
                             </option>
                             <option *ngFor="let drug of drugs" [value]="drug.id">{{ drug.name }}</option>
+                            <option *ngIf="drugs.length === 0" disabled selected> {{ 'No Data Found' | translate }} </option>
                         </select>
                         <button (click)="openDrugModal()"
                             class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#089B41] text-xl">
@@ -140,6 +141,7 @@
                             <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Dose' |
                                 translate }}</option>
                             <option *ngFor="let dose of doses" [value]="dose.id">{{ dose.doseTimes }}</option>
+                            <option *ngIf="doses.length === 0" disabled selected> {{ 'No Data Found' | translate }} </option>
                         </select>
                         <button (click)="openDoseModal()"
                             class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#089B41] text-xl">

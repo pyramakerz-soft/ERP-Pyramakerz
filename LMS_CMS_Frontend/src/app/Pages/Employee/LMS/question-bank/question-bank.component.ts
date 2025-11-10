@@ -917,8 +917,7 @@ export class QuestionBankComponent {
   }
 
   AddOption() {
-    if (!Array.isArray(this.questionBank.questionBankOptionsDTO)) {
-      console.warn("questionBankOptionsDTO was invalid, initializing to []");
+    if (!Array.isArray(this.questionBank.questionBankOptionsDTO)) { 
       this.questionBank.questionBankOptionsDTO = [];
     } else {
       if (this.NewOption != "") {

@@ -190,7 +190,8 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status" }
+            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" 
+                , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status"  ,"Maintenance Employees"}
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -388,7 +389,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Teacher Evaluation Report" }
+            pages: new[] { "Employee" , "Teacher Evaluation Report", "Notification" }
         )]
         public IActionResult GetByDepartmentId(long DepartmentId)
         {
@@ -1541,7 +1542,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
-            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true
+            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true &&a.VacationTypes.IsDeleted != true
             , query => query.Include(emp => emp.Employee),
                 query => query.Include(emp => emp.VacationTypes));
 

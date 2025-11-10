@@ -105,7 +105,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolID/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Section" , "Bus Students", "Fees Activation", "Conduct Types" }
+            pages: new[] { "Section" , "Bus Students", "Fees Activation", "Conduct Types" , "Notification" }
         )]
         public async Task<IActionResult> GetAsyncBySchoolID(long id)
         {
