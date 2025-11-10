@@ -47,7 +47,7 @@ export class LoansComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'saveName' ,'amount'];
 
   loan: Loans = new Loans();
 
@@ -340,7 +340,7 @@ isFormValid(): boolean {
           field == 'numberOfDeduction' ||
           field == 'amount'
         ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
         }
       }

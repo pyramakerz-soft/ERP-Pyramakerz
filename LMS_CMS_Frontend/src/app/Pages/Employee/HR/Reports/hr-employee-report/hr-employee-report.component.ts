@@ -59,6 +59,10 @@ export class HrEmployeeReportComponent {
   SelectedJobCatId: number = 0
   SelectedJobName: string = '';
   SelectedJobCatName: string = '';
+  school = {
+    reportHeaderOneEn: 'Employees Report',
+    reportHeaderOneAr: 'تقرير الموظفين',
+  };
 
   constructor(
     private router: Router,

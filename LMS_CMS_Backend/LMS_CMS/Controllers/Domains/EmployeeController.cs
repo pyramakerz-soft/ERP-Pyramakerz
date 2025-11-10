@@ -1542,7 +1542,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
-            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true
+            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true &&a.VacationTypes.IsDeleted != true
             , query => query.Include(emp => emp.Employee),
                 query => query.Include(emp => emp.VacationTypes));
 
