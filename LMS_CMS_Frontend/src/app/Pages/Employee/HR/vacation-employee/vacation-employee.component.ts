@@ -49,7 +49,7 @@ export class VacationEmployeeComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'vacationTypeName'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'vacationTypesName'];
 
   vacationEmployee: VacationEmployee = new VacationEmployee();
   OldVacationEmployee: VacationEmployee = new VacationEmployee();
