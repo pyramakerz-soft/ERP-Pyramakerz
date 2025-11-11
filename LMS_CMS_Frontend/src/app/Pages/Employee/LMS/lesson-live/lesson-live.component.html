@@ -228,8 +228,7 @@
                 <label class="mb-2 primaryTxt" for="period"> {{ 'Period' | translate }}</label>
                 <input id="period" type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter' | translate }} {{ 'Period' | translate }}" [(ngModel)]="live.period" (input)="validateNumber($event, 'period')"
-                    (ngModelChange)="onInputValueChange({ field: 'period', value: $event })"
-                    (ngModelChange)="onInputValueChange({ field: 'period', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'period', value: $event })"/>
                 <span *ngIf="validationErrors['period']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['period']}}</span>
             </div>

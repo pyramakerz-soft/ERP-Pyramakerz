@@ -21,6 +21,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool AllClasses { get; set; }
         public List<long>? classids { get; set; }
         public bool IsSummerCourse { get; set; }
+        public long? AcademicYearID { get; set; }
 
     }
 }

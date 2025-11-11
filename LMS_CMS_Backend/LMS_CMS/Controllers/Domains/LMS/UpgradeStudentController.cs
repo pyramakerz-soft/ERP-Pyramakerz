@@ -143,6 +143,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                    d => d.IsDeleted != true &&
                                         d.SubjectWeightTypeID == subjectWeightType.WeightTypeID &&
                                         d.SubjectID == subjectWeightType.SubjectID &&
+                                        d.AcademicYearID == academicYearFrom.ID &&
                                         d.OpenDate >= academicYearFrom.DateFrom &&
                                         d.OpenDate <= academicYearFrom.DateTo);
 
@@ -152,7 +153,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             foreach (Assignment assignment in assignmentsIsSpecific)
                             {
                                 AssignmentStudentIsSpecific assignmentStudentIsSpecific = Unit_Of_Work.assignmentStudentIsSpecific_Repository.First_Or_Default(
-                                    d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID);
+                                    d => d.IsDeleted != true && d.AssignmentID == assignment.ID && d.StudentClassroomID == studentClassroomSubject.StudentClassroomID && d.Assignment.AcademicYearID == academicYearFrom.ID);
                                 if (assignmentStudentIsSpecific != null)
                                 {
                                     myAssignments.Add(assignment);
@@ -180,6 +181,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 .FindBy(a => a.SubjectID == subjectWeightType.SubjectID &&
                                              a.IsDeleted != true &&
                                              a.SubjectWeightTypeID == subjectWeightType.ID &&
+                                             a.AcademicYearID == academicYearFrom.ID &&
                                              a.Date >= academicYearFrom.DateFrom &&
                                              a.Date <= academicYearFrom.DateTo).ToList();
 
@@ -348,6 +350,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                .FindBy(a => a.SubjectID == subjectID &&
                                             a.IsDeleted != true &&
                                             a.IsSummerCourse == true &&
+                                            a.AcademicYearID == academicYearFrom.ID &&
                                             a.SubjectWeightTypeID == null &&
                                             a.Date >= academicYearFrom.SummerCourseDateFrom &&
                                             a.Date <= academicYearFrom.SummerCourseDateTo).ToList();

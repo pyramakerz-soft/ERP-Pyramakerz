@@ -40,5 +40,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public List<AssignmentStudentIsSpecificGetDTO> AssignmentStudentIsSpecifics { get; set; } = new List<AssignmentStudentIsSpecificGetDTO>();
         public long? InsertedByUserId { get; set; }
         public string? InsertedByUserName { get; set; }
+        public long? AcademicYearID { get; set; }
     }
 }

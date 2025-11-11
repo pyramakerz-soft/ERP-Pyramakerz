@@ -161,8 +161,7 @@ export class ViolationTypesComponent {
           next: (data) => {
             this.GetViolation();
           },
-          error: (error) => {
-            console.error('Error while deleting the Violation:', error);
+          error: (error) => { 
             Swal.fire({
               title: 'Error',
               text: 'An error occurred while deleting the Violation. Please try again later.',

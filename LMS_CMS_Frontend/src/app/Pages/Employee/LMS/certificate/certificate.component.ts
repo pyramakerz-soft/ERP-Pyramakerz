@@ -456,7 +456,7 @@ isInfoRowsLoading: boolean = false;
   GetAllData() {
     this.TableData = []
     this.LastColumn = []
-    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedClassId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.isSummerCourse, this.DomainName).subscribe((d) => {
+    this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedClassId, this.SelectedStudentId, this.SelectedAcademicYearId, this.DateFrom, this.DateTo, this.isSummerCourse, this.DomainName).subscribe((d) => {
       this.subjects = d.subjectDTO
       this.TableData = d.cells
       this.weightTypes = d.header

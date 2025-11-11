@@ -28,5 +28,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public long AssignmentTypeID { get; set; }
         public long SubjectWeightTypeID { get; set; }
         public List<long>? StudentClassroomIDs { get; set; }
+        public long? AcademicYearID { get; set; }
     }
 }

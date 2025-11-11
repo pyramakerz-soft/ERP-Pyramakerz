@@ -1712,6 +1712,12 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.SubjectWeightTypeID)
               .OnDelete(DeleteBehavior.Restrict); 
             
+            modelBuilder.Entity<Assignment>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.Assignments)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict); 
+            
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.StudentClassroom)
               .WithMany(p => p.AssignmentStudents)
@@ -2235,6 +2241,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(p => p.DirectMarks)
                 .HasForeignKey(p => p.SubjectWeightTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.DirectMarks)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DirectMarkClasses>()
                 .HasOne(p => p.DirectMark)

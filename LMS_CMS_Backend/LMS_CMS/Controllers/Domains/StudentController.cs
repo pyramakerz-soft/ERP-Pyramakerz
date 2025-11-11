@@ -1528,9 +1528,18 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (parameters.AcademicYearID.HasValue)
                 students = students.Where(s => s.StudentGrades.Any(g => g.AcademicYearID == parameters.AcademicYearID.Value && g.IsDeleted != true)).ToList();
 
+            //if (parameters.GradeID.HasValue)
+            //    students = students.Where(s => s.StudentGrades.Any(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)).ToList();
             if (parameters.GradeID.HasValue)
-                students = students.Where(s => s.StudentGrades.Any(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)).ToList();
-
+            {
+                students = students.Where(s =>
+                    s.StudentGrades.Any(g =>
+                        g.GradeID == parameters.GradeID.Value &&
+                        g.IsDeleted != true &&
+                        (!parameters.AcademicYearID.HasValue || g.AcademicYearID == parameters.AcademicYearID.Value)
+                    )
+                ).ToList();
+            }
             if (parameters.ClassroomID.HasValue)
                 students = students.Where(s => s.StudentClassrooms.Any(c => c.ClassID == parameters.ClassroomID.Value && c.IsDeleted != true)).ToList();
 

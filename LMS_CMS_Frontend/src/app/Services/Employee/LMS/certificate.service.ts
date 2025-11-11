@@ -19,7 +19,7 @@ export class CertificateService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(SchoolId:number ,ClassId:number , StudentId:number,DateFrom:string,DateTo:String,isSummerCourse:boolean ,DomainName: string) {
+  Get(SchoolId:number ,ClassId:number , StudentId:number, AcademicYearId:number,DateFrom:string,DateTo:String,isSummerCourse:boolean ,DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -27,9 +27,8 @@ export class CertificateService {
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
-      console.log(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${DateFrom}/${DateTo}?IsSummerCourse=${isSummerCourse}`)
+      .set('Content-Type', 'application/json'); 
       return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] ,lastColumn :CertificateSubjectTotalMark[] }>(`
-        ${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${DateFrom}/${DateTo}?IsSummerCourse=${isSummerCourse}`, { headers });
+        ${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${ClassId}/${StudentId}/${AcademicYearId}/${DateFrom}/${DateTo}?IsSummerCourse=${isSummerCourse}`, { headers });
   }
 }

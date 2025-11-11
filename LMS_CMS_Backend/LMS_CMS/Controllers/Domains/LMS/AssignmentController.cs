@@ -238,8 +238,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudentID/{studID}/{subjID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "student" },
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "student" }
         )]
         public async Task<IActionResult> GetByStudentID(long studID, long subjID)
         {
@@ -284,6 +283,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return NotFound("This Subject isn't in the student classroom");
             }
+            
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == studID && d.AcademicYear.IsActive == true
+                );
+
+            if (studentGrade == null)
+            {
+                return NotFound("This student isn't in the active academic year");
+            }
 
             // Make sure that this subject is assigned to the student and not hidden
             StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
@@ -298,7 +306,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
             List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = await Unit_Of_Work.assignmentStudentIsSpecific_Repository.Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
-                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID && today >= d.Assignment.OpenDate,
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID && today >= d.Assignment.OpenDate 
+                && d.Assignment.AcademicYearID == studentGrade.AcademicYearID,
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
                 query => query.Include(d => d.InsertedByEmployee),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
@@ -306,7 +315,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 );
 
             List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
-                d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true && today >= d.OpenDate,
+                d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true && today >= d.OpenDate
+                && d.AcademicYearID == studentGrade.AcademicYearID,
                 query => query.Include(d => d.AssignmentType),
                 query => query.Include(d => d.InsertedByEmployee),
                 query => query.Include(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
@@ -339,7 +349,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AssignmentStudent> assignmentStudentsSolved = await Unit_Of_Work.assignmentStudent_Repository.Select_All_With_IncludesById<AssignmentStudent>(
-                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID,
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID
+                && d.Assignment.AcademicYearID == studentGrade.AcademicYearID,
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.InsertedByEmployee),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
@@ -537,6 +548,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewAssignment.IsSpecificStudents == false)
             {
                 NewAssignment.StudentClassroomIDs = null;
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewAssignment.AcademicYearID);
+            if (academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            }
+
+            if (NewAssignment.OpenDate < academicYear.DateFrom || NewAssignment.OpenDate > academicYear.DateTo)
+            {
+                return BadRequest("This Date Is Not in this Academic Year");
             }
 
             Assignment assignment = mapper.Map<Assignment>(NewAssignment);
@@ -788,6 +810,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("You Didn't choose Students");
             }
 
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EditAssignment.AcademicYearID);
+            if (academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            }
+             
+            if(EditAssignment.OpenDate < academicYear.DateFrom || EditAssignment.OpenDate > academicYear.DateTo)
+            {
+                return BadRequest("This Date Is Not in this Academic Year");
+            }
 
             if (EditAssignment.IsSpecificStudents == false)
             {

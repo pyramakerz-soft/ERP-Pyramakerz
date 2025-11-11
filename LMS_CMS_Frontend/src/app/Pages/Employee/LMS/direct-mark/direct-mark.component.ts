@@ -29,6 +29,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 
 @Component({
   selector: 'app-direct-mark',
@@ -74,6 +76,7 @@ export class DirectMarkComponent {
   SelectedSubjectId: number = 0;
   schoolsForCreate: School[] = []
   GradesForCreate: Grade[] = []
+  years: AcademicYear[] = []
   subjectsForCreate: Subject[] = [];
   subjectWeightsForCreate: SubjectWeight[] = [];
   classrooms: Classroom[] = [];
@@ -92,6 +95,7 @@ export class DirectMarkComponent {
     public activeRoute: ActivatedRoute,
     private SchoolServ: SchoolService,
     private GradeServ: GradeService,
+    private acadimicYearService: AcadimicYearService,
     private ClassroomServ: ClassroomService,
     public subjectService: SubjectService,
     public subjectWeightService: SubjectWeightService,
@@ -169,12 +173,12 @@ export class DirectMarkComponent {
 
   GetClassroomsData() {
     this.classrooms = []
-    if (!this.directMark.isSummerCourse && this.directMark.subjectID) {
-      this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+    if (!this.directMark.isSummerCourse && this.directMark.subjectID && this.directMark.academicYearID) {
+      this.ClassroomServ.GetBySubjectAndAcademicYearId(this.directMark.subjectID, this.directMark.academicYearID, this.DomainName).subscribe((d) => {
         this.classrooms = d
       })
-    }else if (this.directMark.isSummerCourse && this.directMark.date && this.directMark.subjectID) {
-      this.ClassroomServ.GetFailedClassesBySubject(this.directMark.subjectID, this.directMark.date!, this.DomainName).subscribe((d) => {
+    }else if (this.directMark.isSummerCourse && this.directMark.date && this.directMark.subjectID && this.directMark.academicYearID) {
+      this.ClassroomServ.GetFailedClassesBySubjectAndYear(this.directMark.subjectID, this.directMark.academicYearID, this.directMark.date!, this.DomainName).subscribe((d) => {
         this.classrooms = d
       })
     }
@@ -343,12 +347,13 @@ export class DirectMarkComponent {
       data => {
         this.directMark = data
         this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+          this.acadimicYearService.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => { this.years = d })
           this.GradesForCreate = d
           this.subjectsForCreate = []
           this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
             this.subjectsForCreate = d
             this.getSubjectWeightData()
-            this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+            this.ClassroomServ.GetBySubjectAndAcademicYearId(this.directMark.subjectID, this.directMark.academicYearID, this.DomainName).subscribe((d) => {
               this.classrooms = d
               this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
               this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID)
@@ -574,15 +579,29 @@ isFormValid(): boolean {
     this.viewStudents = false
     this.viewClassStudents = false
     this.GradesForCreate = []
+    this.years = []
     this.subjectsForCreate = []
     this.directMark.gradeID = 0
     this.directMark.subjectID = 0
+    this.directMark.academicYearID = 0
     this.directMark.directMarkClasses = [];
     this.directMark.classids = [];
     this.directMark.allClasses = false;
     this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
     }) 
+    this.acadimicYearService.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+      this.years = d
+    }) 
+  }
+
+  onYearModalChange() { 
+    this.viewStudents = false
+    this.viewClassStudents = false 
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false; 
+    this.GetClassroomsData()
   }
 
   onGradeModalChange() {

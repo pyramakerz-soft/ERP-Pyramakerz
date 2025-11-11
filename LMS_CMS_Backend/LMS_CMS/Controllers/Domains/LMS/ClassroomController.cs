@@ -267,17 +267,48 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<ClassroomGetDTO> DTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
             return Ok(DTO);
         }
-        
-        [HttpGet("GetFailedClassesBySubject/{SubjectId}/{date}")]
+
+        [HttpGet("GetBySubjectAndAcademicYearId/{SubjectId}/{AcademicYearId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject", "Direct Mark" }
+         )]
+        public async Task<IActionResult> GetBySubjectAndAcademicYearId(long SubjectId, long AcademicYearId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.SubjectID == SubjectId && f.Classroom.AcademicYearID == AcademicYearId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true && f.Teacher.IsDeleted != true,
+                    q => q.Include(cs => cs.Classroom)
+                );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Classroom?> classrooms = classroomSubjects.Select(s => s.Classroom).Distinct().ToList();
+
+            if (classrooms == null || classrooms.Count == 0)
+            {
+                return NotFound();
+            }
+            List<ClassroomGetDTO> DTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
+            return Ok(DTO);
+        }
+
+
+        [HttpGet("GetFailedClassesBySubjectAndYear/{SubjectId}/{AcademicYearID}/{date}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
              pages: new[] { "Classroom Subject" , "Direct Mark" }
          )]
-        public async Task<IActionResult> GetFailedClassesBySubject(long SubjectId, DateOnly date)
+        public async Task<IActionResult> GetFailedClassesBySubjectAndYear(long SubjectId, long AcademicYearID, DateOnly date)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.SummerCourseDateFrom <= date && d.SummerCourseDateTo >= date);
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == AcademicYearID && d.SummerCourseDateFrom <= date && d.SummerCourseDateTo >= date);
             if( academicYear == null)
             {
                 return NotFound(); 

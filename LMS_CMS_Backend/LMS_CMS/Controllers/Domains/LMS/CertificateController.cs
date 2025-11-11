@@ -30,12 +30,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
-        [HttpGet("ByStudentId/{SchoolId}/{ClassId}/{StudentId}/{DateFrom}/{DateTo}")]
+        [HttpGet("ByStudentId/{SchoolId}/{ClassId}/{StudentId}/{AcademicYearId}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] {"octa", "employee", "student", "parent" },
             pages: new[] { "Certificate" }
         )]
-        public async Task<IActionResult> GetById(long SchoolId, long ClassId, long StudentId, DateOnly DateFrom, DateOnly DateTo, bool? IsSummerCourse)
+        public async Task<IActionResult> GetById(long SchoolId, long ClassId, long StudentId, long AcademicYearId, DateOnly DateFrom, DateOnly DateTo, bool? IsSummerCourse)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                 s.Classroom != null &&
                                                 s.ClassID == ClassId &&
                                                 s.Classroom.IsDeleted != true &&
-                                                s.Classroom.AcademicYear != null &&
+                                                s.Classroom.AcademicYearID == AcademicYearId &&
                                                 s.Classroom.AcademicYear.DateFrom <= DateFrom &&
                                                 s.Classroom.AcademicYear.DateTo >= DateTo &&
                                                 s.Classroom.AcademicYear.SchoolID == SchoolId);
@@ -110,7 +110,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                 s.Classroom != null &&
                                                 s.ClassID == ClassId &&
                                                 s.Classroom.IsDeleted != true &&
-                                                s.Classroom.AcademicYear != null &&
+                                                s.Classroom.AcademicYearID == AcademicYearId &&
                                                 s.Classroom.AcademicYear.SummerCourseDateFrom <= DateFrom &&
                                                 s.Classroom.AcademicYear.SummerCourseDateTo >= DateTo &&
                                                 s.Classroom.AcademicYear.SchoolID == SchoolId);
@@ -121,7 +121,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     List<DirectMarkClassesStudent> directMarkClassesStudents = await Unit_Of_Work.directMarkClassesStudent_Repository.Select_All_With_IncludesById<DirectMarkClassesStudent>(
                         d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID &&
                         d.DirectMark.Subject.HideFromGradeReport == false &&
-                        d.DirectMark.IsDeleted != true && d.DirectMark.IsSummerCourse == true && d.DirectMark.Date >= DateFrom && d.DirectMark.Date <= DateTo,
+                        d.DirectMark.IsDeleted != true && d.DirectMark.IsSummerCourse == true && d.DirectMark.AcademicYearID == AcademicYearId && d.DirectMark.Date >= DateFrom && d.DirectMark.Date <= DateTo,
                         query => query.Include(d => d.DirectMark).ThenInclude(d => d.Subject)
                         );
 
@@ -172,6 +172,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                          d.Assignment.IsDeleted != true &&
                                          d.Assignment.SubjectID == subject.ID && 
                                          d.Assignment.SubjectWeightTypeID == swt.ID &&
+                                         d.Assignment.AcademicYearID== AcademicYearId &&
                                          d.Assignment.OpenDate >= DateFrom &&
                                          d.Assignment.OpenDate <= DateTo,
                                     query => query.Include(d => d.Assignment));
@@ -181,7 +182,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                     d => d.IsDeleted != true &&
                                          d.SubjectID == subject.ID &&
                                          d.SubjectWeightTypeID == swt.ID &&
-                                         !d.IsSpecificStudents && 
+                                         !d.IsSpecificStudents &&
+                                         d.AcademicYearID == AcademicYearId &&
                                          d.OpenDate >= DateFrom &&
                                          d.OpenDate <= DateTo);
 
@@ -214,7 +216,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             List<DirectMark> directMarks = Unit_Of_Work.directMark_Repository
                                 .FindBy(a => a.SubjectID == subjectId &&
                                              a.IsDeleted != true &&
-                                             a.SubjectWeightTypeID == swt.ID && 
+                                             a.SubjectWeightTypeID == swt.ID &&
+                                             a.AcademicYearID == AcademicYearId &&
                                              a.Date >= DateFrom &&
                                              a.Date <= DateTo).ToList();
 
@@ -291,6 +294,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .FindBy(a => a.SubjectID == subjectId &&
                                          a.IsDeleted != true &&
                                          a.IsSummerCourse == true &&
+                                         a.AcademicYearID == AcademicYearId &&
                                          a.Date >= DateFrom &&
                                          a.Date <= DateTo).ToList();
 

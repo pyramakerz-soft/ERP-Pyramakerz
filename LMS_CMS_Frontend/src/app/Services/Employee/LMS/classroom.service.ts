@@ -52,7 +52,7 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetBySubject/${SubjectId}`, { headers })
   }  
 
-  GetFailedClassesBySubject(SubjectId:number, date:string, DomainName:string) {
+  GetBySubjectAndAcademicYearId(SubjectId:number, yearId:number, DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -61,7 +61,19 @@ baseUrl = ""
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetFailedClassesBySubject/${SubjectId}/${date}`, { headers })
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetBySubjectAndAcademicYearId/${SubjectId}/${yearId}`, { headers })
+  }  
+
+  GetFailedClassesBySubjectAndYear(SubjectId:number, YearId:number, date:string, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetFailedClassesBySubjectAndYear/${SubjectId}/${YearId}/${date}`, { headers })
   }  
 
   GetBySchoolId(schoolId:number,DomainName:string) {
