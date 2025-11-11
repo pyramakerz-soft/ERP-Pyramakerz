@@ -125,6 +125,8 @@ export class LoansReportComponent implements OnInit {
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
+        console.error('this.employees:', this.employees);
+
         this.selectedEmployeeId = 0;
         this.onFilterChange();
       } catch (error) {
@@ -147,6 +149,7 @@ export class LoansReportComponent implements OnInit {
   }
 
 async viewReport() {
+  console.log('this.selectedEmployeeId:', this.selectedEmployeeId);
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
     Swal.fire({
       title: 'Invalid Date Range',
@@ -206,6 +209,7 @@ async viewReport() {
     console.log('API Response:', response);
     
     if (Array.isArray(response)) {
+      this.loansReports = [];
       this.loansReports = response;
       console.log('Loans reports loaded:', this.loansReports.length);
     } else {

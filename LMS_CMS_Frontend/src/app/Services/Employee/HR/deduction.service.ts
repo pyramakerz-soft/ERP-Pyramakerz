@@ -91,7 +91,7 @@ export class DeductionService {
 
     // only include params that are actually selected/passed
     if (typeof jobCategoryId === 'number' && jobCategoryId > 0) {
-      requestBody.jobCategoryId = jobCategoryId;
+      requestBody.categoryId = jobCategoryId;
     }
     if (typeof jobId === 'number' && jobId > 0) {
       requestBody.jobId = jobId;
