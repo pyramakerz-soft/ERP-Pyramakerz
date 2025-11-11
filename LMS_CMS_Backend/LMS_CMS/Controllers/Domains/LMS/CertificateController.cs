@@ -173,7 +173,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                          d.Assignment.SubjectID == subject.ID && 
                                          d.Assignment.SubjectWeightTypeID == swt.ID &&
                                          d.Assignment.OpenDate >= DateFrom &&
-                                         d.Assignment.OpenDate <= DateTo);
+                                         d.Assignment.OpenDate <= DateTo,
+                                    query => query.Include(d => d.Assignment));
 
                             List<Assignment> normalAssignments = await Unit_Of_Work.assignment_Repository
                                 .Select_All_With_IncludesById<Assignment>(

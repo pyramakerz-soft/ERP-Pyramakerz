@@ -23,11 +23,21 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './payable-doc-type.component.html',
-  styleUrl: './payable-doc-type.component.css'
+  styleUrl: './payable-doc-type.component.css',
 })
 export class PayableDocTypeComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -52,7 +62,7 @@ export class PayableDocTypeComponent {
 
   validationErrors: { [key in keyof PayableDocType]?: string } = {};
 
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -65,8 +75,8 @@ export class PayableDocTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public PayableDocTypeServ: PayableDocTypeService,
-    private languageService: LanguageService, 
-  ) { }
+    private languageService: LanguageService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -86,35 +96,44 @@ export class PayableDocTypeComponent {
     });
 
     this.GetAllData();
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.PayableDocTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
 
   Create() {
     this.mode = 'Create';
-    this.data = new PayableDocType()
+    this.data = new PayableDocType();
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Type') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -124,8 +143,8 @@ export class PayableDocTypeComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.PayableDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+          this.GetAllData();
+        });
       }
     });
   }
@@ -133,8 +152,8 @@ export class PayableDocTypeComponent {
   Edit(row: PayableDocType) {
     this.mode = 'Edit';
     this.PayableDocTypeServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.data = d
-    })
+      this.data = d;
+    });
     this.openModal();
   }
 
@@ -158,14 +177,15 @@ export class PayableDocTypeComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.PayableDocTypeServ.Add(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-        },
-          error => {
-            this.isLoading = false
+        this.PayableDocTypeServ.Add(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -173,15 +193,17 @@ export class PayableDocTypeComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.PayableDocTypeServ.Edit(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-        },
-          error => {
-            this.isLoading = false
+        this.PayableDocTypeServ.Edit(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -189,15 +211,16 @@ export class PayableDocTypeComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
     }
   }
 
   closeModal() {
     this.isModalVisible = false;
-    this.validationErrors = {}
-    this.isLoading = false
+    this.validationErrors = {};
+    this.isLoading = false;
   }
 
   openModal() {
@@ -210,12 +233,10 @@ export class PayableDocTypeComponent {
       if (this.data.hasOwnProperty(key)) {
         const field = key as keyof PayableDocType;
         if (!this.data[field]) {
-          if (
-            field == 'name'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -224,11 +245,14 @@ export class PayableDocTypeComponent {
 
     if (this.data.name.length > 100) {
       isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
 
     return isValid;
   }
+
   capitalizeField(field: keyof PayableDocType): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -260,13 +284,24 @@ export class PayableDocTypeComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

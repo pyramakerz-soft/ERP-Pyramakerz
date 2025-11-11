@@ -1424,9 +1424,23 @@
   "Teacher Evaluation Report": "تقرير تقييم المعلم",
   "Pass Mark": "درجة النجاح",
   "Cut Off Date": "تاريخ الإغلاق",
-  "Meeting Link": "رابط الاجتماع",
-  "Number Of Sessions": "عدد الجلسات",
-  "At least one class must be selected": "يجب اختيار فصل واحد على الأقل",
+    "Meeting Link": "رابط الاجتماع",
+      "Number Of Sessions": "عدد الجلسات",
+        "At least one class must be selected": "يجب اختيار فصل واحد على الأقل",
   "Tax Card": "بطاقة ضريبية",
-  "at this year": "في هذا العام"
+"AccountNumberID": "رقم الحساب",
+"ReceivableDocTypesID" : "أنواع المستندات المستحقة",
+"DocNumber" : "رقم المستند",
+"BankOrSafeID" : "البنك أو الخزينة"
+
+
+
+
+
+
+
+
+
+
+
 }
