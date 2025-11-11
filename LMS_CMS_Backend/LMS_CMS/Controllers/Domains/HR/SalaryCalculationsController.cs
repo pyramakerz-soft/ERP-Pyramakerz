@@ -237,7 +237,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                             if (vacationEmployee != null && vacationEmployee.HalfDay == true) // half day vacation
                             {
-                                monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation without deduction
+                                monthlyAttendance.DayStatusId = 6; ///////////////////////////////////////////////////////////////////////////////////// Vacation without deduction
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 {
                                     TimeSpan totalWorked = TimeSpan.Zero;
