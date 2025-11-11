@@ -194,19 +194,6 @@ private showSuccessAlert(message: string) {
   AddClockIn() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      // if (
-      //   this.employeeClocks.clockIn &&
-      //   this.employeeClocks.clockIn.length === 5
-      // ) {
-      //   this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
-      // }
-      // if (
-      //   this.employeeClocks.clockOut &&
-      //   this.employeeClocks.clockOut.length === 5
-      // ) {
-      //   this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
-      // }
-      console.log(this.employeeClocks);
       this.EmployeeClocksServ.Add(
         this.employeeClocks,
         this.DomainName
@@ -239,6 +226,7 @@ private showSuccessAlert(message: string) {
 
   isFormValid(): boolean {
     let isValid = true;
+    console.log(this.employeeClocks);
     for (const key in this.employeeClocks) {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
@@ -251,27 +239,18 @@ private showSuccessAlert(message: string) {
         if(this.employeeClocks.clockIn){
           this.employeeClocks.date=this.employeeClocks.clockIn.slice(0,10)
         }
+        if(this.employeeClocks.clockIn &&this.employeeClocks.clockOut && this.employeeClocks.clockIn > this.employeeClocks.clockOut){
+          this.validationErrors['clockOut'] = `Check Out time must be after the Check In time`;
+          isValid = false;      
+        }
       }
     }
-    // if (
-    //   this.employeeClocks.clockOut &&
-    //   this.employeeClocks.clockIn &&
-    //   this.employeeClocks.clockOut < this.employeeClocks.clockIn
-    // ) {
-    //   this.validationErrors['clockOut'] =
-    //     'Clock out time cannot be earlier than clock in time.';
-    //   isValid = false;
-    // }
     return isValid;
   }
 
   isFormValidForCreate(): boolean {
     let isValid = true;
-    // isValid = !this.TableData.some(
-    //   (element) =>
-    //     element.clockIn &&
-    //     element.clockOut
-    // );
+    console.log()
     return isValid;
   }
 

@@ -623,7 +623,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
 
                 /// bouns
-                List<Bouns> Allbouns = Unit_Of_Work.bouns_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID);
+                List<Bouns> Allbouns = Unit_Of_Work.bouns_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID && m.IsDeleted != true);
                 foreach (var item in Allbouns)
                 {
                     if(item.BounsTypeID == 1) // hours
@@ -643,7 +643,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
 
                 /// deduction
-                List<Deduction> Alldeductions = Unit_Of_Work.deduction_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID);
+                List<Deduction> Alldeductions = Unit_Of_Work.deduction_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID && m.IsDeleted != true);
                 foreach (var item in Alldeductions)
                 {
                     if (item.DeductionTypeID == 1) // hours
@@ -663,7 +663,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 /// Loans
                 DateTime targetDate = new DateTime(year, month, startDay);
 
-                List<Loans> Allloans = Unit_Of_Work.loans_Repository.FindBy(m => m.EmployeeID == employee.ID &&
+                List<Loans> Allloans = Unit_Of_Work.loans_Repository.FindBy(m => m.EmployeeID == employee.ID && m.IsDeleted != true &&
                     (m.DeductionStartYear < year ||
                     (m.DeductionStartYear == year && m.DeductionStartMonth <= month)) &&
                     (m.DeductionEndYear > year ||
