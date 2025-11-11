@@ -74,6 +74,11 @@ export class RemedialClassroomComponent {
   hiddenColumns: string[] = ['Actions'];
   isRtl: boolean = false;
   subscription!: Subscription;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -133,14 +138,51 @@ export class RemedialClassroomComponent {
     });
   }
 
-  GetAllData() {
+  // GetAllData() {
+  //   this.TableData = [];
+  //   if(this.SelectedSchoolIdForFilter != 0){
+  //     this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
+  //       this.TableData = d;
+  //     });
+  //   }
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
     if(this.SelectedSchoolIdForFilter != 0){
-      this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
-        this.TableData = d;
-      });
+      this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolIdForFilter ,DomainName, pageNumber, pageSize).subscribe(
+        (data) => {
+          this.CurrentPage = data.pagination.currentPage;
+          this.PageSize = data.pagination.pageSize;
+          this.TotalPages = data.pagination.totalPages;
+          this.TotalRecords = data.pagination.totalRecords;
+          this.TableData = data.data;
+        },
+        (error) => {
+          if (error.status == 404) {
+            if (this.TotalRecords != 0) {
+              let lastPage;
+              if (this.isDeleting) {
+                lastPage = (this.TotalRecords - 1) / this.PageSize;
+              } else {
+                lastPage = this.TotalRecords / this.PageSize;
+              }
+              if (lastPage >= 1) {
+                if (this.isDeleting) {
+                  this.CurrentPage = Math.floor(lastPage);
+                  this.isDeleting = false;
+                } else {
+                  this.CurrentPage = Math.ceil(lastPage);
+                }
+                this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+              }
+            }
+          } 
+        }
+      );
     }
   }
+
 
   GetAllAcademicYearBySchool() {
     this.academicYears = [];
@@ -180,7 +222,7 @@ export class RemedialClassroomComponent {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
@@ -214,7 +256,7 @@ export class RemedialClassroomComponent {
       else if (this.mode == 'Edit') {
         console.log(this.remedialClassroom)
         this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+         this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
@@ -250,13 +292,16 @@ export class RemedialClassroomComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: RemedialClassroom[] = await firstValueFrom(
-        this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      const data: any = await firstValueFrom(
+        this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolId, this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -292,7 +337,7 @@ export class RemedialClassroomComponent {
       if (result.isConfirmed) {
         this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error: (error) => {
             console.error('Error while deleting the Violation:', error);
@@ -463,19 +508,63 @@ isFormValid(): boolean {
   }
 
   Create() {
-    this.mode = "Create"
-    this.GetAllTeachers()
-    this.openModal()
+      this.mode = "Create"
+      this.GetAllTeachers()
+      this.openModal()
+    }
+
+    private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
-  private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
   }
-}
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }  
 }
