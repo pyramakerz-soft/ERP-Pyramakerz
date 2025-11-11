@@ -25,11 +25,21 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './add-child.component.html',
-  styleUrl: './add-child.component.css'
+  styleUrl: './add-child.component.css',
 })
 export class AddChildComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -48,13 +58,13 @@ export class AddChildComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'studentName'];
-  NationalID: string = "";
+  NationalID: string = '';
   Student: Student = new Student();
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
   isRtl: boolean = false;
   subscription!: Subscription;
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
-  IsNationalIsEmpty: string = ''
+  IsNationalIsEmpty: string = '';
 
   constructor(
     private router: Router,
@@ -68,8 +78,8 @@ export class AddChildComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmplyeeStudentServ: EmployeeStudentService,
-    public StudentServ: StudentService, 
-  ) { }
+    public StudentServ: StudentService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -88,41 +98,47 @@ export class AddChildComponent {
       }
     });
 
-
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
 
     this.GetAllData();
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.EmplyeeStudentServ.Get(this.UserID, this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
 
   Create() {
     this.mode = 'Create';
-    this.Student = new Student()
-    this.NationalID = ""
-    this.emplyeeStudent = new EmplyeeStudent()
+    this.Student = new Student();
+    this.NationalID = '';
+    this.emplyeeStudent = new EmplyeeStudent();
     this.openModal();
   }
 
-
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Child'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Child'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -132,8 +148,8 @@ export class AddChildComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.EmplyeeStudentServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+          this.GetAllData();
+        });
       }
     });
   }
@@ -146,19 +162,23 @@ export class AddChildComponent {
     );
     return IsAllow;
   }
+
   CreateOREdit() {
     if (this.NationalID == '') {
-      this.IsNationalIsEmpty = 'National Id Is Required'
+      this.IsNationalIsEmpty = this.getRequiredErrorMessage('National Id');
       return;
     }
     if (this.emplyeeStudent.studentID != 0) {
-      this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe(
+      this.EmplyeeStudentServ.Add(
+        this.emplyeeStudent,
+        this.DomainName
+      ).subscribe(
         (d) => {
           this.GetAllData();
-          this.closeModal()
+          this.closeModal();
         },
         (error) => {
-          if (error.error == "Student Already Assigned To This Employee") {
+          if (error.error == 'Student Already Assigned To This Employee') {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -168,9 +188,8 @@ export class AddChildComponent {
             });
           }
         }
-      )
-    }
-    else {
+      );
+    } else {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
@@ -195,13 +214,10 @@ export class AddChildComponent {
       if (this.emplyeeStudent.hasOwnProperty(key)) {
         const field = key as keyof EmplyeeStudent;
         if (!this.emplyeeStudent[field]) {
-          if (
-            field == 'employeeID' ||
-            field == 'studentID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'employeeID' || field == 'studentID') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -209,6 +225,7 @@ export class AddChildComponent {
     }
     return isValid;
   }
+
   capitalizeField(field: keyof EmplyeeStudent): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -221,15 +238,18 @@ export class AddChildComponent {
   }
 
   SelectChild(nationalId: string) {
-      this.IsNationalIsEmpty = ''
+    this.IsNationalIsEmpty = '';
+    this.validationErrors = {};
 
-    this.Student = new Student()
-    this.emplyeeStudent = new EmplyeeStudent()
-    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
-      this.Student = d
-      this.emplyeeStudent.studentID = d.id
-      this.emplyeeStudent.employeeID = this.UserID
-    })
+    this.Student = new Student();
+    this.emplyeeStudent = new EmplyeeStudent();
+    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe(
+      (d) => {
+        this.Student = d;
+        this.emplyeeStudent.studentID = d.id;
+        this.emplyeeStudent.employeeID = this.UserID;
+      }
+    );
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -252,7 +272,7 @@ export class AddChildComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -271,6 +291,17 @@ export class AddChildComponent {
       event.target.value = '';
     } else {
       this.NationalID = value;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

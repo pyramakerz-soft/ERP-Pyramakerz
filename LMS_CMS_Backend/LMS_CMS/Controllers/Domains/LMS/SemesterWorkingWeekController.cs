@@ -60,7 +60,55 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             return Ok(semesterWorkingWeeksDTO);
         }
-        
+
+        ////////////////////////////////////////////////////
+
+        [HttpGet("GetBySemesterIDGetWithPaggination/{id}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Working Weeks", "Lessons" }
+         )]
+        public async Task<IActionResult> GetAsyncGetWithPaggination(long id , [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.semesterWorkingWeek_Repository
+               .CountAsync(f => f.IsDeleted != true && f.SemesterID == id);
+
+            Semester Semester = Unit_Of_Work.semester_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
+            if (Semester == null)
+            {
+                return NotFound("No Semester With this ID");
+            }
+
+            List<SemesterWorkingWeek> semesterWorkingWeeks = await Unit_Of_Work.semesterWorkingWeek_Repository.Select_All_With_IncludesById_Pagination<SemesterWorkingWeek>(
+                    f => f.IsDeleted != true && f.SemesterID == id,
+                    query => query.Include(emp => emp.Semester))                   
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (semesterWorkingWeeks == null || semesterWorkingWeeks.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<SemesterWorkingWeekGetDTO> semesterWorkingWeeksDTO = mapper.Map<List<SemesterWorkingWeekGetDTO>>(semesterWorkingWeeks);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = semesterWorkingWeeksDTO, Pagination = paginationMetadata });
+        }
+
         ////////////////////////////////////////////////////
 
         [HttpGet("GetByID/{id}")]

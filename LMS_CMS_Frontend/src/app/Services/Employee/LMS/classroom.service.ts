@@ -124,6 +124,20 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByAcademicYearID/${AcYearId}`, { headers })
   }
 
+  GetByAcademicYearIDWithPaggination(AcYearId:number,DomainName: string, pageNumber: number, pageSize: number) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    // return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByAcademicYearIDWithPaggination/${AcYearId}`, { headers })
+    return this.http.get<{ data: Classroom[], pagination: any }>(`${this.baseUrl}/Classroom/ByAcademicYearIDWithPaggination/${AcYearId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
+
   GetByActiveAcYear(DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 

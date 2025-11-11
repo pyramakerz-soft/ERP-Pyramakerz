@@ -27,6 +27,19 @@ export class AcadimicYearService {
     return this.http.get<AcademicYear[]>(`${this.baseUrl}/AcademicYear`, { headers })
   }
 
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+     if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+    return this.http.get<{ data: AcademicYear[], pagination: any }>(`${this.baseUrl}/AcademicYear/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    
+  }
+
   GetBySchoolId(id:number ,DomainName:string){
     if(DomainName!=null) {
      this.header=DomainName 

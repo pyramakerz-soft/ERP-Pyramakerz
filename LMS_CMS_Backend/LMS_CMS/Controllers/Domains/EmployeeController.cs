@@ -78,14 +78,19 @@ namespace LMS_CMS_PL.Controllers.Domains
             int totalRecords = await Unit_Of_Work.employee_Repository
                .CountAsync(f => f.IsDeleted != true);
 
-            List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById_Pagination<Employee>(
-                    sem => sem.IsDeleted != true,
-                    query => query.Include(emp => emp.BusCompany),
-                    query => query.Include(emp => emp.EmployeeType),
-                    query => query.Include(emp => emp.Role))
-                   .Skip((pageNumber - 1) * pageSize)
-                   .Take(pageSize)
-                   .ToListAsync();
+            List<Employee> Employees = await Unit_Of_Work.employee_Repository
+                                .Select_All_With_IncludesById<Employee>(
+                                    sem => sem.IsDeleted != true,
+                                    query => query.Include(emp => emp.BusCompany),
+                                    query => query.Include(emp => emp.EmployeeType),
+                                    query => query.Include(emp => emp.Role)); // ✅ sort before pagination
+
+            Employees = Employees.OrderBy(t => t.en_name).ToList();
+
+            Employees = Employees
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
 
             if (Employees == null || Employees.Count == 0)
             {
@@ -171,8 +176,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
                 employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
             }
-
-            EmployeesDTO = EmployeesDTO.OrderBy(t => t.en_name).ToList();
 
             var paginationMetadata = new
             {

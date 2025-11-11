@@ -1417,9 +1417,25 @@
   "Teacher Evaluation Report": "Teacher Evaluation Report",
   "Pass Mark": "Pass Mark",
   "Cut Off Date": "Cut Off Date",
-  "Meeting Link": "Meeting Link",
-  "Number Of Sessions": "Number Of Sessions",
-  "At least one class must be selected": "At least one class must be selected",
-  "Tax Card": "Tax Card",
-  "at this year": "at this year"
+    "Meeting Link": "Meeting Link",
+      "Number Of Sessions": "Number Of Sessions",
+        "At least one class must be selected": "At least one class must be selected",
+          "Tax Card": "Tax Card",
+          "AccountNumberID" : "Account Number",
+          "ReceivableDocTypesID" : "Receivable Doc Types",
+          "DocNumber" : "Doc Number",
+          "BankOrSafeID" : "Bank Or Safe"
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
