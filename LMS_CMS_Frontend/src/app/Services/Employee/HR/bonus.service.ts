@@ -87,7 +87,7 @@ export class BonusService {
     .set('Content-Type', 'application/json');
   
   const requestBody = {
-    jobCategoryId: jobCategoryId,
+    categoryId: jobCategoryId,
     jobId: jobId,
     employeeId: employeeId,
     dateFrom: dateFrom,

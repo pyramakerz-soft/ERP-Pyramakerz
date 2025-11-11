@@ -497,7 +497,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     EmployeeEnName = g.Key.EmployeeEnName,
                     EmployeeArName = g.Key.EmployeeArName,
                     TotalAmount = g.Sum(x => x.Amount),
-                    Bonuses = g.ToList()
+                    Bonuses = g.OrderBy(x => x.Date).ToList()
                 })
                 .ToList();
 

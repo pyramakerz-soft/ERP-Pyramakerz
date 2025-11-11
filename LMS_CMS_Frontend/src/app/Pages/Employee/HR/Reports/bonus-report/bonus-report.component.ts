@@ -63,20 +63,20 @@ export class BonusReportComponent implements OnInit {
     private jobService: JobService,
     private employeeService: EmployeeService,
     private apiService: ApiService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private reportsService: ReportsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadJobCategories();
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -145,83 +145,83 @@ export class BonusReportComponent implements OnInit {
     this.bonusReports = [];
   }
 
-async viewReport() {
-  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  if (!this.dateFrom || !this.dateTo) {
-    Swal.fire({
-      title: 'Incomplete Selection',
-      text: 'Please select both Date From and Date To to generate the report.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  this.isLoading = true;
-  this.showTable = false;
-
-  try {
-    const domainName = this.apiService.GetHeader();
-    
-    // Create parameters object with only non-zero values
-    const params: any = {
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo
-    };
-
-    // Only add optional parameters if they have meaningful values
-    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-      params.employeeId = this.selectedEmployeeId;
-    }
-    if (this.selectedJobId && this.selectedJobId !== 0) {
-      params.jobId = this.selectedJobId;
-    }
-    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
-      params.categoryId = this.selectedJobCategoryId;
+  async viewReport() {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
 
-    console.log('Sending parameters:', params);
+    if (!this.dateFrom || !this.dateTo) {
+      Swal.fire({
+        title: 'Incomplete Selection',
+        text: 'Please select both Date From and Date To to generate the report.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
-    const response = await firstValueFrom(
-      this.bonusService.GetBonusReport(
-        params.categoryId,    // Will be undefined if not provided
-        params.jobId,         // Will be undefined if not provided  
-        params.employeeId,    // Will be undefined if not provided
-        params.dateFrom,      // Always provided (mandatory)
-        params.dateTo,        // Always provided (mandatory)
-        domainName
-      )
-    );
+    this.isLoading = true;
+    this.showTable = false;
 
-    console.log('API Response:', response);
-    
-    if (Array.isArray(response)) {
-      this.bonusReports = response;
-      console.log('Bonus reports loaded:', this.bonusReports.length);
-    } else {
-      console.log('Response is not an array:', response);
+    try {
+      const domainName = this.apiService.GetHeader();
+
+      // Create parameters object with only non-zero values
+      const params: any = {
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo
+      };
+
+      // Only add optional parameters if they have meaningful values
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+        params.employeeId = this.selectedEmployeeId;
+      }
+      if (this.selectedJobId && this.selectedJobId !== 0) {
+        params.jobId = this.selectedJobId;
+      }
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+        params.categoryId = this.selectedJobCategoryId;
+      }
+
+      console.log('Sending parameters:', params);
+
+      const response = await firstValueFrom(
+        this.bonusService.GetBonusReport(
+          params.categoryId,    // Will be undefined if not provided
+          params.jobId,         // Will be undefined if not provided  
+          params.employeeId,    // Will be undefined if not provided
+          params.dateFrom,      // Always provided (mandatory)
+          params.dateTo,        // Always provided (mandatory)
+          domainName
+        )
+      );
+
+      console.log('API Response:', response);
+
+      if (Array.isArray(response)) {
+        this.bonusReports = response;
+        console.log('Bonus reports loaded:', this.bonusReports.length);
+      } else {
+        console.log('Response is not an array:', response);
+        this.bonusReports = [];
+      }
+
+      this.prepareExportData();
+      this.showTable = true;
+    } catch (error) {
+      console.error('Error loading bonus reports:', error);
       this.bonusReports = [];
+      this.showTable = true;
+    } finally {
+      this.isLoading = false;
     }
-
-    this.prepareExportData();
-    this.showTable = true;
-  } catch (error) {
-    console.error('Error loading bonus reports:', error);
-    this.bonusReports = [];
-    this.showTable = true;
-  } finally {
-    this.isLoading = false;
   }
-}
 
   private prepareExportData(): void {
     // For PDF (object format) - Flatten the data for the table
@@ -299,31 +299,30 @@ async viewReport() {
   }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
-           this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
-           'All Job Categories';
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name ||
+      this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name ||
+      'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
-           this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
-           'All Jobs';
+    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name ||
+      this.jobs.find(j => j.id == this.selectedJobId)?.ar_name ||
+      'All Jobs';
   }
 
   getEmployeeName(): string {
-    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name || 
-           this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name || 
-           'All Employees';
+    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name ||
+      this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name ||
+      'All Employees';
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ];
+    return [{ keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+    { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+    { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+    { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+    { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
+    ]
   }
 
   DownloadAsPDF() {
@@ -344,7 +343,7 @@ async viewReport() {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -352,7 +351,7 @@ async viewReport() {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -373,14 +372,14 @@ async viewReport() {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -395,7 +394,7 @@ async viewReport() {
     }
 
     this.isExporting = true;
-    
+
     try {
       await this.reportsService.generateExcelReport({
         mainHeader: {
@@ -419,16 +418,16 @@ async viewReport() {
           {
             // title: 'Bonus Report Data',
             headers: [
-              'Employee ID', 
-              'Employee Name', 
-              'Total Amount', 
-              'Bonus ID', 
-              'Bonus Date', 
+              'Employee ID',
+              'Employee Name',
+              'Total Amount',
+              'Bonus ID',
+              'Bonus Date',
               'Bonus Type',
               'Hours',
-              'Minutes', 
-              'Number of Bonus Days', 
-              'Amount', 
+              'Minutes',
+              'Number of Bonus Days',
+              'Amount',
               'Notes'
             ],
             data: this.reportsForExcel
