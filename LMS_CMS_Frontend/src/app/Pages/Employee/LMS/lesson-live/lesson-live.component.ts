@@ -165,6 +165,7 @@ export class LessonLiveComponent {
     this.gradeID = 0 
     this.gradeDayPeriod = 0 
     this.classrooms = []
+    this.live.period = null
 
     if (this.selectedYearForModal) {
       this.getAllClass()
@@ -315,6 +316,7 @@ export class LessonLiveComponent {
   getAllSubject() {
     this.gradeID = 0 
     this.gradeDayPeriod = 0
+    this.live.period = null
      
     this.subject = []
     this.live.subjectID = 0
@@ -334,6 +336,8 @@ export class LessonLiveComponent {
   GetGradeBySubjectID(){
     this.gradeID = 0
     this.gradeDayPeriod = 0
+    this.live.period = null
+
     const selectedSubject = this.subject.find(s => s.id == this.live.subjectID)
     this.gradeID = selectedSubject ? selectedSubject.gradeID : 0
 
@@ -344,7 +348,7 @@ export class LessonLiveComponent {
 
   GetDayPeriodSessions() { 
     this.gradeDayPeriod = 0
- 
+    this.live.period = null
     if(this.gradeID && this.live.weekDayID){ 
       this.gradeService.GetDayPeriodSessions(this.live.weekDayID, this.gradeID, this.DomainName).subscribe((d) => {
         this.gradeDayPeriod = d
@@ -352,7 +356,7 @@ export class LessonLiveComponent {
           Swal.fire({
             icon: 'error',
             title: 'No Periods Found',
-            text: "Please add the period count for this subject’s grade for this day first.",
+            text: "Please add the period count for this grade for this day first.",
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' }
           });

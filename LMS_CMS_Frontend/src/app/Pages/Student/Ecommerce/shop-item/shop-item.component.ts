@@ -44,6 +44,9 @@ export class ShopItemComponent {
   selectedSize: number = 0;
   students: Student[] = [];
   
+  imageList: string[] = [];
+  selectedImage: string | null = null;
+  
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
     , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService, 
   ){}
@@ -95,6 +98,19 @@ export class ShopItemComponent {
         this.shopItem = data
         if(this.shopItem.vatForForeign != 0){
           this.CalculatedVat = (this.shopItem.salesPrice ? this.shopItem.salesPrice : 0) + (this.shopItem.salesPrice ? this.shopItem.salesPrice : 0) * ((this.shopItem.vatForForeign ? this.shopItem.vatForForeign : 0) / 100)
+        }
+
+        const images = [];
+        if (this.shopItem.mainImage) images.push(this.shopItem.mainImage);
+        if (this.shopItem.otherImage) images.push(this.shopItem.otherImage);
+        this.imageList = images;
+ 
+        if (this.shopItem.mainImage) {
+          this.selectedImage = this.shopItem.mainImage;
+        } else if (this.shopItem.otherImage) {
+          this.selectedImage = this.shopItem.otherImage;
+        } else {
+          this.selectedImage = null;
         }
       }
     )
