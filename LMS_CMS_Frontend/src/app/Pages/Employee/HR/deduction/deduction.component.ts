@@ -294,45 +294,53 @@ export class DeductionComponent {
     }
   }
 
-  isFormValid(): boolean {
-   this.SelectedEmployee = this.employees.find(e => e.id == this.deduction.employeeID) || new Employee();
-   
-    let isValid = true;
-    for (const key in this.deduction) {
-      if (this.deduction.hasOwnProperty(key)) {
-        const field = key as keyof Deduction;
-        if (!this.deduction[field]) {
-          if (
-            field == 'date' ||
-            field == 'deductionTypeID' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  this.SelectedEmployee = this.employees.find(e => e.id == this.deduction.employeeID) || new Employee();
+  
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.deduction) {
+    if (this.deduction.hasOwnProperty(key)) {
+      const field = key as keyof Deduction;
+      if (!this.deduction[field]) {
+        if (
+          field == 'date' ||
+          field == 'deductionTypeID' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
-    if (this.SelectedEmployee.hasAttendance != true && (this.deduction.deductionTypeID == 1 || this.deduction.deductionTypeID == 2)) {
-      isValid = false;
-      this.validationErrors['deductionTypeID'] = 'This Employee Has No Attendance so should take deduction by amount only'
-    }
-    if (this.deduction.deductionTypeID == 3 && (this.deduction.amount == 0 || this.deduction.amount == null)) {
-      isValid = false;
-      this.validationErrors['amount'] = 'amount is required'
-    }
-    if (this.deduction.deductionTypeID == 2 && (this.deduction.numberOfDeductionDays == 0 || this.deduction.numberOfDeductionDays == null)) {
-      isValid = false;
-      this.validationErrors['numberOfDeductionDays'] = 'Number Of Bouns Days is required'
-    }
-    if (this.deduction.deductionTypeID == 1 && (this.deduction.hours == 0 || this.deduction.hours == null)) {
-      isValid = false;
-      this.validationErrors['hours'] = 'hours is required'
-    }
-    return isValid;
   }
+
+  // Business logic validations
+  if (this.SelectedEmployee.hasAttendance != true && (this.deduction.deductionTypeID == 1 || this.deduction.deductionTypeID == 2)) {
+    isValid = false;
+    this.validationErrors['deductionTypeID'] = this.translate.instant('This Employee Has No Attendance so should take deduction by amount only');
+  }
+
+  if (this.deduction.deductionTypeID == 3 && (this.deduction.amount == 0 || this.deduction.amount == null)) {
+    isValid = false;
+    this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
+  }
+
+  if (this.deduction.deductionTypeID == 2 && (this.deduction.numberOfDeductionDays == 0 || this.deduction.numberOfDeductionDays == null)) {
+    isValid = false;
+    this.validationErrors['numberOfDeductionDays'] = this.getRequiredErrorMessage('numberOfDeductionDays');
+  }
+
+  if (this.deduction.deductionTypeID == 1 && (this.deduction.hours == 0 || this.deduction.hours == null)) {
+    isValid = false;
+    this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
+  }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof Deduction): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -423,4 +431,41 @@ export class DeductionComponent {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
+getDeductionDisplayValue(deduction: any): string {
+  if (!deduction) return '-';
+  
+  const deductionTypeID = deduction.deductionTypeID;
+  
+  switch (deductionTypeID) {
+    case 1: // Hours
+      const hours = deduction.hours || 0;
+      const minutes = deduction.minutes || 0;
+      // Format hours and minutes with leading zeros
+      const formattedHours = hours.toString().padStart(2, '0');
+      const formattedMinutes = minutes.toString().padStart(2, '0');
+      return `${formattedHours}:H ${formattedMinutes}:M`;
+      
+    case 2: // Day
+      const days = deduction.numberOfDeductionDays || 0;
+      return days == 1 ? '1 day' : `${days} days`;
+      
+    case 3: // Amount
+      const amount = deduction.amount || 0;
+      return `${amount}`;
+      
+    default:
+      return '-';
+  }
+}
 }

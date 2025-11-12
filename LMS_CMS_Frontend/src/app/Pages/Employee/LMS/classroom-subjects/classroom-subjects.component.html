@@ -22,17 +22,24 @@
                         {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Subject' | translate }} {{ 'English Name' | translate }}
+                        {{isRtl 
+                        ? ('Name' | translate) + ' ' + ('Subject' | translate) + ' ' +('w' | translate) + ('English' | translate)
+                        : ('Subject' | translate) + ' ' + ('English' | translate) + ' ' + ('Name' | translate)}}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Subject' | translate }} {{ 'Arabic Name' | translate }}
+                        {{isRtl 
+                        ? ('Name' | translate) + ' ' + ('Subject' | translate) + ' ' +('w' | translate) + ('Arabic' | translate)
+                        : ('Subject' | translate) + ' ' + ('Arabic' | translate) + ' ' + ('Name' | translate)}}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Teacher' | translate }} {{ 'English Name' | translate }}
+                        {{isRtl 
+                        ? ('Name' | translate) + ' ' + ('Teacher' | translate) + ' ' +('w' | translate) + ('English' | translate)
+                        : ('Teacher' | translate) + ' ' + ('English' | translate) + ' ' + ('Name' | translate)}}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Teacher' | translate }} {{ 'Arabic Name' | translate }}
-                    </th>
+                        {{isRtl 
+                        ? ('Name' | translate) + ' ' + ('Teacher' | translate) + ' ' +('w' | translate) + ('Arabic' | translate)
+                        : ('Teacher' | translate) + ' ' + ('Arabic' | translate) + ' ' + ('Name' | translate)}}                    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Co-Teacher' | translate }}
                     </th>

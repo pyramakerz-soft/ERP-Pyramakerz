@@ -190,25 +190,12 @@
     </table>
 </div>
 
-<!-- Hidden PDF Container -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Deduction Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="[
-                'Employee ID', 
-                'Employee Name', 
-                'Total Amount', 
-                'Deduction ID', 
-                'Deduction Date', 
-                'Deduction Type',
-                'Hours',
-                'Minutes',
-                'Number of Deduction Days', 
-                'Amount', 
-                'Notes'
-            ]"
-            [tableData]="reportsForExport" #pdfComponentRef>
+            [tableDataWithHeaderArray]="tableSectionsForPDF"
+            #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

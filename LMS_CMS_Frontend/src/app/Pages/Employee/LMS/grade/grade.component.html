@@ -155,9 +155,11 @@
                     </button>
                 </div>
             </div>
-
+<!--  {{ 'Periods' | translate }} {{ 'Count' | translate }} -->
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt"> {{ 'Periods' | translate }} {{ 'Count' | translate }}</label>
+                <label class="mb-2 primaryTxt">{{isRtl 
+                        ? ('Count' | translate)  + ' ' + ('Periods' | translate)
+                        : ('Periods' | translate) + ' ' + ('Count' | translate) }}</label>
                 <div class="flex flex-wrap justify-around">
                     <div class="flex flex-col mb-4">
                         <label class="mb-2 primaryTxt" for="SAT">{{ 'SAT' | translate }}</label>

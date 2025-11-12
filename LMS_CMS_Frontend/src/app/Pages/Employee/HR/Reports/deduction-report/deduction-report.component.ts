@@ -41,6 +41,8 @@ export class DeductionReportComponent  implements OnInit {
   showViewReportBtn: boolean = false;
   isExporting: boolean = false;
   reportsForExcel: any[] = [];
+  tableSectionsForPDF: any[] = [];
+
 
   // Language and RTL
   isRtl: boolean = false;
@@ -208,80 +210,138 @@ export class DeductionReportComponent  implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    // For PDF (object format) - Flatten the data for the table
-    this.reportsForExport = [];
-    this.deductionReports.forEach(employeeDeduction => {
-      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
-        employeeDeduction.deductions.forEach((deduction: any) => {
-          this.reportsForExport.push({
-            'Employee ID': employeeDeduction.employeeId,
-            'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-            'Total Amount': employeeDeduction.totalAmount,
-            'Deduction ID': deduction.id,
-            'Deduction Date': new Date(deduction.date).toLocaleDateString(),
-            'Deduction Type': deduction.deductionTypeName,
-            'Hours': deduction.hours || '-',
-            'Minutes': deduction.minutes || '-',
-            'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
-            'Amount': deduction.amount || '-',
-            'Notes': deduction.notes || '-'
-          });
+private prepareExportData(): void {
+  // For PDF (object format) - Flatten the data for the table
+  this.reportsForExport = [];
+  
+  // For tableDataWithHeaderArray structure
+  const tableSections: any[] = [];
+  
+  this.deductionReports.forEach(employeeDeduction => {
+    // Create a section for each employee
+    const section = {
+      header: `Employee: ${employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown'}`,
+      data: [
+        { key: 'Employee ID', value: employeeDeduction.employeeId },
+        { key: 'Employee Name', value: employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown' },
+        { key: 'Total Amount', value: employeeDeduction.totalAmount }
+      ],
+      tableHeaders: [
+        'Deduction ID', 
+        'Deduction Date', 
+        'Deduction Type',
+        'Hours',
+        'Minutes', 
+        'Number of Deduction Days', 
+        'Amount', 
+        'Notes'
+      ],
+      tableData: [] as any[]
+    };
+
+    // Add deduction details if available
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
+        section.tableData.push({
+          'Deduction ID': deduction.id,
+          'Deduction Date': new Date(deduction.date).toLocaleDateString(),
+          'Deduction Type': deduction.deductionTypeName,
+          'Hours': deduction.hours || '-',
+          'Minutes': deduction.minutes || '-',
+          'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
+          'Amount': deduction.amount || '-',
+          'Notes': deduction.notes || '-'
         });
-      } else {
-        // If no deductions, still show employee summary
+      });
+    } else {
+      // If no deductions, add a placeholder row
+      section.tableData.push({
+        'Deduction ID': '-',
+        'Deduction Date': '-',
+        'Deduction Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Deduction Days': '-',
+        'Amount': '-',
+        'Notes': 'No deductions found'
+      });
+    }
+
+    tableSections.push(section);
+
+    // Also maintain the flattened version for regular table display
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
         this.reportsForExport.push({
           'Employee ID': employeeDeduction.employeeId,
           'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
           'Total Amount': employeeDeduction.totalAmount,
-          'Deduction ID': '-',
-          'Deduction Date': '-',
-          'Deduction Type': '-',
-          'Hours': '-',
-          'Minutes': '-',
-          'Number of Deduction Days': '-',
-          'Amount': '-',
-          'Notes': '-'
+          'Deduction ID': deduction.id,
+          'Deduction Date': new Date(deduction.date).toLocaleDateString(),
+          'Deduction Type': deduction.deductionTypeName,
+          'Hours': deduction.hours || '-',
+          'Minutes': deduction.minutes || '-',
+          'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
+          'Amount': deduction.amount || '-',
+          'Notes': deduction.notes || '-'
         });
-      }
-    });
+      });
+    } else {
+      this.reportsForExport.push({
+        'Employee ID': employeeDeduction.employeeId,
+        'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+        'Total Amount': employeeDeduction.totalAmount,
+        'Deduction ID': '-',
+        'Deduction Date': '-',
+        'Deduction Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Deduction Days': '-',
+        'Amount': '-',
+        'Notes': '-'
+      });
+    }
+  });
 
-    // For Excel (array format)
-    this.reportsForExcel = [];
-    this.deductionReports.forEach(employeeDeduction => {
-      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
-        employeeDeduction.deductions.forEach((deduction: any) => {
-          this.reportsForExcel.push([
-            employeeDeduction.employeeId,
-            employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-            employeeDeduction.totalAmount,
-            deduction.id,
-            new Date(deduction.date).toLocaleDateString(),
-            deduction.deductionTypeName,
-            deduction.hours || '-',
-            deduction.minutes || '-',
-            deduction.numberOfDeductionDays || '-',
-            deduction.amount || '-',
-            deduction.notes || '-'
-          ]);
-        });
-      } else {
+  // For Excel (array format) - keep existing logic
+  this.reportsForExcel = [];
+  this.deductionReports.forEach(employeeDeduction => {
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
         this.reportsForExcel.push([
           employeeDeduction.employeeId,
           employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
           employeeDeduction.totalAmount,
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-'
+          deduction.id,
+          new Date(deduction.date).toLocaleDateString(),
+          deduction.deductionTypeName,
+          deduction.hours || '-',
+          deduction.minutes || '-',
+          deduction.numberOfDeductionDays || '-',
+          deduction.amount || '-',
+          deduction.notes || '-'
         ]);
-      }
-    });
-  }
+      });
+    } else {
+      this.reportsForExcel.push([
+        employeeDeduction.employeeId,
+        employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+        employeeDeduction.totalAmount,
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-'
+      ]);
+    }
+  });
+
+  // Store the table sections for PDF export
+  (this as any).tableSectionsForPDF = tableSections;
+}
 
   getJobCategoryName(): string {
     return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
