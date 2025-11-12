@@ -319,68 +319,69 @@ export class BonusComponent {
     }
   }
 
-  isFormValid(): boolean {
-    this.SelectedEmployee =
-      this.employees.find((e) => e.id == this.bouns.employeeID) ||
-      new Employee();
-    console.log(123, this.SelectedEmployee);
-    let isValid = true;
-    for (const key in this.bouns) {
-      if (this.bouns.hasOwnProperty(key)) {
-        const field = key as keyof Bonus;
-        if (!this.bouns[field]) {
-          if (
-            field == 'date' ||
-            field == 'bounsTypeID' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `${this.translate.instant(
-              'Field is required'
-            )} ${this.translate.instant(field)}`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  this.SelectedEmployee =
+    this.employees.find((e) => e.id == this.bouns.employeeID) ||
+    new Employee();
+  
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.bouns) {
+    if (this.bouns.hasOwnProperty(key)) {
+      const field = key as keyof Bonus;
+      if (!this.bouns[field]) {
+        if (
+          field == 'date' ||
+          field == 'bounsTypeID' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
-    if (
-      this.SelectedEmployee.hasAttendance != true &&
-      (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)
-    ) {
-      isValid = false;
-      this.validationErrors['bounsTypeID'] = this.translate.instant(
-        'This Employee Has No Attendance so should take bouns by amount only'
-      );
-    }
-    if (
-      this.bouns.bounsTypeID == 3 &&
-      (this.bouns.amount == 0 || this.bouns.amount == null)
-    ) {
-      isValid = false;
-      this.validationErrors['amount'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('amount')}`;
-    }
-    if (
-      this.bouns.bounsTypeID == 2 &&
-      (this.bouns.numberOfBounsDays == 0 ||
-        this.bouns.numberOfBounsDays == null)
-    ) {
-      isValid = false;
-      this.validationErrors['numberOfBounsDays'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('numberOfBounsDays')}`;
-    }
-    if (
-      this.bouns.bounsTypeID == 1 &&
-      (this.bouns.hours == 0 || this.bouns.hours == null)
-    ) {
-      isValid = false;
-      this.validationErrors['hours'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('hours')}`;
-    }
-    return isValid;
   }
+
+  // Business logic validations
+  if (
+    this.SelectedEmployee.hasAttendance != true &&
+    (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)
+  ) {
+    isValid = false;
+    this.validationErrors['bounsTypeID'] = this.translate.instant(
+      'This Employee Has No Attendance so should take bouns by amount only'
+    );
+  }
+
+  if (
+    this.bouns.bounsTypeID == 3 &&
+    (this.bouns.amount == 0 || this.bouns.amount == null)
+  ) {
+    isValid = false;
+    this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
+  }
+
+  if (
+    this.bouns.bounsTypeID == 2 &&
+    (this.bouns.numberOfBounsDays == 0 || this.bouns.numberOfBounsDays == null)
+  ) {
+    isValid = false;
+    this.validationErrors['numberOfBounsDays'] = this.getRequiredErrorMessage('numberOfBounsDays');
+  }
+
+  if (
+    this.bouns.bounsTypeID == 1 &&
+    (this.bouns.hours == 0 || this.bouns.hours == null)
+  ) {
+    isValid = false;
+    this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
+  }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof Bonus): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -470,4 +471,16 @@ export class BonusComponent {
       this.PageSize = 0;
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

@@ -47,7 +47,7 @@ export class LoansComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'saveName' ,'amount'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'safeName' ,'amount'];
 
   loan: Loans = new Loans();
 

@@ -390,24 +390,26 @@ export class LeaveRequestComponent {
     })
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.leaveRequest) {
-      if (this.leaveRequest.hasOwnProperty(key)) {
-        const field = key as keyof LeaveRequest;
-        if (!this.leaveRequest[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.leaveRequest) {
+    if (this.leaveRequest.hasOwnProperty(key)) {
+      const field = key as keyof LeaveRequest;
+      if (!this.leaveRequest[field]) {
+        if (
+          field == 'date' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
+  }
     if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
@@ -519,5 +521,14 @@ export class LeaveRequestComponent {
       this.PageSize = 0
     }
   }
-
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

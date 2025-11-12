@@ -403,26 +403,28 @@ export class VacationEmployeeComponent {
     })
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.vacationEmployee) {
-      if (this.vacationEmployee.hasOwnProperty(key)) {
-        const field = key as keyof VacationEmployee;
-        if (!this.vacationEmployee[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID' ||
-            field == 'vacationTypesID' ||
-            field == 'dateFrom' 
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.vacationEmployee) {
+    if (this.vacationEmployee.hasOwnProperty(key)) {
+      const field = key as keyof VacationEmployee;
+      if (!this.vacationEmployee[field]) {
+        if (
+          field == 'date' ||
+          field == 'employeeID' ||
+          field == 'vacationTypesID' ||
+          field == 'dateFrom' 
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
+  }
     if (this.vacationEmployee.used > this.vacationEmployee.balance) {
       isValid = false;
     }
@@ -529,4 +531,15 @@ export class VacationEmployeeComponent {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+
+  }
 }
