@@ -221,27 +221,6 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt"
                     [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
-                    for="Grade">{{ 'Grade' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
-                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
-                    [disabled]="(!directMark.schoolID) || directMark.id != 0" (change)="onGradeModalChange()"
-                    [(ngModel)]="directMark.gradeID"
-                    (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
-                    <option [ngValue]="0" disabled hidden [selected]="directMark.gradeID == 0">{{ 'Choose' | translate
-                        }} {{ 'Grade' | translate }}</option>
-                    <ng-container *ngIf="GradesForCreate.length > 0; else noDataGradesForCreate">
-                        <option *ngFor="let ac of GradesForCreate" [ngValue]="ac.id">{{ ac.name }}</option>
-                    </ng-container>
-                    <ng-template #noDataGradesForCreate>
-                        <option disabled>{{ 'No Data Found' | translate }}</option>
-                    </ng-template>
-                </select>
-                <span *ngIf="validationErrors['gradeID']"
-                    class="text-red-500 ml-3 font-normal">{{validationErrors['gradeID'] }}</span>
-            </div>
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt"
-                    [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
                     for="year">{{ 'Academic Year' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="year"
                     [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
@@ -260,6 +239,27 @@
                 </select>
                 <span *ngIf="validationErrors['academicYearID']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['academicYearID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
+                    for="Grade">{{ 'Grade' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
+                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
+                    [disabled]="(!directMark.schoolID) || directMark.id != 0" (change)="onGradeModalChange()"
+                    [(ngModel)]="directMark.gradeID"
+                    (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="directMark.gradeID == 0">{{ 'Choose' | translate
+                        }} {{ 'Grade' | translate }}</option>
+                    <ng-container *ngIf="GradesForCreate.length > 0; else noDataGradesForCreate">
+                        <option *ngFor="let ac of GradesForCreate" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataGradesForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['gradeID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['gradeID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt"

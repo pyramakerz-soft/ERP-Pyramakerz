@@ -473,6 +473,11 @@ isFormValid(): boolean {
     this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
     isValid = false;
   }
+  
+  if (!this.directMark.academicYearID) {
+    this.validationErrors['academicYearID'] = this.getRequiredErrorMessage('Academic Year');
+    isValid = false;
+  }
 
   // Validate class selection
   if(this.directMark.classids.length === 0){

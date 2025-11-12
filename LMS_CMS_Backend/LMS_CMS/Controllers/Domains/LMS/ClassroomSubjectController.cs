@@ -468,18 +468,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("GetClassBySubjectIDWithStudentsIncluded/{SubId}")]
+        [HttpGet("GetClassBySubjectIDWithStudentsIncluded/{SubId}/{yearID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Classroom Students", "Assignment" }
         )]
-        public async Task<IActionResult> GetBySubjectIDWithStudentsIncluded(long SubId)
+        public async Task<IActionResult> GetBySubjectIDWithStudentsIncluded(long SubId, long yearID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
              
             List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.IsDeleted != true && f.Hide != true && f.Subject.IsDeleted != true,
+                    f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.AcademicYearID == yearID && f.Classroom.IsDeleted != true && f.Hide != true && f.Subject.IsDeleted != true,
                     query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.StudentClassroomSubjects.Where(d => d.IsDeleted != true)),
                     query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.Student)
                 );
