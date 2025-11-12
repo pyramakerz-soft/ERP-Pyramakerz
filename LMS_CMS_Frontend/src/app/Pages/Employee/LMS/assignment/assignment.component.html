@@ -224,6 +224,28 @@
                     validationErrors['schoolID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !assignment.schoolID || assignment.id != 0 , 'primaryTxt': assignment.schoolID }"
+                    for="year">{{ 'Academic Year' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="year"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 ||!assignment.schoolID  }"
+                    [disabled]="(!assignment.schoolID) || assignment.id != 0" (change)="onYearModalChange()"
+                    [(ngModel)]="assignment.academicYearID"
+                    (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="assignment.academicYearID == 0">{{ 'Choose' |
+                        translate
+                        }} {{ 'Year' | translate }}</option>
+                    <ng-container *ngIf="years.length > 0; else noDataYearForCreate">
+                        <option *ngFor="let ac of years" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataYearForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['academicYearID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['academicYearID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" [ngClass]="{ 'text-gray-400': !assignment.schoolID || assignment.id != 0 , 'primaryTxt': assignment.schoolID }" for="Grade">{{ 'Grade' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
                     [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 ||!assignment.schoolID  }"
