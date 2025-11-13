@@ -28,7 +28,7 @@ export class DataAccordingToLinkFileService {
     return this.http.get<any[]>(`${this.baseUrl}/GetTableDataAccordingToLinkFile/GetTableDataAccordingToLinkFile/${linkFileId}`, { headers });
   }
 
-  GetAllTableDataAccordingToLinkFile(DomainName: string, linkFileId:number) {
+  GetAllTableDataAccordingToLinkFile(DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
