@@ -144,9 +144,9 @@
             validationErrors["expireDate"]}}</span>
     </div>
 
-    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4 space-x-3 rtl:space-x-reverse">
+    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
         <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="bus"
             [(ngModel)]="Data.busCompanyID">
             <option [value]="0" disabled selected hidden>  {{ 'Choose Bus Company' | translate }}</option>
             <option *ngFor="let bus of BusCompany" [value]="bus.id">{{ bus.name }}</option>

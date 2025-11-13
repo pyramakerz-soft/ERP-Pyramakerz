@@ -12,17 +12,21 @@ import { LoadingService } from './Services/loading.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'ERP_System'; 
+  title = 'ERP_System';  
+
   constructor(private router: Router, private loadingService: LoadingService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.loadingService.show();
+        this.loadingService.show(); // start loader
       } else if (
         event instanceof NavigationEnd ||
         event instanceof NavigationCancel ||
         event instanceof NavigationError
       ) {
-        this.loadingService.hide();
+        // hide loader if there are no active HTTP requests
+        if (!this.loadingService['activeRequests']) {
+          this.loadingService.hide();
+        }
       }
     });
   }
