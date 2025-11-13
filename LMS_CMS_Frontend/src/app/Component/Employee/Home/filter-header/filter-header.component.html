@@ -46,7 +46,7 @@
   <div class="flex justify-center items-center">
     <div class="rounded-md overflow-hidden border border-gray-300">
       <ng-container *ngFor="let mode of modes">
-        <button (click)="selectMode(mode)" class="px-4 py-2 text-sm font-medium" [ngClass]="{
+        <button (click)="selectMode(mode)" class="px-4 py-2 text-sm" [ngClass]="{
             'text-white': selectedMode === mode,
             'text-gray-700 hover:bg-gray-100': selectedMode !== mode
           }" [ngStyle]="selectedMode === mode ? { backgroundColor: '#1175B9' } : {}">
