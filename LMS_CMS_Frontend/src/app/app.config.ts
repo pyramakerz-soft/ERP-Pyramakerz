@@ -5,8 +5,7 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forSuspendInterceptor } from './Interceptor/for-suspend.interceptor';
-import { generalErrorHandlingInterceptor } from './Interceptor/general-error-handling.interceptor';
-import { loadingInterceptor } from './Interceptor/loading.interceptor';
+import { generalErrorHandlingInterceptor } from './Interceptor/general-error-handling.interceptor'; 
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, 'i18n/', '.json');
@@ -28,8 +27,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideHttpClient(
-      withInterceptors([
-        loadingInterceptor,
+      withInterceptors([ 
         forSuspendInterceptor,
         generalErrorHandlingInterceptor
       ])

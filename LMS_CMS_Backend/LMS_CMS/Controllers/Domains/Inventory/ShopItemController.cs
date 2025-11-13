@@ -365,6 +365,63 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return Ok(new { Data = shopItemGetDTO, Pagination = paginationMetadata });
         }
+        
+        ///////////////////////////////////////////
+
+        [HttpGet("CheckIfHeCanAddItem/{ItemID}/{StudentID}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "student" , "parent" }
+        )]
+        public async Task<IActionResult> CheckIfHeCanAddItem(long ItemID, long StudentID)
+        {
+            long gradeID = 0;
+            long genderID = 0;
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(
+                d => d.ID == StudentID && d.IsDeleted != true
+                );
+
+            if (student == null)
+            {
+                return NotFound("There is No Student with this ID");
+            }
+
+            genderID = student.GenderId;
+
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true);
+
+            if(studentGrade != null)
+            {
+                gradeID = studentGrade.GradeID;
+            }
+
+            if(gradeID == 0 || genderID == 0)
+            {
+                return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
+            }
+
+            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == ItemID && d.GenderID == genderID && d.GradeID == gradeID);
+             
+            if (shopItem == null)
+            {
+                return Ok(false);
+            }
+            else
+            {
+                return Ok(true);
+            }
+        }
 
         //////////////////////////////////////////////////////////////////////////////
 

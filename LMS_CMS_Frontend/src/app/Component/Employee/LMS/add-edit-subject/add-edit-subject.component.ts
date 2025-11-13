@@ -165,6 +165,8 @@ export class AddEditSubjectComponent {
     this.Sections = []
     this.Grades = []
     this.selectedSection = null
+    this.subject.sectionID = 0
+    this.subject.gradeID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.selectedSchool = Number(selectedValue)
     if (this.selectedSchool) {
@@ -174,6 +176,7 @@ export class AddEditSubjectComponent {
 
   onSectionChange(event: Event) {
     this.Grades = []
+    this.subject.gradeID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.selectedSection = Number(selectedValue)
     if (this.selectedSection) {

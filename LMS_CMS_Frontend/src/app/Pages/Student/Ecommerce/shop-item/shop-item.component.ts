@@ -155,24 +155,38 @@ export class ShopItemComponent {
   } 
 
   addShopItemToCart(id: number) { 
-    this.cartShopItem.studentID = this.StuID
-    this.cartShopItem.quantity = 1
-    this.cartShopItem.shopItemID = id
-    if(this.selectedColor != 0){
-      this.cartShopItem.shopItemColorID = this.selectedColor
-    }
-    if(this.selectedSize != 0){
-      this.cartShopItem.shopItemSizeID = this.selectedSize
-    }
-
-    this.cartShopItemService.Add(this.cartShopItem, this.DomainName).subscribe(
-      data => {
-        Swal.fire({
-          title: "Added Successfully!",
-          icon: "success"
-        }).then((result) => {
-          this.goToCart();
-        }); 
+    this.shopItemService.CheckIfHeCanAddItem(id, this.StuID, this.DomainName).subscribe(
+      data =>{
+        if(data == true){
+          this.cartShopItem.studentID = this.StuID
+          this.cartShopItem.quantity = 1
+          this.cartShopItem.shopItemID = id
+          if(this.selectedColor != 0){
+            this.cartShopItem.shopItemColorID = this.selectedColor
+          }
+          if(this.selectedSize != 0){
+            this.cartShopItem.shopItemSizeID = this.selectedSize
+          }
+      
+          this.cartShopItemService.Add(this.cartShopItem, this.DomainName).subscribe(
+            data => {
+              Swal.fire({
+                title: "Added Successfully!",
+                icon: "success"
+              }).then((result) => {
+                this.goToCart();
+              }); 
+            }
+          )
+        }else{
+          Swal.fire({
+            icon: 'warning',
+            title: 'Oops...',
+            text: "This item isn't available for your selected student",
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
       }
     )
   }
