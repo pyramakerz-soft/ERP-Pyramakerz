@@ -47,7 +47,7 @@ export class AccountService {
     });
   } 
  
-  EditPassword(editpass: EditPass, DomainName?: string) {
+  EditPassword(editpass: EditPass, DomainName?: string) { // view 
     if (DomainName != null) {
       this.header = DomainName
     }
