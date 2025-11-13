@@ -1359,7 +1359,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Student Edit Accounting" , "Student Accounting" }
+            pages: new[] { "Student" , "Student" }
         )]
         public async Task<IActionResult> EditStudentAccountingAsync(AccountingStudentPutDTO newStudent)
         {
@@ -1431,7 +1431,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student Edit Accounting", roleId, userId, student);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, student);
                 if (accessCheck != null)
                 {
                     return accessCheck;
