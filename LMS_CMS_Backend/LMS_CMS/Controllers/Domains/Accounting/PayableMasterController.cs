@@ -144,11 +144,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     query => query.Include(Master => Master.LinkFile)
                     );
 
-            if (PayableDetails == null || PayableDetails.Count == 0)
-            {
-                return NotFound();
-            }
-
             List<PayableDetailsGetDTO> payableDetailsGetDTO = mapper.Map<List<PayableDetailsGetDTO>>(PayableDetails);
 
             foreach (var detail in payableDetailsGetDTO)
@@ -214,8 +209,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     detail.LinkFileTypeName = student?.en_name;
                 }
             }
-
-            payableMasterGetDTO.PayableDetails = payableDetailsGetDTO;
+            if (payableMasterGetDTO.PayableDetails.Count==0)
+            {
+                payableMasterGetDTO.PayableDetails =new List<PayableDetailsGetDTO>();
+            }
+            else
+            {
+              payableMasterGetDTO.PayableDetails = payableDetailsGetDTO;
+            }
             return Ok(payableMasterGetDTO);
         }
 

@@ -136,6 +136,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             ReceivableMasterGetDTO dto = mapper.Map<ReceivableMasterGetDTO>(ReceivableMaster);
             dto.BankOrSaveName = bankOrSaveName;
 
+            List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById<ReceivableDetails>(
+                t => t.IsDeleted != true && t.ReceivableMasterID == id,
+                query => query.Include(Master => Master.ReceivableMaster),
+                query => query.Include(Master => Master.LinkFile)
+                );
+
+
+
             return Ok(dto);
         }
 
