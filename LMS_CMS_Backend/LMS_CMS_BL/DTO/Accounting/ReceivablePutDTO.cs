@@ -15,5 +15,8 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long ReceivableDocTypesID { get; set; }
         public long LinkFileID { get; set; }
         public long BankOrSaveID { get; set; }
+        public List<ReceivableDetailsPutDTO>? UpdatedDetails { get; set; }
+        public List<ReceivableDetailsAddDTO>? NewDetails { get; set; }
+
     }
 }

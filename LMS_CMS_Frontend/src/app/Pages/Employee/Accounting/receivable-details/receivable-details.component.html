@@ -171,7 +171,7 @@
                 </thead>
                 <tbody>
                     <!-- No Data Row -->
-                    <tr *ngIf="receivableDetailsData.length === 0 && !isNewDetails">
+                    <tr *ngIf="receivable.receivableDetails.length === 0 && receivable.newDetails.length === 0">
                         <td colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                                {{ 'No Data Found' | translate }}
@@ -179,7 +179,7 @@
                     </tr>
 
                     <!-- New Row with Inputs -->
-                    <tr *ngIf="isNewDetails" class="no-print bg-white border-t border-gray-300 text-xs md:text-sm">
+                    <tr class="no-print bg-white border-t border-gray-300 text-xs md:text-sm">
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -222,7 +222,7 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="newDetails.notes">
+                               placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="newDetails.notes">
                             </textarea>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

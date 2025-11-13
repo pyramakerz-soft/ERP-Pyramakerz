@@ -237,7 +237,7 @@ namespace LMS_CMS_PL.Controllers.Domains
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Role Edit", roleId, userId, role);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Role", roleId, userId, role);
                 if (accessCheck != null)
                 {
                     return accessCheck;

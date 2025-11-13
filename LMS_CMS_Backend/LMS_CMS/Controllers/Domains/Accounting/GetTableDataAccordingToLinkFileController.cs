@@ -901,6 +901,177 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         }
 
 
+        /////// 
 
+        [HttpGet("GetAllTableDataAccordingToLinkFile")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting" }
+        )]
+        public async Task<IActionResult> GetAllTableDataAccordingToLinkFile()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            LinFileTypeDataDTO linFileTypeDataDTO = new LinFileTypeDataDTO();
+
+
+            // Bank
+            List<Bank> banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (banks == null || banks.Count == 0)
+            {
+                return NotFound();
+            }
+
+            linFileTypeDataDTO.bankGetDTOs = mapper.Map<List<BankGetDTO>>(banks);
+
+            // Safe
+            List<Save> saves = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (saves == null || saves.Count == 0)
+            {
+                return NotFound();
+            }
+
+            linFileTypeDataDTO.saveGetDTO = mapper.Map<List<SaveGetDTO>>(saves);
+
+
+            // Supplier
+            List<Supplier> Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(
+                         f => f.IsDeleted != true,
+                         query => query.Include(b => b.AccountNumber));
+
+            if (Suppliers == null || Suppliers.Count == 0)
+            {
+                Suppliers = new List<Supplier>();
+            }
+
+            linFileTypeDataDTO.supplierGetDTO = mapper.Map<List<SupplierGetDTO>>(Suppliers);
+
+            // Debit
+
+            List<Debit> Debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Debits == null || Debits.Count == 0)
+            {
+                Debits = new List<Debit>();
+            }
+
+            linFileTypeDataDTO.debitGetDTO = mapper.Map<List<DebitGetDTO>>(Debits);
+
+
+            // Credit
+            List<Credit> Credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Credits == null || Credits.Count == 0)
+            {
+                Credits = new List<Credit>();
+            }
+
+            linFileTypeDataDTO.creditGetDTO = mapper.Map<List<CreditGetDTO>>(Credits);
+
+            // Income
+            List<Income> Incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Incomes == null || Incomes.Count == 0)
+            {
+                Incomes = new List<Income>();
+            }
+
+            linFileTypeDataDTO.incomeGetDTO = mapper.Map<List<IncomeGetDTO>>(Incomes);
+
+            // Outcome
+            List<Outcome> Outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Outcomes == null || Outcomes.Count == 0)
+            {
+                Outcomes = new List<Outcome>();
+            }
+
+            linFileTypeDataDTO.outcomeGetDTO = mapper.Map<List<OutcomeGetDTO>>(Outcomes);
+
+            // Asset
+            List<Asset> Assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Assets == null || Assets.Count == 0)
+            {
+                Assets = new List<Asset>();
+            }
+
+            linFileTypeDataDTO.assetGetDTO = mapper.Map<List<AssetGetDTO>>(Assets);
+
+            // Employee
+            List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (Employees == null || Employees.Count == 0)
+            {
+                Employees = new List<Employee>();
+            }
+
+            linFileTypeDataDTO.employee_GetDTO = mapper.Map<List<Employee_GetDTO>>(Employees);
+
+            // Fee
+            List<TuitionFeesType> TuitionFeesTypes = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (TuitionFeesTypes == null || TuitionFeesTypes.Count == 0)
+            {
+                TuitionFeesTypes = new List<TuitionFeesType>();
+            }
+
+            linFileTypeDataDTO.tuitionFeesTypeGetDTO = mapper.Map<List<TuitionFeesTypeGetDTO>>(TuitionFeesTypes);
+
+            // TuitionDiscountType
+            List<TuitionDiscountType> TuitionDiscountTypes = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(
+                f => f.IsDeleted != true,
+                query => query.Include(b => b.AccountNumber));
+
+            if (TuitionDiscountTypes == null || TuitionDiscountTypes.Count == 0)
+            {
+                TuitionDiscountTypes = new List<TuitionDiscountType>();
+            }
+
+            linFileTypeDataDTO.tuitionDiscountTypeGetDTO = mapper.Map<List<TuitionDiscountTypeGetDTO>>(TuitionDiscountTypes);
+
+            // Student
+            List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(
+            query => query.IsDeleted != true,
+            query => query.Include(stu => stu.AccountNumber));
+
+            if (students == null || students.Count == 0)
+            {
+                students = new List<Student>();
+            }
+
+            linFileTypeDataDTO.studentGetDTO = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in linFileTypeDataDTO.studentGetDTO)
+            {
+                Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(item.Nationality);
+                if (nationality != null)
+                {
+                    item.NationalityEnName = nationality.Name;
+                    item.NationalityArName = nationality.ArName;
+                }
+            }
+
+            return Ok(linFileTypeDataDTO);
+        }
     }
 }
