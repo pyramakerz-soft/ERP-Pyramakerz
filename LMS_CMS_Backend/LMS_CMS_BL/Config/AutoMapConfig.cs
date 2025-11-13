@@ -1150,6 +1150,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
             CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
+            CreateMap<RegisteredEmployeeEditDTO, RegisteredEmployee>(); 
 
             CreateMap<DutyAddDto, Duty>();
             CreateMap<Duty, DutyGetDto>()

@@ -411,7 +411,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
             }
 
-            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == ItemID && d.GenderID == genderID && d.GradeID == gradeID);
+            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == ItemID && (d.GenderID == genderID || d.GenderID == null) && (d.GradeID == gradeID || d.GradeID == null));
              
             if (shopItem == null)
             {

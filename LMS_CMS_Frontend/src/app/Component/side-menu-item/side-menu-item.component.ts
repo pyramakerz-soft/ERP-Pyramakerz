@@ -26,7 +26,7 @@ export class SideMenuItemComponent {
 
   constructor(private router: Router, private menuService: MenuService, private communicationService: NewTokenService, private languageService: LanguageService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.subscription = this.communicationService.action$.subscribe((state) => {
       this.menuService.menuItemsForEmployee$.subscribe((items) => {
         this.menuItemsForEmployee = items;
