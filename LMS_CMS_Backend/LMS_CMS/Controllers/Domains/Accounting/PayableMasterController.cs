@@ -210,14 +210,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     detail.LinkFileTypeName = student?.en_name;
                 }
             }
-            //if (payableMasterGetDTO.PayableDetails.Count==0)
-            //{
-            //    payableMasterGetDTO.PayableDetails =new List<PayableDetailsGetDTO>();
-            //}
-            //else
-            //{
-                payableMasterGetDTO.PayableDetails = payableDetailsGetDTO;
-            //}
+            payableMasterGetDTO.PayableDetails = payableDetailsGetDTO;
             return Ok(payableMasterGetDTO);
         }
 

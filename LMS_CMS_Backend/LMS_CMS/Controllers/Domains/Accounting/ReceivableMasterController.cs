@@ -209,11 +209,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     detail.LinkFileTypeName = student?.en_name;
                 }
             }
-            //if (ReceivableMasterGetDTO.ReceivableDetails.Count == 0)
-            //{
-            //    ReceivableMasterGetDTO.ReceivableDetails = new List<ReceivableDetailsGetDTO>();
-            //}
-
             return Ok(ReceivableMasterGetDTO);
         }
 

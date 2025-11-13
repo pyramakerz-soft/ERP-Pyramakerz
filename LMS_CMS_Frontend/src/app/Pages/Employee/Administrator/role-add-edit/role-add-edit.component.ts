@@ -374,9 +374,10 @@ Save() {
           this.router.navigateByUrl("Employee/Role")
         },
         error: (error) => {
+          console.log(error)
           this.isLoading = false
           const nameError = error?.error?.errors?.Name?.[0]
-
+          
           if (error?.error?.status === 401) {
             this.showErrorAlert(this.translate.instant('You are not allowed to edit this role'));
           } else if (
