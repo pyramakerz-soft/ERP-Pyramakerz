@@ -149,6 +149,87 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 
             return Ok();
         }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Registered Employee" }
+        )]
+        public async Task<IActionResult> Edit(RegisteredEmployeeEditDTO EditRegistrationEmployee)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            if (EditRegistrationEmployee == null)
+            {
+                return BadRequest("Employee data is required.");
+            }
+             
+            string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!Regex.IsMatch(EditRegistrationEmployee.Email, pattern))
+            {
+                return BadRequest("Email Is Not Valid");
+            }
+
+            RegisteredEmployee registeredExist = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.ID == EditRegistrationEmployee.ID);
+            if (registeredExist == null)
+            {
+                return BadRequest("This Registered Employee doesn't Exist");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registered Employee", roleId, userId, registeredExist);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            RegisteredEmployee registered = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.User_Name == EditRegistrationEmployee.User_Name && e.ID != EditRegistrationEmployee.ID);
+            if (registered != null)
+            {
+                return BadRequest("This User Name Already Exist");
+            }
+
+            RegisteredEmployee CheckEmailFromRegistered = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.Email == EditRegistrationEmployee.Email && e.ID != EditRegistrationEmployee.ID);
+            if (CheckEmailFromRegistered != null)
+            {
+                return BadRequest("This Email Already Exist");
+            }
+            
+            Employee employeeExists = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.User_Name == EditRegistrationEmployee.User_Name);
+            if (employeeExists != null)
+            {
+                return BadRequest("This User Name Already Exist");
+            }
+            
+            Employee CheckEmail = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.Email == EditRegistrationEmployee.Email);
+            if (CheckEmail != null)
+            {
+                return BadRequest("This Email Already Exist");
+            }
+
+            mapper.Map(EditRegistrationEmployee, registeredExist);
+             
+            Unit_Of_Work.registeredEmployee_Repository.Update(registeredExist);
+            Unit_Of_Work.SaveChanges();
+                
+            return Ok();
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -259,6 +340,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 {
                     return accessCheck;
                 }
+            }
+
+            Employee employeeExists = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.User_Name == registeredEmployee.User_Name);
+            if (employeeExists != null)
+            {
+                return BadRequest("This User Name Already Exist Please Change It");
+            }
+
+            Employee CheckEmail = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.Email == registeredEmployee.Email);
+            if (CheckEmail != null)
+            {
+                return BadRequest("This Email Already Exist Please Change It");
             }
 
             registeredEmployee.IsAccepted = true;

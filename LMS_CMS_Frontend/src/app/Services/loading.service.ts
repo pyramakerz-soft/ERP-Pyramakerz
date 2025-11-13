@@ -4,21 +4,9 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class LoadingService {
-  // private loadingSubject = new BehaviorSubject<boolean>(false);
-  // loading$ = this.loadingSubject.asObservable();
-
-  // show() {
-  //   this.loadingSubject.next(true);
-  // }
-
-  // hide() {
-  //   this.loadingSubject.next(false);
-  // }
-
+export class LoadingService { 
   private loadingSubject = new BehaviorSubject<boolean>(false);
   loading$ = this.loadingSubject.asObservable();
-
   private activeRequests = 0;
 
   show() {
@@ -30,16 +18,12 @@ export class LoadingService {
   }
 
   startRequest() {
-    if (this.activeRequests === 0) {
-      this.show();
-    }
+    if (this.activeRequests === 0) this.show();
     this.activeRequests++;
   }
 
   finishRequest() {
-    this.activeRequests--;
-    if (this.activeRequests <= 0) {
-      this.hide();
-    }
+    this.activeRequests = Math.max(this.activeRequests - 1, 0);
+    if (this.activeRequests === 0) this.hide();
   }
 }
