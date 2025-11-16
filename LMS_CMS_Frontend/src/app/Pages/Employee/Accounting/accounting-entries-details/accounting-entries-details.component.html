@@ -125,160 +125,138 @@
             </thead>
             <tbody>
                 <!-- No Data Row -->
-                <tr *ngIf="accountingEntriesDetailsData.length === 0 && !isNewDetails">
+                <tr *ngIf="(accountingEntries.accountingEntriesDetails?.length || 0) === 0 && (accountingEntries.newDetails?.length || 0) === 0">
                     <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
-                <!-- New Row with Inputs -->
-                <tr *ngIf="isNewDetails" class="no-print bg-white border-t border-gray-300 text-xs md:text-sm">
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- Data Rows -->
+                <tr *ngFor="let row of accountingEntries.accountingEntriesDetails; let i = index"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input id="debitAmount" type="text" placeholder="{{ 'Enter Debit' | translate }}"
+                        <input id="debitAmount" type="text"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                            (input)="validateNumberNewDetails($event, 'debitAmount')"
-                            [(ngModel)]="newDetails.debitAmount"
-                            (ngModelChange)="onInputValueChangeForDetails({ field: 'debitAmount', value: $event })" />
+                            (input)="validateNumberEditedRowData(row ,$event, 'debitAmount')"
+                            [(ngModel)]="row.debitAmount"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'debitAmount', value: $event })" />
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input id="creditAmount" type="text" placeholder="{{ 'Enter Credit' | translate }}"
+                        <input id="creditAmount" type="text"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                            (input)="validateNumberNewDetails($event, 'creditAmount')"
-                            [(ngModel)]="newDetails.creditAmount"
-                            (ngModelChange)="onInputValueChangeForDetails({ field: 'creditAmount', value: $event })" />
+                            (input)="validateNumberEditedRowData(row ,$event, 'creditAmount')"
+                            [(ngModel)]="row.creditAmount"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'creditAmount', value: $event })" />
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select (change)="GetSubAccountData($event)"
-                            (ngModelChange)="onInputValueChangeForDetails({ field: 'accountingTreeChartID', value: $event })"
+                        <select (change)="GetSubAccountData(row ,$event)"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'accountingTreeChartID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                            id="accountingTreeChartID" [(ngModel)]="newDetails.accountingTreeChartID">
+                            id="accountingTreeChartID" [(ngModel)]="row.accountingTreeChartID">
                             <option [value]="0" disabled selected hidden> {{ 'Choose Account' | translate }}</option>
-                            <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}</option>
+                            <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}
+                            </option>
                             <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>{{ 'No Data Found' | translate }}
                             </option>
                         </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['accountingTreeChartID']" class="text-red-500 ml-3 font-normal">
+                          {{ validationErrorsForDetails[row.id]['accountingTreeChartID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select [disabled]="this.newDetails.accountingTreeChartID == 0"
-                            (ngModelChange)="onInputValueChangeForDetails({ field: 'subAccountingID', value: $event })"
+                        <select [disabled]="row.accountingTreeChartID == 0"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'subAccountingID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                            id="subAccountingID" [(ngModel)]="newDetails.subAccountingID">
-                            <option [value]="null" disabled selected hidden>  {{ 'Choose Sub Account Data' | translate }}</option>
-                            <option *ngFor="let sub of subAccountData" [value]="sub.id">{{ sub.en_name }} {{ sub.name }}
-                            </option>
-                            <option *ngIf="subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                            id="subAccountingID" [(ngModel)]="row.subAccountingID">
+                            <option [value]="null" disabled selected hidden> {{ 'Choose Sub Account Data' | translate }}</option>
+                            <option *ngFor="let sub of row.subAccountData" [value]="sub.id">{{ sub.en_name }} {{
+                                sub.name }}</option>
+                            <option *ngIf="row.subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                         </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['subAccountingID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['subAccountingID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                      placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="newDetails.note">
-                        </textarea>
+                        <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            [(ngModel)]="row.note"></textarea>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button [disabled]="!isDetailsValid || isLoading"
-                                [ngClass]="{'cursor-not-allowed opacity-50' : !isDetailsValid}">
-                                <i (click)="SaveNewDetails()" *ngIf="!isLoading"
-                                    class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
-                                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                (click)="DeleteDetail(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
 
-                <!-- Data Rows -->
-                <tr *ngFor="let row of accountingEntriesDetailsData; let i = index"
+                <tr *ngFor="let row of accountingEntries.newDetails; let i = index"
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
 
-                    <!-- If the row is being edited, show inputs -->
-                    <ng-container *ngIf="editingRowId === row.id; else normalRow" class="no-print">
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <input id="debitAmount" type="text"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                (input)="validateNumberEditedRowData($event, 'debitAmount')"
-                                [(ngModel)]="editedRowData.debitAmount"
-                                (ngModelChange)="onInputValueChangeForDetails({ field: 'debitAmount', value: $event })" />
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <input id="creditAmount" type="text"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                (input)="validateNumberEditedRowData($event, 'creditAmount')"
-                                [(ngModel)]="editedRowData.creditAmount"
-                                (ngModelChange)="onInputValueChangeForDetails({ field: 'creditAmount', value: $event })" />
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <select (change)="GetSubAccountData($event)"
-                                (ngModelChange)="onInputValueChangeForDetails({ field: 'accountingTreeChartID', value: $event })"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                                id="accountingTreeChartID" [(ngModel)]="editedRowData.accountingTreeChartID">
-                                <option [value]="0" disabled selected hidden> {{ 'Choose Account' | translate }}</option>
-                                <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}
-                                </option>
-                                <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>{{ 'No Data Found' | translate }}
-                                </option>
-                            </select>
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <select [disabled]="this.editedRowData.accountingTreeChartID == 0"
-                                (ngModelChange)="onInputValueChangeForDetails({ field: 'subAccountingID', value: $event })"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                                id="subAccountingID" [(ngModel)]="editedRowData.subAccountingID">
-                                <option [value]="null" disabled selected hidden> {{ 'Choose Sub Account Data' | translate }}</option>
-                                <option *ngFor="let sub of subAccountData" [value]="sub.id">{{ sub.en_name }} {{
-                                    sub.name }}</option>
-                                <option *ngIf="subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-                            </select>
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                [(ngModel)]="editedRowData.note"></textarea>
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4 rtl:space-x-reverse">
-                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                                    (click)="DeleteDetail(row.id)">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                                <button [disabled]="!isDetailsValid || isLoading"
-                                    [ngClass]="{'cursor-not-allowed opacity-50' : !isDetailsValid}">
-                                    <i (click)="SaveEditedDetail()" *ngIf="!isLoading"
-                                        class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
-                                    <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <!-- Normal row display -->
-                    <ng-template #normalRow>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.debitAmount }}</td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.creditAmount }}</td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{
-                            row.accountingTreeChartName }}</td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subAccountingName }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.note }}</td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4 rtl:space-x-reverse" *ngIf="!isView">
-                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                                    (click)="DeleteDetail(row.id)">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)"
-                                    (click)="EditDetail(row)">
-                                    <i class="fa-solid fa-pencil"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </ng-template>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">__
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <input id="debitAmount" type="text"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            [(ngModel)]="row.debitAmount"
+                            (input)="validateNumberEditedRowData(row ,$event, 'debitAmount')"
+                            (ngModelChange)="onInputValueChangeForDetails(row ,{ field: 'debitAmount', value: $event })" />
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <input id="creditAmount" type="text"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            [(ngModel)]="row.creditAmount"
+                            (input)="validateNumberEditedRowData(row ,$event, 'creditAmount')"
+                            (ngModelChange)="onInputValueChangeForDetails(row ,{ field: 'creditAmount', value: $event })" />
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <select (change)="GetSubAccountData(row ,$event)"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'accountingTreeChartID', value: $event })"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+                            id="accountingTreeChartID" [(ngModel)]="row.accountingTreeChartID">
+                            <option [value]="0" disabled selected hidden> {{ 'Choose Account' | translate }}</option>
+                            <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}
+                            </option>
+                            <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>{{ 'No Data Found' | translate }}
+                            </option>
+                        </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['accountingTreeChartID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['accountingTreeChartID'] }}
+                        </span>
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <select [disabled]="row.accountingTreeChartID == 0"
+                            (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'subAccountingID', value: $event })"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+                            id="subAccountingID" [(ngModel)]="row.subAccountingID">
+                            <option [value]="null" disabled selected hidden> {{ 'Choose Sub Account Data' | translate }}</option>
+                            <option *ngFor="let sub of row.subAccountData" [value]="sub.id">{{ sub.en_name }} {{
+                                sub.name }}</option>
+                            <option *ngIf="row.subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['subAccountingID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['subAccountingID'] }}
+                        </span>
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            [(ngModel)]="row.note"></textarea>
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                (click)="DeleteNewDetail(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

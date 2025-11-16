@@ -250,7 +250,6 @@ export class InstallmentDeductionDetailComponent {
 
       // Validate only these fields
       const requiredFields: (keyof InstallmentDeductionDetail)[] = [
-        'amount',
         'date',
         'feeTypeID',
       ];
@@ -284,7 +283,6 @@ export class InstallmentDeductionDetailComponent {
 
         // Validate only these fields
         const requiredFields: (keyof InstallmentDeductionDetail)[] = [
-          'amount',
           'date',
           'feeTypeID',
         ];
@@ -405,11 +403,11 @@ export class InstallmentDeductionDetailComponent {
   }
 
   AddDetail() {
-    this.Detail = new InstallmentDeductionDetail()
-    this.Detail.id = Date.now() + Math.floor(Math.random() * 10000);
-    this.Detail.installmentDeductionMasterID = this.MasterId
+    var NewDetail = new InstallmentDeductionDetail()
+    NewDetail.id = Date.now() + Math.floor(Math.random() * 10000);
+    NewDetail.installmentDeductionMasterID = this.MasterId
     this.Data.newDetails=this.Data.newDetails || []
-    this.Data.newDetails.push(this.Detail);
+    this.Data.newDetails.push(NewDetail);
   }
 
   // Edit(id: number) {

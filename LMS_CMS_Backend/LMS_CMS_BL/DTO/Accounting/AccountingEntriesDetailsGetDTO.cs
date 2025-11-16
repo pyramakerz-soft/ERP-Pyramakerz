@@ -21,5 +21,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long SubAccountingID { get; set; }
         public string SubAccountingName { get; set; }
         public long InsertedByUserId { get; set; }
+        public List<SubAccountDTO>? SubAccountData { get; set; }
     }
 }
