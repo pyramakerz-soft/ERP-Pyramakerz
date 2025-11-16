@@ -583,14 +583,10 @@ export class PayableDetailsComponent {
           .Delete(id, this.DomainName)
           .subscribe((data) => {
           // this.GetPayableByID();
-          this.payable.payableDetails = (this.payable.payableDetails || []).filter(p => p.id !== id);
-          this.payable.updatedDetails = (this.payable.updatedDetails || []).filter(p => p.id !== id);
-          if(this.payable.updatedDetails.length == 0){
-            this.payable.updatedDetails=[]
-          }
-          if(this.payable.payableDetails.length == 0){
-            this.payable.payableDetails=[]
-          }
+          this.payable.payableDetails = (this.payable.payableDetails || []).filter(p => p.id != id);
+          this.payable.updatedDetails = (this.payable.updatedDetails || []).filter(p => p.id != id);
+          this.payable.payableDetails = [...this.payable.payableDetails];
+          this.payable.updatedDetails = [...this.payable.updatedDetails];
         });
       }
     });

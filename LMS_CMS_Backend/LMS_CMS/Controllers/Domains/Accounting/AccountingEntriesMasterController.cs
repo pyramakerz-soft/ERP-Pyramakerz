@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Domains;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -97,7 +99,146 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound();
             }
 
-            AccountingEntriesMasterGetDTO dto = mapper.Map<AccountingEntriesMasterGetDTO>(AccountingEntriesMaster); 
+            AccountingEntriesMasterGetDTO dto = mapper.Map<AccountingEntriesMasterGetDTO>(AccountingEntriesMaster);
+
+            List<AccountingEntriesDetails> AccountingEntriesDetails = await Unit_Of_Work.accountingEntriesDetails_Repository.Select_All_With_IncludesById<AccountingEntriesDetails>(
+                t => t.IsDeleted != true && t.AccountingEntriesMasterID == id,
+                query => query.Include(Master => Master.AccountingTreeChart),
+                query => query.Include(Master => Master.AccountingEntriesMaster)
+                );
+
+            List<AccountingEntriesDetailsGetDTO> accountingEntriesDetailsGetDTO = mapper.Map<List<AccountingEntriesDetailsGetDTO>>(AccountingEntriesDetails);
+
+            foreach (var detail in accountingEntriesDetailsGetDTO)
+            {
+                AccountingTreeChart acc = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(
+                    ac => ac.ID == detail.AccountingTreeChartID && ac.IsDeleted != true
+                    );
+
+                if (acc.LinkFileID == 6) // Bank
+                {
+                    var bank = Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = bank?.Name;
+
+                    List<Bank> banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(
+                         f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(banks);
+
+                }
+                else if (acc.LinkFileID == 5) // Save
+                {
+                    var save = Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = save?.Name;
+
+                    List<Save> saves = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(saves);
+
+                }
+                else if (acc.LinkFileID == 2) // Supplier
+                {
+                    var supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = supplier?.Name;
+
+                    List<Supplier> Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Suppliers);
+                }
+                else if (acc.LinkFileID == 3) // Debit
+                {
+                    var debit = Unit_Of_Work.debit_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = debit?.Name;
+
+                    List<Debit> Debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Debits);
+
+                }
+                else if (acc.LinkFileID == 4) // Credit
+                {
+                    var credit = Unit_Of_Work.credit_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = credit?.Name;
+
+                    List<Credit> Credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Credits);
+
+                }
+                else if (acc.LinkFileID == 7) // Income
+                {
+                    var income = Unit_Of_Work.income_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = income?.Name;
+
+                    List<Income> Incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Incomes);
+
+                }
+                else if (acc.LinkFileID == 8) // Outcome
+                {
+                    var outcome = Unit_Of_Work.outcome_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = outcome?.Name;
+
+                    List<Outcome> Outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Outcomes);
+                }
+                else if (acc.LinkFileID == 9) // Asset
+                {
+                    var asset = Unit_Of_Work.asset_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = asset?.Name;
+
+                    List<Asset> Assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Assets);
+
+                }
+                else if (acc.LinkFileID == 10) // Employee
+                {
+                    var employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = employee?.en_name;
+
+                    List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(Employees);
+
+                }
+                else if (acc.LinkFileID == 11) // Fee
+                {
+                    var fee = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = fee?.Name;
+
+                    List<TuitionFeesType> TuitionFeesTypes = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(TuitionFeesTypes);
+
+                }
+                else if (acc.LinkFileID == 12) // Discount
+                {
+                    var discount = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = discount?.Name;
+
+                    List<TuitionDiscountType> TuitionDiscountTypes = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(
+                        f => f.IsDeleted != true && f.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(TuitionDiscountTypes);
+
+                }
+                else if (acc.LinkFileID == 13) // Student
+                {
+                    var student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == detail.SubAccountingID);
+                    detail.SubAccountingName = student?.en_name;
+
+                    List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(
+                        query => query.IsDeleted != true && query.AccountNumberID == detail.AccountingTreeChartID);
+                    detail.SubAccountData = mapper.Map<List<SubAccountDTO>>(students);
+                }
+            }
+            dto.AccountingEntriesDetails = accountingEntriesDetailsGetDTO;
 
             return Ok(dto);
         }
@@ -222,6 +363,101 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             Unit_Of_Work.accountingEntriesMaster_Repository.Update(AccountingEntriesMaster);
             Unit_Of_Work.SaveChanges();
+
+
+            // new Details 
+            if(newMaster.NewDetails != null && newMaster.NewDetails.Count > 0)
+            {
+                foreach (var newDetails in newMaster.NewDetails)
+                {
+                    AccountingTreeChart AccountingTreeChart = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.ID == newDetails.AccountingTreeChartID && t.SubTypeID == 2);
+                    AccountingEntriesDetails AccountingEntriesDetails;
+                    if (AccountingTreeChart.LinkFileID != null)
+                    {
+                         AccountingEntriesDetails = mapper.Map<AccountingEntriesDetails>(newDetails);
+
+                        if (AccountingTreeChart.LinkFileID == 6) // Bank
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Bank = Unit_Of_Work.bank_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 5) // Save
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Save = Unit_Of_Work.save_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 2) // Supplier
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 3) // Debit
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Debit = Unit_Of_Work.debit_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 4) // Credit
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Credit = Unit_Of_Work.credit_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 7) // Income
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Income = Unit_Of_Work.income_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 8) // Outcome
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Outcome = Unit_Of_Work.outcome_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 9) // Asset
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Asset = Unit_Of_Work.asset_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 10) // Employee
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Employee = Unit_Of_Work.employee_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 11) // Fee
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.TuitionFeesType = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 12) // Discount
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.TuitionDiscountType = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                        else if (AccountingTreeChart.LinkFileID == 13) // Student
+                        {
+                            AccountingEntriesDetails.SubAccountingID = newDetails.SubAccountingID;
+                            AccountingEntriesDetails.Student = Unit_Of_Work.student_Repository.First_Or_Default(t => t.ID == newDetails.SubAccountingID);
+                        }
+                    }
+                    else
+                    {
+                        AccountingEntriesDetails = mapper.Map<AccountingEntriesDetails>(newDetails);
+                        AccountingEntriesDetails.SubAccountingID = null;
+                    }
+
+                    AccountingEntriesDetails.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        AccountingEntriesDetails.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        AccountingEntriesDetails.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.accountingEntriesDetails_Repository.Add(AccountingEntriesDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
+
             return Ok(newMaster);
         }
 

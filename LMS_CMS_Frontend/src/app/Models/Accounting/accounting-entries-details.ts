@@ -9,6 +9,8 @@ export class AccountingEntriesDetails {
         public accountingTreeChartID: number = 0,
         public accountingTreeChartName: string = '', 
         public accountingEntriesMasterID: number = 0,
-        public insertedByUserId: number = 0
+        public insertedByUserId: number = 0 ,
+        public subAccountData: any[] = []
+
     ) {}
 } 

@@ -57,24 +57,16 @@ export class AccountingEntriesDetailsComponent {
 
   accountingEntries: AccountingEntries = new AccountingEntries()
   validationErrors: { [key in keyof AccountingEntries]?: string } = {};
-  validationErrorsForDetails: { [key in keyof AccountingEntriesDetails]?: string } = {};
+  validationErrorsForDetails: Record<number, Partial<Record<keyof AccountingEntriesDetails, string>>> = {};
 
   dataTypesData: AccountingEntriesDocType[] = []
   bankOrSaveData: any[] = []
-  accountingEntriesDetailsData: AccountingEntriesDetails[] = []
+  // accountingEntriesDetailsData: AccountingEntriesDetails[] = []
   accountingEntriesDetailsDataForPrint: any[] = []
   AccountingTreeChartData: AccountingTreeChart[] = []
-  subAccountData: any[] = []
-  newDetails: AccountingEntriesDetails = new AccountingEntriesDetails()
   totalCredit: number = 0;
   totalDebit: number = 0;
   theDifference: number = 0;
-
-  isNewDetails: boolean = false
-  isDetailsValid: boolean = false
-
-  editingRowId: number | null = null;
-  editedRowData: AccountingEntriesDetails = new AccountingEntriesDetails()
 
   isLoading = false;
   isSaveLoading = false;
@@ -115,7 +107,8 @@ export class AccountingEntriesDetailsComponent {
       this.isCreate = true
     } else {
       this.GetAccountingEntriesByID()
-      this.GetAccountingEntriesDetails()
+      this.GetAccountingTreeChartData()
+      // this.GetAccountingEntriesDetails()
     }
 
     this.activeRoute.url.subscribe(url => {
@@ -175,10 +168,9 @@ export class AccountingEntriesDetailsComponent {
     )
   }
 
-  GetSubAccountData(event: Event) {
-    this.subAccountData = []
-    this.newDetails.subAccountingID = null
-    this.editedRowData.subAccountingID = null
+  GetSubAccountData(row:AccountingEntriesDetails ,event: Event) {
+    row.subAccountData = []
+    row.subAccountingID = null
     const target = event.target as HTMLSelectElement;
     const selectedValue = target ? target.value : null;
 
@@ -188,13 +180,10 @@ export class AccountingEntriesDetailsComponent {
           if (data.linkFileID && data.id) {
             this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileAndSubAccount(this.DomainName, data.linkFileID, data.id).subscribe(
               (data) => {
-                this.subAccountData = data
+                row.subAccountData = data
               }
             )
-          } else {
-            this.newDetails.subAccountingID = null
-            this.editedRowData.subAccountingID = null
-          }
+          } 
         }
       )
     }
@@ -204,8 +193,39 @@ export class AccountingEntriesDetailsComponent {
     this.accountingEntriesService.GetByID(this.AccountingEntriesID, this.DomainName).subscribe(
       (data) => {
         this.accountingEntries = data
+        let totalCredit = 0
+        let totalDebit = 0
+        this.accountingEntries.accountingEntriesDetails.forEach(element => {
+          totalCredit = totalCredit + (element.creditAmount ? element.creditAmount : 0)
+          totalDebit = totalDebit + (element.debitAmount ? element.debitAmount : 0)
+        });
+        this.totalCredit = totalCredit
+        this.totalDebit = totalDebit
+        this.theDifference = this.totalCredit - this.totalDebit
       }
     )
+  }
+
+  CalcTotalData() {
+    let totalCredit = 0;
+    let totalDebit = 0;
+
+    const details = this.accountingEntries.accountingEntriesDetails || [];
+    const newDetails = this.accountingEntries.newDetails || [];
+
+    details.forEach(element => {
+      totalCredit += Number(element.creditAmount) || 0;
+      totalDebit += Number(element.debitAmount) || 0;
+    });
+
+    newDetails.forEach(element => {
+      totalCredit += Number(element.creditAmount) || 0;
+      totalDebit += Number(element.debitAmount) || 0;
+    });
+
+    this.totalCredit = totalCredit;
+    this.totalDebit = totalDebit;
+    this.theDifference = this.totalCredit - this.totalDebit;
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -248,22 +268,104 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  onInputValueChangeForDetails(event: { field: keyof AccountingEntriesDetails, value: any }) {
+  onInputValueChangeForDetails(row:AccountingEntriesDetails ,event: { field: keyof AccountingEntriesDetails, value: any }) {
     const { field, value } = event;
-    (this.newDetails as any)[field] = value;
+    (row as any)[field] = value;
     if (value) {
-      this.validationErrorsForDetails[field] = '';
+      if (this.validationErrorsForDetails[row.id]) {
+        this.validationErrorsForDetails[row.id][field] = '';
+      }
     }
 
-    if (((this.newDetails.creditAmount || this.editedRowData.creditAmount) ||
-      (this.newDetails.debitAmount || this.editedRowData.debitAmount)) &&
-      (this.newDetails.subAccountingID || this.editedRowData.subAccountingID) &&
-      (!isNaN(this.newDetails.creditAmount ? this.newDetails.creditAmount : 0) && !isNaN(this.newDetails.debitAmount ? this.newDetails.debitAmount : 0)) &&
-      (!isNaN(this.editedRowData.creditAmount ? this.editedRowData.creditAmount : 0) && !isNaN(this.editedRowData.debitAmount ? this.editedRowData.debitAmount : 0)) &&
-      (this.newDetails.accountingTreeChartID || this.editedRowData.accountingTreeChartID)) {
-      this.isDetailsValid = true
+    this.CalcTotalData();  
+  }
+
+  isDetailsFormValid(): boolean {
+    let isValid = true;
+
+    // Reset validation errors
+    this.validationErrorsForDetails = {};
+
+    this.accountingEntries.accountingEntriesDetails.forEach((detail) => {
+      // Ensure detail has an ID
+      const id = detail.id;
+      if (!id) return; // skip if no ID
+
+      // Prepare error object for this row
+      if (!this.validationErrorsForDetails[id]) {
+        this.validationErrorsForDetails[id] = {};
+      }
+
+      const errors = this.validationErrorsForDetails[id];
+
+      // Validate only these fields
+      const requiredFields: (keyof AccountingEntriesDetails)[] = [
+        'accountingTreeChartID',
+        'subAccountingID'
+      ];
+
+      requiredFields.forEach((field) => {
+        const value = detail[field];
+        if (!value || value == 0 || value == '') {
+          errors[field] = this.getRequiredErrorMessage(
+            this.DetailsCapitalizeField(field)
+          );
+          console.log(errors)
+          isValid = false;
+        } else {
+          errors[field] = ''; 
+        }
+      });
+    });
+
+    if(this.accountingEntries.newDetails && this.accountingEntries.newDetails.length > 0){
+      this.accountingEntries.newDetails.forEach((detail) => {
+        // Ensure detail has an ID
+        const id = detail.id;
+        if (!id) return; // skip if no ID
+
+        // Prepare error object for this row
+        if (!this.validationErrorsForDetails[id]) {
+          this.validationErrorsForDetails[id] = {};
+        }
+
+        const errors = this.validationErrorsForDetails[id];
+
+        // Validate only these fields
+        const requiredFields: (keyof AccountingEntriesDetails)[] = [
+          'accountingTreeChartID',
+          'subAccountingID'
+        ];
+
+        requiredFields.forEach((field) => {
+          const value = detail[field];
+          if (!value || value == 0 || value == '') {
+            errors[field] = this.getRequiredErrorMessage(
+              this.DetailsCapitalizeField(field)
+            );
+            console.log(errors)
+            isValid = false;
+          } else {
+            errors[field] = ''; 
+          }
+        });
+      });
+    }
+    return isValid;
+  }
+
+  DetailsCapitalizeField(field: keyof AccountingEntriesDetails): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
     } else {
-      this.isDetailsValid = false
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 
@@ -277,31 +379,21 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  validateNumberNewDetails(event: any, field: keyof AccountingEntriesDetails): void {
+  validateNumberEditedRowData(row:AccountingEntriesDetails ,event: any, field: keyof AccountingEntriesDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.newDetails[field] === 'string') {
-        this.newDetails[field] = null as never;
+      if (typeof row[field] === 'string') {
+        row[field] = null as never;
       }
     }
   }
 
-  validateNumberEditedRowData(event: any, field: keyof AccountingEntriesDetails): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.editedRowData[field] === 'string') {
-        this.editedRowData[field] = null as never;
-      }
-    }
-  }
 
   Save() {
-    if (this.isFormValid()) {
-      this.isSaveLoading = true;
-
-      if (this.isCreate) {
+    if (this.isCreate) {
+      if (this.isFormValid()) {
+        this.isSaveLoading = true;
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
@@ -318,13 +410,16 @@ export class AccountingEntriesDetailsComponent {
             this.isSaveLoading = false;
           }
         );
-      } else if (this.isEdit) {
+      }
+    } else if (this.isEdit) {
+      if(this.isDetailsFormValid()){
+        this.isSaveLoading = true;
         this.accountingEntriesService.Edit(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
             this.GetAccountingEntriesByID();
             this.router.navigateByUrl(`Employee/Accounting Entries/${this.AccountingEntriesID}`);
             this.isSaveLoading = false;
-
+  
             Swal.fire({
               title: 'Updated Successfully',
               icon: 'success',
@@ -339,106 +434,12 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  GetAccountingEntriesDetails() {
-    this.accountingEntriesDetailsData = []
-    this.accountingEntriesDetailsService.Get(this.DomainName, this.AccountingEntriesID).subscribe(
-      (data) => {
-        this.accountingEntriesDetailsData = data
-        let totalCredit = 0
-        let totalDebit = 0
-        this.accountingEntriesDetailsData.forEach(element => {
-          totalCredit = totalCredit + (element.creditAmount ? element.creditAmount : 0)
-          totalDebit = totalDebit + (element.debitAmount ? element.debitAmount : 0)
-        });
-        this.totalCredit = totalCredit
-        this.totalDebit = totalDebit
-        this.theDifference = this.totalCredit - this.totalDebit
-      }
-    )
-  }
-
   AddAccountingEntriesDetails() {
-    this.isDetailsValid = false
-    this.editingRowId = null;
-    this.editedRowData = new AccountingEntriesDetails();
-    this.isNewDetails = true
-    this.GetAccountingTreeChartData()
-  }
-
-  SaveNewDetails() {
-    if (this.isDetailsValid) {
-      this.isLoading = true;
-      this.newDetails.accountingEntriesMasterID = this.AccountingEntriesID
-      this.accountingEntriesDetailsService.Add(this.newDetails, this.DomainName).subscribe(
-        (data) => {
-          this.isLoading = false;
-          this.isNewDetails = false
-          this.newDetails = new AccountingEntriesDetails()
-          this.GetAccountingEntriesDetails()
-          this.editingRowId = null;
-          this.editedRowData = new AccountingEntriesDetails();
-          this.isDetailsValid = false
-        },
-        (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'warning',
-            title: error.error,
-            confirmButtonText: 'Okay'
-          });
-        }
-      )
-    }
-  }
-
-  EditDetail(row: AccountingEntriesDetails) {
-    this.isNewDetails = false
-    this.isDetailsValid = true
-    this.newDetails = new AccountingEntriesDetails()
-    this.editingRowId = row.id
-    this.editedRowData = { ...row }
-    this.GetAccountingTreeChartData()
-    if (this.editedRowData.accountingTreeChartID) {
-      this.accountingTreeChartService.GetByID(+this.editedRowData.accountingTreeChartID, this.DomainName).subscribe(
-        (data) => {
-          if (data.linkFileID && data.id) {
-            this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileAndSubAccount(this.DomainName, data.linkFileID, data.id).subscribe(
-              (data) => {
-                this.subAccountData = data
-              }
-            )
-          } else {
-            this.newDetails.subAccountingID = null
-            this.editedRowData.subAccountingID = null
-          }
-        }
-      )
-    }
-  }
-
-  SaveEditedDetail() {
-    if (this.isDetailsValid) {
-      this.isLoading = true;
-      this.accountingEntriesDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-        (data) => {
-          this.isLoading = false;
-          this.editingRowId = null;
-          this.editedRowData = new AccountingEntriesDetails();
-          this.isDetailsValid = false
-          this.isNewDetails = false
-          this.newDetails = new AccountingEntriesDetails()
-          this.GetAccountingEntriesDetails()
-        },
-        (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'warning',
-            title: error.error,
-            confirmButtonText: 'Okay'
-          });
-        }
-      )
-    }
+    var newDetail = new AccountingEntriesDetails();
+    newDetail.id =  Date.now() + Math.floor(Math.random() * 10000);
+    newDetail.accountingEntriesMasterID =  this.AccountingEntriesID
+    this.accountingEntries.newDetails = this.accountingEntries.newDetails || [];
+    this.accountingEntries.newDetails.push(newDetail)
   }
 
   DeleteDetail(id: number) {
@@ -454,40 +455,31 @@ export class AccountingEntriesDetailsComponent {
       if (result.isConfirmed) {
         this.accountingEntriesDetailsService.Delete(id, this.DomainName).subscribe(
           (data) => {
-            this.GetAccountingEntriesDetails()
+            this.accountingEntries.accountingEntriesDetails =this.accountingEntries.accountingEntriesDetails.filter(a=>a.id != id)
+            this.CalcTotalData();  
           }
         )
       }
     });
   }
 
+  DeleteNewDetail(id: number) {
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+          this.accountingEntries.newDetails =this.accountingEntries.newDetails.filter(a=>a.id != id)
+          this.CalcTotalData();  
+      }
+    });
 
-  // DownloadData() {
-  //   let orderElement = document.getElementById('DataToDownload');
-
-  //   if (!orderElement) {
-  //     console.error("Page body not found!");
-  //     return;
-  //   }
-
-  //   document.querySelectorAll('.no-print').forEach(el => {
-  //     (el as HTMLElement).style.display = 'none';
-  //   });
-
-  //   setTimeout(() => {
-  //     html2pdf().from(orderElement).set({
-  //       margin: 10,
-  //       filename: `AccountingEntries_${this.AccountingEntriesID}.pdf`,
-  //       image: { type: 'jpeg', quality: 0.98 },
-  //       html2canvas: { scale: 3, useCORS: true, allowTaint: true, logging: true },
-  //       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-  //     }).save().then(() => {
-  //       document.querySelectorAll('.no-print').forEach(el => {
-  //         (el as HTMLElement).style.display = '';
-  //       });
-  //     });
-  //   }, 500);
-  // }
+  }
 
   async DownloadAsPDF() {
     this.showPDF = true;
@@ -499,7 +491,7 @@ export class AccountingEntriesDetailsComponent {
   }
 
   formatData(){
-    this.accountingEntriesDetailsDataForPrint = this.accountingEntriesDetailsData.map(item => ({
+    this.accountingEntriesDetailsDataForPrint = this.accountingEntries.accountingEntriesDetails.map(item => ({
       id: item.id,
       'Debit Amount': item.debitAmount || 0,
       'Credit Amount': item.creditAmount || 0,
@@ -579,7 +571,7 @@ export class AccountingEntriesDetailsComponent {
         {
           // title: "Accounting Entries Details",
           headers: ['id', 'debitAmount', 'creditAmount', 'Account Name', 'sub Account', 'note'],
-          data: this.accountingEntriesDetailsData.map((row) => [
+          data: this.accountingEntries.accountingEntriesDetails.map((row) => [
             row.id || 0,
             row.debitAmount || 0,
             row.creditAmount || 0,
