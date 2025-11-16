@@ -50,7 +50,8 @@
         <div class="flex justify-between flex-wrap">
             <div class="w-[29%]">
                 <div class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
-                    <div>{{ data.narration }}</div>
+                    <div *ngIf="data.narration">{{ data.narration }}</div>
+                    <div *ngIf="!data.narration">{{ 'No Data Found' | translate }}</div>
                 </div>
             </div>
         </div>

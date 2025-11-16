@@ -4,10 +4,15 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class LoadingService { 
+export class LoadingService {  
   private loadingSubject = new BehaviorSubject<boolean>(false);
   loading$ = this.loadingSubject.asObservable();
+
   private activeRequests = 0;
+
+  get pendingRequests() {
+    return this.activeRequests;
+  }
 
   show() {
     this.loadingSubject.next(true);

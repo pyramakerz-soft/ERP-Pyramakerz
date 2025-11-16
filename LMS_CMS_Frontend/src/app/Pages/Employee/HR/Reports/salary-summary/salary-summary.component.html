@@ -9,7 +9,7 @@
         <label for="Month" class="block mb-2 text-sm font-medium text-gray-900">
             {{ 'Month' | translate }}
         </label>
-        <input id="Month" type="month" [(ngModel)]="selectedMonth" required
+        <input id="Month" type="month" [(ngModel)]="selectedMonth" required 
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             (change)="onDateChange(); IsShowTabls = false;">
     </div>

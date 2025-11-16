@@ -141,16 +141,30 @@ export class RegisteredEmployeeViewComponent {
         cancelButtonText: 'Cancel',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.registeredEmployeeService.Accept(this.employee, this.DomainName).subscribe((d) => {
-            Swal.fire({
-              title: 'Employee Accepted!',
-              text: 'The employee has been successfully accepted.',
-              icon: 'success',
-              confirmButtonColor: 'secondaryBg',
-            }).then(() => { 
-              this.moveToRegisteredEmployee();
-            });
-          });
+          this.registeredEmployeeService.Accept(this.employee, this.DomainName).subscribe(
+            (d) => {
+              Swal.fire({
+                title: 'Employee Accepted!',
+                text: 'The employee has been successfully accepted.',
+                icon: 'success',
+                confirmButtonText: 'Okay',
+                customClass: {
+                  confirmButton: 'secondaryBg'
+                }
+              }).then(() => { 
+                this.moveToRegisteredEmployee();
+              });
+            },
+            (error) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+                confirmButtonText: 'Okay',
+              });
+            }
+          );
         }
       });  
     }

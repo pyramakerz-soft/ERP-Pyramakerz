@@ -231,6 +231,24 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
             }
 
+            switch (newBouns.BounsTypeID)
+            {
+                case 1:
+                    newBouns.NumberOfBounsDays = 0;
+                    newBouns.Amount = 0;
+                    break;
+                case 2:
+                    newBouns.Hours = 0;
+                    newBouns.Minutes = 0;
+                    newBouns.Amount = 0;
+                    break;
+                case 3:
+                    newBouns.NumberOfBounsDays = 0;
+                    newBouns.Hours = 0;
+                    newBouns.Minutes = 0;
+                    break;
+            }
+
             mapper.Map(newBouns, bouns);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             bouns.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
