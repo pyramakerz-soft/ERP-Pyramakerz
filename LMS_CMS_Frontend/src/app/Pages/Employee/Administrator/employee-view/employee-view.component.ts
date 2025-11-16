@@ -201,6 +201,7 @@ export class EmployeeViewComponent {
       if(this.password != ""){
         this.editpasss.id=this.User_Data_After_Login.id;
         this.editpasss.password=this.password 
+        console.log(this.editpasss)
         this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
             this.isChange = false
             this.password = '';

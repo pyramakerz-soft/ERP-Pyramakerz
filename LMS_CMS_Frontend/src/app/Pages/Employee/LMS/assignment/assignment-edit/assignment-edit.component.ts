@@ -133,8 +133,7 @@ export class AssignmentEditComponent {
       this.DomainName
     ).subscribe((d) => {
       this.assignment = d;
-      this.getLessons();
-      console.log(this.assignment)
+      this.getLessons(); 
     });
   }
 

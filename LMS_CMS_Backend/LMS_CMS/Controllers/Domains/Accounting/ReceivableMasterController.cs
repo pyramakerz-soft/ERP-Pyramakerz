@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Domains;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -133,10 +135,81 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 bankOrSaveName = save?.Name;
             }
 
-            ReceivableMasterGetDTO dto = mapper.Map<ReceivableMasterGetDTO>(ReceivableMaster);
-            dto.BankOrSaveName = bankOrSaveName;
+            ReceivableMasterGetDTO ReceivableMasterGetDTO = mapper.Map<ReceivableMasterGetDTO>(ReceivableMaster);
+            ReceivableMasterGetDTO.BankOrSaveName = bankOrSaveName;
 
-            return Ok(dto);
+            List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById<ReceivableDetails>(
+                t => t.IsDeleted != true && t.ReceivableMasterID == id,
+                query => query.Include(Master => Master.ReceivableMaster),
+                query => query.Include(Master => Master.LinkFile)
+                );
+
+            ReceivableMasterGetDTO.ReceivableDetails = mapper.Map<List<ReceivableDetailsGetDTO>>(ReceivableDetails);
+
+            foreach (var detail in ReceivableMasterGetDTO.ReceivableDetails)
+            {
+                if (detail.LinkFileID == 6) // Bank
+                {
+                    var bank = Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = bank?.Name;
+                }
+                else if (detail.LinkFileID == 5) // Save
+                {
+                    var save = Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = save?.Name;
+                }
+                else if (detail.LinkFileID == 2) // Supplier
+                {
+                    var supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = supplier?.Name;
+                }
+                else if (detail.LinkFileID == 3) // Debit
+                {
+                    var debit = Unit_Of_Work.debit_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = debit?.Name;
+                }
+                else if (detail.LinkFileID == 4) // Credit
+                {
+                    var credit = Unit_Of_Work.credit_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = credit?.Name;
+                }
+                else if (detail.LinkFileID == 7) // Income
+                {
+                    var income = Unit_Of_Work.income_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = income?.Name;
+                }
+                else if (detail.LinkFileID == 8) // Outcome
+                {
+                    var outcome = Unit_Of_Work.outcome_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = outcome?.Name;
+                }
+                else if (detail.LinkFileID == 9) // Asset
+                {
+                    var asset = Unit_Of_Work.asset_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = asset?.Name;
+                }
+                else if (detail.LinkFileID == 10) // Employee
+                {
+                    var employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = employee?.en_name;
+                }
+                else if (detail.LinkFileID == 11) // Fee
+                {
+                    var fee = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = fee?.Name;
+                }
+                else if (detail.LinkFileID == 12) // Discount
+                {
+                    var discount = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = discount?.Name;
+                }
+                else if (detail.LinkFileID == 13) // Student
+                {
+                    var student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == detail.LinkFileTypeID);
+                    detail.LinkFileTypeName = student?.en_name;
+                }
+            }
+            return Ok(ReceivableMasterGetDTO);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -338,6 +411,186 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             Unit_Of_Work.receivableMaster_Repository.Update(Receivable);
             Unit_Of_Work.SaveChanges();
+
+            if (newMaster.NewDetails != null)
+            {
+                foreach (var newDetails in newMaster.NewDetails)
+                {
+                    ReceivableDetails receivableDetails = mapper.Map<ReceivableDetails>(newDetails);
+
+                    // Set up the corresponding LinkFileType (based on LinkFileID)
+                    if (newDetails.LinkFileID == 6) // Bank
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Bank = Unit_Of_Work.bank_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 5) // Save
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Save = Unit_Of_Work.save_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 2) // Supplier
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 3) // Debit
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Debit = Unit_Of_Work.debit_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 4) // Credit
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Credit = Unit_Of_Work.credit_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 7) // Income
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Income = Unit_Of_Work.income_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 8) // Outcome
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Outcome = Unit_Of_Work.outcome_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 9) // Asset
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Asset = Unit_Of_Work.asset_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 10) // Employee
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Employee = Unit_Of_Work.employee_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 11) // Fee
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.TuitionFeesType = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 12) // Discount
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.TuitionDiscountType = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+                    else if (newDetails.LinkFileID == 13) // Student
+                    {
+                        receivableDetails.LinkFileTypeID = newDetails.LinkFileTypeID;
+                        receivableDetails.Student = Unit_Of_Work.student_Repository.First_Or_Default(t => t.ID == newDetails.LinkFileTypeID);
+                    }
+
+                    receivableDetails.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        receivableDetails.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        receivableDetails.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.receivableDetails_Repository.Add(receivableDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
+
+            if (newMaster.UpdatedDetails != null)
+            {
+                foreach (var newDetail in newMaster.UpdatedDetails)
+                {
+                    ReceivableDetails receivableDetails = Unit_Of_Work.receivableDetails_Repository.First_Or_Default(d => d.ID == newDetail.ID && d.IsDeleted != true);
+                    if (receivableDetails == null)
+                    {
+                        return NotFound("There is no receivableDetails with this id");
+                    }
+
+                    mapper.Map(newDetail, receivableDetails);
+
+                    if (newDetail.LinkFileID == 6) // Bank
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Bank = Unit_Of_Work.bank_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 5) // Save
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Save = Unit_Of_Work.save_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 2) // Supplier
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 3) // Debit
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Debit = Unit_Of_Work.debit_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 4) // Credit
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Credit = Unit_Of_Work.credit_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 7) // Income
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Income = Unit_Of_Work.income_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 8) // Outcome
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Outcome = Unit_Of_Work.outcome_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 9) // Asset
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Asset = Unit_Of_Work.asset_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 10) // Employee
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Employee = Unit_Of_Work.employee_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 11) // Fee
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.TuitionFeesType = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 12) // Discount
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.TuitionDiscountType = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+                    else if (newDetail.LinkFileID == 13) // Student
+                    {
+                        receivableDetails.LinkFileTypeID = newDetail.LinkFileTypeID;
+                        receivableDetails.Student = Unit_Of_Work.student_Repository.First_Or_Default(t => t.ID == newDetail.LinkFileTypeID);
+                    }
+
+                    receivableDetails.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        receivableDetails.UpdatedByOctaId = userId;
+                        if (receivableDetails.UpdatedByUserId != null)
+                        {
+                            receivableDetails.UpdatedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        receivableDetails.UpdatedByUserId = userId;
+                        if (receivableDetails.UpdatedByOctaId != null)
+                        {
+                            receivableDetails.UpdatedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.receivableDetails_Repository.Update(receivableDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
+
             return Ok(newMaster);
         }
 

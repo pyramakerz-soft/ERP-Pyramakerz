@@ -249,14 +249,24 @@ export class GradeComponent {
     return valid
   }
 
+  // validateNumber(event: any, field: keyof Grade): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     if (typeof this.grade[field] === 'string') {
+  //       this.grade[field] = null as never;
+  //     }
+  //   }
+  // }
+
   validateNumber(event: any, field: keyof Grade): void {
     const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.grade[field] === 'string') {
-        this.grade[field] = null as never;
-      }
+
+    if (!/^\d*$/.test(value)) {
+      event.target.value = value.replace(/[^\d]/g, ''); // remove invalid chars
     }
+
+    this.grade[field] = event.target.value === '' ? null as never : +event.target.value as never;
   }
 
   SaveGrade() {

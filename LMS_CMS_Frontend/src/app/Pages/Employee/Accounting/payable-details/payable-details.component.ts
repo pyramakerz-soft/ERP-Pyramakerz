@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Payable } from '../../../../Models/Accounting/payable';
 import { PayableDocType } from '../../../../Models/Accounting/payable-doc-type';
@@ -31,6 +31,7 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-data';
 @Component({
   selector: 'app-payable-details',
   standalone: true,
@@ -59,30 +60,18 @@ export class PayableDetailsComponent {
 
   payable: Payable = new Payable();
   validationErrors: { [key in keyof Payable]?: string } = {};
-  validationErrorsForDetails: { [key in keyof PayableDetails]?: string } = {};
-
+  validationErrorsForDetails: Record<number, Partial<Record<keyof PayableDetails, string>>> = {};
   dataTypesData: PayableDocType[] = [];
-  // bankOrSaveData: any[] = []
   banksData: BankEmployee[] = [];
   safesData: SafeEmployee[] = [];
   bankOrSafe: string = '';
-  // payableDetailsData: PayableDetails[] = [];
-  newDetails: PayableDetails = new PayableDetails();
   linkFilesData: LinkFile[] = [];
   linkFileTypesData: any[] = [];
   totalAmount: number = 0;
-
-  isNewDetails: boolean = false;
-  isDetailsValid: boolean = false;
-
-  editingRowId: number | null = null;
-  editedRowData: PayableDetails = new PayableDetails();
-
   isLoading = false;
   isSaveLoading = false;
 
-  
-
+  AllLinkFileData : LinkFileTypeData= new LinkFileTypeData()
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
 
@@ -104,6 +93,7 @@ export class PayableDetailsComponent {
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
     private BankEmployeeServ: BankEmployeeService, 
+    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -118,12 +108,10 @@ export class PayableDetailsComponent {
       this.isCreate = true;
       this.payable.linkFileID = 5;
       this.getSaveData();
-    } else {
+    } else { // when edit 
       this.GetPayableByID();
       this.GetLinkFiles();
-      // this.GetPayableDetails();
     }
-
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
       if (url[1].path == 'View') {
@@ -176,6 +164,8 @@ export class PayableDetailsComponent {
       .GetByID(this.PayableID, this.DomainName)
       .subscribe((data) => {
         this.payable = data;
+        this.GetAllLinkFilesTypeData()
+        console.log(this.payable)
         if (this.payable.linkFileID == 5) {
           this.getSaveData();
         } else if (this.payable.linkFileID == 6) {
@@ -255,37 +245,91 @@ export class PayableDetailsComponent {
     return isValid;
   }
 
-  isDetailsFormValid(detail: PayableDetails): boolean {
+  isDetailsFormValid(): boolean {
     let isValid = true;
-    for (const key in detail) {
-      if (this.hasOwnProperty(key)) {
-        const field = key as keyof PayableDetails;
-        if (!detail[field]) {
-          if (field == 'amount' || field == 'linkFileName') {
-            this.validationErrorsForDetails[
-              field
-            ] = `*${this.DetailsCapitalizeField(field)} is required`;
-            isValid = false;
-          }
-        } else {
-          this.validationErrorsForDetails[field] = '';
-        }
+
+    // Reset validation errors
+    this.validationErrorsForDetails = {};
+
+    this.payable.payableDetails.forEach((detail) => {
+      // Ensure detail has an ID
+      const id = detail.id;
+      if (!id) return; // skip if no ID
+
+      // Prepare error object for this row
+      if (!this.validationErrorsForDetails[id]) {
+        this.validationErrorsForDetails[id] = {};
       }
-    }
-    if (detail.linkFileID == 0) {
-      this.validationErrorsForDetails['linkFileID'] = 'link File is required';
-      isValid = false;
-    }
-    if (detail.linkFileTypeID == 0) {
-      this.validationErrorsForDetails['linkFileTypeID'] =
-        'Link File Data is required';
-      isValid = false;
-    }
-    if (detail.amount == null || detail.amount == '') {
-      this.validationErrorsForDetails['amount'] = 'amount is required';
-      isValid = false;
+
+      const errors = this.validationErrorsForDetails[id];
+
+      // Validate only these fields
+      const requiredFields: (keyof PayableDetails)[] = [
+        'amount',
+        'linkFileID',
+        'linkFileTypeID',
+      ];
+
+      requiredFields.forEach((field) => {
+        const value = detail[field];
+        if (!value || value == 0 || value == '') {
+          errors[field] = this.getRequiredErrorMessage(
+            this.DetailsCapitalizeField(field)
+          );
+          console.log(errors)
+          isValid = false;
+        } else {
+          errors[field] = ''; 
+        }
+      });
+    });
+
+    if(this.payable.newDetails && this.payable.newDetails.length > 0){
+      this.payable.newDetails.forEach((detail) => {
+        // Ensure detail has an ID
+        const id = detail.id;
+        if (!id) return; // skip if no ID
+
+        // Prepare error object for this row
+        if (!this.validationErrorsForDetails[id]) {
+          this.validationErrorsForDetails[id] = {};
+        }
+
+        const errors = this.validationErrorsForDetails[id];
+
+        // Validate only these fields
+        const requiredFields: (keyof PayableDetails)[] = [
+          'amount',
+          'linkFileID',
+          'linkFileTypeID',
+        ];
+
+        requiredFields.forEach((field) => {
+          const value = detail[field];
+          if (!value || value == 0 || value == '') {
+            errors[field] = this.getRequiredErrorMessage(
+              this.DetailsCapitalizeField(field)
+            );
+            console.log(errors)
+            isValid = false;
+          } else {
+            errors[field] = ''; 
+          }
+        });
+      });
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof Payable; value: any }) {
@@ -300,53 +344,62 @@ export class PayableDetailsComponent {
     }
   }
 
-  onInputValueChangeForDetails(event: {field: keyof PayableDetails;value: any;}) {
+  onInputValueChangeForEditDetails(row: any ,event: {field: keyof PayableDetails;value: any;}) {
     const { field, value } = event;
-    (this.newDetails as any)[field] = value;
-    if (value) {
-      this.validationErrorsForDetails[field] = '';
+    if (this.validationErrorsForDetails[row.id]) {
+      this.validationErrorsForDetails[row.id][field] = '';
     }
     if (field == 'linkFileID') {
-      this.newDetails.linkFileTypeID = 0;
+      row.linkFileTypeID = 0; // reset old selection
+      row.linkFileTypesData = row.linkFileTypesData || [];
+
+      const numericValue = Number(value); // <-- convert string to number
+      console.log(numericValue, row.linkFileTypesData, this.AllLinkFileData?.supplierGetDTO);
+
+      switch (numericValue) {
+        case 2: // Supplier
+          row.linkFileTypesData = this.AllLinkFileData?.supplierGetDTO || [];
+          break;
+        case 3: // Debit
+          row.linkFileTypesData = this.AllLinkFileData?.debitGetDTO || [];
+          break;
+        case 4: // Credit
+          row.linkFileTypesData = this.AllLinkFileData?.creditGetDTO || [];
+          break;
+        case 5: // Save
+          row.linkFileTypesData = this.AllLinkFileData?.saveGetDTO || [];
+          break;
+        case 6: // Bank
+          row.linkFileTypesData = this.AllLinkFileData?.bankGetDTOs || [];
+          break;
+        case 7: // Income
+          row.linkFileTypesData = this.AllLinkFileData?.incomeGetDTO || [];
+          break;
+        case 8: // Outcome
+          row.linkFileTypesData = this.AllLinkFileData?.outcomeGetDTO || [];
+          break;
+        case 9: // Asset
+          row.linkFileTypesData = this.AllLinkFileData?.assetGetDTO || [];
+          break;
+        case 10: // Employee
+          row.linkFileTypesData = this.AllLinkFileData?.employee_GetDTO || [];
+          break;
+        case 11: // Fee
+          row.linkFileTypesData = this.AllLinkFileData?.tuitionFeesTypeGetDTO || [];
+          break;
+        case 12: // Discount
+          row.linkFileTypesData = this.AllLinkFileData?.tuitionDiscountTypeGetDTO || [];
+          break;
+        case 13: // Student
+          row.linkFileTypesData = this.AllLinkFileData?.studentGetDTO || [];
+          break;
+        default:
+          row.linkFileTypesData = [];
+          break;
+      }
+      console.log(numericValue, row.linkFileTypesData);
     }
 
-    if (
-      (this.newDetails.amount || this.editedRowData.amount) &&
-      !isNaN(this.newDetails.amount ? this.newDetails.amount : 0) &&
-      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
-      (this.newDetails.linkFileID || this.editedRowData.linkFileID) &&
-      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)
-    ) {
-      this.isDetailsValid = true;
-    } else {
-      this.isDetailsValid = false;
-    }
-  }
-
-  onInputValueChangeForEditDetails(event: {
-    field: keyof PayableDetails;
-    value: any;
-  }) {
-    const { field, value } = event;
-    (this.editedRowData as any)[field] = value;
-    if (value) {
-      this.validationErrorsForDetails[field] = '';
-    }
-    if (field == 'linkFileID') {
-      this.editedRowData.linkFileTypeID = 0;
-    }
-
-    if (
-      (this.editedRowData.amount || this.editedRowData.amount) &&
-      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
-      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
-      (this.editedRowData.linkFileID || this.editedRowData.linkFileID) &&
-      (this.editedRowData.linkFileTypeID || this.editedRowData.linkFileTypeID)
-    ) {
-      this.isDetailsValid = true;
-    } else {
-      this.isDetailsValid = false;
-    }
   }
 
   validateNumberPayable(event: any, field: keyof Payable): void {
@@ -359,53 +412,51 @@ export class PayableDetailsComponent {
     }
   }
 
-  validateNumberDetails(event: any, field: keyof PayableDetails): void {
+  validateNumberEditDetails(row:PayableDetails ,event: any, field: keyof PayableDetails): void { // 
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.newDetails[field] === 'string') {
-        this.newDetails[field] = '' as never;
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
       }
     }
   }
 
-  validateNumberEditDetails(event: any, field: keyof PayableDetails): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.editedRowData[field] === 'string') {
-        this.editedRowData[field] = '' as never;
-      }
+  AddInUpdated(row : PayableDetails){
+    this.payable.updatedDetails =this.payable.updatedDetails || []
+    var ExistRow = this.payable.updatedDetails.find(p=>p.id == row.id)
+    if(!ExistRow){
+     this.payable.updatedDetails.push(row)
     }
   }
 
   Save() {
-    if (this.isFormValid()) {
-      this.isSaveLoading = true;
-
-      if (this.isCreate) {
-        this.payableService.Add(this.payable, this.DomainName).subscribe(
-          (data) => {
-            let id = JSON.parse(data).id;
-            this.router.navigateByUrl(`Employee/Payable/${id}`);
-            this.isSaveLoading = false;
-
-            Swal.fire({
-              title: 'Saved Successfully',
-              icon: 'success',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            this.isSaveLoading = false;
-          }
-        );
+    if (this.isCreate) {
+      if(this.isFormValid()){
+          this.isSaveLoading = true;
+          this.payableService.Add(this.payable, this.DomainName).subscribe(
+            (data) => {
+              let id = JSON.parse(data).id;
+              this.router.navigateByUrl(`Employee/Payable/${id}`);
+              this.isSaveLoading = false;
+  
+              Swal.fire({
+                title: 'Saved Successfully',
+                icon: 'success',
+                confirmButtonColor: '#089B41',
+              });
+            },
+            (error) => {
+              this.isSaveLoading = false;
+            }
+          );
+        }
       } else if (this.isEdit) {
+      if(this.isDetailsFormValid()){
         this.payableService.Edit(this.payable, this.DomainName).subscribe(
           (data) => {
             this.GetPayableByID();
             this.isSaveLoading = false;
-
             Swal.fire({
               icon: 'success',
               title: 'Done!',
@@ -414,26 +465,13 @@ export class PayableDetailsComponent {
             });
           },
           (error) => {
+            console.log(error)
             this.isSaveLoading = false;
           }
         );
       }
     }
   }
-
-  // GetPayableDetails() {
-  //   this.payable = [];
-  //   this.payableDetailsService
-  //     .Get(this.DomainName, this.PayableID)
-  //     .subscribe((data) => {
-  //       this.payableDetailsData = data;
-  //       let total = 0;
-  //       this.payableDetailsData.forEach((element) => {
-  //         total = total + (element.amount ? element.amount : 0);
-  //       });
-  //       this.totalAmount = total;
-  //     });
-  // }
 
   GetLinkFiles() {
     this.linkFileService.Get(this.DomainName).subscribe((data) => {
@@ -448,65 +486,73 @@ export class PayableDetailsComponent {
       });
   }
 
+  GetAllLinkFilesTypeData() {
+    this.AllLinkFileData = new LinkFileTypeData();
+    this.dataAccordingToLinkFileService.GetAllTableDataAccordingForPyable(this.DomainName).subscribe((data) => {
+        this.AllLinkFileData = data;
+        console.log(123,this.AllLinkFileData)
+        this.getLinkFileTypeOptions()
+        this.cdRef.detectChanges();
+      });
+  }
+
+  getLinkFileTypeOptions() {
+    if (!this.payable?.payableDetails || !this.AllLinkFileData) return;
+
+    this.payable.payableDetails.forEach((element) => {
+      const numericValue = Number(element.linkFileID);
+      element.linkFileTypesData =element.linkFileTypesData || []
+      switch (numericValue) {
+        case 2: // Supplier
+          element.linkFileTypesData = this.AllLinkFileData?.supplierGetDTO || [];
+          break;
+        case 3: // Debit
+          element.linkFileTypesData = this.AllLinkFileData?.debitGetDTO || [];
+          break;
+        case 4: // Credit
+          element.linkFileTypesData = this.AllLinkFileData?.creditGetDTO || [];
+          break;
+        case 5: // Save
+          element.linkFileTypesData = this.AllLinkFileData?.saveGetDTO || [];
+          break;
+        case 6: // Bank
+          element.linkFileTypesData = this.AllLinkFileData?.bankGetDTOs || [];
+          break;
+        case 7: // Income
+          element.linkFileTypesData = this.AllLinkFileData?.incomeGetDTO || [];
+          break;
+        case 8: // Outcome
+          element.linkFileTypesData = this.AllLinkFileData?.outcomeGetDTO || [];
+          break;
+        case 9: // Asset
+          element.linkFileTypesData = this.AllLinkFileData?.assetGetDTO || [];
+          break;
+        case 10: // Employee
+          element.linkFileTypesData = this.AllLinkFileData?.employee_GetDTO || [];
+          break;
+        case 11: // Fee
+          element.linkFileTypesData = this.AllLinkFileData?.tuitionFeesTypeGetDTO || [];
+          break;
+        case 12: // Discount
+          element.linkFileTypesData = this.AllLinkFileData?.tuitionDiscountTypeGetDTO || [];
+          break;
+        case 13: // Student
+          element.linkFileTypesData = this.AllLinkFileData?.studentGetDTO || [];
+          break;
+        default:
+          element.linkFileTypesData = [];
+          break;
+      }
+    });
+     console.log(this.payable.payableDetails)
+  }
+  
   AddPayableDetails() {
-    this.isDetailsValid = false;
-    this.editingRowId = null;
-    this.editedRowData = new PayableDetails();
-    this.isNewDetails = true;
-    this.GetLinkFiles();
-  }
-
-  SaveNewDetails() {
-    this.newDetails.payableMasterID = this.PayableID;
-    if (this.isDetailsFormValid(this.newDetails)) {
-      this.isLoading = true;
-      this.payableDetailsService
-        .Add(this.newDetails, this.DomainName)
-        .subscribe((data) => {
-          this.isLoading = false;
-          this.isNewDetails = false;
-          this.newDetails = new PayableDetails();
-          this.GetPayableByID();
-          this.editingRowId = null;
-          this.editedRowData = new PayableDetails();
-          this.isDetailsValid = false;
-        });
-    }
-    this.isLoading = false;
-  }
-
-  EditDetail(row: PayableDetails) {
-    this.isNewDetails = false;
-    this.isDetailsValid = true;
-    this.newDetails = new PayableDetails();
-    this.GetLinkFiles();
-    this.editingRowId = row.id;
-    this.editedRowData = { ...row };
-    if (this.editedRowData.linkFileID) {
-      this.dataAccordingToLinkFileService
-        .GetTableDataAccordingToLinkFileForPyable(
-          this.DomainName,
-          +this.editedRowData.linkFileID
-        )
-        .subscribe((data) => {
-          this.linkFileTypesData = data;
-        });
-    }
-  }
-
-  SaveEditedDetail() {
-    if (this.isDetailsFormValid(this.editedRowData)) {
-      this.payableDetailsService
-        .Edit(this.editedRowData, this.DomainName)
-        .subscribe((data) => {
-          this.editingRowId = null;
-          this.editedRowData = new PayableDetails();
-          this.isDetailsValid = false;
-          this.isNewDetails = false;
-          this.newDetails = new PayableDetails();
-          this.GetPayableByID();
-        });
-    }
+    var newDetail = new PayableDetails();
+    newDetail.id =  Date.now() + Math.floor(Math.random() * 10000);
+    newDetail.payableMasterID =  this.PayableID
+    this.payable.newDetails = this.payable.newDetails || [];
+    this.payable.newDetails.push(newDetail)
   }
 
   DeleteDetail(id: number) {
@@ -531,38 +577,45 @@ export class PayableDetailsComponent {
         this.payableDetailsService
           .Delete(id, this.DomainName)
           .subscribe((data) => {
-          this.GetPayableByID();
-          });
+          // this.GetPayableByID();
+          this.payable.payableDetails = (this.payable.payableDetails || []).filter(p => p.id !== id);
+          this.payable.updatedDetails = (this.payable.updatedDetails || []).filter(p => p.id !== id);
+          if(this.payable.updatedDetails.length == 0){
+            this.payable.updatedDetails=[]
+          }
+          if(this.payable.payableDetails.length == 0){
+            this.payable.payableDetails=[]
+          }
+        });
       }
     });
   }
 
-  // DownloadData() {
-  //   let orderElement = document.getElementById('DataToDownload');
+  DeleteNewDetail(id: number) {
+    Swal.fire({
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Payable Detail') +
+        this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+       this.payable.newDetails=this.payable.newDetails.filter(p=>p.id!=id)
+      }
+    });
+  }
 
-  //   if (!orderElement) {
-  //     console.error("Page body not found!");
-  //     return;
-  //   }
-
-  //   document.querySelectorAll('.no-print').forEach(el => {
-  //     (el as HTMLElement).style.display = 'none';
-  //   });
-
-  //   setTimeout(() => {
-  //     html2pdf().from(orderElement).set({
-  //       margin: 10,
-  //       filename: `Payable_${this.PayableID}.pdf`,
-  //       image: { type: 'jpeg', quality: 0.98 },
-  //       html2canvas: { scale: 3, useCORS: true, allowTaint: true, logging: true },
-  //       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-  //     }).save().then(() => {
-  //       document.querySelectorAll('.no-print').forEach(el => {
-  //         (el as HTMLElement).style.display = '';
-  //       });
-  //     });
-  //   }, 500);
-  // }
+ /////////////////////////////////// print
 
   DownloadAsPDF() {
     this.showPDF = true;

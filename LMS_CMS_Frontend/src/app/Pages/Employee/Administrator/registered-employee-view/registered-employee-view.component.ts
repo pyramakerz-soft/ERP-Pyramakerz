@@ -28,10 +28,13 @@ export class RegisteredEmployeeViewComponent {
   DomainName: string = '';
   path: string = '';  
   registereEmployeeID: number = 0;  
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   employeeTypes:EmployeeTypeGet[] = []
   roles:Role[] = []
+  employeeToEdit: RegisteredEmployee = new RegisteredEmployee();
+  isLoading = false; 
+  validationErrors: { [key in keyof RegisteredEmployee]?: string } = {};
   
   constructor(
     private router: Router, 
@@ -169,5 +172,76 @@ export class RegisteredEmployeeViewComponent {
         this.roles = data
       }
     )
+  }
+
+  openEditModal(){
+    this.employeeToEdit= new RegisteredEmployee();
+    this.employeeToEdit.user_Name = this.employee.user_Name;
+    this.employeeToEdit.email = this.employee.email;
+    this.employeeToEdit.id = this.employee.id;
+    
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+  }
+
+  closeModal() {
+    document.getElementById('Add_Modal')?.classList.remove('flex');
+    document.getElementById('Add_Modal')?.classList.add('hidden');
+    this.validationErrors = {};  
+    
+    this.employeeToEdit= new RegisteredEmployee();
+    this.isLoading = false 
+  }
+
+  capitalizeField(field: keyof RegisteredEmployee): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.employeeToEdit) {
+      if (this.employeeToEdit.hasOwnProperty(key)) {
+        const field = key as keyof RegisteredEmployee;
+        if (!this.employeeToEdit[field]) {
+          if(field == "email" || field == "user_Name") {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            isValid = false;
+          } 
+        } else { 
+          this.validationErrors[field] = '';
+        }
+      }
+    } 
+
+    return isValid;
+  }
+
+  onInputValueChange(event: { field: keyof RegisteredEmployee, value: any }) {
+    const { field, value } = event;
+    (this.employeeToEdit as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  Save(){ 
+    if(this.isFormValid()){ 
+      this.isLoading = true; 
+      this.registeredEmployeeService.Edit(this.employeeToEdit, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal()
+          this.GetRegisteredEmployee()
+        },
+        error => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.error || 'An unexpected error occurred',
+            confirmButtonColor: '#089B41',
+          });
+        }
+      );
+    }
   }
 }

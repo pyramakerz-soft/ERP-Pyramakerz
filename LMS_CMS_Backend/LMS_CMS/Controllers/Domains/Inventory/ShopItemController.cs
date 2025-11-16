@@ -126,11 +126,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .Select_All_With_IncludesById_Pagination<ShopItem>(
                     b => b.IsDeleted != true && b.InventorySubCategoriesID == SubCategoryID && b.AvailableInShop == true,
                     query => query.Include(sub => sub.InventorySubCategories),
-                    query => query.Include(sub => sub.School),
-                    query => query.Include(sub => sub.Grade),
-                    query => query.Include(sub => sub.Gender),
-                    query => query.Include(sub => sub.ShopItemColor),
-                    query => query.Include(sub => sub.ShopItemSize)
+                    query => query.Include(sub => sub.School)
+                    //query => query.Include(sub => sub.Grade),
+                    //query => query.Include(sub => sub.Gender),
+                    //query => query.Include(sub => sub.ShopItemColor),
+                    //query => query.Include(sub => sub.ShopItemSize)
                 );
              
             if (!string.IsNullOrWhiteSpace(searchQuery))
@@ -160,28 +160,48 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
 
+            //foreach (var item in shopItemGetDTO)
+            //{
+            //    item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+            //    item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
+
+            //    List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+            //    if (shopItemColors.Count != 0)
+            //    {
+            //        List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
+            //        item.shopItemColors = shopItemColorGetDTO;
+            //    }
+            //    else
+            //        item.shopItemColors = new List<ShopItemColorGetDTO>();
+
+            //    List<ShopItemSize> shopItemSizes = await Unit_Of_Work.shopItemSize_Repository.Select_All_With_IncludesById<ShopItemSize>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+            //    if (shopItemSizes.Count != 0)
+            //    {   
+            //        List<ShopItemSizeGetDTO> shopItemSizeGetDTO = mapper.Map<List<ShopItemSizeGetDTO>>(shopItemSizes);
+            //        item.shopItemSizes = shopItemSizeGetDTO;
+            //    }
+            //    else
+            //        item.shopItemSizes = new List<ShopItemSizeGetDTO>();
+            //}
+
+            var itemIds = shopItems.Select(s => s.ID).ToList();
+
+            var allColors = Unit_Of_Work.shopItemColor_Repository
+                .FindBy(s => itemIds.Contains(s.ShopItemID) && s.IsDeleted != true);
+
+            var allSizes = Unit_Of_Work.shopItemSize_Repository
+                .FindBy(s => itemIds.Contains(s.ShopItemID) && s.IsDeleted != true);
+
             foreach (var item in shopItemGetDTO)
             {
                 item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
                 item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
-                List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
-                if (shopItemColors.Count != 0)
-                {
-                    List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
-                    item.shopItemColors = shopItemColorGetDTO;
-                }
-                else
-                    item.shopItemColors = new List<ShopItemColorGetDTO>();
+                var itemColors = allColors.Where(c => c.ShopItemID == item.ID).ToList();
+                var itemSizes = allSizes.Where(sz => sz.ShopItemID == item.ID).ToList();
 
-                List<ShopItemSize> shopItemSizes = await Unit_Of_Work.shopItemSize_Repository.Select_All_With_IncludesById<ShopItemSize>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
-                if (shopItemSizes.Count != 0)
-                {
-                    List<ShopItemSizeGetDTO> shopItemSizeGetDTO = mapper.Map<List<ShopItemSizeGetDTO>>(shopItemSizes);
-                    item.shopItemSizes = shopItemSizeGetDTO;
-                }
-                else
-                    item.shopItemSizes = new List<ShopItemSizeGetDTO>();
+                item.shopItemColors = mapper.Map<List<ShopItemColorGetDTO>>(itemColors);
+                item.shopItemSizes = mapper.Map<List<ShopItemSizeGetDTO>>(itemSizes);
             }
 
             var paginationMetadata = new
@@ -227,11 +247,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .Select_All_With_IncludesById_Pagination<ShopItem>(
                     b => b.IsDeleted != true && b.InventorySubCategoriesID == SubCategoryID && b.AvailableInShop == true,
                     query => query.Include(sub => sub.InventorySubCategories),
-                    query => query.Include(sub => sub.School),
-                    query => query.Include(sub => sub.Grade),
-                    query => query.Include(sub => sub.Gender),
-                    query => query.Include(sub => sub.ShopItemColor),
-                    query => query.Include(sub => sub.ShopItemSize)
+                    query => query.Include(sub => sub.School)
+                    //query => query.Include(sub => sub.Grade),
+                    //query => query.Include(sub => sub.Gender),
+                    //query => query.Include(sub => sub.ShopItemColor),
+                    //query => query.Include(sub => sub.ShopItemSize)
                 );
 
 
@@ -292,28 +312,47 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
 
+            //foreach (var item in shopItemGetDTO)
+            //{
+            //    item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+            //    item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
+
+            //    List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+            //    if (shopItemColors.Count != 0)
+            //    {
+            //        List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
+            //        item.shopItemColors = shopItemColorGetDTO;
+            //    }
+            //    else
+            //        item.shopItemColors = new List<ShopItemColorGetDTO>();
+
+            //    List<ShopItemSize> shopItemSizes = await Unit_Of_Work.shopItemSize_Repository.Select_All_With_IncludesById<ShopItemSize>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+            //    if (shopItemSizes.Count != 0)
+            //    {
+            //        List<ShopItemSizeGetDTO> shopItemSizeGetDTO = mapper.Map<List<ShopItemSizeGetDTO>>(shopItemSizes);
+            //        item.shopItemSizes = shopItemSizeGetDTO;
+            //    }
+            //    else
+            //        item.shopItemSizes = new List<ShopItemSizeGetDTO>();
+            //}
+            var itemIds = shopItems.Select(s => s.ID).ToList();
+
+            var allColors = Unit_Of_Work.shopItemColor_Repository
+                .FindBy(s => itemIds.Contains(s.ShopItemID) && s.IsDeleted != true);
+
+            var allSizes = Unit_Of_Work.shopItemSize_Repository
+                .FindBy(s => itemIds.Contains(s.ShopItemID) && s.IsDeleted != true);
+
             foreach (var item in shopItemGetDTO)
             {
                 item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
                 item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
 
-                List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
-                if (shopItemColors.Count != 0)
-                {
-                    List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
-                    item.shopItemColors = shopItemColorGetDTO;
-                }
-                else
-                    item.shopItemColors = new List<ShopItemColorGetDTO>();
+                var itemColors = allColors.Where(c => c.ShopItemID == item.ID).ToList();
+                var itemSizes = allSizes.Where(sz => sz.ShopItemID == item.ID).ToList();
 
-                List<ShopItemSize> shopItemSizes = await Unit_Of_Work.shopItemSize_Repository.Select_All_With_IncludesById<ShopItemSize>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
-                if (shopItemSizes.Count != 0)
-                {
-                    List<ShopItemSizeGetDTO> shopItemSizeGetDTO = mapper.Map<List<ShopItemSizeGetDTO>>(shopItemSizes);
-                    item.shopItemSizes = shopItemSizeGetDTO;
-                }
-                else
-                    item.shopItemSizes = new List<ShopItemSizeGetDTO>();
+                item.shopItemColors = mapper.Map<List<ShopItemColorGetDTO>>(itemColors);
+                item.shopItemSizes = mapper.Map<List<ShopItemSizeGetDTO>>(itemSizes);
             }
 
             var paginationMetadata = new
@@ -325,6 +364,63 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             };
 
             return Ok(new { Data = shopItemGetDTO, Pagination = paginationMetadata });
+        }
+        
+        ///////////////////////////////////////////
+
+        [HttpGet("CheckIfHeCanAddItem/{ItemID}/{StudentID}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "student" , "parent" }
+        )]
+        public async Task<IActionResult> CheckIfHeCanAddItem(long ItemID, long StudentID)
+        {
+            long gradeID = 0;
+            long genderID = 0;
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(
+                d => d.ID == StudentID && d.IsDeleted != true
+                );
+
+            if (student == null)
+            {
+                return NotFound("There is No Student with this ID");
+            }
+
+            genderID = student.GenderId;
+
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true);
+
+            if(studentGrade != null)
+            {
+                gradeID = studentGrade.GradeID;
+            }
+
+            if(gradeID == 0 || genderID == 0)
+            {
+                return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
+            }
+
+            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == ItemID && (d.GenderID == genderID || d.GenderID == null) && (d.GradeID == gradeID || d.GradeID == null));
+             
+            if (shopItem == null)
+            {
+                return Ok(false);
+            }
+            else
+            {
+                return Ok(true);
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////////

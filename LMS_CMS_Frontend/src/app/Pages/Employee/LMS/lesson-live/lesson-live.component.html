@@ -185,10 +185,11 @@
                 <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['classroomID']}}</span>
             </div>
-            <div class="flex flex-col mb-4 w-[49%]">
+            <div class="flex flex-col mb-4 w-full">
                 <label for="subject" class="block mb-2"
-                    [ngClass]="{ 'text-gray-400': !SelectedGradeId, 'primaryTxt': SelectedGradeId }"> {{ 'Subjects' | translate }}</label>
+                    [ngClass]="{ 'text-gray-400': !live.classroomID, 'primaryTxt': live.classroomID }"> {{ 'Subjects' | translate }}</label>
                 <select id="subject" (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })"
+                    (change)="GetGradeBySubjectID()"
                     class="border border-gray-300 primaryTxt rounded-lg p-2.5 w-full"
                     [ngClass]="{ 'bg-[#EBEBEB]': !live.classroomID }"
                     [(ngModel)]="live.subjectID" [disabled]="!live.classroomID">
@@ -204,6 +205,7 @@
             <div class="flex flex-col mb-4 w-[100%]">
                 <label for="day" class="block mb-2 primaryTxt">  {{ 'Week Day' | translate }}</label>
                 <select id="day" (ngModelChange)="onInputValueChange({ field: 'weekDayID', value: $event })"
+                    (change)="GetDayPeriodSessions()"
                     class="border border-gray-300 primaryTxt rounded-lg p-2.5 w-full"
                     [(ngModel)]="live.weekDayID">
                     <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Day' | translate }}</option>
@@ -218,15 +220,15 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="name"> {{ 'Name' | translate }}</label>
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter' | translate }}{{ 'Name' | translate }}" [(ngModel)]="live.name"
-                    (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Name' | translate }}" [(ngModel)]="live.name"
                     (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['name']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="period"> {{ 'Period' | translate }}</label>
+                <label class="mb-2" for="period" [ngClass]="{ 'text-gray-400': !gradeDayPeriod, 'primaryTxt': gradeDayPeriod }"> {{ 'Period' | translate }}</label>
                 <input id="period" type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [ngClass]="{ 'bg-[#EBEBEB]': !gradeDayPeriod }" [disabled]="!gradeDayPeriod"
                     placeholder="{{ 'Enter' | translate }} {{ 'Period' | translate }}" [(ngModel)]="live.period" (input)="validateNumber($event, 'period')"
                     (ngModelChange)="onInputValueChange({ field: 'period', value: $event })"/>
                 <span *ngIf="validationErrors['period']" class="text-red-500 ml-3 font-normal">{{
@@ -236,8 +238,7 @@
                 <label class="mb-2 primaryTxt" for="liveLink">  {{ 'Live Link' | translate }}</label>
                 <input id="liveLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter' | translate }} {{ 'Live Link' | translate }}" [(ngModel)]="live.liveLink"
-                    (ngModelChange)="onInputValueChange({ field: 'liveLink', value: $event })"
-                    (ngModelChange)="onInputValueChange({ field: 'liveLink', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'liveLink', value: $event })"/>
                 <span *ngIf="validationErrors['liveLink']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['liveLink']}}</span>
             </div>
