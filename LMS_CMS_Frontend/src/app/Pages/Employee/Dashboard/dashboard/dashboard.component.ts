@@ -21,6 +21,7 @@ import {
 import { CategoryRankingsComponent } from '../../../../Component/Employee/Home/category-ranking/category-ranking.component';
 import { RequestProgressComponent } from '../../../../Component/Employee/Home/request-progresss/request-progresss.component';
 import { DashboardService } from '../../../../Services/Dashboard/dashboard.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,6 +40,8 @@ import { DashboardService } from '../../../../Services/Dashboard/dashboard.servi
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
+
+@InitLoader()
 export class DashboardComponent implements OnInit, OnDestroy {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -72,12 +75,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService: DashboardService
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {  
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.DomainName = this.ApiServ.GetHeader();
 
-    if (!this.DomainName) {
-      console.error('DomainName is not set!');
+    if (!this.DomainName) { 
       this.errorMessage = 'Domain configuration error';
       this.isLoading = false;
       return;

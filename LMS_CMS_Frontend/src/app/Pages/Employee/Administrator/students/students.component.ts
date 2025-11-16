@@ -23,6 +23,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-students',
   standalone: true,
@@ -30,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
+
+@InitLoader()
 export class StudentsComponent {
 
   keysArray: string[] = ['id', 'name', 'academicYearName', 'floorName', 'gradeName', 'number'];

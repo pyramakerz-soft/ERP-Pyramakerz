@@ -231,6 +231,24 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
             }
 
+            switch (newDeduction.DeductionTypeID)
+            {
+                case 1:
+                    newDeduction.NumberOfDeductionDays = 0;
+                    newDeduction.Amount = 0;
+                    break;
+                case 2:
+                    newDeduction.Hours = 0;
+                    newDeduction.Minutes = 0;
+                    newDeduction.Amount = 0;
+                    break;
+                case 3:
+                    newDeduction.NumberOfDeductionDays = 0;
+                    newDeduction.Hours = 0;
+                    newDeduction.Minutes = 0;
+                    break;
+            }
+
             mapper.Map(newDeduction, deduction);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             deduction.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

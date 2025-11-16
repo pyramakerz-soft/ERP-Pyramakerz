@@ -26,7 +26,8 @@ export class AppComponent {
       ) {
         // Wait for active requests (from ngOnInit) to finish
         const interval = setInterval(() => {
-          if (!this.loadingService['activeRequests']) {
+          // if (!this.loadingService['activeRequests']) { 
+          if (this.loadingService.pendingRequests === 0) {
             this.loadingService.hide();
             clearInterval(interval);
           }
