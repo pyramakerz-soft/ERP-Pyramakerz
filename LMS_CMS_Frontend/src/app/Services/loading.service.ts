@@ -10,7 +10,7 @@ export class LoadingService {
 
   private activeRequests = 0;
 
-  get pendingRequests() {
+  get pendingRequests(): number {
     return this.activeRequests;
   }
 
@@ -31,4 +31,15 @@ export class LoadingService {
     this.activeRequests = Math.max(this.activeRequests - 1, 0);
     if (this.activeRequests === 0) this.hide();
   }
+
+  private trackNgOnInitRequests = false;
+
+  startNgInitTracking() {
+    this.trackNgOnInitRequests = true;
+  }
+
+  stopNgInitTracking() {
+    this.trackNgOnInitRequests = false;
+  }
+
 }
