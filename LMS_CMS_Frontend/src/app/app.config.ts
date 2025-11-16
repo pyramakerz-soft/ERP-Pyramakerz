@@ -6,6 +6,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forSuspendInterceptor } from './Interceptor/for-suspend.interceptor';
 import { generalErrorHandlingInterceptor } from './Interceptor/general-error-handling.interceptor'; 
+import { loadingInterceptor } from './Interceptor/loading.interceptor';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, 'i18n/', '.json');
@@ -23,13 +24,14 @@ export function appInitializerFactory(translate: TranslateService) {
 }
  
 export const appConfig: ApplicationConfig = {
-  providers: [
+  providers: [ 
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideHttpClient(
       withInterceptors([ 
         forSuspendInterceptor,
-        generalErrorHandlingInterceptor
+        generalErrorHandlingInterceptor,
+        loadingInterceptor
       ])
     ),
     importProvidersFrom(
