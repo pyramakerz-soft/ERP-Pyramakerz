@@ -119,26 +119,6 @@ export class AssignmentStudentComponent {
       });
   }
 
-  // getAllSchools() {
-  //   this.schools = [];
-  //   this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-  //     this.schools = d;
-  //   });
-  // }
-
-  // getAllGradesBySchoolId() {
-  //   this.Grades = [];
-  //   this.IsShowTabls = false;
-  //   this.SelectedGradeId = 0;
-  //   this.ClassId = 0;
-  //   this.GradeServ.GetBySchoolId(
-  //     this.SelectedSchoolId,
-  //     this.DomainName
-  //   ).subscribe((d) => {
-  //     this.Grades = d;
-  //   });
-  // }
-
   getAllClassByGradeId() {
     this.classes = [];
     this.ClassId = 0;
@@ -238,6 +218,17 @@ export class AssignmentStudentComponent {
 
   moveToDetails(id: number) {
     this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`);
+  }
+
+  IsLate(row: AssignmentStudent) :boolean{
+    const TheSubmittedDate = new Date(row.insertedAt); // current date
+    const dueDate = new Date(row.dueDate);
+    if (TheSubmittedDate > dueDate) {
+      return true
+    }
+    else {
+      return false
+    }
   }
 
   openFile(link: string | null) {

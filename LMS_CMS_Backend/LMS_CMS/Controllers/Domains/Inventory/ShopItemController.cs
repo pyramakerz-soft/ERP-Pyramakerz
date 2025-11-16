@@ -99,6 +99,79 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         ///////////////////////////////////////////
 
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Shop Item", "Shop" , "Items", "Stocking" , "Item Card Report"
+               , "Item Card Report With Average" }
+       )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.shopItem_Repository
+                .CountAsync(f => f.IsDeleted != true);
+
+            List<ShopItem> shopItem = await Unit_Of_Work.shopItem_Repository.Select_All_With_IncludesById_Pagination<ShopItem>(
+                    b => b.IsDeleted != true,
+                    query => query.Include(sub => sub.InventorySubCategories),
+                    query => query.Include(sub => sub.School),
+                    query => query.Include(sub => sub.Grade),
+                    query => query.Include(sub => sub.Gender),
+                    query => query.Include(sub => sub.ShopItemColor),
+                    query => query.Include(sub => sub.ShopItemSize))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (shopItem == null || shopItem.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ShopItemGetDTO> shopItemGetDTO = mapper.Map<List<ShopItemGetDTO>>(shopItem);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var item in shopItemGetDTO)
+            {
+                item.MainImage = _fileService.GetFileUrl(item.MainImage, Request, HttpContext);
+                item.OtherImage = _fileService.GetFileUrl(item.OtherImage, Request, HttpContext);
+
+                List<ShopItemColor> shopItemColors = await Unit_Of_Work.shopItemColor_Repository.Select_All_With_IncludesById<ShopItemColor>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+                if (shopItemColors.Count != 0)
+                {
+                    List<ShopItemColorGetDTO> shopItemColorGetDTO = mapper.Map<List<ShopItemColorGetDTO>>(shopItemColors);
+                    item.shopItemColors = shopItemColorGetDTO;
+                }
+                else
+                    item.shopItemColors = new List<ShopItemColorGetDTO>();
+
+                List<ShopItemSize> shopItemSizes = await Unit_Of_Work.shopItemSize_Repository.Select_All_With_IncludesById<ShopItemSize>(s => s.ShopItemID == item.ID && s.IsDeleted != true);
+                if (shopItemSizes.Count != 0)
+                {
+                    List<ShopItemSizeGetDTO> shopItemSizeGetDTO = mapper.Map<List<ShopItemSizeGetDTO>>(shopItemSizes);
+                    item.shopItemSizes = shopItemSizeGetDTO;
+                }
+                else
+                    item.shopItemSizes = new List<ShopItemSizeGetDTO>();
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = shopItemGetDTO, Pagination = paginationMetadata });
+        }
+
+        ///////////////////////////////////////////
+
         [HttpGet("GetBySubCategoryID/{SubCategoryID}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" , "parent" , "student" }
