@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
 import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
@@ -17,12 +17,14 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import html2pdf from 'html2pdf.js';
+
 @Component({
   selector: 'app-bus-print-name-tag',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent , TranslateModule],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './bus-print-name-tag.component.html',
   styleUrl: './bus-print-name-tag.component.css'
 })
@@ -31,7 +33,7 @@ export class BusPrintNameTagComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
   path: string = ""
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   key: string = "id";
   value: any = "";
@@ -51,19 +53,27 @@ export class BusPrintNameTagComponent {
 
   DomainName: string = "";
   busId: number = -1;
+  selectedBusName: string = "";
+  selectedBusDriverNo: string = "";
 
   IsClearBus: boolean = false;
+  showPDF: boolean = false;
 
-  constructor(private router: Router, 
-    private menuService: MenuService, 
-    public activeRoute: ActivatedRoute, 
-    public account: AccountService, 
-    public busStudentServ: BusStudentService, 
-    public DomainServ: DomainService, 
-    public EditDeleteServ: DeleteEditPermissionService, 
-    public ApiServ: ApiService, 
+  @ViewChild('nameTagContainer') nameTagContainer!: ElementRef;
+
+  
+  constructor(
+    private router: Router,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public busStudentServ: BusStudentService,
+    public DomainServ: DomainService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
     public BusServ: BusService,
-    private languageService: LanguageService ) { }
+    private languageService: LanguageService
+  ) { }
 
   ngOnInit() {
 
@@ -92,18 +102,18 @@ export class BusPrintNameTagComponent {
       this.IsEmployee = false;
       this.AllowEdit = true;
       this.AllowDelete = true;
-    } 
+    }
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   GetAllDomains() {
     this.DomainServ.Get().subscribe((data) => {
@@ -118,7 +128,7 @@ export class BusPrintNameTagComponent {
   }
 
   async GetTableData(busId: number) {
-    this.busStudentData=[]
+    this.busStudentData = []
     try {
       const data = await firstValueFrom(this.busStudentServ.GetbyBusId(busId, this.DomainName));
       this.busStudentData = data;
@@ -131,6 +141,15 @@ export class BusPrintNameTagComponent {
     this.IsChoosenDomain = true;
     const selectedValue: number = Number((event.target as HTMLSelectElement).value);
     this.busId = selectedValue;
+    
+    // Get the selected bus name and driver number
+    const selectedBus = this.BusData.find(bus => bus.id === selectedValue);
+    if (selectedBus) {
+      this.selectedBusName = selectedBus.name || '';
+      // Assuming bus has a driverPhone or driverNo property, adjust as needed
+      this.selectedBusDriverNo = (selectedBus as any).driverPhone || (selectedBus as any).driverNo || '';
+    }
+    
     this.GetTableData(this.busId);
   }
 
@@ -151,7 +170,7 @@ export class BusPrintNameTagComponent {
     );
 
     this.busStudentData = data || [];
-    
+
     if (this.value !== "") {
       const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
       this.busStudentData = this.busStudentData.filter(t => {
@@ -165,5 +184,112 @@ export class BusPrintNameTagComponent {
         return fieldValue == this.value;
       });
     }
+  }
+
+  DownloadAsPDF() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.printNameTagPDF();
+    }, 500);
+  }
+
+  Print() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.printNameTag();
+      setTimeout(() => this.showPDF = false, 500);
+    }, 500);
+  }
+
+  printNameTagPDF() {
+    const opt = {
+      margin: [0.2, 0.2, 0.2, 0.2],
+      filename: `Bus-Name-Tags-${this.selectedBusName || 'bus'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
+    };
+
+    const container = this.nameTagContainer.nativeElement as HTMLElement;
+    const clone = container.cloneNode(true) as HTMLElement;
+
+    clone.style.position = 'static';
+    clone.style.top = 'auto';
+    clone.style.left = 'auto';
+    clone.style.display = 'block';
+    clone.style.width = '210mm';
+    clone.style.maxWidth = '210mm';
+    clone.style.margin = '0 auto';
+    clone.style.background = 'white';
+    clone.style.padding = '20px';
+    clone.style.boxSizing = 'border-box';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.width = '100%';
+    wrapper.style.display = 'block';
+    wrapper.style.background = 'white';
+    wrapper.appendChild(clone);
+
+    document.body.appendChild(wrapper);
+
+    html2pdf()
+      .from(clone)
+      .set(opt)
+      .save()
+      .then(() => {
+        document.body.removeChild(wrapper);
+        this.showPDF = false;
+      })
+      .catch((error: any) => {
+        console.error('PDF generation failed:', error);
+        document.body.removeChild(wrapper);
+        this.showPDF = false;
+      });
+  }
+
+  printNameTag() {
+    const printContents = this.nameTagContainer.nativeElement.innerHTML;
+
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { 
+          margin: 0; 
+          font-family: Arial, sans-serif;
+        }
+        .print-container {
+          padding: 20px;
+          background: white;
+          max-width: 210mm;
+          margin: 0 auto;
+        }
+        @media print {
+          body > *:not(.print-container) {
+            display: none !important;
+          }
+          .print-container {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            margin: 0 !important;
+            padding: 20px !important;
+          }
+        }
+      </style>
+    `;
+
+    const printContainer = document.createElement('div');
+    printContainer.className = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+
+    document.body.appendChild(printContainer);
+    window.print();
+
+    setTimeout(() => {
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
+    }, 100);
   }
 }
