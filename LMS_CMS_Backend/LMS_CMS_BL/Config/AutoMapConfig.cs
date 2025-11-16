@@ -1548,6 +1548,20 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
 
+            CreateMap<Student, SubAccountDTO>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.en_name));
+            CreateMap<TuitionFeesType, SubAccountDTO>();
+            CreateMap<Asset, SubAccountDTO>();
+            CreateMap<Income, SubAccountDTO>();
+            CreateMap<Debit, SubAccountDTO>();
+            CreateMap<Supplier, SubAccountDTO>();
+            CreateMap<Credit, SubAccountDTO>();
+            CreateMap<Outcome, SubAccountDTO>();
+            CreateMap<Employee, SubAccountDTO>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.en_name));
+            CreateMap<Save, SubAccountDTO>();
+            CreateMap<Bank, SubAccountDTO>();
+
         }
     } 
 }
