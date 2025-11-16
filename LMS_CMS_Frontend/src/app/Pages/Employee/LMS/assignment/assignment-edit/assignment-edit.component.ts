@@ -27,6 +27,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
@@ -34,6 +36,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
+
+@InitLoader()
 export class AssignmentEditComponent {
 
   assignment: Assignment = new Assignment();
@@ -89,7 +93,8 @@ export class AssignmentEditComponent {
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
     public QuestionBankTypeServ: QuestionBankTypeService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,  
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

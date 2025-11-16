@@ -34,6 +34,8 @@ import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-assignment',
   standalone: true,
@@ -41,6 +43,8 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
   templateUrl: './assignment.component.html',
   styleUrl: './assignment.component.css'
 })
+
+@InitLoader()
 export class AssignmentComponent {
   validationErrors: { [key in keyof Assignment]?: string } = {};
   keysArray: string[] = ['id', 'englishName', 'arabicName', 'mark', 'assignmentTypeEnglishName', 'assignmentTypeArabicName'];
@@ -107,6 +111,7 @@ export class AssignmentComponent {
     public router: Router,
     private translate: TranslateService,
     private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

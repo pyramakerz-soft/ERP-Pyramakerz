@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-registered-employee-view',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registered-employee-view.component.html',
   styleUrl: './registered-employee-view.component.css'
 })
+
+@InitLoader()
 export class RegisteredEmployeeViewComponent {
   employee:RegisteredEmployee = new RegisteredEmployee()
   DomainName: string = '';
@@ -45,6 +49,7 @@ export class RegisteredEmployeeViewComponent {
     public employeeTypeService: EmployeeTypeService,
     public roleService: RoleService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() { 

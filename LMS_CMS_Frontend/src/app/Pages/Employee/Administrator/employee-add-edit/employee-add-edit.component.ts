@@ -29,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { LocationService } from '../../../../Services/Employee/HR/location.service';
 import { Location } from '../../../../Models/HR/location';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-add-edit',
@@ -37,6 +39,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './employee-add-edit.component.html',
   styleUrl: './employee-add-edit.component.css',
 })
+
+@InitLoader()
 export class EmployeeAddEditComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -106,6 +110,7 @@ export class EmployeeAddEditComponent {
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

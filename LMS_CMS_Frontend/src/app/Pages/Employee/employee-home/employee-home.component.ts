@@ -3,6 +3,8 @@ import { AnnouncementService } from '../../../Services/Employee/Administration/a
 import { Announcement } from '../../../Models/Administrator/announcement';
 import { ApiService } from '../../../Services/api.service';
 import { CommonModule } from '@angular/common';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 @Component({
   selector: 'app-employee-home',
   standalone: true,
@@ -10,13 +12,16 @@ import { CommonModule } from '@angular/common';
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.css',
 })
+
+@InitLoader()
 export class EmployeeHomeComponent { 
   announcements: Announcement[] = []  
   DomainName = ''
   selectedIndex = 0;
   private intervalId: any;
 
-  constructor(private announcementService: AnnouncementService, public ApiServ: ApiService){}
+  constructor(private announcementService: AnnouncementService, public ApiServ: ApiService,
+    private loadingService: LoadingService ){}
     
   ngOnInit(){ 
     this.DomainName = this.ApiServ.GetHeader();

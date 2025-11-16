@@ -13,6 +13,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-assignment',
   standalone: true,
@@ -20,6 +22,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject-assignment.component.html',
   styleUrl: './subject-assignment.component.css'
 })
+
+@InitLoader()
 export class SubjectAssignmentComponent {
 
   path: string = ""
@@ -36,7 +40,8 @@ export class SubjectAssignmentComponent {
   AllAssignment: any[] = []
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

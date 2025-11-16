@@ -27,6 +27,8 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { Observable, of } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-time-table-view',
@@ -35,6 +37,8 @@ import Swal from 'sweetalert2';
   templateUrl: './time-table-view.component.html',
   styleUrl: './time-table-view.component.css',
 })
+
+@InitLoader()
 export class TimeTableViewComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -90,6 +94,7 @@ export class TimeTableViewComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     public timetableServ: TimeTableService, 
+    private loadingService: LoadingService,
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

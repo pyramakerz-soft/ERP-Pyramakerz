@@ -20,6 +20,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-registration-confirmation-details',
   standalone: true,
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registration-confirmation-details.component.html',
   styleUrl: './registration-confirmation-details.component.css'
 })
+
+@InitLoader()
 export class RegistrationConfirmationDetailsComponent {
   DomainName: string = "";
   UserID: number = 0;
@@ -50,7 +54,8 @@ export class RegistrationConfirmationDetailsComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public stateService: RegistrationFormStateService,
     public registrationFormSubmissionService: RegistrationFormSubmissionService, public registrationFormParentService: RegisterationFormParentService
-    , public registrationFormService: RegistrationFormService, private languageService: LanguageService ){}
+    , public registrationFormService: RegistrationFormService, private languageService: LanguageService,
+    private loadingService: LoadingService ){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

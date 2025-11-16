@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-tax-issuer',
   standalone: true,
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './tax-issuer.component.html',
   styleUrl: './tax-issuer.component.css'
 })
+
+@InitLoader()
 export class TaxIssuerComponent {
   taxData:TaxIssuer = new TaxIssuer()
   taxDataToEdit:TaxIssuer = new TaxIssuer()
@@ -42,6 +46,7 @@ export class TaxIssuerComponent {
     public taxTypeService: TaxTypeService,     
     public taxIssuerService: TaxIssuerService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

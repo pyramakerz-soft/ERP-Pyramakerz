@@ -22,6 +22,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Student } from '../../../../Models/student';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-shop',
@@ -30,6 +32,8 @@ import { Student } from '../../../../Models/student';
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
+
+@InitLoader()
 export class ShopComponent { 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
@@ -56,7 +60,8 @@ export class ShopComponent {
   searchQuery: string = '';
    
   constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
-    public account: AccountService,public StudentService: StudentService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
+    public account: AccountService,public StudentService: StudentService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService,
+    private loadingService: LoadingService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

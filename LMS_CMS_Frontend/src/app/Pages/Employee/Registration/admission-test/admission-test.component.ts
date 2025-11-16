@@ -23,6 +23,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-admission-test',
   standalone: true,
@@ -30,6 +32,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './admission-test.component.html',
   styleUrl: './admission-test.component.css'
 })
+
+@InitLoader()
 export class AdmissionTestComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -79,7 +83,8 @@ export class AdmissionTestComponent {
     public AcadimicYearServ: AcadimicYearService,
     public SubjectServ: SubjectService,
     private translate: TranslateService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

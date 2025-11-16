@@ -18,6 +18,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import 'leaflet-control-geocoder';
 import * as L from 'leaflet';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-location',
@@ -26,6 +28,8 @@ import * as L from 'leaflet';
   templateUrl: './location.component.html',
   styleUrl: './location.component.css',
 })
+
+@InitLoader()
 export class LocationComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -65,7 +69,8 @@ export class LocationComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     private translate: TranslateService,
-    public LocationServ: LocationService, 
+    public LocationServ: LocationService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

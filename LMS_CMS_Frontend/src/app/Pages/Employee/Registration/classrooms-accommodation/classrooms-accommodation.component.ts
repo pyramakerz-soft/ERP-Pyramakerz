@@ -26,6 +26,8 @@ import { RegistrationFormStateService } from '../../../../Services/Employee/Regi
 import { RegistrationFormState } from '../../../../Models/Registration/registration-form-state';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-classrooms-accommodation',
   standalone: true,
@@ -33,6 +35,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './classrooms-accommodation.component.html',
   styleUrl: './classrooms-accommodation.component.css',
 })
+
+@InitLoader()
 export class ClassroomsAccommodationComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -85,6 +89,7 @@ export class ClassroomsAccommodationComponent {
     public registrationFormStateService: RegistrationFormStateService,
     public YearServ: AcadimicYearService, 
     private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

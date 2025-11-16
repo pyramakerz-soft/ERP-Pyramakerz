@@ -24,6 +24,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-students',
   standalone: true,
@@ -77,7 +78,8 @@ export class StudentsComponent {
     public acadimicYearService: AcadimicYearService, 
     public floorService: FloorService, 
     public router: Router,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService
     ) { }
 
   ngOnInit() {

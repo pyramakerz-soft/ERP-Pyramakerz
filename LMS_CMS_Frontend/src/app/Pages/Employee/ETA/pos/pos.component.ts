@@ -16,6 +16,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-pos',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.css'
 })
+
+@InitLoader()
 export class POSComponent {
   validationErrors: { [key in keyof POS]?: string } = {}; 
   keysArray: string[] = ['id','clientID','clientSecret','clientSecret2','deviceSerialNumber'];
@@ -63,7 +67,8 @@ export class POSComponent {
     public posService: POSService, 
     public router: Router,
     private languageService: LanguageService, 
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

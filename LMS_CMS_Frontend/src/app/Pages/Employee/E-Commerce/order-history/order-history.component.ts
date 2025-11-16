@@ -13,6 +13,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-order-history',
   standalone: true,
@@ -20,6 +22,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './order-history.component.html',
   styleUrl: './order-history.component.css'
 })
+
+@InitLoader()
 export class OrderHistoryComponent {  
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -39,7 +43,8 @@ export class OrderHistoryComponent {
     private router: Router, 
     private orderrService: OrderService, 
     private orderrStateService: OrderStateService,
-    private languageService: LanguageService, ){}
+    private languageService: LanguageService, 
+    private loadingService: LoadingService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

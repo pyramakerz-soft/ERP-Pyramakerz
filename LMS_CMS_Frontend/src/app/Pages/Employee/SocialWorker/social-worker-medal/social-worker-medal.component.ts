@@ -16,6 +16,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SocialWorkerMedalService } from '../../../../Services/Employee/SocialWorker/social-worker-medal.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-social-worker-medal',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './social-worker-medal.component.html',
   styleUrl: './social-worker-medal.component.css'
 })
+
+@InitLoader()
 export class SocialWorkerMedalComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -63,6 +67,7 @@ export class SocialWorkerMedalComponent {
     public ApiServ: ApiService,
     public SocialWorkerMedalServ: SocialWorkerMedalService,
     private languageService: LanguageService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

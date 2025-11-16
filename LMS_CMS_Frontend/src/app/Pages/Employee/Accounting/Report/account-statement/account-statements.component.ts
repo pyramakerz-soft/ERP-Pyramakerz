@@ -14,6 +14,8 @@ import { ReportsService } from '../../../../../Services/Employee/Accounting/repo
 import { SupplierService } from '../../../../../Services/Employee/Accounting/supplier.service';
 import { Supplier } from '../../../../../Models/Accounting/supplier';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-account-statements',
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './account-statements.component.html',
   styleUrl: './account-statements.component.css'
 })
+
+@InitLoader()
 export class AccountStatementsComponent {
   type: string = '';
   SubAccountNumber: number | null = null;
@@ -64,7 +68,8 @@ export class AccountStatementsComponent {
     public reportsService: ReportsService,
     private router: Router,
     private languageService: LanguageService,
-    private supplierService: SupplierService, 
+    private supplierService: SupplierService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

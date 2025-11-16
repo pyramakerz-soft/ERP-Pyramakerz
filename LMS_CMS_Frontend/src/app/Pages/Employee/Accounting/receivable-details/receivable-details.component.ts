@@ -30,6 +30,8 @@ import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/sa
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-data';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-receivable-details',
@@ -38,6 +40,8 @@ import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-d
   templateUrl: './receivable-details.component.html',
   styleUrl: './receivable-details.component.css',
 })
+
+@InitLoader()
 export class ReceivableDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -102,7 +106,8 @@ export class ReceivableDetailsComponent {
     public reportsService: ReportsService,
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
-    private BankEmployeeServ: BankEmployeeService
+    private BankEmployeeServ: BankEmployeeService,    
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

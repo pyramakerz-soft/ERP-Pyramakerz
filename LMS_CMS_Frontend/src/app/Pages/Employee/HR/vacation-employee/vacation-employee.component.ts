@@ -21,6 +21,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { VacationTypesService } from '../../../../Services/Employee/HR/vacation-types.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-vacation-employee',
@@ -29,6 +31,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './vacation-employee.component.html',
   styleUrl: './vacation-employee.component.css'
 })
+
+@InitLoader()
 export class VacationEmployeeComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -80,7 +84,8 @@ export class VacationEmployeeComponent {
     public VacationEmployeeServ: VacationEmployeeService,
     public EmployeeServ: EmployeeService,
     private translate: TranslateService,
-    public VacationTypesServ: VacationTypesService, 
+    public VacationTypesServ: VacationTypesService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

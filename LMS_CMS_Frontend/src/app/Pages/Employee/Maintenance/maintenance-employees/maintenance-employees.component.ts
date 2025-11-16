@@ -17,6 +17,8 @@ import { AccountService } from '../../../../Services/account.service';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
 import { Employee } from '../../../../Models/Employee/employee';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -25,6 +27,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
   templateUrl: './maintenance-employees.component.html',
   styleUrl: './maintenance-employees.component.css'
 })
+
+@InitLoader()
 export class MaintenanceEmployeesComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   UserID: number = 0;
@@ -48,16 +52,17 @@ export class MaintenanceEmployeesComponent {
   IsChoosenDomain: boolean = false;
 
   constructor(    
-      private languageService: LanguageService,
-      private router: Router,
-      private apiService: ApiService, 
-      public mainServ: MaintenanceEmployeesService,
-      private deleteEditPermissionServ: DeleteEditPermissionService,
-      public account: AccountService,
-      public EmpServ: EmployeeService,
-      private activeRoute: ActivatedRoute, 
-      private menuService: MenuService,  
-      private translate: TranslateService
+    private languageService: LanguageService,
+    private router: Router,
+    private apiService: ApiService, 
+    public mainServ: MaintenanceEmployeesService,
+    private deleteEditPermissionServ: DeleteEditPermissionService,
+    public account: AccountService,
+    public EmpServ: EmployeeService,
+    private activeRoute: ActivatedRoute, 
+    private menuService: MenuService,  
+    private translate: TranslateService,
+    private loadingService: LoadingService 
 ){}
 
   ngOnInit() {

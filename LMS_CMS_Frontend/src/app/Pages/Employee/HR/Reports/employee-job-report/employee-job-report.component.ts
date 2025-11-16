@@ -12,6 +12,8 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-job-report',
@@ -20,6 +22,8 @@ import { CommonModule } from '@angular/common';
   templateUrl: './employee-job-report.component.html',
   styleUrl: './employee-job-report.component.css'
 })
+
+@InitLoader()
 export class EmployeeJobReportComponent  implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
@@ -58,7 +62,8 @@ export class EmployeeJobReportComponent  implements OnInit {
     private jobService: JobService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

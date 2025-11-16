@@ -22,6 +22,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-create-hygiene-form',
@@ -31,6 +33,8 @@ import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygi
   templateUrl: './create-hygiene-form.component.html',
   styleUrls: ['./create-hygiene-form.component.css'],
 })
+
+@InitLoader()
 export class CreateHygieneFormComponent implements OnInit {
     schools: School[] = [];
   grades: Grade[] = [];
@@ -57,9 +61,8 @@ export class CreateHygieneFormComponent implements OnInit {
     private studentService: StudentService,
     private languageService: LanguageService,  
     private translate: TranslateService,
-    private hygieneFormService: HygieneFormService
-
-
+    private hygieneFormService: HygieneFormService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {

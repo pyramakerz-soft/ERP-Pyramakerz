@@ -14,6 +14,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-parent-medical-history',
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './medical-history-table.component.html',
   styleUrls: ['./medical-history-table.component.css'],
 })
+
+@InitLoader()
 export class ParentMedicalHistoryComponent implements OnInit {
   headers: string[] = ['ID', 'Details', 'Permanent Drug', 'Date', 'Actions'];
   keys: string[] = ['id', 'details', 'permanentDrug', 'insertedAt'];
@@ -37,7 +41,8 @@ export class ParentMedicalHistoryComponent implements OnInit {
     private medicalHistoryService: MedicalHistoryService,
     private languageService: LanguageService,
     private apiService: ApiService, 
-    private translate: TranslateService // Add this 
+    private translate: TranslateService, // Add this 
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit(): void {

@@ -21,6 +21,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-discussion-room',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './discussion-room.component.html',
   styleUrl: './discussion-room.component.css'
 })
+
+@InitLoader()
 export class DiscussionRoomComponent {
   TableData: DiscussionRoom[] = []
   discussionRoom: DiscussionRoom = new DiscussionRoom()
@@ -70,6 +74,7 @@ export class DiscussionRoomComponent {
     public classroomStudentService: ClassroomStudentService,
     public SchoolService: SchoolService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

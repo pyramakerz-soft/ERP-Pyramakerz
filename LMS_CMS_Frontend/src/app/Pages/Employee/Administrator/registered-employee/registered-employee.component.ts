@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-registered-employee',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registered-employee.component.html',
   styleUrl: './registered-employee.component.css'
 })
+
+@InitLoader()
 export class RegisteredEmployeeComponent {  
   DomainName: string = '';
   TableData:RegisteredEmployee[] = []
@@ -40,6 +44,7 @@ export class RegisteredEmployeeComponent {
     public ApiServ: ApiService, 
     public registeredEmployeeService: RegisteredEmployeeService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() { 

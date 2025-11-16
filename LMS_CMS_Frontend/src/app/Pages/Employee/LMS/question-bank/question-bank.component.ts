@@ -37,6 +37,8 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -44,6 +46,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
+
+@InitLoader()
 export class QuestionBankComponent {
   @ViewChild('dropdownContainer') dropdownRef!: ElementRef;
 
@@ -146,6 +150,7 @@ export class QuestionBankComponent {
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
     private translate: TranslateService, 
+    private loadingService: LoadingService,
   ) { }
 
   ngOnInit() {

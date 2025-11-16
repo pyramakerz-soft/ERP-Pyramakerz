@@ -36,6 +36,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -43,6 +45,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './accounting-employee-edit.component.html',
   styleUrl: './accounting-employee-edit.component.css'
 })
+
+@InitLoader()
 export class AccountingEmployeeEditComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -125,6 +129,7 @@ export class AccountingEmployeeEditComponent {
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

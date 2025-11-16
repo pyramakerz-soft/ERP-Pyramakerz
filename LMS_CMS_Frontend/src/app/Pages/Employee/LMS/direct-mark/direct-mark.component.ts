@@ -31,6 +31,8 @@ import { Classroom } from '../../../../Models/LMS/classroom';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-direct-mark',
@@ -39,6 +41,8 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
   templateUrl: './direct-mark.component.html',
   styleUrl: './direct-mark.component.css'
 })
+
+@InitLoader()
 export class DirectMarkComponent {
 
   validationErrors: { [key in keyof DirectMark]?: string } = {};
@@ -103,7 +107,8 @@ export class DirectMarkComponent {
     public DirectMarkServ: DirectMarkService,
     public router: Router,
     private translate: TranslateService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

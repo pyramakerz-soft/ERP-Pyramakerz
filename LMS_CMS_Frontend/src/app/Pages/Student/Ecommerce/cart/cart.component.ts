@@ -19,6 +19,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Student } from '../../../../Models/student';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-cart',
@@ -27,6 +29,8 @@ import { Student } from '../../../../Models/student';
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
+
+@InitLoader()
 export class CartComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
@@ -47,7 +51,8 @@ export class CartComponent {
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
     private router: Router, private cartService: CartService, public StudentService: StudentService,
-    private orderService: OrderService, public cartShopItemService:CartShopItemService ){}
+    private orderService: OrderService, public cartShopItemService:CartShopItemService,
+    private loadingService: LoadingService ){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

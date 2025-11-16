@@ -19,6 +19,8 @@ import { LinkFileService } from '../../../../../Services/Employee/Accounting/lin
 import { LinkFile } from '../../../../../Models/Accounting/link-file';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-account-balance',
@@ -27,6 +29,8 @@ import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.
   templateUrl: './account-balance.component.html',
   styleUrl: './account-balance.component.css'
 })
+
+@InitLoader()
 export class AccountBalanceComponent implements OnInit {
   // Filter parameters
   toDate: string = '';
@@ -83,7 +87,8 @@ export class AccountBalanceComponent implements OnInit {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private linkFileService: LinkFileService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

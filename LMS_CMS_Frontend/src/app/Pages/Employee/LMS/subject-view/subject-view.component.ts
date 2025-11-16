@@ -21,6 +21,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-view',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject-view.component.html',
   styleUrl: './subject-view.component.css'
 })
+
+@InitLoader()
 export class SubjectViewComponent {
   subject: Subject = new Subject()
   subjectId = 0;
@@ -56,7 +60,8 @@ export class SubjectViewComponent {
 
   constructor(private languageService: LanguageService, public subjectService: SubjectService, public activeRoute: ActivatedRoute, public router: Router, public EditDeleteServ: DeleteEditPermissionService,
     public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService: SubjectWeightService,private translate: TranslateService,
-    public subjectResourceService: SubjectResourceService, public weightTypeService: WeightTypeService) { }
+    public subjectResourceService: SubjectResourceService, public weightTypeService: WeightTypeService,
+    private loadingService: LoadingService) { }
 
   async ngOnInit() {
     this.subjectId = await Number(this.activeRoute.snapshot.paramMap.get('SubId'))

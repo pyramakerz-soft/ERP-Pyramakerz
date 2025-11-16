@@ -21,6 +21,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-teacher',
   standalone: true,
@@ -28,6 +30,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './subject-teacher.component.html',
   styleUrl: './subject-teacher.component.css'
 })
+
+@InitLoader()
 export class SubjectTeacherComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');   
@@ -56,7 +60,8 @@ export class SubjectTeacherComponent {
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
     private languageService: LanguageService,
-    private translate: TranslateService 
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

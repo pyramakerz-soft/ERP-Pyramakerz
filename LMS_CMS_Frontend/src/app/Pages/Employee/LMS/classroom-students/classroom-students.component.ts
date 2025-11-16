@@ -20,6 +20,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-classroom-students',
   standalone: true,
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './classroom-students.component.html',
   styleUrl: './classroom-students.component.css'
 })
+
+@InitLoader()
 export class ClassroomStudentsComponent {
   classId:number = 0
   DomainName: string = '';
@@ -71,6 +75,7 @@ export class ClassroomStudentsComponent {
     public router: Router,
     private translate: TranslateService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

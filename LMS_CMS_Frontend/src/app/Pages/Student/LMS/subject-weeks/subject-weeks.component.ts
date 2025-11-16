@@ -15,6 +15,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-weeks',
   standalone: true,
@@ -22,6 +24,8 @@ import Swal from 'sweetalert2';
   templateUrl: './subject-weeks.component.html',
   styleUrl: './subject-weeks.component.css'
 })
+
+@InitLoader()
 export class SubjectWeeksComponent {
   WorkingWeekData: SemesterWorkingWeek[] = []
   path: string = ""
@@ -35,7 +39,8 @@ export class SubjectWeeksComponent {
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public SemesterWorkingWeekServ: SemesterWorkingWeekService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public SemesterWorkingWeekServ: SemesterWorkingWeekService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

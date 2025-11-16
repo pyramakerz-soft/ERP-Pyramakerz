@@ -13,6 +13,8 @@ import { DeductionService } from '../../../../../Services/Employee/HR/deduction.
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-deduction-report',
@@ -21,6 +23,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './deduction-report.component.html',
   styleUrl: './deduction-report.component.css'
 })
+
+@InitLoader()
 export class DeductionReportComponent  implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
@@ -66,7 +70,8 @@ export class DeductionReportComponent  implements OnInit {
     private employeeService: EmployeeService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

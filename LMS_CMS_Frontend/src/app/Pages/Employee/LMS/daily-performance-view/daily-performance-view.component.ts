@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-daily-performance-view',
   standalone: true,
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './daily-performance-view.component.html',
   styleUrl: './daily-performance-view.component.css'
 })
+
+@InitLoader()
 export class DailyPerformanceViewComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -45,6 +49,7 @@ export class DailyPerformanceViewComponent {
     private router: Router,
     public DailyPerformanceServ: DailyPerformanceService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

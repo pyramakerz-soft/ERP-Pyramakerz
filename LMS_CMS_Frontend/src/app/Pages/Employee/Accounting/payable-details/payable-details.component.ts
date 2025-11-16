@@ -32,6 +32,8 @@ import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
 import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-data';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-payable-details',
   standalone: true,
@@ -39,6 +41,8 @@ import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-d
   templateUrl: './payable-details.component.html',
   styleUrl: './payable-details.component.css',
 })
+
+@InitLoader()
 export class PayableDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -93,7 +97,8 @@ export class PayableDetailsComponent {
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
     private BankEmployeeServ: BankEmployeeService, 
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

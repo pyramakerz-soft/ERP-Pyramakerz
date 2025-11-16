@@ -17,6 +17,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-lesson-resources-type',
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './lesson-resources-type.component.html',
   styleUrl: './lesson-resources-type.component.css'
 })
+
+@InitLoader()
 export class LessonResourcesTypeComponent {
  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -62,7 +66,8 @@ export class LessonResourcesTypeComponent {
     public ApiServ: ApiService,
     public TypeServ: LessonResourceTypeService,
     private languageService: LanguageService,
-    private translate: TranslateService, 
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

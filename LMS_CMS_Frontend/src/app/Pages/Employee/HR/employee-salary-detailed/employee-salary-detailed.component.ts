@@ -25,6 +25,8 @@ import { MonthlyAttendance } from '../../../../Models/HR/monthly-attendance';
 import { SalaryHistory } from '../../../../Models/HR/salary-history';
 import { SalaryCalculationService } from '../../../../Services/Employee/HR/salary-calculation.service';
 import { SalaryReportsService } from '../../../../Services/Employee/HR/salary-reports.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-salary-detailed',
@@ -33,6 +35,8 @@ import { SalaryReportsService } from '../../../../Services/Employee/HR/salary-re
   templateUrl: './employee-salary-detailed.component.html',
   styleUrl: './employee-salary-detailed.component.css'
 })
+
+@InitLoader()
 export class EmployeeSalaryDetailedComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -85,7 +89,8 @@ export class EmployeeSalaryDetailedComponent {
     public JobCategoriesServ: JobCategoriesService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    private cdr: ChangeDetectorRef, 
+    private cdr: ChangeDetectorRef,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

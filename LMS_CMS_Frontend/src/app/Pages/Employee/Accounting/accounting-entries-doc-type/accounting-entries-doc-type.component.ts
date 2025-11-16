@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-accounting-entries-doc-type',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './accounting-entries-doc-type.component.html',
   styleUrl: './accounting-entries-doc-type.component.css',
 })
+
+@InitLoader()
 export class AccountingEntriesDocTypeComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -75,7 +79,8 @@ export class AccountingEntriesDocTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AccountingEntriesDocTypeServ: AccountingEntriesDocTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

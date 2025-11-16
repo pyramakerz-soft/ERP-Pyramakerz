@@ -17,6 +17,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-certificate-type',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './certificate-type.component.html',
   styleUrl: './certificate-type.component.css'
 })
+
+@InitLoader()
 export class CertificateTypeComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -71,6 +75,7 @@ export class CertificateTypeComponent {
     private sanitizer: DomSanitizer,
     private languageService: LanguageService, 
     private translate: TranslateService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-semester-view',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './semester-view.component.html',
   styleUrl: './semester-view.component.css'
 })
+
+@InitLoader()
 export class SemesterViewComponent {
   DomainName: string = "";
   semesterId: number = 0
@@ -55,7 +59,8 @@ export class SemesterViewComponent {
   isDeleting: boolean = false;
 
   constructor(private languageService: LanguageService,public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, private translate: TranslateService,
-    public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
+    public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService,
+    private loadingService: LoadingService){}
 
   ngOnInit(){
     this.DomainName = this.ApiServ.GetHeader();

@@ -9,6 +9,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import {  Subscription } from 'rxjs';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-view-report',
   standalone: true,
@@ -16,6 +18,8 @@ import {  Subscription } from 'rxjs';
     templateUrl: './view-report.component.html',
   styleUrl: './view-report.component.css'
 })
+
+@InitLoader()
 export class ViewReportComponent implements OnInit {
   @Input() reportType: 'parent' | 'doctor' = 'parent';
   @Input() id?: number;
@@ -31,6 +35,7 @@ export class ViewReportComponent implements OnInit {
     private router: Router,
     private apiService: ApiService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
