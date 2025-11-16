@@ -238,6 +238,17 @@ export class EvaluationTemplateGroupQuestionComponent {
         }
       }
     }
+
+    if (this.question.mark && this.question.mark < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Mark',
+        text: 'Mark cannot be negative.',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' }
+      });
+      return false;
+    }
     return isValid;
   }
   capitalizeField(field: keyof EvaluationTemplateGroupQuestion): string {

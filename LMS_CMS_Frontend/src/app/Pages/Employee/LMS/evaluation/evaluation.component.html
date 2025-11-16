@@ -54,7 +54,7 @@
     </div> 
      
     <div class="flex flex-col w-[25%] mb-4">
-        <label class="mb-2 font-medium" for="Period" [ngClass]="{ 'text-gray-400': !SchoolID, 'primaryTxt': SchoolID }">{{ 'Time' | translate }} {{ 'Period' | translate }}</label>
+        <label class="mb-2 font-medium" for="Period" [ngClass]="{ 'text-gray-400': !SchoolID, 'primaryTxt': SchoolID }">{{ 'Period' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Period"
             [disabled]="!SchoolID" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolID }"
             [(ngModel)]="EvaluationEmployee.period">
