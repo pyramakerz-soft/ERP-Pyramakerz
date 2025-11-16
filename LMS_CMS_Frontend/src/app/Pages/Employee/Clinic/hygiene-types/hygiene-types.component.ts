@@ -13,6 +13,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-hygiene-types',
   standalone: true,
@@ -27,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './hygiene-types.component.html',
   styleUrls: ['./hygiene-types.component.css'],
 })
+
+@InitLoader()
 export class HygieneTypesComponent implements OnInit {
   hygieneType: HygieneTypes = new HygieneTypes(0, '', 0);
   editHygieneType = false;
