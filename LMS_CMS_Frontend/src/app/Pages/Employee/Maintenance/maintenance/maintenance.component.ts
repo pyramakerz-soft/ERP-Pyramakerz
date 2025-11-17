@@ -353,39 +353,80 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async saveMaintenance(): Promise<void> {
-    if (!this.isFormValid()) return;
+async saveMaintenance(): Promise<void> {
+  if (!this.isFormValid()) return;
 
-    try {
-      this.isSaving = true;
-      const domainName = this.apiService.GetHeader();
+  try {
+    this.isSaving = true;
+    const domainName = this.apiService.GetHeader();
 
-      // Ensure date is properly formatted as YYYY-MM-DD
-      // Since date is always a string in the form, we can use it directly
-      const submitData: Maintenance = {
-        ...this.maintenanceForm,
-        companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
-        maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
-      };
+    // Ensure date is properly formatted as YYYY-MM-DD
+    const submitData: Maintenance = {
+      ...this.maintenanceForm,
+      companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
+      maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
+    };
 
-      if (this.editMode && this.maintenanceForm.id) {
-        await firstValueFrom(this.maintenanceService.update(submitData, domainName));
-        this.showSuccessAlert(this.translate.instant('Maintenance record updated successfully'));
-      } else {
-        await firstValueFrom(this.maintenanceService.create(submitData, domainName));
-        this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
-      }
-
-      this.loadMaintenance();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving maintenance record:', error);
-      const errorMessage = String(error) || this.translate.instant('Failed to save maintenance record');
-      this.showErrorAlert(errorMessage);
-    } finally {
-      this.isSaving = false;
+    if (this.editMode && this.maintenanceForm.id) {
+      await firstValueFrom(this.maintenanceService.update(submitData, domainName));
+      this.showSuccessAlert(this.translate.instant('Maintenance record updated successfully'));
+    } else {
+      await firstValueFrom(this.maintenanceService.create(submitData, domainName));
+      this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
     }
+
+    this.loadMaintenance();
+    this.closeModal();
+  } catch (error: any) {
+    console.error('Error saving maintenance record:', error);
+    
+    // Extract backend error message
+    let errorMessage = this.translate.instant('Failed to save maintenance record');
+    
+    if (error.error) {
+      // Try to get the error message from different possible properties
+      errorMessage = error.error.message || 
+                    error.error.error || 
+                    error.error.title ||
+                    error.error.Message ||
+                    error.error.Error ||
+                    this.getErrorMessageFromResponse(error);
+    } else if (error.message) {
+      errorMessage = error.message;
+    } else if (error.status === 404) {
+      errorMessage = this.translate.instant('Resource not found');
+    } else if (error.status === 400) {
+      errorMessage = this.translate.instant('Bad request - please check your input');
+    } else if (error.status === 500) {
+      errorMessage = this.translate.instant('Server error - please try again later');
+    }
+    
+    this.showErrorAlert(errorMessage);
+  } finally {
+    this.isSaving = false;
   }
+}
+
+// Helper method to extract error message from different response formats
+private getErrorMessageFromResponse(error: any): string {
+  try {
+    // If the error is a string, try to parse it as JSON
+    if (typeof error.error === 'string') {
+      const parsedError = JSON.parse(error.error);
+      return parsedError.message || parsedError.error || parsedError.title || String(error.error);
+    }
+    
+    // If error has a statusText, use it
+    if (error.statusText) {
+      return error.statusText;
+    }
+    
+    return String(error);
+  } catch (parseError) {
+    // If parsing fails, return the original error as string
+    return String(error.error || error);
+  }
+}
 
   validateDecimal(event: any, field: string): void {
     const input = event.target as HTMLInputElement;

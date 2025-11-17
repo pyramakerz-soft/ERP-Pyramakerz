@@ -78,9 +78,9 @@ export class DeductionReportComponent  implements OnInit {
     this.loadJobCategories();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+      this.isRtl = direction == 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir == 'rtl';
   }
 
   ngOnDestroy(): void { 
@@ -100,60 +100,65 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadJobs() {
-    if (this.selectedJobCategoryId) {
+    this.selectedJobId = 0;
+    this.employees = [];
+    this.selectedEmployeeId = 0;
+    
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
         );
         this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading jobs:', error);
+        this.jobs = [];
       }
     } else {
       this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   async loadEmployees() {
-    if (this.selectedJobId) {
+    this.selectedEmployeeId = 0;
+    
+    if (this.selectedJobId && this.selectedJobId !== 0) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading employees:', error);
         this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       }
     } else {
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
     this.showTable = false;
-    // Enable View Report when both dates are selected.
-    // Keep previous full-selection behavior as well (optional).
     const datesSelected = !!this.dateFrom && !!this.dateTo;
     const fullSelection = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
     this.showViewReportBtn = datesSelected || fullSelection;
     this.deductionReports = [];
+  }
+
+        ResetFilter() {
+    this.selectedJobCategoryId = 0;
+    this.selectedJobId = 0;
+    this.dateTo = '';
+    this.dateFrom = '';
+    this.selectedEmployeeId = 0;
+    this.showTable = false;
+    this.showViewReportBtn = false;
   }
 
   async viewReport() {
@@ -182,23 +187,43 @@ export class DeductionReportComponent  implements OnInit {
 
     try {
       const domainName = this.apiService.GetHeader();
+
+      // Create parameters object with only non-zero values
+      const params: any = {
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo
+      };
+
+      // Only add optional parameters if they have meaningful values
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+        params.employeeId = this.selectedEmployeeId;
+      }
+      if (this.selectedJobId && this.selectedJobId !== 0 && this.selectedJobId !== null) {
+        params.jobId = this.selectedJobId;
+      }
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0 && this.selectedJobCategoryId !== null) {
+        params.categoryId = this.selectedJobCategoryId;
+      }
+
+      console.log('Sending parameters:', params);
+
       const response = await firstValueFrom(
-        // pass undefined for filters that are not selected so service omits them
         this.deductionService.GetDeductionReport(
-          this.selectedJobCategoryId || undefined,
-          this.selectedJobId || undefined,
-          this.selectedEmployeeId || undefined,
-          this.dateFrom || undefined,
-          this.dateTo || undefined,
+          params.categoryId,    // Will be undefined if not provided
+          params.jobId,         // Will be undefined if not provided  
+          params.employeeId,    // Will be undefined if not provided
+          params.dateFrom,      // Always provided (mandatory)
+          params.dateTo,        // Always provided (mandatory)
           domainName
         )
       );
 
       console.log('API Response:', response);
-      
+
       if (Array.isArray(response)) {
+        this.deductionReports = [];
         this.deductionReports = response;
-        console.log('Deduction reports loaded:', this.deductionReports.length);
+        console.log('Bonus reports loaded:', this.deductionReports.length);
       } else {
         console.log('Response is not an array:', response);
         this.deductionReports = [];
@@ -207,7 +232,7 @@ export class DeductionReportComponent  implements OnInit {
       this.prepareExportData();
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading deduction reports:', error);
+      console.error('Error loading bonus reports:', error);
       this.deductionReports = [];
       this.showTable = true;
     } finally {
@@ -376,7 +401,7 @@ private prepareExportData(): void {
   }
 
   DownloadAsPDF() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -389,7 +414,7 @@ private prepareExportData(): void {
   }
 
   Print() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -438,7 +463,7 @@ private prepareExportData(): void {
   }
 
   async exportExcel() {
-    if (this.reportsForExcel.length === 0) {
+    if (this.reportsForExcel.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }

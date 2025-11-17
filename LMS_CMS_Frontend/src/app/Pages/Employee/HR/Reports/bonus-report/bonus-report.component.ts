@@ -98,56 +98,63 @@ export class BonusReportComponent implements OnInit {
   }
 
   async loadJobs() {
-    if (this.selectedJobCategoryId) {
+    this.selectedJobId = 0;
+    this.employees = [];
+    this.selectedEmployeeId = 0;
+    
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
         );
         this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading jobs:', error);
+        this.jobs = [];
       }
     } else {
       this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   async loadEmployees() {
-    if (this.selectedJobId) {
+    this.selectedEmployeeId = 0;
+    
+    if (this.selectedJobId && this.selectedJobId !== 0) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading employees:', error);
         this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       }
     } else {
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
     this.showTable = false;
     this.showViewReportBtn = !!this.dateFrom && !!this.dateTo;
     this.bonusReports = [];
+  }
+
+    ResetFilter() {
+    this.selectedJobCategoryId = 0;
+    this.selectedJobId = 0;
+    this.dateTo = '';
+    this.dateFrom = '';
+    this.selectedEmployeeId = 0;
+    this.showTable = false;
+    this.showViewReportBtn = false;
   }
 
   async viewReport() {
@@ -187,10 +194,10 @@ export class BonusReportComponent implements OnInit {
       if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
         params.employeeId = this.selectedEmployeeId;
       }
-      if (this.selectedJobId && this.selectedJobId !== 0) {
+      if (this.selectedJobId && this.selectedJobId !== 0 && this.selectedJobId !== null) {
         params.jobId = this.selectedJobId;
       }
-      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0 && this.selectedJobCategoryId !== null) {
         params.categoryId = this.selectedJobCategoryId;
       }
 
@@ -210,6 +217,7 @@ export class BonusReportComponent implements OnInit {
       console.log('API Response:', response);
 
       if (Array.isArray(response)) {
+        this.bonusReports = [];
         this.bonusReports = response;
         console.log('Bonus reports loaded:', this.bonusReports.length);
       } else {
@@ -232,11 +240,19 @@ export class BonusReportComponent implements OnInit {
     // For PDF (object format) - Flatten the data for the table
     this.reportsForExport = [];
     this.bonusReports.forEach(employeeBonus => {
+      const employeeName =
+        employeeBonus.employeeEnName ||
+        employeeBonus.employeeName ||
+        employeeBonus.employeeArName ||
+        employeeBonus.en_name ||
+        employeeBonus.ar_name ||
+        'Unknown';
+
       if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
         employeeBonus.bonuses.forEach((bonus: any) => {
           this.reportsForExport.push({
             'Employee ID': employeeBonus.employeeId,
-            'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
+            'Employee Name': employeeName,
             'Total Amount': employeeBonus.totalAmount,
             'Bonus ID': bonus.id,
             'Bonus Date': new Date(bonus.date).toLocaleDateString(),
@@ -252,7 +268,7 @@ export class BonusReportComponent implements OnInit {
         // If no bonuses, still show employee summary
         this.reportsForExport.push({
           'Employee ID': employeeBonus.employeeId,
-          'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
+          'Employee Name': employeeName,
           'Total Amount': employeeBonus.totalAmount,
           'Bonus ID': '-',
           'Bonus Date': '-',
@@ -269,11 +285,19 @@ export class BonusReportComponent implements OnInit {
     // For Excel (array format)
     this.reportsForExcel = [];
     this.bonusReports.forEach(employeeBonus => {
+      const employeeName =
+        employeeBonus.employeeEnName ||
+        employeeBonus.employeeName ||
+        employeeBonus.employeeArName ||
+        employeeBonus.en_name ||
+        employeeBonus.ar_name ||
+        'Unknown';
+
       if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
         employeeBonus.bonuses.forEach((bonus: any) => {
           this.reportsForExcel.push([
             employeeBonus.employeeId,
-            employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
+            employeeName,
             employeeBonus.totalAmount,
             bonus.id,
             new Date(bonus.date).toLocaleDateString(),
@@ -288,7 +312,7 @@ export class BonusReportComponent implements OnInit {
       } else {
         this.reportsForExcel.push([
           employeeBonus.employeeId,
-          employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
+          employeeName,
           employeeBonus.totalAmount,
           '-',
           '-',
@@ -304,30 +328,31 @@ export class BonusReportComponent implements OnInit {
   }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name ||
-      this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name ||
-      'All Job Categories';
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
+           this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
+           'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name ||
-      this.jobs.find(j => j.id == this.selectedJobId)?.ar_name ||
-      'All Jobs';
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
+           this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
+           'All Jobs';
   }
 
   getEmployeeName(): string {
-    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name ||
-      this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name ||
-      'All Employees';
+    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name || 
+           this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name || 
+           'All Employees';
   }
 
   getInfoRows(): any[] {
-    return [{ keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
-    { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
-    { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
-    { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
-    { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
-    ]
+    return [
+      { keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+      { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+      { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+      { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+      { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
+    ];
   }
 
   DownloadAsPDF() {
@@ -406,12 +431,6 @@ export class BonusReportComponent implements OnInit {
           en: 'Bonus Report',
           ar: 'تقرير المكافآت'
         },
-        // subHeaders: [
-        //   {
-        //     en: 'Employee Bonus Records',
-        //     ar: 'سجلات مكافآت الموظفين'
-        //   }
-        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },
@@ -421,7 +440,6 @@ export class BonusReportComponent implements OnInit {
         ],
         tables: [
           {
-            // title: 'Bonus Report Data',
             headers: [
               'Employee ID',
               'Employee Name',

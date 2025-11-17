@@ -61,9 +61,7 @@ export class MaintenanceReportComponent implements OnInit {
   reportsForExport: any[] = [];
   school = {
     reportHeaderOneEn: 'Maintenance Report',
-    reportHeaderTwoEn: 'Student Behavior Records',
     reportHeaderOneAr: 'تقرير الصيانة',
-    reportHeaderTwoAr: 'سجلات سلوك الطلاب'
   };
 
   constructor(
