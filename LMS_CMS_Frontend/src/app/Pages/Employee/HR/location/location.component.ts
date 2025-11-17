@@ -21,6 +21,7 @@ import * as L from 'leaflet';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
+
 @Component({
   selector: 'app-location',
   standalone: true,
@@ -330,38 +331,56 @@ CreateOREdit() {
   }
 
   private initMap(): void {
-    this.map = L.map('map').setView([30.0444, 31.2357], 13); // Default Cairo
 
+    // Create map
+    this.map = L.map('map').setView([30.0444, 31.2357], 13);
+
+    // Tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
-    // Marker
-    this.marker = L.marker([30.0444, 31.2357], { draggable: true }).addTo(
-      this.map
-    );
+    // Custom Font Awesome marker
+    const faIcon = L.divIcon({
+      html: '<i class="fa-solid fa-location-dot" style="font-size:34px;color:red;"></i>',
+      className: 'fa-map-marker-icon',
+      iconSize: [34, 34],
+      iconAnchor: [17, 34], // bottom center
+    });
 
-    // Drag marker updates lat/lng
+    // Marker
+    this.marker = L.marker([30.0444, 31.2357], {
+      draggable: true,
+      icon: faIcon
+    }).addTo(this.map);
+
+    // Drag event
     this.marker.on('dragend', (e: any) => {
       const pos = e.target.getLatLng();
       this.location.latitude = pos.lat;
       this.location.longitude = pos.lng;
+      this.updateCircle();
     });
 
-    // Click event to update lat/lng
+    // Click on map → move marker
     this.map.on('click', (e: any) => {
       this.marker.setLatLng(e.latlng);
       this.location.latitude = e.latlng.lat;
       this.location.longitude = e.latlng.lng;
-      this.updateCircle(); // update circle when map clicked
+      this.updateCircle();
     });
 
+    // Save zoom
     this.map.on('zoomend', () => {
       this.location.zoom = this.map.getZoom();
     });
-    // Add search bar
+
+    // Geocoder Search Bar
     // @ts-ignore
     L.Control.geocoder().addTo(this.map);
+
+    // Draw initial circle if needed
+    this.updateCircle();
   }
 
   /** Called when latitude or longitude inputs change */

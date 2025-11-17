@@ -8,17 +8,17 @@ import { TestWithRegistrationForm } from '../../../Models/Registration/test-with
   providedIn: 'root'
 })
 export class TestService {
-  
- baseUrl = ""
+
+  baseUrl = ""
   header = ""
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
 
- Add(test: Test,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Add(test: Test, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -31,9 +31,9 @@ export class TestService {
     });
   }
 
-  Edit(test: Test,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(test: Test, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -43,9 +43,9 @@ export class TestService {
     return this.http.put(`${this.baseUrl}/Test`, test, { headers });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -55,9 +55,9 @@ export class TestService {
     return this.http.delete(`${this.baseUrl}/Test/${id}`, { headers })
   }
 
-  Get(DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -66,10 +66,22 @@ export class TestService {
       .set('Content-Type', 'application/json');
     return this.http.get<Test[]>(`${this.baseUrl}/Test`, { headers })
   }
-  
-  GetByID(id:number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Test[], pagination: any }>(`${this.baseUrl}/Test/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -79,9 +91,9 @@ export class TestService {
     return this.http.get<Test>(`${this.baseUrl}/Test/${id}`, { headers })
   }
 
-  GetByRegistrationFormParentIDFromEmployee(RPID:number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByRegistrationFormParentIDFromEmployee(RPID: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -91,9 +103,9 @@ export class TestService {
     return this.http.get<TestWithRegistrationForm[]>(`${this.baseUrl}/Test/byRegistrationFormParentIDFromEmployee/${RPID}`, { headers })
   }
 
-  GetByRegistrationFormParentIDFromParent(RPID:number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByRegistrationFormParentIDFromParent(RPID: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

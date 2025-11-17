@@ -70,6 +70,12 @@ export class AdmissionTestComponent {
   subscription!: Subscription;
   isLoading = false;
 
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
+
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -105,7 +111,7 @@ export class AdmissionTestComponent {
       }
     });
 
-    this.GetAllData();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -149,12 +155,65 @@ export class AdmissionTestComponent {
     this.test.subjectID = selectedSubjectId;
   }
 
-  GetAllData() {
-    this.Data = []
-    this.testServ.Get(this.DomainName).subscribe((d) => {
-      this.Data = d
-    })
+  // GetAllData() {
+  //   this.Data = []
+  //   this.testServ.GetWithPaggination(this.DomainName).subscribe((d) => {
+  //     this.Data = d
+  //   })
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.Data = [];
+    this.testServ.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.Data = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load bonuses');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
   }
+
+  private showErrorAlert(errorMessage: string) {
+      const translatedTitle = this.translate.instant('Error');
+      const translatedButton = this.translate.instant('Okay');
+  
+      Swal.fire({
+        icon: 'error',
+        title: translatedTitle,
+        text: errorMessage,
+        confirmButtonText: translatedButton,
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    }
+  
 
   GetGradesBySchoolId() {
     this.Grades = []
@@ -204,7 +263,7 @@ export class AdmissionTestComponent {
       if (result.isConfirmed) {
         this.testServ.Delete(id, this.DomainName).subscribe(
           (data: any) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           }
         );
       }
@@ -238,7 +297,7 @@ export class AdmissionTestComponent {
       this.isLoading = true
       if (this.mode == "Create") {
         this.testServ.Add(this.test, this.DomainName).subscribe(() => {
-          this.GetAllData();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           this.closeModal();
           this.isLoading = false
         },
@@ -255,7 +314,7 @@ export class AdmissionTestComponent {
         );
       } if (this.mode == "Edit") {
         this.testServ.Edit(this.test, this.DomainName).subscribe(() => {
-          this.GetAllData();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           this.closeModal();
           this.isLoading = false
         },
@@ -335,13 +394,16 @@ export class AdmissionTestComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Test[] = await firstValueFrom(
-        this.testServ.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.testServ.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.Data = data || [];
+      this.Data = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -354,7 +416,7 @@ export class AdmissionTestComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -386,15 +448,59 @@ export class AdmissionTestComponent {
     return map[field] ?? this.capitalizeField(field);
   }
 
-  private getRequiredErrorMessage(fieldName: string): string {
-    const fieldTranslated = this.translate.instant(fieldName);
-    const requiredTranslated = this.translate.instant('Is Required');
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
 
-    if (this.isRtl) {
-      return `${requiredTranslated} ${fieldTranslated}`;
-    } else {
-      return `${fieldTranslated} ${requiredTranslated}`;
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
     }
   }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
   
 }
