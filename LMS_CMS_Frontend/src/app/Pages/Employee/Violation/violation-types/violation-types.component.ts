@@ -21,6 +21,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { ViolationTypeService } from '../../../../Services/Employee/Violation/violation-type.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
+
+@InitLoader()
 export class ViolationTypesComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -74,6 +78,7 @@ export class ViolationTypesComponent {
     public empTypeServ: EmployeeTypeService,
     private translate: TranslateService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

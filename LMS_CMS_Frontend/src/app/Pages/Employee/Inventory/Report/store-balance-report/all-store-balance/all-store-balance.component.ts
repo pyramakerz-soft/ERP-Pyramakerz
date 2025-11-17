@@ -13,6 +13,8 @@ import { RealTimeNotificationServiceService } from '../../../../../../Services/s
 import { firstValueFrom, Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../Services/loading.service';
 
 type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
 
@@ -23,6 +25,8 @@ type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
   templateUrl: './all-store-balance.component.html',
   styleUrls: ['./all-store-balance.component.css'],
 })
+
+@InitLoader()
 export class AllStoresBalanceReportComponent implements OnInit {
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
 
@@ -60,7 +64,8 @@ cachedTableDataForPDF: any[] = [];
     private categoryService: InventoryCategoryService,
     private route: ActivatedRoute,    
     private languageService: LanguageService, 
-      private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

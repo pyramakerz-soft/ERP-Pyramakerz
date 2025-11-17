@@ -28,13 +28,17 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-lesson-live',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-live.component.html',
   styleUrl: './lesson-live.component.css'
-})
+}) 
+
+@InitLoader()
 export class LessonLiveComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -97,6 +101,7 @@ export class LessonLiveComponent {
     private translate: TranslateService,
     private languageService: LanguageService, 
     private gradeService: GradeService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

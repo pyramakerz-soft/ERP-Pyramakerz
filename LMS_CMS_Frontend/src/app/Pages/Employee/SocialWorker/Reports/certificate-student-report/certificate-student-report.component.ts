@@ -20,6 +20,8 @@ import { ActivatedRoute } from '@angular/router';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { Student } from '../../../../../Models/student';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 
 @Component({
@@ -29,6 +31,8 @@ import { Student } from '../../../../../Models/student';
   templateUrl: './certificate-student-report.component.html',
   styleUrl: './certificate-student-report.component.css'
 })
+
+@InitLoader()
 export class CertificateStudentReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -82,7 +86,8 @@ export class CertificateStudentReportComponent implements OnInit {
     public account: AccountService,   
     private route: ActivatedRoute,
     private languageService: LanguageService, 
-    private reportsService: ReportsService 
+    private reportsService: ReportsService ,
+    private loadingService: LoadingService 
 
   ) {}
 

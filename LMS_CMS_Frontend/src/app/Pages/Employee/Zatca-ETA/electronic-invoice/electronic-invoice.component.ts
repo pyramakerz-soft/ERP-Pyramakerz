@@ -17,6 +17,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-electronic-invoice',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrls: ['./electronic-invoice.component.css'],
   providers: [DatePipe],
 })
+
+@InitLoader()
 export class ElectronicInvoiceComponent implements OnInit {
   schools: School[] = [];
   selectedSchoolId: number | null = null;
@@ -68,8 +72,8 @@ export class ElectronicInvoiceComponent implements OnInit {
     private apiService: ApiService,
     private router: Router,
     private route: ActivatedRoute, 
-    private translate: TranslateService
-    
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {
     this.DomainName = this.apiService.GetHeader();
     this.route.data.subscribe((data) => {

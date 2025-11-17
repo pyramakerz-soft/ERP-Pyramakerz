@@ -22,6 +22,8 @@ import { LanguageService } from '../../../Services/shared/language.service';
 import { MenuService } from '../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../Services/shared/reports.service';
+import { LoadingService } from '../../../Services/loading.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-time-table-student',
@@ -30,6 +32,8 @@ import { ReportsService } from '../../../Services/shared/reports.service';
   templateUrl: './time-table-student.component.html',
   styleUrl: './time-table-student.component.css'
 })
+
+@InitLoader()
 export class TimeTableStudentComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -86,6 +90,7 @@ export class TimeTableStudentComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     public timetableServ: TimeTableService,
+    private loadingService: LoadingService 
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

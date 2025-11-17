@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-incomes',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './incomes.component.html',
   styleUrl: './incomes.component.css',
 })
+
+@InitLoader()
 export class IncomesComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -76,7 +80,8 @@ export class IncomesComponent {
     public ApiServ: ApiService,
     public IncomeServ: IncomeService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

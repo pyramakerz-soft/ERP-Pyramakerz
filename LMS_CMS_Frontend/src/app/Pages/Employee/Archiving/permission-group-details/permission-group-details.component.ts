@@ -11,6 +11,8 @@ import { PermissionGroupDetails } from '../../../../Models/Archiving/permission-
 import { ArchivingService } from '../../../../Services/Employee/Archiving/archiving.service';
 import { PermissionGroupArchivingItemComponent } from '../../../../Component/Employee/Archiving/permission-group-archiving-item/permission-group-archiving-item.component';
 import Swal from 'sweetalert2';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-permission-group-details',
@@ -19,6 +21,8 @@ import Swal from 'sweetalert2';
   templateUrl: './permission-group-details.component.html',
   styleUrl: './permission-group-details.component.css'
 })
+
+@InitLoader()
 export class PermissionGroupDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
   
@@ -39,7 +43,8 @@ export class PermissionGroupDetailsComponent {
     public account: AccountService,  
     public ApiServ: ApiService, 
     public permissionGroupDetailsService: PermissionGroupDetailsService,
-    public archivingService: ArchivingService
+    public archivingService: ArchivingService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

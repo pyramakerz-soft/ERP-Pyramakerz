@@ -19,6 +19,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import html2pdf from 'html2pdf.js';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-transfered-from-kindergarten-report',
@@ -27,6 +29,8 @@ import html2pdf from 'html2pdf.js';
   templateUrl: './transfered-from-kindergarten-report.component.html',
   styleUrl: './transfered-from-kindergarten-report.component.css'
 })
+
+@InitLoader()
 export class TransferedFromKindergartenReportComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -79,7 +83,8 @@ export class TransferedFromKindergartenReportComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService, 
+    public reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

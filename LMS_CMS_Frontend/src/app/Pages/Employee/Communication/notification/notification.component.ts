@@ -31,6 +31,8 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../Services/student.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
@@ -38,6 +40,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css'
 })
+
+@InitLoader()
 export class NotificationComponent {
 
   TableData:Notification[] = []
@@ -87,8 +91,8 @@ export class NotificationComponent {
     public gradeService: GradeService,
     public classroomService: ClassroomService,
     public studentService: StudentService, 
-    private translate: TranslateService
-
+    private translate: TranslateService,
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {

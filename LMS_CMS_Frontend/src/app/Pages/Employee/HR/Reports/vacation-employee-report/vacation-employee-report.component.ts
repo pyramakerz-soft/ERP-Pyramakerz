@@ -12,6 +12,8 @@ import { EmployeeService } from '../../../../../Services/Employee/employee.servi
 import { VacationEmployeeService } from '../../../../../Services/Employee/HR/vacation-employee.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-vacation-employee-report',
@@ -19,6 +21,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
  imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],  templateUrl: './vacation-employee-report.component.html',
   styleUrl: './vacation-employee-report.component.css'
 })
+
+@InitLoader()
 export class VacationEmployeeReportComponent implements OnInit {
   selectedJobCategoryId: number = 0;
   selectedJobId: number = 0;
@@ -57,7 +61,8 @@ export class VacationEmployeeReportComponent implements OnInit {
     private employeeService: EmployeeService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

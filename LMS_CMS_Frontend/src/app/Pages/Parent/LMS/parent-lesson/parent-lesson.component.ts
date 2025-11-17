@@ -33,6 +33,8 @@ import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-parent-lesson',
@@ -41,6 +43,8 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
   templateUrl: './parent-lesson.component.html',
   styleUrl: './parent-lesson.component.css'
 })
+
+@InitLoader()
 export class ParentLessonComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -96,7 +100,8 @@ export class ParentLessonComponent {
     public SemesterWorkingWeekServ: SemesterWorkingWeekService,
     public acadimicYearService: AcadimicYearService,
     private languageService: LanguageService,   
-    private reportsService: ReportsService 
+    private reportsService: ReportsService ,
+    private loadingService: LoadingService 
     
   ) { }
 

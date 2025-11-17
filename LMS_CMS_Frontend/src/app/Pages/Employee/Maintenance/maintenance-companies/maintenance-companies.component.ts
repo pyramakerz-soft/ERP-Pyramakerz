@@ -16,14 +16,18 @@ import { MaintenanceCompaniesService } from '../../../../Services/Employee/Maint
 import { ApiService } from '../../../../Services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-maintenance-companies',
   standalone: true,
-  imports: [TranslateModule,SearchComponent,CommonModule, FormsModule ,],
+  imports: [TranslateModule, SearchComponent, CommonModule, FormsModule,],
   templateUrl: './maintenance-companies.component.html',
   styleUrl: './maintenance-companies.component.css'
 })
+
+@InitLoader()
 export class MaintenanceCompaniesComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -35,52 +39,53 @@ export class MaintenanceCompaniesComponent {
   editCompany: boolean = false;
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: MaintenanceCompanies[] = [] 
+  TableData: MaintenanceCompanies[] = []
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
-  key: string= "id";
+  key: string = "id";
   DomainName: string = '';
   value: any;
   IsChoosenDomain: boolean = false;
   selectedCompany: MaintenanceCompanies | null = null;
   isLoading = false;
-  isModalOpen= false;
+  isModalOpen = false;
   // validationErrors: { [key: string]: string } = {};
-  validationErrors: { [key in keyof MaintenanceCompanies]?: string } = {}; 
-  academicDegree: MaintenanceCompanies = new MaintenanceCompanies(0,'','');
+  validationErrors: { [key in keyof MaintenanceCompanies]?: string } = {};
+  academicDegree: MaintenanceCompanies = new MaintenanceCompanies(0, '', '');
   mode: string = "";
   isEditMode = false;
   path: string = "";
-constructor(    
-  private languageService: LanguageService,
-  private router: Router,
-  private apiService: ApiService,
-  public account: AccountService, 
-  private mainServ: MaintenanceCompaniesService,
-  private deleteEditPermissionServ: DeleteEditPermissionService, 
-  private activeRoute: ActivatedRoute,
-  private menuService: MenuService,
-  private translate: TranslateService
+  constructor(
+    private languageService: LanguageService,
+    private router: Router,
+    private apiService: ApiService,
+    public account: AccountService,
+    private mainServ: MaintenanceCompaniesService,
+    private deleteEditPermissionServ: DeleteEditPermissionService,
+    private activeRoute: ActivatedRoute,
+    private menuService: MenuService,
+    private translate: TranslateService,
+    private loadingService: LoadingService 
+  ) { }
 
-) {}
-
-    ngOnInit() {
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     if (this.User_Data_After_Login.type === "employee") {
       this.IsChoosenDomain = true;
       this.DomainName = this.apiService.GetHeader();
-      
+
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path;
       });
       this.mainServ.Get(this.DomainName).subscribe({
-      next: (data:any) => {
-        this.TableData = data; 
-      },
-      error: (err:any) => {
-        console.error('Error fetching companies:', err);
-      }
-    });}
+        next: (data: any) => {
+          this.TableData = data;
+        },
+        error: (err: any) => {
+          console.error('Error fetching companies:', err);
+        }
+      });
+    }
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -92,7 +97,7 @@ constructor(
       }
     });
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -100,54 +105,54 @@ constructor(
 
 
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   IsAllowDelete(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowDelete(
-    InsertedByID,
-    this.UserID,
-    this.AllowDeleteForOthers
-  );
-}
+    return this.deleteEditPermissionServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+  }
 
 
   IsAllowEdit(InsertedByID: number): boolean {
-  return this.deleteEditPermissionServ.IsAllowEdit(
-    InsertedByID,
-    this.UserID,
-    this.AllowEditForOthers
-  );
-}
+    return this.deleteEditPermissionServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+  }
 
 
 
@@ -155,7 +160,7 @@ private showSuccessAlert(message: string) {
   async GetTableData() {
     this.TableData = [];
     try {
-      const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+      const data = await firstValueFrom(this.mainServ.Get(this.DomainName));
       this.TableData = data;
     } catch (error) {
       this.TableData = [];
@@ -168,7 +173,7 @@ private showSuccessAlert(message: string) {
     const deleteTitle = this.translate.instant('Are you sure you want to delete this company?');
     const deleteButton = this.translate.instant('Delete');
     const cancelButton = this.translate.instant('Cancel');
-    
+
     Swal.fire({
       title: deleteTitle,
       icon: 'warning',
@@ -201,20 +206,20 @@ private showSuccessAlert(message: string) {
   isFormValid(): boolean {
     let isValid = true;
     this.validationErrors = {};
-    
-    for (const key in this.selectedCompany) { 
+
+    for (const key in this.selectedCompany) {
       if (this.selectedCompany.hasOwnProperty(key)) {
         const field = key as keyof MaintenanceCompanies;
         if (!this.selectedCompany[field]) {
-          if (field == 'en_Name'|| field == 'ar_Name') {
+          if (field == 'en_Name' || field == 'ar_Name') {
             this.validationErrors[field] = this.translate.instant('Field is required', { field: this.capitalizeField(field) });
             isValid = false;
           }
-        } else { 
+        } else {
           this.validationErrors[field] = '';
         }
       }
-    } 
+    }
     return isValid;
   }
 
@@ -225,110 +230,110 @@ private showSuccessAlert(message: string) {
     (this.selectedCompany as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
-    } 
-  }
-    capitalizeField(field: keyof MaintenanceCompanies): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
     }
-
-
-Edit(id: number) {
-  const Item = this.TableData.find((row: any) => row.id === id);
-
-  if (Item) {
-    this.isEditMode = true;             // 👈 explicitly set edit mode
-    this.selectedCompany = { ...Item }; // clone to avoid mutating the table row
-    this.openModal(false);              // false = editing
-  } else {
-    console.error("Item not found with id:", id);
   }
-}
+  capitalizeField(field: keyof MaintenanceCompanies): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+
+  Edit(id: number) {
+    const Item = this.TableData.find((row: any) => row.id === id);
+
+    if (Item) {
+      this.isEditMode = true;             // 👈 explicitly set edit mode
+      this.selectedCompany = { ...Item }; // clone to avoid mutating the table row
+      this.openModal(false);              // false = editing
+    } else {
+      console.error("Item not found with id:", id);
+    }
+  }
 
 
 
- async onSearchEvent(event: { key: string, value: any }) {
-      this.key = event.key;
-      this.value = event.value;
-      try {
-        const data: MaintenanceCompanies[] = await firstValueFrom( this.mainServ.Get(this.DomainName));  
-        this.TableData = data || [];
-    
-        if (this.value !== "") {
-          const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-    
-          this.TableData = this.TableData.filter(t => {
-            const fieldValue = t[this.key as keyof typeof t];
-            if (typeof fieldValue === 'string') {
-              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-            }
-            if (typeof fieldValue === 'number') {
-              return fieldValue.toString().includes(numericValue.toString())
-            }
-            return fieldValue == this.value;
-          });
-        }
-      } catch (error) {
-        this.TableData = [];
+  async onSearchEvent(event: { key: string, value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: MaintenanceCompanies[] = await firstValueFrom(this.mainServ.Get(this.DomainName));
+      this.TableData = data || [];
+
+      if (this.value !== "") {
+        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+
+        this.TableData = this.TableData.filter(t => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
       }
+    } catch (error) {
+      this.TableData = [];
     }
-
-
-
-
-openModal(forNew: boolean = true) {
-  if (forNew) {
-    this.isEditMode = false;
-    this.selectedCompany = new MaintenanceCompanies(0, '', '');
   }
-  this.isModalOpen = true;
-
-  document.getElementById('Add_Modal')?.classList.remove('hidden');
-  document.getElementById('Add_Modal')?.classList.add('flex');
-}
 
 
 
- closeModal() {
+
+  openModal(forNew: boolean = true) {
+    if (forNew) {
+      this.isEditMode = false;
+      this.selectedCompany = new MaintenanceCompanies(0, '', '');
+    }
+    this.isModalOpen = true;
+
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+  }
+
+
+
+  closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
-    document.getElementById('Add_Modal')?.classList.add('hidden');   
+    document.getElementById('Add_Modal')?.classList.add('hidden');
     this.validationErrors = {};
   }
 
 
-Save() {  
-  if (this.isFormValid()) {
-    this.isLoading = true;    
-    if (this.selectedCompany?.id == 0) { 
-      this.mainServ.Add(this.selectedCompany!, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.GetTableData();
-          this.isLoading = false;
-          this.showSuccessAlert(this.translate.instant('Company added successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to add company');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    } else {
-      this.mainServ.Edit(this.selectedCompany!, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.GetTableData();
-          this.isLoading = false;
-          this.showSuccessAlert(this.translate.instant('Company updated successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update company');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+  Save() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.selectedCompany?.id == 0) {
+        this.mainServ.Add(this.selectedCompany!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Company added successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to add company');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      } else {
+        this.mainServ.Edit(this.selectedCompany!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Company updated successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update company');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
   }
-}
 
 
 

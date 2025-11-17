@@ -24,6 +24,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AttendanceService } from '../../../../Services/Employee/SocialWorker/attendance.service';
 import Swal from 'sweetalert2';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-attendance',
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './attendance.component.html',
   styleUrl: './attendance.component.css'
 })
+
+@InitLoader()
 export class AttendanceComponent {
   keysArray: string[] = ['id', 'date'];
   key: string = "id";
@@ -72,7 +76,8 @@ export class AttendanceComponent {
 
   constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,
-    public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceService: AttendanceService) { }
+    public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceService: AttendanceService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

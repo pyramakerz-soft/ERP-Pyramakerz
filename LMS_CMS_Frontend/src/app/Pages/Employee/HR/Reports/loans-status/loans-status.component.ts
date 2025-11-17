@@ -20,6 +20,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { LoanStatus } from '../../../../../Models/HR/loan-status';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-loans-status',
@@ -28,6 +30,8 @@ import Swal from 'sweetalert2';
   templateUrl: './loans-status.component.html',
   styleUrl: './loans-status.component.css'
 })
+
+@InitLoader()
 export class LoansStatusComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -80,7 +84,8 @@ export class LoansStatusComponent {
     public LoansServ: LoansService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    private cdr: ChangeDetectorRef, 
+    private cdr: ChangeDetectorRef,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

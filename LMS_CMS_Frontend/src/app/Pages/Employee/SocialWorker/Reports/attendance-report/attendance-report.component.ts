@@ -20,6 +20,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-attendance-report',
@@ -28,6 +30,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './attendance-report.component.html',
   styleUrl: './attendance-report.component.css'
 })
+
+@InitLoader()
 export class AttendanceReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -84,7 +88,8 @@ constructor(
   private apiService: ApiService,
   private route: ActivatedRoute,
   private languageService: LanguageService, 
-  private reportsService: ReportsService 
+  private reportsService: ReportsService,
+  private loadingService: LoadingService 
 ) {}
 
   ngOnInit() {

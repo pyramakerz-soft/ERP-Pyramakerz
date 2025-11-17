@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-accounting-employee',
@@ -27,6 +29,8 @@ import Swal from 'sweetalert2';
   templateUrl: './accounting-employee.component.html',
   styleUrl: './accounting-employee.component.css'
 })
+
+@InitLoader()
 export class AccountingEmployeeComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -69,6 +73,7 @@ export class AccountingEmployeeComponent {
     public EmployeeServ: EmployeeService,
     public accountServ:AccountingTreeChartService ,
     private languageService: LanguageService ,  
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

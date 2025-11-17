@@ -25,6 +25,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-assignment-student',
   standalone: true,
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './assignment-student.component.html',
   styleUrl: './assignment-student.component.css',
 })
+
+@InitLoader()
 export class AssignmentStudentComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -82,7 +86,8 @@ export class AssignmentStudentComponent {
     private GradeServ: GradeService,
     public classServ: ClassroomService,
     public assignmentServ: AssignmentService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -118,26 +123,6 @@ export class AssignmentStudentComponent {
         this.getAllClassByGradeId()
       });
   }
-
-  // getAllSchools() {
-  //   this.schools = [];
-  //   this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-  //     this.schools = d;
-  //   });
-  // }
-
-  // getAllGradesBySchoolId() {
-  //   this.Grades = [];
-  //   this.IsShowTabls = false;
-  //   this.SelectedGradeId = 0;
-  //   this.ClassId = 0;
-  //   this.GradeServ.GetBySchoolId(
-  //     this.SelectedSchoolId,
-  //     this.DomainName
-  //   ).subscribe((d) => {
-  //     this.Grades = d;
-  //   });
-  // }
 
   getAllClassByGradeId() {
     this.classes = [];
@@ -238,6 +223,17 @@ export class AssignmentStudentComponent {
 
   moveToDetails(id: number) {
     this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`);
+  }
+
+  IsLate(row: AssignmentStudent) :boolean{
+    const TheSubmittedDate = new Date(row.insertedAt); // current date
+    const dueDate = new Date(row.dueDate);
+    if (TheSubmittedDate > dueDate) {
+      return true
+    }
+    else {
+      return false
+    }
   }
 
   openFile(link: string | null) {

@@ -30,6 +30,8 @@ import Swal from 'sweetalert2';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-conduct-add-edit',
   standalone: true,
@@ -37,6 +39,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './conduct-add-edit.component.html',
   styleUrl: './conduct-add-edit.component.css'
 })
+
+@InitLoader()
 export class ConductAddEditComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -82,7 +86,8 @@ export class ConductAddEditComponent {
     private StudentServ: StudentService,
     private ConductTypeServ: ConductTypeService,
     private ProcedureTypeServ: ProcedureTypeService,
-    private ConductServ: ConductService, 
+    private ConductServ: ConductService,
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {

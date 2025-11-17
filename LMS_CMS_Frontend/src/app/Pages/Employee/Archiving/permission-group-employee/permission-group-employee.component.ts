@@ -16,6 +16,8 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service'; 
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-permission-group-employee',
@@ -24,6 +26,8 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
   templateUrl: './permission-group-employee.component.html',
   styleUrl: './permission-group-employee.component.css'
 })
+
+@InitLoader()
 export class PermissionGroupEmployeeComponent {
   TableData:PermissionGroupEmployee[] = []
   employees:Employee[] = []
@@ -52,7 +56,8 @@ export class PermissionGroupEmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public employeeService:EmployeeService, 
-    public permissionGroupEmployeeService:PermissionGroupEmployeeService
+    public permissionGroupEmployeeService:PermissionGroupEmployeeService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

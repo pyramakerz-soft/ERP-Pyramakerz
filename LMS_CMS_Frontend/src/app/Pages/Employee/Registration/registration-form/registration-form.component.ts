@@ -36,6 +36,8 @@ import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Field } from '../../../../Models/Registration/field';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -43,6 +45,8 @@ import { Field } from '../../../../Models/Registration/field';
   templateUrl: './registration-form.component.html',
   styleUrl: './registration-form.component.css',
 })
+
+@InitLoader()
 export class RegistrationFormComponent {
   DomainName: string = '';
   UserID: number = 0;
@@ -118,7 +122,8 @@ export class RegistrationFormComponent {
     public gradeServce: GradeService,
     public sectionServce: SectionService,
     private languageService: LanguageService,
-    public GenderServ: GenderService, 
+    public GenderServ: GenderService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

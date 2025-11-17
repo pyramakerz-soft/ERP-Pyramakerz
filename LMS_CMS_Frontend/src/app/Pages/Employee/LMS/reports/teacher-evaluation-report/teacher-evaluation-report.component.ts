@@ -12,6 +12,8 @@ import Swal from 'sweetalert2';
 import { Chart, ChartConfiguration } from 'chart.js';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-teacher-evaluation-report',
@@ -20,6 +22,8 @@ import jsPDF from 'jspdf';
   templateUrl: './teacher-evaluation-report.component.html',
   styleUrl: './teacher-evaluation-report.component.css',
 })
+
+@InitLoader()
 export class TeacherEvaluationReportComponent implements OnInit {
   DomainName: string = '';
   dateFrom: string = '';
@@ -47,7 +51,8 @@ export class TeacherEvaluationReportComponent implements OnInit {
     private employeeService: EmployeeService,
     private departmentService: DepartmentService,
     private evaluationService: EvaluationEmployeeService,
-    private apiService: ApiService
+    private apiService: ApiService, 
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

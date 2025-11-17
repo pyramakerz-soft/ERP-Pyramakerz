@@ -25,6 +25,8 @@ import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item
 import { Maintenance } from '../../../../Models/Maintenance/maintenance';
 import { MaintenanceCompanies } from '../../../../Models/Maintenance/maintenance-companies';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-maintenance',
@@ -33,6 +35,8 @@ import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance
   templateUrl: './maintenance.component.html',
   styleUrls: ['./maintenance.component.css']
 })
+
+@InitLoader()
 export class MaintenanceComponent implements OnInit, OnDestroy {
   // Table configuration
   headers: string[] = ['ID', 'Date', 'Item', 'Company', 'Employee', 'Cost', 'Note', 'Actions'];
@@ -83,7 +87,8 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     private menuService: MenuService,
     private editDeleteService: DeleteEditPermissionService,
     private accountService: AccountService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit(): void {

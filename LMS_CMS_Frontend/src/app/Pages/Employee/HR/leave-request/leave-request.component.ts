@@ -19,6 +19,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-leave-request',
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './leave-request.component.html',
   styleUrl: './leave-request.component.css'
 })
+
+@InitLoader()
 export class LeaveRequestComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -77,7 +81,8 @@ export class LeaveRequestComponent {
     public ApiServ: ApiService,
     public LeaveRequestServ: LeaveRequestService,
     public BounsTypeServ: BounsTypeService,
-    public EmployeeServ: EmployeeService, 
+    public EmployeeServ: EmployeeService,
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {

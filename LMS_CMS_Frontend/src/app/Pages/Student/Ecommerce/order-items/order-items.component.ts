@@ -22,6 +22,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-order-items',
   standalone: true,
@@ -29,6 +31,8 @@ import jsPDF from 'jspdf';
   templateUrl: './order-items.component.html',
   styleUrl: './order-items.component.css'
 })
+
+@InitLoader()
 export class OrderItemsComponent {  
   
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -46,7 +50,7 @@ export class OrderItemsComponent {
   subscription!: Subscription;
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
-    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService){}
+    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService, private loadingService: LoadingService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

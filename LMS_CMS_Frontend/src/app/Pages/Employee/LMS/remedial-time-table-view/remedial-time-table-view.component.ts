@@ -30,6 +30,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-remedial-time-table-view',
   standalone: true,
@@ -37,6 +39,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
   templateUrl: './remedial-time-table-view.component.html',
   styleUrl: './remedial-time-table-view.component.css'
 })
+
+@InitLoader()
 export class RemedialTimeTableViewComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -92,6 +96,7 @@ export class RemedialTimeTableViewComponent {
     public RemedialTimeTableServ: RemedialTimeTableService,
     public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
     private languageService: LanguageService, 
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

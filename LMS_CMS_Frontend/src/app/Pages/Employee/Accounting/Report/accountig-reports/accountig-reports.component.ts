@@ -18,6 +18,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-accountig-reports',
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './accountig-reports.component.html',
   styleUrl: './accountig-reports.component.css',
 })
+
+@InitLoader()
 export class AccountigReportsComponent {
   type: string = '';
 
@@ -69,6 +73,7 @@ export class AccountigReportsComponent {
     public bankService: BankService,
     public saveService: SaveService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

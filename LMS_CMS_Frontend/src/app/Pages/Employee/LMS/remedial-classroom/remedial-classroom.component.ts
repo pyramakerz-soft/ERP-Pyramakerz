@@ -30,6 +30,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-remedial-classroom',
@@ -38,6 +40,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
+
+@InitLoader()
 export class RemedialClassroomComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -97,7 +101,8 @@ export class RemedialClassroomComponent {
     public ClassroomSubjectServ: ClassroomSubjectService,
     private cdRef: ChangeDetectorRef, 
     private languageService: LanguageService,
-    private translate: TranslateService,
+    private translate: TranslateService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

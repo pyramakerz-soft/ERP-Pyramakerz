@@ -49,6 +49,8 @@ import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/sa
 import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
@@ -62,6 +64,8 @@ import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
+
+@InitLoader()
 export class InventoryDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -188,6 +192,7 @@ export class InventoryDetailsComponent {
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   async ngOnInit() {

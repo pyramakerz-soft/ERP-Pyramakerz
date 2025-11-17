@@ -18,6 +18,8 @@ import { LanguageService } from '../../../../../../Services/shared/language.serv
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { keyframes } from '@angular/animations';
+import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../Services/loading.service';
 interface FlagOption {
   id: number;
   name: string;
@@ -30,6 +32,8 @@ interface FlagOption {
   templateUrl: './invoice-report-master-detailed.component.html',
   styleUrls: ['./invoice-report-master-detailed.component.css'],
 })
+
+@InitLoader()
 export class InvoiceReportMasterDetailedComponent implements OnInit {
   dateFrom: string = '';
   dateTo: string = '';
@@ -98,7 +102,8 @@ school = {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService, 
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService 
 
   ) {}
 

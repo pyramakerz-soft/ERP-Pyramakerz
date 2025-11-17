@@ -18,6 +18,8 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { Maintenance } from '../../../../../Models/Maintenance/maintenance';
 import { MaintenanceService } from '../../../../../Services/Employee/Maintenance/maintenance.services';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-maintenance-report',
@@ -26,6 +28,8 @@ import { MaintenanceService } from '../../../../../Services/Employee/Maintenance
   templateUrl: './maintenance-report.component.html',
   styleUrl: './maintenance-report.component.css'
 })
+
+@InitLoader()
 export class MaintenanceReportComponent implements OnInit {
   // Filter properties
   dateFrom: string = '';
@@ -70,7 +74,8 @@ export class MaintenanceReportComponent implements OnInit {
     private maintenanceEmployeesService: MaintenanceEmployeesService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

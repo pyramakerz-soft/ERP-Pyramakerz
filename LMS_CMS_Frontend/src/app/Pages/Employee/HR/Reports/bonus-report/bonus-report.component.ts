@@ -13,6 +13,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-bonus-report',
@@ -21,6 +23,8 @@ import Swal from 'sweetalert2';
   templateUrl: './bonus-report.component.html',
   styleUrl: './bonus-report.component.css'
 })
+
+@InitLoader()
 export class BonusReportComponent implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
@@ -64,7 +68,8 @@ export class BonusReportComponent implements OnInit {
     private employeeService: EmployeeService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

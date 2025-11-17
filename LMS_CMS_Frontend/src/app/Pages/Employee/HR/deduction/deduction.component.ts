@@ -21,6 +21,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-deduction',
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './deduction.component.html',
   styleUrl: './deduction.component.css'
 })
+
+@InitLoader()
 export class DeductionComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -77,7 +81,8 @@ export class DeductionComponent {
     public DeductionServ: DeductionService,
     public DeductionTypeServ: DeductionTypeService,
     private translate: TranslateService,
-    public EmployeeServ: EmployeeService, 
+    public EmployeeServ: EmployeeService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

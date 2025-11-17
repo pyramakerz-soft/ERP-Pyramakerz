@@ -24,6 +24,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-shop-items-add-edit',
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './shop-items-add-edit.component.html',
   styleUrl: './shop-items-add-edit.component.css'
 })
+
+@InitLoader()
 export class ShopItemsAddEditComponent { 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
  
@@ -75,6 +79,7 @@ export class ShopItemsAddEditComponent {
     public genderService: GenderService,
     public shopItemService: ShopItemService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

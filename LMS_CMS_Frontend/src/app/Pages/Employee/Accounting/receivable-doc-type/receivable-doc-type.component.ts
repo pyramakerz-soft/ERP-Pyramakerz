@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-receivable-doc-type',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './receivable-doc-type.component.html',
   styleUrl: './receivable-doc-type.component.css',
 })
+
+@InitLoader()
 export class ReceivableDocTypeComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -74,7 +78,8 @@ export class ReceivableDocTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public ReceivableDocTypeServ: ReceivableDocTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

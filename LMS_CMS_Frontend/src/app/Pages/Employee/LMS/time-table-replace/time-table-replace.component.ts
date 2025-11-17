@@ -21,6 +21,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { Day } from '../../../../Models/day';
 import { Grade } from '../../../../Models/LMS/grade';
 import { SessionGroupDTO } from '../../../../Models/LMS/session-group-dto';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-time-table-replace',
   standalone: true,
@@ -28,6 +30,8 @@ import { SessionGroupDTO } from '../../../../Models/LMS/session-group-dto';
   templateUrl: './time-table-replace.component.html',
   styleUrl: './time-table-replace.component.css',
 })
+
+@InitLoader()
 export class TimeTableReplaceComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -72,6 +76,7 @@ export class TimeTableReplaceComponent {
     public ApiServ: ApiService,
     public timetableServ: TimeTableService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService,
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

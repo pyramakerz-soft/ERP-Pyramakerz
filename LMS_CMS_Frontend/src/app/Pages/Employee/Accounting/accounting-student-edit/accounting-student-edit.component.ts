@@ -27,6 +27,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-accounting-student-edit',
@@ -35,6 +37,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './accounting-student-edit.component.html',
   styleUrl: './accounting-student-edit.component.css'
 })
+
+@InitLoader()
 export class AccountingStudentEditComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -76,6 +80,7 @@ export class AccountingStudentEditComponent {
     public StudentServ: StudentService,
     public NationalityServ: NationalityService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

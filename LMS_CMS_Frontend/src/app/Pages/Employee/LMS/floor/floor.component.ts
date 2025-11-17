@@ -20,6 +20,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-floor',
   standalone: true,
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './floor.component.html',
   styleUrl: './floor.component.css',
 })
+
+@InitLoader()
 export class FloorComponent {
   keysArray: string[] = ['id', 'name', 'floorMonitorName'];
   key: string = 'id';
@@ -70,6 +74,7 @@ export class FloorComponent {
     public employeeService: EmployeeService,
     public router: Router,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

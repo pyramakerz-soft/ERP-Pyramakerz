@@ -13,6 +13,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-hygiene-form',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './hygiene-form.component.html',
   styleUrls: ['./hygiene-form.component.css'],
 })
+
+@InitLoader()
 export class HygieneFormComponent implements OnInit {
   @Input() students: any[] = [];
   @Input() hygieneTypes: any[] = [];
@@ -48,7 +52,8 @@ export class HygieneFormComponent implements OnInit {
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

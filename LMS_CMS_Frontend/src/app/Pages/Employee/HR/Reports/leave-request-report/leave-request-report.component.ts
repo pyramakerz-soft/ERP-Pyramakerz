@@ -13,6 +13,8 @@ import { LeaveRequestService } from '../../../../../Services/Employee/HR/leave-r
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-leave-request-report',
@@ -21,6 +23,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './leave-request-report.component.html',
   styleUrl: './leave-request-report.component.css'
 })
+
+@InitLoader()
 export class LeaveRequestReportComponent  implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
@@ -64,7 +68,8 @@ export class LeaveRequestReportComponent  implements OnInit {
     private employeeService: EmployeeService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

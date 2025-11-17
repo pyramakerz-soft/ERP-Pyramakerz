@@ -20,6 +20,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-add-child',
   standalone: true,
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './add-child.component.html',
   styleUrl: './add-child.component.css',
 })
+
+@InitLoader()
 export class AddChildComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -78,7 +82,8 @@ export class AddChildComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmplyeeStudentServ: EmployeeStudentService,
-    public StudentServ: StudentService
+    public StudentServ: StudentService,
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

@@ -6,6 +6,8 @@ import { Announcement } from '../../../Models/Administrator/announcement';
 import { AnnouncementService } from '../../../Services/Employee/Administration/announcement.service';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../Services/api.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 
 @Component({
   selector: 'app-home-parent',
@@ -14,6 +16,8 @@ import { ApiService } from '../../../Services/api.service';
   templateUrl: './home-parent.component.html',
   styleUrl: './home-parent.component.css'
 })
+
+@InitLoader()
 export class HomeParentComponent {
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   greeting: string = '';
@@ -22,7 +26,8 @@ export class HomeParentComponent {
   selectedIndex = 0;
   private intervalId: any;
   
-  constructor(public accountService: AccountService, private announcementService: AnnouncementService, private router: Router, public ApiServ: ApiService){}
+  constructor(public accountService: AccountService, private announcementService: AnnouncementService, private router: Router, public ApiServ: ApiService,
+    private loadingService: LoadingService ){}
   
   ngOnInit() { 
     this.DomainName = this.ApiServ.GetHeader();

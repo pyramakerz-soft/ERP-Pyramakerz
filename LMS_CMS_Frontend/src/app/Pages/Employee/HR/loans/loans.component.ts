@@ -20,6 +20,8 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-loans',
@@ -28,6 +30,8 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.css',
 })
+
+@InitLoader()
 export class LoansComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -74,7 +78,8 @@ export class LoansComponent {
     private translate: TranslateService,
     public LoansServ: LoansService,
     public SafeEmployeeServ: SafeEmployeeService,
-    public EmployeeServ: EmployeeService, 
+    public EmployeeServ: EmployeeService,
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

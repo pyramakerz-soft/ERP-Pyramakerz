@@ -25,6 +25,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-accounting-entries-details',
@@ -33,6 +35,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './accounting-entries-details.component.html',
   styleUrl: './accounting-entries-details.component.css'
 })
+
+@InitLoader()
 export class AccountingEntriesDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -88,6 +92,7 @@ export class AccountingEntriesDetailsComponent {
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
     public accountingTreeChartService: AccountingTreeChartService,
     public reportsService: ReportsService, private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

@@ -21,6 +21,8 @@ import { TokenData } from '../../../../../Models/token-data';
 import { ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../../../Services/account.service';
 import { Student } from '../../../../../Models/student';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-medical-history',
   standalone: true,
@@ -28,6 +30,8 @@ import { Student } from '../../../../../Models/student';
   templateUrl: './medical-history.component.html',
   styleUrls: ['./medical-history.component.css'],
 })
+
+@InitLoader()
 export class MedicalHistoryComponent implements OnInit {
   headers: string[] = ['ID', 'School', 'Grade', 'Class', 'Student', 'Details', 'Permanent Drug', 'Date', 'Actions'];
   headersarabic: string[] = ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التفاصيل', 'الدواء الدائم', 'التاريخ', 'الإجراءات'];
@@ -55,8 +59,8 @@ export class MedicalHistoryComponent implements OnInit {
     public account: AccountService,
     public ApiServ: ApiService,
     private route: ActivatedRoute,
-    private translate: TranslateService
-
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit(): void {

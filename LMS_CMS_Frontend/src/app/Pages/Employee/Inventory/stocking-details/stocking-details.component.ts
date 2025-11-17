@@ -36,6 +36,8 @@ import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-stocking-details',
   standalone: true,
@@ -43,6 +45,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './stocking-details.component.html',
   styleUrl: './stocking-details.component.css',
 })
+
+@InitLoader()
 export class StockingDetailsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -128,6 +132,7 @@ export class StockingDetailsComponent {
     public printservice: ReportsService,
     private languageService: LanguageService,
     private translate: TranslateService, 
+    private loadingService: LoadingService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
