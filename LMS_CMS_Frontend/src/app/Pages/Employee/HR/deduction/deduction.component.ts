@@ -339,7 +339,7 @@ isFormValid(): boolean {
     this.validationErrors['numberOfDeductionDays'] = this.getRequiredErrorMessage('numberOfDeductionDays');
   }
 
-  if (this.deduction.deductionTypeID == 1 && (this.deduction.hours == 0 || this.deduction.hours == null)) {
+  if (this.deduction.deductionTypeID == 1 && (this.deduction.minutes == 0 || this.deduction.minutes == null) &&(this.deduction.hours == 0 || this.deduction.hours == null)) {
     isValid = false;
     this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
   }

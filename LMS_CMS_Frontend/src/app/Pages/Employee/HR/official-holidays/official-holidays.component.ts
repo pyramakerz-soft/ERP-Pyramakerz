@@ -266,6 +266,7 @@ export class OfficialHolidaysComponent {
     if(this.officialHoliday.dateTo=='' || this.officialHoliday.dateTo < this.officialHoliday.dateFrom){
       this.officialHoliday.dateTo = this.officialHoliday.dateFrom
     }
+    this.validationErrors['dateTo'] = ''
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

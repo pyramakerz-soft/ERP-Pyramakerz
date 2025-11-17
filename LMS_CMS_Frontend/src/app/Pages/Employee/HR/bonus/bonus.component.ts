@@ -377,10 +377,8 @@ isFormValid(): boolean {
     this.validationErrors['numberOfBounsDays'] = this.getRequiredErrorMessage('numberOfBounsDays');
   }
 
-  if (
-    this.bouns.bounsTypeID == 1 &&
-    (this.bouns.hours == 0 || this.bouns.hours == null)
-  ) {
+  // if (this.bouns.bounsTypeID == 1 &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
+  if (this.bouns.bounsTypeID == 1 && (this.bouns.minutes == 0 || this.bouns.minutes == null) &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
     isValid = false;
     this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
   }

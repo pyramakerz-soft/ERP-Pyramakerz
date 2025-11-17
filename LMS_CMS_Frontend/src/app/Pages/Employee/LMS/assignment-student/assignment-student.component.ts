@@ -71,6 +71,7 @@ export class AssignmentStudentComponent {
   SelectedGradeId: number = 0;
 
   DegreeError: string = '';
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -244,71 +245,94 @@ export class AssignmentStudentComponent {
     }
   }
 
-  saveDegree(row: AssignmentStudent): void {
-    const TheSubmittedDate = new Date(row.insertedAt); // current date
-    const dueDate = new Date(row.dueDate);
-    TheSubmittedDate.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
-    console.log(343, TheSubmittedDate, dueDate);
-    if (this.IsFormValid(row)) {
-      if (TheSubmittedDate > dueDate) {
-        Swal.fire({
-          title: 'Apply Late Submission Penalty?',
-          text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#089B41',
-          cancelButtonColor: '#17253E',
-          confirmButtonText: 'Apply Penalty',
-          cancelButtonText: 'Forgive Delay',
-        }).then((result) => {
-          row.evaluationConsideringTheDelay = result.isConfirmed;
-          this.assignmentStudentServ.Edit(row, this.DomainName).subscribe(
-            (d) => {
-              this.editDegreeId = null;
-              this.GetAllData(this.CurrentPage, this.PageSize);
-            },
-            (error) => {
-              this.editDegreeId = null;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error.error,
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-              this.GetAllData(this.CurrentPage, this.PageSize);
-            }
-          );
-        });
-      } else {
-        row.evaluationConsideringTheDelay = false;
-        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updated Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.editDegreeId = null;
-            this.GetAllData(this.CurrentPage, this.PageSize);
-          },
-          error: (err) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong, please try again.',
-              confirmButtonColor: '#d33',
-            });
-            this.editDegreeId = null;
-            this.GetAllData(this.CurrentPage, this.PageSize);
-            console.error('Edit error:', err);
-          },
-        });
-      }
+  saveDegree(): void {
+    if (this.IsFormValid()) {
+      this.isLoading = true;
+      this.assignmentStudentServ.EditAll(this.TableData, this.DomainName).subscribe(
+        (d) => {
+          this.isLoading = false;
+          this.GetAllData(this.CurrentPage, this.PageSize);
+        },
+        (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+          this.isLoading = false;
+          this.GetAllData(this.CurrentPage, this.PageSize);
+        }
+      );
     }
   }
+
+  // saveDegree(row: AssignmentStudent): void {
+  //   const TheSubmittedDate = new Date(row.insertedAt); // current date
+  //   const dueDate = new Date(row.dueDate);
+  //   TheSubmittedDate.setHours(0, 0, 0, 0);
+  //   dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
+  //   console.log(343, TheSubmittedDate, dueDate);
+  //   if (this.IsFormValid(row)) {
+  //     if (TheSubmittedDate > dueDate) {
+  //       Swal.fire({
+  //         title: 'Apply Late Submission Penalty?',
+  //         text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
+  //         icon: 'warning',
+  //         showCancelButton: true,
+  //         confirmButtonColor: '#089B41',
+  //         cancelButtonColor: '#17253E',
+  //         confirmButtonText: 'Apply Penalty',
+  //         cancelButtonText: 'Forgive Delay',
+  //       }).then((result) => {
+  //         row.evaluationConsideringTheDelay = result.isConfirmed;
+  //         this.assignmentStudentServ.Edit(row, this.DomainName).subscribe(
+  //           (d) => {
+  //             this.editDegreeId = null;
+  //             this.GetAllData(this.CurrentPage, this.PageSize);
+  //           },
+  //           (error) => {
+  //             this.editDegreeId = null;
+  //             Swal.fire({
+  //               icon: 'error',
+  //               title: 'Oops...',
+  //               text: error.error,
+  //               confirmButtonText: 'Okay',
+  //               customClass: { confirmButton: 'secondaryBg' },
+  //             });
+  //             this.GetAllData(this.CurrentPage, this.PageSize);
+  //           }
+  //         );
+  //       });
+  //     } else {
+  //       row.evaluationConsideringTheDelay = false;
+  //       this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
+  //         next: () => {
+  //           Swal.fire({
+  //             icon: 'success',
+  //             title: 'Done',
+  //             text: 'Updated Successfully',
+  //             confirmButtonColor: '#089B41',
+  //           });
+  //           this.editDegreeId = null;
+  //           this.GetAllData(this.CurrentPage, this.PageSize);
+  //         },
+  //         error: (err) => {
+  //           Swal.fire({
+  //             icon: 'error',
+  //             title: 'Error',
+  //             text: 'Something went wrong, please try again.',
+  //             confirmButtonColor: '#d33',
+  //           });
+  //           this.editDegreeId = null;
+  //           this.GetAllData(this.CurrentPage, this.PageSize);
+  //           console.error('Edit error:', err);
+  //         },
+  //       });
+  //     }
+  //   }
+  // }
 
   validateNumberAssignmentStudent(
     event: any,
@@ -324,16 +348,19 @@ export class AssignmentStudentComponent {
     }
   }
 
-  IsFormValid(row: AssignmentStudent): boolean {
+  IsFormValid(): boolean {
     let isValid = true;
-    if (row.degree == null) {
-      isValid = false;
-      this.DegreeError = 'Degree Can not be empty';
-    }
-    if (row.degree != null && row.degree > row.assignmentDegree) {
-      isValid = false;
-      this.DegreeError = 'Degree cannot exceed ' + row.assignmentDegree;
-    }
+    this.DegreeError = '';  // reset error
+    this.TableData.forEach(row => {
+      console.log(this.TableData)
+      if (!row.degree && row.degree !== 0){
+        isValid = false;
+      }
+      else if (row.degree && row.assignmentDegree &&row.degree > row.assignmentDegree) {
+        isValid = false;
+      }
+    });
+
     return isValid;
   }
 

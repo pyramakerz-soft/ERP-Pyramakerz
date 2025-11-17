@@ -51,7 +51,7 @@
   </div>
 
   <div class="flex flex-col mb-4 w-[24%]">
-    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }} {{'&' | translate}} {{'Time'| translate }}</label>
+    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }}</label>
     <input *ngIf="!IsPrint" id="name" type="date"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
