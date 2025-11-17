@@ -21,14 +21,14 @@ import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import {  firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchStudentComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, SearchStudentComponent, TranslateModule ,SearchComponent],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
@@ -36,7 +36,7 @@ import { LoadingService } from '../../../../Services/loading.service';
 @InitLoader()
 export class StudentsComponent {
 
-  keysArray: string[] = ['id', 'name', 'academicYearName', 'floorName', 'gradeName', 'number'];
+  keysArray: string[] = ['id', 'en_name', 'user_Name', 'nationalityEnName', 'currentSchoolName', 'currentGradeName' , 'currentAcademicYear'];
   key: string = "id";
   value: any = "";
  isRtl: boolean = false;
@@ -273,6 +273,39 @@ export class StudentsComponent {
         });
       }
     });
+  }
+
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: any = await firstValueFrom(
+        this.StudentService.GetAllWithPaginnation(this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.StudentsData = data.data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.StudentsData = this.StudentsData.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.StudentsData = [];
+    }
   }
 
   closeModal() {

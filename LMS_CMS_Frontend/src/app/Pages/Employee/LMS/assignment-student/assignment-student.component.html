@@ -3,6 +3,13 @@
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAssignment()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Assignment' | translate }} {{ 'Students' | translate }}</h1>
     </div>
+    <div *ngIf="assignment.assignmentTypeID==1"  class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+        <button [disabled]="isLoading" (click)="saveDegree()"
+            class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
 </div>
 
 <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
@@ -67,24 +74,35 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.studentEnglishName }}
                     </td>
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <input type="checkbox" id="active" class="w-5 h-5"
+                        [checked]="IsLate(row)">
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ IsLate(row) }}
+                        <div class="flex justify-start">
+                            <div *ngIf="IsLate(row)" class="border flex space-x-2 rtl:space-x-reverse items-center justify-between rounded-md shadow px-2 py-1 ">
+                                <span class="w-[6px] h-[6px] p-1 rounded-full" style="background-color: green; padding: 4px;"></span>
+                                <p>
+                                    {{ 'Is Late' | translate }}
+                                </p>
+                            </div>
+                            <div *ngIf="!IsLate(row)" class="border flex space-x-2 rtl:space-x-reverse items-center justify-between rounded-md shadow px-2 py-1 ">
+                                <div class="w-[6px] h-[6px] p-1 rounded-full" style="background-color: gray; padding: 4px;"></div>
+                                <p>
+                                    {{ 'Is Late' | translate }}
+                                </p>
+                            </div>
+                        </div>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID==1" >
                         <div class="flex items-center gap-2">
-                            <input *ngIf="row.id==editDegreeId" type="number" [(ngModel)]="row.degree" (ngModelChange)="onInputValueChange()"
+                            <input type="text" [(ngModel)]="row.degree" (ngModelChange)="onInputValueChange()"
                                 [max]="row.assignmentDegree" min="0" (input)="validateNumberAssignmentStudent($event, 'degree',row)"
                                 class="w-20 px-2 py-1 border border-gray-300 rounded" />
-                            <span *ngIf="row.id!=editDegreeId">{{ row.degree }}</span>
-                            / {{ row.assignmentDegree }}
-                            <button *ngIf="row.id==editDegreeId" (click)="saveDegree(row)">
-                                <i class="far fa-check-circle secondaryTxt"></i>
-                            </button>
-                            <button *ngIf="row.id!=editDegreeId" (click)="editDegreeId = row.id">
-                                <i class="fa-solid fa-pencil"></i>
-                            </button>
+                                / {{ row.assignmentDegree }}
                         </div>
-                        <span *ngIf="DegreeError" class="text-red-500 ml-3 font-normal">{{ DegreeError }}</span>
+                        <span *ngIf="row.degree && row.assignmentDegree &&row.degree > row.assignmentDegree" class="text-red-500 ml-3 font-normal">Degree cannot exceed {{row.assignmentDegree }}</span>
+                        <span *ngIf="!row.degree" class="text-red-500 ml-3 font-normal">Degree cannot be empty</span>
 
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID!=1" >

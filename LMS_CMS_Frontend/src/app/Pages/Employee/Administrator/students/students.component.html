@@ -3,8 +3,7 @@
 <div class="flex justify-between items-center">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Students' | translate }}</h1>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
-        <i class="fas fa-search ltr:mr-3 rtl:ml-3 text-gray-500 cursor-pointer" style="width: 22.51px; height: 22.51px; font-size: 22.51px;"
-         (click)="OpenModal()"></i>
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         <button (click)="Create()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
               {{ 'Create Student' | translate }}

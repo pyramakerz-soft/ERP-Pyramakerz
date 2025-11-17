@@ -154,7 +154,7 @@
         <div class="flex justify-between items-center  rtl:space-x-reverse">
             <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Loans' | translate}} : {{row.totalLoans}} </h1>
             <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Deducted' | translate}} : {{row.totalDeducted}} </h1>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{row.remaining}} </h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} :  {{ row.remaining > 0 ? row.remaining : 0 }} </h1>
         </div>
         <div class="w-full h-1 bg-gray-500 my-5"></div>
     </div>
@@ -162,7 +162,7 @@
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Loans' | translate}} : {{totalLoansAll}} </h1>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Deducted' | translate}} : {{totalDeductedAll }} </h1>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{remainingAll }} </h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{ remainingAll > 0 ? remainingAll : 0 }}</h1>
     </div>
 </div>
 

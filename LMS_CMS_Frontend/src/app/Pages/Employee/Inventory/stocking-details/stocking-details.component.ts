@@ -148,7 +148,12 @@ export class StockingDetailsComponent {
     await this.GetAllSchools();
     if (!this.MasterId) {
       this.mode = 'Create';
-      this.Data.date = new Date().toISOString().split('T')[0];
+      this.mode = 'Create';
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      this.Data.date = `${year}-${month}-${day}`;
     } else {
       this.mode = 'Edit';
       this.GetTableDataByID();
