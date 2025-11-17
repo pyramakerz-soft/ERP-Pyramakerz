@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, formatCurrency } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
@@ -20,26 +20,16 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { ViolationTypeService } from '../../../../Services/Employee/Violation/violation-type.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
-  imports: [CommonModule, FormsModule,TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
 export class ViolationTypesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -82,7 +72,8 @@ export class ViolationTypesComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public empTypeServ: EmployeeTypeService,
-    private languageService: LanguageService
+    private translate: TranslateService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -93,6 +84,7 @@ export class ViolationTypesComponent {
       this.path = url[0].path;
     });
     this.GetEmployeeType();
+    this.GetViolation();
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -108,13 +100,17 @@ export class ViolationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetViolation() {
     this.Data = []
-    if (this.SelectedEmployeeType != 0) {
-      this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
-        this.Data = data;
-      });
-    }
+    this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
+      this.Data = data;
+    });
   }
 
   GetEmployeeType() {
@@ -152,21 +148,20 @@ export class ViolationTypesComponent {
 
   Delete(id: number): void {
     Swal.fire({
-      title: 'Are you sure you want to delete this Violation?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.violationTypeServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
             this.GetViolation();
           },
-          error: (error) => {
-            console.error('Error while deleting the Violation:', error);
+          error: (error) => { 
             Swal.fire({
               title: 'Error',
               text: 'An error occurred while deleting the Violation. Please try again later.',
@@ -181,7 +176,7 @@ export class ViolationTypesComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.validationErrors={}
+    this.validationErrors = {}
   }
 
   CreateOREdit() {
@@ -200,19 +195,11 @@ export class ViolationTypesComponent {
           });
         }, error => {
           this.isLoading = false
-          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
+          {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'This Name Already Exists',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -228,28 +215,18 @@ export class ViolationTypesComponent {
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Updatedd Successfully',
+            text: 'Updated Successfully',
             confirmButtonColor: '#089B41',
           });
         }, error => {
           this.isLoading = false
-          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'This Name Already Exists',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
-          }
         })
       }
     }
@@ -280,6 +257,16 @@ export class ViolationTypesComponent {
     );
   }
 
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    // if the clicked element is not inside your dropdown, close it
+    if (!target.closest('.employee-type-dropdown')) {
+      this.dropdownOpen = false;
+    }
+  }
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
     return IsAllow;
@@ -300,13 +287,14 @@ export class ViolationTypesComponent {
             field == 'employeeTypeIds' ||
             field == 'name'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
+            const fieldName = field === 'employeeTypeIds' ? 'Employee Type' : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(fieldName);
+             isValid = false;
           }
         }
         if (this.violationType.employeeTypeIds.length == 0) {
-          this.validationErrors["employeeTypeIds"] = `employee Type is required`;
-          isValid = false;
+          this.validationErrors["employeeTypeIds"] = this.getRequiredErrorMessage('Employee Type');
+           isValid = false;
         }
       }
     }
@@ -348,6 +336,17 @@ export class ViolationTypesComponent {
       }
     } catch (error) {
       this.Data = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 

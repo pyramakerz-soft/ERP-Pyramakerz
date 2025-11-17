@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-accountig-configuration',
@@ -36,7 +37,7 @@ export class AccountigConfigurationComponent {
     public ApiServ: ApiService,     
     public accountingTreeChartService: AccountingTreeChartService,
     public accountingConfigurationService: AccountingConfigurationService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -53,6 +54,12 @@ export class AccountigConfigurationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetById(){
     this.accountConfigData = new AccountingConfiguration()
@@ -74,8 +81,7 @@ export class AccountigConfigurationComponent {
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
   
-  closeModal() {
-    this.accountConfigDataToEdit = new AccountingConfiguration()
+  closeModal() { 
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
   }
@@ -93,7 +99,7 @@ export class AccountigConfigurationComponent {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });

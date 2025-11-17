@@ -14,9 +14,10 @@ import { School } from '../../../../Models/school';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-academic-year',
   standalone: true,
@@ -27,11 +28,8 @@ import {  Subscription } from 'rxjs';
 export class AcademicYearComponent {
   keysArray: string[] = [
     'id',
-    'name',
-    'dateFrom',
-    'dateTo',
-    'schoolName',
-    'isActive'
+    'name', 
+    'schoolName', 
   ];
   key: string = 'id';
   value: any = '';
@@ -50,21 +48,15 @@ export class AcademicYearComponent {
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   Schools: School[] = [];
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     public account: AccountService,
@@ -74,8 +66,9 @@ export class AcademicYearComponent {
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
     public router: Router,
+    private translate: TranslateService,
     public acadimicYearServicea: AcadimicYearService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -88,7 +81,7 @@ export class AcademicYearComponent {
       this.path = url[0].path;
     });
 
-    this.getAcademicYearData();
+    this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -105,6 +98,13 @@ export class AcademicYearComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   openModal(Id?: number) {
     if (Id) {
@@ -132,13 +132,16 @@ export class AcademicYearComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: AcademicYear[] = await firstValueFrom(
-        this.acadimicYearServicea.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.acadimicYearServicea.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.academicYearData = data || [];
+      this.academicYearData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -179,11 +182,38 @@ export class AcademicYearComponent {
     return IsAllow;
   }
 
-  getAcademicYearData() {
+  getAcademicYearData(DomainName: string, pageNumber: number, pageSize: number) {
     this.academicYearData = [];
-    this.acadimicYearServicea.Get(this.DomainName).subscribe((data) => {
-      this.academicYearData = data;
-    });
+    this.acadimicYearServicea.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.academicYearData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+      }
+    );
   }
 
   getAcademicYearById(id: number) {
@@ -214,17 +244,19 @@ export class AcademicYearComponent {
             field == 'dateFrom' ||
             field == 'dateTo'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(
+              field as string
+            )}`;
             isValid = false;
           }
         } else {
           if (field == 'name') {
             if (this.academicYear.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} cannot be longer than 100 characters`;
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant(
+                'cannot be longer than 100 characters'
+              );
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
           } else {
@@ -234,6 +266,17 @@ export class AcademicYearComponent {
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof AcademicYear; value: any }) {
@@ -271,50 +314,79 @@ export class AcademicYearComponent {
     return valid;
   }
 
+  checkSummerCourseFromToDate() {
+    let valid = true;
+
+    const fromDate: Date = new Date(this.academicYear.summerCourseDateFrom? this.academicYear.summerCourseDateFrom : "");
+    const toDate: Date = new Date(this.academicYear.summerCourseDateTo? this.academicYear.summerCourseDateTo : "");
+    const diff: number = toDate.getTime() - fromDate.getTime();
+
+    if (diff < 0) {
+      valid = false;
+      Swal.fire({
+        title: 'From Date Must Be a Date Before To Date',
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: 'Ok',
+      });
+      this.isLoading = false;
+    }
+
+    return valid;
+  }
+
   Save() {
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.checkFromToDate()) {
-        if (this.editAcademicYear == false) {
-          this.acadimicYearServicea
-            .Add(this.academicYear, this.DomainName)
-            .subscribe(
-              (result: any) => {
-                this.closeModal();
-                this.isLoading = false;
-                this.getAcademicYearData();
-              },
-              (error) => {
-                this.isLoading = false;
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: 'Try Again Later!',
-                  confirmButtonText: 'Okay',
-                  customClass: { confirmButton: 'secondaryBg' },
-                });
-              }
-            );
-        } else {
-          this.acadimicYearServicea
-            .Edit(this.academicYear, this.DomainName)
-            .subscribe(
-              (result: any) => {
-                this.closeModal();
-                this.isLoading = false;
-                this.getAcademicYearData();
-              },
-              (error) => {
-                this.isLoading = false;
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: 'Try Again Later!',
-                  confirmButtonText: 'Okay',
-                  customClass: { confirmButton: 'secondaryBg' },
-                });
-              }
-            );
+        if(this.checkSummerCourseFromToDate()){
+          if(this.academicYear.summerCourseDateFrom == ""){
+            this.academicYear.summerCourseDateFrom = null; 
+          }
+          if(this.academicYear.summerCourseDateTo == ""){
+            this.academicYear.summerCourseDateTo = null; 
+          }
+          if (this.editAcademicYear == false) {
+            this.acadimicYearServicea
+              .Add(this.academicYear, this.DomainName)
+              .subscribe(
+                (result: any) => {
+                  this.closeModal();
+                  this.isLoading = false;
+                  this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
+                }
+              );
+          } else {
+            this.acadimicYearServicea
+              .Edit(this.academicYear, this.DomainName)
+              .subscribe(
+                (result: any) => {
+                  this.closeModal();
+                  this.isLoading = false;
+                  this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
+                }
+              );
+          }
         }
       }
     }
@@ -322,20 +394,20 @@ export class AcademicYearComponent {
 
   deleteAcademicYear(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Academic Year?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Academic Year') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.acadimicYearServicea
           .Delete(id, this.DomainName)
           .subscribe((data: any) => {
             this.academicYearData = [];
-            this.getAcademicYearData();
+            this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
           });
       }
     });
@@ -346,4 +418,48 @@ export class AcademicYearComponent {
       'Employee/Semester/' + this.DomainName + '/' + Id
     );
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }    
 }

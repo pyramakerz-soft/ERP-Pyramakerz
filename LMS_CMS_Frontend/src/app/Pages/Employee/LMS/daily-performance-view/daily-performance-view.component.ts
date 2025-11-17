@@ -14,6 +14,7 @@ import { DailyPerformance } from '../../../../Models/LMS/daily-performance';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-daily-performance-view',
   standalone: true,
@@ -43,7 +44,7 @@ export class DailyPerformanceViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public DailyPerformanceServ: DailyPerformanceService,
-        private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -57,6 +58,13 @@ export class DailyPerformanceViewComponent {
         });
         this.isRtl = document.documentElement.dir === 'rtl';
       
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToBack() {

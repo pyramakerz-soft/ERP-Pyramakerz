@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Unicode;
 using LMS_CMS_DAL.Models.Octa;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -36,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee", "student", "parent" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -52,8 +53,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
-                    sem => sem.IsDeleted != true,
-                    query => query.Include(emp => emp.Section));
+                    sem => sem.IsDeleted != true && sem.Section.IsDeleted != true,
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -68,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySection/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" }
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -84,8 +85,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
-                    sem => sem.IsDeleted != true&&sem.SectionID==id,
-                    query => query.Include(emp => emp.Section));
+                    sem => sem.IsDeleted != true&&sem.SectionID== id && sem.Section.IsDeleted != true,
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -101,7 +102,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySchool/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" , "student", "parent" }
         )]
         public async Task<IActionResult> GetBySchool(long id)
         {
@@ -130,8 +131,65 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
-                    sem => sem.IsDeleted != true && sem.Section.SchoolID == id,
-                    query => query.Include(emp => emp.Section));
+                    sem => sem.IsDeleted != true && sem.Section.SchoolID == id && sem.Section.IsDeleted!= true,
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
+
+            if (Grades == null || Grades.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<GradeGetDTO> GradeDTO = mapper.Map<List<GradeGetDTO>>(Grades);
+
+            return Ok(GradeDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetBySchoolAndStudent/{SchoolId}/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student", "parent" }
+        )]
+        public async Task<IActionResult> GetBySchool(long SchoolId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (SchoolId == 0  || StudentId == 0 )
+            {
+                return BadRequest("Please Enter School ID and StudentId");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SchoolId);
+            if (school == null)
+            {
+                return NotFound("There is no School with this ID");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == StudentId);
+            if (student == null)
+            {
+                return NotFound("There is no student with this ID");
+            }
+
+            List<StudentGrade> StudentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
+                   sem => sem.IsDeleted != true && sem.StudentID == StudentId && sem.AcademicYear.SchoolID == SchoolId && sem.AcademicYear.IsDeleted != true,
+                   query => query.Include(emp => emp.Grade));
+
+            List<long> gradesIds= StudentGrades.Select(g => g.GradeID).ToList();
+
+            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(
+                    sem => sem.IsDeleted != true && sem.Section.SchoolID == SchoolId && sem.Section.IsDeleted != true && gradesIds.Contains(sem.ID),
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (Grades == null || Grades.Count == 0)
             {
@@ -165,7 +223,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             Grade grade = await Unit_Of_Work.grade_Repository.FindByIncludesAsync(
                     sem => sem.IsDeleted != true && sem.ID == id,
-                    query => query.Include(emp => emp.Section));
+                    query => query.Include(emp => emp.Section), query => query.Include(emp => emp.UpgradeTo));
 
             if (grade == null)
             {
@@ -175,6 +233,50 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             GradeGetDTO gradeDTO = mapper.Map<GradeGetDTO>(grade);
 
             return Ok(gradeDTO);
+        }
+        
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetDayPeriodSessions/{DayID}/{GradeID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Grade", "Lesson Live" }
+        )]
+        public IActionResult GetDayPeriodSessions(long DayID, long GradeID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+             
+            Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.ID == GradeID);
+
+            if (grade == null)
+            {
+                return NotFound("there is no Grade With This Id");
+            }
+
+            int period = DayID switch
+            {
+                1 => grade.MON ?? 0,
+                2 => grade.TUS ?? 0,
+                3 => grade.WED ?? 0,
+                4 => grade.THRU ?? 0,
+                5 => grade.FRI ?? 0,
+                6 => grade.SAT ?? 0,
+                7 => grade.SUN ?? 0,
+                _ => 0
+            };
+
+            return Ok(period);
         }
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -296,6 +398,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (section.school.MaximumPeriodCountTimeTable < Newgrade.FRI)
                 {
                     return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (Newgrade.UpgradeToID == 0 || Newgrade.UpgradeToID == null)
+            {
+                Newgrade.UpgradeToID = null;
+            }
+            else
+            {
+                Grade upgradedTo = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.ID == Newgrade.UpgradeToID && d.IsDeleted != true);
+                if (upgradedTo == null)
+                {
+                    return BadRequest("No Grade with this ID");
                 }
             }
 
@@ -462,6 +577,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (section.school.MaximumPeriodCountTimeTable < newGrade.FRI)
                 {
                     return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.UpgradeToID == 0 || newGrade.UpgradeToID == null)
+            {
+                newGrade.UpgradeToID = null;
+            }
+            else
+            {
+                if(newGrade.UpgradeToID == grade.ID)
+                {
+                    return BadRequest("You Can't upgrade to the same grade");
+                }
+                Grade upgradedTo = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.ID == newGrade.UpgradeToID && d.IsDeleted != true);
+                if (upgradedTo == null)
+                {
+                    return BadRequest("No Grade with this ID");
                 }
             }
 

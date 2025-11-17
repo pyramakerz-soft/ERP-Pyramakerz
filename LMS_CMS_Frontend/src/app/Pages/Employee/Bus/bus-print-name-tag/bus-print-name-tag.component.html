@@ -1,5 +1,5 @@
 <div class="flex justify-between">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Print Name Tag' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Print Name Tag' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
     </div>
@@ -17,10 +17,13 @@
         </select>
     </div>
     <div class="w-[48%]">
-        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">  {{ 'Buses' | translate }}</label>
+        <label for="buses" class="mb-2 text-sm font-medium text-gray-900"> {{ 'Buses' | translate }}</label>
         <select id="buses" (change)="getDataByBusId($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  w-full p-2.5">
-            <option [value]="-1" disabled selected hidden>  {{ 'Select a Bus' | translate }}</option>
+            <option [value]="-1" disabled selected hidden> {{ 'Select a Bus' | translate }}</option>
+            <option *ngIf="BusData.length === 0" disabled selected>
+                {{ 'No Data Found' | translate }}
+            </option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
@@ -29,10 +32,13 @@
 </div>
 <div *ngIf="this.User_Data_After_Login.type === 'employee'" class="mt-5">
     <div>
-        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">  {{ 'Buses' | translate }}</label>
+        <label for="buses" class="mb-2 text-sm font-medium text-gray-900"> {{ 'Buses' | translate }}</label>
         <select id="buses" (change)="getDataByBusId($event)" [(ngModel)]="busId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option [value]="-1" disabled selected hidden>  {{ 'Select a Bus' | translate }}</option>
+            <option [value]="-1" disabled selected hidden> {{ 'Select a Bus' | translate }}</option>
+            <option *ngIf="BusData.length === 0" disabled selected>
+                {{ 'No Data Found' | translate }}
+            </option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
@@ -41,40 +47,47 @@
 </div>
 
 <div *ngIf="busId!=-1">
+    <div class="flex justify-end mt-3 space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" 
+             [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" 
+             [title]="'Print' | translate">
+    </div>
+
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'ID' | translate }}
+                        {{ 'ID' | translate }}
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'School Name' | translate }}
+                        {{ 'School Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Grade' | translate }}
+                        {{ 'Grade' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Classes' | translate }}
+                        {{ 'Classes' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Student name' | translate }}
+                        {{ 'Student name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Categories' | translate }}
+                        {{ 'Categories' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Semester' | translate }}
+                        {{ 'Semester' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Exception' | translate }}
+                        {{ 'Exception' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Date From' | translate }}
+                        {{ 'Date From' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                          {{ 'Date To' | translate }}
+                        {{ 'Date To' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -83,7 +96,7 @@
                 <tr *ngIf="busStudentData.length === 0">
                     <td colspan="11"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                      {{ 'No Data Found' | translate }}
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -109,17 +122,46 @@
             </tbody>
         </table>
     </div>
-    <!-- <div class="flex justify-end mt-3">
-        <button 
-            [ngClass]="{ 
-                'text-gray-500': !IsChoosenDomain, 
-                'border border-gray-500': !IsChoosenDomain,
-                'cursor-not-allowed': !IsChoosenDomain,
-                'secondaryBg': IsChoosenDomain,
-                'text-white': IsChoosenDomain
-            }" 
-            class="rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Print
-        </button>
-    </div> -->
+</div>
+
+<!-- Name Tag Template (Hidden until PDF/Print) -->
+<div *ngIf="showPDF" #nameTagContainer 
+     style="padding: 20px; font-family: Arial, sans-serif; background: white; max-width: 210mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px;">
+
+  <!-- Grid of Name Tags (2 columns) -->
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px;">
+    
+    <div *ngFor="let student of busStudentData" 
+         style="border: 3px dashed #333; border-radius: 6px; padding: 15px; background: white; page-break-inside: avoid; min-height: 180px; display: flex; flex-direction: column;">
+      
+      <!-- School Name Header -->
+      <div style="text-align: center; margin-bottom: 10px;">
+        <div style="font-size: 16px; font-weight: bold; color: #000;">
+          {{ student.schoolName }}
+        </div>
+      </div>
+
+      <!-- Student Info -->
+      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="margin-bottom: 8px;">
+          <span style="font-size: 14px; font-weight: bold; color: #000;">Name: </span>
+          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.studentName }}</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <span style="font-size: 14px; font-weight: bold; color: #000;">Class: </span>
+          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.className }}</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 13px; font-weight: bold; color: #000;">{{ student.busCategoryName }}</div>
+        </div>
+      </div>
+
+      <!-- Bus Info -->
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 12px; font-weight: bold; color: #000;">{{ selectedBusName }}</div>
+        <div style="font-size: 11px; color: #666;">{{ student.gradeName }}</div>
+      </div>
+    </div>
+
+  </div>
 </div>

@@ -13,7 +13,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         [Key]
         public long ID { get; set; }
         public string? DocNumber { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         public string? Notes { get; set; }
         public long EmployeeID { get; set; }
         public string? EmployeeName { get; set; }
@@ -21,5 +21,8 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? StudentName { get; set; }
         public long InsertedByUserId { get; set; }
         public List<InstallmentDeductionDetailsGetDTO>? InstallmentDeductionDetails { get; set; }
+        public List<InstallmentDeductionDetailsAddDTO>? NewDetails { get; set; }
+        //public List<InstallmentDeductionDetailsGetDTO>? UpdatedDetails { get; set; }
+
     }
 }

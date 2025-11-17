@@ -1,11 +1,11 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Subject' | translate }}  {{ 'Categories' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Subject Categories' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         
         <button (click)="openModal()"
         class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-             {{ 'Create' | translate }}  {{ 'Subject' | translate }} {{ 'Category' | translate }}
+             {{ 'Create' | translate }} {{ 'Subject Category' | translate }}
         </button>
     </div>
 </div>
@@ -18,13 +18,10 @@
                      {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                       {{ 'Subject' | translate }}  {{ 'Categories' | translate }}
+                    {{ 'Subject' | translate }} {{ 'Categories' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'Date' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Actions' | translate }}
+                    {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -43,7 +40,6 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date:'MMM d, yyyy' }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
@@ -65,15 +61,15 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editSubjectCategory" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Subject' | translate }}  {{ 'Category' | translate }}</h1>
-            <h1 *ngIf="editSubjectCategory" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Subject' | translate }}  {{ 'Category' | translate }}</h1>
+            <h1 *ngIf="!editSubjectCategory" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Subject Category' | translate }}</h1>
+            <h1 *ngIf="editSubjectCategory" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Subject Category' | translate }}</h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         
         <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="name"> {{ 'Subject' | translate }}  {{ 'Category' | translate }}</label>
-                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Subject' | translate }}  {{ 'Category' | translate }}"
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Name' | translate }}</label>
+                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Name' | translate }}"
                 [(ngModel)]="subjectCategory.name" 
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>

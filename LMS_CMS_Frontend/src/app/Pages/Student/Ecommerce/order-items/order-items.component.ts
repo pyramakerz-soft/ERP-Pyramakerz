@@ -16,11 +16,16 @@ import { Order } from '../../../../Models/Student/ECommerce/order';
 // import html2pdf from 'html2pdf.js';
 import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 @Component({
   selector: 'app-order-items',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './order-items.component.html',
   styleUrl: './order-items.component.css'
 })
@@ -37,8 +42,10 @@ export class OrderItemsComponent {
   totalSalesPrices: number = 0;
   totalVat: number = 0;
   previousRoute: any;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   
-  constructor(public account: AccountService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
     public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService){}
   
   ngOnInit(){
@@ -62,13 +69,22 @@ export class OrderItemsComponent {
     });  
 
     this.getOrderById()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   goToCart() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Cart")
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Cart")
+      this.router.navigateByUrl("Student/Cart")
     } 
   } 
 
@@ -80,7 +96,7 @@ export class OrderItemsComponent {
         this.router.navigateByUrl("Employee/Order");
       }
     } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+      this.router.navigateByUrl("Student/Order")
     } 
   }
 
@@ -150,22 +166,22 @@ export class OrderItemsComponent {
       return;
     } 
 
-    // html2canvas(orderElement, { scale: 2 }).then(canvas => {
-    //   let imgData = canvas.toDataURL('image/png');
-    //   let pdf = new jsPDF('p', 'mm', 'a4');
-    //   let imgWidth = 210;
-    //   let imgHeight = (canvas.height * imgWidth) / canvas.width;
+    html2canvas(orderElement, { scale: 2 }).then(canvas => {
+      let imgData = canvas.toDataURL('image/png');
+      let pdf = new jsPDF('p', 'mm', 'a4');
+      let imgWidth = 210;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    //   pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    //   pdf.save(`Order_${this.orderID}.pdf`);
-    // }); 
-    // html2pdf().from(orderElement).set({
-    //   margin: 10,
-    //   filename: `Order_${this.orderID}.pdf`,
-    //   image: { type: 'jpeg', quality: 0.98 },
-    //   html2canvas: { scale: 3, useCORS: true, allowTaint: true },
-    //   jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-    // }).save();
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`Order_${this.orderID}.pdf`);
+    }); 
+    html2pdf().from(orderElement).set({
+      margin: 10,
+      filename: `Order_${this.orderID}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 3, useCORS: true, allowTaint: true },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    }).save();
   }
 
   async convertToDataURL(source: any) {

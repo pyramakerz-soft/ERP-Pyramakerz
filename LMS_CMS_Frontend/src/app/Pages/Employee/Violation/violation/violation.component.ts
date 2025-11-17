@@ -19,11 +19,14 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 import { Employee } from '../../../../Models/Employee/employee';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-violation',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './violation.component.html',
   styleUrl: './violation.component.css'
 })
@@ -39,7 +42,8 @@ export class ViolationComponent {
   empTypes: EmployeeTypeGet[] = [];
   violationType: ViolationType[] = [];
   employees: Employee[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -49,25 +53,39 @@ export class ViolationComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName', 'date'];
+  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName'];
 
   violation: Violation = new Violation();
 
   validationErrors: { [key in keyof Violation]?: string } = {};
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
+    private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public violationServ: ViolationService,
     public violationTypeServ: ViolationTypeService,
     public EmployeeServ: EmployeeService,
-    public EmployeeTypeServ: EmployeeTypeService
+    public EmployeeTypeServ: EmployeeTypeService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,14 +105,58 @@ export class ViolationComponent {
       }
     });
 
-    this.GetAllData();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  GetAllData() {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  // GetAllData() {
+  //   this.TableData = [];
+  //   this.violationServ.Get(this.DomainName).subscribe((d) => {
+  //     this.TableData = d;
+  //   });
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
-    this.violationServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d;
-    });
+    this.violationServ.Get(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+      }
+    );
   }
 
   GetAllempTypes() {
@@ -124,39 +186,29 @@ export class ViolationComponent {
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
-    this.violation.attach = '';
-    this.violation.attachFile = null;
-
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      'image/jpeg',
-      'image/png'
-    ];
 
     if (file) {
-      // Check size
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) { 
+        this.validationErrors['attachFile'] = `The file ${file.name} is not an allowed type. Allowed types are: ${this.allowedExtensions.join(', ')}`;
+        this.violation.attachFile = null;
         return;
       }
 
-      // Check type
-      if (allowedMimeTypes.includes(file.type)) {
-        this.violation.attachFile = file;
-        this.validationErrors['attachFile'] = '';
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['attachFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.violation.attachFile = null;
+        return; 
+      } else{
+        this.violation.attachFile = file;  
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['attachFile'] = 'Invalid file type. Only PDF, DOC, DOCX, JPEG, and PNG are allowed.';
-        return;
       }
     }
-
+    
     input.value = '';
-  }
+  }   
 
   Create() {
     this.mode = 'Create';
@@ -166,19 +218,30 @@ export class ViolationComponent {
     this.openModal();
   }
 
+  removeAttachment(){
+    if(this.mode == 'Edit'){
+      this.violation.deletedAttach = this.violation.attach
+      this.violation.attach = ""
+    }
+    else{
+      this.violation.attachFile = null;
+      this.violation.attach = ""
+    }
+  }
+
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Violation?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Violation')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.violationServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData();
+        this.violationServ.Delete(id, this.DomainName).subscribe(() => {
+        this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -228,7 +291,7 @@ export class ViolationComponent {
       if (this.mode == 'Create') {
         this.violationServ.Add(this.violation, this.DomainName).subscribe(
           (d) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
             Swal.fire({
@@ -244,7 +307,7 @@ export class ViolationComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -257,10 +320,10 @@ export class ViolationComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Updatedd Successfully',
+              text: 'Updated Successfully',
               confirmButtonColor: '#089B41',
             });
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
           },
@@ -269,7 +332,7 @@ export class ViolationComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -300,14 +363,30 @@ export class ViolationComponent {
             field == 'employeeTypeId' ||
             field == 'employeeID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
       }
     }
+ if (this.violation.date) {
+    const dateValue = new Date(this.violation.date);
+
+    // Invalid date check
+    if (isNaN(dateValue.getTime())) {
+      this.validationErrors['date'] ='Please enter a valid date';
+      isValid = false;
+    }
+
+    const dateStr = this.violation.date.toString(); // original input, e.g., "222222-11-09"
+      // ✅ Extract year part and check its length
+    const yearPart = dateStr.split('-')[0]; // "222222" from "222222-11-09"
+    if (yearPart.length > 5 ) {
+      this.validationErrors['date'] = 'Please enter a valid date.';
+      isValid = false;
+    }
+  }
     return isValid;
   }
 
@@ -341,13 +420,16 @@ export class ViolationComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Violation[] = await firstValueFrom(
-        this.violationServ.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.violationServ.Get(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -371,6 +453,72 @@ export class ViolationComponent {
   }
 
   view(Id: number) {
-    this.router.navigateByUrl('Employee/Violation/' + Id);
+    this.router.navigateByUrl('Employee/violation/' + Id);
   }
+
+  private getFieldDisplayName(field: keyof Violation): string {
+    // map technical field names to user-facing labels (these keys will be translated by translate.instant)
+    const map: { [key in keyof Violation]?: string } = {
+      date: 'Date',
+      violationTypeID: 'Violation Type',
+      employeeTypeId: 'Employee Type',
+      employeeID: 'Employee',
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }  
 }

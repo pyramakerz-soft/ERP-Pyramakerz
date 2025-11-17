@@ -30,7 +30,7 @@ export class ClassroomSubjectService {
     return this.http.get<ClassroomSubject[]>(`${this.baseUrl}/ClassroomSubject/GetByClassroom/${classID}`, { headers });
   }
 
-  GetClassBySubjectIDWithStudentsIncluded(SubId: number, DomainName: string) {
+  GetClassBySubjectIDWithStudentsIncluded(SubId: number, yearId:number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -39,7 +39,7 @@ export class ClassroomSubjectService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<StudentClassWhenSubject[]>(`${this.baseUrl}/ClassroomSubject/GetClassBySubjectIDWithStudentsIncluded/${SubId}`, { headers });
+    return this.http.get<StudentClassWhenSubject[]>(`${this.baseUrl}/ClassroomSubject/GetClassBySubjectIDWithStudentsIncluded/${SubId}/${yearId}`, { headers });
   }
 
   GetByEmpId(EmpId: number, DomainName: string) {

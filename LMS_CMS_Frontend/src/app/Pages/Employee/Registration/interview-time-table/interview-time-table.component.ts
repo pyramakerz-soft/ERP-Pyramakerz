@@ -16,7 +16,10 @@ import { InterviewTimeTableService } from '../../../../Services/Employee/Registr
 import { InterviewTimeTable } from '../../../../Models/Registration/interview-time-table';
 import Swal from 'sweetalert2';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-interview-time-table',
@@ -29,7 +32,8 @@ export class InterviewTimeTableComponent {
   keysArray: string[] = ['id', 'date', 'fromTime', 'toTime', 'capacity', 'reserved', 'academicYearName'];
   key: string = "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   interviewTimeTableData: InterviewTimeTable[] = []
 
   SchoolData: School[] = []
@@ -70,7 +74,8 @@ export class InterviewTimeTableComponent {
 
   isLoading = false
 
-  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService, private translate: TranslateService,
+    private languageService: LanguageService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router,
     public yearService: AcadimicYearService, public interviewTimeTableService: InterviewTimeTableService,
     public schoolService: SchoolService) { }
@@ -86,8 +91,7 @@ export class InterviewTimeTableComponent {
     });
 
     this.getTimeTableData()
-    this.getSchools()
-    this.getYears()
+    this.getSchools() 
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -98,6 +102,17 @@ export class InterviewTimeTableComponent {
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
       }
     });
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -271,13 +286,13 @@ export class InterviewTimeTableComponent {
       }
     )
   }
-
-  getYears() {
-    this.yearService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.AcademicYearData = data;
-      }
-    )
+ 
+  GetAllAcademicYearBySchool() {
+    this.AcademicYearData = [];
+    this.selectedYear = 0
+    this.yearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe((data) => {
+      this.AcademicYearData = data;
+    });
   }
 
   getYearsForModal() {
@@ -327,7 +342,9 @@ export class InterviewTimeTableComponent {
   }
 
   validateNumber(event: any, field: keyof InterviewTimeTable): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.interviewTimeTable[field] === 'string') {
@@ -337,6 +354,7 @@ export class InterviewTimeTableComponent {
   }
 
   handleDays(event: Event, optionSelected: string) {
+    this.validationErrors['days'] = ''
     const checkbox = event.target as HTMLInputElement;
 
     if (checkbox.checked) {
@@ -361,7 +379,7 @@ export class InterviewTimeTableComponent {
         } else {
           if (!this.editInterviewTimeTable) {
             if (this.interviewTimeTable.days.length == 0) {
-              this.validationErrors["days"] = `*${this.capitalizeField("days")} is required`
+              this.validationErrors["days"] = `*${this.capitalizeField("days")} are required`
               isValid = false;
             }
           }
@@ -420,7 +438,8 @@ export class InterviewTimeTableComponent {
           this.interviewTimeTableService.Add(this.interviewTimeTable, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
-              this.getTimeTableData()
+              // this.getTimeTableData()
+              this.Search()
               this.isLoading = false
             },
             error => {
@@ -446,7 +465,8 @@ export class InterviewTimeTableComponent {
           this.interviewTimeTableService.Edit(this.interviewTimeTable, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
-              this.getTimeTableData()
+              // this.getTimeTableData()
+              this.Search()
               this.isLoading = false
             },
             error => {
@@ -515,19 +535,19 @@ export class InterviewTimeTableComponent {
 
   deleteInterview(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Interview Time?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Time') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.interviewTimeTableService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.interviewTimeTableData = []
-            this.getTimeTableData()
+            this.Search()
           }
         )
       }

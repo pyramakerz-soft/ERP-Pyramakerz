@@ -14,9 +14,10 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DepartmentService } from '../../../../Services/Employee/Administration/department.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-department',
@@ -26,18 +27,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './department.component.css',
 })
 export class DepartmentComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -68,12 +58,13 @@ export class DepartmentComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public DepartmentServ: DepartmentService,
-     private languageService: LanguageService
+     private languageService: LanguageService, 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -100,6 +91,12 @@ export class DepartmentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   GetAllData() {
     this.TableData = [];
     this.DepartmentServ.Get(this.DomainName).subscribe((d) => {
@@ -116,13 +113,13 @@ export class DepartmentComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Department?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Department') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.DepartmentServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -183,7 +180,7 @@ export class DepartmentComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
@@ -212,7 +209,7 @@ export class DepartmentComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });

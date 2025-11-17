@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using LMS_CMS_BL.DTO.Administration;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
@@ -7,6 +8,8 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,13 +26,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public AnnouncementController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService)
+        public AnnouncementController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -54,14 +59,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
             List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcements);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var announcement in announcementGetDTO)
             {
-                if (!string.IsNullOrEmpty(announcement.ImageLink))
-                {
-                    announcement.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
-                }
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
             }
 
             return Ok(announcementGetDTO);
@@ -91,14 +92,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
             List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcements);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var announcement in announcementGetDTO)
             {
-                if (!string.IsNullOrEmpty(announcement.ImageLink))
-                {
-                    announcement.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
-                }
+                announcement.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
             }
 
             return Ok(announcementGetDTO);
@@ -126,12 +123,53 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
             AnnouncementGetDTO announcementGetDTO = mapper.Map<AnnouncementGetDTO>(announcement);
+            
+            announcementGetDTO.ImageLink = _fileService.GetFileUrl(announcement.ImageLink, Request, HttpContext);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            if (!string.IsNullOrEmpty(announcement.ImageLink))
+            return Ok(announcementGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetMyAnnouncement")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetMyAnnouncement()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            var UserTypeID = 0; 
+            switch (userTypeClaim)
             {
-                announcementGetDTO.ImageLink = $"{serverUrl}{announcementGetDTO.ImageLink.Replace("\\", "/")}";
-            } 
+                case "employee":
+                    UserTypeID = 1;
+                    break;
+                case "parent":
+                    UserTypeID = 3;
+                    break;
+                case "student":
+                    UserTypeID = 2;
+                    break;
+            }
+
+            List<AnnouncementSharedTo> announcementSharedTos = await Unit_Of_Work.announcementSharedTo_Repository.Select_All_With_IncludesById<AnnouncementSharedTo>(
+                d => d.IsDeleted != true && d.UserTypeID == UserTypeID && d.Announcement.IsDeleted != true,
+                query => query.Include(d => d.Announcement)
+                );
+             
+            if (announcementSharedTos == null || announcementSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcementSharedTos.Select(d => d.Announcement).ToList());
+
+            foreach (var item in announcementGetDTO)
+            {
+                item.ImageLink = _fileService.GetFileUrl(item.ImageLink, Request, HttpContext);
+            }
 
             return Ok(announcementGetDTO);
         }
@@ -178,33 +216,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             Unit_Of_Work.SaveChanges();
 
 
-            string returnFileInput = _fileImageValidationService.ValidateImageFile(NewAnnouncement.ImageFile);
+            string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewAnnouncement.ImageFile);
             if (returnFileInput != null)
             {
                 return BadRequest(returnFileInput);
             }
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Announcement");
-            var subjectFolder = Path.Combine(baseFolder, announcement.ID.ToString());
-            if (!Directory.Exists(subjectFolder))
-            {
-                Directory.CreateDirectory(subjectFolder);
-            }
-
             if (NewAnnouncement.ImageFile != null)
             {
-                if (NewAnnouncement.ImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(subjectFolder, NewAnnouncement.ImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewAnnouncement.ImageFile.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            announcement.ImageLink = Path.Combine("Uploads", "Announcement", announcement.ID.ToString(), NewAnnouncement.ImageFile.FileName);
-            Unit_Of_Work.announcement_Repository.Update(announcement);
+                announcement.ImageLink = await _fileService.UploadFileAsync(NewAnnouncement.ImageFile, "Administration/Announcement", announcement.ID, HttpContext);
+                Unit_Of_Work.announcement_Repository.Update(announcement);
+            } 
 
             foreach (long userTypeID in NewAnnouncement.UserTypeIDs)
             {
@@ -270,7 +292,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             if (EditAnnouncement.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(EditAnnouncement.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(EditAnnouncement.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -288,43 +310,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 }
             }
 
-            if (EditAnnouncement.ImageFile != null)
+            if(EditAnnouncement.ImageFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Announcement"); 
-                var announcementFolder = Path.Combine(baseFolder, EditAnnouncement.ID.ToString());
-
-                if (System.IO.File.Exists(announcementFolder))
-                {
-                    System.IO.File.Delete(announcementFolder); // Delete the old file
-                }
-
-                if (Directory.Exists(announcementFolder))
-                {
-                    Directory.Delete(announcementFolder, true);
-                }
-
-                if (!Directory.Exists(announcementFolder))
-                {
-                    Directory.CreateDirectory(announcementFolder);
-                }
-
-                if (EditAnnouncement.ImageFile.Length > 0)
-                {
-                    var filePath = Path.Combine(announcementFolder, EditAnnouncement.ImageFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await EditAnnouncement.ImageFile.CopyToAsync(stream);
-                    }
-                }
-
-                EditAnnouncement.ImageLink = Path.Combine("Uploads", "Announcement", EditAnnouncement.ID.ToString(), EditAnnouncement.ImageFile.FileName);
+                EditAnnouncement.ImageLink = await _fileService.ReplaceFileAsync(
+                    EditAnnouncement.ImageFile,
+                    announcementExists.ImageLink,
+                    "Administration/Announcement",
+                    announcementExists.ID,
+                    HttpContext
+                );
             }
             else
             {
-                EditAnnouncement.ImageLink = imageLinkExists;
+                EditAnnouncement.ImageLink = announcementExists.ImageLink;
             }
 
             mapper.Map(EditAnnouncement, announcementExists);
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             announcementExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

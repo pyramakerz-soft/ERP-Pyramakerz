@@ -17,9 +17,10 @@ import { ClassroomStudentService } from '../../../../Services/Employee/LMS/class
 import { ClassStudentForDiscussionRoom } from '../../../../Models/LMS/class-student-for-discussion-room';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-discussion-room',
   standalone: true,
@@ -64,10 +65,11 @@ export class DiscussionRoomComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public router: Router,
+    private translate: TranslateService,
     public discussionRoomService: DiscussionRoomService,
     public classroomStudentService: ClassroomStudentService,
     public SchoolService: SchoolService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -95,6 +97,13 @@ export class DiscussionRoomComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   getAllData() {
     this.TableData = []
@@ -348,40 +357,57 @@ export class DiscussionRoomComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.discussionRoom) {
-      if (this.discussionRoom.hasOwnProperty(key)) {
-        const field = key as keyof DiscussionRoom;
-        if (!this.discussionRoom[field]) {
-          if (field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
-        }
-      }
-    }
-
-    if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
-      const start = new Date(this.discussionRoom.startDate);
-      const end = new Date(this.discussionRoom.endDate);
-
-      if (end < start) {
-        this.validationErrors['endDate'] = '*End date cannot be before start date';
-        isValid = false;
-      }
-    }
-
-    if (this.choosedStudentsClass.length == 0) {
-      this.validationErrors['studentClassrooms'] = '*Students are required'
-    } else {
-      this.validationErrors['studentClassrooms'] = ''
-    }
-
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  // Validate required fields with translation
+  if (!this.discussionRoom.title) {
+    this.validationErrors['title'] = this.getRequiredErrorMessage('Title');
+    isValid = false;
   }
+  
+  if (!this.discussionRoom.startDate) {
+    this.validationErrors['startDate'] = this.getRequiredErrorMessage('Start Date');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.endDate) {
+    this.validationErrors['endDate'] = this.getRequiredErrorMessage('End Date');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.time) {
+    this.validationErrors['time'] = this.getRequiredErrorMessage('Time');
+    isValid = false;
+  }
+  
+  if (!this.discussionRoom.meetingLink) {
+    this.validationErrors['meetingLink'] = this.getRequiredErrorMessage('Meeting Link');
+    isValid = false;
+  }
+
+  // Validate date logic
+  if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
+    const start = new Date(this.discussionRoom.startDate);
+    const end = new Date(this.discussionRoom.endDate);
+
+    if (end < start) {
+      this.validationErrors['endDate'] = '*End date cannot be before start date';
+      isValid = false;
+    }
+  }
+
+  // Validate students selection
+  if (this.choosedStudentsClass.length == 0) {
+    this.validationErrors['studentClassrooms'] = this.getRequiredErrorMessage('Students');
+    isValid = false;
+  } else {
+    this.validationErrors['studentClassrooms'] = '';
+  }
+
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof DiscussionRoom, value: any }) {
     const { field, value } = event;
@@ -502,14 +528,14 @@ export class DiscussionRoomComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this discussion room?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: "Yes, I'm sure",
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
+          title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +this.translate.instant('Discussion Room') + " " + this.translate.instant('?'),
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#089B41',
+          cancelButtonColor: '#17253E',
+          confirmButtonText: this.translate.instant('Delete'),
+          cancelButtonText: this.translate.instant('Cancel'),
+        }).then((result) => {
       if (result.isConfirmed) {
         this.discussionRoomService.Delete(id, this.DomainName).subscribe((d) => {
           this.getAllData()
@@ -525,7 +551,7 @@ export class DiscussionRoomComponent {
       const data: any = await firstValueFrom(
         this.discussionRoomService.Get(this.DomainName)
       );
-      this.TableData = data.data || [];
+      this.TableData = data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -547,4 +573,16 @@ export class DiscussionRoomComponent {
       this.TableData = [];
     }
   }
+
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+   
 }

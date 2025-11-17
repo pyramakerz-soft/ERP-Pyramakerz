@@ -1,6 +1,7 @@
 ﻿using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,6 +24,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("Section")]
         public long SectionID { get; set; }
         public Section Section { get; set; }
+        
+        [ForeignKey("UpgradeTo")]
+        public long? UpgradeToID { get; set; }
+        public Grade? UpgradeTo { get; set; }
+        
         public int? SAT { get; set; }
         public int? SUN { get; set; }
         public int? MON { get; set; }
@@ -38,6 +44,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<Test> Tests { get; set; } = new HashSet<Test>();
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
+        public ICollection<AppointmentGrade> AppointmentGrades { get; set; } = new HashSet<AppointmentGrade>();
+        public ICollection<Grade> UpgradeTos { get; set; } = new HashSet<Grade>();
+        public ICollection<FailedStudents> FailedStudents { get; set; } = new HashSet<FailedStudents>();
 
     }
 }

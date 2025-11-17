@@ -60,7 +60,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         [HttpGet("ByJobCategory/{id}")]
         [Authorize_Endpoint_(
        allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Job" }
+       pages: new[] { "Job", "Employee Accounting", "Loans Report", "Bonus Report", "Deduction Report", "Vacation Report", "Leave Request Report", "Hr Employees Report", "Employee Salary Detailed Report", "Salary Summary Report", "HR Attendance Report" }
        )]
         public async Task<IActionResult> GetAllByJobCategoryIdAsync(long id)
         {

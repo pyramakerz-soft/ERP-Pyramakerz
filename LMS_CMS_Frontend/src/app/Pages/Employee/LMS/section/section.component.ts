@@ -14,9 +14,10 @@ import { SectionService } from '../../../../Services/Employee/LMS/section.servic
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-section',
   standalone: true,
@@ -43,18 +44,8 @@ export class SectionComponent {
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   isLoading = false;
 
   Schools: School[] = [];
@@ -68,7 +59,8 @@ export class SectionComponent {
     public schoolService: SchoolService,
     public router: Router,
     public sectionService: SectionService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private translate: TranslateService, 
   ) {}
 
   ngOnInit() {
@@ -98,6 +90,12 @@ export class SectionComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   openModal(Id?: number) {
     if (Id) {
@@ -202,17 +200,19 @@ export class SectionComponent {
         const field = key as keyof Section;
         if (!this.section[field]) {
           if (field == 'name' || field == 'schoolID') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(
+              field as string
+            )}`;
             isValid = false;
           }
         } else {
           if (field == 'name') {
             if (this.section.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} cannot be longer than 100 characters`;
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant(
+                'cannot be longer than 100 characters'
+              );
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
           } else {
@@ -222,6 +222,17 @@ export class SectionComponent {
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof Section; value: any }) {
@@ -248,7 +259,7 @@ export class SectionComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -266,7 +277,7 @@ export class SectionComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -278,13 +289,13 @@ export class SectionComponent {
 
   deleteSection(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Section?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Section') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.sectionService

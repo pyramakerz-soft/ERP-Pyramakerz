@@ -27,6 +27,18 @@ export class RemedialClassroomService {
     return this.http.get<RemedialClassroom[]>(`${this.baseUrl}/RemedialClassroom/BySchoolId/${SchoolId}`, { headers });
   }
 
+  GetBySchoolIdWithPaggination(SchoolId: number, DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: RemedialClassroom[], pagination: any }>(`${this.baseUrl}/RemedialClassroom/BySchoolIdWithPaggination/${SchoolId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetByGradeId(GradeId: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;

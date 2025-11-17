@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Subject Categories"}
+            pages: new[] { "Subject Categories" , "Subject" }
         )]
         public IActionResult GetAsync()
         {

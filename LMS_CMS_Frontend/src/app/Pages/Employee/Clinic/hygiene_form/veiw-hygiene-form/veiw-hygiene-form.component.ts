@@ -9,13 +9,12 @@ import { ApiService } from '../../../../../Services/api.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-
 import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-table.component';
 import { DatePipe } from '@angular/common';
 import { HygieneTypesService } from '../../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
 import { firstValueFrom } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-view-hygiene-form',
@@ -43,8 +42,8 @@ export class ViewHygieneFormComponent implements OnInit {
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-   private languageService: LanguageService,
-    private hygieneTypesService: HygieneTypesService
+    private languageService: LanguageService,
+    private hygieneTypesService: HygieneTypesService, 
 
   ) {}
 
@@ -53,6 +52,7 @@ export class ViewHygieneFormComponent implements OnInit {
     if (id) {
       await this.loadHygieneTypes();
       this.loadHygieneForm(Number(id));
+      console.log(this.loadHygieneForm(Number(id)));
     }
       this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -60,7 +60,11 @@ export class ViewHygieneFormComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
 
 
@@ -71,6 +75,8 @@ export class ViewHygieneFormComponent implements OnInit {
         this.hygieneTypesService.Get(domainName)
       );
       this.hygieneTypes = data;
+      console.log('testing hygiene types');
+      console.log(this.hygieneTypes);
     } catch (error) {
       console.error('Error loading hygiene types:', error);
     }
@@ -82,6 +88,7 @@ export class ViewHygieneFormComponent implements OnInit {
       this.hygieneFormService.GetById(id, domainName).subscribe({
         next: (hygieneForm) => {
           this.hygieneForm = hygieneForm;
+          console.log(hygieneForm);
           this.prepareStudentData(hygieneForm);
         },
         error: (error) => {
@@ -93,31 +100,30 @@ export class ViewHygieneFormComponent implements OnInit {
     }
   }
 
-  private prepareStudentData(hygieneForm: HygieneForm) {
-    this.students = hygieneForm.studentHygieneTypes.map(
-      (studentHygieneType) => {
-        const studentData: any = {
-          id: studentHygieneType.studentId,
-          en_name: studentHygieneType.student,
-          attendance: studentHygieneType.attendance,
-          comment: studentHygieneType.comment,
-          actionTaken: studentHygieneType.actionTaken,
-        };
+private prepareStudentData(hygieneForm: HygieneForm) {
+  this.students = hygieneForm.studentHygieneTypes.map(
+    (studentHygieneType) => {
+      const studentData: any = {
+        id: studentHygieneType.studentId,
+        en_name: studentHygieneType.student,
+        attendance: studentHygieneType.attendance,
+        comment: studentHygieneType.comment,
+        actionTaken: studentHygieneType.actionTaken,
+      };
 
-        // Initialize all hygiene types as false
-        this.hygieneTypes.forEach((hygieneType) => {
-          studentData[`hygieneType_${hygieneType.id}`] = false;
-        });
-
-        // Set to true only the hygiene types that exist in the student's data
-        if (studentHygieneType.hygieneTypes && studentHygieneType.attendance) {
-          studentHygieneType.hygieneTypes.forEach((hygieneType) => {
-            studentData[`hygieneType_${hygieneType.id}`] = true;
-          });
+      this.hygieneTypes.forEach((hygieneType) => {
+        if (studentHygieneType.attendance === true) {
+          const hasHygieneType = studentHygieneType.hygieneTypes?.some(
+            ht => ht.id === hygieneType.id
+          );
+          studentData[`hygieneType_${hygieneType.id}`] = hasHygieneType ? true : false;
+        } else {
+          studentData[`hygieneType_${hygieneType.id}`] = null;
         }
+      });
 
-        return studentData;
-      }
-    );
-  }
+      return studentData;
+    }
+  );
+}
 }

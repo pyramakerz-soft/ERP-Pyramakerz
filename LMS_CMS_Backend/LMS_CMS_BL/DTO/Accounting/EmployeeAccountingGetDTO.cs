@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_BL.DTO.HR;
 
 namespace LMS_CMS_BL.DTO.Accounting
 {
@@ -31,20 +32,19 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
         public string? NationalityName { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
-        public int? MonthSalary { get; set; }
+        public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
         public string? AttendanceTime { get; set; }
         public string? DepartureTime { get; set; }
         public float? DelayAllowance { get; set; }
-        public int? AnnualLeaveBalance { get; set; }
-        public int? CasualLeavesBalance { get; set; }
-        public int? MonthlyLeaveRequestBalance { get; set; }
+        public decimal? AnnualLeaveBalance { get; set; }
+        public decimal? CasualLeavesBalance { get; set; }
+        public decimal? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
-        public bool? CanReceiveRequest { get; set; }
-        public bool? CanReceiveMessage { get; set; }
+        public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
         public long? ReasonOfLeavingID { get; set; }
@@ -60,6 +60,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string AcademicDegreeName { get; set; }
         public List<long>? Days { get; set; }
         public List<long>? Students { get; set; }
+        public List<AnnualVacationEmployeeGetDTO>? AnnualVacationEmployee { get; set; }
         public long InsertedByUserId { get; set; }
 
     }

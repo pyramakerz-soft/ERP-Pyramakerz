@@ -19,9 +19,10 @@ import { SupplierService } from '../../../../Services/Employee/Accounting/suppli
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { CountryService } from '../../../../Services/Employee/Accounting/country.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-suppliers',
@@ -31,18 +32,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './suppliers.component.css',
 })
 export class SuppliersComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -53,7 +43,7 @@ export class SuppliersComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -78,10 +68,11 @@ export class SuppliersComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     public SupplierServ: SupplierService,
     public accountServ: AccountingTreeChartService,
     public countryServ: CountryService,
-     private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -104,10 +95,17 @@ export class SuppliersComponent {
     this.GetAllData();
     this.GetAllAccount();
     this.GetAllCountries();
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -136,13 +134,13 @@ export class SuppliersComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Supplier?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Supplier') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.SupplierServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -179,7 +177,9 @@ export class SuppliersComponent {
   }
 
   validateNumber(event: any, field: keyof Supplier): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.Supplier[field] === 'string') {
@@ -197,12 +197,12 @@ export class SuppliersComponent {
           this.isLoading = false
 
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -214,19 +214,19 @@ export class SuppliersComponent {
           this.isLoading = false
 
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           })
       }
       this.closeModal()
-    } 
+    }
   }
 
   closeModal() {
@@ -238,44 +238,72 @@ export class SuppliersComponent {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.Supplier) {
-      if (this.Supplier.hasOwnProperty(key)) {
-        const field = key as keyof Supplier;
-        if (!this.Supplier[field]) {
-          if (
-            field == 'name' ||
-            field == 'countryID' ||
-            field == 'email' ||
-            field == 'website' ||
-            field == 'phone1' ||
-            field == 'taxCard' ||
-            field == 'commercialRegister' ||
-            field == 'accountNumberID' ||
-            field == 'address'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
-      isValid = false;
-      this.validationErrors['email']='Email is not valid.'
-    }
-    
-    if (this.Supplier.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
-    }
-
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+  
+  if (!this.Supplier.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.Supplier.countryID) {
+    this.validationErrors['countryID'] = this.getRequiredErrorMessage('Country');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.email) {
+    this.validationErrors['email'] = this.getRequiredErrorMessage('Email');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.website) {
+    this.validationErrors['website'] = this.getRequiredErrorMessage('Website');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.phone1) {
+    this.validationErrors['phone1'] = this.getRequiredErrorMessage('Phone');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.taxCard) {
+    this.validationErrors['taxCard'] = this.getRequiredErrorMessage('Tax Card');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.commercialRegister) {
+    this.validationErrors['commercialRegister'] = this.getRequiredErrorMessage('Commercial Register');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.accountNumberID) {
+    this.validationErrors['accountNumberID'] = this.getRequiredErrorMessage('Account Number');
+    isValid = false;
+  }
+  
+  if (!this.Supplier.address) {
+    this.validationErrors['address'] = this.getRequiredErrorMessage('Address');
+    isValid = false;
+  }
+
+  // Validate email format
+  const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
+    isValid = false;
+    this.validationErrors['email'] = this.translate.instant('Email is not valid');
+  }
+
+  // Validate name length
+  if (this.Supplier.name && this.Supplier.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters');
+  }
+
+  return isValid;
+}
+
+
   capitalizeField(field: keyof Supplier): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -316,4 +344,15 @@ export class SuppliersComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

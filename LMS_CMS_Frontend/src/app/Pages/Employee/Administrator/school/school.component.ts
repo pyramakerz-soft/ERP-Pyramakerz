@@ -15,7 +15,7 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Day } from '../../../../Models/day';
 import { DaysService } from '../../../../Services/Octa/days.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 @Component({
@@ -42,18 +42,8 @@ export class SchoolComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   isLoading = false;
   WeekDays:Day[]=[]
   
@@ -65,9 +55,8 @@ export class SchoolComponent {
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
     public DaysServ: DaysService,
-    public router: Router
-    ,
-     private languageService: LanguageService
+    public router: Router,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -95,6 +84,13 @@ export class SchoolComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   getSchoolData() {
     this.schoolData = []
@@ -237,7 +233,10 @@ export class SchoolComponent {
   }
 
   validateNumber(event: any, field: keyof School): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.school[field] === 'string') {
@@ -260,7 +259,7 @@ export class SchoolComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });

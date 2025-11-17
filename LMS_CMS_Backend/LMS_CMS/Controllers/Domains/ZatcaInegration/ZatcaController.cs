@@ -8,6 +8,7 @@ using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.S3;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ using Newtonsoft.Json;
 using System.Text;
 using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK.Contracts.Models;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 {
@@ -319,7 +321,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcName = $"PC{master.SchoolPCId}_{master.School.ID}";
             
-            string filesEnvironment = _config.GetValue<string>("ZatcaFilesEnvironment");
+            bool isProduction = _config.GetValue<bool>("IsProduction");
 
             string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
 
@@ -344,7 +346,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
                 string certContent = string.Empty;
 
-                if (filesEnvironment == "local")
+                if (!isProduction)
                 {
                     certContent = System.IO.File.ReadAllText(pcsidPath);
 
@@ -402,17 +404,21 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 else if (master.FlagId == 12)
                     subDirectory = "Credits/";
 
-                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                bool uploaded = false;
 
-                if (!uploaded)
-                    return BadRequest("Uploading Invoice failed!");
+                if (isProduction)
+                {
+                    uploaded = await s3Client.UploadFileAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                    if (!uploaded)
+                        return BadRequest("Uploading Invoice failed!");
 
-                xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+                    xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
-                //if (System.IO.File.Exists(xmlPath))
-                //{
-                //    System.IO.File.Delete(xmlPath);
-                //}
+                    if (System.IO.File.Exists(xmlPath))
+                    {
+                        System.IO.File.Delete(xmlPath);
+                    }
+                }
             }
 
             return master.IsValid == 1 ? Ok(new { message = master.Status } ) : BadRequest(master.Status);
@@ -471,7 +477,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string subDomainValue = _domainService.GetSubdomain(HttpContext);
             string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
 
-            string filesEnvironment = _config.GetValue<string>("ZatcaFilesEnvironment");
+            bool isProduction = _config.GetValue<bool>("IsProduction");
 
             if (masters != null && masters.Count > 0)
             {
@@ -536,7 +542,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                             string certContent = string.Empty;
                             string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
 
-                            if (filesEnvironment == "local")
+                            if (!isProduction)
                             {
                                 certContent = System.IO.File.ReadAllText(pcsidPath);
 
@@ -588,18 +594,21 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                             else if (master.FlagId == 12)
                                 subDirectory = "Credits/";
 
-                            bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                            bool uploaded = false;
 
-                            if (!uploaded)
-                                return BadRequest("Uploading Invoice failed!");
+                            if (isProduction)
+                            {
+                                uploaded = await s3Client.UploadFilesAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                                if (!uploaded)
+                                    return BadRequest("Uploading Invoice failed!"); 
+                                
+                                xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
-                            xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
-
-                            //if (System.IO.File.Exists(xmlPath))
-                            //{
-                            //    System.IO.File.Delete(xmlPath);
-                            //}
-                            
+                                if (System.IO.File.Exists(xmlPath))
+                                {
+                                    System.IO.File.Delete(xmlPath);
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -611,7 +620,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             Unit_Of_Work.SaveChanges();
 
-            return Ok();
+            return Ok("All invoices uploaded successfully.");
         }
         #endregion
 
@@ -621,7 +630,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Electronic-Invoice" }
         )]
-        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateOnly startDate, DateOnly endDate, int pageNumber = 1, int pageSize = 10)
         {
             if (endDate < startDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -638,7 +647,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 d => d.SchoolId == schoolId &&
                 d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12) &&
-                d.Date.Date >= startDate && d.Date.Date <= endDate.AddDays(1)) 
+                d.Date >= startDate && d.Date <= endDate) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

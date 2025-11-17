@@ -24,8 +24,5 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("Teacher")]
         public long? TeacherID { get; set; }
         public Employee? Teacher { get; set; }
-
-
-
     }
 }

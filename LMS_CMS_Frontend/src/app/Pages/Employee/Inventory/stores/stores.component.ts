@@ -17,16 +17,17 @@ import { StoresService } from '../../../../Services/Employee/Inventory/stores.se
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
 import { StoreAdd } from '../../../../Models/Inventory/store-add';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-stores',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent , TranslateModule],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './stores.component.html',
-  styleUrl: './stores.component.css'
+  styleUrl: './stores.component.css',
 })
 export class StoresComponent {
   User_Data_After_Login: TokenData = new TokenData(
@@ -47,7 +48,7 @@ export class StoresComponent {
   path: string = '';
 
   TableData: Store[] = [];
-  store: StoreAdd = new StoreAdd();
+  store: Store = new Store();
 
   isModalVisible: boolean = false;
   mode: string = 'Create';
@@ -63,25 +64,26 @@ export class StoresComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  keysArray: string[] = ['id', 'name' ];
-  key: string = "id";
-  value: any = "";
+  keysArray: string[] = ['id', 'name'];
+  key: string = 'id';
+  value: any = '';
 
   validationErrors: { [key in keyof Store]?: string } = {};
-  isLoading = false
+  isLoading = false;
 
   constructor(
     public empTypeVioletionServ: EmployeeTypeViolationService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public StoresServ: StoresService,
     public CategoryServ: InventoryCategoryService,
-    private languageService: LanguageService
-  ) { }
+    private languageService: LanguageService, 
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,47 +99,117 @@ export class StoresComponent {
       if (settingsPage) {
         this.AllowEdit = settingsPage.allow_Edit;
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
-      this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
+
+    // Subscribe to language changes to re-translate validation errors
+    this.translate.onLangChange.subscribe(() => {
+      this.revalidateForm();
     });
-    this.isRtl = document.documentElement.dir === 'rtl';    
+
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  
+  private revalidateForm() {
+    // Re-translate existing validation errors when language changes
+    const translatedErrors: { [key in keyof Store]?: string } = {};
+
+    for (const key in this.validationErrors) {
+      const field = key as keyof Store;
+      const error = this.validationErrors[field];
+      if (error) {
+        // Re-translate the error message
+        if (error.includes('is required')) {
+          const fieldName = error.split(' ')[0].replace('*', '');
+          translatedErrors[field] = `*${this.translate.instant(
+            fieldName
+          )} ${this.translate.instant('is required')}`;
+        } else {
+          // For other error types, try to translate the whole message
+          translatedErrors[field] = this.translate.instant(error);
+        }
+      }
+    }
+
+    this.validationErrors = translatedErrors;
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    const translatedMessage = this.translate.instant(errorMessage);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: translatedMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    const translatedMessage = this.translate.instant(message);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: translatedMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.StoresServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
 
   GetAllCategories() {
     this.CategoryServ.Get(this.DomainName).subscribe((d) => {
-      this.Categories = d
-    })
+      this.Categories = d;
+    });
   }
 
   Create() {
     this.mode = 'Create';
-    this.store = new StoreAdd();
+    this.store = new Store();
     this.dropdownOpen = false;
-    this.openModal();
     this.CategoriesSelected = [];
+    this.validationErrors = {}; // Clear any existing validation errors
+    this.openModal();
   }
-
   openModal() {
     this.isModalVisible = true;
   }
 
   Edit(row: Store): void {
     this.mode = 'Edit';
-    this.store.id = row.id;
-    this.store.name = row.name;
-    this.store.categoriesIds = row.storeCategories.map(s => s.id);
-    this.CategoriesSelected = row.storeCategories
+    this.validationErrors = {}; // Clear any existing validation errors
+    this.StoresServ.GetById(row.id, this.DomainName).subscribe((d) => {
+      this.store = d;
+      this.CategoriesSelected = this.store.storeCategories;
+      this.store.categoriesIds = this.store.storeCategories.map((s) => s.id);
+      console.log(this.store);
+    });
     this.openModal();
     this.dropdownOpen = false;
   }
@@ -146,114 +218,148 @@ export class StoresComponent {
     if (!this.CategoriesSelected.some((e) => e.id === category.id)) {
       this.CategoriesSelected.push(category);
     }
-     if (! this.store.categoriesIds.some((e) => e=== category.id)) {
-       this.store.categoriesIds.push(category.id);
+    if (!this.store.categoriesIds.some((e) => e === category.id)) {
+      this.store.categoriesIds.push(category.id);
     }
     this.dropdownOpen = false;
   }
 
-
   Delete(id: number): void {
+    const translatedTitle =
+      this.translate.instant('Are you sure you want to') +
+      ' ' +
+      this.translate.instant('delete') +
+      ' ' +
+      this.translate.instant('this') +
+      ' ' +
+      this.translate.instant('Store') +
+      '?';
+    const translatedConfirm = this.translate.instant('Delete');
+    const translatedCancel = this.translate.instant('Cancel');
+
     Swal.fire({
-      title: 'Are you sure you want to delete this Store?',
+      title: translatedTitle,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
     }).then((result) => {
       if (result.isConfirmed) {
-        this.StoresServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+        this.StoresServ.Delete(id, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.showSuccessAlert(
+              this.translate.instant('Deleted successfully')
+            );
+          },
+          (error) => {
+            this.showErrorAlert(
+              error.error ||
+                this.translate.instant('Failed to delete the store')
+            );
+          }
+        );
       }
     });
   }
 
   closeModal() {
     this.isModalVisible = false;
+    this.validationErrors = {}; // Clear validation errors when modal closes
+    this.store = new Store(); // Reset the store object
+    this.CategoriesSelected = []; // Clear selected categories
   }
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.StoresServ.Add(this.store, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal();
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.StoresServ.Add(this.store, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+            this.showSuccessAlert(
+              this.translate.instant('Created successfully')
+            );
+          },
+          (error) => {
+            this.isLoading = false;
+            this.showErrorAlert(error.error);
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.StoresServ.Edit(this.store, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal();
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.StoresServ.Edit(this.store, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+            this.showSuccessAlert(
+              this.translate.instant('Updated successfully')
+            );
+          },
+          (error) => {
+            this.isLoading = false;
+            this.showErrorAlert(error.error);
+          }
+        );
       }
-    } 
+    }
   }
 
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
-
   removeSelected(id: number): void {
-    this.CategoriesSelected = this.CategoriesSelected.filter((e) => e.id !== id);
-    this.store.categoriesIds = this.store.categoriesIds.filter(
-      (i) => i !== id
+    this.CategoriesSelected = this.CategoriesSelected.filter(
+      (e) => e.id !== id
     );
+    this.store.categoriesIds = this.store.categoriesIds.filter((i) => i !== id);
   }
 
   IsAllowDelete(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
     return IsAllow;
   }
 
   IsAllowEdit(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
     return IsAllow;
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Store[] = await firstValueFrom(this.StoresServ.Get(this.DomainName));
+      const data: Store[] = await firstValueFrom(
+        this.StoresServ.Get(this.DomainName)
+      );
       this.TableData = data || [];
 
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
 
-        this.TableData = this.TableData.filter(t => {
+        this.TableData = this.TableData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -265,16 +371,16 @@ export class StoresComponent {
 
   isFormValid(): boolean {
     let isValid = true;
+    this.validationErrors = {}; // Clear previous errors
+
     for (const key in this.store) {
       if (this.store.hasOwnProperty(key)) {
         const field = key as keyof StoreAdd;
         if (!this.store[field]) {
-          if (
-            field == 'name'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
+          if (field == 'name') {
+            this.validationErrors[field] = `*${this.translate.instant(
               field
-            )} is required`;
+            )} ${this.translate.instant('Is Required')}`;
             isValid = false;
           }
         }
@@ -283,11 +389,14 @@ export class StoresComponent {
 
     if (this.store.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters'
+      );
     }
 
     return isValid;
   }
+
   capitalizeField(field: keyof Store): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -296,7 +405,7 @@ export class StoresComponent {
     const { field, value } = event;
     (this.store as any)[field] = value;
     if (value) {
-      this.validationErrors[field] = '';
+      this.validationErrors[field] = ''; // Clear error when user starts typing
     }
   }
 }

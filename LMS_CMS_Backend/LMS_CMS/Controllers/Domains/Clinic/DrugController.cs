@@ -17,18 +17,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public DrugController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public DrugController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Drugs" }
+            pages: new[] { "Drugs", "Follow Up" }
         )]
         public async Task<IActionResult> Get()
         {
@@ -100,7 +102,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Drugs" }
+            pages: new[] { "Drugs", "Follow Up" }
         )]
         public IActionResult Add(DrugAddDTO drugDto)
         {
@@ -152,7 +154,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         public IActionResult Update(DrugPutDTO drugDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
 
@@ -174,6 +177,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (drug == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Drugs", roleId, userId, drug);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             _mapper.Map(drugDto, drug);
@@ -218,7 +230,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
             
@@ -232,6 +245,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (drug == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Drugs", roleId, userId, drug);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             drug.IsDeleted = true;

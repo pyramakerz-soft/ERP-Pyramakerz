@@ -1,12 +1,4 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  SimpleChanges,
-  OnInit,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
@@ -14,10 +6,18 @@ import { CommonModule } from '@angular/common';
 import { ParentMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { Student } from '../../../../../Models/student';
+import { TokenData } from '../../../../../Models/token-data';
+import { jwtDecode } from 'jwt-decode';
+import { StudentService } from '../../../../../Services/student.service';
 
 @Component({
   selector: 'app-parent-medical-history-modal',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   standalone: true,
   templateUrl: './medical-history-modal.component.html',
   styleUrls: ['./medical-history-modal.component.css'],
@@ -31,6 +31,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
   editMode = false;
   medicalHistory: ParentMedicalHistory = {
     id: 0,
+    studentId: 0, // Changed from undefined to 0 for required field
     details: '',
     permanentDrug: '',
     firstReport: null,
@@ -40,35 +41,116 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     insertedByUserId: 0,
     en_name: ''
   };
+  
   firstReportPreview: File | null = null;
-  secReportPreview: File | null = null;
+  secReportPreview: File | string | null = null;
   validationErrors: { [key: string]: string } = {};
   isSaving: boolean = false;
+  isRtl: boolean = false;
+  subscription!: Subscription;
+  
+  students: Student[] = [];
+  parentId: number = 0;
 
   constructor(
     private medicalHistoryService: MedicalHistoryService,
-    private apiService: ApiService
+    private studentService: StudentService,
+    private languageService: LanguageService,
+    private apiService: ApiService, 
+    private translate: TranslateService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+    this.loadParentStudents();
+  }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private getParentIdFromToken(): number {
+    try {
+      const token = localStorage.getItem('current_token');
+      if (token) {
+        const decodedToken: TokenData = jwtDecode(token);
+        return decodedToken.id;
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+    return 0;
+  }
+
+  async loadParentStudents() {
+    try {
+      this.parentId = this.getParentIdFromToken();
+      if (this.parentId > 0) {
+        const domainName = this.apiService.GetHeader();
+        const students = await firstValueFrom(
+          this.studentService.Get_By_ParentID(this.parentId, domainName)
+        );
+        this.students = students;
+        
+        // Reset studentId to 0 (no selection) regardless of how many students
+        if (!this.editMode) {
+          this.medicalHistory.studentId = 0;
+        }
+      }
+    } catch (error) { 
+      this.showErrorAlert('Failed to load students');
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['medicalHistoryData']) {
       if (this.medicalHistoryData) {
         this.editMode = true;
         this.medicalHistory = { ...this.medicalHistoryData };
-        this.firstReportPreview = this.medicalHistory.firstReport;
-        this.secReportPreview = this.medicalHistory.secReport;
+        this.firstReportPreview = this.medicalHistory.firstReport as any;
+        this.secReportPreview = this.medicalHistory.secReport as any;
       } else {
         this.resetForm();
       }
     }
   }
 
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
   private resetForm() {
     this.editMode = false;
     this.medicalHistory = {
       id: 0,
+      studentId: 0, // Always reset to 0 (no selection)
       details: '',
       permanentDrug: '',
       firstReport: null,
@@ -120,6 +202,12 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     this.validationErrors = {};
     let isValid = true;
 
+    // Student selection validation - must select a student (value should not be 0)
+    if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
+      this.validationErrors['studentId'] = '*Please select a student';
+      isValid = false;
+    }
+
     if (!this.medicalHistory.details || this.medicalHistory.details.trim() === '') {
       this.validationErrors['details'] = '*Details are required';
       isValid = false;
@@ -138,19 +226,19 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
           await firstValueFrom(
             this.medicalHistoryService.UpdateByParentAsync(this.medicalHistory, domainName)
           );
-          Swal.fire('Success', 'Medical history updated successfully!', 'success');
+          this.showSuccessAlert('Medical history updated successfully!');
         } else {
           await firstValueFrom(
             this.medicalHistoryService.AddByParent(this.medicalHistory, domainName)
           );
-          Swal.fire('Success', 'Medical history created successfully!', 'success');
+          this.showSuccessAlert('Medical history created successfully!');
         }
 
         this.onSave.emit();
         this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        Swal.fire('Error', 'Failed to save medical history. Please try again later.', 'error');
+      } catch (error:any) {
+        const errorMessage = error.error?.message || error.error || this.translate.instant('Failed to save the item');
+        this.showErrorAlert(errorMessage);
       } finally {
         this.isSaving = false;
       }

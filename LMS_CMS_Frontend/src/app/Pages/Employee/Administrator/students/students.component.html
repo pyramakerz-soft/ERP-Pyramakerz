@@ -29,10 +29,16 @@
                       {{ 'nationality' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                      {{ 'School' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                       {{ 'Grade' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                       {{ 'Academic Year' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Suspended' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                      {{ 'Actions' | translate }}
@@ -42,7 +48,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="StudentsData.length === 0">
-                <td colspan="7"
+                <td colspan="8"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     {{ 'No Data Found' | translate }}
                 </td>
@@ -57,8 +63,13 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.en_name }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.user_Name }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.nationalityEnName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentSchoolName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentGradeName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentAcademicYear }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <i *ngIf="row.isSuspended" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                    <i *ngIf="!row.isSuspended" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
+                </td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button  (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
@@ -70,11 +81,49 @@
                         <button  (click)="View(row.registrationFormParentID)">
                             <i class="fa-solid fa-eye"></i> 
                         </button>
+                        <button (click)="suspend(row)" title="Suspend">
+                            <i class="fa-solid fa-hand"></i>
+                        </button>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
+</div>
+
+
+<div class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4  rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+        [disabled]="CurrentPage === 1 || StudentsData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || StudentsData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p> {{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+        [disabled]="CurrentPage === TotalPages || StudentsData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || StudentsData.length == 0}">
+            <p> {{'Next'| translate }}</p> 
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input  (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p> {{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}}  {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}}  {{'Item'| translate }})</p>
+    </div>
 </div>
 
 <app-search-student

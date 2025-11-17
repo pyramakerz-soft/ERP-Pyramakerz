@@ -5,15 +5,17 @@
 </div>
 
 <div class="my-5 flex flex-wrap justify-between items-center">
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="store">  {{'Store'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
-            [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
-            <option *ngIf="stores.length === 0" disabled selected>  {{'No Data Found'| translate }}</option>
-        </select>
-    </div>
+<!-- Store dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="store">{{'Store'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
+        [(ngModel)]="selectedStoreId" (ngModelChange)="onStoreSelected()">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
+        <option *ngIf="stores.length == 0" [ngValue]="null" disabled>{{'No Stores Available'| translate }}</option>
+    </select>
+</div>
+
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="dateFrom">  {{'Date From'| translate }}</label>
@@ -38,39 +40,49 @@
         </select>
     </div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags">  {{'Category'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedCategoryId" (change)="onCategorySelected()">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let category of categories" [ngValue]="category.id">
-                {{ category.name }}
-            </option>
-        </select>
-    </div>
+<!-- Category dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Category'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedCategoryId" (change)="onCategorySelected()"
+        [disabled]="!selectedStoreId">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let category of categories" [ngValue]="category.id">
+            {{ category.name }}
+        </option>
+        <!-- <option *ngIf="categories.length == 0" [ngValue]="null" disabled>
+            {{ selectedStoreId ? ('No Categories Available' | translate) : ('Select a store first' | translate) }}
+        </option> -->
+    </select>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags">  {{'Sub'| translate }}  {{'Category'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedSubCategoryId" (change)="onSubCategorySelected()"
-            [disabled]="selectedCategoryId === null">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let subCategory of subCategories" [ngValue]="subCategory.id">
-                {{ subCategory.name }}
-            </option>
-        </select>
-    </div>
+<!-- Sub Category dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Sub'| translate }} {{'Category'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedSubCategoryId" (change)="onSubCategorySelected()"
+        [disabled]="selectedCategoryId === null">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let subCategory of subCategories" [ngValue]="subCategory.id">
+            {{ subCategory.name }}
+        </option>
+        <option [ngValue]="null" *ngIf="subCategories.length == 0" disabled>{{'No Sub Categories Available'| translate }}</option>
+    </select>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags">{{'Item'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedItemId" [disabled]="selectedSubCategoryId === null">
-            <option [ngValue]="null"> {{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let item of items" [ngValue]="item.id">
-                {{ item.enName }}
-            </option>
-        </select>
-    </div>
+<!-- Item dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Item'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedItemId" (change)="onFilterChange()"
+        [disabled]="selectedSubCategoryId === null && items.length === 0">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let item of items" [ngValue]="item.id">
+            {{ item.enName }}
+        </option>
+        <option [ngValue]="null" *ngIf="items.length == 0" disabled>{{'No Items Available'| translate }}</option>
+    </select>
+</div>
 
     <div class="w-[24%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
@@ -105,11 +117,11 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                       {{'Store'| translate }}
                 </th>
-                <th *ngIf="reportType === 'sales'"
+                <th *ngIf="reportType == 'sales'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                       {{'Student'| translate }}
                 </th>
-                <th *ngIf="reportType === 'purchase'"
+                <th *ngIf="reportType == 'purchase'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                       {{'Supplier'| translate }}
                 </th>
@@ -122,15 +134,15 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngIf="transactions.length === 0">
-                <td [attr.colspan]="reportType === 'inventory' ? 5 : 6"
+            <tr *ngIf="transactions.length == 0">
+                <td [attr.colspan]="reportType == 'inventory' ? 5 : 6"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     {{'No Data Found'| translate }}
                 </td>
             </tr>
 
             <tr *ngFor="let transaction of transactions; let i = index"
-                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 == 1, 'bg-white': i % 2 !== 1 }"
                 class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.invoiceNumber }}
@@ -141,11 +153,11 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.storeName }}
                 </td>
-                <td *ngIf="reportType === 'sales'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ transaction.studentName || 'N/A' }}
+                <td *ngIf="reportType == 'sales'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ transaction.studentName || '-' }}
                 </td>
-                <td *ngIf="reportType === 'purchase'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ transaction.supplierName || 'N/A' }}
+                <td *ngIf="reportType == 'purchase'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ transaction.supplierName || '-' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.flagEnName }}
@@ -161,8 +173,8 @@
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4 rtl:space-x-reverse">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse" (click)="changePage(currentPage-1)"
-            [disabled]="currentPage === 1 || transactions.length == 0"
-            [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1 || transactions.length == 0}">
+            [disabled]="currentPage == 1 || transactions.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': currentPage == 1 || transactions.length == 0}">
             <i class="fa-solid fa-arrow-left"></i>
 
 
@@ -171,14 +183,14 @@
 
         <div class="flex">
             <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
-                [ngClass]="{ 'border': page === currentPage, 'hover:bg-gray-100': page !== currentPage }"
+                [ngClass]="{ 'border': page == currentPage, 'hover:bg-gray-100': page !== currentPage }"
                 (click)="changePage(page)">
                 <p class="cursor-pointer text-center">{{ page }}</p>
             </div>
         </div>
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse" (click)="changePage(currentPage+1)"
-            [disabled]="currentPage === totalPages || transactions.length == 0"
-            [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages || transactions.length == 0}">
+            [disabled]="currentPage == totalPages || transactions.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': currentPage == totalPages || transactions.length == 0}">
             <p>{{'Next'| translate }}</p>
             <i class="fa-solid fa-arrow-right"></i>
         </button>
@@ -190,15 +202,22 @@
 </div> -->
 
 
+<!-- Update the PDF print section to conditionally include student/supplier -->
 <div class="absolute  -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Report'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="reportType + ' Transactions Report'"
         [infoRows]="[
       { keyEn: 'From Date: ' + this.dateFrom },
+      { keyAr: this.dateFrom + ' : من تاريخ' },
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + this.getStoreName() },
-            ]"
-        [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
+      { keyEn: 'Transaction Types: ' + this.getSelectedFlagNames() }
+        ]"
+        [tableHeaders]="reportType == 'sales' ? 
+          ['Invoice #', 'Date', 'Store', 'Student', 'Total Amount', 'Transaction Type'] : 
+          reportType == 'purchase' ? 
+          ['Invoice #', 'Date', 'Store', 'Supplier', 'Total Amount', 'Transaction Type'] : 
+          ['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
         [tableData]="transactionsForExport" #pdfComponentRef>
     </app-pdf-print>
 </div>

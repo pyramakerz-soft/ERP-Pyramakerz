@@ -19,25 +19,26 @@ import { firstValueFrom } from 'rxjs';
 import { WeekDay } from '../../../../Models/week-day';
 import { DaysService } from '../../../../Services/Octa/days.service';
 import { Day } from '../../../../Models/day';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-semester',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './semester.component.html',
   styleUrl: './semester.component.css'
 })
 export class SemesterComponent {
-  keysArray: string[] = ['id', 'name','dateFrom','dateTo','academicYearName'];
-  key: string= "id";
+  keysArray: string[] = ['id', 'name', 'dateFrom', 'dateTo', 'academicYearName'];
+  key: string = "id";
   value: any = "";
 
-  semesterData:Semester[] = []
-  semester:Semester = new Semester()
-  academicYear:AcademicYear = new AcademicYear()
-  editSemester:boolean = false
+  semesterData: Semester[] = []
+  semester: Semester = new Semester()
+  academicYear: AcademicYear = new AcademicYear()
+  editSemester: boolean = false
   validationErrors: { [key in keyof Semester]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -46,19 +47,19 @@ export class SemesterComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = ""
-  WeekDays:Day[]=[]
+  WeekDays: Day[] = []
 
   DomainName: string = "";
   UserID: number = 0;
   academicYearId: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  isLoading = false; 
-    
+  isLoading = false;
+
   constructor(public account: AccountService,
-    private languageService: LanguageService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public DaysServ: DaysService){}
-  
-  ngOnInit(){
+    private languageService: LanguageService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, public DaysServ: DaysService,private translate: TranslateService ) { }
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
@@ -72,7 +73,7 @@ export class SemesterComponent {
     this.DomainName = String(this.activeRoute.snapshot.paramMap.get('domainName'))
 
     this.getAcademicYearData()
-    this.getSemesterData() 
+    this.getSemesterData()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -85,10 +86,17 @@ export class SemesterComponent {
     });
 
 
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllDays() {
@@ -97,7 +105,7 @@ export class SemesterComponent {
     });
   }
 
-  getAcademicYearData(){
+  getAcademicYearData() {
     this.acadimicYearService.GetByID(this.academicYearId, this.DomainName).subscribe(
       (data) => {
         this.academicYear = data;
@@ -105,25 +113,25 @@ export class SemesterComponent {
     )
   }
 
-  getSemesterData(){
-    this.semesterData=[]
+  getSemesterData() {
+    this.semesterData = []
     this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName).subscribe(
       (data) => {
         this.semesterData = data;
       }
     )
-  } 
+  }
 
   GetSemesterById(Id: number) {
     this.semesterService.GetByID(Id, this.DomainName).subscribe((data) => {
-      this.semester = data; 
+      this.semester = data;
     });
   }
 
   openModal(Id?: number) {
     if (Id) {
       this.editSemester = true;
-      this.GetSemesterById(Id); 
+      this.GetSemesterById(Id);
     }
     this.GetAllDays()
     document.getElementById("Add_Modal")?.classList.remove("hidden");
@@ -134,24 +142,24 @@ export class SemesterComponent {
     document.getElementById("Add_Modal")?.classList.remove("flex");
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
-    this.semester= new Semester()
+    this.semester = new Semester()
 
-    if(this.editSemester){
+    if (this.editSemester) {
       this.editSemester = false
     }
-    this.validationErrors = {}; 
-  } 
+    this.validationErrors = {};
+  }
 
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Semester[] = await firstValueFrom(this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName));  
+      const data: Semester[] = await firstValueFrom(this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName));
       this.semesterData = data || [];
-  
+
       if (this.value !== "") {
         const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
+
         this.semesterData = this.semesterData.filter(t => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
@@ -168,11 +176,11 @@ export class SemesterComponent {
     }
   }
 
-  moveToAcademicYear(){
+  moveToAcademicYear() {
     this.router.navigateByUrl("Employee/Academic Years")
   }
 
-  MoveToSemesterView(id:number){
+  MoveToSemesterView(id: number) {
     this.router.navigateByUrl('Employee/Working Weeks/' + this.DomainName + '/' + id)
   }
 
@@ -186,17 +194,17 @@ export class SemesterComponent {
       if (this.semester.hasOwnProperty(key)) {
         const field = key as keyof Semester;
         if (!this.semester[field]) {
-          if(field == "name" || field == "dateFrom" || field == "dateTo"){
+          if (field == "name" || field == "dateFrom" || field == "dateTo") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
         } else {
-          if(field == "name"){
-            if(this.semester.name.length > 100){
+          if (field == "name") {
+            if (this.semester.name.length > 100) {
               this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
               isValid = false;
             }
-          } else{
+          } else {
             this.validationErrors[field] = '';
           }
         }
@@ -222,15 +230,15 @@ export class SemesterComponent {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
-  
+
   checkFromToDate() {
     let valid = true;
-  
+
     const semesterFrom: Date = new Date(this.semester.dateFrom);
     const semesterTo: Date = new Date(this.semester.dateTo);
     const academicFrom: Date = new Date(this.academicYear.dateFrom);
     const academicTo: Date = new Date(this.academicYear.dateTo);
-  
+
     // Check that semesterFrom is before semesterTo
     if (semesterTo.getTime() < semesterFrom.getTime()) {
       valid = false;
@@ -243,7 +251,7 @@ export class SemesterComponent {
       this.isLoading = false;
       return false;
     }
-  
+
     // Check that semester dates are within the academic year dates
     if (
       semesterFrom.getTime() < academicFrom.getTime() ||
@@ -259,17 +267,17 @@ export class SemesterComponent {
       this.isLoading = false;
       return false;
     }
-  
+
     return valid;
   }
-  
 
-  SaveSemester(){
-    if(this.isFormValid()){
+
+  SaveSemester() {
+    if (this.isFormValid()) {
       this.isLoading = true;
       this.semester.academicYearID = this.academicYearId
-      if(this.checkFromToDate()){
-        if(this.editSemester == false){
+      if (this.checkFromToDate()) {
+        if (this.editSemester == false) {
           this.semesterService.Add(this.semester, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
@@ -281,13 +289,13 @@ export class SemesterComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
             }
           );
-        } else{
+        } else {
           this.semesterService.Edit(this.semester, this.DomainName).subscribe(
             (result: any) => {
               this.closeModal()
@@ -299,31 +307,31 @@ export class SemesterComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
             }
           );
-        }  
+        }
       }
     }
-  } 
+  }
 
-  deleteSemester(id:number){
+  deleteSemester(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Semester?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Semester') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.semesterService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
-            this.semesterData=[]
+            this.semesterData = []
             this.getSemesterData()
           }
         );

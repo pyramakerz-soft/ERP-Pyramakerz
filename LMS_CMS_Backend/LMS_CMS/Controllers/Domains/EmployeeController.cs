@@ -1,16 +1,20 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Accounting;
+using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace LMS_CMS_PL.Controllers.Domains
@@ -33,13 +38,154 @@ namespace LMS_CMS_PL.Controllers.Domains
         IMapper mapper;
         private readonly UOW _Unit_Of_Work_Octa;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public EmployeeController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW Unit_Of_Work, CheckPageAccessService checkPageAccessService)
+        public EmployeeController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW Unit_Of_Work, CheckPageAccessService checkPageAccessService, FileUploadsService fileService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _Unit_Of_Work_Octa = Unit_Of_Work;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
+            _fileService = fileService;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee", "Employee Accounting", "Installment Deduction" }
+        )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.employee_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Employee> Employees = await Unit_Of_Work.employee_Repository
+                                .Select_All_With_IncludesById<Employee>(
+                                    sem => sem.IsDeleted != true,
+                                    query => query.Include(emp => emp.BusCompany),
+                                    query => query.Include(emp => emp.EmployeeType),
+                                    query => query.Include(emp => emp.Role)); // ✅ sort before pagination
+
+            Employees = Employees.OrderBy(t => t.en_name).ToList();
+
+            Employees = Employees
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
+            if (Employees == null || Employees.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Employee_GetDTO> EmployeesDTO = mapper.Map<List<Employee_GetDTO>>(Employees);
+            foreach (var employeeDTO in EmployeesDTO)
+            {
+                List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
+                List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
+                if (filesDTO != null)
+                {
+                    employeeDTO.Files = filesDTO;
+                    foreach (var file in filesDTO)
+                    {
+                        if (!string.IsNullOrEmpty(file.Link))
+                        {
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
+                        }
+                    }
+                }
+                else
+                    employeeDTO.Files = new List<EmployeeAttachmentDTO>();
+
+
+                List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted != true);
+
+                if (floors != null && floors.Any())
+                    employeeDTO.FloorsSelected = floors.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.FloorsSelected = new List<long>();
+
+
+                List<SubjectSupervisor> subjectSupervisors = Unit_Of_Work.subjectSupervisor_Repository
+                   .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+                var subjectIds = subjectSupervisors.Select(ss => ss.SubjectID).ToList();
+
+                List<Subject> subjects = Unit_Of_Work.subject_Repository
+                    .FindBy(s => subjectIds.Contains(s.ID) && s.IsDeleted != true);
+
+
+                if (subjects != null && subjects.Any())
+                    employeeDTO.SubjectSelected = subjects.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.SubjectSelected = new List<long>();
+
+
+                List<GradeSupervisor> gradeSupervisors = Unit_Of_Work.gradeSupervisor_Repository
+                  .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+                var gradeIds = gradeSupervisors.Select(ss => ss.GradeID).ToList();
+
+                List<Grade> grades = Unit_Of_Work.grade_Repository
+                    .FindBy(s => gradeIds.Contains(s.ID) && s.IsDeleted != true);
+
+                if (grades != null && grades.Any())
+                    employeeDTO.GradeSelected = grades.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.GradeSelected = new List<long>();
+
+                // Get current month and year
+                var currentDate = DateTime.UtcNow;
+                var currentMonth = currentDate.Month;
+                var currentYear = currentDate.Year;
+
+                // Filter leave requests for the current month only
+                List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                    .FindBy(l => l.EmployeeID == employeeDTO.ID
+                              && l.IsDeleted != true
+                              && l.Date.Month == currentMonth
+                              && l.Date.Year == currentYear);
+
+                // Sum up hours and minutes
+                var allHours = leaveRequests.Sum(l => l.Hours);
+                var allMinutes = leaveRequests.Sum(l => l.Minutes);
+
+                // Convert total minutes into hours and remaining minutes
+                allHours += allMinutes / 60;
+                allMinutes = allMinutes % 60;
+
+                // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
+                employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = EmployeesDTO, Pagination = paginationMetadata });
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +193,8 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" 
+                , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status"  ,"Maintenance Employees"}
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -62,6 +209,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
             List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(
                     sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.BusCompany),
@@ -78,7 +226,6 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
                 List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
                 if (filesDTO != null)
                 {
                     employeeDTO.Files = filesDTO;
@@ -86,7 +233,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     {
                         if (!string.IsNullOrEmpty(file.Link))
                         {
-                            file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext); 
                         }
                     }
                 }
@@ -130,7 +277,31 @@ namespace LMS_CMS_PL.Controllers.Domains
                 else
                     employeeDTO.GradeSelected = new List<long>();
 
+                // Get current month and year
+                var currentDate = DateTime.UtcNow;
+                var currentMonth = currentDate.Month;
+                var currentYear = currentDate.Year;
+
+                // Filter leave requests for the current month only
+                List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                    .FindBy(l => l.EmployeeID == employeeDTO.ID
+                              && l.IsDeleted != true
+                              && l.Date.Month == currentMonth
+                              && l.Date.Year == currentYear);
+
+                // Sum up hours and minutes
+                var allHours = leaveRequests.Sum(l => l.Hours);
+                var allMinutes = leaveRequests.Sum(l => l.Minutes);
+
+                // Convert total minutes into hours and remaining minutes
+                allHours += allMinutes / 60;
+                allMinutes = allMinutes % 60;
+
+                // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
+                employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
             }
+
+            EmployeesDTO = EmployeesDTO.OrderBy(t => t.en_name).ToList();
 
             return Ok(EmployeesDTO);
         }
@@ -140,7 +311,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByTypeId/{TypeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Bus Details" , "Floor" , "Classroom" , "Remedial Classes" , "Evaluation" , "Evaluation Report" }
         )]
         public async Task<IActionResult> GetByTypeIDAsync(long TypeId)
         {
@@ -166,15 +337,14 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
                 List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
                 if (filesDTO != null)
                 {
                     employeeDTO.Files = filesDTO;
                     foreach (var file in filesDTO)
                     {
                         if (!string.IsNullOrEmpty(file.Link))
-                        {
-                            file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                        { 
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
                         }
                     }
                 }
@@ -182,7 +352,38 @@ namespace LMS_CMS_PL.Controllers.Domains
                     employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
             }
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
+            return Ok(employeeDTOs);
+        }
+        
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByJobId/{JobId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee", "Loans Report" , "Bonus Report" , "Deduction Report" , "Vacation Report" , "Leave Request Report" , "Hr Employees Report" , "Employee Salary Detailed Report" , "Salary Summary Report" , "HR Attendance Report" }
+        )]
+        public IActionResult GetByJobId(long JobId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Job job = Unit_Of_Work.job_Repository.First_Or_Default(d => d.ID == JobId && d.IsDeleted != true);
+            if (job == null)
+            {
+                return NotFound("No Job with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.JobID == JobId);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees with this job Id");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
             return Ok(employeeDTOs);
         }
         
@@ -191,7 +392,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee" , "Teacher Evaluation Report", "Notification" }
         )]
         public IActionResult GetByDepartmentId(long DepartmentId)
         {
@@ -209,16 +410,221 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
+            return Ok(employeeDTOs);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetWhoCanAcceptRequestsFromEmployeeByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequest == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(employeeDTOs);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequestFromParent == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(employeeDTOs);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetWhoCanAcceptMessagesFromParentAndStudentByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult GetWhoCanAcceptMessagesFromParentAndStudentByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveMessageFromParent == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept messages");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("{empId}")]
+        [HttpGet("GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId/{SubjectId}/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentIdAsync(long SubjectId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SubjectId);
+            if (subject == null)
+            {
+                return NotFound("No Subject with this Id");
+            }
+            
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == StudentId);
+            if (student == null)
+            {
+                return NotFound("No student with this Id");
+            } 
+
+            List<long> teacherIDs = new List<long>();
+
+            // Get student current grade
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
+                && d.AcademicYear.IsActive == true && d.StudentID == StudentId);
+
+            if (studentGrade != null)
+            {
+                // Get his classroom
+                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
+                    && d.StudentID == StudentId && d.Classroom.GradeID == studentGrade.GradeID);
+
+                if (studentClassroom != null)
+                {
+                    StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
+                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false && d.SubjectID == SubjectId);
+
+                    if (studentClassroomSubject != null)
+                    {
+                        ClassroomSubject classroomSubject = await Unit_Of_Work.classroomSubject_Repository.FindByIncludesAsync(
+                            d => d.IsDeleted != true && d.ClassroomID == studentClassroom.ClassID && d.SubjectID == SubjectId && d.Hide == false,
+                            query => query.Include(d => d.Teacher)
+                            );
+
+                        if (classroomSubject != null)
+                        {
+                            if(classroomSubject.TeacherID != null && classroomSubject.Teacher.IsDeleted != true)
+                            {
+                                teacherIDs.Add(classroomSubject.TeacherID.Value);
+                            }
+                             
+                            List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
+                            d => d.ClassroomSubjectID == classroomSubject.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
+                            );
+                            if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
+                            {
+                                teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
+                            }
+                        }
+                    } 
+                }
+            }
+
+            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
+                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == StudentId && d.RemedialClassroom.SubjectID == SubjectId,
+                query => query.Include(d => d.RemedialClassroom)
+                );
+
+            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
+            {
+                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
+            }
+
+            if (teacherIDs == null || teacherIDs.Count == 0)
+            {
+                return NotFound("There are no teachers for this student and subject");
+            }
+
+            teacherIDs = teacherIDs.Distinct().ToList();
+
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && teacherIDs.Contains(d.ID));
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(employeeDTOs);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetMyData")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetMyData()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == userId, 
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee found");
+            }
+
+            Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
+              
+            return Ok(employeeDTO); 
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("{empId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> GetByIDAsync(long empId)
         {
@@ -238,15 +644,14 @@ namespace LMS_CMS_PL.Controllers.Domains
             Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
             List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID &&s.IsDeleted!=true);
             List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             if (filesDTO != null)
             {
                 employeeDTO.Files = filesDTO;
                 foreach (var file in filesDTO)
                 {
                     if (!string.IsNullOrEmpty(file.Link))
-                    {
-                        file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                    { 
+                        file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
                     }
                 }
             }
@@ -291,6 +696,19 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.GradeSelected = new List<long>();
 
 
+            List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository
+              .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var locationIds = employeeLocations.Select(ss => ss.LocationID).ToList();
+
+            List<Location> locations = Unit_Of_Work.location_Repository
+                .FindBy(s => locationIds.Contains(s.ID) && s.IsDeleted != true);
+
+            if (locations != null && locations.Any())
+                employeeDTO.LocationSelected = locations.Select(v => v.ID).ToList();
+            else
+                employeeDTO.LocationSelected = new List<long>();
+
             return Ok(employeeDTO); 
         }
         private string GetMimeType(string filePath)
@@ -305,10 +723,67 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("getInfoByToken")]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByTokenAsync()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized(new { error = "User ID or Type claim not found." });
+            }
+
+            long empId = long.Parse(userIdClaim);
+
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == empId,
+                    query => query.Include(emp => emp.BusCompany),
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound(new { error = "No employee found" });
+            }
+
+            Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
+
+            List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository
+              .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var locationIds = employeeLocations.Select(ss => ss.LocationID).ToList();
+
+            List<Location> locations = Unit_Of_Work.location_Repository
+                .FindBy(s => locationIds.Contains(s.ID) && s.IsDeleted != true);
+
+            employeeDTO.Locations = mapper.Map<List<LocationGetDTO>>(locations);
+
+            EmployeeClocks lastClock = Unit_Of_Work.employeeClocks_Repository
+              .FindBy(e => e.IsDeleted != true && e.EmployeeID == employee.ID)
+              .OrderByDescending(e => e.ClockIn)
+              .ThenByDescending(e => e.ClockIn)
+              .FirstOrDefault();
+
+            employeeDTO.IsClockedIn = lastClock != null && lastClock.ClockOut == null;
+
+            return Ok(employeeDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee Create" }
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> Add([FromForm] EmployeeAddDTO NewEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files)
         {
@@ -328,6 +803,18 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return BadRequest("Employee data is required.");
             }
 
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
+                    if (returnFileInput != null)
+                    {
+                        return BadRequest(returnFileInput);
+                    } 
+                } 
+            }
+
             //Validation
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             if (NewEmployee.Email != null && !Regex.IsMatch(NewEmployee.Email, pattern))
@@ -337,9 +824,9 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (NewEmployee.EmployeeTypeID == 2)
             {
                 if (NewEmployee.LicenseNumber == null)
-                    return BadRequest("LicenseNumber Is Required");
+                    return BadRequest("License Number Is Required");
                 if (NewEmployee.ExpireDate == null)
-                    return BadRequest("ExpireDate Is Required");
+                    return BadRequest("Expire Date Is Required");
             }
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.User_Name == NewEmployee.User_Name);
@@ -400,6 +887,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            employee.ConnectionStatusID = 1;
             if (userTypeClaim == "octa")
             {
                 employee.InsertedByOctaId = userId;
@@ -461,38 +949,34 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Unit_Of_Work.SaveChanges();
             }
 
-            ////create attachment folder
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");
-            var employeeFolder = Path.Combine(baseFolder, employee.User_Name);
-            if (!Directory.Exists(employeeFolder))
+            //// Create EmployeeVacationType
+            List<VacationTypes> vacationTypes = Unit_Of_Work.vacationTypes_Repository.FindBy(a => a.IsDeleted != true);
+            foreach (var type in vacationTypes)
             {
-                Directory.CreateDirectory(employeeFolder);
+                var annualVacation = new AnnualVacationEmployee();
+                annualVacation.EmployeeID = employee.ID;
+                annualVacation.VacationTypesID = type.ID;
+                Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
+                Unit_Of_Work.SaveChanges();
             }
+
 
             if (files != null && files.Any())
             {
                 foreach (var file in files)
-                {
-                    if (file.file.Length > 0)
-                    {
-                        var filePath = Path.Combine(employeeFolder, file.file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.file.CopyToAsync(stream);
-                        }
-                    }
+                { 
                     EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
-                        EmployeeID = employee.ID,
-                        Link = $"Uploads/Attachments/{employee.User_Name}/{file.file.FileName}",
+                        EmployeeID = employee.ID, 
+                        Link = await _fileService.UploadFileAsync(file.file, "Administration/Employee/Attachments", employee.ID, HttpContext),
                         Name = file.Name,
                     };
-
+                     
                     Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
                     Unit_Of_Work.SaveChanges();
-                }
+                } 
             }
-
+              
             return Ok(NewEmployee);
         }
 
@@ -502,7 +986,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Employee Edit" }
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files , [FromForm] List<EmployeeAttachmentAddDTO> editedFiles)
         {
@@ -523,6 +1007,30 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Employee cannot be null");
             }
+
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
+                    if (returnFileInput != null)
+                    {
+                        return BadRequest(returnFileInput);
+                    }
+                }
+            }
+            if (editedFiles != null && editedFiles.Count > 0)
+            {
+                foreach (var file in editedFiles)
+                {
+                    string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
+                    if (returnFileInput != null)
+                    {
+                        return BadRequest(returnFileInput);
+                    }
+                }
+            }
+
             Employee CheckEmail = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.Email == newEmployee.Email && e.ID!= newEmployee.ID);
             if (CheckEmail != null)
             {
@@ -532,6 +1040,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (oldEmp == null)
             {
                 return NotFound("Employee not found.");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, oldEmp);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             if (newEmployee.BusCompanyID != null && newEmployee.BusCompanyID != 0)
@@ -586,43 +1103,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 if (newEmployee.LicenseNumber == null)
                 {
-                    return BadRequest("LicenseNumber is required.");
+                    return BadRequest("License Number is required.");
                 }
 
                 if (newEmployee.ExpireDate == null)
                 {
-                    return BadRequest("ExpireDate is required.");
+                    return BadRequest("Expire Date is required.");
                 }
             }
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");
-            if (oldEmp.User_Name != newEmployee.User_Name)
-            {
-                var oldEmployeeFolder = Path.Combine(baseFolder, oldEmp.User_Name);
-                var newEmployeeFolder = Path.Combine(baseFolder, newEmployee.User_Name);
-
-                if (Directory.Exists(oldEmployeeFolder))
-                {
-                    try
-                    {
-                        Directory.Move(oldEmployeeFolder, newEmployeeFolder);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"An error occurred while renaming the folder: {ex.Message}");
-                    }
-                }
-            }
-
-
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, oldEmp);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
+              
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             if(oldEmp.User_Name!=newEmployee.User_Name)
@@ -649,33 +1138,16 @@ namespace LMS_CMS_PL.Controllers.Domains
             oldEmp.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.employee_Repository.Update(oldEmp);
             await Unit_Of_Work.SaveChangesAsync();
-
-            // Create new folder for employee
-            var sanitizedUserName = newEmployee.User_Name.Trim();
-            var employeeFolder = Path.Combine(baseFolder, sanitizedUserName);
-
-            if (!Directory.Exists(employeeFolder))
-            {
-                Directory.CreateDirectory(employeeFolder);
-            }
-
-            // Handle new files
+             
+            // Handle new files 
             if (files != null && files.Any())
             {
                 foreach (var file in files)
                 {
-                    if (file.file.Length > 0)
-                    {
-                        var filePath = Path.Combine(employeeFolder, file.file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.file.CopyToAsync(stream);
-                        }
-                    }
                     EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
                         EmployeeID = oldEmp.ID,
-                        Link = $"Uploads/Attachments/{oldEmp.User_Name}/{file.file.FileName}",
+                        Link = await _fileService.UploadFileAsync(file.file, "Administration/Employee/Attachments", oldEmp.ID, HttpContext),
                         Name = file.Name,
                     };
 
@@ -694,6 +1166,47 @@ namespace LMS_CMS_PL.Controllers.Domains
                     existingAttachment.Name = filee.Name;
                     Unit_Of_Work.employeeAttachment_Repository.Update(existingAttachment);
                 }
+            }
+
+            //// Create LcationEmployee
+            if (newEmployee.NewLocationSelected != null && newEmployee.NewLocationSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.NewLocationSelected)
+                {
+                    Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (location != null)
+                    {
+                        EmployeeLocation employeeLocation = Unit_Of_Work.employeeLocation_Repository.First_Or_Default(s => s.LocationID == location.ID && s.EmployeeID == oldEmp.ID && s.IsDeleted == true);
+                        if (employeeLocation != null)
+                        {
+                            employeeLocation.IsDeleted = null;
+                            Unit_Of_Work.employeeLocation_Repository.Update(employeeLocation);
+                        }
+                        else
+                        {
+                            employeeLocation = new EmployeeLocation();
+                            employeeLocation.LocationID = item;
+                            employeeLocation.EmployeeID = oldEmp.ID;
+                            Unit_Of_Work.employeeLocation_Repository.Add(employeeLocation);
+                        }
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Delete LcationEmployee
+            if (newEmployee.DeletedLocationSelected != null && newEmployee.DeletedLocationSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.DeletedLocationSelected)
+                {
+                    EmployeeLocation employeeLocation = Unit_Of_Work.employeeLocation_Repository.First_Or_Default(s => s.LocationID == item && s.EmployeeID == oldEmp.ID && s.IsDeleted != true);
+                    if (employeeLocation != null)
+                    {
+                        employeeLocation.IsDeleted = true;
+                        Unit_Of_Work.employeeLocation_Repository.Update(employeeLocation);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
             }
 
             //// Create floorMonitor
@@ -809,8 +1322,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
             await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
-        }
-
+        } 
 
         //////////////////////////////////////////////////////
 
@@ -880,48 +1392,96 @@ namespace LMS_CMS_PL.Controllers.Domains
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        
+        //////////////////////////////////////////////////////
+
+        [HttpDelete("Suspend/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Employee" }
+        )]
+        public IActionResult Suspend(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            Employee employee = Unit_Of_Work.employee_Repository.Select_By_Id(id);
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee with this ID");
+            }
+            
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, employee);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+             
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            employee.IsSuspended = !employee.IsSuspended;
+            employee.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                employee.UpdatedByOctaId = userId;
+                if (employee.UpdatedByUserId != null)
+                {
+                    employee.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                employee.UpdatedByUserId = userId;
+                if (employee.UpdatedByOctaId != null)
+                {
+                    employee.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.employee_Repository.Update(employee);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
 
         //////////////////////////////////////////////////////
 
 
         [HttpDelete("DeleteFiles/{id}")]
-        public IActionResult DeleteFiles(long id)
+        public async Task<IActionResult> DeleteFilesAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             EmployeeAttachment employeeAttachment = Unit_Of_Work.employeeAttachment_Repository.First_Or_Default(s => s.ID == id);
+            await _fileService.DeleteFileAsync(
+                employeeAttachment.Link,
+                "Administration/Employee/Attachments",
+                employeeAttachment.EmployeeID,
+                HttpContext
+            );
             Unit_Of_Work.employeeAttachment_Repository.Delete(id);
             Unit_Of_Work.SaveChanges();
-            Uri uri = new Uri(employeeAttachment.Link);
-            string path = uri.LocalPath; 
-            string fileName = Path.GetFileName(path); 
-            string directory = Path.GetDirectoryName(path); 
-            string folderName = Path.GetFileName(directory);
-            if (string.IsNullOrEmpty(folderName) || string.IsNullOrEmpty(fileName))
-            {
-                return BadRequest(new { message = "Invalid file details provided." });
-            }
-            if (folderName.Contains("..") || fileName.Contains(".."))
-            {
-                return BadRequest(new { message = "Invalid file path." });
-            }
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments", folderName, fileName);
-            if (!System.IO.File.Exists(filePath))
-            {
-                return NotFound(new { message = "File not found." });
-            }
-
-            try
-            {
-                System.IO.File.Delete(filePath);
-                return Ok(new { message = "File deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"An error occurred while deleting the file: {ex.Message}" });
-            }
+             
+            return Ok(new { message = "File deleted successfully." });
         }
 
   
@@ -930,7 +1490,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("getByAccountingEmployee/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Employee Accounting" }
         )]
         public async Task<IActionResult> GetByAccounting(long id)
         {
@@ -985,6 +1545,12 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
+            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true &&a.VacationTypes.IsDeleted != true
+            , query => query.Include(emp => emp.Employee),
+                query => query.Include(emp => emp.VacationTypes));
+
+            employeeDTO.AnnualVacationEmployee = mapper.Map<List<AnnualVacationEmployeeGetDTO>>(annualVacationEmployees);
+
             return Ok(employeeDTO);
         }
         //////////////////////////////////////////////////////////////////////////////
@@ -1014,6 +1580,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (employee == null || employee.IsDeleted == true)
             {
                 return NotFound("No Employee with this ID");
+            }
+
+            if(newEmployee.NationalID != null)
+            {
+                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.NationalID == newEmployee.NationalID && d.ID != newEmployee.ID);
+                if(emp != null)
+                {
+                    return BadRequest("This National ID already exists");
+                }
             }
 
             if (newEmployee.AccountNumberID != 0 && newEmployee.AccountNumberID != null)
@@ -1112,7 +1687,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee Accounting", roleId, userId, employee);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, employee);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -1169,32 +1744,117 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             }
             //////delete all empStudents
-          List<EmployeeStudent> employeeStudents = await Unit_Of_Work.employeeStudent_Repository.Select_All_With_IncludesById<EmployeeStudent>(
-                  sem => sem.EmployeeID == newEmployee.ID);
+            
+            List<EmployeeStudent> employeeStudents = await Unit_Of_Work.employeeStudent_Repository.Select_All_With_IncludesById<EmployeeStudent>(
+                    sem => sem.EmployeeID == newEmployee.ID);
           
-          foreach (EmployeeStudent emp in employeeStudents)
-          {
-              Unit_Of_Work.employeeStudent_Repository.Delete(emp.ID);
-              Unit_Of_Work.SaveChanges();
-          }
+            foreach (EmployeeStudent emp in employeeStudents)
+            {
+                Unit_Of_Work.employeeStudent_Repository.Delete(emp.ID);
+                Unit_Of_Work.SaveChanges();
+            }
           
-          foreach (var empStudent in newEmployee.Students)
-          {
+            foreach (var empStudent in newEmployee.Students)
+            {
                 Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == empStudent && s.IsDeleted != true);
                 if (student != null)
                 {
-                  EmployeeStudent emp = new EmployeeStudent();
-                  emp.EmployeeID = newEmployee.ID;
-                  emp.StudentID = empStudent;
-                  Unit_Of_Work.employeeStudent_Repository.Add(emp);
-                  Unit_Of_Work.SaveChanges();
+                    EmployeeStudent emp = new EmployeeStudent();
+                    emp.EmployeeID = newEmployee.ID;
+                    emp.StudentID = empStudent;
+                    Unit_Of_Work.employeeStudent_Repository.Add(emp);
+                    Unit_Of_Work.SaveChanges();
 
                 }
-          }
-          
-          return Ok(newEmployee);
+            }
+
+            if (newEmployee.AnnualVacationEmployee.Count > 0)
+            {
+                foreach (var vacDto in newEmployee.AnnualVacationEmployee)
+                {
+                    var existingEntity = Unit_Of_Work.annualVacationEmployee_Repository.First_Or_Default(v => v.ID == vacDto.ID);
+
+                    if (existingEntity != null)
+                    {
+                        mapper.Map(vacDto, existingEntity); // update fields in tracked entity
+                        Unit_Of_Work.annualVacationEmployee_Repository.Update(existingEntity);
+                        Unit_Of_Work.SaveChanges();
+                    }
+                }
+            }
+
+
+            return Ok(newEmployee);
         }
-    }   
+        [HttpPost("report")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Job Report"})]
+        public async Task<IActionResult> GetReport([FromBody] EmployeeReportRequestDto request)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (request == null)
+                return BadRequest("Invalid request.");
+
+            // repos
+            var employeeRepo = uow.employee_Repository;
+            var jobRepo = uow.job_Repository;
+            var jobCategoryRepo = uow.jobCategory_Repository;
+
+            IQueryable<Employee> query = employeeRepo.Query().Where(e => e.IsDeleted != true);
+
+            if (request.JobId.HasValue && request.JobCategoryId.HasValue)
+            {
+                var job = await jobRepo.Select_By_IdAsync(request.JobId.Value);
+                if (job == null)
+                    return NotFound("Job with this ID not found.");
+
+                var category = await jobCategoryRepo.Select_By_IdAsync(request.JobCategoryId.Value);
+                if (category == null)
+                    return NotFound("JobCategory with this ID not found.");
+
+                if (job.JobCategoryID != request.JobCategoryId.Value)
+                    return BadRequest("The provided JobId does not belong to the given JobCategoryId.");
+
+                query = query.Where(e => e.JobID == request.JobId.Value);
+            }
+         
+            else if (request.JobId.HasValue)
+            {
+                var job = await jobRepo.Select_By_IdAsync(request.JobId.Value);
+                if (job == null)
+                    return NotFound("Job with this ID not found.");
+
+                query = query.Where(e => e.JobID == request.JobId.Value);
+            }
+            
+            else if (request.JobCategoryId.HasValue)
+            {
+                var category = await jobCategoryRepo.Select_By_IdAsync(request.JobCategoryId.Value);
+                if (category == null)
+                    return NotFound("JobCategory with this ID not found.");
+
+                query = query.Where(e => e.Job.JobCategoryID == request.JobCategoryId.Value);
+            }
+
+            var employees = await query.ToListAsync();
+
+            if (!employees.Any())
+                return NotFound("No employees found for the given filters.");
+
+            var dtoList = mapper.Map<List<EmployeeReportDto>>(employees);
+            return Ok(dtoList);
+        }
+
+    }
 }
 
 

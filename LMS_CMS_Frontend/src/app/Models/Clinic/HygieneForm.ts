@@ -13,22 +13,26 @@ export class HygieneForm {
   ) {}
 }
 
-export interface StudentHygieneType {
-  id: number;
-  studentId: number;
-  student: string;
-  en_name: string | null;
-  hygieneFormId: number;
-  attendance: boolean;
-  comment: string;
-  actionTaken: string;
-  selectAll: boolean;
-  hygieneTypes: HygieneType[];
+export class StudentHygieneType {
+  constructor(
+    public id: number = 0,
+    public studentId: number = 0,
+    public student: string = '',
+    public en_name: string | null = null,
+    public hygieneFormId: number = 0,
+    public attendance: boolean = false,
+    public comment: string = '',
+    public actionTaken: string = '',
+    public selectAll: boolean = false,
+    public hygieneTypes: HygieneType[] = []
+  ) {}
 }
 
-export interface HygieneType {
-  id: number;
-  type: string;
-  en_name: string;
-  insertedByUserId: number;
+export class HygieneType {
+  constructor(
+    public id: number = 0,
+    public type: string = '',
+    public en_name: string = '',
+    public insertedByUserId: number = 0
+  ) {}
 }

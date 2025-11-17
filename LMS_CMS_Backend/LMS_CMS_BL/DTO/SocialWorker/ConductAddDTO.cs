@@ -12,9 +12,10 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string? Details { get; set; }
         public DateOnly Date { get; set; }
         public bool IsSendSMSToParent { get; set; }
-        public FormFile? NewFile { get; set; }
+        public IFormFile? NewFile { get; set; }
         public long StudentID { get; set; }
         public long ConductTypeID { get; set; }
         public long ProcedureTypeID { get; set; }
+        public long ClassroomID { get; set; }
     }
 }

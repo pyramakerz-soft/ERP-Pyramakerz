@@ -19,9 +19,11 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-students',
   standalone: true,
@@ -29,6 +31,8 @@ import {  Subscription } from 'rxjs';
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
+
+@InitLoader()
 export class StudentsComponent {
 
   keysArray: string[] = ['id', 'name', 'academicYearName', 'floorName', 'gradeName', 'number'];
@@ -52,6 +56,11 @@ export class StudentsComponent {
   preSelectedYear: number | null = null;
   preSelectedGrade: number | null = null;
   preSelectedClassroom: number | null = null;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(public account: AccountService, 
     public buildingService: BuildingService, 
@@ -63,11 +72,13 @@ export class StudentsComponent {
     public StudentService: StudentService, 
     public employeeServ: EmployeeService,
     public sectionService: SectionService, 
+    private translate: TranslateService,
     public gradeService: GradeService, 
     public acadimicYearService: AcadimicYearService, 
     public floorService: FloorService, 
     public router: Router,
-      private languageService: LanguageService) { }
+    private languageService: LanguageService, 
+    ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -79,7 +90,7 @@ export class StudentsComponent {
       this.path = url[0].path
     });
 
-    this.getStudentData()
+    this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -93,8 +104,15 @@ export class StudentsComponent {
        this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir === 'rtl'; 
   }
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
@@ -106,28 +124,83 @@ export class StudentsComponent {
     return IsAllow;
   }
 
-  getStudentData() {
+  // getStudentData() {
+  //   this.OriginStudentData = []
+  //   this.StudentsData = []
+  //   this.StudentService.GetAll(this.DomainName).subscribe(
+  //     (data: Student[]) => { 
+  //       this.OriginStudentData = data;
+  //       this.StudentsData = data;
+
+  //     }
+  //   )
+  // }
+
+  getStudentData(DomainName: string, pageNumber: number, pageSize: number) {
     this.OriginStudentData = []
     this.StudentsData = []
-    this.StudentService.GetAll(this.DomainName).subscribe(
-      (data: Student[]) => { 
-        this.OriginStudentData = data;
-        this.StudentsData = data;
-
+    this.StudentService.GetAllWithPaginnation(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.OriginStudentData = data.data;
+        this.StudentsData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+        // else {
+        //   const errorMessage =
+        //     error.error ||
+        //     this.translate.instant('Failed to load Students');
+        //   this.showErrorAlert(errorMessage);
+        // }
       }
-    )
+    );
   }
 
   OpenModal() {
     this.isModalOpen = true;
   }
 
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
   Create() {
-    this.router.navigateByUrl(`Employee/Create Student`);
+    this.router.navigateByUrl(`Employee/Student/Create`);
   }
 
   Edit(StuId: number, Rid: number) {
-    this.router.navigateByUrl(`Employee/Edit Student/${Rid}/${StuId}`);
+    this.router.navigateByUrl(`Employee/Student/Edit/${Rid}/${StuId}`);
   }
 
 
@@ -137,17 +210,64 @@ export class StudentsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Student?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.StudentService.Delete(id, this.DomainName).subscribe((d) => {
-          this.getStudentData();
+        this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+        });
+      }
+    });
+  }
+
+  suspend(stu:Student){ 
+    let message = ""
+    let doneMessage = ""
+    let doneTitle = ""
+    if(stu.isSuspended == false){
+      message = "Are you sure you want to Suspend this Student?"
+      doneMessage = "The Student has been Suspend successfully."
+      doneTitle = "Suspend!"
+    }else{
+      message = "Are you sure you want to UnSuspend this Student?"
+      doneMessage = "The Student has been UnSuspend successfully."
+      doneTitle = "UnSuspend!"
+    }
+    Swal.fire({
+      title: message,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: doneTitle,
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) { 
+        this.StudentService.Suspend(stu.id, this.DomainName).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: doneTitle,
+              text: doneMessage,
+              confirmButtonColor: '#089B41',
+            });
+            this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+          },
+          error: (error) => {
+            const errorMessage = error?.error || 'An unexpected error occurred.';
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: errorMessage,
+              confirmButtonColor: '#089B41',
+            });
+          },
         });
       }
     });
@@ -161,5 +281,49 @@ export class StudentsComponent {
     document.getElementById("Hide_Modal")?.classList.add("hidden");
 
     this.isModalOpen = false;
+  }
+
+   changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getStudentData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
   }
 }

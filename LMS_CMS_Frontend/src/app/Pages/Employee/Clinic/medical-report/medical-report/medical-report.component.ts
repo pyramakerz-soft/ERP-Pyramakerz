@@ -1,6 +1,4 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
-import { FollowUpService } from '../../../../../Services/Employee/Clinic/follow-up.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -11,13 +9,17 @@ import { GradeService } from '../../../../../Services/Employee/LMS/grade.service
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { MedicalReportService } from '../../../../../Services/Employee/Clinic/medical-report.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
-import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
@@ -30,10 +32,10 @@ export class MedicalReportComponent implements OnInit {
   selectedTab = this.tabs[0];
 
   // Filter controls
-  selectedSchool: number | null = null;
-  selectedGrade: number | null = null;
-  selectedClass: number | null = null;
-  selectedStudent: number | null = null;
+  selectedSchool: number = 0;
+  selectedGrade: number = 0;
+  selectedClass: number = 0;
+  selectedStudent: number = 0;
 
   // Data sources
   schools: any[] = [];
@@ -61,28 +63,62 @@ export class MedicalReportComponent implements OnInit {
   pdfInfoRows: any[] = [];
   pdfTableHeaders: string[] = [];
   pdfTableData: any[] = [];
+  reportType: string = 'employee';
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  DomainName: string = '';
+  UserID: number = 0;
+  // Students: Student[] = [];
 
   constructor(
     private router: Router,
-    private hygieneFormService: HygieneFormService,
+    // private hygieneFormService: HygieneFormService,
     private languageService: LanguageService,
-    private medicalHistoryService: MedicalHistoryService,
-    private followUpService: FollowUpService,
+    // private medicalHistoryService: MedicalHistoryService,
+    // private followUpService: FollowUpService,
     private apiService: ApiService,
     private medicalReportService: MedicalReportService,
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private stateService: StateService, 
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private route: ActivatedRoute,
+    private reportsService: ReportsService // Add this
   ) {}
 
   ngOnInit(): void {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    this.DomainName = this.ApiServ.GetHeader();
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    if(this.reportType == 'parent'){
+      this.GetStudentsData()
+    }
+
     this.loadSchools();
       this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
+
     this.isRtl = document.documentElement.dir === 'rtl';
-  }
+        this.restoreState();
+    }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+  GetStudentsData() {
+    this.students = []
+    this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+      this.students = d
+      console.log(this.students)
+    })
+  }  
 
   async loadSchools() {
     try {
@@ -94,6 +130,69 @@ export class MedicalReportComponent implements OnInit {
     }
   }
 
+  private saveState() {
+    this.stateService.setMedicalReportState({
+      selectedTab: this.selectedTab,
+      selectedSchool: this.selectedSchool,
+      selectedGrade: this.selectedGrade,
+      selectedClass: this.selectedClass,
+      selectedStudent: this.selectedStudent,
+      tableData: this.tableData,
+      showTable: this.showTable,
+      schools: this.schools,
+      grades: this.grades,
+      classes: this.classes,
+      students: this.students
+    });
+  }
+
+  private restoreState() {
+    const savedState = this.stateService.getMedicalReportState();
+    if (savedState) {
+      this.selectedTab = savedState.selectedTab;
+      this.selectedSchool = savedState.selectedSchool;
+      this.selectedGrade = savedState.selectedGrade;
+      this.selectedClass = savedState.selectedClass;
+      this.selectedStudent = savedState.selectedStudent;
+      this.tableData = savedState.tableData;
+      this.showTable = savedState.showTable;
+      this.schools = savedState.schools || [];
+      this.grades = savedState.grades || [];
+      this.classes = savedState.classes || [];
+      this.students = savedState.students || [];
+      
+      this.prepareExportData();
+      this.stateService.clearMedicalReportState();
+    }
+  }
+
+    viewDetails(id: number) {
+    this.saveState();
+    if (this.selectedTab === 'MH By Parent') {
+      this.router.navigateByUrl(`Employee/Medical Report/parent/${id}`);
+    } else if (this.selectedTab === 'MH By Doctor') {
+      this.router.navigateByUrl(`Employee/Medical Report/doctor/${id}`);
+    }
+  }
+
+  OrCheck():boolean{
+    if(this.reportType === 'employee'){
+      return !this.selectedSchool || !this.selectedGrade || !this.selectedClass || !this.selectedStudent
+    }
+    else{
+      return !this.selectedStudent
+    }
+  }
+
+  AndCheck():boolean{
+    if(this.reportType === 'employee'){
+     return (!!this.selectedSchool && !!this.selectedGrade && !!this.selectedClass && !!this.selectedStudent )
+   }
+    else{
+     return (!!this.selectedStudent)
+    }
+  }
+
   async loadGrades() {
     if (this.selectedSchool) {
       try {
@@ -102,11 +201,11 @@ export class MedicalReportComponent implements OnInit {
           this.gradeService.GetBySchoolId(this.selectedSchool, domainName)
         );
         this.grades = data;
-        this.selectedGrade = null;
+        this.selectedGrade = 0;
         this.classes = [];
-        this.selectedClass = null;
+        this.selectedClass = 0;
         this.students = [];
-        this.selectedStudent = null;
+        this.selectedStudent = 0;
       } catch (error) {
         console.error('Error loading grades:', error);
       }
@@ -121,9 +220,9 @@ export class MedicalReportComponent implements OnInit {
           this.classroomService.GetByGradeId(this.selectedGrade, domainName)
         );
         this.classes = data;
-        this.selectedClass = null;
+        this.selectedClass = 0;
         this.students = [];
-        this.selectedStudent = null;
+        this.selectedStudent = 0;
       } catch (error) {
         console.error('Error loading classes:', error);
       }
@@ -141,30 +240,39 @@ export class MedicalReportComponent implements OnInit {
           id: student.id,
           name: student.en_name || 'Unknown',
         }));
-        this.selectedStudent = null; // Reset selected student when class changes
+        this.selectedStudent = 0; // Reset selected student when class changes
       } catch (error) {
         console.error('Error loading students:', error);
       }
     } else {
       this.students = [];
-      this.selectedStudent = null;
+      this.selectedStudent = 0;
     }
   }
 
-  onSchoolChange() {
-    this.loadGrades();
-    this.resetTable();
-  }
+onSchoolChange() {
+  this.loadGrades();
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
-  onGradeChange() {
-    this.loadClasses();
-    this.resetTable();
-  }
+onGradeChange() {
+  this.loadClasses();
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
-  onClassChange() {
-    this.loadStudents();
-    this.resetTable();
-  }
+onClassChange() {
+  this.loadStudents();
+  this.resetTable();
+  this.saveState(); // Add this
+}
+
+selectTab(tab: string) {
+  this.selectedTab = tab;
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
   resetTable() {
     this.showTable = false;
@@ -172,21 +280,18 @@ export class MedicalReportComponent implements OnInit {
   }
 
   async viewReport() {
-    if (
-      !this.selectedSchool ||
-      !this.selectedGrade ||
-      !this.selectedClass ||
-      !this.selectedStudent
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select School, Grade, Class and Student',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (
+    //  !this.selectedStudent
+    // ) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Missing Information',
+    //     text: 'Please select School, Grade, Class and Student',
+    //     confirmButtonColor: '#3085d6',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
@@ -197,86 +302,163 @@ export class MedicalReportComponent implements OnInit {
 
       switch (this.selectedTab) {
         case 'MH By Parent':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllMHByParent(
-              domainName,
-              this.selectedStudent, // studentId first
-              this.selectedSchool, // schoolId
-              this.selectedGrade, // gradeId
-              this.selectedClass // classId
-            )
-          );
+          if(this.reportType === 'parent'){
+            console.log(this.selectedStudent)
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByParentByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByParent(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
           this.tableData = data.map((item) => ({
+            id: item.id,  // Make sure to include this
             date: new Date(item.insertedAt).toLocaleDateString(),
             details: item.details || 'No details',
-            permanentDrug: item.permanentDrug || 'None',
+            permanentDrug: item.permanentDrug || '-'
           }));
-          break;
+          console.log('MH By Parent data with IDs:', this.tableData);  // Debug log
+        break;
 
         case 'MH By Doctor':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllMHByDoctor(
-              domainName,
-              this.selectedStudent,
-              this.selectedSchool,
-              this.selectedGrade,
-              this.selectedClass
-            )
-          );
+          if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByDoctorByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllMHByDoctor(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
           this.tableData = data.map((item) => ({
+            id: item.id,  // Make sure to include this
             date: new Date(item.insertedAt).toLocaleDateString(),
             details: item.details || 'No details',
-            permanentDrug: item.permanentDrug || 'None',
+            permanentDrug: item.permanentDrug || '-'
           }));
-          break;
+          console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
+        break;
 
-        case 'Hygiene Form':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllHygieneForms(
-              domainName,
-              this.selectedStudent,
-              this.selectedSchool,
-              this.selectedGrade,
-              this.selectedClass
-            )
-          );
-          this.tableData = data.flatMap((form) =>
-            form.studentHygieneTypes.map((student: any) => ({
-              date: new Date(form.date).toLocaleDateString(),
-              attendance: student.attendance ? 'Present' : 'Absent',
-              types:
-                student.hygieneTypeId === 1
-                  ? 'Type 1'
-                  : student.hygieneTypeId === 2
-                  ? 'Type 2'
-                  : 'N/A',
-              comment: student.comment || 'None',
-              actionTaken: student.actionTaken || 'None',
-            }))
-          );
-          break;
+case 'Hygiene Form':
+  if(this.reportType === 'parent'){
+    data = await firstValueFrom(
+      this.medicalReportService.getAllHygieneFormsByStudentId(
+        domainName,
+        this.selectedStudent,
+      )
+    );
+  }
+  else{
+    data = await firstValueFrom(
+      this.medicalReportService.getAllHygieneForms(
+        domainName,
+        this.selectedStudent,
+        this.selectedSchool,
+        this.selectedGrade,
+        this.selectedClass
+      )
+    );
+  }
+  
+  this.tableData = data.flatMap((form) => {
+    // Find the student hygiene record for the selected student
+    const studentHygiene = form.studentHygieneTypes?.find(
+      (sht: any) => sht.studentId === this.selectedStudent
+    );
+    
+    if (!studentHygiene) return [];
+    
+    // Create a row with basic info
+    const row: any = {
+      date: new Date(form.date).toLocaleDateString(),
+      attendance: studentHygiene.attendance ? 'Present' : 'Absent',
+      comment: studentHygiene.comment || '-',
+      actionTaken: studentHygiene.actionTaken || '-'
+    };
+
+    // Get all possible hygiene types from the form data
+    // This assumes all forms have the same hygiene types available
+    const allHygieneTypes = new Set<string>();
+    data.forEach((f: any) => {
+      f.studentHygieneTypes?.forEach((sht: any) => {
+        sht.hygieneTypes?.forEach((type: any) => {
+          allHygieneTypes.add(type.type);
+        });
+      });
+    });
+
+    // Initialize all hygiene types as 'No'
+    allHygieneTypes.forEach(type => {
+      row[type] = 'No';
+    });
+
+    // Mark selected hygiene types as 'Yes'
+    if (studentHygiene.hygieneTypes && studentHygiene.hygieneTypes.length > 0) {
+      studentHygiene.hygieneTypes.forEach((type: any) => {
+        row[type.type] = 'Yes';
+      });
+    }
+
+    return row;
+  });
+break;
 
         case 'Follow Up':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllFollowUps(
-              domainName,
-              this.selectedStudent,
-              this.selectedSchool,
-              this.selectedGrade,
-              this.selectedClass
-            )
-          );
-          this.tableData = data.map((item) => ({
-            date: new Date(item.date).toLocaleDateString(),
+            if(this.reportType === 'parent'){
+            data = await firstValueFrom(
+              this.medicalReportService.getAllFollowUpsByStudentId(
+                domainName,
+                this.selectedStudent,
+              )
+            );
+          }
+          else{
+            data = await firstValueFrom(
+              this.medicalReportService.getAllFollowUps(
+                domainName,
+                this.selectedStudent,
+                this.selectedSchool,
+                this.selectedGrade,
+                this.selectedClass
+              )
+            );
+          }
+          this.tableData = data.map((item: any) => ({
+            date: new Date(item.insertedAt).toLocaleDateString(),
             diagnosis: item.diagnosis || 'No diagnosis',
-            drug: item.drug || 'None',
-            dose: item.dose || 'None',
+            drug: item.followUpDrugs?.map((d: any) => d.drug).join(', ') || 'No drug',
+            dose: item.followUpDrugs?.map((d: any) => d.dose).join(', ') || 'No dose',
             recommendations: item.recommendation || 'No recommendations',
+            complains: item.complains || 'No complains',
+            doctor: item.en_name || 'Unknown'
           }));
-          break;
+        break;
+  
       }
 
       this.prepareExportData();
+      console.log('Report data loaded:', this.tableData);
       this.showTable = true;
     } catch (error) {
       console.error('Error loading report data:', error);
@@ -286,241 +468,275 @@ export class MedicalReportComponent implements OnInit {
       this.isLoading = false;
     }
   }
-
-  selectTab(tab: string) {
-    this.selectedTab = tab;
-    this.resetTable();
-  }
-
-  prepareExportData() {
-    this.pdfTableData = this.tableData.map((item) => {
-      switch (this.selectedTab) {
-        case 'MH By Parent':
-        case 'MH By Doctor':
-          return {
-            Date: item.date,
-            Details: item.details,
-            'Permanent Drug': item.permanentDrug,
-          };
-        case 'Hygiene Form':
-          return {
-            Date: item.date,
-            Attendance: item.attendance,
-            Type: item.types,
-            Comment: item.comment,
-            'Action Taken': item.actionTaken,
-          };
-        case 'Follow Up':
-          return {
-            Date: item.date,
-            Diagnosis: item.diagnosis,
-            Drug: item.drug,
-            Dose: item.dose,
-            Recommendations: item.recommendations,
-          };
-        default:
-          return {};
-      }
-    });
-
-    // Set PDF headers based on selected tab
+  
+prepareExportData() {
+  this.pdfTableData = this.tableData.map((item) => {
     switch (this.selectedTab) {
       case 'MH By Parent':
       case 'MH By Doctor':
-        this.pdfTableHeaders = ['Date', 'Details', 'Permanent Drug'];
-        break;
+        return {
+          Date: item.date,
+          Details: item.details,
+          'Permanent Drug': item.permanentDrug,
+        };
       case 'Hygiene Form':
-        this.pdfTableHeaders = [
-          'Date',
-          'Attendance',
-          'Type',
-          'Comment',
-          'Action Taken',
-        ];
-        break;
+        const hygieneRow: any = {
+          Date: item.date,
+          Attendance: item.attendance,
+          Comment: item.comment,
+          'Action Taken': item.actionTaken
+        };
+        
+        // Add dynamic hygiene types - ensure all types have values
+        Object.keys(item).forEach(key => {
+          if (key !== 'date' && key !== 'attendance' && 
+              key !== 'comment' && key !== 'actionTaken') {
+            hygieneRow[key] = item[key] || 'No'; // This ensures 'No' instead of undefined
+          }
+        });
+        
+        return hygieneRow;
       case 'Follow Up':
-        this.pdfTableHeaders = [
-          'Date',
-          'Diagnosis',
-          'Drug',
-          'Dose',
-          'Recommendations',
-        ];
-        break;
+        return {
+          Date: item.date,
+          Diagnosis: item.diagnosis,
+          Drug: item.drug,
+          Dose: item.dose,
+          Recommendations: item.recommendations,
+          Complains: item.complains,
+          Doctor: item.doctor
+        };
+      default:
+        return {};
     }
+  });
 
-    // Set info rows
-    const selectedSchool = this.schools.find(
-      (s) => s.id === this.selectedSchool
-    );
-    const selectedGrade = this.grades.find((g) => g.id === this.selectedGrade);
-    const selectedClass = this.classes.find((c) => c.id === this.selectedClass);
-    const selectedStudent = this.students.find(
-      (s) => s.id === this.selectedStudent
-    );
+  // Set PDF headers based on selected tab
+  switch (this.selectedTab) {
+    case 'MH By Parent':
+    case 'MH By Doctor':
+      this.pdfTableHeaders = ['Date', 'Details', 'Permanent Drug'];
+      break;
+    case 'Hygiene Form':
+      this.pdfTableHeaders = ['Date', 'Attendance'];
+      
+      // Add dynamic hygiene type headers and ensure all data has these columns
+      if (this.tableData.length > 0) {
+        const allTypes = new Set<string>();
+        
+        // Collect all possible hygiene types from all rows
+        this.tableData.forEach(row => {
+          Object.keys(row).forEach(key => {
+            if (key !== 'date' && key !== 'attendance' && 
+                key !== 'comment' && key !== 'actionTaken') {
+              allTypes.add(key);
+            }
+          });
+        });
 
-    this.pdfInfoRows = [
-      { keyEn: 'Report Type: ' + this.selectedTab },
-      { keyEn: 'School: ' + (selectedSchool?.name || 'N/A') },
-      { keyEn: 'Grade: ' + (selectedGrade?.name || 'N/A') },
-      { keyEn: 'Class: ' + (selectedClass?.name || 'N/A') },
-      { keyEn: 'Student: ' + (selectedStudent?.name || 'N/A') },
-      { keyEn: 'Report Date: ' + new Date().toLocaleDateString() },
-    ];
+        // Add all hygiene types to headers
+        allTypes.forEach(type => this.pdfTableHeaders.push(type));
+        
+        // Ensure all rows have all hygiene type columns with 'No' as default
+        this.pdfTableData = this.pdfTableData.map(row => {
+          allTypes.forEach(type => {
+            if (!row.hasOwnProperty(type)) {
+              row[type] = 'No';
+            }
+          });
+          return row;
+        });
+      }
+      
+      this.pdfTableHeaders.push('Comment', 'Action Taken');
+      break;
+      case 'Follow Up':
+      this.pdfTableHeaders = [
+        'Date',
+        'Diagnosis',
+        'Drug',
+        'Dose',
+        'Recommendations',
+      ];
+      break;
   }
+
+  // Set info rows (your existing code)
+  const selectedSchool = this.schools.find(
+    (s) => s.id === this.selectedSchool
+  );
+  const selectedGrade = this.grades.find((g) => g.id === this.selectedGrade);
+  const selectedClass = this.classes.find((c) => c.id === this.selectedClass);
+  const selectedStudent = this.students.find(
+    (s) => s.id === this.selectedStudent
+  );
+
+  this.pdfInfoRows = [
+    { keyEn: 'Report Type: ' + this.selectedTab },
+    { keyEn: 'School: ' + (selectedSchool?.name || '-') },
+    { keyEn: 'Grade: ' + (selectedGrade?.name || '-') },
+    { keyEn: 'Class: ' + (selectedClass?.name || '-') },
+    { keyEn: 'Student: ' + (selectedStudent?.name || '-') },
+    { keyEn: 'Report Date: ' + new Date().toLocaleDateString() },
+  ];
+}
 
   getCurrentHeaders(): string[] {
     switch (this.selectedTab) {
       case 'MH By Parent':
       case 'MH By Doctor':
         return ['Date', 'Details', 'Permanent Drug'];
-      case 'Hygiene Form':
-        return ['Date', 'Attendance', 'Type', 'Comment', 'Action Taken'];
-      case 'Follow Up':
-        return ['Date', 'Diagnosis', 'Drug', 'Dose', 'Recommendations'];
+
+case 'Hygiene Form':
+  const hygieneHeaders = ['Date', 'Attendance'];
+  
+  // Find all unique hygiene types in the data
+  const allTypes = new Set<string>();
+  this.tableData.forEach(row => {
+    Object.keys(row).forEach(key => {
+      if (key !== 'date' && key !== 'attendance' && key !== 'comment' && key !== 'actionTaken') {
+        allTypes.add(key);
+      }
+    });
+  });
+
+  // Add hygiene type headers
+  allTypes.forEach(type => hygieneHeaders.push(type));
+  
+  hygieneHeaders.push('Comment', 'Action Taken');
+  return hygieneHeaders;
+
+case 'Follow Up':
+  return ['Date', 'Diagnosis', 'Drug', 'Dose', 'Recommendations', 'Complains', 'Doctor'];
+  
       default:
         return [];
     }
   }
 
-  getCellValue(row: any, header: string): string {
-    const headerKey = header.toLowerCase().replace(/ /g, '');
-    switch (headerKey) {
-      case 'date':
-        return row.date;
-      case 'details':
-        return row.details;
-      case 'permanentdrug':
-        return row.permanentDrug;
-      case 'attendance':
-        return row.attendance;
-      case 'type':
-        return row.types;
-      case 'comment':
-        return row.comment;
-      case 'actiontaken':
-        return row.actionTaken;
-      case 'diagnosis':
-        return row.diagnosis;
-      case 'drug':
-        return row.drug;
-      case 'dose':
-        return row.dose;
-      case 'recommendations':
-        return row.recommendations;
-      default:
-        return row[headerKey] || '';
+getCellDisplay(row: any, header: string): string {
+  const value = this.getCellValue(row, header);
+  
+  // Only apply check/X formatting for hygiene type columns in Hygiene Form tab
+  if (this.selectedTab === 'Hygiene Form' && 
+      header !== 'Date' && 
+      header !== 'Attendance' && 
+      header !== 'Comment' && 
+      header !== 'Action Taken') {
+    
+    if (value === 'Yes' || value == 'true') {
+      return '<span class="text-green-600 font-bold">✓</span>'; // Checkmark
+    } else {
+      return '<span class="text-red-600 font-bold">✗</span>'; // X mark
     }
   }
+  
+  // For all other cases, return the original value
+  return value;
+}
 
-  exportToExcel() {
-    if (this.tableData.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No Data',
-        text: 'No data to export!',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+// Update the getCellValue method to handle boolean values
+getCellValue(row: any, header: string): string {
+  const headerKey = header.toLowerCase().replace(/ /g, '');
+  switch (headerKey) {
+    case 'date':
+      return row.date;
+    case 'details':
+      return row.details;
+    case 'permanentdrug':
+      return row.permanentDrug;
+    case 'attendance':
+      return row.attendance;
+    case 'comment':
+      return row.comment;
+    case 'actiontaken':
+      return row.actionTaken;
+    case 'diagnosis':
+      return row.diagnosis;
+    case 'drug':
+      return row.drug;
+    case 'dose':
+      return row.dose;
+    case 'recommendations':
+      return row.recommendations;
 
-    const excelData: any[] = [];
+    default:
+      // Handle dynamic hygiene type headers
+      if (this.tableData.length > 0 && this.selectedTab === 'Hygiene Form') {
+        const firstRow = this.tableData[0];
+        if (Object.keys(firstRow).includes(header)) {
+          return row[header] || 'No';
+        }
+      }
+      return row[headerKey] || '';
+  }
+}
 
-    // Add header
-    excelData.push([
-      {
-        v: `${this.pdfSchoolData.reportHeaderOneEn} - ${this.pdfSchoolData.reportHeaderTwoEn}`,
-        s: {
-          font: { bold: true, sz: 16 },
-          alignment: { horizontal: 'center' },
-        },
+async exportToExcel() {
+  if (this.tableData.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'No Data',
+      text: 'No data to export!',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  try {
+    const selectedSchool = this.schools.find(s => s.id === this.selectedSchool);
+    const selectedGrade = this.grades.find(g => g.id === this.selectedGrade);
+    const selectedClass = this.classes.find(c => c.id === this.selectedClass);
+    const selectedStudent = this.students.find(s => s.id === this.selectedStudent);
+
+    // Prepare info rows
+    const infoRows = [
+      { key: 'Report Type', value: this.selectedTab },
+      { key: 'School', value: selectedSchool?.name || '-' },
+      { key: 'Grade', value: selectedGrade?.name || '-' },
+      { key: 'Class', value: selectedClass?.name || '-' },
+      { key: 'Student', value: selectedStudent?.name || '-' },
+      { key: 'Report Date', value: new Date().toLocaleDateString() }
+    ];
+
+    // Prepare table data
+    const tableData = this.pdfTableData.map(row => {
+      return this.pdfTableHeaders.map(header => row[header] || '-');
+    });
+
+    const excelOptions = {
+      mainHeader: {
+        en: 'Medical Report',
+        ar: 'التقرير الطبي'
       },
-    ]);
-    excelData.push([]);
+      // subHeaders: [
+      //   {
+      //     en: 'Detailed Medical Information',
+      //     ar: 'معلومات طبية مفصلة'
+      //   }
+      // ],
+      infoRows: infoRows,
+      tables: [
+        {
+          headers: this.pdfTableHeaders,
+          data: tableData
+        }
+      ],
+      filename: `Medical_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    };
 
-    // Add filter information
-    const selectedSchool = this.schools.find(
-      (s) => s.id === this.selectedSchool
-    );
-    const selectedGrade = this.grades.find((g) => g.id === this.selectedGrade);
-    const selectedClass = this.classes.find((c) => c.id === this.selectedClass);
-    const selectedStudent = this.students.find(
-      (s) => s.id === this.selectedStudent
-    );
+    await this.reportsService.generateExcelReport(excelOptions);
 
-    excelData.push([
-      { v: 'Report Type:', s: { font: { bold: true } } },
-      { v: this.selectedTab, s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'School:', s: { font: { bold: true } } },
-      { v: selectedSchool?.name || 'N/A', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Grade:', s: { font: { bold: true } } },
-      { v: selectedGrade?.name || 'N/A', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Class:', s: { font: { bold: true } } },
-      { v: selectedClass?.name || 'N/A', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Student:', s: { font: { bold: true } } },
-      { v: selectedStudent?.name || 'N/A', s: { font: { bold: true } } },
-    ]);
-    excelData.push([]);
-
-    // Add table headers
-    excelData.push(
-      this.pdfTableHeaders.map((h) => ({
-        v: h,
-        s: {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '4472C4' } },
-          alignment: { horizontal: 'center' },
-          border: {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-        },
-      }))
-    );
-
-    // Add table data
-    this.pdfTableData.forEach((row, idx) => {
-      const isEven = idx % 2 === 0;
-      const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
-
-      const rowData = this.pdfTableHeaders.map((header) => ({
-        v: row[header] || '-',
-        s: { fill: { fgColor: { rgb: fillColor } } },
-      }));
-      excelData.push(rowData);
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Export Failed',
+      text: 'Failed to export data to Excel. Please try again.',
+      confirmButtonText: 'OK',
     });
-
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-    // Merge header
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-    worksheet['!merges'].push({
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: this.pdfTableHeaders.length - 1 },
-    });
-
-    // Set column widths
-    worksheet['!cols'] = this.pdfTableHeaders.map(() => ({ wch: 20 }));
-
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Medical Report');
-
-    // Save file
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Medical_Report_${dateStr}.xlsx`);
   }
+}
 
   exportToPDF() {
     if (this.pdfTableData.length === 0) {
@@ -545,55 +761,59 @@ export class MedicalReportComponent implements OnInit {
     }, 100);
   }
 
-  printTable() {
-    if (this.pdfTableData.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No Data',
-        text: 'No data to print!',
-        confirmButtonText: 'OK',
-      });
+printTable() {
+  if (this.tableData.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'No Data',
+      text: 'No data to print!',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.prepareExportData(); // Ensure data is prepared
+  
+  this.pdfTitle = `${this.selectedTab} Report`;
+  this.showPDF = true;
+
+  setTimeout(() => {
+    const printContents = document.getElementById('pdfPrintData')?.innerHTML;
+    if (!printContents) {
       return;
     }
 
-    this.pdfTitle = `${this.selectedTab} Report`;
-    this.showPDF = true;
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { margin: 0; }
+        @media print {
+          body > *:not(#print-container) { display: none !important; }
+          #print-container {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+
+    document.body.appendChild(printContainer);
+    window.print();
 
     setTimeout(() => {
-      const printContents = document.getElementById('pdfPrintData')?.innerHTML;
-      if (!printContents) {
-        return;
-      }
-
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) { display: none !important; }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      document.body.appendChild(printContainer);
-      window.print();
-
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
     }, 100);
-  }
+  }, 300); // Increased timeout to ensure data is ready
+}
+
+
 }

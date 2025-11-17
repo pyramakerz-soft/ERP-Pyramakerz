@@ -14,16 +14,16 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-receivable-doc-type',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './receivable-doc-type.component.html',
-  styleUrl: './receivable-doc-type.component.css'
+  styleUrl: './receivable-doc-type.component.css',
 })
 export class ReceivableDocTypeComponent {
   User_Data_After_Login: TokenData = new TokenData(
@@ -48,7 +48,7 @@ export class ReceivableDocTypeComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -61,12 +61,13 @@ export class ReceivableDocTypeComponent {
   data: ReceivableDocType = new ReceivableDocType();
 
   validationErrors: { [key in keyof ReceivableDocType]?: string } = {};
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
@@ -74,7 +75,7 @@ export class ReceivableDocTypeComponent {
     public ApiServ: ApiService,
     public ReceivableDocTypeServ: ReceivableDocTypeService,
     private languageService: LanguageService
-  ) { }
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -94,49 +95,69 @@ export class ReceivableDocTypeComponent {
     });
 
     this.GetAllData();
-          this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.ReceivableDocTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
 
   Create() {
     this.mode = 'Create';
-    this.data = new ReceivableDocType()
+    this.data = new ReceivableDocType();
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Receivable Doc Type?',
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Type') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.ReceivableDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+        this.ReceivableDocTypeServ.Delete(id, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+          }
+        );
       }
     });
   }
 
   Edit(row: ReceivableDocType) {
     this.mode = 'Edit';
-    this.ReceivableDocTypeServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.data = d
-    })
-    this.validationErrors = {}
+    this.ReceivableDocTypeServ.GetByID(row.id, this.DomainName).subscribe(
+      (d) => {
+        this.data = d;
+      }
+    );
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -160,46 +181,50 @@ export class ReceivableDocTypeComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.ReceivableDocTypeServ.Add(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
+        this.ReceivableDocTypeServ.Add(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.ReceivableDocTypeServ.Edit(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
+        this.ReceivableDocTypeServ.Edit(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
     }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -213,12 +238,10 @@ export class ReceivableDocTypeComponent {
       if (this.data.hasOwnProperty(key)) {
         const field = key as keyof ReceivableDocType;
         if (!this.data[field]) {
-          if (
-            field == 'name'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -227,10 +250,13 @@ export class ReceivableDocTypeComponent {
 
     if (this.data.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
     return isValid;
   }
+
   capitalizeField(field: keyof ReceivableDocType): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -262,13 +288,24 @@ export class ReceivableDocTypeComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

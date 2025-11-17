@@ -7,6 +7,7 @@ export class Student {
       public en_name: string = '',
       public ar_name: string = '',
       public password: string = '',
+      public dateOfBirth : String = '' ,
       public mobile: string = '',
       public phone: string = '',
       public address: string = '',
@@ -23,8 +24,12 @@ export class Student {
       public insertedByUserId :number =0,
       public genderName: string = '',
       public genderId :number =0,
+      public currentSchoolName: string = '',
+      public currentSchoolId :number =0,
       public academicYearName: string = '',
       public gradeName: string = '',
       public className: string = '',
+      public isSuspended: boolean = false, 
+      public passportNo: number =0
   ) {}
 } 

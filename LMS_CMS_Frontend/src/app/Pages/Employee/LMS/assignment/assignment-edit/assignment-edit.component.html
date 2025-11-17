@@ -1,7 +1,8 @@
 <div class="flex justify-between items-center mb-6">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left rtl:rotate-180 cursor-pointer" (click)="goBack()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">   {{ 'Edit' | translate }}  {{ 'Assignment' | translate }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Assignment' | translate }}
+        </h1>
     </div>
     <button class="text-white px-4 py-2 rounded-lg font-medium" (click)="GoToAssignmentStudent()">
         <img src="Images/classroom.png" class="w-7" alt="Upload Icon" />
@@ -12,7 +13,7 @@
     <!-- Basic Information Section -->
     <div class="flex flex-wrap justify-between gap-4 mb-6">
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Assignment Name' | translate }} </p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Assignment Name' | translate }} </p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.englishName}}
             </p>
@@ -20,14 +21,14 @@
 
         <!-- Assignment Type -->
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Assignment Type' | translate }} </p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Assignment Type' | translate }} </p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.assignmentTypeEnglishName}}
             </p>
         </div>
 
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">   {{ 'Open Date' | translate }} </p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Open Date' | translate }} </p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.openDate}}
             </p>
@@ -52,7 +53,7 @@
         </div>
 
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Subject' | translate }}</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Subject' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.subjectEnglishName}}
             </p>
@@ -70,7 +71,7 @@
     <div *ngIf="assignment.linkFile" class="bg-white p-4 rounded-lg">
         <div class="flex flex-wrap gap-4">
             <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
+                <h1 class="text-sm font-semibold mb-2"> {{ 'Name' | translate }}</h1>
                 <p class="text-sm font-medium text-gray-700 mb-4">{{ assignment.linkFile.split('/').pop() }}</p>
                 <div class="border border-cacaca rounded-lg p-6">
                     <div class="flex justify-between items-center">
@@ -82,7 +83,7 @@
                     </div>
                     <a [href]="assignment.linkFile" target="_blank" rel="noopener"
                         class="secondaryTxt cursor-pointer hover:underline mt-2">
-                          {{ 'Click to' | translate }}  {{ 'View' | translate }}
+                        {{ 'Click to' | translate }} {{ 'View' | translate }}
                     </a>
                 </div>
             </div>
@@ -98,7 +99,7 @@
 
             <button (click)="openModal()"
                 class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-                  {{ 'Add' | translate }}  {{ 'Question' | translate }}
+                {{ 'Add' | translate }} {{ 'Question' | translate }}
             </button>
         </div>
     </div>
@@ -108,7 +109,7 @@
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'ID' | translate }}
+                        {{ 'ID' | translate }}
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
@@ -127,7 +128,7 @@
                 <tr *ngIf="assignment.assignmentQuestions.length === 0">
                     <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                         {{ 'No Data Found' | translate }}
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -158,23 +159,26 @@
 <div id="Add_Modal1" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">  {{ 'Upload' | translate }}</h1>
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Upload' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 w-full mb-4">
-            <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+            <div
+                class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                 <div class="flex justify-center w-full">
-                    <label for="file-upload"
+                    <label for="imageFile"
                         class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                         <img *ngIf="!assignment.fileFile" src="Images/Icon frame.png" class="w-1/4">
                         <img *ngIf="assignment.fileFile" src="Images/FileAttached.png" class="w-1/4">
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">
-                          {{ 'Click to' | translate }}  {{ 'Upload' | translate }}  {{ '(Word - PDF)' | translate }}</span></p>
-                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]">   {{ '(Max. File size: 25 MB)' | translate }}</p>
+                                {{ 'Click to' | translate }} {{ 'Upload' | translate }} {{ '(Word - PDF)' | translate
+                                }}</span></p>
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{ '(Max. File size: 25 MB)' |
+                            translate }}</p>
                     </label>
-                    <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)" />
+                    <input id="imageFile" type="file" class="hidden" (change)="onFileSelected($event)" />
                 </div>
             </div>
         </div>
@@ -194,7 +198,7 @@
 <div id="Add_Modal2" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[60%] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="font-semibold text-2xl leading-9"> {{ 'Add' | translate }}  {{ 'Question' | translate }}</h1>
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Add' | translate }} {{ 'Question' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
@@ -202,11 +206,13 @@
         <div class="flex flex-wrap gap-x-4 gap-y-4 w-full ">
             <!-- Lesson -->
             <div class="w-[48%]">
-                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Lesson' | translate }}</label>
+                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Lesson' | translate
+                    }}</label>
                 <select id="Lesson"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="SelectedLessonID" (change)="getTags();">
-                    <option value=0 disabled selected hidden>  {{ 'Select' | translate }}  {{ 'Lesson' | translate }}</option>
+                    <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Lesson' | translate }}
+                    </option>
                     <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
                     <option *ngIf="Lessons.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
@@ -215,57 +221,80 @@
             </div>
             <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Tags' | translate }}</label>
-                <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px]"
-                        (click)="toggleDropdown()" tabindex="0">
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                    {{ 'Tags' | translate }}
+                </label>
+
+                <div class="relative tags-container">
+                    <!-- Tags Box -->
+                    <div class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px] flex flex-wrap gap-2 items-center"
+                        (click)="toggleDropdown($event)" [class.opacity-50]="!SelectedLessonID"
+                        [class.cursor-not-allowed]="!SelectedLessonID" tabindex="0">
+
                         <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
-                            <div class="flex flex-wrap">
-                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                    *ngFor="let selected of tagsSelected">
-                                    {{ selected.name }}
-                                    <span class="ml-2 cursor-pointer text-red-500"
-                                        (click)="removeSelected(selected.id)">
-                                        &times;
-                                    </span>
+                            <span
+                                class="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center max-w-[150px] truncate"
+                                *ngFor="let selected of tagsSelected">
+                                {{ selected.name }}
+                                <span class="ml-2 cursor-pointer text-red-500"
+                                    (click)="removeSelected(selected.id, $event)">
+                                    &times;
                                 </span>
-                            </div>
+                            </span>
                         </ng-container>
+
                         <ng-template #placeholder>
-                            <span class="text-gray-400">{{ 'Choose' | translate }}  {{ 'Tag' | translate }}</span>
+                            <span class="text-gray-400">
+                                <span *ngIf="!SelectedLessonID">{{ 'Select' | translate }} {{'Lesson' | translate}} {{'First' | translate}}</span>
+                                <span *ngIf="SelectedLessonID">{{ 'Choose' | translate }} {{ 'Tags' | translate
+                                    }}</span>
+                            </span>
                         </ng-template>
                     </div>
+
+                    <!-- Dropdown -->
                     <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                        *ngIf="dropdownOpen">
+                        *ngIf="dropdownOpen && SelectedLessonID">
                         <ul *ngIf="tags.length > 0">
                             <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                (click)="selectType(Type)">
+                                (click)="selectType(Type, $event)">
                                 {{ Type.name }}
                             </li>
                         </ul>
-                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">{{ 'No Data Found' | translate }}</div>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">
+                            {{ 'No Data Found' | translate }}
+                        </div>
                     </div>
                 </div>
-                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+
+                <!-- Validation -->
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">
+                    {{ validationErrors['tag'] }}
+                </span>
             </div>
 
             <!-- Number of Questions -->
             <div class="w-[100%]">
                 <label class="block mb-2 text-sm font-medium text-gray-900">
-                    {{ 'Number Of' | translate }}  {{ 'Total' | translate }}  {{ 'Questions' | translate }} ({{ selectedQuestions.length }})
+                    {{ 'Number Of' | translate }} {{ 'Total' | translate }} {{ 'Questions' | translate }} ({{
+                    selectedQuestions.length }})
                 </label>
                 <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
-                    [value]="getFormattedQuestionTypes()" disabled placeholder="{{ 'Enter' | translate }} {{ 'From' | translate }}" />
+                    [value]="getFormattedQuestionTypes()" disabled
+                    placeholder="{{ 'Number' | translate }}" />
             </div>
 
             <!-- Question Type -->
             <div class="w-full">
-                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Question' | translate }}  {{ 'Type' | translate }}</label>
+                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Question' | translate }} {{ 'Type' |
+                    translate }}</label>
                 <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     (change)="GetQuestionBank(this.CurrentPage, this.PageSize)" [(ngModel)]="SelectedTypeID">
-                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Lesson' | translate }}</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Type' | translate }}
+                    </option>
                     <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
-                    <option *ngIf="QuestionBankType .length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="QuestionBankType .length === 0" disabled selected>{{ 'No Data Found' | translate }}
+                    </option>
                 </select>
             </div>
 
@@ -286,15 +315,15 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                              {{ 'Description' | translate }}
+                            {{ 'Description' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                              {{ 'Mark' | translate }}
+                            {{ 'Mark' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ 'Difficulty' | translate }}  {{ 'Level' | translate }}
+                            {{ 'Difficulty' | translate }} {{ 'Level' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -303,7 +332,7 @@
                     <tr *ngIf="Questions.length === 0">
                         <td id="data-cell" colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                              {{ 'No Data Found' | translate }}
+                            {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -344,8 +373,7 @@
                     <p>{{ 'Previous' | translate }}</p>
                 </button>
                 <div class="flex">
-                    <div *ngFor="let page of visiblePages"
-                        class="rounded-lg py-[10px] w-[40px]"
+                    <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
                         [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
                         (click)="changeCurrentPage(page)">
                         <p class="cursor-pointer text-center">{{ page }}</p>
@@ -368,7 +396,8 @@
             </div>
 
             <div>
-                <p>{{CurrentPage}}{{ 'of' | translate }} {{TotalPages}} {{ 'pages' | translate }} ({{TotalRecords}} {{ 'Item' | translate }})</p>
+                <p>{{CurrentPage}}{{ 'of' | translate }} {{TotalPages}} {{ 'pages' | translate }} ({{TotalRecords}} {{
+                    'Item' | translate }})</p>
             </div>
         </div>
 
@@ -386,7 +415,7 @@
 <div id="Add_Modal3" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[60%] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="font-semibold text-2xl leading-9">{{ 'Add' | translate }}  {{ 'Question' | translate }}</h1>
+            <h1 class="font-semibold text-2xl leading-9">{{ 'Add' | translate }} {{ 'Question' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
@@ -394,11 +423,13 @@
         <div class="flex flex-wrap gap-x-4 gap-y-4 w-full mb-2">
             <!-- Lesson -->
             <div class="w-[48%]">
-                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Lesson' | translate }}</label>
+                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Lesson' | translate
+                    }}</label>
                 <select id="Lesson"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="SelectedLessonID" (change)="getTags();">
-                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Lesson' | translate }}</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Lesson' | translate }}
+                    </option>
                     <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
                     <option *ngIf="Lessons.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -408,38 +439,56 @@
 
             <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Tags' | translate }}</label>
-                <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
-                        (click)="toggleDropdown()" tabindex="0">
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                    {{ 'Tags' | translate }}
+                </label>
+
+                <div class="relative tags-container">
+                    <!-- Tags Box -->
+                    <div class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px] flex flex-wrap gap-2 items-center"
+                        (click)="toggleDropdown($event)" [class.opacity-50]="!SelectedLessonID"
+                        [class.cursor-not-allowed]="!SelectedLessonID" tabindex="0">
+
                         <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
-                            <div class="flex flex-wrap">
-                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                    *ngFor="let selected of tagsSelected">
-                                    {{ selected.name }}
-                                    <span class="ml-2 cursor-pointer text-red-500"
-                                        (click)="removeSelected(selected.id)">
-                                        &times;
-                                    </span>
+                            <span
+                                class="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center max-w-[150px] truncate"
+                                *ngFor="let selected of tagsSelected">
+                                {{ selected.name }}
+                                <span class="ml-2 cursor-pointer text-red-500"
+                                    (click)="removeSelected(selected.id, $event)">
+                                    &times;
                                 </span>
-                            </div>
+                            </span>
                         </ng-container>
+
                         <ng-template #placeholder>
-                            <span class="text-gray-400">{{ 'Choose' | translate }} {{ 'Tag' | translate }}</span>
+                            <span class="text-gray-400">
+                                {{ 'Select' | translate }} {{'Lesson' | translate}} {{'First' | translate}}
+                                <span *ngIf="SelectedLessonID">{{ 'Choose' | translate }} {{ 'Tags' | translate
+                                    }}</span>
+                            </span>
                         </ng-template>
                     </div>
+
+                    <!-- Dropdown -->
                     <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                        *ngIf="dropdownOpen">
+                        *ngIf="dropdownOpen && SelectedLessonID">
                         <ul *ngIf="tags.length > 0">
                             <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                (click)="selectType(Type)">
+                                (click)="selectType(Type, $event)">
                                 {{ Type.name }}
                             </li>
                         </ul>
-                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">  {{ 'No Data Found' | translate }}</div>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">
+                            {{ 'No Data Found' | translate }}
+                        </div>
                     </div>
                 </div>
-                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+
+                <!-- Validation -->
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">
+                    {{ validationErrors['tag'] }}
+                </span>
             </div>
         </div>
 
@@ -448,10 +497,11 @@
                 class="flex justify-center gap-6 mb-4 items-start">
                 <!-- Question Type Dropdown -->
                 <div class="w-[48%]">
-                    <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Question' | translate }}  {{ 'Type' | translate }}</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Question' | translate }} {{ 'Type' |
+                        translate }}</label>
                     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                         (focus)="validationErrors['type-' + i] = ''" [(ngModel)]="option.questionTypeId">
-                        <option value="0" disabled> {{ 'Select' | translate }}  {{ 'Type' | translate }}</option>
+                        <option value="0" disabled> {{ 'Select' | translate }} {{ 'Type' | translate }}</option>
                         <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
                     </select>
                     <span *ngIf="validationErrors['type-' + i]" class="text-red-500 mt-1 text-sm">
@@ -461,8 +511,9 @@
 
                 <!-- Number Input -->
                 <div class="w-[48%]">
-                    <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Number Of' | translate }}  {{ 'Questions' | translate }}</label>
-                    <input type="number" class="rounded-lg border border-solid px-4 py-3 w-full"
+                    <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Number Of' | translate }} {{
+                        'Questions' | translate }}</label>
+                    <input type="text" class="rounded-lg border border-solid px-4 py-3 w-full"
                         [ngClass]="{ 'input-error': !option.numberOfQuestion || option.numberOfQuestion <= 0 }"
                         [(ngModel)]="option.numberOfQuestion" (focus)="validationErrors['count-' + i] = ''"
                         (input)="validateNumberQuestionAssignmentTypeCount($event, i, 'numberOfQuestion')"
@@ -480,9 +531,10 @@
                 </div>
             </div>
             <!-- Add New Type Block -->
-            <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse my-3 cursor-pointer" (click)="addTypeBlock()">
+            <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse my-3 cursor-pointer"
+                (click)="addTypeBlock()">
                 <i class="fa-regular fa-square-plus"></i>
-                <p class="primaryTxt">{{ 'Add' | translate }}  {{ 'Type' | translate }}</p>
+                <p class="primaryTxt">{{ 'Add' | translate }} {{ 'Type' | translate }}</p>
             </div>
             <span *ngIf="validationErrors['questionAssignmentTypeCountDTO']" class="text-red-500 ml-3">{{
                 validationErrors['questionAssignmentTypeCountDTO'] }}</span>
@@ -491,7 +543,7 @@
         <div class="flex justify-end mt-6">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="Save()">
-                <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

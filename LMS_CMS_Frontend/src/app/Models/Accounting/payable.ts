@@ -1,3 +1,5 @@
+import { PayableDetails } from "./payable-details";
+
 export class Payable {
     constructor(
         public id: number = 0,
@@ -10,6 +12,9 @@ export class Payable {
         public linkFileName: string = '',
         public bankOrSaveID: number = 0,
         public bankOrSaveName: string = '',
+        public payableDetails : PayableDetails []=[] ,
+        public newDetails : PayableDetails []=[] ,
+        public updatedDetails : PayableDetails []=[] ,
         public insertedByUserId: number = 0
     ) {}
 }

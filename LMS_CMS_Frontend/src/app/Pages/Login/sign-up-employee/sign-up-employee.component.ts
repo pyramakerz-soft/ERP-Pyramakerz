@@ -7,43 +7,61 @@ import { RegisteredEmployeeService } from '../../../Services/Employee/Administra
 import { ApiService } from '../../../Services/api.service';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 import Swal from 'sweetalert2';
- 
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-sign-up-employee',
   standalone: true,
-  imports: [FormsModule, CommonModule, RecaptchaModule],
+  imports: [FormsModule, CommonModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up-employee.component.html',
   styleUrl: './sign-up-employee.component.css'
 })
 export class SignUpEmployeeComponent {
   DomainName: string = '';
-  employee:RegisteredEmployee = new RegisteredEmployee()
+  employee: RegisteredEmployee = new RegisteredEmployee()
   confirmPassword: string = '';
+  isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof RegisteredEmployee]?: string } = {};
-  isLoading = false;  
+  isLoading = false;
   IsConfimPassEmpty = false
 
-  @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
-  
-  constructor(private router: Router, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
-  
+  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
+
+  constructor(private router: Router, private languageService: LanguageService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
+
   ngOnInit() {
-    this.DomainName = this.ApiServ.GetHeader(); 
+    this.DomainName = this.ApiServ.GetHeader();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
- 
-  onCaptchaResolved(token: string | null): void {
-    if (token) {
-      this.employee.recaptchaToken = token;
-      this.validationErrors['recaptchaToken'] = ''
-    } else { 
-      this.employee.recaptchaToken = '';
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
+  // onCaptchaResolved(token: string | null): void {
+  //   if (token) {
+  //     this.employee.recaptchaToken = token;
+  //     this.validationErrors['recaptchaToken'] = ''
+  //   } else {
+  //     this.employee.recaptchaToken = '';
+  //   }
+  // }
+
   validateNumber(event: any, field: keyof RegisteredEmployee): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (!/^\d+$/.test(value)) {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.employee[field] === 'string') {
         this.employee[field] = '' as never;
       }
@@ -75,22 +93,22 @@ export class SignUpEmployeeComponent {
       isValid = false;
     }
 
-    if(this.confirmPassword != ""){
+    if (this.confirmPassword != "") {
       if (this.employee.password != this.confirmPassword) {
         this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
         isValid = false;
       }
-    } else{
+    } else {
       this.IsConfimPassEmpty = true
       isValid = false;
     }
 
-    if(this.employee.recaptchaToken == ""){ 
-      this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-      isValid = false;
-    } else{
-      this.validationErrors['recaptchaToken'] = '';
-    }
+    // if (this.employee.recaptchaToken == "") {
+    //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+    //   isValid = false;
+    // } else {
+    //   this.validationErrors['recaptchaToken'] = '';
+    // }
 
     return isValid;
   }
@@ -106,14 +124,14 @@ export class SignUpEmployeeComponent {
       this.validationErrors[field] = '';
     }
   }
-  
+
   onConfirmPasswordChange() {
     this.validationErrors['password'] = '';
     this.IsConfimPassEmpty = false
   }
 
-  SignUp(){ 
-    if(this.isFormValid()){
+  SignUp() {
+    if (this.isFormValid()) {
       this.isLoading = true;
       this.registeredEmployeeService.Add(this.employee, this.DomainName).subscribe(
         data => {
@@ -126,14 +144,15 @@ export class SignUpEmployeeComponent {
 
           this.employee = new RegisteredEmployee()
           this.confirmPassword = ''
-          this.captchaRef.reset();
+          this.isLoading = false;
+          // this.captchaRef.reset();
         },
-        error => { 
-          this.employee.recaptchaToken = ''; 
-          this.isLoading = false; 
-          if (this.captchaRef) {
-            this.captchaRef.reset();
-          }
+        error => {
+          this.employee.recaptchaToken = '';
+          this.isLoading = false;
+          // if (this.captchaRef) {
+          //   this.captchaRef.reset();
+          // }
           Swal.fire({
             icon: 'error',
             title: 'Oops...',

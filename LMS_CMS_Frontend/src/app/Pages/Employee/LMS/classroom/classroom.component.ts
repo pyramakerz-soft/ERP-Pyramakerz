@@ -27,9 +27,10 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-classroom',
@@ -82,9 +83,13 @@ export class ClassroomComponent {
   copyClassroom:CopyClassroom = new CopyClassroom()
 
   activeAcademicYearID = 0
-
-  constructor(public account: AccountService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-      private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public employeeServ : EmployeeService ,
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
+  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+      private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,    private translate: TranslateService, public employeeServ : EmployeeService ,
       public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
       
   ngOnInit(){
@@ -117,6 +122,14 @@ export class ClassroomComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
   } 
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   openModal(classroomId?: number) {
     if (classroomId) {
@@ -166,19 +179,23 @@ export class ClassroomComponent {
     this.copyClassroom = new CopyClassroom()
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
-    this.SelectedSchoolIdForFilteration = 0
-    this.activeAcademicYearID = 0
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
+    this.SelectedSchoolIdForFilteration = 0
     try {
-      const data: Classroom[] = await firstValueFrom(this.classroomService.Get(this.DomainName));  
-      this.classroomData = data || [];
-  
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
-        this.classroomData = this.classroomData.filter(t => {
+      const data: any = await firstValueFrom(this.classroomService.GetByAcademicYearIDWithPaggination(this.activeAcademicYearID ,this.DomainName, this.CurrentPage, this.PageSize));  
+      this.classroomData = data.data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.classroomData = this.classroomData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
@@ -217,18 +234,57 @@ export class ClassroomComponent {
     )
   }
   
-  getClassroomDataByYearID(){
-    this.classroomData=[]
+  // getClassroomDataByYearID(){
+  //   this.classroomData=[]
+  //   this.IsViewTable=true
+  //   this.classroomService.GetByAcYearId(this.activeAcademicYearID, this.DomainName).subscribe(
+  //     (data) => {
+  //       this.classroomData = data;
+  //       if(this.classroomData.length != 0){
+  //         this.activeAcademicYearID = this.classroomData[0].academicYearID
+  //       }
+  //     }
+  //   )
+  // }
+
+  getClassroomDataByYearID(DomainName: string, pageNumber: number, pageSize: number) {
+    this.classroomData = [];
     this.IsViewTable=true
-    this.classroomService.GetByAcYearId(this.activeAcademicYearID, this.DomainName).subscribe(
+    this.classroomService.GetByAcademicYearIDWithPaggination(this.activeAcademicYearID ,DomainName, pageNumber, pageSize).subscribe(
       (data) => {
-        this.classroomData = data;
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.classroomData = data.data;
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
         }
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
       }
-    )
+    );
   }
+
 
   AcademicYearIsChanged(){
     this.classroomData=[]
@@ -315,13 +371,15 @@ export class ClassroomComponent {
         const field = key as keyof Classroom;
         if (!this.classroom[field]) {
           if(field == "name" || field == "number" || field == "gradeID" || field == "floorID" || field == "academicYearID"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(field as string)}`;
             isValid = false;
           }
         } else {
           if(field == "name"){
             if(this.classroom.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant('cannot be longer than 100 characters');
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
           } else{
@@ -333,6 +391,17 @@ export class ClassroomComponent {
     return isValid;
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+ 
   onInputValueChange(event: { field: keyof Classroom, value: any }) {
     const { field, value } = event;
     
@@ -343,7 +412,10 @@ export class ClassroomComponent {
   }
  
   validateNumber(event: any, field: keyof Classroom): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.classroom[field] === 'string') {
@@ -362,16 +434,18 @@ export class ClassroomComponent {
       if(this.editClassroom == false){
         this.classroomService.Add(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
             this.isLoadingSaveClassroom=false
-            this.getClassroomData()
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error => {
             this.isLoadingSaveClassroom=false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -380,16 +454,18 @@ export class ClassroomComponent {
       } else{
         this.classroomService.Edit(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
-            this.getClassroomData()
             this.isLoadingSaveClassroom=false
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error => {
             this.isLoadingSaveClassroom=false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -401,19 +477,19 @@ export class ClassroomComponent {
 
   deleteClassroom(id:number){
     Swal.fire({
-      title: 'Are you sure you want to delete this Classroom?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Classroom') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.classroomService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.classroomData=[]
-            this.getClassroomData()
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           }
         );
       }
@@ -508,13 +584,13 @@ export class ClassroomComponent {
     this.isLoading=true
     if(this.copyClassroom.fromAcademicYearID == this.copyClassroom.toAcademicYearID){
       this.closeCopyModal()
-      this.getClassroomData()
+      this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
       this.isLoading=false
     } else{
       this.classroomService.CopyClassroom(this.copyClassroom, this.DomainName).subscribe(
         (result: any) => {
           this.closeCopyModal()
-          this.getClassroomData()
+          this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           this.isLoading=false
         },
         error => {
@@ -522,7 +598,7 @@ export class ClassroomComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });
@@ -536,4 +612,48 @@ export class ClassroomComponent {
     this.SelectedSchoolIdForFilteration =0
    this.getAllClassroomData()
   }
+
+    changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  } 
 }

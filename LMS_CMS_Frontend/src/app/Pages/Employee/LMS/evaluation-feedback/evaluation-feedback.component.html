@@ -26,10 +26,6 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                              {{ 'Date' | translate }}
-                        </th>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                               {{ 'Name Of Evaluation' | translate }}
                         </th>
                         <th
@@ -59,9 +55,6 @@
                         </td>
                         <td *ngIf="mode =='Evaluator' " class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.evaluatedEnglishName }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.date }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.evaluationTemplateEnglishTitle }}

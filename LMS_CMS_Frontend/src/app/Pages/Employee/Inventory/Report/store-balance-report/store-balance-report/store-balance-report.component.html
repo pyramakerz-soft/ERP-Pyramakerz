@@ -1,52 +1,52 @@
 <div class="flex justify-between">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">
-        {{pageTitle}}
+        {{pageTitle|translate}}
     </h1>
 </div>
 
-<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
     <!-- Store Selector -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="store">Store</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="store">{{ 'Store' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="store"
             [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
-            <option [ngValue]="null" disabled selected hidden>Choose Store</option>
+            <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Store' | translate }}</option>
             <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
         </select>
     </div>
 
     <!-- Date To -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">Date To</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
         <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             id="dateTo" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 
     <!-- Category Selector -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="category">Category</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="category">{{ 'Category' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="category"
             [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()">
-            <option [ngValue]="null">All Categories</option>
+            <option [ngValue]="null">{{ 'All' | translate }} {{ 'Categories' | translate }}</option>
             <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
         </select>
     </div>
 
     <!-- Checkboxes -->
     <div class="w-full md:w-1/3 flex flex-col">
-        <label class="block mb-2 text-sm font-medium text-gray-900">Filters</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Filters' | translate }}</label>
         <div class="flex flex-wrap gap-4">
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="hasBalance" [(ngModel)]="hasBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-            <label for="hasBalance" class="text-sm text-gray-700">Has Balance</label>
+            <label for="hasBalance" class="text-sm text-gray-700"> {{ 'Has Balance' | translate }}</label>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="overdrawnBalance" [(ngModel)]="overdrawnBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-            <label for="overdrawnBalance" class="text-sm text-gray-700">Overdrawn Balance</label>
+            <label for="overdrawnBalance" class="text-sm text-gray-700">{{ 'Overdrawn Balance' | translate }}</label>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center  space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="zeroBalances" [(ngModel)]="zeroBalances" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-            <label for="zeroBalances" class="text-sm text-gray-700">Zero Balances</label>
+            <label for="zeroBalances" class="text-sm text-gray-700">{{ 'Zero Balances' | translate }}</label>
         </div>
         </div>
     </div>
@@ -57,12 +57,11 @@
                 'bg-gray-100 text-gray-300': !dateTo || !selectedStoreId,
                 'secondaryBg text-white': dateTo && selectedStoreId
             }">
-            View Report
+            {{ 'View Report' | translate }}
         </button>
     </div>
 </div>
-
-<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4">
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
@@ -71,45 +70,45 @@
 
 
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Item Code
+                    {{ 'Item Code' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Item Name
+                    {{ 'Item Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Quantity
+                    {{ 'Quantity' | translate }}
                 </th>
                 <th *ngIf="reportType === 'PurchasePrice'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Purchase Price
+                    {{ 'Purchase Price' | translate }}
                 </th>
                 <th *ngIf="reportType === 'PurchasePrice'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Total Purchase
+                    {{ 'Total Purchase' | translate }}
                 </th>
                 <th *ngIf="reportType === 'SalesPrice'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Sales Price
+                    {{ 'Sales Price' | translate }}
                 </th>
                 <th *ngIf="reportType === 'SalesPrice'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Total Sales
+                    {{ 'Total Sales' | translate }}
                 </th>
                 <th *ngIf="reportType === 'Cost'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Average Cost
+                    {{ 'Average Cost' | translate }}
                 </th>
                 <th *ngIf="reportType === 'Cost'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Total Cost
+                    {{ 'Total Cost' | translate }}
                 </th>
                 <th *ngIf="reportType === 'ItemsUnderLimit'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Limit
+                    {{ 'Limit' | translate }}
                 </th>
             </tr>
         </thead>
@@ -117,7 +116,7 @@
             <tr *ngIf="!reportData?.data || (reportData?.data?.length ?? 0) === 0">
                 <td [attr.colspan]="baseHeaders.length"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                    {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -132,31 +131,31 @@
                     {{ item.itemName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.quantity }}
+                    <span [innerHTML]="formatNumberForDisplayWithLTR(item.quantity)"></span>
                 </td>
                 <td *ngIf="reportType === 'PurchasePrice'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.purchasePrice | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.purchasePrice) }}
                 </td>
                 <td *ngIf="reportType === 'PurchasePrice'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalPurchase | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalPurchase) }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.salesPrice | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.salesPrice) }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalSales | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalSales) }}
                 </td>
                 <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.averageCost | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.averageCost) }}
                 </td>
                 <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalCost | number:'1.2-2' }}
+                    {{ formatNumberForDisplay(item.totalCost) }}
                 </td>
                 <td *ngIf="reportType === 'ItemsUnderLimit'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.limit }}
+                    {{ formatNumberForDisplay(item.limit) }}
                 </td>
             </tr>
         </tbody>
@@ -172,7 +171,7 @@
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + getStoreName() },
       { keyEn: 'Category: ' + getCategoryName() },
-      { keyEn: 'Has Balance: ' + getBalanceFiltersInfo() },]"
+      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() },]"
             [tableHeaders]="baseHeaders"
             
              [tableData]="reportForExport" #pdfPrintComponent>

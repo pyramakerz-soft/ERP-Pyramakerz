@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <app-table [headers]="GetTableHeaders()" [data]="doses" [keys]="['id', 'doseTimes', 'insertedAt']"
+    <app-table [headers]="GetTableHeaders()" [data]="doses" [keys]="['id', 'doseTimes']"
         (delete)="deleteDose($event)" (edit)="openModal($event.id)">
     </app-table>
 
@@ -18,9 +18,9 @@
         [buttonText]="editDose ? (isRtl? 'حفظ':'Save') :  (isRtl? 'إنشاء':'Create')" [isLoading]="isSaving" (save)="saveDose()" (close)="closeModal()"
         [ngClass]="{ hidden: !isModalVisible }">
         <div class="flex flex-col w-full mb-4">
-            <label class="mb-2 primaryTxt" for="name">  {{'Dose'| translate }} {{'Name'| translate }}</label>
+            <label class="mb-2 primaryTxt" for="name">{{ 'the' | translate }}{{ 'Dose' | translate }}</label>
             <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="{{'Enter'| translate }} {{'Dose'| translate }}  {{'Times'| translate }}" [(ngModel)]="dose.doseTimes"
+                placeholder="{{ 'Enter' | translate }} {{ 'the' | translate }}{{ 'Dose' | translate }}" [(ngModel)]="dose.doseTimes"
                 (ngModelChange)="onInputValueChange({ field: 'doseTimes', value: $event })" />
             <span *ngIf="validationErrors['doseTimes']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['doseTimes'] }}

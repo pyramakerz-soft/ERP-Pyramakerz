@@ -30,7 +30,7 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student`, { headers })
   }
 
-  GetAllWithSearch(KeyWord:string,PageNumber:number =1 ,pageSize:number =10 ,DomainName?:string){
+  GetAllWithPaginnation(DomainName: string, pageNumber: number, pageSize: number ){
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -40,7 +40,20 @@ export class StudentService {
     .set('domain-name', this.header)
     .set('Content-Type', 'application/json');
 
-    return this.http.get<any>(`${this.baseUrl}/Student/Search?keyword=${KeyWord}&pageNumber=${PageNumber}&pageSize=${pageSize}`, { headers })
+    return this.http.get<{ data: Student[], pagination: any }>(`${this.baseUrl}/Student/WithPaginnation?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
+  GetAllWithSearch(SchoolId:number ,KeyWord:string,PageNumber:number =1 ,pageSize:number =10 ,DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<any>(`${this.baseUrl}/Student/SearchBySchoolId/${SchoolId}?keyword=${KeyWord}&pageNumber=${PageNumber}&pageSize=${pageSize}`, { headers })
   }
 
   GetByID(id:number,DomainName?:string){
@@ -91,6 +104,15 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ClassID/${id}`, { headers });
   }
 
+  GetByClassNotInActiveYear(id: number, DomainName: string): Observable<Student[]> {
+    const headers = new HttpHeaders()
+      .set('Domain-Name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/GetByClassNotInActiveYear/${id}`, { headers });
+  }
+
   GetByClassIDAndThoseWhoWishesToUseSchoolTransportation(id: number, DomainName: string): Observable<Student[]> {
     const headers = new HttpHeaders()
       .set('Domain-Name', DomainName)
@@ -109,6 +131,17 @@ export class StudentService {
     .set('Content-Type', 'application/json');
 
     return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_SchoolID/${id}`, { headers })
+  }
+
+  Get_By_ParentID(id:number,DomainName:string){
+    this.header=DomainName 
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ParentID/${id}`, { headers })
   }
 
   EditAccountingEmployee(student:Student,DomainName?:string){
@@ -252,4 +285,16 @@ export class StudentService {
     .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Student/${id}`, { headers })
   }
+ 
+  Suspend(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/Student/Suspend/${id}`, { headers });
+  } 
 }

@@ -26,7 +26,7 @@ export class SideMenuItemComponent {
 
   constructor(private router: Router, private menuService: MenuService, private communicationService: NewTokenService, private languageService: LanguageService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.subscription = this.communicationService.action$.subscribe((state) => {
       this.menuService.menuItemsForEmployee$.subscribe((items) => {
         this.menuItemsForEmployee = items;
@@ -63,13 +63,16 @@ export class SideMenuItemComponent {
     this.routerEventsSub?.unsubscribe();
   }
 
-  navigateToRoute(routName: string): void {
+  navigateToRoute(route: any): void {
     const routes: Routes = this.router.config;
+ 
+    if(route.children.length > 0){
+      return; 
+    }
 
-    const routeExists = this.isRouteExist(routName, routes);
-
+    const routeExists = this.isRouteExist(route.en_name, routes); 
     if (routeExists) {
-      this.router.navigateByUrl(`Employee/${routName}`)
+      this.router.navigateByUrl(`Employee/${route.en_name}`)
     }
   }
 

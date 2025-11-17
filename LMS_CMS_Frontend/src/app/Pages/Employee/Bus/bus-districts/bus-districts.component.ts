@@ -14,9 +14,10 @@ import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-Districts',
   standalone: true,
@@ -58,6 +59,7 @@ export class BusDistrictsComponent {
   constructor(private router: Router, 
     public activeRoute: ActivatedRoute, 
     private menuService: MenuService, 
+    private translate: TranslateService,
     public account: AccountService, 
     public busDistrictServ: BusDistrictService, 
     public DomainServ: DomainService, 
@@ -99,6 +101,13 @@ export class BusDistrictsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+ 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   Create() {
     this.mode = "add";
@@ -132,14 +141,14 @@ export class BusDistrictsComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this bus District?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('District') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.busDistrictServ.Delete(id, this.DomainName).subscribe((data) => {

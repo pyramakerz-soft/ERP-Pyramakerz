@@ -1,46 +1,54 @@
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Proof Registration And Success Form Report</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Proof Registration And Success Form Report' | translate }}</h1>
 </div>
 
-<div class="flex justify-start items-center space-x-4">
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
     <div class="w-[49%]">
-        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedSchoolId" (change)="getAllYears()">
-            <option value=0 disabled selected hidden>Select a School</option>
+            [(ngModel)]="SelectedSchoolId" (change)="onSchoolChange()">
+            <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
         </select>
     </div>
+
     <div class="w-[49%]">
-        <label for="Year" class="block mb-2 text-sm font-medium text-gray-900">Year</label>
+        <label for="Year" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Year' | translate }}</label>
         <select id="Year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedYearId"  (change)="getAllStudents()" [disabled]="!SelectedSchoolId">
-            <option value=0 disabled selected hidden>Select a Year</option>
+            [(ngModel)]="SelectedYearId" (change)="onYearChange()" [disabled]="!SelectedSchoolId">
+            <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Year' | translate }} </option>
             <option *ngFor="let ac of academicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
         </select>
     </div>
 </div>
 
 <div class="flex justify-start items-center mt-2">
     <div class="w-[80%]">
-        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900">Student</label>
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Student' | translate }}</label>
         <ng-container *ngIf="!isSearching">
             <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                [(ngModel)]="SelectedStudentId" [disabled]="!SelectedSchoolId || !SelectedYearId">
-                <option value="0" disabled selected hidden>Select a Student</option>
+                [(ngModel)]="SelectedStudentId"
+                [disabled]="!SelectedSchoolId || !SelectedYearId">
+                <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
                 <option *ngFor="let ac of filteredStudents" [value]="ac.id">
-                    {{ ac.user_Name }}
+                    {{ ac.en_name }}
                 </option>
+                <option *ngIf="filteredStudents.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+
             </select>
         </ng-container>
         <ng-container *ngIf="isSearching">
             <input type="text" id="StudentSearch"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                [(ngModel)]="searchQuery" (input)="searchStudents()" placeholder="Search by Name">
+                [(ngModel)]="searchQuery" (input)="searchStudents()" placeholder="{{ 'Search by Name' | translate }}">
         </ng-container>
     </div>
 
@@ -55,62 +63,90 @@
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
             [disabled]="!SelectedSchoolId || !SelectedStudentId || !SelectedYearId"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedStudentId || !SelectedYearId, 'secondaryBg text-white': SelectedSchoolId && SelectedStudentId && SelectedYearId }">View
-            Report</button>
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedStudentId || !SelectedYearId, 'secondaryBg text-white': SelectedSchoolId && SelectedStudentId && SelectedYearId }">
+            {{ 'View Report' | translate }}</button>
     </div>
 </div>
 
-<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4">
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
-        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <tr>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Name
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Mobile
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Nationality
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Gender
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="border-t border-gray-300 text-xs md:text-sm bg-white">
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.id }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.en_name }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.mobile }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ this.DataToPrint.student.nationalityEnName }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.genderName }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Certificate Display on Main Page -->
+<div *ngIf="showTable" class="mt-5 bg-white p-8 rounded-lg shadow-lg border border-gray-300">
+  <!-- School Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-2xl font-bold">{{school.reportHeaderOneEn}}</h1>
+    <h2 class="text-xl">{{school.reportHeaderTwoEn}}</h2>
+    <div *ngIf="school.reportImage" class="mt-4">
+      <img [src]="school.reportImage" class="max-h-20 mx-auto" alt="School Logo">
+    </div>
+  </div>
+
+  <!-- Certificate Title -->
+  <h1 class="text-3xl font-bold text-center mb-8 primaryTxt">Identifier Letter</h1>
+
+  <!-- Certificate Content -->
+  <div class="space-y-4 text-lg leading-8">
+    <div class="flex justify-between">
+      <span><strong>Date:</strong> {{CurrentDate}}</span>
+    </div>
+    
+    <p><strong>Dear Sirs,</strong></p>
+    
+    <p>This to certify that Student / {{DataToPrint?.student?.en_name || SelectedStudent.en_name}}</p>
+    
+    <p>{{DataToPrint?.student?.nationalityEnName}} Nationality</p>
+    
+    <!-- <p>and identity no {{DataToPrint?.student?.nationalIDExpiredDate || 'N/A'}}</p> -->
+    
+    <p>Is registered in this school from {{DataToPrint?.classFrom?.gradeName}} Year {{DataToPrint?.classFrom?.academicYearName}} to {{DataToPrint?.classTo?.gradeName}}</p>
+    
+    <p>Until This Year {{DataToPrint?.classTo?.academicYearName}}</p>
+    
+    <p>And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="mt-12 space-y-4">
+    <p><strong>Best Regards,</strong></p>
+    <p><strong>Administration</strong></p>
+  </div>
+
+  <!-- Arabic Version (for RTL support) -->
+  <div class="mt-12 border-t pt-8" [dir]="'rtl'">
+    <div class="space-y-4 text-lg leading-8">
+      <div class="flex justify-between">
+        <span><strong>التاريخ:</strong> {{ArabicCurrentDate}}</span>
+      </div>
+      
+      <p><strong>تحية طيبة وبعد</strong></p>
+      
+      <p>نفيدكم بأن الطالبة / {{DataToPrint?.student?.ar_name || SelectedStudent.ar_name}}</p>
+      
+      <p>تحمل الجنسية / {{DataToPrint?.student?.nationalityArName}}</p>
+      
+      <!-- <p>وتحمل هوية مقيم / {{DataToPrint?.student?.nationalIDExpiredDate || 'غير متوفر'}}</p> -->
+      
+      <p>مقيدة لدينا من الصف {{DataToPrint?.classFrom?.gradeName}} عام {{DataToPrint?.classFrom?.academicYearName}} إلى الصف {{DataToPrint?.classTo?.gradeName}}</p>
+      
+      <p>وحتى عام {{DataToPrint?.classTo?.academicYearName}}</p>
+      
+      <p>وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.</p>
+    </div>
+
+    <div class="mt-12 space-y-4">
+      <p><strong>وتقبلوا فائق التحية والاحترام</strong></p>
+      <p><strong>ادارة المدرسة</strong></p>
+    </div>
+  </div>
 </div>
+
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Latter'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Letter /  افاده'"
         [infoRows]="[
         {
           keyEn: 'Date : ' + this.CurrentDate,
@@ -148,7 +184,7 @@
           keyAr: 'وحتى عام ' + this.DataToPrint.classTo.academicYearName
         },
         {
-          keyEn: 'And he was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
+          keyEn: 'And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
           keyAr: 'وقد أعطيت له هذه الإفادة لتقديمها لمن يهمه الأمر دون أدنى مسؤولية على المدرسة.'
         }
       ]
@@ -162,7 +198,6 @@
             EnNote: 'Administration ',
             ArNote: 'ادارة المدرسة'
         }
-      ]
-      " #pdfComponentRef></app-pdf-print>
+      ]" #pdfComponentRef></app-pdf-print>
     </div>
 </div>

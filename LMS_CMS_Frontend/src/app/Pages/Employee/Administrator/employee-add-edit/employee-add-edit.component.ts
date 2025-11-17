@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
@@ -25,34 +24,28 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LocationService } from '../../../../Services/Employee/HR/location.service';
+import { Location } from '../../../../Models/HR/location';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-employee-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule,TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './employee-add-edit.component.html',
   styleUrl: './employee-add-edit.component.css',
 })
 export class EmployeeAddEditComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-   isRtl: boolean = false;
-    subscription!: Subscription;
-  Data: EmployeeGet = new EmployeeGet();
+  isRtl: boolean = false;
+  subscription!: Subscription;
+  Data: Employee = new Employee();
   BusCompany: BusType[] = [];
   Roles: Role[] = [];
   empTypes: EmployeeTypeGet[] = [];
@@ -61,7 +54,7 @@ export class EmployeeAddEditComponent {
   RoleId: number = 0;
   EmpType: number = 0;
   EmpId: number = 0;
-  validationErrors: { [key in keyof EmployeeGet]?: string } = {};
+  validationErrors: { [key in keyof Employee]?: string } = {};
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   DeletedFiles: number[] = [];
   SelectedFiles: EmployeeAttachment[] = [];
@@ -69,6 +62,8 @@ export class EmployeeAddEditComponent {
   isLoading = false;
   floors: Floor[] = [];
   floorsSelected: Floor[] = [];
+  locations: Location[] = [];
+  locationsSelected: Location[] = [];
   grades: Grade[] = [];
   gradeSelected: Grade[] = [];
   subject: Subject[] = [];
@@ -78,10 +73,23 @@ export class EmployeeAddEditComponent {
   isSubjectSupervisor = false;
 
   dropdownOpen = false;
+  LocationdropdownOpen = false;
   GradedropdownOpen = false;
   SubjectdropdownOpen = false;
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
 
+    // Dropdown element references
+  @ViewChild('locationDropdown') locationDropdown!: ElementRef;
+  @ViewChild('floorDropdown') floorDropdown!: ElementRef;
+  @ViewChild('gradeDropdown') gradeDropdown!: ElementRef;
+  @ViewChild('subjectDropdown') subjectDropdown!: ElementRef;
+  
   constructor(
     public RoleServ: RoleService,
     public empTypeServ: EmployeeTypeService,
@@ -94,9 +102,10 @@ export class EmployeeAddEditComponent {
     private router: Router,
     public EmpServ: EmployeeService,
     public FloorServ: FloorService,
+    public LocationServ: LocationService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
-private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -105,19 +114,19 @@ private languageService: LanguageService
     if (this.User_Data_After_Login.type === 'employee') {
       this.DomainName = this.ApiServ.GetHeader();
       this.activeRoute.url.subscribe((url) => {
-        this.path = url[0].path;
+      this.path = url.map(segment => segment.path).join('/');
 
-        if (this.path == 'Employee Create') {
+        if (this.path.endsWith("Employee/Create")) {
           this.mode = 'Create';
-        } else if (this.path == 'Employee Edit') {
+        }else{
           this.mode = 'Edit';
           this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
           this.EmpServ.Get_Employee_By_ID(
             this.EmpId,
             this.DomainName
           ).subscribe(async (data) => {
-            this.Data = data; 
-            this.Data.editedFiles = []; 
+            this.Data = data;
+            this.Data.editedFiles = [];
             if (data.files == null) {
               this.Data.files = [];
             }
@@ -128,6 +137,14 @@ private languageService: LanguageService
                 this.isFloorMonitor = true
                 this.floorsSelected = this.floors.filter((s) =>
                   this.Data.floorsSelected.includes(s.id)
+                );
+              }
+            });
+            this.LocationServ.Get(this.DomainName).subscribe((data) => {
+              this.locations = data;
+              if (this.Data.locationSelected.length > 0) {
+                this.locationsSelected = this.locations.filter((s) =>
+                  this.Data.locationSelected.includes(s.id)
                 );
               }
             });
@@ -154,17 +171,26 @@ private languageService: LanguageService
         this.GetBusCompany();
         this.GetRole();
         this.GetFloors();
+        this.GetLocations();
         this.GetGrade();
         this.GetSubject();
         this.GetEmployeeType();
       });
     }
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetBusCompany() {
     this.BusCompanyServ.Get(this.DomainName).subscribe((data) => {
@@ -176,6 +202,13 @@ private languageService: LanguageService
     this.floors = [];
     this.FloorServ.Get(this.DomainName).subscribe((data) => {
       this.floors = data;
+    });
+  }
+
+  GetLocations() {
+    this.locations = [];
+    this.LocationServ.Get(this.DomainName).subscribe((data) => {
+      this.locations = data;
     });
   }
 
@@ -207,19 +240,38 @@ private languageService: LanguageService
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
-        const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
-        if (file.size > maxSizeInBytes) {
+        const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+        if (!this.allowedExtensions.includes(fileExtension)) {
+          Swal.fire({
+            title: 'Invalid file type',
+            html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+            icon: 'warning',
+            confirmButtonColor: '#089B41',
+            confirmButtonText: "OK"
+          }); 
+          input.value = '';
           continue;
-        }
-        this.NewFile = new EmployeeAttachment();
-        this.NewFile.file = file;
-        this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
-        this.NewFile.link = '';
-        this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
-        this.SelectedFiles.push(this.NewFile);
+        }else if(file.size > 25 * 1024 * 1024) {
+          Swal.fire({
+            title: 'The file size exceeds the maximum limit of 25 MB.',
+            icon: 'warning', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          }) 
+          input.value = '';
+          continue; 
+        }else{
+          this.NewFile = new EmployeeAttachment();
+          this.NewFile.file = file;
+          this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
+          this.NewFile.link = '';
+          this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
+          this.SelectedFiles.push(this.NewFile);
+        } 
       }
     }
     input.value = '';
@@ -260,7 +312,7 @@ private languageService: LanguageService
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
-        const field = key as keyof EmployeeGet;
+        const field = key as keyof Employee;
         if (!this.Data[field]) {
           if (
             field == 'user_Name' ||
@@ -300,12 +352,12 @@ private languageService: LanguageService
       isValid = false;
     }
 
-    if (this.Data.en_name.length > 100) {
+    if (this.Data.en_name && this.Data.en_name.length > 100) {
       this.validationErrors['en_name'] = `*English Name cannot be longer than 100 characters`;
       isValid = false;
     }
 
-    if (this.Data.ar_name.length > 100) {
+    if (this.Data.ar_name && this.Data.ar_name.length > 100) {
       this.validationErrors['ar_name'] = `*Arabic Name cannot be longer than 100 characters`;
       isValid = false;
     }
@@ -313,11 +365,11 @@ private languageService: LanguageService
     return isValid;
   }
 
-  capitalizeField(field: keyof EmployeeGet): string {
+  capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  onInputValueChange(event: { field: keyof EmployeeGet; value: any }) {
+  onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;
     if (value) {
@@ -325,8 +377,10 @@ private languageService: LanguageService
     }
   }
 
-  validateNumber(event: any, field: keyof EmployeeGet): void {
-    const value = event.target.value;
+  validateNumber(event: any, field: keyof Employee): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.Data[field] === 'string') {
@@ -338,9 +392,11 @@ private languageService: LanguageService
   async Save() {
     this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
     this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
+    this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
     this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
+      const initialLength = this.Data.files.length; 
       for (let i = 0; i < this.SelectedFiles.length; i++) {
         this.Data.files.push(this.SelectedFiles[i]);
       }
@@ -352,7 +408,7 @@ private languageService: LanguageService
               Swal.fire({
                 icon: 'success',
                 title: 'Done',
-                text: 'Employee Added Succeessfully',
+                text: 'Employee Added Successfully',
                 confirmButtonColor: '#089B41',
               });
               this.moveToEmployee();
@@ -394,12 +450,13 @@ private languageService: LanguageService
                   Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error.errors || 'An unexpected error occurred',
+                    text: error.error || 'An unexpected error occurred',
                     confirmButtonColor: '#089B41',
                   });
                   break;
               }
               this.isLoading = false;
+              this.Data.files.splice(initialLength);
               return false;
             }
           );
@@ -416,7 +473,7 @@ private languageService: LanguageService
               Swal.fire({
                 icon: 'success',
                 title: 'Done',
-                text: 'Employee Edited Succeessfully',
+                text: 'Employee Edited Successfully',
                 confirmButtonColor: '#089B41',
               });
               this.moveToEmployee();
@@ -448,11 +505,12 @@ private languageService: LanguageService
                   Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error.errors || 'An unexpected error occurred',
+                    text: error.error || 'An unexpected error occurred',
                     confirmButtonColor: '#089B41',
                   });
                   break;
               }
+              this.Data.files.splice(initialLength);
               return false;
             }
           );
@@ -494,10 +552,17 @@ private languageService: LanguageService
     }
 
   }
-
+ 
+  isFileInSelected(file: any): boolean { 
+    return this.SelectedFiles.some(
+      (f) => f.file?.name === file.name || f.name === file.name
+    );
+  }
+  
   //////////////////////////////////////////////////// floor
 
-  toggleDropdown(): void {
+  toggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.dropdownOpen = !this.dropdownOpen;
   }
 
@@ -540,9 +605,56 @@ private languageService: LanguageService
     this.dropdownOpen = false;
   }
 
+  //////////////////////////////////////////////////// Locations
+
+  LocationtoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
+    this.LocationdropdownOpen = !this.LocationdropdownOpen;
+  }
+
+  LocationselectType(Type: Location): void {
+    if (!this.locationsSelected.some((e) => e.id === Type.id)) {
+      this.locationsSelected.push(Type);
+    }
+    if (this.mode == 'Edit') {
+      if (!Array.isArray(this.Data.newLocationSelected)) {
+        this.Data.newLocationSelected = [];
+      }
+      this.Data.newLocationSelected.push(Type.id);
+    }
+    this.LocationdropdownOpen = false;
+  }
+
+  LocationremoveSelected(id: number): void {
+    const index = this.locationsSelected.findIndex((tag) => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.locationsSelected.splice(index, 1)[0];
+    if (this.locationsSelected.length == 0) {
+      this.isFloorMonitor = false
+    }
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+      this.Data.deletedLocationSelected.push(removed.id);
+    }
+    this.LocationdropdownOpen = false;
+  }
+
+  onLocationChange() {
+    if (!this.Data.isRestrictedForLoctaion) {
+      if (this.mode === 'Edit') {
+        this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+        const selectedIds = (this.locationsSelected || []).map(s => s.id);
+        this.Data.deletedLocationSelected.push(...selectedIds);
+      }
+      this.locationsSelected = [];
+    }
+    this.LocationdropdownOpen = false;
+  }
+
   //////////////////////////////////////////////////// Grade
 
-  GradetoggleDropdown(): void {
+  GradetoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.GradedropdownOpen = !this.GradedropdownOpen;
   }
 
@@ -586,7 +698,8 @@ private languageService: LanguageService
   }
   //////////////////////////////////////////////////// Subject
 
-  SubjecttoggleDropdown(): void {
+  SubjecttoggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
     this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
   }
 
@@ -627,6 +740,21 @@ private languageService: LanguageService
       this.subjectSelected = [];
     }
     this.SubjectdropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    const clickedInsideLocation = this.locationDropdown?.nativeElement.contains(target);
+    const clickedInsideFloor = this.floorDropdown?.nativeElement.contains(target);
+    const clickedInsideGrade = this.gradeDropdown?.nativeElement.contains(target);
+    const clickedInsideSubject = this.subjectDropdown?.nativeElement.contains(target);
+
+    if (!clickedInsideLocation) this.LocationdropdownOpen = false;
+    if (!clickedInsideFloor) this.dropdownOpen = false;
+    if (!clickedInsideGrade) this.GradedropdownOpen = false;
+    if (!clickedInsideSubject) this.SubjectdropdownOpen = false;
   }
 
 }

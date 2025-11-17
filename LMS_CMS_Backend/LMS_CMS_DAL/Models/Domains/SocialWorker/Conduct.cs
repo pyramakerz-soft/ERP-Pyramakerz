@@ -22,6 +22,10 @@ namespace LMS_CMS_DAL.Models.Domains.SocialWorker
         public long StudentID { get; set; }
         public Student Student { get; set; }
 
+        [ForeignKey("Classroom")]
+        public long ClassroomID { get; set; }
+        public Classroom Classroom { get; set; }
+
         [ForeignKey("ConductType")]
         public long ConductTypeID { get; set; }
         public ConductType ConductType { get; set; }

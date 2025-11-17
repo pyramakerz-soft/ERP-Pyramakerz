@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-average-cost-calc',
   standalone: true,
@@ -29,7 +30,7 @@ export class AverageCostCalcComponent {
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
     private router: Router,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
 
@@ -39,6 +40,12 @@ export class AverageCostCalcComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   validateDateRange(): boolean {

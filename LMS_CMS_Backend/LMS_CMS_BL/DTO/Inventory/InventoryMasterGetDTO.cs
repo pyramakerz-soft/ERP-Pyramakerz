@@ -13,15 +13,15 @@ namespace LMS_CMS_BL.DTO.Inventory
     {
         public long ID { get; set; }
         public string? InvoiceNumber { get; set; }
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
-        public int CashAmount { get; set; }
-        public int VisaAmount { get; set; }
-        public int Remaining { get; set; }
-        public int Total { get; set; }
+        public decimal CashAmount { get; set; }
+        public decimal VisaAmount { get; set; }
+        public decimal Remaining { get; set; }
+        public decimal Total { get; set; }
         public string Notes { get; set; }
-        public List<string>? Attachments { get; set; }
+        public List<string>? Attachments { get; set; } //7
         public long StoreID { get; set; }
         public long StudentID { get; set; }
         public long FlagId { get; set; }
@@ -43,13 +43,16 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? QrImage { get; set; }
         public long? SaveID { get; set; }
         public long? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
         public long? SchoolPCId { get; set; }
+        public string? SchoolPCName { get; set; }
         public long? SupplierId { get; set; }
         public long? BankID { get; set; }
         public long? StoreToTransformId { get; set; }
+        public string? StoreToTransformName { get; set; }
         public string? StoreName { get; set; }
         public string? StudentName { get; set; }
-        public string? SupplierName { get; set; }
+        public string? SupplierName { get; set; }  //7
         public string? SaveName { get; set; }
         public string? BankName { get; set; }
         public long? InsertedByUserId { get; set; }

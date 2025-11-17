@@ -15,6 +15,7 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-fees-activation-report',
   standalone: true,
@@ -47,7 +48,7 @@ export class FeesActivationReportComponent {
     public ApiServ: ApiService,  
     public reportsService: ReportsService, 
     public sharedReportsService: SharedReportsService ,
-      private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() { 
@@ -59,6 +60,14 @@ export class FeesActivationReportComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }  
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
@@ -173,7 +182,7 @@ export class FeesActivationReportComponent {
         filename: "Fees Activation Report.xlsx",
         tables: [
           {
-            title: "Fees Activation",
+            // title: "Fees Activation",
             headers,
             data: dataRows
           }

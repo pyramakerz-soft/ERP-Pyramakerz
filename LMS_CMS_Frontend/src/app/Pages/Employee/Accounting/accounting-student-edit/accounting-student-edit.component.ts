@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { StudentService } from '../../../../Services/student.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AccountingEmployee } from '../../../../Models/Accounting/accounting-employee';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { AcademicDegree } from '../../../../Models/Administrator/academic-degree';
 import { Department } from '../../../../Models/Administrator/department';
@@ -27,6 +26,8 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-student-edit',
   standalone: true,
@@ -46,7 +47,7 @@ export class AccountingStudentEditComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -59,6 +60,7 @@ export class AccountingStudentEditComponent {
   StudentId: number = 0;
   nationalities: Nationality[] = []
   isLoading = false
+  EmailValidation: string = '';
 
   constructor(
     private router: Router,
@@ -73,7 +75,7 @@ export class AccountingStudentEditComponent {
     public accountServ: AccountingTreeChartService,
     public StudentServ: StudentService,
     public NationalityServ: NationalityService,
-      private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,12 +100,18 @@ export class AccountingStudentEditComponent {
     this.GetAllData();
     this.GetAllAccount();
     this.GetAllNationalitys();
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+  
   GetAllData() {
     this.StudentServ.GetByID(this.StudentId, this.DomainName).subscribe((d: any) => {
       this.Data = d;
@@ -123,11 +131,13 @@ export class AccountingStudentEditComponent {
   }
 
   validateNumber(event: any, field: keyof Student): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.Data[field] === 'string') {
-        this.Data[field] = '' as never;  
+        this.Data[field] = '' as never;
       }
     }
   }
@@ -135,28 +145,48 @@ export class AccountingStudentEditComponent {
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Student Accounting`)
   }
+
+  OnEmailChange() {
+    this.EmailValidation = ''
+  }
+
   Save() {
+    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (this.Data.email && !emailPattern.test(this.Data.email)) {
+      this.EmailValidation = 'Email is not valid';
+      return;
+    }
     this.isLoading = true
     this.StudentServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
       this.GetAllData();
       Swal.fire({
         icon: 'success',
         title: 'Done',
-        text: 'Student Edited Succeessfully',
+        text: 'Student Edited Successfully',
         confirmButtonColor: '#089B41',
       });
       this.router.navigateByUrl(`Employee/Student Accounting`)
       this.isLoading = false
     },
-      err => {
-        this.isLoading = false
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
+      error => {
+        this.isLoading = false 
+        if (typeof error.error === 'string' && error.error.includes("Email Already Taken")) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'This Email Already Taken',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
       })
   }
 }

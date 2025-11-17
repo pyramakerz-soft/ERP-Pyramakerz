@@ -26,11 +26,15 @@ import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/class
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-remedial-classroom',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
@@ -48,7 +52,7 @@ export class RemedialClassroomComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name' ,'numberOfSession' , 'insertedAt' ,'schoolName' ,'gradeName' ,"subjectEnglishName" ,'teacherEnName'];
+  keysArray: string[] = ['id', 'name', 'numberOfSession', 'schoolName', 'gradeName', "subjectEnglishName", 'teacherEnName'];
 
   TableData: RemedialClassroom[] = [];
   schools: School[] = [];
@@ -59,6 +63,7 @@ export class RemedialClassroomComponent {
   Teachers: Employee[] = [];
   students: Employee[] = [];
   SelectedSchoolId: number = 0;
+  SelectedSchoolIdForFilter: number = 0;
   SelectedTimeTableId: number = 0;
   preSelectedClassroom: number | null = null;
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
@@ -67,6 +72,13 @@ export class RemedialClassroomComponent {
   isModalOpen: boolean = false;
   hiddenInputs: string[] = [];
   hiddenColumns: string[] = ['Actions'];
+  isRtl: boolean = false;
+  subscription!: Subscription;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -83,7 +95,9 @@ export class RemedialClassroomComponent {
     public SubjectServ: SubjectService,
     public EmployeeServ: EmployeeService,
     public ClassroomSubjectServ: ClassroomSubjectService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef, 
+    private languageService: LanguageService,
+    private translate: TranslateService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,7 +117,18 @@ export class RemedialClassroomComponent {
       }
     });
     this.GetAllSchools();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+
 
   GetAllSchools() {
     this.schools = [];
@@ -113,12 +138,51 @@ export class RemedialClassroomComponent {
     });
   }
 
-  GetAllData() {
+  // GetAllData() {
+  //   this.TableData = [];
+  //   if(this.SelectedSchoolIdForFilter != 0){
+  //     this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
+  //       this.TableData = d;
+  //     });
+  //   }
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
-    this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
-    });
+    if(this.SelectedSchoolIdForFilter != 0){
+      this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolIdForFilter ,DomainName, pageNumber, pageSize).subscribe(
+        (data) => {
+          this.CurrentPage = data.pagination.currentPage;
+          this.PageSize = data.pagination.pageSize;
+          this.TotalPages = data.pagination.totalPages;
+          this.TotalRecords = data.pagination.totalRecords;
+          this.TableData = data.data;
+        },
+        (error) => {
+          if (error.status == 404) {
+            if (this.TotalRecords != 0) {
+              let lastPage;
+              if (this.isDeleting) {
+                lastPage = (this.TotalRecords - 1) / this.PageSize;
+              } else {
+                lastPage = this.TotalRecords / this.PageSize;
+              }
+              if (lastPage >= 1) {
+                if (this.isDeleting) {
+                  this.CurrentPage = Math.floor(lastPage);
+                  this.isDeleting = false;
+                } else {
+                  this.CurrentPage = Math.ceil(lastPage);
+                }
+                this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+              }
+            }
+          } 
+        }
+      );
+    }
   }
+
 
   GetAllAcademicYearBySchool() {
     this.academicYears = [];
@@ -129,12 +193,10 @@ export class RemedialClassroomComponent {
   }
 
   GetAllGrades() {
-    this.grades = [];
-    this.subjects = [];
-    this.Teachers = [];
     this.remedialClassroom.subjectID = 0
     this.remedialClassroom.gradeID = 0
-    this.remedialClassroom.teacherID = 0
+    this.grades = [];
+    this.subjects = [];
     this.GradeServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
       this.grades = d;
     });
@@ -142,8 +204,6 @@ export class RemedialClassroomComponent {
 
   GetAllSubjectGradeId() {
     this.subjects = [];
-    this.Teachers = [];
-    this.remedialClassroom.teacherID = 0
     this.remedialClassroom.subjectID = 0
     this.SubjectServ.GetByGradeId(this.remedialClassroom.gradeID, this.DomainName).subscribe((d) => {
       this.subjects = d;
@@ -162,7 +222,7 @@ export class RemedialClassroomComponent {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
@@ -185,7 +245,7 @@ export class RemedialClassroomComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -196,13 +256,13 @@ export class RemedialClassroomComponent {
       else if (this.mode == 'Edit') {
         console.log(this.remedialClassroom)
         this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+         this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Updatedd Successfully',
+            text: 'Updated Successfully',
             confirmButtonColor: '#089B41',
           });
         }, error => {
@@ -211,7 +271,7 @@ export class RemedialClassroomComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' }
           });
@@ -232,13 +292,16 @@ export class RemedialClassroomComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: RemedialClassroom[] = await firstValueFrom(
-        this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      const data: any = await firstValueFrom(
+        this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolId, this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -263,18 +326,18 @@ export class RemedialClassroomComponent {
 
   delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Remedial Classroom?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Remedial Classroom') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error: (error) => {
             console.error('Error while deleting the Violation:', error);
@@ -295,12 +358,14 @@ export class RemedialClassroomComponent {
   }
 
   openModal() {
+    this.remedialClassroom = new RemedialClassroom();
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
 
   closeModal() {
     this.remedialClassroom = new RemedialClassroom();
+    this.validationErrors = {}
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.isModalOpen = false;
@@ -308,7 +373,7 @@ export class RemedialClassroomComponent {
 
   onInputValueChange(event: { field: keyof RemedialClassroom; value: any }) {
     const { field, value } = event;
-    if (field == 'name' || field == 'schoolID') {
+    if (field == 'name' || field == 'schoolID' || field == 'numberOfSession' || field == 'academicYearID' || field == 'gradeID' || field == 'subjectID' || field == 'teacherID') {
       (this.remedialClassroom as any)[field] = value;
       if (value) {
         this.validationErrors[field] = '';
@@ -328,12 +393,24 @@ export class RemedialClassroomComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  // validateNumber(event: any, field: keyof RemedialClassroom): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     if (typeof this.remedialClassroom[field] === 'string') {
+  //       this.remedialClassroom[field] = '' as never;
+  //     }
+  //   }
+  // }
+
   validateNumber(event: any, field: keyof RemedialClassroom): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
-      event.target.value = '';
+      event.target.value = ''; 
       if (typeof this.remedialClassroom[field] === 'string') {
-        this.remedialClassroom[field] = '' as never;
+        this.remedialClassroom[field] = '' as never;  
       }
     }
   }
@@ -356,29 +433,48 @@ export class RemedialClassroomComponent {
     return IsAllow;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.remedialClassroom) {
-      if (this.remedialClassroom.hasOwnProperty(key)) {
-        const field = key as keyof RemedialClassroom;
-        if (!this.remedialClassroom[field]) {
-          if (
-            field == 'name' ||
-            field == 'numberOfSession' ||
-            field == 'gradeID' ||
-            field == 'subjectID' ||
-            field == 'teacherID' ||
-            field == 'academicYearID' ||
-            field == 'schoolID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.remedialClassroom.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.remedialClassroom.numberOfSession) {
+    this.validationErrors['numberOfSession'] = this.getRequiredErrorMessage('Number Of Sessions');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.gradeID) {
+    this.validationErrors['gradeID'] = this.getRequiredErrorMessage('Grade');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.subjectID) {
+    this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.teacherID) {
+    this.validationErrors['teacherID'] = this.getRequiredErrorMessage('Teacher');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.academicYearID) {
+    this.validationErrors['academicYearID'] = this.getRequiredErrorMessage('Academic Year');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.schoolID) {
+    this.validationErrors['schoolID'] = this.getRequiredErrorMessage('School');
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   Edit(id: number) {
     this.mode = "Edit"
@@ -411,8 +507,64 @@ export class RemedialClassroomComponent {
     this.openModal()
   }
 
-  Create(){
-    this.mode = "Create"
-    this.openModal()
+  Create() {
+      this.mode = "Create"
+      this.GetAllTeachers()
+      this.openModal()
+    }
+
+    private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }  
 }

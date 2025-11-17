@@ -11,11 +11,15 @@ import { InterviewTimeTableService } from '../../../Services/Employee/Registrati
 import { RegistrationFormInterviewService } from '../../../Services/Employee/Registration/registration-form-interview.service';
 import Swal from 'sweetalert2';
 import { DayWithInterviews } from '../../../Models/Registration/day-with-interviews';
- 
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-interview-registration',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './interview-registration.component.html',
   styleUrl: './interview-registration.component.css'
 })
@@ -34,7 +38,8 @@ export class InterviewRegistrationComponent {
   academicYearIdID = 0
   selectedDate = ""
   selectedTime = ""
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   interviewTimeTable:InterviewTimeTable[] = []
   ToChooseFromInterviewTimeTable:InterviewTimeTable[] = []
 
@@ -48,7 +53,7 @@ export class InterviewRegistrationComponent {
   private interviewMap = new Map<string, InterviewTimeTable[]>();
   currentMonthDays: DayWithInterviews[] = [];
 
-  constructor(public account: AccountService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
     public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService){}
 
   ngOnInit(){
@@ -58,6 +63,16 @@ export class InterviewRegistrationComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   
   trackByInterview(index: number, interview: InterviewTimeTable): number {

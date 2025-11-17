@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class PayableMasterAddDTO
     {
         public string DocNumber { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         public string? Notes { get; set; }
         public long PayableDocTypeID { get; set; }
         public long LinkFileID { get; set; }

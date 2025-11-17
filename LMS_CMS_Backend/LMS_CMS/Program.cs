@@ -1,3 +1,22 @@
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using LMS_CMS_BL.UOW;
+using LMS_CMS_BL.Config;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
+using LMS_CMS_PL.Middleware;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Octa;
+using LMS_CMS_PL.Services;
+using LMS_CMS_DAL.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Zatca.EInvoice.SDK.Contracts;
+using Zatca.EInvoice.SDK;
 using Amazon;
 using Amazon.S3;
 using Amazon.SecretsManager;
@@ -8,7 +27,6 @@ using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Hubs;
 using LMS_CMS_PL.Middleware;
-using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -26,6 +44,10 @@ using System.Text.Json.Serialization;
 using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts;
 using static Org.BouncyCastle.Math.EC.ECCurve;
+using LMS_CMS_PL.Services.FileValidations;
+using Microsoft.AspNetCore.HttpOverrides;
+using LMS_CMS_PL.Services.Dashboard;
+using LMS_CMS_PL.Services.S3;
 
 namespace LMS_CMS
 {
@@ -110,11 +132,15 @@ namespace LMS_CMS
 
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                path.StartsWithSegments("/notificationHub"))
-                            { 
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
+                            {
                                 context.Token = accessToken;
-                            }
+                            } 
+                            //if (!string.IsNullOrEmpty(accessToken) &&
+                            //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+                            //{
+                            //    context.Token = accessToken;
+                            //}
                             return Task.CompletedTask;
                         }
                     };
@@ -131,11 +157,13 @@ namespace LMS_CMS
             builder.Services.AddScoped<DbContextFactoryService>();
             builder.Services.AddScoped<GenerateJWTService>();
             builder.Services.AddScoped<FileImageValidationService>();
+            builder.Services.AddScoped<FileVideoValidationService>();
             builder.Services.AddScoped<FileWordPdfValidationService>();
+            builder.Services.AddScoped<FileValidationService>();
             builder.Services.AddScoped<CancelInterviewDayMessageService>();
             builder.Services.AddScoped<EmailService>();
-            builder.Services.AddScoped<GenerateBarCodeEan13>(); 
-            builder.Services.AddScoped<CheckPageAccessService>(); 
+            builder.Services.AddScoped<GenerateBarCodeEan13>();
+            builder.Services.AddScoped<CheckPageAccessService>();
             builder.Services.AddScoped<InVoiceNumberCreate>();
             builder.Services.AddScoped<CalculateCurrentStock>();
             builder.Services.AddScoped<CreateStudentService>();
@@ -149,25 +177,40 @@ namespace LMS_CMS
             builder.Services.AddScoped<IamNotRobot>();
             builder.Services.AddScoped<UserTreeService>();
             builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<RequestService>();
+            builder.Services.AddScoped<ChatMessageService>();
+            builder.Services.AddScoped<SendNotificationService>();
+            builder.Services.AddScoped<ValidTeachersForStudentService>(); 
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<FileUploadsService>();
+            builder.Services.AddScoped<Accounting_Service>();
+            builder.Services.AddScoped<Clinic_Service>();
+            builder.Services.AddScoped<Communication_Service>();
+            builder.Services.AddScoped<ECommerce_Service>();
+            builder.Services.AddScoped<HR_Service>();
+            builder.Services.AddScoped<Inventory_Service>();
+            builder.Services.AddScoped<LMS_Service>();
+            builder.Services.AddScoped<Registration_Service>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
-                Region = RegionEndpoint.USEast1 
+                Region = RegionEndpoint.USEast1
             });
 
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
             /// 2)
             builder.Services.AddCors(option =>
             {
                 option.AddPolicy(txt, builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins(allowedOrigins)
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .WithHeaders("content-type", "Domain-Name")
                            .WithExposedHeaders("Content-Disposition")
                            .AllowCredentials();
                 });
-            }); 
+            });
 
             /// For generic repo:
             builder.Services.AddScoped<UOW>();
@@ -182,7 +225,7 @@ namespace LMS_CMS
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+                });
 
             builder.Services.Configure<IISServerOptions>(options =>
             {
@@ -199,8 +242,9 @@ namespace LMS_CMS
             //builder.Services.AddSignalR();
             builder.Services.AddSignalR(hubOptions =>
             {
-                hubOptions.EnableDetailedErrors = true;
-                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+                hubOptions.EnableDetailedErrors = true; 
+                hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // send ping every 15s
+                hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // allow up to 60s silence
             });
 
             var app = builder.Build();
@@ -209,7 +253,39 @@ namespace LMS_CMS
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
-            app.UseCors(txt);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            app.UseRouting();
+            app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+
+            app.UseAuthentication();
+
+            //////// Get Connection String
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
+                appBuilder =>
+                {
+                    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
+                    appBuilder.UseMiddleware<SuspendMiddleware>();
+                });
+
+            /// For Endpoint, to check if the user has access for this endpoint or not
+            /// Make sure to be here before UseAuthorization
+            app.UseMiddleware<Endpoint_Authorization_Middleware>();
+
+            app.UseAuthorization();
+
+            app.MapControllers();
+            // 2) SignalR
+            //app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+            //app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            //app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+            app.MapHub<AppHub>("/appHub").RequireAuthorization();
+
+            app.MapFallbackToFile("index.html");
+
 
             ///////// send files
             app.UseStaticFiles();
@@ -223,21 +299,6 @@ namespace LMS_CMS
                 }
             });
 
-            //////// Authentication
-            app.UseAuthentication();
-
-
-            //////// Get Connection String
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
-                appBuilder =>
-            {
-                appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-            });
-            //app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"), 
-            //    appBuilder =>
-            //{
-            //    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-            //}); 
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -246,18 +307,8 @@ namespace LMS_CMS
                 app.UseSwaggerUI();
             }
 
+            // Redirects http:// requests to https://.
             app.UseHttpsRedirection();
-
-
-            /// For Endpoint, to check if the user has access for this endpoint or not
-            /// Make sure to be here before UseAuthorization
-            app.UseMiddleware<Endpoint_Authorization_Middleware>();
-             
-            app.UseAuthorization();
-
-
-            // 2) SignalR
-            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
 
 
             //app.Urls.Add("http://0.0.0.0:5000");
@@ -265,9 +316,7 @@ namespace LMS_CMS
             //    builder.AllowAnyOrigin()
             //   .AllowAnyMethod()
             //   .AllowAnyHeader()
-            //);
-
-            app.MapControllers();
+            //); 
 
             app.Run();
         }

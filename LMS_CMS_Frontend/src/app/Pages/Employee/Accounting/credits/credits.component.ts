@@ -16,9 +16,10 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { CreditService } from '../../../../Services/Employee/Accounting/credit.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-credits',
   standalone: true,
@@ -41,7 +42,7 @@ export class CreditsComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';
@@ -59,6 +60,7 @@ export class CreditsComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
@@ -66,7 +68,7 @@ export class CreditsComponent {
     public ApiServ: ApiService,
     public CreditServ: CreditService,
     public accountServ: AccountingTreeChartService,
-     private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -88,12 +90,19 @@ export class CreditsComponent {
 
     this.GetAllData();
     this.GetAllAccount()
-   this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAllData() {
     this.TableData = []
@@ -116,13 +125,13 @@ export class CreditsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Credit?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Credit')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.CreditServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -167,12 +176,12 @@ export class CreditsComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -184,18 +193,18 @@ export class CreditsComponent {
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           });
-      } 
-    } 
+      }
+    }
   }
 
   closeModal() {
@@ -207,31 +216,30 @@ export class CreditsComponent {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.credit) {
-      if (this.credit.hasOwnProperty(key)) {
-        const field = key as keyof Credit;
-        if (!this.credit[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-
-    if (this.credit.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.credit.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.credit.accountNumberID) {
+    this.validationErrors['accountNumberID'] = this.getRequiredErrorMessage('Account Number');
+    isValid = false;
+  }
+
+  // Validate name length
+  if (this.credit.name && this.credit.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters');
+  }
+  
+  return isValid;
+}
+
   capitalizeField(field: keyof Credit): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -272,4 +280,15 @@ export class CreditsComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

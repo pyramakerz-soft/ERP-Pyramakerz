@@ -40,6 +40,42 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByGradeID/${GradeId}`, { headers })
   }
 
+  GetBySubjectId(SubjectId:number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetBySubject/${SubjectId}`, { headers })
+  }  
+
+  GetBySubjectAndAcademicYearId(SubjectId:number, yearId:number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetBySubjectAndAcademicYearId/${SubjectId}/${yearId}`, { headers })
+  }  
+
+  GetFailedClassesBySubjectAndYear(SubjectId:number, YearId:number, date:string, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetFailedClassesBySubjectAndYear/${SubjectId}/${YearId}/${date}`, { headers })
+  }  
+
   GetBySchoolId(schoolId:number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
@@ -64,6 +100,18 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByGradeAndAcademicYearID/${GradeId}/${AcYearId}`, { headers })
   }
 
+  ByGradeAndAcademicYearIDAndStudent(GradeId:number, AcYearId:number,StudentId : number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByGradeAndAcademicYearIDAndStudent/${GradeId}/${AcYearId}/${StudentId}`, { headers })
+  }  
+
   GetByAcYearId(AcYearId:number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
@@ -76,6 +124,20 @@ baseUrl = ""
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByAcademicYearID/${AcYearId}`, { headers })
   }
 
+  GetByAcademicYearIDWithPaggination(AcYearId:number,DomainName: string, pageNumber: number, pageSize: number) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    // return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByAcademicYearIDWithPaggination/${AcYearId}`, { headers })
+    return this.http.get<{ data: Classroom[], pagination: any }>(`${this.baseUrl}/Classroom/ByAcademicYearIDWithPaggination/${AcYearId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
+
   GetByActiveAcYear(DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
@@ -86,6 +148,18 @@ baseUrl = ""
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/ByActiveAcademicYearID`, { headers })
+  }
+
+  GetByLessonID(LessonID:number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Classroom[]>(`${this.baseUrl}/Classroom/GetByLessonID/${LessonID}`, { headers })
   }
 
   Add(Classroom: Classroom,DomainName:string) {

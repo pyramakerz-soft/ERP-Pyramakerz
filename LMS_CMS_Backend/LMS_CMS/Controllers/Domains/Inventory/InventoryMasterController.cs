@@ -9,6 +9,8 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
+using LMS_CMS_PL.Services.S3;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,14 +28,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         public  InVoiceNumberCreate _InVoiceNumberCreate;
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly IConfiguration _config;
+        private readonly FileUploadsService _fileService;
+        private readonly FileValidationService _fileValidationService;
 
-        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IConfiguration config)
+        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IConfiguration config, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             this._InVoiceNumberCreate = inVoiceNumberCreate;
             _checkPageAccessService = checkPageAccessService;
             _config = config;
+            _fileService = fileService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("ByFlagId/{id}")]
@@ -46,7 +52,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
 
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
 
             // Get total record count
             int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
@@ -71,6 +77,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryFlagGetDTO Flagdto = mapper.Map<InventoryFlagGetDTO>(inventoryFlags);
 
             List<InventoryMasterGetDTO> DTO = mapper.Map<List<InventoryMasterGetDTO>>(Data);
+            foreach (var master in DTO)
+            {
+                for (int i = 0; i < master.Attachments.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(master.Attachments[i]))
+                    {
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
+                    }
+                }
+            }
 
             var paginationMetadata = new
             {
@@ -83,11 +99,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(new { Data = DTO, Pagination = paginationMetadata , inventoryFlag=Flagdto });
         }
 
-        /////////////////////////////////////////////////////////////////////////////-77
+        ///////////////////////////////////////////////////////////////////////////////////////////-77
         [HttpGet("Search")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Inventory" }
+        allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Inventory Transaction Detailed Report", "Sales Transaction Detailed Report", "Purchase Transaction Detailed Report"  }
          )]
         public async Task<IActionResult> GetSearch([FromQuery] InventoryMasterSearch obj)
         {
@@ -95,20 +111,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (obj.FlagIds == null || !obj.FlagIds.Any())
                 return BadRequest("FlagIds cannot be null or empty.");
-
-            // ✅ تحويل DateTo إلى نهاية اليوم لضمان شمول اليوم كله
-            var dateFrom = obj.DateFrom.Date;
-            var dateTo = obj.DateTo.Date.AddDays(1).AddTicks(-1);
+            var dateFrom = obj.DateFrom;
+            var dateTo = obj.DateTo;
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");
-
-            // ✅ جلب البيانات الأساسية
             var data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
                 f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
                 query => query
                     .Include(x => x.Store)
                     .Include(x => x.Student)
+                    .Include(x => x.Supplier)
                     .Include(x => x.InventoryFlags)
                     .Include(x => x.InventoryDetails)
                         .ThenInclude(detail => detail.ShopItem)
@@ -116,9 +129,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                                 .ThenInclude(subCategory => subCategory.InventoryCategories)
                     .Include(x => x.Save)
                     .Include(x => x.Bank)
-            );
 
-            // ✅ التصفية حسب التاريخ وباقي الفلاتر
+            );
             var filteredData = data.Where(f =>
                 f.Date >= dateFrom && f.Date <= dateTo &&
                 (obj.StoredId == null || (f.Store != null && f.Store.ID == obj.StoredId)) &&
@@ -127,7 +139,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     (obj.SubCategoryId == null || detail.ShopItem.InventorySubCategoriesID == obj.SubCategoryId) &&
                     (obj.ItemId == null || detail.ShopItemID == obj.ItemId)
                 )
-            ).ToList();
+            )
+             .OrderBy(x => x.Date)
+                .ToList();
 
             if (!filteredData.Any())
                 return NotFound("No records found matching the search criteria.");
@@ -136,6 +150,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
           
             var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
 
+            foreach (var master in dto)
+            {
+                for (int i = 0; i < master.Attachments.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(master.Attachments[i]))
+                    {
+                        master.Attachments[i] = _fileService.GetFileUrl(master.Attachments[i], Request, HttpContext); 
+                    }
+                }
+            }
+
             return Ok(new
             {
                 AllTotal = allTotal,
@@ -143,12 +168,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             });
         }
 
-        /////////////////////////////////////////////////////////////////////////////-77
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-77
 
         [HttpGet("SearchInvoice")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Inventory" }
+        pages: new[] { "Inventory Transaction Report", "Purchase Transaction Report", "Sales Transaction Report" }
         )]
         public async Task<IActionResult> GetSearchInvoice([FromQuery] InventoryMasterSearch obj)
         {
@@ -157,13 +182,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (obj.FlagIds == null || !obj.FlagIds.Any())
                 return BadRequest("FlagIds cannot be null or empty.");
 
-            var dateFrom = obj.DateFrom.Date;
-            var dateTo = obj.DateTo.Date.AddDays(1).AddTicks(-1); // نهاية اليوم
+            var dateFrom = obj.DateFrom;
+            var dateTo = obj.DateTo; 
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");
-
-            // ✅ جلب البيانات + Supplier
             var data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
                 f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
                 query => query
@@ -192,10 +215,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("No records found matching the search criteria.");
 
             var allTotal = filteredData.Sum(item => item.Total * (item.InventoryFlags?.FlagValue ?? 0));
-
-            // ✅ بناء DTO يدويًا مع الحقول المطلوبة
-            var summaryDtos = filteredData.Select(f => new
-            {
+            var summaryDtos = 
+                filteredData.Select(f => new {
                 f.ID,
                 f.InvoiceNumber,
                 f.Date,
@@ -219,7 +240,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 f.SaveID,
                 f.BankID,
                 f.Notes
-            }).ToList();
+            })
+              .OrderBy(x => x.Date)
+                .ToList();
 
             return Ok(new
             {
@@ -228,12 +251,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             });
         }
 
-        /////////////////////////////////////////////////////////////////////////-777
+        //////////////////////////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Inventory" }
+              pages: new[] { "Inventory" , "Zatca Electronic-Invoice" , "ETA Electronic-Invoice" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -247,6 +270,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryMaster Data = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                     s => s.IsDeleted != true && s.ID == id,
                     query => query.Include(store => store.Store),
+                    query => query.Include(store => store.StoreToTransform),
+                    query => query.Include(store => store.School),
+                    query => query.Include(store => store.SchoolPCs),
                     query => query.Include(store => store.Student),
                     query => query.Include(store => store.Supplier),
                     query => query.Include(store => store.Save),
@@ -260,12 +286,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             InventoryMasterGetDTO DTO = mapper.Map<InventoryMasterGetDTO>(Data);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master";
-            if (Data.Attachments != null)
+            for (int i = 0; i < DTO.Attachments.Count; i++)
             {
-                DTO.Attachments = Data.Attachments.Select(filePath =>
-                    $"{serverUrl}/{Data.ID}/{Path.GetFileName(filePath)}"
-                ).ToList();
+                if (!string.IsNullOrEmpty(DTO.Attachments[i]))
+                {
+                    DTO.Attachments[i] = _fileService.GetFileUrl(DTO.Attachments[i], Request, HttpContext); 
+                }
             }
             return Ok(DTO);
         }
@@ -352,6 +378,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (newData == null)
             {
                 return BadRequest("Master cannot be null.");
+            }
+
+            if (newData.Attachment != null)
+            {
+                foreach (var item in newData.Attachment)
+                {
+                    if (item != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(item);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        } 
+                    }
+                }
             }
 
             Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newData.StoreID && b.IsDeleted != true);
@@ -502,9 +543,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 if (expectedRemaining != newData.Remaining)
                 {
                     return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
-                }
-
-
+                } 
             }
 
             List<ShopItem> existingShopItems = new List<ShopItem>();
@@ -587,14 +626,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             long SaleID = 0;
             SaleID = Master.ID;
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Master");
-            var saleFolder = Path.Combine(baseFolder, Master.ID.ToString());
-
-            if (!Directory.Exists(saleFolder))
-            {
-                Directory.CreateDirectory(saleFolder);
-            }
+             
 
             if (Master.Attachments == null)
             {
@@ -604,17 +636,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (newData.Attachment != null)
             {
                 foreach (var item in newData.Attachment)
-                {
+                { 
                     if (item != null)
                     {
-                        var filePath = Path.Combine(saleFolder, item.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await item.CopyToAsync(stream);
-                        }
-
-                        var fileUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Sales/{SaleID}/{item.FileName}";
-                        Master.Attachments.Add(fileUrl);
+                        var fileUrl = await _fileService.UploadFileAsync(item, "Inventory/InventoryMaster", SaleID, HttpContext);
+                        Master.Attachments.Add(fileUrl);  
                     }
                 }
             }
@@ -661,6 +687,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return Unauthorized("User ID, Type claim not found.");
             }
 
+            if (newSale.NewAttachments != null)
+            {
+                foreach (var item in newSale.NewAttachments)
+                {
+                    if (item != null)
+                    {
+                        string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(item);
+                        if (returnFileInput != null)
+                        {
+                            return BadRequest(returnFileInput);
+                        }
+                    }
+                }
+            }
 
             Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newSale.StoreID && b.IsDeleted != true);
             if (store == null)
@@ -783,7 +823,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newSale.FlagId == 8 || newSale.FlagId == 9 || newSale.FlagId == 10 || newSale.FlagId == 11 || newSale.FlagId == 12)
             {
-                double expectedRemaining = (newSale.Total) - ((newSale.CashAmount ?? 0) + (newSale.VisaAmount ?? 0));
+                decimal expectedRemaining = (newSale.Total) - ((newSale.CashAmount ?? 0) + (newSale.VisaAmount ?? 0));
                 if (expectedRemaining != newSale.Remaining)
                 {
                     return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
@@ -800,16 +840,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     return accessCheck;
                 }
             }
-
-            mapper.Map(newSale, sale);
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Master");
-            var saleFolder = Path.Combine(baseFolder, sale.ID.ToString());
-
-            if (!Directory.Exists(saleFolder))
-            {
-                Directory.CreateDirectory(saleFolder);
-            }
-
+             
             if (sale.Attachments == null)
             {
                 sale.Attachments = new List<string>();
@@ -829,34 +860,40 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     if (item != null)
                     {
-                        var filePath = Path.Combine(saleFolder, item.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await item.CopyToAsync(stream);
-                        }
-
-                        var fileUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master/{newSale.ID}/{item.FileName}";
-                        sale.Attachments.Add(fileUrl);
+                        var fileUrl = await _fileService.UploadFileAsync(item, "Inventory/InventoryMaster", newSale.ID, HttpContext);
+                        sale.Attachments.Add(fileUrl); 
                     }
                 }
             }
+
+
+            mapper.Map(newSale, sale);
 
             if (newSale.DeletedAttachments != null)
             {
                 foreach (var fileUrl in newSale.DeletedAttachments)
                 {
-                    var fileName = Path.GetFileName(fileUrl); // Extract just the filename from the URL
-                    var filePath = Path.Combine(saleFolder, fileName);
+                    await _fileService.DeleteFileAsync(
+                        fileUrl,
+                        "Inventory/InventoryMaster",
+                        newSale.ID,
+                        HttpContext
+                    );
 
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
+                    // Normalize both fileUrl and sale.Attachments entries before comparing
+                    var index = fileUrl.IndexOf("Uploads", StringComparison.OrdinalIgnoreCase);
+                    var relativeFileUrl = index >= 0 ? fileUrl.Substring(index) : fileUrl;
 
-                    sale.Attachments.Remove(fileUrl);
+                    // Convert backslashes (\) to forward slashes (/)
+                    relativeFileUrl = relativeFileUrl.Replace("\\", "/");
+
+                    sale.Attachments = sale.Attachments
+                        .Select(s => s.Replace("\\", "/")) // normalize stored attachments
+                        .Where(s => !string.Equals(s, relativeFileUrl, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
                 }
             }
-
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             sale.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

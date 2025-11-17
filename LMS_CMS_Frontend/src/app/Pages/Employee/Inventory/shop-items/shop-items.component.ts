@@ -15,9 +15,10 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ShopItemService } from '../../../../Services/Employee/Inventory/shop-item.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop-items',
@@ -27,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './shop-items.component.css'
 })
 export class ShopItemsComponent {
-User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -57,7 +47,7 @@ User_Data_After_Login: TokenData = new TokenData(
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'enName', 'arName', 'purchasePrice', 'salesPrice', 'barCode', 'vatForForeign' ,'limit' ,'availableInShop' ,'schoolName' ,'inventorySubCategoriesName'];
+  keysArray: string[] = ['id', 'enName', 'arName', 'purchasePrice', 'salesPrice', 'barCode', 'vatForForeign', 'limit', 'schoolName', 'inventorySubCategoriesName'];
 
   validationErrors: { [key in keyof ShopItem]?: string } = {};
 
@@ -70,10 +60,11 @@ User_Data_After_Login: TokenData = new TokenData(
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public shopItemService:ShopItemService,
-    private languageService: LanguageService
-  ) {}
-  
+    public shopItemService: ShopItemService,
+    private translate: TranslateService,
+    private languageService: LanguageService, 
+  ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -93,33 +84,39 @@ User_Data_After_Login: TokenData = new TokenData(
     });
 
     this.GetAllData();
-         this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  GetAllData() {
-   this.shopItemService.Get(this.DomainName).subscribe(
-    data =>{
-      this.TableData = data 
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
-   )
   }
- 
+
+  GetAllData() {
+    this.shopItemService.Get(this.DomainName).subscribe(
+      data => {
+        this.TableData = data
+      }
+    )
+  }
+
   Create() {
     this.router.navigateByUrl(`Employee/Shop Item/Create`)
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Item?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.shopItemService.Delete(id, this.DomainName).subscribe(
@@ -131,7 +128,7 @@ User_Data_After_Login: TokenData = new TokenData(
     });
   }
 
-  Edit(id:number) {
+  Edit(id: number) {
     this.router.navigateByUrl(`Employee/Shop Item/${id}`)
   }
 
@@ -157,12 +154,12 @@ User_Data_After_Login: TokenData = new TokenData(
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: ShopItem[] = await firstValueFrom(this.shopItemService.Get(this.DomainName));  
+      const data: ShopItem[] = await firstValueFrom(this.shopItemService.Get(this.DomainName));
       this.TableData = data || [];
-  
+
       if (this.value !== "") {
         const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
+
         this.TableData = this.TableData.filter(t => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {

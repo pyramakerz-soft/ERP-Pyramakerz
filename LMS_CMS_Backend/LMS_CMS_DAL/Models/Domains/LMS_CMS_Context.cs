@@ -1,14 +1,16 @@
-﻿using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -185,7 +187,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AssignmentStudent> AssignmentStudent { get; set; }
         public DbSet<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific { get; set; }
         public DbSet<AssignmentQuestion> AssignmentQuestion { get; set; }
-        public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
+        public DbSet<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
         public DbSet<ETAPOS> ETAPOS { get; set; }
         public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
@@ -219,7 +221,55 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Conduct> Conduct { get; set; }
         public DbSet<Attendance> Attendance { get; set; }
         public DbSet<AttendanceStudent> AttendanceStudent { get; set; }
+        public DbSet<IssuesType> IssuesType { get; set; }
+        public DbSet<StudentIssue> StudentIssue { get; set; }
+        public DbSet<SocialWorkerMedal> SocialWorkerMedal { get; set; }
+        public DbSet<CertificateType> CertificateType { get; set; }
+        public DbSet<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; }
+        public DbSet<CertificateStudent> CertificateStudent { get; set; }
+        public DbSet<HorizontalMeeting> HorizontalMeeting { get; set; }
+        public DbSet<ParentMeeting> ParentMeeting { get; set; }
+        public DbSet<Appointment> Appointment { get; set; }
+        public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
+        public DbSet<AppointmentParent> AppointmentParent { get; set; }
+        public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
+        public DbSet<DirectMark> DirectMark { get; set; }
+        public DbSet<DirectMarkClasses> DirectMarkClasses { get; set; }
 
+        // Maintenance Module
+        public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
+        public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
+        public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+        public DbSet<Maintenance> Maintenances { get; set; }
+
+
+        public DbSet<Bouns> Bouns { get; set; }
+        public DbSet<BounsType> BounsType { get; set; }
+        public DbSet<Deduction> Deduction { get; set; }
+        public DbSet<DeductionType> DeductionType { get; set; }
+        public DbSet<LeaveRequest> LeaveRequest { get; set; }
+        public DbSet<Loans> Loans { get; set; }
+        public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
+        public DbSet<VacationEmployee> VacationEmployee { get; set; }
+        public DbSet<VacationTypes> VacationTypes { get; set; }
+        public DbSet<ConnectionStatus> ConnectionStatus { get; set; }
+        public DbSet<ArchivingTree> ArchivingTree{ get; set; }
+        public DbSet<PermissionGroup> PermissionGroup { get; set; }
+        public DbSet<PermissionGroupDetails> PermissionGroupDetails { get; set; }
+        public DbSet<PermissionGroupEmployee> PermissionGroupEmployee { get; set; }
+        public DbSet<AnnualVacationEmployee> AnnualVacationEmployee { get; set; }
+        public DbSet<EmployeeClocks> EmployeeClocks { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<EmployeeLocation> EmployeeLocation { get; set; }
+        public DbSet<SalaryConfigration> SalaryConfigration { get; set; }
+        public DbSet<BankEmployee> BankEmployee { get; set; }
+        public DbSet<SafeEmployee> SafeEmployee { get; set; }
+        public DbSet<RefreshTokens> RefreshTokens { get; set; }
+        public DbSet<DayStatus> DayStatus { get; set; }
+        public DbSet<MonthlyAttendance> MonthlyAttendance { get; set; }
+        public DbSet<SalaryHistory> SalaryHistory { get; set; }
+        public DbSet<EmployeeLoans> EmployeeLoans { get; set; } 
+        public DbSet<EmployeeLoans> FailedStudents { get; set; } 
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -254,10 +304,6 @@ namespace LMS_CMS_DAL.Models.Domains
             
             modelBuilder.Entity<Employee>()
                 .HasIndex(p => p.Email)
-                .IsUnique();
-
-            modelBuilder.Entity<ViolationType>()
-                .HasIndex(p => p.Name)
                 .IsUnique();
 
             modelBuilder.Entity<EmployeeType>()
@@ -390,6 +436,25 @@ namespace LMS_CMS_DAL.Models.Domains
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
+            modelBuilder.Entity<AppointmentStatus>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<BounsType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<DeductionType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<SalaryConfigration>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<DayStatus>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
 
             ///////////////////////// OnDelete: /////////////////////////
             modelBuilder.Entity<Page>()
@@ -547,7 +612,7 @@ namespace LMS_CMS_DAL.Models.Domains
                  .WithMany(p => p.BusStudents)
                  .HasForeignKey(p => p.SemseterID)
                  .OnDelete(DeleteBehavior.Restrict);
-
+             
             //modelBuilder.Entity<StudentAcademicYear>()
             //     .HasOne(p => p.Student)
             //     .WithMany(p => p.StudentAcademicYears)
@@ -666,6 +731,12 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasOne(p => p.Section)
                  .WithMany(p => p.Grades)
                  .HasForeignKey(p => p.SectionID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Grade>()
+                 .HasOne(p => p.UpgradeTo)
+                 .WithMany(p => p.UpgradeTos)
+                 .HasForeignKey(p => p.UpgradeToID)
                  .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Classroom>()
@@ -1287,6 +1358,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.StoreID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.SchoolPCs)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolPCId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<EvaluationTemplateGroup>()
                 .HasOne(p => p.EvaluationTemplate)
                 .WithMany(p => p.EvaluationTemplateGroups)
@@ -1629,6 +1712,12 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.SubjectWeightTypeID)
               .OnDelete(DeleteBehavior.Restrict); 
             
+            modelBuilder.Entity<Assignment>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.Assignments)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict); 
+            
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.StudentClassroom)
               .WithMany(p => p.AssignmentStudents)
@@ -1665,15 +1754,15 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.QuestionBankID)
               .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<DirectMarkClassroomStudent>()
-              .HasOne(p => p.WeightType)
-              .WithMany(p => p.DirectMarkClassroomStudents)
-              .HasForeignKey(p => p.WeightTypeID)
+            modelBuilder.Entity<DirectMarkClassesStudent>()
+              .HasOne(p => p.DirectMark)
+              .WithMany(p => p.DirectMarkClassesStudent)
+              .HasForeignKey(p => p.DirectMarkID)
               .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<DirectMarkClassroomStudent>()
+            modelBuilder.Entity<DirectMarkClassesStudent>()
               .HasOne(p => p.StudentClassroom)
-              .WithMany(p => p.DirectMarkClassroomStudents)
+              .WithMany(p => p.DirectMarkClassesStudent)
               .HasForeignKey(p => p.StudentClassroomID)
               .OnDelete(DeleteBehavior.Restrict);
             
@@ -1991,10 +2080,22 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.ProcedureTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Conduct>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.Conduct)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<ConductType>()
                 .HasOne(p => p.ConductLevel)
                 .WithMany(p => p.ConductTypes)
                 .HasForeignKey(p => p.ConductLevelID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConductType>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.ConductTypes)
+                .HasForeignKey(p => p.SchoolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ConductTypeSection>()
@@ -2008,6 +2109,352 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(p => p.ConductTypeSections)
                 .HasForeignKey(p => p.SectionID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentIssue>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.StudentIssues)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentIssue>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.StudentIssues)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SocialWorkerMedalStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.SocialWorkerMedalStudent)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SocialWorkerMedalStudent>()
+                .HasOne(p => p.SocialWorkerMedal)
+                .WithMany(p => p.SocialWorkerMedalStudent)
+                .HasForeignKey(p => p.SocialWorkerMedalID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CertificateStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.CertificateStudent)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CertificateStudent>()
+                .HasOne(p => p.CertificateType)
+                .WithMany(p => p.CertificateStudent)
+                .HasForeignKey(p => p.CertificateTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Appointment>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(p => p.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Parent)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.ParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.AppointmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Grade)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.GradeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.AppointmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Bouns)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(p => p.BounsType)
+                .WithMany(p => p.Bouns)
+                .HasForeignKey(p => p.BounsTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Deduction)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(p => p.DeductionType)
+                .WithMany(p => p.Deduction)
+                .HasForeignKey(p => p.DeductionTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.LeaveRequest)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Loans)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(p => p.Save)
+                .WithMany(p => p.Loans)
+                .HasForeignKey(p => p.SafeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.VacationEmployee)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
+                .HasOne(p => p.VacationTypes)
+                .WithMany(p => p.VacationEmployee)
+                .HasForeignKey(p => p.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.DirectMarks)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+                .HasOne(p => p.SubjectWeightType)
+                .WithMany(p => p.DirectMarks)
+                .HasForeignKey(p => p.SubjectWeightTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.DirectMarks)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMarkClasses>()
+                .HasOne(p => p.DirectMark)
+                .WithMany(p => p.DirectMarkClasses)
+                .HasForeignKey(p => p.DirectMarkID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMarkClasses>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.DirectMarkClasses)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Maintenance Module
+            modelBuilder.Entity<MaintenanceEmployee>()
+                 .HasOne(me => me.Employee)
+                 .WithMany(me => me.MaintenanceEmployees)
+                 .HasForeignKey(me => me.EmployeeID)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+               .HasOne(m => m.Item)
+               .WithMany(m => m.Maintenances)
+               .HasForeignKey(m => m.ItemID)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.MaintenanceEmployee)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.MaintenanceEmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Company)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.CompanyID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            
+            modelBuilder.Entity<Employee>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Employees)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Student>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Students)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Parent>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Parents)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ArchivingTree>()
+                .HasOne(m => m.ArchivingTreeParent)
+                .WithMany(m => m.ChildArchivingTrees)
+                .HasForeignKey(m => m.ArchivingTreeParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.ArchivingTree)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.ArchivingTreeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.VacationTypes)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Bank)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.BankID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Save)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.SaveID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<RefreshTokens>()
+                .HasOne(m => m.UserType)
+                .WithMany(m => m.RefreshTokens)
+                .HasForeignKey(m => m.UserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.DayStatus)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.DayStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SalaryHistory)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(m => m.Loans)
+                .WithMany(m => m.EmployeeLoans)
+                .HasForeignKey(m => m.loanId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Student)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Grade)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.GradeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.Subject)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<FailedStudents>()
+                .HasOne(m => m.AcademicYear)
+                .WithMany(m => m.FailedStudents)
+                .HasForeignKey(m => m.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict); 
+
 
 
             ///////////////////////// Exception: /////////////////////////
@@ -2108,6 +2555,108 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(v => v.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<MaintenanceEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Location>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLoans>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
@@ -2176,6 +2725,9 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AccountBalanceReport>()
                 .HasNoKey().ToView(null);
 
+            modelBuilder.Entity<AccountStatementReport>()
+                .HasNoKey().ToView(null);
+
             modelBuilder.Entity<AccountTotals>()
                 .HasNoKey().ToView(null);
 
@@ -2201,6 +2753,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_InventoryMaster_IsDeleted");
 
+            modelBuilder.Entity<InventoryDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_InventoryDetails_IsDeleted");
+
             modelBuilder.Entity<Supplier>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Supplier_IsDeleted");
@@ -2213,6 +2769,14 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.LinkFileID)
                 .HasDatabaseName("IX_PayableMaster_LinkFileID");
 
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_PayableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_PayableMaster_Date");
+
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_PayableDetails_IsDeleted");
@@ -2220,6 +2784,30 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.LinkFileTypeID)
                 .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableMaster_IsDeleted");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.LinkFileID)
+                .HasDatabaseName("IX_ReceivableMaster_LinkFileID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_ReceivableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_ReceivableMaster_Date");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableDetails_IsDeleted");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.LinkFileTypeID)
+                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID"); 
         }
     }
 }

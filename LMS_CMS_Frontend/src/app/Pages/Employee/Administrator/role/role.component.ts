@@ -12,9 +12,10 @@ import { FormsModule } from '@angular/forms';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-role',
   standalone: true,
@@ -23,18 +24,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './role.component.css',
 })
 export class RoleComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   TableData: Role[] = [];
 
@@ -56,11 +46,12 @@ export class RoleComponent {
     public roleserv: RoleService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public ApiServ: ApiService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-          private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -90,6 +81,13 @@ export class RoleComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+ 
   async getAllRoles() {
     try {
       const data = await firstValueFrom(
@@ -150,18 +148,18 @@ export class RoleComponent {
   }
 
   Edit(id: number) {
-    this.router.navigateByUrl(`Employee/Role Edit/${id}`);
+    this.router.navigateByUrl(`Employee/Role/${id}`);
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Role?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Role') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.roleserv.Delete(id, this.DomainName).subscribe({
@@ -178,6 +176,6 @@ export class RoleComponent {
   }
 
   Create() {
-    this.router.navigateByUrl('Employee/Role Create');
+    this.router.navigateByUrl('Employee/Role/Create');
   }
 }

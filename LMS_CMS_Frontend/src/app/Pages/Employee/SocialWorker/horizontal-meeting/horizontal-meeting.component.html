@@ -1,0 +1,129 @@
+<div class="">
+    <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Horizontal Meeting' | translate }}</h1>
+        <div class="flex justify-between items-center">
+            <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+            <button (click)="Create()"
+                class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+                {{ 'Create' | translate }} {{ 'Horizontal Meeting' | translate }}
+            </button>
+        </div>
+    </div>
+
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'ID' | translate }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Title' | translate }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'URL' | translate }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Actions' | translate }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="6"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of TableData; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.id }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.title }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <a [href]="row.url" target="_blank" class="text-blue-600 hover:underline">
+                                {{ 'Meeting link' | translate }}
+                            </a>
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
+                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row.id)">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+    class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Horizontal Meeting' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Horizontal Meeting' | translate }}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="title">{{ 'Title' | translate }}</label>
+                <input id="title" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Title' | translate }}" [(ngModel)]="horizontalMeeting.title"
+                    (ngModelChange)="onInputValueChange({ field: 'title', value: $event })" />
+                <span *ngIf="validationErrors['title']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['title']}}</span>
+            </div>
+        </div>
+
+        <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="date">{{ 'Date' | translate }}</label>
+                <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Date' | translate }}" [(ngModel)]="horizontalMeeting.date"
+                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+                <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['date']}}</span>
+            </div>
+        </div>
+
+        <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="url">{{ 'URL' | translate }}</label>
+                <input id="url" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'URL' | translate }}" [(ngModel)]="horizontalMeeting.url"
+                    (ngModelChange)="onInputValueChange({ field: 'url', value: $event })" />
+                <span *ngIf="validationErrors['url']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['url']}}</span>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="CreateOREdit()">
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

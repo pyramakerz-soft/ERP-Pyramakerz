@@ -11,5 +11,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public long ChatMessageID { get; set; }
         public long ReceiverUserTypeID { get; set; }
         public UserFilter? UserFilters { get; set; }
+
+        public bool IsTeacher { get; set; }
     }
 }

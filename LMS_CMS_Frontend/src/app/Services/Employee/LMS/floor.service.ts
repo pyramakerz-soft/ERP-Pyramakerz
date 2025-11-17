@@ -27,7 +27,20 @@ export class FloorService {
     return this.http.get<Floor[]>(`${this.baseUrl}/Floor/getByBuildingID/${buildingId}`, { headers })
   }
 
-   Get(DomainName:string) {
+  GetByBuildingIdWithPaggination(buildingId:number, DomainName: string, pageNumber: number, pageSize: number) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    // return this.http.get<Floor[]>(`${this.baseUrl}/Floor/getByBuildingIDWithPaggination/${buildingId}`, { headers })
+    return this.http.get<{ data: Floor[], pagination: any }>(`${this.baseUrl}/Floor/getByBuildingIDWithPaggination/${buildingId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
+  Get(DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
     }

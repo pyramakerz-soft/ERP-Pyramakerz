@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_BL.DTO.HR;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,16 +23,16 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? ResidenceNumber { get; set; }
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
-        public int? MonthSalary { get; set; }
+        public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
         public string? AttendanceTime { get; set; }
         public string? DepartureTime { get; set; }
         public float? DelayAllowance { get; set; }
-        public int? AnnualLeaveBalance { get; set; }
-        public int? CasualLeavesBalance { get; set; }
-        public int? MonthlyLeaveRequestBalance { get; set; }
+        public decimal? AnnualLeaveBalance { get; set; }
+        public decimal? CasualLeavesBalance { get; set; }
+        public decimal? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
         public long? AcademicDegreeID { get; set; }
@@ -41,6 +42,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long? ReasonOfLeavingID { get; set; }
         public List<int>? Days { get; set; }
         public List<long>? Students { get; set; }
-
+        public List<AnnualVacationEmployeeEditDTO>? AnnualVacationEmployee { get; set; }
     }
 }

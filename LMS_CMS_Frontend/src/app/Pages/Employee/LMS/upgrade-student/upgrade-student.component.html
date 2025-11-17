@@ -1,0 +1,63 @@
+<h1 class="primaryTxt font-semibold text-2xl leading-9">Upgrade Students</h1> 
+
+<div class="mt-5 flex justify-between items-center space-x-4 rtl:space-x-reverse">
+    <div class="w-[20%]">
+        <label for="School1" class="primaryTxt block mb-2 text-sm text-gray-900">School</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId" (change)="getAcademicYearBySchoolId();">
+            <option value=0 disabled selected hidden>Select School</option>
+            <option *ngFor="let stu of schools" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+
+    <div class="w-[20%]">
+        <label for="fromAC" class="primaryTxt block mb-2 text-sm text-gray-900">From Academic Year</label>
+        <select id="fromAC" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedFromAcademicYearId" [disabled]="!SelectedSchoolId" (ngModelChange)="onFromAcademicYearChange()">
+            <option value=0 disabled selected hidden>Select Year</option>
+            <option *ngFor="let ac of filteredAcademicYearFrom" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="filteredAcademicYearFrom.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+
+    <div class="w-[20%]">
+        <label for="toAC" class="primaryTxt block mb-2 text-sm text-gray-900">To Academic Year</label>
+        <select id="toAC" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedToAcademicYearId" [disabled]="!SelectedSchoolId" (ngModelChange)="onToAcademicYearChange()">
+            <option value=0 disabled selected hidden>Select Year</option>
+            <option *ngFor="let ac of filteredAcademicYearTo" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="filteredAcademicYearTo.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+    
+    <div class="w-[20%]">
+        <div class="flex w-full space-x-5 rtl:space-x-reverse items-center">
+            <input type="checkbox" id="Summer" class="w-5 h-5"
+                [(ngModel)]="isSummerCourse" />
+            <label for="Summer" class="text-sm">Summer Course</label>
+        </div> 
+    </div>
+
+    <div>
+        <button class="p-3 rounded-lg"
+            [disabled]="!SelectedSchoolId || !filteredAcademicYearFrom || !SelectedToAcademicYearId || isLoading"
+            (click)="UpgradeStudents()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedToAcademicYearId || !filteredAcademicYearFrom , 
+            'secondaryBg text-white': SelectedSchoolId && SelectedToAcademicYearId && filteredAcademicYearFrom}"> 
+            <span *ngIf="!isLoading">Upgrade Students</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div> 
+</div>
+ 
+<div *ngIf="isLoading" class="p-6 flex flex-col items-center">
+  <div class="w-10 h-10 border-4 border-[#089B41] border-t-transparent rounded-full animate-spin"></div>
+  <p class="mt-4 text-gray-700 font-medium">Upgrading students, please wait...</p>
+</div>

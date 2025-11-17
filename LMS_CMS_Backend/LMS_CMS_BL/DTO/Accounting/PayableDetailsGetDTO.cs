@@ -17,5 +17,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long LinkFileTypeID { get; set; }
         public string LinkFileTypeName { get; set; }
         public long InsertedByUserId { get; set; }
+        public List<object> LinkFileTypesData { get; set; }
     }
 }

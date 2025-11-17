@@ -50,6 +50,18 @@ export class GradeService {
     return this.http.get<Grade[]>(`${this.baseUrl}/Grade/GetBySchool/${schoolId}`, { headers })
   }
 
+  GetBySchoolAndStudent(schoolId:number,StudentId:number, DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Grade[]>(`${this.baseUrl}/Grade/GetBySchoolAndStudent/${schoolId}/${StudentId}`, { headers })
+  }
+
   GetByID(id: number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
@@ -60,6 +72,18 @@ export class GradeService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<Grade>(`${this.baseUrl}/Grade/${id}`, { headers })
+  }
+
+  GetDayPeriodSessions(DayID: number, GradeID: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<number>(`${this.baseUrl}/Grade/GetDayPeriodSessions/${DayID}/${GradeID}`, { headers })
   }
 
   Add(Grade: Grade,DomainName:string) {

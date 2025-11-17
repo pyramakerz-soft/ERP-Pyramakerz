@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Floor" }
+            pages: new[] { "Floor", "Employee" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -87,7 +87,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("getByBuildingID/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Floor" }
+            pages: new[] { "Floor" , "Classroom" }
         )]
         public async Task<IActionResult> GetByBuildingId(long id)
         {
@@ -121,6 +121,57 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<FloorGetDTO> floorsDTO = mapper.Map<List<FloorGetDTO>>(floors);
 
             return Ok(floorsDTO);
+        }
+
+        [HttpGet("getByBuildingIDWithPaggination/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Floor", "Classroom" }
+        )]
+        public async Task<IActionResult> GetByBuildingIdWithPaggination(long id,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (id == 0)
+            {
+                return BadRequest("Enter Building ID");
+            }
+
+            int totalRecords = await Unit_Of_Work.floor_Repository
+              .CountAsync(f => f.IsDeleted != true && f.buildingID == id);
+
+            Building Building = await Unit_Of_Work.building_Repository.FindByIncludesAsync(t => t.IsDeleted != true && t.ID == id);
+
+
+            if (Building == null)
+            {
+                return NotFound();
+            }
+
+            List<Floor> floors = await Unit_Of_Work.floor_Repository.Select_All_With_IncludesById_Pagination<Floor>(
+                t => t.IsDeleted != true && t.buildingID == id,
+                 query => query.Include(e => e.building),
+                query => query.Include(emp => emp.floorMonitor))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+
+            if (floors == null || floors.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<FloorGetDTO> floorsDTO = mapper.Map<List<FloorGetDTO>>(floors);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = floorsDTO, Pagination = paginationMetadata });
         }
 
         [HttpPost]

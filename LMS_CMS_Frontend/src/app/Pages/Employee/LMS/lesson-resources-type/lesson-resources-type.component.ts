@@ -13,9 +13,10 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { LessonResourceTypeService } from '../../../../Services/Employee/LMS/lesson-resource-type.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-lesson-resources-type',
@@ -60,7 +61,8 @@ export class LessonResourcesTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public TypeServ: LessonResourceTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private translate: TranslateService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,6 +89,15 @@ export class LessonResourcesTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+
+   ngOnDestroy(): void { 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }  
+
+
+
   GetAllData() {
     this.TableData = [];
     this.TypeServ.Get(this.DomainName).subscribe((d) => {
@@ -103,13 +114,13 @@ export class LessonResourcesTypeComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson Resource Type?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.TypeServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -163,7 +174,7 @@ export class LessonResourcesTypeComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -185,7 +196,7 @@ export class LessonResourcesTypeComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });

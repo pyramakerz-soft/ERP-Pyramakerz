@@ -14,9 +14,10 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-installment-deduction-master',
@@ -26,7 +27,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './installment-deduction-master.component.css'
 })
 export class InstallmentDeductionMasterComponent {
- User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -45,26 +46,27 @@ export class InstallmentDeductionMasterComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'docNumber' ,'employeeName' ,'studentName'];
+  keysArray: string[] = ['id', 'docNumber', 'employeeName', 'studentName'];
 
-  CurrentPage:number = 1
-  PageSize:number = 10
-  TotalPages:number = 1
-  TotalRecords:number = 0
-  isDeleting:boolean = false;
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public InstallmentDeductionServ:InstallmentDeductionMasterService ,
-     private languageService: LanguageService
-  ) {}
+    public InstallmentDeductionServ: InstallmentDeductionMasterService,
+    private languageService: LanguageService, 
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -85,29 +87,35 @@ export class InstallmentDeductionMasterComponent {
 
     this.GetAllData(this.CurrentPage, this.PageSize)
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/Installment Deduction Details`)
+    this.router.navigateByUrl(`Employee/Installment Deduction/Create`)
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Installment Deduction?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "  + this.translate.instant('Installment Deduction') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.InstallmentDeductionServ.Delete(id,this.DomainName).subscribe((D)=>{
+        this.InstallmentDeductionServ.Delete(id, this.DomainName).subscribe((D) => {
           this.GetAllData(this.CurrentPage, this.PageSize)
         })
       }
@@ -115,7 +123,7 @@ export class InstallmentDeductionMasterComponent {
   }
 
   Edit(row: InstallmentDeductionMaster) {
-    this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${row.id}`)
+    this.router.navigateByUrl(`Employee/Installment Deduction/Edit/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -158,7 +166,7 @@ export class InstallmentDeductionMasterComponent {
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
-          if (typeof fieldValue === 'number') { 
+          if (typeof fieldValue === 'number') {
             return fieldValue.toString().includes(numericValue.toString())
           }
           return fieldValue == this.value;
@@ -169,43 +177,43 @@ export class InstallmentDeductionMasterComponent {
     }
   }
 
-  GetAllData(pageNumber:number, pageSize:number){
+  GetAllData(pageNumber: number, pageSize: number) {
     this.InstallmentDeductionServ.Get(this.DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
         this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords 
+        this.TotalRecords = data.pagination.totalRecords
         this.TableData = data.data
-      }, 
-      (error) => { 
-        if(error.status == 404){
-          if(this.TotalRecords != 0){
-            let lastPage = this.TotalRecords / this.PageSize 
-            if(lastPage >= 1){
-              if(this.isDeleting){
-                this.CurrentPage = Math.floor(lastPage) 
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage = this.TotalRecords / this.PageSize
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
                 this.isDeleting = false
-              } else{
-                this.CurrentPage = Math.ceil(lastPage) 
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
               }
               this.GetAllData(this.CurrentPage, this.PageSize)
             }
-          } 
+          }
         }
       }
     )
   }
 
-  changeCurrentPage(currentPage:number){
+  changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) { 
+  validatePageSize(event: any) {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-        event.target.value = '';
+      event.target.value = '';
     }
   }
 
@@ -232,9 +240,9 @@ export class InstallmentDeductionMasterComponent {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
-  View(id:number){
-    this.router.navigateByUrl(`Employee/Installment Deduction Details/View/${id}`)
+
+  View(id: number) {
+    this.router.navigateByUrl(`Employee/Installment Deduction/View/${id}`)
   }
 
   validateNumber(event: any): void {

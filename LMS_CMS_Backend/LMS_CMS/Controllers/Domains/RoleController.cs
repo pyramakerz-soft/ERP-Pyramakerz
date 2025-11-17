@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Role"}
+            pages: new[] { "Role", "Employee" , "Registered Employee" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -98,7 +98,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Role Create" }
+            pages: new[] { "Role" }
         )]
         public async Task<IActionResult> Add(RoleAddDTO NewRoles)
         {
@@ -201,7 +201,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Role Edit" }
+            pages: new[] { "Role" }
         )]
         public async Task<IActionResult> Edit(RolePutDTO newRole)
         {
@@ -237,7 +237,7 @@ namespace LMS_CMS_PL.Controllers.Domains
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Role Edit", roleId, userId, role);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Role", roleId, userId, role);
                 if (accessCheck != null)
                 {
                     return accessCheck;

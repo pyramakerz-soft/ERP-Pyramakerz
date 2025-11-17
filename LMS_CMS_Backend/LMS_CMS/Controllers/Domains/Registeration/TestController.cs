@@ -88,7 +88,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [HttpGet("byRegistrationFormParentIDFromEmployee/{id}")]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" ,"parent"},
-         pages: new[] { "Admission Test" }
+         pages: new[] { "Admission Test" , "Registration Confirmation" }
          )]
         public async Task<IActionResult> GetbyRegistrationFormParentIDAsyncFromEmployee(long id)
         {
@@ -221,7 +221,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
 
                 testDTO = testDTO
-                 .Where(t => (t.RegistrationTestVisibleToParent == true) || (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
+                 //.Where(t => (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
                  .ToList();
 
                 var response = new

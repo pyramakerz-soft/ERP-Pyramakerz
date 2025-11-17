@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms'; 
@@ -30,7 +30,7 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../Services/student.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
@@ -86,7 +86,9 @@ export class NotificationComponent {
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
-    public studentService: StudentService
+    public studentService: StudentService, 
+    private translate: TranslateService
+
   ) { }
 
   ngOnInit() {
@@ -113,6 +115,51 @@ export class NotificationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showWarningAlert(message: string) {
+  const translatedTitle = this.translate.instant('Warning');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'warning',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 
   getAllData(){
     this.TableData = []
@@ -190,31 +237,31 @@ export class NotificationComponent {
     return IsAllow;
   } 
   
-  onImageFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    const input = event.target as HTMLInputElement;
+onImageFileSelected(event: any) {
+  const file: File = event.target.files[0];
+  const input = event.target as HTMLInputElement;
 
-    if (file) {
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['imageFile'] = 'The file size exceeds the maximum limit of 25 MB.';
-        this.notification.imageFile = null;
-        return; 
-      }
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.notification.imageFile = file; 
-        this.validationErrors['imageFile'] = ''; 
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['imageFile'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
-        this.notification.imageFile = null;
-        return; 
-      }
+  if (file) {
+    if (file.size > 25 * 1024 * 1024) {
+      this.validationErrors['imageFile'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
+      this.notification.imageFile = null;
+      return; 
     }
-    
-    input.value = '';
+    if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      this.notification.imageFile = file; 
+      this.validationErrors['imageFile'] = ''; 
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+    } else {
+      this.validationErrors['imageFile'] = this.translate.instant('Invalid file type. Only JPEG, JPG and PNG are allowed');
+      this.notification.imageFile = null;
+      return; 
+    }
   }
+  
+  input.value = '';
+}
 
   onIsAllowDismissChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
@@ -369,45 +416,54 @@ export class NotificationComponent {
     )
   }
 
-  Save(){
-    if(this.notification.text == '' && this.notification.link == '' && this.notification.imageFile == null){
-      Swal.fire({
-        title: 'You have to insert at least one item (Image - Text - Link)',
-        icon: 'warning', 
-        confirmButtonColor: '#089B41', 
-        confirmButtonText: "OK"
-      })
-    } else{
-      this.isLoading = true;
-      this.notificationService.Add(this.notification, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.getAllData()
-        },
-        error => {
-          this.isLoading = false;
-        }
-      ); 
-    }
-  } 
-
-  Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this notification?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: "Yes, I'm sure",
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.notificationService.Delete(id, this.DomainName).subscribe((d) => {
-          this.getAllData()
-        });
+Save(){
+  if(this.notification.text == '' && this.notification.link == '' && this.notification.imageFile == null){
+    this.showWarningAlert(this.translate.instant('You have to insert at least one item (Image - Text - Link)'));
+  } else{
+    this.isLoading = true;
+    this.notificationService.Add(this.notification, this.DomainName).subscribe(
+      (result: any) => {
+        this.closeModal();
+        this.getAllData();
+        this.showSuccessAlert(this.translate.instant('Notification created successfully'));
+      },
+      error => {
+        this.isLoading = false;
+        const errorMessage = error.error?.message || this.translate.instant('Failed to create notification');
+        this.showErrorAlert(errorMessage);
       }
-    });  
+    ); 
   }
+}
+
+Delete(id: number) {
+  const deleteTitle = this.translate.instant('Are you sure you want to delete this notification?');
+  const confirmButton = this.translate.instant('Yes, I\'m sure');
+  const cancelButton = this.translate.instant('Cancel');
+  
+  Swal.fire({
+    title: deleteTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: confirmButton,
+    cancelButtonText: cancelButton,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.notificationService.Delete(id, this.DomainName).subscribe(
+        (d) => {
+          this.getAllData();
+          this.showSuccessAlert(this.translate.instant('Notification deleted successfully'));
+        },
+        (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete notification');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
+  });  
+}
 
   filterByTypeID($event: Event) {
     const selectedId = ($event.target as HTMLSelectElement).value; 

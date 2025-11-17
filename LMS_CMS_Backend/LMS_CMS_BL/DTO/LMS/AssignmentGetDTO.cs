@@ -15,11 +15,12 @@ namespace LMS_CMS_BL.DTO.LMS
         public string EnglishName { get; set; } 
         public string ArabicName { get; set; }
         public float Mark { get; set; }
+        public float PassMark { get; set; }
         public DateOnly OpenDate { get; set; }
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }
         public bool IsSpecificStudents { get; set; }
-        public bool IsVisibleToStudent { get; set; }
+        public bool IsVisibleToStudent { get; set; } 
         public string? LinkFile { get; set; } 
         public long SubjectID { get; set; }  
         public string SubjectEnglishName { get; set; }  
@@ -39,5 +40,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public List<AssignmentStudentIsSpecificGetDTO> AssignmentStudentIsSpecifics { get; set; } = new List<AssignmentStudentIsSpecificGetDTO>();
         public long? InsertedByUserId { get; set; }
         public string? InsertedByUserName { get; set; }
+        public long? AcademicYearID { get; set; }
     }
 }

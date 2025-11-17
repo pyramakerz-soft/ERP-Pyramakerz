@@ -15,11 +15,15 @@ import { DeleteEditPermissionService } from '../../../../../Services/shared/dele
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-proof-registration-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl: './proof-registration-report.component.html',
   styleUrl: './proof-registration-report.component.css'
 })
@@ -31,7 +35,8 @@ export class ProofRegistrationReportComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -66,10 +71,11 @@ export class ProofRegistrationReportComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
+    private languageService: LanguageService,
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService
+    public reportsService: ReportsService, 
   ) { }
 
   ngOnInit() {
@@ -90,7 +96,17 @@ export class ProofRegistrationReportComponent {
       }
     });
     this.getAllSchools()
-    this.getAllYears()
+    // Don't call getAllYears() here - wait for school selection
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {
@@ -100,9 +116,23 @@ export class ProofRegistrationReportComponent {
   }
 
   getAllYears() {
-    this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.academicYears = d
-    })
+    // Clear previous academic years immediately
+    this.academicYears = [];
+    
+    // Only call API if a school is selected
+    if (this.SelectedSchoolId && this.SelectedSchoolId > 0) {
+      this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe({
+        next: (d) => {
+          this.academicYears = d || [];
+        },
+        error: (err) => {
+          console.error('Error fetching academic years:', err);
+          this.academicYears = [];
+        }
+      });
+    } else {
+      this.academicYears = [];
+    }
   }
 
   toggleSearchMode() {
@@ -114,15 +144,58 @@ export class ProofRegistrationReportComponent {
   }
 
   getAllStudents() {
-    this.studentServ.GetByAcademicYearID(this.SelectedYearId ,this.DomainName).subscribe((d) => {
-      this.Students = d;
-      this.filteredStudents = d; 
-    });
+    // Clear previous students immediately
+    this.Students = [];
+    this.filteredStudents = [];
+    
+    // Only call API if a year is selected
+    if (this.SelectedYearId && this.SelectedYearId > 0) {
+      this.studentServ.GetByAcademicYearID(this.SelectedYearId, this.DomainName).subscribe({
+        next: (d) => {
+          this.Students = d || [];
+          this.filteredStudents = d || []; 
+        },
+        error: (err) => {
+          console.error('Error fetching students:', err);
+          this.Students = [];
+          this.filteredStudents = [];
+        }
+      });
+    } else {
+      this.Students = [];
+      this.filteredStudents = [];
+    }
+  }
+
+  onSchoolChange() {
+    console.log('School changed to:', this.SelectedSchoolId);
+    
+    // Reset all dependent fields
+    this.SelectedYearId = 0;
+    this.SelectedStudentId = 0;
+    this.Students = [];
+    this.filteredStudents = [];
+    this.showTable = false;
+    
+    // Get academic years for the selected school
+    this.getAllYears();
+  }
+
+  onYearChange() {
+    console.log('Year changed to:', this.SelectedYearId);
+    
+    // Reset dependent fields
+    this.SelectedStudentId = 0;
+    this.Students = [];
+    this.filteredStudents = [];
+    this.showTable = false;
+    
+    // Get students for the selected academic year
+    this.getAllStudents();
   }
 
   searchStudents() {
     if (this.searchQuery) {
-      // this.SelectedStudent=this.Students
       this.filteredStudents = this.Students.filter(student =>
         student.user_Name.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
@@ -132,15 +205,54 @@ export class ProofRegistrationReportComponent {
   }
 
   GetStudentById() {
-    this.studentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
-      this.SelectedStudent = d
-    })
+    if (this.SelectedStudentId && this.SelectedStudentId > 0) {
+      this.studentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
+        this.SelectedStudent = d
+      });
+    }
   }
 
   async ViewReport() {
-    await this.GetData()
-    this.showTable = true
-    this.GetStudentById()
+    if (this.SelectedSchoolId && this.SelectedYearId && this.SelectedStudentId) {
+      await this.GetData();
+      this.showTable = true;
+    }
+  }
+
+  GetData(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Validate all required fields
+      if (!this.SelectedSchoolId || !this.SelectedYearId || !this.SelectedStudentId) {
+        reject(new Error('School, Year, and Student must be selected'));
+        return;
+      }
+
+      this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
+        .subscribe({
+          next: (d) => {
+            this.DataToPrint = d; 
+            this.school = d.school;
+            this.CurrentDate = d.date;
+            this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
+            this.ArabicCurrentDate = new Date(d.date).toLocaleDateString('ar-EG', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+            
+            // Update SelectedStudent with complete data from API response
+            if (d.student) {
+              this.SelectedStudent = { ...this.SelectedStudent, ...d.student };
+            }
+            resolve();
+          },
+          error: (err) => {
+            console.error('Error fetching certificate data:', err);
+            reject(err);
+          }
+        });
+    });
   }
 
   Print() {
@@ -205,6 +317,7 @@ export class ProofRegistrationReportComponent {
   }
 
   formatDate(dateString: string, dir: string): string {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const locale = dir === 'rtl' ? 'ar-EG' : 'en-US';
     return date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -236,33 +349,32 @@ export class ProofRegistrationReportComponent {
       ],
       reportImage: this.school.reportImage,
       filename: "Student Information Report.xlsx",
-      tables: tables // ✅ dynamic table sections from your actual data
+      tables: tables 
     });
   }
-  
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ.GetStudentProofRegistration(this.SelectedYearId, this.SelectedStudentId, this.SelectedSchoolId, this.DomainName)
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = d; 
-            this.school = d.school;
-            this.CurrentDate=d.date
-            this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
-            this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            });
+  getStudentName(): string {
+    return this.DataToPrint?.student?.en_name || this.SelectedStudent.en_name || '-';
+  }
 
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          }
-        });
-    });
+  getStudentArabicName(): string {
+    return this.DataToPrint?.student?.ar_name || this.SelectedStudent.ar_name || '-';
+  }
+
+  getNationality(): string {
+    return this.DataToPrint?.student?.nationalityEnName || '-';
+  }
+
+  getArabicNationality(): string {
+    return this.DataToPrint?.student?.nationalityArName || '-';
+  }
+
+  getCurrentGrade(): string {
+    console.log('Current Grade:', this.DataToPrint?.student?.gradeName);
+    return this.DataToPrint?.student?.gradeName || '-';
+  }
+
+  getPassportNo(): string {
+    return this.DataToPrint?.student?.passportNo || '-';
   }
 }

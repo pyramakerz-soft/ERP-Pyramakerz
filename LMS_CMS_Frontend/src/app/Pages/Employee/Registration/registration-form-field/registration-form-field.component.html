@@ -5,7 +5,7 @@
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center">
-                {{ 'Create Categories' | translate }}
+                {{ 'Create' | translate }}  {{ 'Category' | translate }}
             </button>
         </div>
     </div>
@@ -49,7 +49,7 @@
                     <td
                         class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e] hover:bg-gray-200">
                         {{ row.id }}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.enName }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.enName|translate}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.arName }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.orderInForm }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -83,8 +83,8 @@
             <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
 
-        <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">{{ 'Create Categories' | translate }}</h1>
-        <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit Categories' | translate }}</h1>
+        <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Category' | translate }}</h1>
+        <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Category' | translate }}</h1>
         <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
             <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Name of category English' | translate }}</h6>
             <div class="flex justify-start  gap-2 items-start">

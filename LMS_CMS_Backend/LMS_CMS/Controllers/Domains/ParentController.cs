@@ -3,6 +3,7 @@ using Azure.Core;
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +47,40 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("ByStudentID/{Id}")]
+        [Authorize]
+        public IActionResult ByStudentID(long Id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.ID == Id
+                );
+            if (student == null)
+            {
+                return NotFound("No student with this ID");
+            }
+            
+            if (student.Parent_Id == null)
+            {
+                return NotFound("This student doesn't have a parent");
+            }
+
+            Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == student.Parent_Id);
+
+            if (parent == null)
+            {
+                return NotFound("No Parent found");
+            }
+
+            ParentGetDTO employeeDTO = mapper.Map<ParentGetDTO>(parent);
+
+            return Ok(employeeDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        
         [HttpPost]
         public async Task<IActionResult> AddAsync(ParentDTO UserInfo)
         {
@@ -55,11 +90,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Data Can't be null");
             }
-            bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(UserInfo.RecaptchaToken);
-            if (!isValidCaptcha)
-            {
-                return BadRequest("You must confirm you are not a robot.");
-            }
+            //bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(UserInfo.RecaptchaToken);
+            //if (!isValidCaptcha)
+            //{
+            //    return BadRequest("You must confirm you are not a robot.");
+            //}
             if (UserInfo.Email == null)
             {
                 return BadRequest("Email Can't be null");
@@ -100,6 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             var confirmationCode = new Random().Next(100000, 999999).ToString();
             Parent NewParent =mapper.Map<Parent>(UserInfo);
             NewParent.Password = BCrypt.Net.BCrypt.HashPassword(NewParent.Password);
+            NewParent.ConnectionStatusID = 1;
             Unit_Of_Work.parent_Repository.Add(NewParent);
             Unit_Of_Work.SaveChanges();
 
@@ -111,9 +147,16 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 foreach (var item in registerationFormParent)
                 {
-                item.ParentID = NewParent.ID;
-                Unit_Of_Work.registerationFormParent_Repository.Update(item);
-                Unit_Of_Work.SaveChanges();
+                    item.ParentID = NewParent.ID;
+                    Unit_Of_Work.registerationFormParent_Repository.Update(item);
+                    Unit_Of_Work.SaveChanges();
+                    List<Student> students = Unit_Of_Work.student_Repository.FindBy(r => r.RegistrationFormParentID == item.ID);
+                    foreach (var student in students)
+                    {
+                        student.Parent_Id = NewParent.ID;
+                        Unit_Of_Work.student_Repository.Update(student);
+                        Unit_Of_Work.SaveChanges();
+                    }
                 }
             }
             return Ok(UserInfo);

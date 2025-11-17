@@ -14,9 +14,10 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-categories',
   standalone: true,
@@ -25,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './categories.component.css'
 })
 export class CategoriesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');  
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -67,11 +57,12 @@ export class CategoriesComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public InventoryCategoryServ: InventoryCategoryService,
-     private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -99,6 +90,13 @@ export class CategoriesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetAllData() {
     this.TableData = []
     this.InventoryCategoryServ.Get(this.DomainName).subscribe((d) => {
@@ -115,13 +113,13 @@ export class CategoriesComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Category?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') +this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.InventoryCategoryServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -171,7 +169,7 @@ export class CategoriesComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -188,7 +186,7 @@ export class CategoriesComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });

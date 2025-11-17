@@ -14,11 +14,14 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-remedial-classroom-student',
   standalone: true,
-  imports: [FormsModule, CommonModule ,SearchStudentComponent],
+  imports: [FormsModule, CommonModule, SearchStudentComponent, TranslateModule],
   templateUrl: './remedial-classroom-student.component.html',
   styleUrl: './remedial-classroom-student.component.css',
 })
@@ -39,7 +42,8 @@ export class RemedialClassroomStudentComponent {
     new RemedialClassroomStudent();
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
   validationErrors: { [key in keyof RemedialClassroomStudent]?: string } = {};
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -48,14 +52,14 @@ export class RemedialClassroomStudentComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   isLoading = false;
   isModalOpen = false;
-  preSelectedYear: number | null = null;  
-  preSelectedGrade: number | null = null;  
-  preSelectedClassroom: number | null = null;  
-  hiddenInputs: string[] = ['classroom' ];
-  hiddenColumns: string[] = ['Actions' ];
+  preSelectedYear: number | null = null;
+  preSelectedGrade: number | null = null;
+  preSelectedClassroom: number | null = null;
+  hiddenInputs: string[] = ['classroom'];
+  hiddenColumns: string[] = ['Actions'];
 
 
   constructor(
@@ -66,8 +70,10 @@ export class RemedialClassroomStudentComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public router: Router,
-    public RemedialClassroomServ: RemedialClassroomService
-  ) {}
+    private translate: TranslateService,
+    public RemedialClassroomServ: RemedialClassroomService,   
+    private languageService: LanguageService,
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -79,7 +85,7 @@ export class RemedialClassroomStudentComponent {
       this.path = url[0].path;
     });
 
-    this.RemedialClassroomID = Number(this.activeRoute.snapshot.paramMap.get('id') );
+    this.RemedialClassroomID = Number(this.activeRoute.snapshot.paramMap.get('id'));
 
     this.GetRemedialClassroom();
 
@@ -92,22 +98,31 @@ export class RemedialClassroomStudentComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetRemedialClassroom() {
-    this.RemedialClassroomServ.GetById(this.RemedialClassroomID,this.DomainName).subscribe((d) => {
+    this.RemedialClassroomServ.GetById(this.RemedialClassroomID, this.DomainName).subscribe((d) => {
       this.remedialClassroom = d;
-    },err=>{
+    }, err => {
     });
   }
 
   openModal() {
     this.isModalOpen = true;
-    this.remedialClassroomStudent.remedialClassroomID=this.RemedialClassroomID
-  } 
+    this.remedialClassroomStudent.remedialClassroomID = this.RemedialClassroomID
+  }
 
   handleStudentSelected(students: number[]) {
-    if(students.length==0){
+    if (students.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Students Selected',
@@ -115,24 +130,24 @@ export class RemedialClassroomStudentComponent {
         confirmButtonText: 'Got it',
         customClass: { confirmButton: 'secondaryBg' }
       });
-    }else{
-      this.remedialClassroomStudent.studentIds=students
-      this.remedialClassroomStudent.remedialClassroomID=this.RemedialClassroomID
-      this.RemedialClassroomStudentServ.Add(this.remedialClassroomStudent,this.DomainName).subscribe((d)=>{
-          this.GetRemedialClassroom()
-          this.closeModal()
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Created Successfully',
-            confirmButtonColor: '#089B41',
-          });
-      },err=>{
+    } else {
+      this.remedialClassroomStudent.studentIds = students
+      this.remedialClassroomStudent.remedialClassroomID = this.RemedialClassroomID
+      this.RemedialClassroomStudentServ.Add(this.remedialClassroomStudent, this.DomainName).subscribe((d) => {
+        this.GetRemedialClassroom()
+        this.closeModal()
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Created Successfully',
+          confirmButtonColor: '#089B41',
+        });
+      }, error => {
         this.closeModal()
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' }
         });
@@ -235,18 +250,18 @@ export class RemedialClassroomStudentComponent {
 
   dalete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Student?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Student') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.RemedialClassroomStudentServ.Delete(id, this.DomainName).subscribe((data: any) => {
           this.GetRemedialClassroom()
-          });
+        });
       }
     });
   }

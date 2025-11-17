@@ -1,68 +1,68 @@
 <div class="flex justify-between">
-    <h1 class="primaryTxt font-bold text-2xl leading-9">Lists of students' names in classes</h1>
+    <h1 class="primaryTxt font-bold text-2xl leading-9"> {{ 'Student Names In Class' | translate }}</h1>
 </div>
 
 <div class="my-5 flex flex-wrap justify-between items-center">
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="school">School</label>
+        <label class="mb-2 font-medium primaryTxt" for="school"> {{ 'School' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school"
             [(ngModel)]="SchoolId" (change)="onSchoolChange($event)">
-            <option [value]="0" disabled selected hidden>Choose School</option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let c of Schools" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="AcademicYear"
-            [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">Year</label>
+        <label class="mb-2 font-medium" for="AcademicYear"
+            [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }"> {{ 'Year' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="AcademicYear"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="AcademicYearId"
             (change)="onYearChange($event)">
-            <option [value]="0" disabled selected hidden>Choose Year</option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Year' | translate }}</option>
             <option *ngFor="let g of AcademicYears" [value]="g.id">{{ g.name }}</option>
-            <option *ngIf="AcademicYears.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="AcademicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col w-[40%] mb-4">
-        <label class="mb-2" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">Grade</label>
+        <label class="mb-2 font-medium" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">{{ 'Grade' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="GradeId"
             (change)="onGradeChange($event)">
-            <option [value]="0" disabled selected hidden>Choose Grade</option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
             <option *ngFor="let g of Grades" [value]="g.id">{{ g.name }}</option>
-            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col w-[40%] mb-4">
-        <label class="mb-2" for="Class"
-            [ngClass]="{ 'text-gray-400': !GradeId || !AcademicYearId, 'primaryTxt': GradeId && AcademicYearId }">Class</label>
+        <label class="mb-2 font-medium" for="Class"
+            [ngClass]="{ 'text-gray-400': !GradeId || !AcademicYearId, 'primaryTxt': GradeId && AcademicYearId }">{{ 'Class' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Class"
             [disabled]="!GradeId || !AcademicYearId" [ngClass]="{ 'bg-[#EBEBEB]': !GradeId || !AcademicYearId }"
             [(ngModel)]="ClassId">
-            <option [value]="0" disabled selected hidden>Choose Class</option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
             <option *ngFor="let g of Classrooms" [value]="g.id">{{ g.name }}</option>
-            <option *ngIf="Classrooms.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Classrooms.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div>
         <button class="p-4  font-medium text-xl rounded-lg" (click)="ViewReport()"
             [disabled]="!SchoolId || !GradeId || !AcademicYearId || !ClassId"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !SchoolId || !GradeId || !AcademicYearId || !ClassId, 'secondaryBg text-white': SchoolId && GradeId && AcademicYearId && ClassId }">View
-            Report</button>
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SchoolId || !GradeId || !AcademicYearId || !ClassId, 'secondaryBg text-white': SchoolId && GradeId && AcademicYearId && ClassId }">
+             {{ 'View Report' | translate }}</button>
     </div>
 </div>
 
-<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4">
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4  rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
                 { keyEn: 'Class : ' + this.class.name},
@@ -71,30 +71,30 @@
                 { keyEn: 'School : ' +  this.school.name },
                 { keyEn: 'Year : ' +this.AcademicYearName },
                 { keyEn: 'Grade : ' +this.GradeName }
-            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
+            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationality', 'genderName']" [tableData]="StudentData"
             #pdfComponentRef>
         </app-pdf-print>
     </div>
-</div>
+</div> -->
 
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
+                    {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Name
+                    {{ 'Name' | translate }}
+                </th>
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Mobile' | translate }}
+                </th> -->
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Nationality' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Mobile
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Nationality
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Gender
+                    {{ 'Gender' | translate }}
                 </th>
             </tr>
         </thead>
@@ -102,7 +102,7 @@
             <tr *ngIf="StudentData.length === 0">
                 <td colspan="5"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                    {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -115,9 +115,9 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.en_name }}
                 </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.mobile }}
-                </td>
+                </td> -->
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.nationalityEnName }}
                 </td>
@@ -130,14 +130,9 @@
 </div>
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
-                { keyEn: 'Class : ' + this.class.name},
-                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
-                { keyEn: 'Date : ' + this.date },
-                { keyEn: 'School : ' +  this.school.name },
-                { keyEn: 'Year : ' +this.AcademicYearName },
-                { keyEn: 'Grade : ' +this.GradeName }
-            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="inforows()" 
+            [tableHeaders]="['ID', 'Name', 'Nationality', 'Gender']" 
+            [tableData]="preparePDFData()"
             #pdfComponentRef>
         </app-pdf-print>
     </div>
@@ -336,7 +331,7 @@ stu:Student = new Student() -->
                     This is to certify that Student / {{stu.en_name}} {{stu.nationalityName}} Nationality and Identity No. {{stu.nationality}} 
                     is registered for this school from {{stu.en_name}} {{stu.en_name}}
                     until this Year {{stu.en_name}} in {{stu.en_name}}
-                    and he was given this certificate to presented to whom it may concern, without paring of school.
+                    And he/she was given this certificate to presented to whom it may concern, without paring of school.
                 </div> 
             </div>
             <div class="rtl text-end w-1/2">

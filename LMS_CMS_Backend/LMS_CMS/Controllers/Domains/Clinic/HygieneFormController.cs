@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -17,11 +18,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
     {
         private readonly IMapper _mapper;
         private readonly DbContextFactoryService _dbContextFactory;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public HygieneFormController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public HygieneFormController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get
@@ -32,53 +35,62 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         )]
         public async Task<IActionResult> Get()
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            
             var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            
-            if (userIdClaim == null || userTypeClaim == null)
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (!long.TryParse(userIdClaim, out long userId) || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized("User claims are missing or invalid.");
             }
-            
-            List<HygieneForm> hygieneForms = await Unit_Of_Work.hygieneForm_Repository.Select_All_With_IncludesById<HygieneForm>(
-                    d => d.IsDeleted != true, 
-                    query => query.Include(h => h.Classroom),
-                    query => query.Include(h => h.School),
-                    query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes),
-                    query => query.Include(x => x.InsertedByEmployee)
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var query = Unit_Of_Work.hygieneForm_Repository.SelectQuery<HygieneForm>(
+                d => d.IsDeleted != true
             );
 
-            foreach (var ff in hygieneForms)
-            {
-                foreach (var dd in ff.StudentHygieneTypes)
+            var hygieneFormsDto = await query
+                .Select(h => new HygieneFormGetDTO 
                 {
-                    if (dd.Student == null)
-                        dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
+                    // Map parent properties
+                    ID = h.Id,
+                    Date = h.Date,
+                    SchoolId = h.SchoolId,
+                    School = h.School.Name,
+                    GradeId = h.GradeId,
+                    Grade = h.Grade.Name,
+                    ClassRoomID = h.ClassRoomID,
+                    ClassRoom = h.Classroom.Name,
 
-                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && dd.IsDeleted != true);
+                    StudentHygieneTypes = h.StudentHygieneTypes
+                        .Where(x => x.IsDeleted != true)
+                        .Select(sht => new StudentHygieneTypesGetDTO
+                        {
+                            ID = sht.Id,
+                            StudentId = sht.StudentId,
+                            Student = sht.Student.en_name,
+                            Attendance = sht.Attendance,
+                            Comment = sht.Comment,
+                            ActionTaken = sht.ActionTaken,
 
-                    HygieneType hygieneType = new();
-                    if (studentHygiene is not null)
-                    {
+                            // Project the *next* level of children
+                            HygieneTypes = sht.HygieneTypes
+                                .Where(ht => ht.IsDeleted != true)
+                                .Select(ht => new HygieneTypeGetDTO
+                                {
+                                    ID = ht.Id,
+                                    Type = ht.Type
+                                }).ToList()
+                        }).ToList()
+                })
+                .AsNoTracking() 
+                .ToListAsync();
 
-                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
-                        dd.HygieneTypes?.Add(hygieneType);
-                    }
-                }
-            }
-
-            if (hygieneForms == null || hygieneForms.Count == 0)
+            if (hygieneFormsDto == null || hygieneFormsDto.Count == 0)
             {
                 return NotFound();
             }
-
-            List<HygieneFormGetDTO> hygieneFormsDto = _mapper.Map<List<HygieneFormGetDTO>>(hygieneForms);
 
             return Ok(hygieneFormsDto);
         }
@@ -92,49 +104,60 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         )]
         public async Task<IActionResult> GetByID(long id)
         {
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (!long.TryParse(userIdClaim, out long userId) || userTypeClaim == null)
+            {
+                return Unauthorized("User claims are missing or invalid.");
+            }
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var query = Unit_Of_Work.hygieneForm_Repository.SelectQuery<HygieneForm>(
+                h => h.Id == id && h.IsDeleted != true
+            );
 
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            HygieneForm hygieneForm = await Unit_Of_Work.hygieneForm_Repository.FindByIncludesAsync(
-                    h => h.Id == id && h.IsDeleted != true,
-                    query => query.Include(x => x.Classroom),
-                    query => query.Include(x => x.School),
-                    query => query.Include(x => x.Grade),
-                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
-                    query => query.Include(x => x.InsertedByEmployee)
-                );
-
-            if (hygieneForm == null)
-            {
-                return NotFound("HygieneForm not found");
-            }
-
-            foreach (var dd in hygieneForm.StudentHygieneTypes)
-            {
-                if (dd.Student == null)
-                    dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
-
-                StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && x.IsDeleted != true);
-
-                HygieneType hygieneType = new();
-                if (studentHygiene is not null)
+            var hygieneFormDto = await query
+                .Select(h => new HygieneFormGetDTO 
                 {
-                    hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
-                    dd.HygieneTypes?.Add(hygieneType);
-                }
-            }
+                    ID = h.Id,
+                    Date = h.Date,
+                    SchoolId = h.SchoolId,
+                    School = h.School.Name,
+                    GradeId = h.GradeId,
+                    Grade = h.Grade.Name,
+                    ClassRoomID = h.ClassRoomID,
+                    ClassRoom = h.Classroom.Name,
 
-            HygieneFormGetDTO hygieneFormDto = _mapper.Map<HygieneFormGetDTO>(hygieneForm);
+                    StudentHygieneTypes = h.StudentHygieneTypes
+                        .Where(x => x.IsDeleted != true) 
+                        .Select(sht => new StudentHygieneTypesGetDTO 
+                        {
+                            ID = sht.Id,
+                            StudentId = sht.StudentId,
+                            Student = sht.Student.en_name,
+                            Attendance = sht.Attendance,
+                            Comment = sht.Comment,
+                            ActionTaken = sht.ActionTaken,
+
+                            HygieneTypes = sht.HygieneTypes
+                                .Where(ht => ht.IsDeleted != true) 
+                                .Select(ht => new HygieneTypeGetDTO 
+                                {
+                                    ID = ht.Id,
+                                    Type = ht.Type
+                                }).ToList()
+                        }).ToList()
+                })
+                .AsNoTracking() 
+                .FirstOrDefaultAsync(); 
+
+            if (hygieneFormDto == null)
+            {
+                return NotFound("HygieneForm not found.");
+            }
 
             return Ok(hygieneFormDto);
         }
@@ -148,150 +171,232 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         )]
         public ActionResult Add(HygieneFormAddDTO hygieneFormDTO)
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            
-            var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            
-            long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            
-            if (userIdClaim == null || userTypeClaim == null)
+
+            if (!long.TryParse(userIdClaim, out long userId) || userTypeClaim == null)
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
 
             if (!ModelState.IsValid)
             {
-                return BadRequest("Hygiene Form can not be null");
+                return BadRequest("Invalid model state.");
             }
 
-            List<HygieneType> hygieneTypes = new();
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            foreach (var hfd in hygieneFormDTO.StudentHygieneTypes)
+            var allHygieneTypeIds = hygieneFormDTO.StudentHygieneTypes
+                .SelectMany(s => s.HygieneTypesIds) 
+                .Distinct()
+                .ToList();
+
+            var hygieneTypesFromDb = Unit_Of_Work.hygieneType_Repository
+                .SelectQuery<HygieneType>(ht => allHygieneTypeIds.Contains(ht.Id) && ht.IsDeleted != true)
+                .ToDictionary(ht => ht.Id);
+
+            if (hygieneTypesFromDb.Count != allHygieneTypeIds.Count)
             {
-                foreach (var ht in hfd.HygieneTypesIds)
-                {
-                    HygieneType hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(d => d.Id == ht && d.IsDeleted != true);
-
-                    if (hygieneType == null)
-                    {
-                        return NotFound($"Hygien Type ID: {ht} not found");
-                    }
-
-                    hygieneTypes.Add(hygieneType);
-
-                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(sh => sh.StudentId == hfd.StudentId && sh.HygieneTypeId == ht);
-
-                    if (studentHygiene == null)
-                    {
-                        StudentHygienes studentHygieneObject = new();
-                        studentHygieneObject.StudentId = hfd.StudentId;
-                        studentHygieneObject.HygieneTypeId = ht;
-                        Unit_Of_Work.studentHygiens_Repository.Add(studentHygieneObject);
-                    }
-                }
+                var missingIds = allHygieneTypeIds.Except(hygieneTypesFromDb.Keys);
+                return NotFound($"The following Hygiene Type IDs were not found: {string.Join(", ", missingIds)}");
             }
 
             HygieneForm hygieneForm = _mapper.Map<HygieneForm>(hygieneFormDTO);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            hygieneForm.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            DateTime now = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
+            hygieneForm.InsertedAt = now;
             if (userTypeClaim == "octa")
             {
                 hygieneForm.InsertedByOctaId = userId;
             }
-
             else if (userTypeClaim == "employee")
             {
                 hygieneForm.InsertedByUserId = userId;
             }
 
-            foreach (var studentTypes in hygieneForm.StudentHygieneTypes)
+            for (int i = 0; i < hygieneFormDTO.StudentHygieneTypes.Count; i++)
             {
-                studentTypes.HygieneTypes = hygieneTypes;
-            }
+                var dtoChild = hygieneFormDTO.StudentHygieneTypes.ElementAt(i);
+                var entityChild = hygieneForm.StudentHygieneTypes.ElementAt(i);
 
+                var specificHygieneTypes = new List<HygieneType>();
+                foreach (var htId in dtoChild.HygieneTypesIds)
+                {
+                    specificHygieneTypes.Add(hygieneTypesFromDb[htId]); 
+                }
+
+                entityChild.HygieneTypes = specificHygieneTypes;
+
+                entityChild.InsertedAt = now; 
+
+                foreach (var htId in dtoChild.HygieneTypesIds)
+                {
+                    var logExists = Unit_Of_Work.studentHygiens_Repository.SelectQuery<StudentHygienes>(sh =>
+                        sh.StudentId == entityChild.StudentId &&
+                        sh.HygieneTypeId == htId &&
+                        sh.Date == hygieneForm.Date);
+
+                    if (logExists == null)
+                    {
+                        Unit_Of_Work.studentHygiens_Repository.Add(new StudentHygienes
+                        {
+                            StudentId = entityChild.StudentId,
+                            HygieneTypeId = htId,
+                            Date = hygieneForm.Date,
+                            InsertedAt = now
+                        });
+                    }
+                }
+            }
             Unit_Of_Work.hygieneForm_Repository.Add(hygieneForm);
+
             Unit_Of_Work.SaveChanges();
-
-            List<StudentHygieneTypes> sht = _mapper.Map<List<StudentHygieneTypes>>(hygieneFormDTO.StudentHygieneTypes);
-
-            foreach (var item in sht)
-            {
-                item.HygieneFormId = hygieneForm.Id;
-
-                item.HygieneTypes = hygieneTypes;
-
-                Unit_Of_Work.studentHygieneTypes_Repository.Add(item);
-
-            }
 
             return Ok(hygieneFormDTO);
         }
         #endregion
 
         #region Update Hygiene Form
+        #region Update
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Form Medical Report" }
         )]
-        public ActionResult Update(HygieneFormPutDTO hygieneFormDTO)
+        public async Task<IActionResult> Update(HygieneFormPutDTO hygieneFormDTO)
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+            // 1. --- Validation and User Claims ---
             var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = userClaims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
 
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
+            if (!long.TryParse(userIdClaim, out long userId) || userTypeClaim == null || !long.TryParse(userRoleClaim, out long roleId))
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized("User claims are missing or invalid.");
             }
+
             if (!ModelState.IsValid)
             {
-                return BadRequest("Hygiene Form can not be null");
+                return BadRequest("Invalid model state.");
             }
 
-            HygieneForm hygieneForm = Unit_Of_Work.hygieneForm_Repository.First_Or_Default(d => d.Id == hygieneFormDTO.ID && d.IsDeleted != true);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // 2. --- Load Existing Entity AND its Children for Reconciliation ---
+            // CRITICAL: We MUST include the children to allow Entity Framework to track and delete them.
+            HygieneForm hygieneForm = await Unit_Of_Work.hygieneForm_Repository.FindByIncludesAsync(
+                d => d.Id == hygieneFormDTO.ID && d.IsDeleted != true,
+                query => query.Include(hf => hf.StudentHygieneTypes)
+                               .ThenInclude(sht => sht.HygieneTypes) // Include grandchildren for removal
+            );
 
             if (hygieneForm == null)
             {
-                return NotFound();
+                return NotFound($"Hygiene Form with ID {hygieneFormDTO.ID} not found.");
             }
 
-            _mapper.Map(hygieneFormDTO, hygieneForm);
+            // 3. --- Authorization Check (Using existing service) ---
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Hygiene Form Medical Report", roleId, userId, hygieneForm);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            // 4. --- Efficiently Fetch All *New* HygieneTypes at Once ---
+            var allHygieneTypeIds = hygieneFormDTO.StudentHygieneTypes
+                .SelectMany(s => s.HygieneTypesIds)
+                .Distinct()
+                .ToList();
+
+            var hygieneTypesFromDb = Unit_Of_Work.hygieneType_Repository
+                .SelectQuery<HygieneType>(ht => allHygieneTypeIds.Contains(ht.Id) && ht.IsDeleted != true)
+                .ToDictionary(ht => ht.Id);
+
+            if (hygieneTypesFromDb.Count != allHygieneTypeIds.Count)
+            {
+                var missingIds = allHygieneTypeIds.Except(hygieneTypesFromDb.Keys);
+                return NotFound($"The following Hygiene Type IDs were not found: {string.Join(", ", missingIds)}");
+            }
+
+            // 5. --- Map Parent Properties and Set Audit Fields ---
+            _mapper.Map(hygieneFormDTO, hygieneForm); // Map scalar properties of the parent
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime now = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-            hygieneForm.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
+            hygieneForm.UpdatedAt = now;
             if (userTypeClaim == "octa")
             {
                 hygieneForm.UpdatedByOctaId = userId;
-                if (hygieneForm.UpdatedByUserId != null)
-                {
-                    hygieneForm.UpdatedByUserId = null;
-                }
+                hygieneForm.UpdatedByUserId = null;
             }
             else if (userTypeClaim == "employee")
             {
                 hygieneForm.UpdatedByUserId = userId;
-                if (hygieneForm.UpdatedByOctaId != null)
-                {
-                    hygieneForm.UpdatedByOctaId = null;
-                }
+                hygieneForm.UpdatedByOctaId = null;
             }
 
+            // 6. --- Reconcile Child Collection (Delete-and-Replace) ---
+
+            // A. Delete all existing children
+            Unit_Of_Work.studentHygieneTypes_Repository.RemoveRange(hygieneForm.StudentHygieneTypes);
+            hygieneForm.StudentHygieneTypes.Clear(); // Clear the collection reference
+
+            // B. Create and Add new children from the DTO
+            foreach (var dtoChild in hygieneFormDTO.StudentHygieneTypes)
+            {
+                // Map DTO child to a new entity
+                var entityChild = _mapper.Map<StudentHygieneTypes>(dtoChild);
+
+                // Link the correct HygieneType entities
+                var specificHygieneTypes = new List<HygieneType>();
+                foreach (var htId in dtoChild.HygieneTypesIds)
+                {
+                    specificHygieneTypes.Add(hygieneTypesFromDb[htId]);
+
+                    // Log update/insert to StudentHygienes table
+                    var logExists = Unit_Of_Work.studentHygiens_Repository.SelectQuery<StudentHygienes>(sh =>
+                        sh.StudentId == entityChild.StudentId &&
+                        sh.HygieneTypeId == htId &&
+                        sh.Date == hygieneForm.Date).Any(); // Check if log already exists for this date
+
+                    if (!logExists)
+                    {
+                        Unit_Of_Work.studentHygiens_Repository.Add(new StudentHygienes
+                        {
+                            StudentId = entityChild.StudentId,
+                            HygieneTypeId = htId,
+                            Date = hygieneForm.Date,
+                            InsertedAt = now
+                        });
+                    }
+                }
+
+                entityChild.HygieneTypes = specificHygieneTypes;
+
+                // Set properties for the new child
+                entityChild.Id = 0; // Ensure EF treats this as a new record
+                entityChild.HygieneFormId = hygieneForm.Id; // Link to parent
+                entityChild.InsertedAt = now;
+
+                // Add to the parent's collection. EF will handle insertion on SaveChanges.
+                hygieneForm.StudentHygieneTypes.Add(entityChild);
+            }
+
+            // 7. --- Save All Changes ---
+            // This single call performs all updates, deletes, and inserts in one transaction.
             Unit_Of_Work.hygieneForm_Repository.Update(hygieneForm);
             Unit_Of_Work.SaveChanges();
 
             return Ok(hygieneFormDTO);
         }
+        #endregion
         #endregion
 
         #region Delete Hygiene Form
@@ -300,13 +405,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Form Medical Report" }
         )]
-        public ActionResult Delete(long id)
+        public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
             
@@ -322,7 +428,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
             
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Hygiene Form Medical Report", roleId, userId, hygieneForm);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
             hygieneForm.IsDeleted = true;
+
+            StudentHygieneTypes sht = Unit_Of_Work.studentHygieneTypes_Repository.First_Or_Default(x => x.HygieneFormId == hygieneForm.Id && x.IsDeleted != true);
+             
+            if (sht.IsDeleted != true)
+                sht.IsDeleted = true;
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             hygieneForm.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

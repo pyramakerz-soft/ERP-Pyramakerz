@@ -42,7 +42,7 @@
     </div>
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg"
-            [disabled]="!activeAcademicYearID || !SelectedSchoolIdForFilteration " (click)="getClassroomDataByYearID()"
+            [disabled]="!activeAcademicYearID || !SelectedSchoolIdForFilteration " (click)="getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)"
             [ngClass]="{ 'bg-gray-100 text-gray-300': !activeAcademicYearID || !SelectedSchoolIdForFilteration , 'secondaryBg text-white': SelectedSchoolIdForFilteration && activeAcademicYearID  }">
              {{ 'Apply' | translate }}
         </button>
@@ -115,6 +115,39 @@
     </table>
 </div>
 
+<div *ngIf="IsViewTable" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4  rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+        [disabled]="CurrentPage === 1 || classroomData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || classroomData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p> {{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+        [disabled]="CurrentPage === TotalPages || classroomData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || classroomData.length == 0}">
+            <p> {{'Next'| translate }}</p> 
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input  (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p> {{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}}  {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}}  {{'Item'| translate }})</p>
+    </div>
+</div>
 
 <!-- Add-Edit Classroom Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
@@ -138,7 +171,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="number"> {{ 'Classroom Number' | translate }}</label>
                 <input id="number" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder=" {{ 'Enter' | translate }}  {{ 'Classroom Number' | translate }}" [(ngModel)]="classroom.number"
+                    placeholder=" {{ 'Enter' | translate }} {{ 'Classroom Number' | translate }}" [(ngModel)]="classroom.number"
                     (ngModelChange)="onInputValueChange({ field: 'number', value: $event })"
                     (input)="validateNumber($event, 'number')" />
                 <span *ngIf="validationErrors['number']" class="text-red-500 ml-3 font-normal">{{
@@ -236,7 +269,7 @@
                     [(ngModel)]="classroom.homeroomTeacherID">
                     <option *ngIf="!classroom.id" [value]="null" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
                     <option *ngIf="classroom.id" [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
-                    <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.user_Name }}</option>
+                    <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.en_name }}</option>
                     <option *ngIf="Employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>

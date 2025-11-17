@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registered-employee-view',
   standalone: true,
@@ -27,10 +28,13 @@ export class RegisteredEmployeeViewComponent {
   DomainName: string = '';
   path: string = '';  
   registereEmployeeID: number = 0;  
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   employeeTypes:EmployeeTypeGet[] = []
   roles:Role[] = []
+  employeeToEdit: RegisteredEmployee = new RegisteredEmployee();
+  isLoading = false; 
+  validationErrors: { [key in keyof RegisteredEmployee]?: string } = {};
   
   constructor(
     private router: Router, 
@@ -40,7 +44,7 @@ export class RegisteredEmployeeViewComponent {
     public registeredEmployeeService: RegisteredEmployeeService,
     public employeeTypeService: EmployeeTypeService,
     public roleService: RoleService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() { 
@@ -59,6 +63,13 @@ export class RegisteredEmployeeViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   GetRegisteredEmployee(){
     this.employee = new RegisteredEmployee()
     this.registeredEmployeeService.GetById(this.registereEmployeeID, this.DomainName).subscribe((d) => {
@@ -74,7 +85,7 @@ export class RegisteredEmployeeViewComponent {
 
   reject() {
     Swal.fire({
-      title: 'Are you sure you want to Reject This Employee?',
+      title: 'Are you sure you want to Reject And Delete This Employee?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -130,16 +141,30 @@ export class RegisteredEmployeeViewComponent {
         cancelButtonText: 'Cancel',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.registeredEmployeeService.Accept(this.employee, this.DomainName).subscribe((d) => {
-            Swal.fire({
-              title: 'Employee Accepted!',
-              text: 'The employee has been successfully accepted.',
-              icon: 'success',
-              confirmButtonColor: 'secondaryBg',
-            }).then(() => { 
-              this.moveToRegisteredEmployee();
-            });
-          });
+          this.registeredEmployeeService.Accept(this.employee, this.DomainName).subscribe(
+            (d) => {
+              Swal.fire({
+                title: 'Employee Accepted!',
+                text: 'The employee has been successfully accepted.',
+                icon: 'success',
+                confirmButtonText: 'Okay',
+                customClass: {
+                  confirmButton: 'secondaryBg'
+                }
+              }).then(() => { 
+                this.moveToRegisteredEmployee();
+              });
+            },
+            (error) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+                confirmButtonText: 'Okay',
+              });
+            }
+          );
         }
       });  
     }
@@ -161,5 +186,76 @@ export class RegisteredEmployeeViewComponent {
         this.roles = data
       }
     )
+  }
+
+  openEditModal(){
+    this.employeeToEdit= new RegisteredEmployee();
+    this.employeeToEdit.user_Name = this.employee.user_Name;
+    this.employeeToEdit.email = this.employee.email;
+    this.employeeToEdit.id = this.employee.id;
+    
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+  }
+
+  closeModal() {
+    document.getElementById('Add_Modal')?.classList.remove('flex');
+    document.getElementById('Add_Modal')?.classList.add('hidden');
+    this.validationErrors = {};  
+    
+    this.employeeToEdit= new RegisteredEmployee();
+    this.isLoading = false 
+  }
+
+  capitalizeField(field: keyof RegisteredEmployee): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.employeeToEdit) {
+      if (this.employeeToEdit.hasOwnProperty(key)) {
+        const field = key as keyof RegisteredEmployee;
+        if (!this.employeeToEdit[field]) {
+          if(field == "email" || field == "user_Name") {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            isValid = false;
+          } 
+        } else { 
+          this.validationErrors[field] = '';
+        }
+      }
+    } 
+
+    return isValid;
+  }
+
+  onInputValueChange(event: { field: keyof RegisteredEmployee, value: any }) {
+    const { field, value } = event;
+    (this.employeeToEdit as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  Save(){ 
+    if(this.isFormValid()){ 
+      this.isLoading = true; 
+      this.registeredEmployeeService.Edit(this.employeeToEdit, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal()
+          this.GetRegisteredEmployee()
+        },
+        error => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.error || 'An unexpected error occurred',
+            confirmButtonColor: '#089B41',
+          });
+        }
+      );
+    }
   }
 }

@@ -1,0 +1,238 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Evaluation Report' | translate }}</h1>
+</div>
+
+<!-- Filters Section -->
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="template" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Template' | translate }}</label>
+        <select id="template"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="filterParams.templateId" (ngModelChange)="onFilterChange()">
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Template' | translate }}</option>
+            <option *ngFor="let template of Templates" [value]="template.id">{{ template.englishTitle }}</option>
+            <option *ngIf="Templates.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Start Date' | translate }}</label>
+        <input id="fromDate" type="date" class="block mb-2 text-sm font-medium text-gray-900" [(ngModel)]="filterParams.fromDate" 
+               (change)="DateChange()" (ngModelChange)="onFilterChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <div class="flex flex-col w-[30%] mb-4">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{ 'End Date' | translate }}</label>
+        <input id="toDate" type="date" class="block mb-2 text-sm font-medium text-gray-900" [(ngModel)]="filterParams.toDate" 
+               (change)="DateChange()" (ngModelChange)="onFilterChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label for="employee" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Employee' | translate }}</label>
+        <select id="employee"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="filterParams.employeeId" (ngModelChange)="onFilterChange()">
+  <option [value]="0" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
+  <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
+</select>
+    </div>
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label for="school" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="school"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="filterParams.schoolId" (change)="onSchoolChange($event)" (ngModelChange)="onFilterChange()">
+            <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+            <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+    <div class="flex flex-col w-[25%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="Class"
+            [ngClass]="{ 'text-gray-400': !filterParams.schoolId, 'primaryTxt': filterParams.schoolId }">{{ 'Class' |
+            translate }}</label>
+        <select id="class"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [disabled]="!filterParams.schoolId" [(ngModel)]="filterParams.classroomId" (ngModelChange)="onFilterChange()">
+            <option [value]="0" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+            <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
+        </select>  
+    </div>
+
+    <div class="px-4 py-3 cursor-pointer font-medium text-lg rounded-lg">
+<button class="p-3 font-medium text-xl rounded-lg" (click)="generateReport()"
+    [disabled]="!filterParams.templateId || !filterParams.fromDate || !filterParams.toDate"
+    [ngClass]="{ 'bg-gray-100 text-gray-300': !filterParams.fromDate || !filterParams.toDate || !filterParams.templateId,
+     'secondaryBg text-white': filterParams.fromDate && filterParams.toDate && filterParams.templateId }">
+    {{ 'View Report' | translate }}
+</button>
+    </div>
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+  <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" [title]="'Download Excel' | translate">
+  <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+  <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+</div>
+
+<!-- Report Results -->
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="reportData.length === 0 && !isLoading" class="w-full justify-center items-center flex py-8">
+            <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                {{'No Data Found'| translate }}
+            </span>
+    </div>
+
+    <div *ngIf="isLoading" class="w-full justify-center items-center flex py-8">
+        <i class="fas fa-spinner fa-spin text-2xl primaryTxt"></i>
+        <span class="ml-2">{{ 'Loading...' | translate }}</span>
+    </div>
+
+    <!-- Updated structure for the new data format -->
+    <div *ngFor="let employee of reportData; let empIndex = index" class="border rounded-lg mb-4">
+        <div class="flex rounded-lg justify-between items-center cursor-pointer px-4 py-3 bg-[#394b6e3a]" 
+             (click)="toggleEmployeeCollapse(empIndex)">
+            <h3 class="text-lg font-semibold">{{ 'Employee' | translate }}: {{ isRtl? employee.employeeArabicName : employee.employeeEnglishName }}</h3>
+            <i class="fa" [ngClass]="{
+                'fa-chevron-down': !collapsedEmployees.has(empIndex),
+                'fa-chevron-up': collapsedEmployees.has(empIndex) }">
+            </i>
+        </div>
+
+        <div *ngIf="collapsedEmployees.has(empIndex)" class="p-4 bg-white">
+            <div *ngFor="let evaluation of employee.reportsByDate; let evalIndex = index" class="border rounded-lg mb-4">
+                <div class="flex rounded-lg justify-between items-center cursor-pointer px-4 py-3 bg-[#e5e7eb]" 
+                     (click)="toggleEvaluationCollapse(empIndex, evalIndex)">
+                    <h4 class="text-md font-semibold">{{ 'Evaluation Date' | translate }}: {{ evaluation.date }}</h4>
+                    <i class="fa" [ngClass]="{
+                        'fa-chevron-down': !isEvaluationCollapsed(empIndex, evalIndex),
+                        'fa-chevron-up': isEvaluationCollapsed(empIndex, evalIndex) }">
+                    </i>
+                </div>
+
+                <div *ngIf="isEvaluationCollapsed(empIndex, evalIndex)" class="p-4 bg-white">
+                    <!-- Questions Section -->
+                    <div *ngFor="let group of evaluation.evaluationEmployeeQuestionGroups" class="mb-6">
+                        <div class="primaryBg p-4 rounded-xl text-white mb-4">
+                            {{ group.englishTitle || group.arabicTitle }}
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div *ngFor="let question of group.evaluationEmployeeQuestions" 
+                                 class="bg-[#EBEBEB] p-4 rounded-xl border">
+                                <div class="font-medium mb-2">{{ question.questionEnglishTitle || question.questionArabicTitle }}</div>
+                                
+                                <div class="flex my-2 items-center">
+                                    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let j = index">
+                                        <i class="fa-star text-[#6F6F6F]" [class.fa-solid]="j < question.mark"
+                                            [class.fa-regular]="j >= question.mark" 
+                                            [class.text-yellow-400]="j < question.mark"></i>
+                                    </ng-container>
+                                    <!-- <span class="ml-2 text-sm text-gray-600">({{ question.average || '-' }})</span> -->
+                                </div>
+                                
+                                <p class="text-gray-600 text-sm" *ngIf="question.note">
+                                    <strong>{{ 'Notes' | translate }}:</strong> {{ question.note }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Corrections Section -->
+                    <div *ngIf="evaluation.evaluationEmployeeStudentBookCorrections?.length > 0" class="mt-6">
+                        <div class="primaryBg p-4 rounded-xl text-white mb-4">
+                            {{ 'Student Corrections' | translate }}
+                        </div>
+                        
+                        <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                            <table class="w-full table-auto bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                                <thead class="bg-[#EBEBEB] text-sm md:text-base">
+                                    <tr>
+                                        <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                            {{ 'Student' | translate }}
+                                        </th>
+                                        <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                            {{ 'Correction Book' | translate }}
+                                        </th>
+                                        <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                            {{ 'Status' | translate }}
+                                        </th>
+                                        <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                            {{ 'Notes' | translate }}
+                                        </th>
+                                        <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                                            {{ 'Average' | translate }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let correction of evaluation.evaluationEmployeeStudentBookCorrections; let j = index"
+                                        [ngClass]="{ 'bg-[#F7F7F7]': j % 2 === 1, 'bg-white': j % 2 !== 1 }"
+                                        class="border-t border-gray-300 text-xs md:text-sm">
+                                        <td class="py-3 px-4 border border-[#EAECF0]">
+                                            {{ correction.studentEnglishName || correction.studentArabicName }}
+                                        </td>
+                                        <td class="py-3 px-4 border border-[#EAECF0]">
+                                            {{ correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName }}
+                                        </td>
+                                        <td class="py-3 px-4 border border-[#EAECF0]">
+                                            <div class="flex">
+                                                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let k = index">
+                                                    <i class="fa-star" [class.fa-solid]="k < correction.state"
+                                                        [class.fa-regular]="k >= correction.state" 
+                                                        [class.text-yellow-400]="k < correction.state"></i>
+                                                </ng-container>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-4 border border-[#EAECF0]">
+                                            {{ correction.note || '-' }}
+                                        </td>
+                                        <td class="py-3 px-4 border border-[#EAECF0]">
+                                            {{ correction.averageStudent || '-' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination and PDF section remain the same -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" 
+                       [fileName]="'Evaluation Report'"
+                       [infoRows]="[
+                { 
+                  keyEn: 'Template: ' + getTemplateName(),
+                  keyAr:  getTemplateName() + ': النموذج'
+                },
+                {
+                  keyEn: 'Employee: ' + getEmployeeName(),
+                  keyAr:  getEmployeeName() + ': الموظف'
+                },
+                {
+                  keyEn: 'School: ' + getSchoolName(),
+                  keyAr:  getSchoolName() + ': المدرسة'
+                },
+                {
+                  keyEn: 'Class: ' + getClassName(),
+                  keyAr:  getClassName() + ': الفصل' 
+                },
+                {
+                  keyEn: 'Date Range: ' + getDateRange(),
+                  keyAr:  getDateRange() + ': النطاق الزمني' 
+                },
+                {
+                  keyEn: 'Generated On: ' + getGeneratedDate(),
+                  keyAr:  getGeneratedDate() + ': تم الإنشاء في'
+                }
+              ]"
+                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                       #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

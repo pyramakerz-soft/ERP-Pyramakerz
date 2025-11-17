@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         [HttpGet]
         [Authorize_Endpoint_(
        allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Reasons For Leaving Work" }
+       pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
        )]
         public async Task<IActionResult> GetAsync()
         {

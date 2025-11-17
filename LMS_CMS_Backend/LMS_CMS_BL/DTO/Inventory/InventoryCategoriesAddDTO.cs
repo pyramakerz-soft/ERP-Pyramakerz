@@ -9,8 +9,6 @@ namespace LMS_CMS_BL.DTO.Inventory
 {
     public class InventoryCategoriesAddDTO
     {
-        [Required(ErrorMessage = "Name is required")]
-        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
     }
 }

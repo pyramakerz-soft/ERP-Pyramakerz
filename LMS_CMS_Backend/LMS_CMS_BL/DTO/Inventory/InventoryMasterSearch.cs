@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Inventory
 {
-    public class InventoryMasterSearch  //-77
+    public class InventoryMasterSearch  
     {
         public long? StoredId { get; set; }
-        public DateTime DateFrom { get; set; }
-        public DateTime DateTo { get; set; }
+        public DateOnly DateFrom { get; set; }
+        public DateOnly DateTo { get; set; }
         public List<long> FlagIds { get; set; }
         public long? CategoryId { get; set; }
         public long? SubCategoryId { get; set; }

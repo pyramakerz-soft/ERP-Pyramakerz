@@ -15,40 +15,45 @@ import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assi
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-student-assignment-view',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './student-assignment-view.component.html',
   styleUrl: './student-assignment-view.component.css'
 })
 export class StudentAssignmentViewComponent {
 
- User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   TableData: AssignmentStudent[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   isDeleting: boolean = false;
   AssignmentStudentId: number = 0;
   ClassId: number = 0;
   assignmentStudent: AssignmentStudent = new AssignmentStudent()
-  isLoading :boolean = false
+  isLoading: boolean = false
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private languageService: LanguageService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    public assignmentServ: AssignmentService
+    public assignmentServ: AssignmentService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -59,11 +64,24 @@ export class StudentAssignmentViewComponent {
     });
     this.AssignmentStudentId = Number(this.activeRoute.snapshot.paramMap.get('AssignmentStudentId'));
     this.GetAssignment()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
+      console.log(this.assignmentStudent)
+      if (this.assignmentStudent.isVisibleToStudent != true) {
+        this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignmentStudent.subjectId}`)
+      }
     })
   }
 

@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -381,12 +382,12 @@ namespace LMS_CMS_PL.Services.Zatca
 
             string pcName = $"PC{master.SchoolPCId}_{master.SchoolId}";
 
-            string filesEnvironment = config.GetValue<string>("ZatcaFilesEnvironment");
+            bool isProduction = config.GetValue<bool>("IsProduction");
 
             string certContent = string.Empty;
             string privateKeyContent = string.Empty;
 
-            if (filesEnvironment == "local")
+            if (!isProduction)
             {
                 string certPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
                 certContent = File.ReadAllText(certPath);

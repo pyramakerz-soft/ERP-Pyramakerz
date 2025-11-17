@@ -27,6 +27,7 @@ import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-daily-performance-master',
   standalone: true,
@@ -111,6 +112,13 @@ export class DailyPerformanceMasterComponent {
 
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+
   getAllSchools() {
     this.schools = []
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
@@ -153,7 +161,7 @@ export class DailyPerformanceMasterComponent {
   }
 
   Create() {
-    this.router.navigateByUrl('Employee/Create Daily Performance')
+    this.router.navigateByUrl('Employee/Daily Performance')
   }
 
   View(id: number) {

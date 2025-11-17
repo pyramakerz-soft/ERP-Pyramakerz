@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Procedure Types" , "Conducts" , "Conducts Report" , "Attendance Report" }
         )]
         public IActionResult Get()
         {
@@ -64,7 +64,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Procedure Types" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -97,7 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Procedure Types" }
         )]
         public async Task<IActionResult> Add(ProcedureTypeAddDTO NewProcedureType)
         {
@@ -141,7 +141,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Lesson Resources Types" }
+           pages: new[] { "Procedure Types" }
        )]
         public async Task<IActionResult> EditAsync(ProcedureTypeAddDTO newProcedureType)
         {
@@ -176,7 +176,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, procedureType);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Procedure Types", roleId, userId, procedureType);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -213,7 +213,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Procedure Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -242,7 +242,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, procedureType);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Procedure Types", roleId, userId, procedureType);
                 if (accessCheck != null)
                 {
                     return accessCheck;

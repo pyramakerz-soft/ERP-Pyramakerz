@@ -29,9 +29,10 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { FeesActivationAddPut } from '../../../../Models/Accounting/fees-activation-add-put';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { StudentService } from '../../../../Services/student.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-fees-activation',
   standalone: true,
@@ -49,6 +50,7 @@ export class FeesActivationComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: FeesActivation[] = [];
+  OriginalTableData: FeesActivation[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
@@ -96,6 +98,7 @@ export class FeesActivationComponent {
     private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public ApiServ: ApiService,
     public accountServ: AccountingTreeChartService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -108,7 +111,7 @@ export class FeesActivationComponent {
     public studentService: StudentService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
     public FeesDiscountTypeServ: TuitionDiscountTypeService,
-    public AcademicYearServ: AcadimicYearService,
+    public AcademicYearServ: AcadimicYearService, 
   ) { }
 
   ngOnInit() {
@@ -138,10 +141,18 @@ export class FeesActivationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   GetAllFeesData() {
     this.TableData = []
+    this.OriginalTableData = []
     this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
+      this.OriginalTableData = d;
+      this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
       this.isSearchLoading = false
     },err=>{
      this.isSearchLoading = false
@@ -149,14 +160,14 @@ export class FeesActivationComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Fees Activation?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "+ this.translate.instant('Fees Activation') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.feesActivationServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -183,13 +194,30 @@ export class FeesActivationComponent {
     }
   }
 
+  // validateNumberForDiscount(event: any): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     this.DiscountPercentage = 0
+  //   }
+  // }
+
   validateNumberForDiscount(event: any): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      this.DiscountPercentage = 0
+    let value = event.target.value;
+
+    value = value.replace(/[^0-9.]/g, '');
+
+    if ((value.split('.').length - 1) > 1) {
+      value = value.slice(0, value.length - 1); 
     }
-  }
+ 
+    if (parseFloat(value) > 100) {
+      value = '100';   
+    }
+ 
+    event.target.value = value;
+    this.DiscountPercentage = value ? parseFloat(value) : 0;  
+}
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -334,11 +362,15 @@ export class FeesActivationComponent {
 
   async Activate() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       this.FeesForAdd = [];
-      const distinctStudentIDs = Array.from(new Set(this.TableData.map(stu => stu.studentID)));
+
+      const distinctStudentIDs = Array.from(
+        new Set(this.OriginalTableData.map(stu => stu.studentID))
+      );
+
       distinctStudentIDs.forEach(stu => {
-        var fee: FeesActivationAddPut = new FeesActivationAddPut();
+        const fee = new FeesActivationAddPut();
         fee.academicYearId = this.YearId;
         fee.amount = this.Fees.amount;
         fee.date = this.Fees.date;
@@ -349,20 +381,26 @@ export class FeesActivationComponent {
         fee.studentID = stu;
         this.FeesForAdd.push(fee);
       });
+
       try {
         await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
-        this.GetAllFeesData();
-        this.Search()
-        this.Fees =new FeesActivationAddPut()
-        Swal.fire({
+        this.Fees = new FeesActivationAddPut();
+        this.DiscountPercentage = null;
+
+        await this.GetAllFeesData();
+        await this.Search();
+
+        await Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',
           confirmButtonColor: '#089B41',
         });
-        this.isLoading = false
+
       } catch (error) {
         console.error("Error while activating fees:", error);
-        this.isLoading = false
+        this.isLoading = false;
+      } finally {
+        this.isLoading = false;
       }
     }
   }
@@ -384,7 +422,9 @@ export class FeesActivationComponent {
 
   async CalculateNet() {
     this.Fees.net = this.Fees.amount
-    await this.CalculateDiscountFromPercentage()
+    if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
+      this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+    }
     this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
   }
 

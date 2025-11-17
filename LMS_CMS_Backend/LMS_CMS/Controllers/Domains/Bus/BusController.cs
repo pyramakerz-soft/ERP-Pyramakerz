@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bus Details" }
+            pages: new[] { "Bus Details" , "Print Name Tag" }
         )]
         public async Task<IActionResult> GetAsync()
         {

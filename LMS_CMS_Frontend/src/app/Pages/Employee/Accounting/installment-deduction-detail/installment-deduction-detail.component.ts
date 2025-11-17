@@ -22,14 +22,16 @@ import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting
 import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 
 @Component({
   selector: 'app-installment-deduction-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule , TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './installment-deduction-detail.component.html',
   styleUrl: './installment-deduction-detail.component.css'
 })
@@ -42,7 +44,7 @@ export class InstallmentDeductionDetailComponent {
   AllowDeleteForOthers: boolean = false;
 
   Data: InstallmentDeductionMaster = new InstallmentDeductionMaster();
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -58,7 +60,7 @@ isRtl: boolean = false;
   emplyeeStudents: EmplyeeStudent[] = []
   FeesType: TuitionFeesType[] = []
 
-  TableData: InstallmentDeductionDetail[] = []
+  // TableData: InstallmentDeductionDetail[] = []
   Detail: InstallmentDeductionDetail = new InstallmentDeductionDetail()
   MasterId: number = 0;
   editingRowId: any = 0;
@@ -66,12 +68,15 @@ isRtl: boolean = false;
   IsOpenToAdd: boolean = false
   isLoading = false
   validationErrors: { [key in keyof InstallmentDeductionMaster]?: string } = {};
+  // validationErrorsInstallmentDeductionDetails: { [key in keyof InstallmentDeductionDetail]?: string } = {};
+  validationErrorsForDetails: Record<number, Partial<Record<keyof InstallmentDeductionDetail, string>>> = {};
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -81,7 +86,7 @@ isRtl: boolean = false;
     public installmentDeductionDetailServ: InstallmentDeductionDetailService,
     public installmentDeductionMasterServ: InstallmentDeductionMasterService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -96,7 +101,6 @@ isRtl: boolean = false;
     if (!this.MasterId) {
       this.mode = "Create"
     } else {
-      this.GetTableDataByID();
       this.GetMasterInfo();
     }
 
@@ -132,6 +136,13 @@ isRtl: boolean = false;
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+   ngOnDestroy(): void { 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
   moveToMaster() {
     this.router.navigateByUrl(`Employee/Installment Deduction`)
   }
@@ -159,7 +170,35 @@ isRtl: boolean = false;
     return isValid;
   }
 
+  // isFormValidInstallmentDeductionDetails(row?: InstallmentDeductionDetail): boolean {
+  //   let isValid = true;
+  //   if (row) {
+  //     this.Detail = row
+  //   }
+  //   for (const key in this.Detail) {
+  //     if (this.Detail.hasOwnProperty(key)) {
+  //       const field = key as keyof InstallmentDeductionDetail;
+  //       if (!this.Detail[field]) {
+  //         if (
+  //           field == 'feeTypeID' ||
+  //           field == 'date'
+  //         ) {
+  //           this.validationErrorsInstallmentDeductionDetails[field] = `*${this.capitalizeFieldDetails(
+  //             field
+  //           )} is required`;
+  //           isValid = false;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return isValid;
+  // }
+
   capitalizeField(field: keyof InstallmentDeductionMaster): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  capitalizeFieldDetails(field: keyof InstallmentDeductionDetail): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
@@ -171,50 +210,168 @@ isRtl: boolean = false;
     }
   }
 
+  onInputValueChangeDetails(row :InstallmentDeductionDetail ,event: { field: keyof InstallmentDeductionDetail; value: any }) {
+    const { field, value } = event;
+    (this.Detail as any)[field] = value;
+    if (value) {
+    if (this.validationErrorsForDetails[row.id]) {
+      this.validationErrorsForDetails[row.id][field] = '';
+    }
+  }
+  }
+
+  validateNumberEditDetails(row:InstallmentDeductionDetail ,event: any, field: keyof InstallmentDeductionDetail): void { // 
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
+      }
+    }
+  }
+
+  isDetailsFormValid(): boolean {
+    let isValid = true;
+
+    // Reset validation errors
+    this.validationErrorsForDetails = {};
+
+    this.Data.installmentDeductionDetails.forEach((detail) => {
+      // Ensure detail has an ID
+      const id = detail.id;
+      if (!id) return; // skip if no ID
+
+      // Prepare error object for this row
+      if (!this.validationErrorsForDetails[id]) {
+        this.validationErrorsForDetails[id] = {};
+      }
+
+      const errors = this.validationErrorsForDetails[id];
+
+      // Validate only these fields
+      const requiredFields: (keyof InstallmentDeductionDetail)[] = [
+        'date',
+        'feeTypeID',
+      ];
+
+      requiredFields.forEach((field) => {
+        const value = detail[field];
+        if (!value || value == 0 || value == '') {
+          errors[field] = this.getRequiredErrorMessage(
+            this.DetailsCapitalizeField(field)
+          );
+          console.log(errors)
+          isValid = false;
+        } else {
+          errors[field] = ''; 
+        }
+      });
+    });
+
+    if(this.Data.newDetails && this.Data.newDetails.length > 0){
+      this.Data.newDetails.forEach((detail) => {
+        // Ensure detail has an ID
+        const id = detail.id;
+        if (!id) return; // skip if no ID
+
+        // Prepare error object for this row
+        if (!this.validationErrorsForDetails[id]) {
+          this.validationErrorsForDetails[id] = {};
+        }
+
+        const errors = this.validationErrorsForDetails[id];
+
+        // Validate only these fields
+        const requiredFields: (keyof InstallmentDeductionDetail)[] = [
+          'date',
+          'feeTypeID',
+        ];
+
+        requiredFields.forEach((field) => {
+          const value = detail[field];
+          if (!value || value == 0 || value == '') {
+            errors[field] = this.getRequiredErrorMessage(
+              this.DetailsCapitalizeField(field)
+            );
+            console.log(errors)
+            isValid = false;
+          } else {
+            errors[field] = ''; 
+          }
+        });
+      });
+    }
+    return isValid;
+  }
+  
+  DetailsCapitalizeField(field: keyof InstallmentDeductionDetail): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
   Save() {
-    if (this.isFormValid()) {
-      this.isLoading = true
-      if (this.mode == "Create") {
+    if (this.mode == "Create") {
+        if (this.isFormValid()) {
+          this.isLoading = true
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
           this.isLoading = false
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Done Succeessfully',
+            text: 'Done Successfully',
             confirmButtonColor: '#089B41',
           });
 
-          this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
+          this.router.navigateByUrl(`Employee/Installment Deduction/Edit/${this.MasterId}`)
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
           })
+        }
       }
       else if (this.mode == "Edit") {
-        this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-          this.GetMasterInfo()
-          this.isLoading = false
-        },
-          err => {
+        if(this.isDetailsFormValid()){
+          this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
+            this.GetMasterInfo()
             this.isLoading = false
             Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
+              icon: 'success',
+              title: 'Done',
+              text: 'Done Successfully',
+              confirmButtonColor: '#089B41',
             });
-          })
+          },
+            error => {
+              console.log(error)
+              this.isLoading = false
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            })
+        }
       }
-    }
   }
   onEmployeeChange() {
     this.emplyeeStudents = []
@@ -245,41 +402,57 @@ isRtl: boolean = false;
     })
   }
 
-  GetTableDataByID() {
-    this.TableData = [];
-    this.installmentDeductionDetailServ.GetByMasterId(this.MasterId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
-    })
-  }
-
   AddDetail() {
-    this.IsOpenToAdd = true
+    var NewDetail = new InstallmentDeductionDetail()
+    NewDetail.id = Date.now() + Math.floor(Math.random() * 10000);
+    NewDetail.installmentDeductionMasterID = this.MasterId
+    this.Data.newDetails=this.Data.newDetails || []
+    this.Data.newDetails.push(NewDetail);
   }
 
-  Edit(id: number) {
-    this.editingRowId = id
-  }
+  // Edit(id: number) {
+  //   this.Detail = new InstallmentDeductionDetail()
+  //   this.validationErrorsInstallmentDeductionDetails = {}
+  //   this.editingRowId = id
+  // }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Installment Deduction Details?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Detail')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.installmentDeductionDetailServ.Delete(id, this.DomainName).subscribe((D) => {
-          this.GetTableDataByID();
+        this.Data.installmentDeductionDetails = this.Data.installmentDeductionDetails.filter(s=>s.id != id)
+        this.Data.installmentDeductionDetails = this.Data.installmentDeductionDetails || []
           Swal.fire({
             icon: 'success',
             title: 'Done',
-            text: 'Installment Deduction Details Deleted Succeessfully',
+            text: 'Installment Deduction Details Deleted Successfully',
             confirmButtonColor: '#089B41',
           });
         })
+      }
+    });
+  }
+
+  DeleteNew(id: number) {
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Details')+ this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.Data.newDetails = this.Data.newDetails.filter(s=>s.id != id)
       }
     });
   }
@@ -308,24 +481,8 @@ isRtl: boolean = false;
     })
   }
 
-  SaveRow() {
-    this.Detail.installmentDeductionMasterID = this.MasterId
-    this.installmentDeductionDetailServ.Add(this.Detail, this.DomainName).subscribe((d) => {
-      this.GetTableDataByID();
-    })
-    this.IsOpenToAdd = false
-    this.Detail = new InstallmentDeductionDetail()
-  }
-
   CancelAdd() {
     this.IsOpenToAdd = false
-  }
-
-  SaveEdit(row: InstallmentDeductionDetail) {
-    this.editingRowId = null;
-    this.installmentDeductionDetailServ.Edit(row, this.DomainName).subscribe((d) => {
-      this.GetTableDataByID();
-    })
   }
 
   validateNumber(event: any, field: keyof InstallmentDeductionMaster): void {

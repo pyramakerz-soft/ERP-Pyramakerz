@@ -11,12 +11,12 @@
   </div>
 
   <app-table [headers]="GetTableHeaders()" [data]="diagnoses"
-    [keys]="['id', 'name', 'insertedAt']" (delete)="deleteDiagnosis($event)" (edit)="openModal($event.id)">
+    [keys]="['id', 'name']" (delete)="deleteDiagnosis($event)" (edit)="openModal($event.id)">
   </app-table>
 
-<app-modal [title]="editDiagnosis ? (isRtl? 'التشخيص':'Diagnosis') : (isRtl? 'إنشاء تشخيص':'Create Diagnosis') " [isEditMode]="editDiagnosis"
-  buttonText="{{'Save'| translate }}" (save)="saveDiagnosis()" (close)="closeModal()"
-  [isLoading]="isSaving" [ngClass]="{ hidden: !isModalVisible }">
+  <app-modal [title]="editDiagnosis ? (isRtl? 'التشخيص':'Diagnosis') : (isRtl? 'إنشاء تشخيص':'Create Diagnosis') " [isEditMode]="editDiagnosis"
+    buttonText="{{'Save'| translate }}" (save)="saveDiagnosis()" (close)="closeModal()"
+    [isLoading]="isSaving" [ngClass]="{ hidden: !isModalVisible }">
     <div class="flex flex-col w-full mb-4">
       <label class="mb-2 primaryTxt" for="name"> {{ 'Diagnosis Name' | translate }}</label>
       <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"

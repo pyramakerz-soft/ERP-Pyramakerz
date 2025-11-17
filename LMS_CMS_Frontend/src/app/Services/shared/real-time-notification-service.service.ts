@@ -8,14 +8,13 @@ import { Notification } from '../../Models/Communication/notification';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../account.service';
 import { TokenData } from '../../Models/token-data';
+import { catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RealTimeNotificationServiceService {
-  private hubConnection: signalR.HubConnection| null = null; 
-  BaseUrlOcta=""
-  header = ""
+  private hubConnection: signalR.HubConnection| null = null;  
   DomainName = "" 
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   
@@ -28,9 +27,7 @@ export class RealTimeNotificationServiceService {
     private dialog: MatDialog,
     public http: HttpClient,
     public ApiServ: ApiService, public notificationService:NotificationService, public account: AccountService
-  ) {
-    this.BaseUrlOcta=ApiServ.BaseUrlOcta
-    this.header = ApiServ.GetHeader()
+  ) { 
     this.DomainName = this.ApiServ.GetHeader(); 
   }  
 
@@ -40,7 +37,7 @@ export class RealTimeNotificationServiceService {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.ApiServ.BaseUrlSignalR}notificationHub`, {
+      .withUrl(`${this.ApiServ.BaseUrlSignalR}appHub`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => localStorage.getItem("current_token") || '',
@@ -52,6 +49,20 @@ export class RealTimeNotificationServiceService {
           Math.min(retryContext.previousRetryCount * 1000, 10000)
       })
       .build();
+
+    // this.hubConnection = new signalR.HubConnectionBuilder()
+    //   .withUrl(`${this.ApiServ.BaseUrlSignalR}notificationHub`, {
+    //     skipNegotiation: true,
+    //     transport: signalR.HttpTransportType.WebSockets,
+    //     accessTokenFactory: () => localStorage.getItem("current_token") || '',
+    //     headers: { "Domain-Name": this.DomainName }
+    //   })
+    //   .configureLogging(signalR.LogLevel.Debug)
+    //   .withAutomaticReconnect({
+    //     nextRetryDelayInMilliseconds: retryContext => 
+    //       Math.min(retryContext.previousRetryCount * 1000, 10000)
+    //   })
+    //   .build();
 
     // Connection state handlers
     this.hubConnection.onreconnecting(() => {
@@ -80,7 +91,7 @@ export class RealTimeNotificationServiceService {
 
     this.hubConnection.on('ReceiveNotification', (data: any) => { 
       this.showNotificationModal(data);
-    });
+    }); 
   }
 
   stopConnection(): void {
@@ -96,36 +107,48 @@ export class RealTimeNotificationServiceService {
     }
   }
 
-  private loadOldNotifications() {
-    this.notificationService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
-      if (data && data.length > 0) {
-        this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
-          data: { notification: data },
-          disableClose: true,
-          panelClass: 'fullscreen-notification-modal',
-        });
-      }
-    });
-  }  
+  // private loadOldNotifications() {
+  //   this.notificationService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
+  //     if (data && data.length > 0) {
+  //       this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
+  //         data: { notification: data },
+  //         disableClose: true,
+  //         panelClass: 'fullscreen-notification-modal',
+  //       });
+  //     }
+  //   });
+  // }  
 
-  private joinNotificationGroup() {
-    const userTypeString = this.getUserTypeNumber(this.User_Data_After_Login.type);
-    const groupName = `${this.DomainName}_${userTypeString}_${this.User_Data_After_Login.id}`;
+  private loadOldNotifications() {
+    this.notificationService.GetNotNotifiedYetByUserID(this.DomainName)
+      .pipe(
+        catchError(error => {
+          if (error?.status === 404) {
+            return of([]);
+          }
+          console.error('GetNotNotifiedYetByUserID failed', error);
+          return of([]);
+        })
+      )
+      .subscribe((data) => {
+        if (data && data.length > 0) {
+          this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
+            data: { notification: data },
+            disableClose: true,
+            panelClass: 'fullscreen-notification-modal',
+          });
+        }
+      });
+  }  
+  
+  private joinNotificationGroup() { 
+    const groupName = `${this.DomainName}_${this.User_Data_After_Login.type}_${this.User_Data_After_Login.id}`;
     
     this.hubConnection?.invoke('JoinGroup', groupName) 
       .catch(err => { 
         setTimeout(() => this.joinNotificationGroup(), 2000);
       });
-  }
-
-  private getUserTypeNumber(type: string): number {
-    switch(type) {
-      case "employee": return 1;
-      case "student": return 2;
-      case "parent": return 3;
-      default: return 0;
-    }
-  }
+  } 
 
   private showNotificationModal(newNotification: Notification) {
     // Check if dialog exists and is open

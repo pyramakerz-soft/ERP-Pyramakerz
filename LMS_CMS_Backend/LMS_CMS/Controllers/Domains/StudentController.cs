@@ -72,9 +72,9 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.NationalityArName = nationality.ArName;
                 }
 
-                StudentGrade studentGrade =await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
-                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true ,
-                    s => s.Include(stu => stu.Grade) ,
+                StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true,
+                    s => s.Include(stu => stu.Grade),
                     s => s.Include(stu => stu.AcademicYear)
                     );
 
@@ -91,26 +91,106 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(StudentDTO);
         }
 
-        [HttpGet("Search")]
-        public async Task<IActionResult> SearchStudents(string keyword, int pageNumber = 1, int pageSize = 10)
+        [HttpGet("WithPaginnation")]
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // Build query with optional filter
-            var query = Unit_Of_Work.student_Repository
-                .SelectQuery<Student>(s => s.IsDeleted != true && s.User_Name.Contains(keyword))
-                .Include(s => s.AccountNumber)
-                .Include(s => s.Gender)
-                .OrderBy(s => s.en_name); // You can change to ar_name or Id if needed
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.student_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById_Pagination<Student>(
+                sem => sem.IsDeleted != true,
+                query => query.Include(stu => stu.AccountNumber),
+                query => query.Include(stu => stu.AccountNumber),
+                query => query.Include(stu => stu.Gender))
+               .Skip((pageNumber - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
+
+            if (students == null || students.Count == 0)
+            {
+                return NotFound("No Student found");
+            }
+
+            List<StudentGetDTO> StudentDTO = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in StudentDTO)
+            {
+                Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(item.Nationality);
+                if (nationality != null)
+                {
+                    item.NationalityEnName = nationality.Name;
+                    item.NationalityArName = nationality.ArName;
+                }
+
+                StudentGrade studentGrade =await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true ,
+                    s => s.Include(stu => stu.Grade) ,
+                    s => s.Include(stu => stu.AcademicYear).ThenInclude(a=>a.School)
+                    );
+
+                if (studentGrade != null)
+                {
+                    item.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                    item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+                    if (studentGrade.Grade != null)
+                        item.CurrentGradeName = studentGrade.Grade.Name;
+
+                    if (studentGrade.AcademicYear != null)
+                        item.CurrentAcademicYear = studentGrade.AcademicYear.Name;
+                }
+
+            }
+
+            StudentDTO = StudentDTO.OrderBy(t => t.en_name).ToList();
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = StudentDTO, Pagination = paginationMetadata });
+        }
+
+        [HttpGet("SearchBySchoolId/{SchoolId}")]
+        public async Task<IActionResult> SearchStudents(long SchoolId ,string keyword, int pageNumber = 1, int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+             var studentClassrooms = Unit_Of_Work.studentClassroom_Repository
+                .SelectQuery<StudentClassroom>(
+                    sc => sc.IsDeleted != true
+                        && sc.Classroom.AcademicYear.SchoolID == SchoolId
+                        && sc.Student.User_Name.Contains(keyword)
+                        && sc.Student.IsDeleted != true
+                        && sc.Classroom.IsDeleted != true
+                )
+                .Include(sc => sc.Student);
+
+            //// Build query with optional filter
+            //var query = Unit_Of_Work.student_Repository
+            //    .SelectQuery<Student>(s => s.IsDeleted != true && s.User_Name.Contains(keyword))
+            //    .Include(s => s.AccountNumber)
+            //    .Include(s => s.Gender)
+            //    .OrderBy(s => s.en_name); // You can change to ar_name or Id if needed
 
             // Get total count for pagination info (optional)
-            int totalRecords = await query.CountAsync();
+            var query = studentClassrooms.Select(sa => sa.Student).ToList();
+
+
+            int totalRecords = query.Count();
 
             // Apply pagination
-            var pagedStudents = await query
+            var pagedStudents = query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToList();
 
             // Check for results
             if (pagedStudents == null || pagedStudents.Count == 0)
@@ -131,6 +211,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.NationalityArName = nationality.ArName;
                 }
             }
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             // Return with optional pagination info
             return Ok(new
@@ -166,6 +247,16 @@ namespace LMS_CMS_PL.Controllers.Domains
                 StudentDTO.NationalityArName = nationality.ArName;
             }
 
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == StudentDTO.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                 query => query.Include(emp => emp.AcademicYear),
+                 query => query.Include(emp => emp.AcademicYear.School)
+                 );
+
+            if (studentGrade != null)
+            {
+                StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            }
 
             return Ok(StudentDTO);
         }
@@ -214,6 +305,55 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(studentDTOs);
+        }
+
+        [HttpGet("GetByClassNotInActiveYear/{Id}")]
+        public async Task<IActionResult> GetByClassNotInActiveYear(long Id)
+        {
+            if (Id == 0)
+            {
+                return BadRequest("ID can't e null");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(d => d.ID == Id && d.IsDeleted != true);
+            if (cls == null)
+            {
+                return NotFound("No Class with this Id");
+            }
+
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //    query => query.IsDeleted != true && query.ClassID == Id,
+            //    query => query.Include(stu => stu.Student)
+            //);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                query => query.IsDeleted != true && query.ClassID == Id && query.Student.IsDeleted != true,
+                query => query.Include(stu => stu.Student)
+            );
+
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
+            {
+                return NotFound("No students found.");
+            }
+
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -274,6 +414,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(filteredStudents);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -312,7 +453,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             //);
 
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
-                query => query.IsDeleted != true && query.Classroom.AcademicYear.SchoolID == Id,
+                query => query.IsDeleted != true && query.Classroom.AcademicYear.SchoolID == Id && query.Student.IsDeleted != true && query.Classroom.IsDeleted != true,
                 query => query.Include(stu => stu.Student)
             );
 
@@ -323,6 +464,62 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
+
+            return Ok(studentDTOs);
+        }
+        
+        /////
+
+        [HttpGet("Get_By_ParentID/{Id}")]
+        public async Task<IActionResult> Get_By_ParentID(long Id)
+        {
+            if (Id == 0)
+            {
+                return BadRequest("ID can't e null");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.ID == Id && d.IsDeleted != true);
+            if (parent == null)
+            {
+                return NotFound("No parent with this Id");
+            } 
+
+            List<Student> students = Unit_Of_Work.student_Repository.FindBy(query => query.IsDeleted != true && query.Parent_Id == Id);
+
+            if (students == null || students.Count == 0)
+            {
+                return NotFound("No students found.");
+            }
+
+
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            foreach (var item in studentDTOs)
+            {
+                StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == item.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                   query => query.Include(emp => emp.AcademicYear),
+                   query => query.Include(emp => emp.AcademicYear.School)
+                   );
+
+                if(studentGrade != null)
+                {
+                    item.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                    item.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+                }
+            }
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
@@ -365,11 +562,6 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             for (int i = 0; i < classes.Count; i++)
             {
-                //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                //    query => query.IsDeleted != true && query.ClassID == classes[i].ID,
-                //    query => query.Include(stu => stu.Student)
-                //);
-
                 List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                     query => query.IsDeleted != true && query.ClassID == classes[i].ID,
                     query => query.Include(stu => stu.Student)
@@ -377,7 +569,10 @@ namespace LMS_CMS_PL.Controllers.Domains
 
                 for (int j = 0; j < studentClassrooms.Count; j++)
                 {
-                    if (!students.Contains(studentClassrooms[j].Student))
+                    // Add check to ensure student is not deleted and not already in the list
+                    if (studentClassrooms[j].Student != null &&
+                        studentClassrooms[j].Student.IsDeleted != true &&
+                        !students.Contains(studentClassrooms[j].Student))
                     {
                         students.Add(studentClassrooms[j].Student);
                     }
@@ -390,10 +585,10 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(studentDTOs);
         }
-
         //  /////
 
         [HttpGet("GetBySchoolGradeClassID")]
@@ -505,7 +700,8 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(new
             {
@@ -552,6 +748,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
                  query => query.IsDeleted != true && query.ID == stuId,
                  query => query.Include(stu => stu.Gender),
+                 query => query.Include(stu => stu.RegistrationFormParent),
                  query => query.Include(stu => stu.Parent));
 
             if (student == null)
@@ -577,9 +774,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsID = 0;
             for (int i = 0; i < classrooms.Count; i++)
             {
-                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
                 StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
-                
+
                 if (stuAY != null)
                 {
                     clsID = stuAY.ClassID;
@@ -599,13 +795,34 @@ namespace LMS_CMS_PL.Controllers.Domains
                 studentDTO.NationalityArName = nationality.ArName;
             }
 
+            RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 16 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion2 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 17 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion3 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 18 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            RegisterationFormSubmittion registerationFormSubmittion4 = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 19 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+
+            if (registerationFormSubmittion != null)
+            {
+                studentDTO.GuardianPassportNo = registerationFormSubmittion.TextAnswer; 
+                studentDTO.GuardianNationalID = registerationFormSubmittion2.TextAnswer;
+                studentDTO.GuardianQualification = registerationFormSubmittion3.TextAnswer;
+                studentDTO.GuardianWorkPlace = registerationFormSubmittion4.TextAnswer;
+            }
+
+
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "Egypt Standard Time"
-                : "Africa/Cairo";
+            ? "Egypt Standard Time"
+            : "Africa/Cairo";
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {
@@ -615,7 +832,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
-
         /////
 
         [HttpGet("GetStudentProofRegistrationAndSuccessForm")]
@@ -731,7 +947,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {
@@ -832,7 +1048,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {
@@ -934,7 +1150,8 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
+            studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(new
             {
@@ -1032,7 +1249,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {
@@ -1126,7 +1343,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
-            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request);
+            School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
 
             return Ok(new
             {
@@ -1142,7 +1359,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Student Edit Accounting" }
+            pages: new[] { "Student" , "Student" }
         )]
         public async Task<IActionResult> EditStudentAccountingAsync(AccountingStudentPutDTO newStudent)
         {
@@ -1165,7 +1382,16 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No student with this ID");
             }
 
-            if (newStudent.AccountNumberID != null)
+            if (newStudent.Email != null)
+            {
+                Student studentCheckEnail = Unit_Of_Work.student_Repository.First_Or_Default(s => s.Email == newStudent.Email && s.ID!=newStudent.ID );
+                if (studentCheckEnail != null)
+                {
+                    return NotFound("This Email Already Taken");
+                }
+            }
+
+            if (newStudent.AccountNumberID != null && newStudent.AccountNumberID!=0)
             {
                 AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newStudent.AccountNumberID);
 
@@ -1186,6 +1412,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                     }
                 }
             }
+            else
+            {
+                newStudent.AccountNumberID = null;
+
+            }
 
 
             if (newStudent.Nationality != 0 && newStudent.Nationality != null)
@@ -1200,7 +1431,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student Edit Accounting", roleId, userId, student);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, student);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -1297,9 +1528,18 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (parameters.AcademicYearID.HasValue)
                 students = students.Where(s => s.StudentGrades.Any(g => g.AcademicYearID == parameters.AcademicYearID.Value && g.IsDeleted != true)).ToList();
 
+            //if (parameters.GradeID.HasValue)
+            //    students = students.Where(s => s.StudentGrades.Any(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)).ToList();
             if (parameters.GradeID.HasValue)
-                students = students.Where(s => s.StudentGrades.Any(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)).ToList();
-
+            {
+                students = students.Where(s =>
+                    s.StudentGrades.Any(g =>
+                        g.GradeID == parameters.GradeID.Value &&
+                        g.IsDeleted != true &&
+                        (!parameters.AcademicYearID.HasValue || g.AcademicYearID == parameters.AcademicYearID.Value)
+                    )
+                ).ToList();
+            }
             if (parameters.ClassroomID.HasValue)
                 students = students.Where(s => s.StudentClassrooms.Any(c => c.ClassID == parameters.ClassroomID.Value && c.IsDeleted != true)).ToList();
 
@@ -1388,7 +1628,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                         else
                         {
                             dto.ClassName = student.StudentClassrooms
-                                .Where(c => c.Classroom?.AcademicYear != null &&
+                                .Where(c => c.Classroom?.AcademicYear != null && c.IsDeleted != true && c.Classroom.IsDeleted != true &&
                                             c.Classroom.AcademicYear.IsActive && c.Classroom.AcademicYear.IsDeleted != true)
                                 .OrderByDescending(c => c.ClassID)
                                 .Select(c => c.Classroom.Name)
@@ -1471,6 +1711,76 @@ namespace LMS_CMS_PL.Controllers.Domains
             Unit_Of_Work.SaveChanges();
 
             return Ok();
-        } 
+        }
+
+        //////////////////////////////////////////////////////
+
+        [HttpDelete("Suspend/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Student" }
+        )]
+        public IActionResult Suspend(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            Student stud = Unit_Of_Work.student_Repository.Select_By_Id(id);
+
+            if (stud == null || stud.IsDeleted == true)
+            {
+                return NotFound("No Student with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, stud);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            stud.IsSuspended = !stud.IsSuspended;
+            stud.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                stud.UpdatedByOctaId = userId;
+                if (stud.UpdatedByUserId != null)
+                {
+                    stud.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                stud.UpdatedByUserId = userId;
+                if (stud.UpdatedByOctaId != null)
+                {
+                    stud.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.student_Repository.Update(stud);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
     }
 }

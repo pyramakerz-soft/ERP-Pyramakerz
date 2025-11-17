@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -17,18 +19,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public DiagnosisController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public DiagnosisController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Diagnosis" }
+            pages: new[] { "Diagnosis", "Follow Up" }
         )]
         public async Task<IActionResult> Get()
         {
@@ -156,7 +160,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         public IActionResult Update(DiagnosisPutDTO diagnosisDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -180,6 +185,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
 
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Diagnosis", roleId, userId, diagnosis);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
             _mapper.Map(diagnosisDto, diagnosis);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -223,7 +236,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
             
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
@@ -243,6 +257,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (diagnosis == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Diagnosis", roleId, userId, diagnosis);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             diagnosis.IsDeleted = true;

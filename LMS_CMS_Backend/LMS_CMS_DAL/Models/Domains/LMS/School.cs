@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<SchoolPCs>? SchoolPCs { get; set; } = new HashSet<SchoolPCs>();
         public ICollection<DiscussionRoom> DiscussionRooms { get; set; } = new HashSet<DiscussionRoom>();
+        public ICollection<ConductType> ConductTypes { get; set; } = new HashSet<ConductType>();
+        public ICollection<Appointment> Appointments { get; set; } = new HashSet<Appointment>();
+        public ICollection<Stocking> Stocking { get; set; } = new HashSet<Stocking>();
 
     }
 }

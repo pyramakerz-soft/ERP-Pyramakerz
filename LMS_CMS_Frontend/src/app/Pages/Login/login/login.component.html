@@ -7,7 +7,7 @@
         <img src="Images/LogoInLogin3.png" alt="Avatar">
       </div>
 
-      <div class="flex items-center justify-between space-x-2 mb-4">
+      <div class="flex items-center justify-between space-x-2 rtl:space-x-reverse mb-4">
         <div>
           <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : studentImage" alt="student"
             (click)="selectType('student')" class="cursor-pointer">
@@ -26,27 +26,27 @@
 
       <div class="flex flex-col w-full">
         <div class="mb-2 w-full py-2">
-          <label for="user_name" class="py-6">Username:</label>
+          <label for="user_name" class="py-6">{{ 'Username' | translate }}:</label>
           <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="user_name" type="text"
             [(ngModel)]="userInfo.user_Name" (input)="onUserNameChange()" />
         </div>
         <span *ngIf="userNameError" class="text-red-500 text-sm ml-2 font-normal mb-5">{{ userNameError }}</span>
 
         <div class="mb-2 w-full">
-          <label for="password" class="py-6">Password:</label>
+          <label for="password" class="py-6"> {{ 'Password' | translate }}:</label>
           <input class="w-full h-[56px] rounded-[8px] border px-2" id="password" type="password"
             [(ngModel)]="userInfo.password" (input)="onPasswordChange()" />
         </div>
         <span *ngIf="passwordError" class="text-red-500 text-sm ml-2 font-normal mb-5">{{ passwordError }}</span>
 
         <button [disabled]="isLoading" class="mt-2 secondaryBg text-white p-2 rounded w-full" (click)="SignIN()">
-          <span *ngIf="!isLoading">Save</span>
+          <span *ngIf="!isLoading"> {{ 'Login' | translate }}</span>
           <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
 
         <div *ngIf="this.isParentHovered || isEmployeeHovered" class="flex justify-around mt-2">
-          <p class="font-poppins text-base font-normal leading-[21px]">Don’t have an account? <a (click)="SignUp()"
-              class="secondaryTxt mr-2 cursor-pointer">Sign Up</a>
+          <p class="font-poppins text-base font-normal leading-[21px]">{{ 'Don’t have an account?' | translate }} <a (click)="SignUp()"
+              class="secondaryTxt mr-2 cursor-pointer"> {{ 'Sign Up' | translate }}</a>
           </p>
         </div>
 

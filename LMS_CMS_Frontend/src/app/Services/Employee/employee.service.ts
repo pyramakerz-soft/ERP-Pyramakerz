@@ -2,9 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Employee } from '../../Models/Employee/employee';
-import { EmployeeGet } from '../../Models/Employee/employee-get';
 import { EditPass } from '../../Models/Employee/edit-pass';
-import { AccountingEmployee } from '../../Models/Accounting/accounting-employee';
+import { Observable, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +12,9 @@ export class EmployeeService {
 
   baseUrl = ""
   header = ""
-
+  private cachedDomainForMyData?: string;
+  private myData$?: Observable<Employee>;
+ 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
     this.header = ApiServ.GetHeader();
@@ -32,19 +33,32 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
   }
 
-  GetByDepartmentId(departmentID: number,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetWithJobId(jobId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('Authorization', `Bearer ${token}`)
-    .set('domain-name', this.header)
-    .set('Content-Type', 'application/json');
+      .set('Authorization', `Bearer ${token}`)
+      .set('domain-name', this.header)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByJobId/${jobId}`, { headers })
+  }
+
+  GetByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('domain-name', this.header)
+      .set('Content-Type', 'application/json');
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByDepartmentId/${departmentID}`, { headers })
   }
 
-  Add(employee: EmployeeGet, DomainName?: string) {
+  Add(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -68,10 +82,10 @@ export class EmployeeService {
     formData.append('role_ID', employee.role_ID?.toString() ?? '');
     formData.append('busCompanyID', employee.busCompanyID?.toString() ?? '');
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
-    formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
+    formData.append('isRestrictedForLoctaion', employee.isRestrictedForLoctaion?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
@@ -92,15 +106,21 @@ export class EmployeeService {
       });
     }
 
+    if (employee.locationSelected && employee.locationSelected.length > 0) {
+      employee.locationSelected.forEach((floor, index) => {
+        formData.append(`locationSelected[${index}]`, floor.toString());
+      });
+    }
+
     if (employee.subjectSelected && employee.subjectSelected.length > 0) {
       employee.subjectSelected.forEach((floor, index) => {
         formData.append(`subjectSelected[${index}]`, floor.toString());
       });
     }
-    return this.http.post<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
+    return this.http.post<Employee>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
-  Edit(employee: EmployeeGet, DomainName?: string) {
+  Edit(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -125,10 +145,10 @@ export class EmployeeService {
     formData.append('role_ID', employee.role_ID?.toString() ?? '');
     formData.append('busCompanyID', employee.busCompanyID?.toString() ?? '');
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
-    formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
+    formData.append('isRestrictedForLoctaion', employee.isRestrictedForLoctaion?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       let uploadIndex = 0;
@@ -153,7 +173,7 @@ export class EmployeeService {
       });
     }
 
-     if (employee.deletedGradesSelected && employee.deletedGradesSelected.length > 0) {
+    if (employee.deletedGradesSelected && employee.deletedGradesSelected.length > 0) {
       employee.deletedGradesSelected.forEach((floor, index) => {
         formData.append(`deletedGradesSelected[${index}]`, floor.toString());
       });
@@ -165,7 +185,19 @@ export class EmployeeService {
       });
     }
 
-     if (employee.deletedSubjectsSelected && employee.deletedSubjectsSelected.length > 0) {
+    if (employee.deletedLocationSelected && employee.deletedLocationSelected.length > 0) {
+      employee.deletedLocationSelected.forEach((floor, index) => {
+        formData.append(`deletedLocationSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.newLocationSelected && employee.newLocationSelected.length > 0) {
+      employee.newLocationSelected.forEach((floor, index) => {
+        formData.append(`newLocationSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.deletedSubjectsSelected && employee.deletedSubjectsSelected.length > 0) {
       employee.deletedSubjectsSelected.forEach((floor, index) => {
         formData.append(`deletedSubjectsSelected[${index}]`, floor.toString());
       });
@@ -190,7 +222,7 @@ export class EmployeeService {
         uploadIndex++;
       });
     }
-    return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
+    return this.http.put<Employee>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
   Get_Employees(DomainName?: string) {
@@ -202,7 +234,19 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<EmployeeGet[]>(`${this.baseUrl}/Employee`, { headers });
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee`, { headers });
+  }
+
+  GeTWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Employee[], pagination: any }>(`${this.baseUrl}/Employee/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   Get_Employee_By_ID(id: number, DomainName?: string) {
@@ -214,7 +258,47 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/${id}`, { headers });
+    return this.http.get<Employee>(`${this.baseUrl}/Employee/${id}`, { headers });
+  }
+ 
+  // GetMyData(DomainName?: string) {
+  //   if (DomainName != null) {
+  //     this.header = DomainName
+  //   }
+  //   const token = localStorage.getItem("current_token");
+  //   const headers = new HttpHeaders()
+  //     .set('domain-name', this.header)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .set('Content-Type', 'application/json');
+  //   return this.http.get<Employee>(`${this.baseUrl}/Employee/GetMyData`, { headers });
+  // }
+
+  GetMyData(DomainName?: string, options?: { forceRefresh?: boolean }): Observable<Employee> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const activeDomain = this.header;
+    const forceRefresh = options?.forceRefresh ?? false;
+
+    if (forceRefresh || !this.myData$ || this.cachedDomainForMyData !== activeDomain) {
+      const token = localStorage.getItem("current_token");
+      const headers = new HttpHeaders()
+        .set('domain-name', activeDomain)
+        .set('Authorization', `Bearer ${token}`)
+        .set('Content-Type', 'application/json');
+
+      this.cachedDomainForMyData = activeDomain;
+      this.myData$ = this.http.get<Employee>(`${this.baseUrl}/Employee/GetMyData`, { headers })
+        .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    }
+
+    return this.myData$!;
+  }
+
+  clearMyDataCache(): void {
+    this.cachedDomainForMyData = undefined;
+    this.myData$ = undefined;
   }
 
   DeleteFile(id: number, DomainName?: string) {
@@ -239,9 +323,21 @@ export class EmployeeService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Employee/${id}`, { headers });
-  } 
+  }
 
-  EditAccountingEmployee(employee: AccountingEmployee, DomainName?: string) {
+  Suspend(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/Employee/Suspend/${id}`, { headers });
+  }
+
+  EditAccountingEmployee(employee: Employee, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -253,7 +349,6 @@ export class EmployeeService {
     return this.http.put(`${this.baseUrl}/Employee/EmployeeAccounting`, employee, { headers });
   }
 
-
   GetAcountingEmployee(id: number, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName
@@ -263,6 +358,73 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<AccountingEmployee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
+    return this.http.get<Employee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
   }
+
+  GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetWhoCanAcceptRequestsFromEmployeeByDepartmentId/${departmentID}`, { headers });
+  }
+
+  GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId/${departmentID}`, { headers });
+  }
+
+  GetWhoCanAcceptMessagesFromParentAndStudentByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetWhoCanAcceptMessagesFromParentAndStudentByDepartmentId/${departmentID}`, { headers });
+  }
+
+  GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(SubjectId: number, StudentId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId/${SubjectId}/${StudentId}`, { headers });
+  }
+
+GetJobReport(jobId: number, jobCategoryId: number, DomainName?: string) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  
+  const requestBody = {
+    jobId: jobId,
+    jobCategoryId: jobCategoryId
+  };
+  
+  return this.http.post<any[]>(`${this.baseUrl}/Employee/report`, requestBody, { headers });
+}
 }

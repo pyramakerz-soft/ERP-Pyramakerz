@@ -1,0 +1,181 @@
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-bold text-2xl leading-9">
+        {{ 'Conduct Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap justify-start space-x-2 items-center">
+    <!-- Date From -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateFrom"
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- School Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
+            [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option *ngIf="schools.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+    <!-- Grade Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
+            [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngIf="grades.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
+        </select>
+    </div>
+
+    <!-- Class Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
+            [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngIf="classes.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
+        </select>
+    </div>
+
+    <!-- Student Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let student of students" [ngValue]="student.id">{{ student.name }}</option>
+        </select>
+    </div>
+
+          <!-- Student Selector when parent-->
+    <div *ngIf="this.reportType == 'parent'" class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let student of students" [ngValue]="student.id">{{ student.en_name }}</option>
+        </select>
+    </div>
+
+    <!-- Conduct Type Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="conductType">{{ 'Conduct Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="conductType"
+            [(ngModel)]="selectedConductTypeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedSchoolId">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Conduct Type' | translate }}</option>
+            <option *ngIf="conductTypes.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let type of conductTypes" [ngValue]="type.id">{{ type.en_name }}</option>
+        </select>
+    </div>
+
+    <!-- Procedure Type Selector -->
+    <div *ngIf="this.reportType == 'employee'"  class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="procedureType">{{ 'Procedure Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="procedureType"
+            [(ngModel)]="selectedProcedureTypeId" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Procedure Type' | translate }}</option>
+            <option *ngIf="procedureTypes.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let type of procedureTypes" [ngValue]="type.id">{{ type.name }}</option>
+        </select>
+    </div>
+
+    <div class="flex justify-end mb-4 w-[24%]">
+        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
+            'secondaryBg text-white': showViewReportBtn && !isLoading
+        }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
+</div>
+
+    <!-- View Report Button -->
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
+<!-- Results Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Date' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Student Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Conduct Type' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Procedure Type' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Details' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="conductReports.length === 0">
+                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <tr *ngFor="let report of conductReports; let i = index"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.date | date:'mediumDate' }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.studentEnName }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.conductType.name || '-' }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.procedureType.name || '-' }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.details || '-' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Hidden PDF Container -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Conduct Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details']"
+            [tableData]="reportsForPDF" #pdfComponentRef> 
+        </app-pdf-print>
+    </div>
+</div>

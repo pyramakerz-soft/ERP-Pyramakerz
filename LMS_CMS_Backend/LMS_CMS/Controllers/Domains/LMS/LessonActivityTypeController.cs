@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Lesson Activity Types" }
+            pages: new[] { "Lesson Activity Types" , "Lesson Activity" }
         )]
         public IActionResult Get()
         {

@@ -5,15 +5,16 @@
 </div>
 
 <div class="my-5 flex flex-wrap justify-between items-center">
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="store">{{'Store'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
-            [(ngModel)]="selectedStoreId">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
-            <option *ngIf="stores.length === 0" disabled selected> {{'No Data Found'| translate }}</option>
-        </select>
-    </div>
+<!-- Store dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="store">{{'Store'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
+        [(ngModel)]="selectedStoreId" (ngModelChange)="onStoreSelected()">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
+        <option *ngIf="stores.length == 0" [ngValue]="null" disabled>{{'No Stores Available'| translate }}</option>
+    </select>
+</div>
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="dateFrom"> {{'Date From'| translate }}</label>
@@ -38,39 +39,49 @@
         </select>
     </div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags">{{'Category'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedCategoryId" (change)="onCategorySelected()">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let category of categories" [ngValue]="category.id">
-                {{ category.name }}
-            </option>
-        </select>
-    </div>
+<!-- Category dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Category'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedCategoryId" (change)="onCategorySelected()"
+        [disabled]="!selectedStoreId">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let category of categories" [ngValue]="category.id">
+            {{ category.name }}
+        </option>
+        <!-- <option *ngIf="categories.length == 0" [ngValue]="null" disabled>
+            {{ selectedStoreId ? ('No Categories Available' | translate) : ('Select a store first' | translate) }}
+        </option> -->
+    </select>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags"> {{'Sub'| translate }}  {{'Category'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedSubCategoryId" (change)="onSubCategorySelected()"
-            [disabled]="selectedCategoryId === null">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let subCategory of subCategories" [ngValue]="subCategory.id">
-                {{ subCategory.name }}
-            </option>
-        </select>
-    </div>
+<!-- Sub Category dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Sub'| translate }} {{'Category'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedSubCategoryId" (change)="onSubCategorySelected()"
+        [disabled]="selectedCategoryId === null">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let subCategory of subCategories" [ngValue]="subCategory.id">
+            {{ subCategory.name }}
+        </option>
+        <option [ngValue]="null" *ngIf="subCategories.length == 0" disabled>{{'No Sub Categories Available'| translate }}</option>
+    </select>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="flags">{{'Item'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="selectedItemId" [disabled]="selectedSubCategoryId === null">
-            <option [ngValue]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let item of items" [ngValue]="item.id">
-                {{ item.enName }}
-            </option>
-        </select>
-    </div>
+<!-- Item dropdown -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="flags">{{'Item'| translate }}</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        [(ngModel)]="selectedItemId" (change)="onFilterChange()"
+        [disabled]="selectedSubCategoryId === null && items.length === 0">
+        <option [ngValue]="null">{{'Select'| translate }} {{'All'| translate }}</option>
+        <option *ngFor="let item of items" [ngValue]="item.id">
+            {{ item.enName }}
+        </option>
+        <option [ngValue]="null" *ngIf="items.length == 0" disabled>{{'No Items Available'| translate }}</option>
+    </select>
+</div>
 
     <div class="w-[24%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
@@ -79,13 +90,11 @@
             'bg-gray-100 text-gray-300': !dateFrom || !dateTo || selectedStoreId === undefined || selectedFlagIds.length === 0, 
             'secondaryBg text-white': dateFrom && dateTo && selectedStoreId !== undefined && selectedFlagIds.length > 0
         }">
-{{'View Report'| translate }}
+            {{'View Report'| translate }}
         </button>
     </div>
 </div>
 
-
-<!-- (click)="exportExcel()" -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png"  (click)="exportExcel()" title="Export to Excel">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png"  (click)="DownloadAsPDF()" title="Export to PDF">
@@ -93,15 +102,7 @@
 
 </div>
 
-
-
 <div *ngIf="showTable" class="mb-8">
-    <div class="p-2 rounded-top mb-2 bg-primary-100">
-        <h5 class="primaryTxt font-semibold text-xl leading-9">
-            {{ reportType | titlecase }}  {{'Transaction Report'| translate }}{{'Detailed'| translate }}
-        </h5>
-    </div>
-
     <ng-container *ngIf="transactionsForExport.length > 0; else noDataTemplate">
         <ng-container *ngFor="let section of transactionsForExport; trackBy: trackByInvoice">
             <div class="mb-8">
@@ -114,8 +115,8 @@
                 <div class="mb-4 p-3 border rounded-2xl shadow-sm bg-[#EBEBEB]">
                     <div class="grid grid-cols-2 gap-2">
                         <ng-container *ngFor="let item of section.summary; trackBy: trackBySummaryItem">
-                            <div class="font-semibold p-2">{{ item.key }}</div>
-                            <div class="p-2">{{ item.value }}</div>
+                            <div class="font-semibold p-2">{{ item.key | translate }}</div>
+                            <div class="p-2">{{ item.value | translate }}</div>
                         </ng-container>
                     </div>
                 </div>
@@ -162,10 +163,12 @@
     </ng-template>
 </div>
 
+<!-- Update the PDF print section to conditionally include student/supplier -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" 
-                       [fileName]="'Inventory Transactions Detailed Report'"
+                       [fileName]="reportType + ' Transactions Detailed Report'"
+                       [infoRows]="getInfoRows()"
                        [tableDataWithHeaderArray]="cachedTableDataForPDF"
                        #pdfComponentRef>
         </app-pdf-print>

@@ -30,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySubjectId/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Subject" }
+            pages: new[] { "Subject", "Assignment" , "Direct Mark" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -109,7 +109,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Subject Weight Type can not be null");
             }
 
-            if(NewSubjectWeightType.Value > 100)
+            if(NewSubjectWeightType.Weight > 100)
             {
                 return BadRequest("Value Can't be more than 100%");
             }
@@ -126,8 +126,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Weight Type with this ID");
             }
 
+            SubjectWeightType IfsubjectWeightExist = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(s=>s.SubjectID == NewSubjectWeightType.SubjectID && s.WeightTypeID == NewSubjectWeightType.WeightTypeID && s.IsDeleted!= true);
+            if(IfsubjectWeightExist != null)
+            {
+                return BadRequest("This Subject Already Have This WeightType");
+            }
+
             List<SubjectWeightType> subjectWeightTypes = Unit_Of_Work.subjectWeightType_Repository.FindBy(
                 f => f.IsDeleted != true && f.SubjectID == NewSubjectWeightType.SubjectID);
+
 
             if(subjectWeightTypes != null &&  subjectWeightTypes.Count > 0)
             {
@@ -135,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 foreach (var item in subjectWeightTypes)
                 {
-                    count += item.Value;
+                    count += item.Weight;
                 }
 
                 if(count == 100)
@@ -143,7 +150,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("You Have Already total of 100%");
                 }
 
-                if(count + NewSubjectWeightType.Value > 100)
+                if(count + NewSubjectWeightType.Weight > 100)
                 {
                     return BadRequest("You Exceeded 100%");
                 }
@@ -223,7 +230,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            if (EditSubjectWeightType.Value > 100)
+            if (EditSubjectWeightType.Weight > 100)
             {
                 return BadRequest("Value Can't be more than 100%");
             }
@@ -237,7 +244,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 foreach (var item in subjectWeightTypes)
                 {
-                    count += item.Value;
+                    count += item.Weight;
                 }
 
                 if (count == 100)
@@ -245,7 +252,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("You Have Already total of 100%");
                 }
 
-                if (count + EditSubjectWeightType.Value > 100)
+                if (count + EditSubjectWeightType.Weight > 100)
                 {
                     return BadRequest("You Exceeded 100%");
                 }

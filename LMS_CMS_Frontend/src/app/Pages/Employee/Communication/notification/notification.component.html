@@ -116,11 +116,7 @@
         </div>
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
-            <div class="w-full m-auto">
-                <div class="mb-7 flex justify-center">
-                    <img src="Images/LogoInLogin3.png" alt="Avatar">
-                </div>
-    
+            <div class="w-full m-auto mt-5"> 
                 <div class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
                     <div>
                         <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
@@ -149,8 +145,7 @@
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
-                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !notification.userFilters.departmentID, 'primaryTxt': notification.userFilters.departmentID }">
-                           {{'Choose'| translate }} {{'Employee'| translate }}</label>
+                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !notification.userFilters.departmentID, 'primaryTxt': notification.userFilters.departmentID }">{{'Employee'| translate }}</label>
                         <select
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="notification.userFilters.employeeID"
                         [disabled]="!notification.userFilters.departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.departmentID }">
@@ -163,7 +158,7 @@
     
                 <div *ngIf="!isEmployeeHovered" class="w-full">
                     <div class="flex flex-col w-full mb-4">
-                        <label class="primaryTxt mb-2" for="School"> {{'School'| translate }}</label>
+                        <label class="primaryTxt mb-2" for="School">{{'School'| translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School" 
                         [(ngModel)]="notification.userFilters.schoolID" (change)="onSchoolChange($event)">
                             <option [value]="0" disabled selected hidden>{{'Choose'| translate }} {{'School'| translate }}</option>
@@ -174,8 +169,7 @@
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
-                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !notification.userFilters.schoolID, 'primaryTxt': notification.userFilters.schoolID }">
-                             {{'Choose'| translate }} {{'Section'| translate }}</label>
+                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !notification.userFilters.schoolID, 'primaryTxt': notification.userFilters.schoolID }">{{'Section'| translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Section" 
                         [(ngModel)]="notification.userFilters.sectionID" (change)="onSectionChange($event)"
                         [disabled]="!notification.userFilters.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.schoolID }">
@@ -185,8 +179,7 @@
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
-                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !notification.userFilters.sectionID, 'primaryTxt': notification.userFilters.sectionID }">
-                            {{'Choose'| translate }} {{'Grade'| translate }}</label>
+                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !notification.userFilters.sectionID, 'primaryTxt': notification.userFilters.sectionID }">{{'Grade'| translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" 
                         [(ngModel)]="notification.userFilters.gradeID" (change)="onGradeChange($event)"
                         [disabled]="!notification.userFilters.sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.sectionID }">
@@ -196,8 +189,7 @@
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
-                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !notification.userFilters.gradeID, 'primaryTxt': notification.userFilters.gradeID }">
-                              {{'Choose'| translate }} {{'Classroom'| translate }}</label>
+                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !notification.userFilters.gradeID, 'primaryTxt': notification.userFilters.gradeID }">{{'Classroom'| translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroom" 
                         [(ngModel)]="notification.userFilters.classroomID" (change)="onClassroomChange($event)"
                         [disabled]="!notification.userFilters.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.gradeID }">
@@ -207,8 +199,7 @@
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
-                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !notification.userFilters.classroomID, 'primaryTxt': notification.userFilters.classroomID }">
-                             {{'Choose'| translate }}  {{'Student'| translate }}</label>
+                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !notification.userFilters.classroomID, 'primaryTxt': notification.userFilters.classroomID }">{{'Student'| translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
                         [(ngModel)]="notification.userFilters.studentID"
                         [disabled]="!notification.userFilters.classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.classroomID }">
@@ -232,14 +223,14 @@
                 <div class="w-full mb-4"> 
                     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                         <div class="flex justify-center w-full">
-                            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                            <label for="imageFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                                 <img *ngIf="!notification.imageLink && !notification.imageFile" src="Images/Icon frame.png" class="w-1/4">
                                 <img *ngIf="notification.imageFile" src="Images/FileAttached.png" class="w-1/4">
                                 <img *ngIf="notification.imageLink && !notification.imageFile" [src]="notification.imageLink" class="w-1/3 object-cover">
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{'Click to'| translate }} {{'Upload'| translate }}</span></p>
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{'(Max. File size: 25 MB)'| translate }}</p>
                             </label>
-                            <input [disabled]="this.notification.id != 0" id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+                            <input [disabled]="this.notification.id != 0" id="imageFile" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                         </div>
                     </div> 
                 </div>  

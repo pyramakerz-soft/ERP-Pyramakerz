@@ -29,12 +29,65 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "parent", "student" },
+           pages: new[] { "Academic Years", "Bus Students", "Classroom", "Student", "Lesson Live", "Registration Confirmation", "Interview Time Table" }
+       )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.academicYear_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<AcademicYear> academicYear = await Unit_Of_Work.academicYear_Repository.Select_All_With_IncludesById_Pagination<AcademicYear>(
+                    sem => sem.IsDeleted != true,
+                    query => query.Include(emp => emp.School))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (academicYear == null || academicYear.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AcademicYearGet> AcademicYearDTOs = mapper.Map<List<AcademicYearGet>>(academicYear);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = AcademicYearDTOs, Pagination = paginationMetadata });
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Academic Years" }
+            allowedTypes: new[] { "octa", "employee", "parent" , "student" },
+            pages: new[] { "Academic Years" , "Bus Students", "Classroom" , "Student", "Lesson Live" , "Registration Confirmation" , "Interview Time Table" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -66,10 +119,48 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("BySchoolId/{id}")]
+        [HttpGet("BySchoolIdAndDate/{id}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Academic Years" , "Fees Activation" }
+            allowedTypes: new[] { "octa", "employee", "parent", "student" },
+            pages: new[] { "Academic Years" , "Fees Activation"  }
+        )]
+        public async Task<IActionResult> GetBySchoolIdAndDateAsync(long id, DateOnly DateFrom, DateOnly DateTo)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            List<AcademicYear> academicYears = await Unit_Of_Work.academicYear_Repository.Select_All_With_IncludesById<AcademicYear>(
+                    sem => sem.IsDeleted != true && sem.SchoolID==id && sem.DateFrom <= DateFrom && sem.DateTo >= DateTo ,
+                    query => query.Include(emp => emp.School));
+
+            if (academicYears == null || !academicYears.Any())
+            {
+                return NotFound();
+            }
+
+           List<AcademicYearGet> AcademicYearDTOs = mapper.Map<List<AcademicYearGet>>(academicYears);
+
+            return Ok(AcademicYearDTOs);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("BySchoolId/{id}/")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" },
+            pages: new[] { "Academic Years", "Fees Activation", "Bus Students" , "Classroom" , "Remedial Classes" , "Lessons" , "Lesson Live" , "Certificate"
+                , "Assignment Report" , "Admission Test" , "Classroom Accommodation", "Student Names In Class" 
+                , "Student Information", "Proof Registration And Success Form" , "Proof Registration", "Students Information Form Report" 
+                , "Transferred  From Kindergarten Report" , "Attendance" ,"Attendance Report"}
         )]
         public async Task<IActionResult> GetBySchoolIdAsync(long id)
         {
@@ -86,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<AcademicYear> academicYear = await Unit_Of_Work.academicYear_Repository.Select_All_With_IncludesById<AcademicYear>(
-                    sem => sem.IsDeleted != true && sem.SchoolID==id,
+                    sem => sem.IsDeleted != true && sem.SchoolID == id,
                     query => query.Include(emp => emp.School));
 
             if (academicYear == null || academicYear.Count == 0)

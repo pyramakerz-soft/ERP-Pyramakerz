@@ -18,9 +18,10 @@ import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-time-table',
   standalone: true,
@@ -29,18 +30,8 @@ import {  Subscription } from 'rxjs';
   styleUrl: './time-table.component.css',
 })
 export class TimeTableComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -83,9 +74,10 @@ export class TimeTableComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
-    public TimeTableServ: TimeTableService ,
+    private translate: TranslateService,
+    public TimeTableServ: TimeTableService,
     private cdRef: ChangeDetectorRef,
-    private languageService: LanguageService,
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -105,11 +97,19 @@ export class TimeTableComponent {
       }
     });
     this.GetAllSchools();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAllSchools() {
     this.TableData = [];
@@ -120,12 +120,11 @@ export class TimeTableComponent {
 
   GetAllData() {
     this.TableData = [];
-    this.TimeTableServ.GetBySchoolId(
-      this.SelectedSchoolId,
-      this.DomainName
-    ).subscribe((d) => {
-      this.TableData = d;
-    });
+    if(this.SelectedSchoolId != 0){
+      this.TimeTableServ.GetBySchoolId(this.SelectedSchoolId,this.DomainName).subscribe((d) => {
+        this.TableData = d;
+      });
+    }
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -247,7 +246,8 @@ export class TimeTableComponent {
         });
         this.closeModal();
         this.isLoading = false
-        this.SelectedSchoolId = 0;
+        this.GetAllData()
+        // this.SelectedSchoolId = 0;
       }, error => {
         Swal.fire({
           icon: 'error',
@@ -272,13 +272,13 @@ export class TimeTableComponent {
 
   delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Time Table?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Time Table') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.TimeTableServ.Delete(id, this.DomainName).subscribe(

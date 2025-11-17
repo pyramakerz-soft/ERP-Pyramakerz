@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetByMasterID/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Accounting Entries Details" }
+           pages: new[] {  "Accounting Entries" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -157,7 +157,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Accounting Entries Details" }
+            pages: new[] { "Accounting Entries" }
         )]
         public async Task<IActionResult> GetbyIdAsync(long id)
         {
@@ -253,7 +253,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Accounting Entries Details" }
+            pages: new[] { "Accounting Entries" }
         )]
         public IActionResult Add(AccountingEntriesDetailsAddDTO newDetails)
         {
@@ -498,7 +498,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Accounting Entries Details" }
+            pages: new[] { "Accounting Entries" }
         )]
         public IActionResult Edit(AccountingEntriesDetailsPutDTO newDetail)
         {
@@ -555,7 +555,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Accounting Entries Details", roleId, userId, AccountingEntriesDetails);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Accounting Entries", roleId, userId, AccountingEntriesDetails);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -764,7 +764,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Accounting Entries Details" }
+            pages: new[] { "Accounting Entries" }
         )]
         public IActionResult Delete(long id)
         {
@@ -796,7 +796,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Accounting Entries Details", roleId, userId, AccountingEntriesDetails);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Accounting Entries", roleId, userId, AccountingEntriesDetails);
                 if (accessCheck != null)
                 {
                     return accessCheck;

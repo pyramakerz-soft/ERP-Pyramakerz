@@ -4,10 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiService {
-
   BaseUrl = 'https://localhost:7205/api/with-domain';
   BaseUrlOcta = 'https://localhost:7205/api';
-  BaseUrlSignalR = 'https://localhost:7205';
+  BaseUrlSignalR = 'https://localhost:7205/';
+
 
   // BaseUrl = 'http://localhost:5094/api/with-domain';
   // BaseUrlOcta = 'http://localhost:5094/api';
@@ -16,7 +16,7 @@ export class ApiService {
 
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
   // BaseUrlOcta="http://44.210.155.226:5000/api"
-  // BaseUrlSignalR="http://44.210.155.226:5000"
+  // BaseUrlSignalR="http://44.210.155.226:5000/"
 
   constructor() {}
 

@@ -1,45 +1,51 @@
-export interface InventoryNetSummary {
-  shopItemId: number;
-  storeId: number;
-  toDate: Date;
-  inQuantity: number;
-  outQuantity: number;
-  quantitybalance: number;
-  costBalance: number;
+export class InventoryNetSummary {
+  constructor(
+    public shopItemId: number = 0,
+    public storeId: number = 0,
+    public toDate: Date = new Date(),
+    public inQuantity: number = 0,
+    public outQuantity: number = 0,
+    public quantitybalance: number = 0,
+    public costBalance: number = 0
+  ) {}
 }
 
-export interface InventoryNetTransaction {
-  flagName: string;
-  invoiceNumber: string;
-  date: Date;
-  notes: string | null;
-  quantity: number;
-  supplierName: string | null;
-  studentName: string | null;
-  storeToName: string | null;
-  totalIn: number;
-  totalOut: number;
-  balance: number;
-  averageCost: number | null;
-  price: number;
-  totalPrice: number;
-  itemInOut: number;
-  inQuantity: number;
-  outQuantity: number;
+export class InventoryNetTransaction {
+  constructor(
+    public flagName: string = '',
+    public invoiceNumber: string = '',
+    public date: Date = new Date(),
+    public notes: string | null = null,
+    public quantity: number = 0,
+    public supplierName: string | null = null,
+    public studentName: string | null = null,
+    public storeToName: string | null = null,
+    public totalIn: number = 0,
+    public totalOut: number = 0,
+    public balance: number = 0,
+    public averageCost: number | null = null,
+    public price: number = 0,
+    public totalPrice: number = 0,
+    public itemInOut: number = 0,
+    public inQuantity: number = 0,
+    public outQuantity: number = 0
+  ) {}
 }
 
-export interface CombinedReportData {
-  isSummary: boolean;
-  date: string;
-  transactionType: string;
-  invoiceNumber: string;
-  authority: string;
-  income: number | string;
-  outcome: number | string;
-  quantitybalance: number;
+export class CombinedReportData {
+  constructor(
+    public isSummary: boolean = false,
+    public date: string = '',
+    public transactionType: string = '',
+    public invoiceNumber: string = '',
+    public authority: string = '',
+    public income: number | string = 0,
+    public outcome: number | string = 0,
+    public quantitybalance: number = 0
+  ) {}
 }
 
-export interface InventoryNetCombinedResponse {
+export class InventoryNetCombinedResponse {
   summary: {
     fromDate: string;
     shopItemId: number;
@@ -51,24 +57,40 @@ export interface InventoryNetCombinedResponse {
     costBalance: number;
   };
   transactions: InventoryNetCombinedTransaction[];
+
+  constructor(init?: Partial<InventoryNetCombinedResponse>) {
+    this.summary = init?.summary || {
+      fromDate: '',
+      shopItemId: 0,
+      storeId: 0,
+      toDate: '',
+      inQuantity: 0,
+      outQuantity: 0,
+      quantitybalance: 0,
+      costBalance: 0
+    };
+    this.transactions = init?.transactions || [];
+  }
 }
 
-export interface InventoryNetCombinedTransaction {
-  date: string;
-  flagId: number;
-  flagName: string;
-  invoiceNumber: string;
-  notes: string | null;
-  inQuantity: number;
-  outQuantity: number;
-  quantity: number;
-  balance: number;
-  price: number;
-  totalPrice: number;
-  averageCost: number;
-  itemInOut: number;
-  supplierName: string | null;
-  studentName: string | null;
-  storeName: string | null;
-  storeToName: string | null;
+export class InventoryNetCombinedTransaction {
+  constructor(
+    public date: string = '',
+    public flagId: number = 0,
+    public flagName: string = '',
+    public invoiceNumber: string = '',
+    public notes: string | null = null,
+    public inQuantity: number = 0,
+    public outQuantity: number = 0,
+    public quantity: number = 0,
+    public balance: number = 0,
+    public price: number = 0,
+    public totalPrice: number = 0,
+    public averageCost: number = 0,
+    public itemInOut: number = 0,
+    public supplierName: string | null = null,
+    public studentName: string | null = null,
+    public storeName: string | null = null,
+    public storeToName: string | null = null
+  ) {}
 }

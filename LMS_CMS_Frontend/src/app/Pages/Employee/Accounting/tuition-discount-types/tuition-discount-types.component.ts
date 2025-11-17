@@ -16,16 +16,17 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { TuitionDiscountTypeService } from '../../../../Services/Employee/Accounting/tuition-discount-type.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-tuition-discount-types',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './tuition-discount-types.component.html',
-  styleUrl: './tuition-discount-types.component.css'
+  styleUrl: './tuition-discount-types.component.css',
 })
 export class TuitionDiscountTypesComponent {
   User_Data_After_Login: TokenData = new TokenData(
@@ -47,7 +48,7 @@ export class TuitionDiscountTypesComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: TuitionDiscountTypes[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -64,21 +65,22 @@ export class TuitionDiscountTypesComponent {
 
   validationErrors: { [key in keyof TuitionDiscountTypes]?: string } = {};
   AccountNumbers: AccountingTreeChart[] = [];
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public tuitionServ: TuitionDiscountTypeService,
     public accountServ: AccountingTreeChartService,
-      private languageService: LanguageService
-  ) { }
+    private languageService: LanguageService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -98,48 +100,65 @@ export class TuitionDiscountTypesComponent {
     });
 
     this.GetAllData();
-    this.GetAllAccount()
+    this.GetAllAccount();
 
-          this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.tuitionServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-    })
-
+    });
   }
 
   GetAllAccount() {
-    this.accountServ.GetBySubAndFileLinkID(12, this.DomainName).subscribe((d) => {
-      this.AccountNumbers = d;
-    })
+    this.accountServ
+      .GetBySubAndFileLinkID(12, this.DomainName)
+      .subscribe((d) => {
+        this.AccountNumbers = d;
+      });
   }
   Create() {
     this.mode = 'Create';
     this.tuitionDiscountTypes = new TuitionDiscountTypes();
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Type?',
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Type') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.tuitionServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+          this.GetAllData();
+        });
       }
     });
   }
@@ -147,9 +166,9 @@ export class TuitionDiscountTypesComponent {
   Edit(row: TuitionDiscountTypes) {
     this.mode = 'Edit';
     this.tuitionServ.GetById(row.id, this.DomainName).subscribe((d) => {
-      this.tuitionDiscountTypes = d
-    })
-    this.validationErrors = {}
+      this.tuitionDiscountTypes = d;
+    });
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -173,46 +192,54 @@ export class TuitionDiscountTypesComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.tuitionServ.Add(this.tuitionDiscountTypes, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.tuitionServ
+          .Add(this.tuitionDiscountTypes, this.DomainName)
+          .subscribe(
+            (d) => {
+              this.closeModal();
+              this.GetAllData();
+              this.isLoading = false;
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
       }
       if (this.mode == 'Edit') {
-        this.tuitionServ.Edit(this.tuitionDiscountTypes, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.tuitionServ
+          .Edit(this.tuitionDiscountTypes, this.DomainName)
+          .subscribe(
+            (d) => {
+              this.closeModal();
+              this.GetAllData();
+              this.isLoading = false;
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
       }
-    } 
+    }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -226,13 +253,10 @@ export class TuitionDiscountTypesComponent {
       if (this.tuitionDiscountTypes.hasOwnProperty(key)) {
         const field = key as keyof TuitionDiscountTypes;
         if (!this.tuitionDiscountTypes[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name' || field == 'accountNumberID') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -241,7 +265,9 @@ export class TuitionDiscountTypesComponent {
 
     if (this.tuitionDiscountTypes.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
     return isValid;
   }
@@ -277,13 +303,23 @@ export class TuitionDiscountTypesComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

@@ -16,7 +16,11 @@ import { TimeTableReplace } from '../../../../Models/LMS/time-table-replace';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Day } from '../../../../Models/day';
+import { Grade } from '../../../../Models/LMS/grade';
+import { SessionGroupDTO } from '../../../../Models/LMS/session-group-dto';
 @Component({
   selector: 'app-time-table-replace',
   standalone: true,
@@ -25,18 +29,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './time-table-replace.component.css',
 })
 export class TimeTableReplaceComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -53,15 +46,20 @@ export class TimeTableReplaceComponent {
   MaxPeriods: number = 0;
   TimeTableName: string = '';
   TimeTable: TimeTableDayGroupDTO[] = [];
+  OriginTimeTable: TimeTableDayGroupDTO[] = [];
 
   draggedSubject: any = null;
-  draggedSession: any = null;
+  draggedSession: SessionGroupDTO = new SessionGroupDTO();
   SessionReplaced: TimeTableReplace[] = [];
-  HoldingSessionsSession: any[] = [];
+  HoldingSessionsSession: SessionGroupDTO[] = [];
   AllTeacherInTarget: number[] = [];
   AllTeacherInDraged: number[] = [];
   dragFromcard: boolean = false;
   isLoading = false;
+  SelectedDay: number = 0;
+  SelectedGrade: number = 0;
+  grades: Grade[] = [];
+  days: Day[] = [];
 
   constructor(
     private router: Router,
@@ -73,7 +71,7 @@ export class TimeTableReplaceComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public timetableServ: TimeTableService,
-    private languageService: LanguageService,
+    private languageService: LanguageService, 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -85,31 +83,116 @@ export class TimeTableReplaceComponent {
     this.TimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
 
-        this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetTimeTable() {
-    this.timetableServ
-      .GetByID(this.TimeTableId, this.DomainName)
-      .subscribe((d) => {
+    this.TimeTable = [];
+    this.OriginTimeTable = [];
+    this.SelectedDay = 0;
+    this.SelectedGrade = 0;
+    this.timetableServ.GetByID(this.TimeTableId, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
+        this.OriginTimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
+        this.ExtractDaysAndGrades();
       });
+  }
+
+  ExtractDaysAndGrades() {
+    this.days = [];
+    this.grades = [];
+
+    this.TimeTable.forEach((dayEntry) => {
+      // Add day info if not already added
+      if (!this.days.some((d) => d.id === dayEntry.dayId)) {
+        this.days.push({
+          id: dayEntry.dayId,
+          name: dayEntry.dayName,
+        });
+      }
+
+      // Loop over grades in this day
+      dayEntry.grades.forEach((grade) => {
+        // Add grade info if not already added
+        if (!this.grades.some((g) => g.id === grade.gradeId)) {
+          this.grades.push({
+            id: grade.gradeId,
+            name: grade.gradeName,
+            dateFrom: '',
+            dateTo: '',
+            insertedByUserId: 0,
+            sectionID: 0,
+            sectionName: '',
+            upgradeToID: 0,
+            upgradeToName: '',sat: null,
+            sun: null,
+            mon: null,
+            tus: null,
+            wed: null,
+            thru: null,
+            fri: null,
+          });
+        }
+      });
+    });
+  }
+
+  FilterTimeTable() {
+    this.TimeTable = [...this.OriginTimeTable];
+
+    if (this.SelectedDay != 0 && this.SelectedGrade != 0) {
+      // Filter by both day and grade
+      this.TimeTable = this.TimeTable.filter(
+        (day) => +day.dayId === +this.SelectedDay
+      )
+        .map((day) => ({
+          ...day,
+          grades: day.grades.filter(
+            (grade) => +grade.gradeId === +this.SelectedGrade
+          ),
+        }))
+        .filter((day) => day.grades.length > 0);
+    } else if (this.SelectedDay != 0 && this.SelectedGrade == 0) {
+      // Filter by day only
+      this.TimeTable = this.TimeTable.filter(
+        (day) => +day.dayId === +this.SelectedDay
+      );
+    } else if (this.SelectedDay == 0 && this.SelectedGrade != 0) {
+      // Filter by grade only
+      this.TimeTable = this.TimeTable.map((day) => ({
+        ...day,
+        grades: day.grades.filter(
+          (grade) => +grade.gradeId === +this.SelectedGrade
+        ),
+      })).filter((day) => day.grades.length > 0);
+    }
   }
 
   moveToTimeTable() {
     this.router.navigateByUrl(`Employee/Time Table`);
   }
 
-  onDragStart(event: DragEvent, session: any) {
-    this.draggedSession = session; // store the reference, not deep copy
-    this.draggedSubject = null;
-    event.dataTransfer?.setData('text/plain', JSON.stringify(session));
-    this.dragFromcard = false;
+  onDragStart(event: DragEvent, session: SessionGroupDTO) {
+    if(session.subjects.length != 0 ){
+      this.draggedSession = session; // store the reference, not deep copy
+      console.log(this.draggedSession)
+      this.draggedSubject = null;
+      event.dataTransfer?.setData('text/plain', JSON.stringify(session));
+      this.dragFromcard = false;
+    }
   }
 
   onDragOver(event: DragEvent) {
@@ -119,24 +202,17 @@ export class TimeTableReplaceComponent {
   onDropHolding(event: DragEvent) {
     event.preventDefault();
     if (!this.draggedSession) return;
-    if (
-      !this.HoldingSessionsSession.some(
-        (s) => s.sessionId === this.draggedSession.sessionId
-      )
-    ) {
+    if (!this.HoldingSessionsSession.some((s) => s.sessionId === this.draggedSession.sessionId)) {
       this.HoldingSessionsSession.push(
         JSON.parse(JSON.stringify(this.draggedSession))
       ); // deep copy for holding area
     }
-    this.removeSessionFromTimeTable(this.draggedSession.sessionId);
-    this.draggedSession = null;
     this.dragFromcard = true;
+    this.removeSessionFromTimeTable(this.draggedSession.sessionId);
+    this.draggedSession = new SessionGroupDTO();
   }
 
-  private areSubjectsTeachersEqual(
-    subjects1: any[],
-    subjects2: any[]
-  ): boolean {
+  private areSubjectsTeachersEqual(subjects1: any[],subjects2: any[]): boolean {
     const teachers1 = [...new Set(subjects1.map((s) => s.teacherId))].sort();
     const teachers2 = [...new Set(subjects2.map((s) => s.teacherId))].sort();
 
@@ -145,13 +221,11 @@ export class TimeTableReplaceComponent {
     return teachers1.every((id, index) => id === teachers2[index]);
   }
 
-  onDrop(event: DragEvent, targetSession: any, day: any, periodIndex: number) {
+  async onDrop(event: DragEvent, targetSession: any, day: any, periodIndex: number) {
     event.preventDefault();
     if (!this.draggedSession) return;
 
-    const draggedLocation = this.getSessionLocation(
-      this.draggedSession.sessionId
-    );
+    const draggedLocation = this.getSessionLocation(this.draggedSession.sessionId);
     const targetLocation = this.getSessionLocation(targetSession.sessionId);
 
     if (!draggedLocation || !targetLocation) {
@@ -164,46 +238,24 @@ export class TimeTableReplaceComponent {
     const draggedTeacherIds = this.extractTeacherIds(this.draggedSession);
     const targetTeacherIds = this.extractTeacherIds(targetSession);
 
-    const isSameTeacher = this.areSubjectsTeachersEqual(
-      targetSession.subjects,
-      this.draggedSession.subjects
-    );
-    const isSameDayAndPeriod =
-      (draggedLocation.dayId === targetLocation.dayId &&
-        draggedLocation.periodIndex === targetLocation.periodIndex) ||
-      isSameTeacher;
+    const isSameTeacher = this.areSubjectsTeachersEqual(targetSession.subjects,this.draggedSession.subjects);
+    const isSameDayAndPeriod =(draggedLocation.dayId === targetLocation.dayId && draggedLocation.periodIndex === targetLocation.periodIndex) ||isSameTeacher;
 
     let allTeachersInTargetDayPeriod, allTeachersInDraggedDayPeriod;
 
     if (!isSameDayAndPeriod) {
-      allTeachersInTargetDayPeriod = this.collectTeachersAtPeriod(
-        targetLocation.dayId,
-        periodIndex,
-        [targetSession.sessionId]
-      );
-      allTeachersInDraggedDayPeriod = this.collectTeachersAtPeriod(
-        draggedLocation.dayId,
-        periodIndex,
-        [this.draggedSession.sessionId]
-      );
+      allTeachersInTargetDayPeriod = this.collectTeachersAtPeriod(targetLocation.dayId,periodIndex,[targetSession.sessionId]);
+      allTeachersInDraggedDayPeriod = this.collectTeachersAtPeriod(draggedLocation.dayId,periodIndex,[this.draggedSession.sessionId]);
     } else {
-      allTeachersInTargetDayPeriod = this.collectTeachersAtPeriod(
-        targetLocation.dayId,
-        periodIndex,
-        [this.draggedSession.sessionId, targetSession.sessionId]
-      );
-      allTeachersInDraggedDayPeriod = this.collectTeachersAtPeriod(
-        draggedLocation.dayId,
-        periodIndex,
-        [this.draggedSession.sessionId, targetSession.sessionId]
-      );
+      allTeachersInTargetDayPeriod = this.collectTeachersAtPeriod(targetLocation.dayId,periodIndex,[this.draggedSession.sessionId, targetSession.sessionId]);
+      allTeachersInDraggedDayPeriod = this.collectTeachersAtPeriod(draggedLocation.dayId,periodIndex,[this.draggedSession.sessionId, targetSession.sessionId]);
     }
 
     if (this.hasIntersection(targetTeacherIds, allTeachersInDraggedDayPeriod)) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Target session teachers conflict with other sessions in the dragged session day/period',
+        text: 'Some teachers in the target session already have another class at this time',
         confirmButtonColor: '#089B41',
       });
       return;
@@ -213,69 +265,48 @@ export class TimeTableReplaceComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: ' Dragged session teachers conflict with other sessions in the target session day/period',
+        text: ' Some teachers are already assigned to another session at this time',
         confirmButtonColor: '#089B41',
       });
       return;
     }
-    const draggedSubjectIds = this.draggedSession.subjects.map(
-      (s: any) => s.subjectId
-    );
-    const targetClassroomSubjects = this.getClassroomSubjectIds(
-      targetLocation.classroomId
-    );
+    const draggedSubjectIds = this.draggedSession.subjects.map((s: any) => s.subjectId);
+    const targetClassroomSubjects = this.getClassroomSubjectIds(targetLocation.classroomId);
 
-    const targetSubjectIds = targetSession.subjects.map(
-      (s: any) => s.subjectId
-    );
-    const dragedClassroomSubjects = this.getClassroomSubjectIds(
-      draggedLocation.classroomId
-    );
+    const targetSubjectIds = targetSession.subjects.map((s: any) => s.subjectId);
+    const dragedClassroomSubjects = this.getClassroomSubjectIds(draggedLocation.classroomId);
     // Check if all dragged subjects exist in target classroom
-    const isSubjectValidForTargetClass =
-      draggedSubjectIds.every((id: any) =>
-        targetClassroomSubjects.includes(id)
-      ) &&
-      targetSubjectIds.every((id: any) => dragedClassroomSubjects.includes(id));
+    const isSubjectValidForTargetClass =draggedSubjectIds.every((id: any) =>targetClassroomSubjects.includes(id)) && targetSubjectIds.every((id: any) => dragedClassroomSubjects.includes(id));
 
     if (!isSubjectValidForTargetClass) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'One or more subjects in the dragged session do not exist in the target classroom.',
+        text: 'Subjects in the dragged session don’t match the target classroom’s subjects.',
         confirmButtonColor: '#089B41',
       });
       return;
     }
-    this.SessionReplaced.push(
-      new TimeTableReplace(
-        this.draggedSession.sessionId,
-        targetSession.sessionId
-      )
-    );
+    await this.SessionReplaced.push(new TimeTableReplace( this.draggedSession.sessionId,targetSession.sessionId));
     const targetSessionCopy = JSON.parse(JSON.stringify(targetSession));
-    this.swapSubjects(targetSession, this.draggedSession);
+    await this.swapSubjects(targetSession, this.draggedSession);
     if (this.dragFromcard == true) {
-      const indexInHolding = this.HoldingSessionsSession.findIndex(
-        (s) => s.sessionId === targetSession.sessionId
-      );
-      if (indexInHolding !== -1) {
-        this.HoldingSessionsSession = this.HoldingSessionsSession.filter(
-          (s) => s.sessionId !== targetSession.sessionId
-        );
+      const indexInHolding = this.HoldingSessionsSession.find((s) => s.sessionId == this.draggedSession.sessionId);
+      if (indexInHolding) {
+        if(indexInHolding.subjects.length == 0){
+          this.HoldingSessionsSession = this.HoldingSessionsSession.filter((s) => s.sessionId != this.draggedSession.sessionId);
+        }
       }
     } else {
-      this.HoldingSessionsSession = this.HoldingSessionsSession.filter(
-        (s) => s.sessionId !== this.draggedSession.sessionId
-      );
+      this.HoldingSessionsSession = this.HoldingSessionsSession.filter((s) => s.sessionId != this.draggedSession.sessionId);
     }
 
-    this.draggedSession = null;
+    this.draggedSession = new SessionGroupDTO();
   }
 
   private getClassroomSubjectIds(classroomId: number): number[] {
     const subjectIds = new Set<number>();
-    this.TimeTable.forEach((day) => {
+    this.OriginTimeTable.forEach((day) => {
       day.grades.forEach((grade) => {
         grade.classrooms.forEach((classroom) => {
           if (classroom.classroomId === classroomId) {
@@ -319,11 +350,7 @@ export class TimeTableReplaceComponent {
     }
   }
 
-  private collectTeachersAtPeriod(
-    dayId: number,
-    periodIndex: number,
-    excludeSessionIds: number[]
-  ): number[] {
+  private collectTeachersAtPeriod(dayId: number,periodIndex: number,excludeSessionIds: number[]): number[] {
     const teacherIds: number[] = [];
     this.TimeTable.filter((day) => day.dayId === dayId).forEach((day) => {
       day.grades.forEach((grade) => {
@@ -364,11 +391,7 @@ export class TimeTableReplaceComponent {
     for (const day of this.TimeTable) {
       for (const grade of day.grades) {
         for (const classroom of grade.classrooms) {
-          for (
-            let periodIndex = 0;
-            periodIndex < classroom.sessions.length;
-            periodIndex++
-          ) {
+          for ( let periodIndex = 0; periodIndex < classroom.sessions.length; periodIndex++) {
             const session = classroom.sessions[periodIndex];
             if (session.sessionId === sessionId) {
               return {
@@ -408,9 +431,9 @@ export class TimeTableReplaceComponent {
     this.SessionReplaced = deduplicated;
   }
 
-  Save() {
+  async Save() {
     this.isLoading = true;
-    this.deduplicateSessionReplacements();
+    await this.deduplicateSessionReplacements();
     this.timetableServ.Edit(this.SessionReplaced, this.DomainName).subscribe(
       (d) => {
         Swal.fire({
@@ -420,20 +443,35 @@ export class TimeTableReplaceComponent {
           confirmButtonColor: '#089B41',
         });
         this.isLoading = false;
-        this.router.navigateByUrl(
-          `Employee/Time Table/` + this.TimeTableId
-        );
+        this.router.navigateByUrl(`Employee/Time Table/` + this.TimeTableId);
       },
       (error) => {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });
         this.isLoading = false;
       }
     );
+  }
+
+  autoScroll(event: DragEvent) {
+    const scrollSpeed = 20; // Adjust for faster/slower scrolling
+    const scrollZone = 100; // Distance (px) from top/bottom where scrolling starts
+
+    const scrollContainer = document.documentElement || document.body;
+
+    const mouseY = event.clientY;
+    const viewportHeight = window.innerHeight;
+
+    if (mouseY < scrollZone) {
+      window.scrollBy({ top: -scrollSpeed, behavior: 'smooth' });
+    }
+    if (mouseY > viewportHeight - scrollZone) {
+      window.scrollBy({ top: scrollSpeed, behavior: 'smooth' });
+    }
   }
 }

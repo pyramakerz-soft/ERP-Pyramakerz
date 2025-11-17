@@ -15,11 +15,12 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import Swal from 'sweetalert2';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-subject-teacher',
   standalone: true,
@@ -29,18 +30,7 @@ import {  Subscription } from 'rxjs';
 })
 export class SubjectTeacherComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  ); 
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');   
 
   DomainName: string = '';
   UserID: number = 0;
@@ -54,7 +44,7 @@ export class SubjectTeacherComponent {
   subject: ClassroomSubject[] = []
   validationErrors: { [key in keyof ClassroomSubject]?: string } = {};
   isLoading = false;
-  employee: EmployeeGet = new EmployeeGet()
+  employee: Employee = new Employee()
 
   constructor(
     private router: Router, 
@@ -65,7 +55,8 @@ export class SubjectTeacherComponent {
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
-      private languageService: LanguageService
+    private languageService: LanguageService,
+    private translate: TranslateService 
   ) { }
 
   ngOnInit() {
@@ -87,8 +78,40 @@ export class SubjectTeacherComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+  
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
   moveToEmployee() {
-    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectTeacher.teacherID}`)
+    this.router.navigateByUrl(`Employee/Employee/${this.SupjectTeacher.teacherID}`)
   }
 
   GetData() {
@@ -136,28 +159,25 @@ export class SubjectTeacherComponent {
     this.openModal()
   }
 
-  AddSupjectTeacher() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      this.ClassroomSubjectServ.Edit(this.SupjectTeacher, this.DomainName).subscribe({
-        next: () => {
-          this.GetData();
-          this.isLoading = false;
-          this.closeModal();
-        },
-        error: (err) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred',
-            confirmButtonColor: '#089B41',
-          });
-          this.isLoading = false;
-          this.closeModal();
-        }
-      });
-    }
+AddSupjectTeacher() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    this.ClassroomSubjectServ.Edit(this.SupjectTeacher, this.DomainName).subscribe({
+      next: () => {
+        this.GetData();
+        this.isLoading = false;
+        this.closeModal();
+        this.showSuccessAlert(this.translate.instant('Subject teacher assigned successfully'));
+      },
+      error: (err) => {
+        this.isLoading = false;
+        const errorMessage = err.error?.message || this.translate.instant('Failed to assign subject teacher');
+        this.showErrorAlert(errorMessage);
+        this.closeModal();
+      }
+    });
   }
+}
 
   openModal() {
     document.getElementById("Add_Modal")?.classList.remove("hidden");
@@ -177,30 +197,22 @@ export class SubjectTeacherComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.SupjectTeacher) {
-      if (this.SupjectTeacher.hasOwnProperty(key)) {
-        const field = key as keyof ClassroomSubject;
-        if (!this.SupjectTeacher[field]) {
-          if (
-            field == 'classroomID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-        if (this.SupjectTeacher.id == 0) {
-          this.validationErrors['subjectID'] = "Subject is required"
-          isValid = false;
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+
+  if (!this.SupjectTeacher.classroomID) {
+    this.validationErrors['classroomID'] = this.translate.instant('Classroom is required');
+    isValid = false;
   }
 
+  if (this.SupjectTeacher.id == 0) {
+    this.validationErrors['subjectID'] = this.translate.instant('Subject is required');
+    isValid = false;
+  }
+
+  return isValid;
+}
   onInputValueChange(event: { field: keyof ClassroomSubject; value: any }) {
     const { field, value } = event;
 

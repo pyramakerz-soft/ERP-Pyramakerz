@@ -55,6 +55,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? Room { get; set; }
         public string? LandMark { get; set; }
         public string? AdditionalInfo { get; set; }
+        public bool IsSuspended { get; set; }
 
         [ForeignKey("TaxCustomer")]
         public int? TypeID { get; set; }
@@ -77,6 +78,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("StartAcademicYear")]
         public long? StartAcademicYearID { get; set; }
         public AcademicYear StartAcademicYear { get; set; }
+
+
+        [ForeignKey("ConnectionStatus")]
+        public long? ConnectionStatusID { get; set; }
+        public ConnectionStatus ConnectionStatus { get; set; }
 
         public string? DateOfBirth {  get; set; }
         public string? PlaceOfBirth { get; set; }
@@ -125,6 +131,10 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<RemedialClassroomStudent> RemedialClassroomStudents { get; set; } = new HashSet<RemedialClassroomStudent>();
         public ICollection<Conduct> Conduct { get; set; } = new HashSet<Conduct>();
         public ICollection<AttendanceStudent> AttendanceStudents { get; set; } = new HashSet<AttendanceStudent>();
+        public ICollection<StudentIssue> StudentIssues { get; set; } = new HashSet<StudentIssue>();
+        public ICollection<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; } = new HashSet<SocialWorkerMedalStudent>();
+        public ICollection<CertificateStudent> CertificateStudent { get; set; } = new HashSet<CertificateStudent>();
+        public ICollection<FailedStudents> FailedStudents { get; set; } = new HashSet<FailedStudents>();
 
     }
 }

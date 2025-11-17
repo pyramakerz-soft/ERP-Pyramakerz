@@ -15,9 +15,10 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { JobCategoriesService } from '../../../../Services/Employee/Administration/job-categories.service';
 import { firstValueFrom } from 'rxjs';
 import { Job } from '../../../../Models/Administrator/job';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-job-categories',
   standalone: true,
@@ -26,18 +27,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './job-categories.component.css',
 })
 export class JobCategoriesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -51,7 +41,7 @@ export class JobCategoriesComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';
@@ -72,9 +62,10 @@ export class JobCategoriesComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     public JobCategoryServ: JobCategoriesService,
-     private languageService: LanguageService
-  ) {}
+    private languageService: LanguageService
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -94,10 +85,17 @@ export class JobCategoriesComponent {
     });
 
     this.GetAllData();
-   this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';  
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -116,13 +114,13 @@ export class JobCategoriesComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Job Category?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') +this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.JobCategoryServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -140,7 +138,7 @@ export class JobCategoriesComponent {
     this.openModal();
   }
 
-  IsAllowDelete(InsertedByID: number) { 
+  IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
       this.UserID,
@@ -170,7 +168,7 @@ export class JobCategoriesComponent {
           },
           (error) => {
             this.isLoading = false;
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -178,14 +176,14 @@ export class JobCategoriesComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }
@@ -201,7 +199,7 @@ export class JobCategoriesComponent {
           },
           (error) => {
             this.isLoading = false;
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -209,14 +207,14 @@ export class JobCategoriesComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }

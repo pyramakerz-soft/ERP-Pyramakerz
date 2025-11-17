@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetByMasterID/{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Receivable Details" }
+           pages: new[] { "Receivable"  }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -151,7 +151,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Receivable Details" }
+            pages: new[] { "Receivable" }
         )]
         public async Task<IActionResult> GetbyIdAsync(long id)
         {
@@ -247,7 +247,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Receivable Details" }
+            pages: new[] { "Receivable" }
         )]
         public IActionResult Add(ReceivableDetailsAddDTO newDetails)
         {
@@ -465,7 +465,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Receivable Details" }
+            pages: new[] { "Receivable" }
         )]
         public IActionResult Edit(ReceivableDetailsPutDTO newDetail)
         {
@@ -604,7 +604,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Receivable Details", roleId, userId, ReceivableDetails);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Receivable", roleId, userId, ReceivableDetails);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -704,7 +704,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Receivable Details" }
+            pages: new[] { "Receivable" }
         )]
         public IActionResult Delete(long id)
         {
@@ -736,7 +736,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Receivable Details", roleId, userId, ReceivableDetails);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Receivable", roleId, userId, ReceivableDetails);
                 if (accessCheck != null)
                 {
                     return accessCheck;

@@ -1,7 +1,7 @@
 export class LessonLive {
     constructor(
         public id: number = 0,
-        public period: number = 0,
+        public period: number|null = null,
         public name: string = '',
         public liveLink: string = '',
         public recordLink: string = '',

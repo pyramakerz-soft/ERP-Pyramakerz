@@ -57,12 +57,22 @@ export class AssignmentStudentService {
     if (DomainName != null) {
       this.header = DomainName
     }
+
+    const payload = {
+      id: data.id,
+      degree: data.degree,
+      evaluationConsideringTheDelay: data.evaluationConsideringTheDelay,
+      assignmentStudentQuestions: data.assignmentStudentQuestions.map(q => ({
+        id: q.id,
+        mark: q.mark
+      }))
+    };
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/AssignmentStudent`, data, { headers });
+    return this.http.put(`${this.baseUrl}/AssignmentStudent`, payload, { headers });
   }
 
   Add(data: AssignmentStudent, DomainName: string) {

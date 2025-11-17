@@ -47,7 +47,7 @@ export class AccountService {
     });
   } 
  
-  EditPassword(editpass: EditPass, DomainName?: string) {
+  EditPassword(editpass: EditPass, DomainName?: string) { // view 
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -59,25 +59,36 @@ export class AccountService {
     return this.http.put(`${this.baseUrl}/Account/EditPass`, editpass, { headers });
   }
 
-  Get_Data_Form_Token(){
+  Get_Data_Form_Token(isFromLogin?:boolean){
     let User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
     let token = localStorage.getItem("current_token")
     if(token){
       User_Data_After_Login = jwtDecode(token)  
  
       if(User_Data_After_Login.type == 'employee'){
-        this.employeeService.Get_Employee_By_ID(User_Data_After_Login.id, this.header).subscribe(
-          data => {  
-            if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){ 
-              this.logOutService.logOut()  
+        if(isFromLogin){
+          this.employeeService.GetMyData(this.header, { forceRefresh: true }).subscribe(data => { 
+            if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){  
+              this.logOutService.logOut() 
+              this.router.navigateByUrl(""); 
             } 
-          }
-        )
+          });
+        }else{
+          this.employeeService.GetMyData(this.header).subscribe(
+            data => {  
+              if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){  
+                this.logOutService.logOut() 
+                this.router.navigateByUrl(""); 
+              } 
+            }
+          )
+        }
       } else if(User_Data_After_Login.type == 'parent'){
         this.parentService.GetByID(User_Data_After_Login.id, this.header).subscribe(
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut() 
+              this.router.navigateByUrl("");
             } 
           }
         )
@@ -85,7 +96,8 @@ export class AccountService {
         this.studentService.GetByID(User_Data_After_Login.id, this.header).subscribe(
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
-              this.logOutService.logOut() 
+              this.logOutService.logOut()
+              this.router.navigateByUrl(""); 
             } 
           }
         )
@@ -94,6 +106,7 @@ export class AccountService {
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut() 
+              this.router.navigateByUrl("");
             } 
           }
         )

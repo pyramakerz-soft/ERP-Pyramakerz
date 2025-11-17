@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
@@ -18,11 +19,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public FollowUpController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public FollowUpController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get
@@ -63,6 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             List<FollowUpGetDTO> followUpDto = _mapper.Map<List<FollowUpGetDTO>>(followUps);
+            followUpDto = followUpDto.OrderByDescending(f => f.Date).ToList();
 
             foreach (var follow in followUpDto)
             {
@@ -245,7 +249,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         public IActionResult Update(FollowUpPutDTO followUpDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -267,6 +272,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (followUp == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Follow Up", roleId, userId, followUp);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             foreach (var followUpDrug in followUpDto.FollowUpDrugs)
@@ -310,6 +324,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             Unit_Of_Work.followUp_Repository.Update(followUp);
             Unit_Of_Work.SaveChanges();
 
+            List<FollowUpDrug> existingDrugs = Unit_Of_Work.followUpDrug_Repository.FindBy(f => f.FollowUpId == followUp.Id && f.IsDeleted != true).ToList();
+
+            var dtoIds = followUpDto.FollowUpDrugs
+                .Where(f => f.ID != 0)
+                .Select(f => f.ID)
+                .ToList();
+             
+            var drugsToDelete = existingDrugs.Where(e => !dtoIds.Contains(e.Id)).ToList();
+            foreach (var oldDrug in drugsToDelete)
+            {
+                Unit_Of_Work.followUpDrug_Repository.Delete(oldDrug.Id);
+            }
+
             foreach (var followUpDrugDto in followUpDto.FollowUpDrugs)
             {
                 var existingFollowUpDrug = Unit_Of_Work.followUpDrug_Repository
@@ -331,7 +358,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     Unit_Of_Work.followUpDrug_Repository.Add(newFollowUpDrug);
                 }
             }
-
+            
+            Unit_Of_Work.SaveChanges();
             return Ok(followUpDto);
         }
         #endregion
@@ -354,7 +382,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             long.TryParse(userIdClaim, out long userId);
 
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
@@ -369,6 +398,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (followUp == null)
             {
                 return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Follow Up", roleId, userId, followUp);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             followUp.IsDeleted = true;
@@ -397,7 +435,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             Unit_Of_Work.followUp_Repository.Update(followUp);
             Unit_Of_Work.SaveChanges();
 
-            return Ok("Follow Up deleted successfully");
+            return Ok();
         }
         #endregion
     }

@@ -255,8 +255,16 @@
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedGrade || editBusStudent, 'primaryTxt': selectedGrade && !editBusStudent}" for="class"> {{ 'Choose Class' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="class" [(ngModel)]="selectedClass" (change)="onClassChange()" [disabled]="!selectedGrade || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedGrade || editBusStudent }">
+                <label class="mb-2" for="ac" [ngClass]="{ 'text-gray-400': !selectedSchool || editBusStudent, 'primaryTxt': selectedSchool && !editBusStudent }"> {{ 'Choose Academic Year' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="ac" [(ngModel)]="selectedYear" (change)="onYearChange()" [disabled]="!selectedSchool || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool || editBusStudent }">
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Academic Year' | translate }}</option>
+                    <option *ngFor="let Year of filteredYears" [value]="Year.id">{{ Year.name }}</option>
+                    <option *ngIf="filteredYears.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                </select>
+            </div>
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedGrade || !selectedYear || editBusStudent, 'primaryTxt': selectedGrade && selectedYear && !editBusStudent}" for="class"> {{ 'Choose Class' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="class" [(ngModel)]="selectedClass" (change)="onClassChange()" [disabled]="!selectedGrade || !selectedYear || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedGrade || !selectedYear || editBusStudent }">
                     <option [value]="null" disabled selected hidden> {{ 'Choose Class' | translate }}</option>
                     <option *ngFor="let classItem of filteredClasses" [value]="classItem.id">{{ classItem.name }}</option>
                     <option *ngIf="filteredClasses.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
@@ -285,10 +293,10 @@
                 <span *ngIf="validationErrors['busCategoryID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['busCategoryID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="semester"> {{ 'Semester' | translate }}</label>
+                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedYear, 'primaryTxt': selectedYear}" for="semester" > {{ 'Semester' | translate }}</label>
                 <select 
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="semester" [(ngModel)]="busStudent.semseterID" 
-                (ngModelChange)="onInputValueChange({ field: 'semseterID', value: $event })">
+                (ngModelChange)="onInputValueChange({ field: 'semseterID', value: $event })" [disabled]="!selectedYear" [ngClass]="{ 'bg-[#EBEBEB]': !selectedYear }">
                     <option [value]="null" disabled selected hidden> {{ 'Choose Semester' | translate }}</option>
                     <option *ngFor="let semester of Semesters" [value]="semester.id">{{ semester.name }}</option>
                     <option *ngIf="Semesters.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>

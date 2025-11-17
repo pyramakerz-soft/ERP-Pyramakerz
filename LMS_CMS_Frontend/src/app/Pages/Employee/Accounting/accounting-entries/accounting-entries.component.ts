@@ -13,14 +13,14 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-accounting-entries',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent,TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './accounting-entries.component.html',
   styleUrl: './accounting-entries.component.css'
 })
@@ -30,12 +30,12 @@ export class AccountingEntriesComponent {
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
-  AllowDeleteForOthers: boolean = false; 
+  AllowDeleteForOthers: boolean = false;
 
   DomainName: string = '';
   UserID: number = 0;
 
-  keysArray: string[] = ['id', 'docNumber' ,"date", "accountingEntriesDocTypeName"];
+  keysArray: string[] = ['id', 'docNumber', "accountingEntriesDocTypeName"];
 
   path: string = '';
   key: string = 'id';
@@ -44,24 +44,26 @@ export class AccountingEntriesComponent {
   accountingEntriesData: AccountingEntries[] = []
   isRtl: boolean = false;
   subscription!: Subscription;
-  CurrentPage:number = 1
-  PageSize:number = 10
-  TotalPages:number = 1
-  TotalRecords:number = 0
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
 
-  isDeleting:boolean = false;
+  isDeleting: boolean = false;
 
-constructor(
+  constructor(
     private router: Router,
-     private menuService: MenuService, 
-     public activeRoute: ActivatedRoute,
-      public account: AccountService, 
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
+    public account: AccountService,
     public DomainServ: DomainService,
-     public EditDeleteServ: DeleteEditPermissionService, 
-     public ApiServ: ApiService, 
-     public accountingEntriesService:AccountingEntriesService,
-    private languageService: LanguageService){}
-    
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public accountingEntriesService: AccountingEntriesService,
+    private languageService: LanguageService,
+  ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -88,7 +90,14 @@ constructor(
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  async onSearchEvent(event: { key: string; value: any }) { 
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
     this.CurrentPage = 1
     this.TotalPages = 1
@@ -124,11 +133,11 @@ constructor(
   validateNumber(event: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       this.PageSize = 0
     }
   }
-  
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
@@ -147,48 +156,48 @@ constructor(
     return IsAllow;
   }
 
-  GetAccountingEntriesDate(DomainName: string, pageNumber:number, pageSize:number){
+  GetAccountingEntriesDate(DomainName: string, pageNumber: number, pageSize: number) {
     this.accountingEntriesService.Get(DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
         this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords 
+        this.TotalRecords = data.pagination.totalRecords
         this.accountingEntriesData = data.data
-      }, 
-      (error) => { 
-        if(error.status == 404){
-          if(this.TotalRecords != 0){
-            let lastPage 
-            if(this.isDeleting){
-              lastPage = (this.TotalRecords - 1) / this.PageSize 
-            }else{
-              lastPage = this.TotalRecords / this.PageSize 
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize
+            } else {
+              lastPage = this.TotalRecords / this.PageSize
             }
-            if(lastPage >= 1){
-              if(this.isDeleting){
-                this.CurrentPage = Math.floor(lastPage) 
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
                 this.isDeleting = false
-              } else{
-                this.CurrentPage = Math.ceil(lastPage) 
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
               }
               this.GetAccountingEntriesDate(this.DomainName, this.CurrentPage, this.PageSize)
             }
-          } 
+          }
         }
       }
     )
   }
 
-  changeCurrentPage(currentPage:number){
+  changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
     this.GetAccountingEntriesDate(this.DomainName, this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) { 
+  validatePageSize(event: any) {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-        event.target.value = '';
+      event.target.value = '';
     }
   }
 
@@ -216,33 +225,33 @@ constructor(
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  Create(id?:number, isEdit?:boolean){
-    if(id){
-      if(isEdit){
-        this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`)
-      }else{
-        this.router.navigateByUrl(`Employee/Accounting Entries Details/View/${id}`)
+  Create(id?: number, isEdit?: boolean) {
+    if (id) {
+      if (isEdit) {
+        this.router.navigateByUrl(`Employee/Accounting Entries/${id}`)
+      } else {
+        this.router.navigateByUrl(`Employee/Accounting Entries/View/${id}`)
       }
-    } else{
-      this.router.navigateByUrl("Employee/Accounting Entries Details")
+    } else {
+      this.router.navigateByUrl("Employee/Accounting Entries/Create")
     }
   }
 
-  Delete(id:number){
+  Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Accounting Entries?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.accountingEntriesService.Delete(id,this.DomainName).subscribe((D)=>{
+        this.accountingEntriesService.Delete(id, this.DomainName).subscribe((D) => {
           this.isDeleting = true
           this.GetAccountingEntriesDate(this.DomainName, this.CurrentPage, this.PageSize);
-          if(this.TotalRecords == 1){
+          if (this.TotalRecords == 1) {
             this.TotalRecords = 0
             this.accountingEntriesData = []
           }

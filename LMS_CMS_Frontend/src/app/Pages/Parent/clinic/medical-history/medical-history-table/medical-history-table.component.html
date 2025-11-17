@@ -1,27 +1,25 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Medical History</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Medical History' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="openModal()"
                 class="rounded-lg px-4 py-3 flex items-center justify-center gap-2 secondaryBorder secondaryTxt">
-                Create Medical History
+                {{ 'Create' | translate }} {{ 'Medical History' | translate }}
             </button>
         </div>
     </div>
 
-<app-table [headers]="headers" [data]="medicalHistories" [keys]="keys" (delete)="deleteMedicalHistory($event)"
-    (edit)="openModal($event)">
-</app-table>
+    <app-table [headers]="headers" [data]="medicalHistories" [keys]="keys" (delete)="deleteMedicalHistory($event)"
+        (edit)="openModal($event)">
+    </app-table>
 
     <!-- Modal Overlay -->
     <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}"
         class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-<app-parent-medical-history-modal
-  [isVisible]="isModalVisible" 
-  (isVisibleChange)="onModalVisibilityChange($event)"
-  (onSave)="loadMedicalHistories()" 
-  [medicalHistoryData]="selectedMedicalHistory">
-</app-parent-medical-history-modal>
-</div>
+        <app-parent-medical-history-modal [isVisible]="isModalVisible"
+            (isVisibleChange)="onModalVisibilityChange($event)" (onSave)="loadMedicalHistories()"
+            [medicalHistoryData]="selectedMedicalHistory">
+        </app-parent-medical-history-modal>
+    </div>
 </div>

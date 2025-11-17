@@ -17,6 +17,7 @@ import * as XLSX from 'xlsx-js-style';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-accountig-reports',
@@ -67,7 +68,7 @@ export class AccountigReportsComponent {
     private router: Router,
     public bankService: BankService,
     public saveService: SaveService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -92,6 +93,14 @@ export class AccountigReportsComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
@@ -385,7 +394,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Bank Or Save ?', value: t.linkFileName },
                   { key: 'Bank Or Save Data', value: t.bankOrSaveName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Link File', 'Link File Type'],
@@ -425,7 +434,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Bank Or Save ?', value: t.linkFileName },
                   { key: 'Bank Or Save Data', value: t.bankOrSaveName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Link File', 'Link File Type'],
@@ -464,7 +473,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Employee Name', value: t.employeeName },
                   { key: 'Student  Name', value: t.studentName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Date', 'Fee Type'],
@@ -502,7 +511,7 @@ export class AccountigReportsComponent {
                   { key: 'Doc Type', value: t.accountingEntriesDocTypeName },
                   { key: 'Doc Number', value: t.docNumber },
                   { key: 'Date', value: t.date },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: [
@@ -534,161 +543,108 @@ export class AccountigReportsComponent {
     return of([]);
   }
 
-  DownloadAsExcel() {
-    this.GetDataForPrint().subscribe((result) => {
-      if (!result || result.length === 0) {
-        Swal.fire({
-          title: 'No Data',
-          text: 'No data available for export.',
-          icon: 'info',
-          confirmButtonText: 'OK',
+async DownloadAsExcel() {
+  try {
+    // Get the data for export
+    const exportData = await this.GetDataForPrint().toPromise();
+    
+    if (!exportData || exportData.length === 0) {
+      Swal.fire({
+        title: 'No Data',
+        text: 'No data available for export.',
+        icon: 'info',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    // Prepare tables for the Excel report
+    const tables = exportData.map((section: any, index: number) => {
+      // Create table data
+      const tableData = section.table.data.map((row: any) => {
+        return section.table.headers.map((header: string) => {
+          // Handle different data types appropriately
+          const value = row[header];
+          if (header.toLowerCase().includes('amount') || header.toLowerCase().includes('id')) {
+            return isNaN(Number(value)) ? 0 : Number(value);
+          }
+          return value || '';
         });
-        return;
-      }
+      });
 
-      // Map result to expected structure
-      const exportData = Array.isArray(result) ? result : [];
+      return {
+        title: section.header,
+        headers: section.table.headers,
+        data: tableData
+      };
+    });
 
-      const excelData: any[] = [];
+    // Prepare info rows
+    const infoRows = [
+      { key: 'Report Type', value: this.type },
+      { key: 'Start Date', value: this.SelectedStartDate },
+      { key: 'End Date', value: this.SelectedEndDate },
+      { key: 'Total Records', value: this.TotalRecords },
+      { key: 'Generated On', value: new Date().toLocaleDateString() }
+    ];
 
-      // Add report title with styling
-      excelData.push([
-        {
-          v: `${this.type.toUpperCase()} REPORT DETAILED`,
-          s: {
-            font: { bold: true, sz: 16 },
-            alignment: { horizontal: 'center' },
-          },
-        },
-      ]);
-      excelData.push([]); // empty row
+    // Add section summaries as additional info
+    if (exportData.length > 0) {
+      infoRows.push({ key: 'Number of Invoices', value: exportData.length });
+    }
 
-      // Add filter information with styling
-      excelData.push([
-        { v: 'Start Date:', s: { font: { bold: true } } },
-        { v: this.SelectedStartDate, s: { font: { bold: true } } },
-      ]);
-      excelData.push([
-        { v: 'End Date:', s: { font: { bold: true } } },
-        { v: this.SelectedEndDate, s: { font: { bold: true } } },
-      ]);
-      excelData.push([]); // empty row
-
-      // Add each invoice/section
-      exportData.forEach((section: any, sectionIdx: number) => {
-        // Section header
-        excelData.push([
-          {
-            v: section.header,
-            s: {
-              font: { bold: true, color: { rgb: 'FFFFFF' } },
-              fill: { fgColor: { rgb: '4472C4' } },
-            },
-          },
-        ]);
-
-        // Section summary/details
-        section.summary.forEach((row: any, i: number) => {
-          excelData.push([
-            {
-              v: row.key,
-              s: {
-                font: { bold: true },
-                fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } },
-              },
-            },
-            {
-              v: row.value,
-              s: {
-                fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } },
-              },
-            },
-          ]);
-        });
-
-        excelData.push([]); // empty row
-
-        // Table headers
-        excelData.push(
-          section.table.headers.map((header: string) => ({
-            v: header,
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: '4472C4' } },
-              color: { rgb: 'FFFFFF' },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          }))
-        );
-
-        // Table rows
-        if (section.table.data && section.table.data.length > 0) {
-          section.table.data.forEach((row: any, i: number) => {
-            excelData.push(
-              section.table.headers.map((header: string) => ({
-                v: row[header],
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              }))
-            );
-          });
-        } else {
-          excelData.push([
-            {
-              v: 'No items found for this invoice',
-              s: {
-                font: { italic: true },
-                alignment: { horizontal: 'center' },
-              },
-              colSpan: section.table.headers.length,
-            },
-          ]);
+    // Generate the Excel report using the shared service
+    await this.sharedReportsService.generateExcelReport({
+      mainHeader: {
+        en: `${this.type.toUpperCase()} REPORT`,
+        ar: this.getArabicReportTitle()
+      },
+      subHeaders: [
+        { 
+          en: 'Detailed Transaction Summary', 
+          ar: 'ملخص المعاملات التفصيلي' 
         }
+      ],
+      infoRows: infoRows,
+      reportImage: '', // Add your logo URL if needed
+      filename: `${this.type.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.xlsx`,
+      tables: tables
+    });
 
-        excelData.push([]); // empty row for spacing between sections
-      });
+    // Show success message
+    Swal.fire({
+      title: 'Export Successful',
+      text: `${this.type} report has been exported to Excel successfully.`,
+      icon: 'success',
+      confirmButtonColor: '#089B41',
+      timer: 2000,
+      showConfirmButton: false
+    });
 
-      // Create worksheet
-      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-      // Merge cells for headers and special cells
-      if (!worksheet['!merges']) worksheet['!merges'] = [];
-      worksheet['!merges'].push({
-        s: { r: 0, c: 0 },
-        e: { r: 0, c: (exportData[0]?.table?.headers?.length || 4) - 1 },
-      });
-      let rowOffset = 5;
-      // exportData.forEach((section: any) => {
-      //   worksheet['!merges'].push({
-      //     s: { r: rowOffset, c: 0 },
-      //     e: { r: rowOffset, c: (section.table.headers?.length || 4) - 1 },
-      //   });
-      //   rowOffset +=
-      //     1 + // header
-      //     section.summary.length +
-      //     2 + // empty row + table header
-      //     (section.table.data?.length || 1) +
-      //     1; // empty row
-      // });
-
-      // Apply column widths
-      worksheet['!cols'] = Array(
-        exportData[0]?.table?.headers?.length || 4
-      ).fill({ wch: 18 });
-
-      // Create workbook and save
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Accounting Report');
-
-      const dateStr = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(workbook, `${this.type}_Report_${dateStr}.xlsx`);
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire({
+      title: 'Export Failed',
+      text: 'There was an error exporting the report to Excel. Please try again.',
+      icon: 'error',
+      confirmButtonColor: '#089B41',
     });
   }
+}
+
+// Helper method to get Arabic title
+private getArabicReportTitle(): string {
+  switch (this.type) {
+    case 'Payable':
+      return 'تقرير الدفع';
+    case 'Receivable':
+      return 'تقرير الاستحقاق';
+    case 'Installment Deduction':
+      return 'تقرير خصم الأقساط';
+    case 'Accounting Entries':
+      return 'تقرير القيود المحاسبية';
+    default:
+      return 'تقرير المحاسبة';
+  }
+}
 }

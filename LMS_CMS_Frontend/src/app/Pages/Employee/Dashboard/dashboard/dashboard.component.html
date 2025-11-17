@@ -1,0 +1,85 @@
+<div class="min-h-screen">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        <!-- Total Students -->
+        <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-sm text-gray-500">{{ 'Total' | translate }} {{ 'Students' | translate }} {{ 'at this year' | translate }}</p>
+            <h2 class="text-2xl font-bold">{{ todaysData?.studentCountInCurrentActive || 0 }}</h2>
+        </div>
+
+        <!-- Total Classrooms -->
+        <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-sm text-gray-500">{{ 'Total' | translate }} {{ 'Classroom Count' | translate }} {{ 'at this year' | translate }}</p>
+            <h2 class="text-2xl font-bold">{{ todaysData?.classroomCountInCurrentActive || 0 }}</h2>
+        </div>
+
+        <!-- Inventory Low Items -->
+        <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-sm text-gray-500">{{ 'Inventory Low Items Today' | translate }}</p>
+            <h2 class="text-2xl font-bold">{{ todaysData?.inventoryLowItemsToday || 0 }}</h2>
+        </div>
+    </div>
+
+    <!-- Filter Header -->
+    <div class="mb-4">
+        <app-filter-header (selectionChanged)="onSelection($event)"></app-filter-header>
+    </div>
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading">
+
+        <!-- Second Row: Dashboard Data Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <!-- Visits in Clinic -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Visits In Clinic' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.followUpCount || 0 }}</h2>
+            </div>
+
+            <!-- Fees Collected -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'Fees Collected' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.feesAmount || 0 | number:'1.0-0' }}</h2>
+            </div>
+
+            <!-- HR Salary -->
+            <div class="bg-white p-4 rounded-xl shadow">
+                <p class="text-sm text-gray-500">{{ 'HR Salary' | translate }}</p>
+                <h2 class="text-2xl font-bold">{{ dashboardData?.totalSalaries || 0 | number:'1.0-0' }}</h2>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Pie Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <!-- Assignment Submission Chart -->
+            <app-assignment-pie [submissionsCount]="dashboardData?.submissionsCount"></app-assignment-pie>
+
+            <!-- Registration Chart -->
+            <app-chart-pie [registrationFormStateCount]="dashboardData?.registrationFormStateCount"></app-chart-pie>
+
+            <div class="flex flex-col gap-4">
+                <!-- Request Status Progress Bar -->
+                <app-request-progress [requestStateCount]="dashboardData?.requestStateCount"></app-request-progress>
+
+                <!-- Bottom Section: Category Rankings (now directly under request status, same width) -->
+                <app-category-rankings [categoryRankings]="dashboardData?.categoryRankings"></app-category-rankings>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Inventory Charts - Dynamic layout based on month view -->
+        <div [class]="isMonthView ? 'grid grid-cols-1 gap-4 mb-4' : 'grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4'">
+            <!-- Inventory Purchase -->
+            <app-revenue-chart [inventoryPurchase]="dashboardData?.inventoryPurchase">
+            </app-revenue-chart>
+
+            <!-- Inventory Sales -->
+            <app-revenue-chart-sales [inventorySales]="dashboardData?.inventorySales">
+            </app-revenue-chart-sales>
+        </div>
+
+
+    </div>
+</div>

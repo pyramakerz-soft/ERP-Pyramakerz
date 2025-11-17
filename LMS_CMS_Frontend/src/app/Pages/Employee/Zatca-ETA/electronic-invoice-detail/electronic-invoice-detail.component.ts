@@ -11,11 +11,14 @@ import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service'
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-electronic-invoice-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './electronic-invoice-detail.component.html',
   styleUrls: ['./electronic-invoice-detail.component.css'],
   providers: [DatePipe],
@@ -59,7 +62,8 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
   DomainName: string = '';
   currentSystem: 'zatca' | 'eta' = 'zatca';
   showPDF = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   school = {
     reportHeaderOneEn: 'Invoice Report',
     reportHeaderTwoEn: 'Simplified Tax Invoice',
@@ -71,12 +75,13 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private languageService: LanguageService,
     private inventoryDetailsService: InventoryDetailsService,
     private inventoryMasterService: InventoryMasterService,
     public ApiServ: ApiService,
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
-    private etaService: EtaService
+    private etaService: EtaService, 
   ) {}
 
   ngOnInit() {
@@ -87,6 +92,16 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.currentSystem = this.route.snapshot.data['system'] || 'zatca';
 
     this.loadInvoice();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   // Update the loadInvoice() method in electronic-invoice-detail.component.ts
@@ -242,7 +257,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     if (!this.invoice.inventoryDetails) return [];
 
     return this.invoice.inventoryDetails.map((item) => ({
-      Product: item.itemName || 'N/A',
+      Product: item.itemName || '-',
       Quantity: item.quantity || 0,
       Price: item.price || 0,
       Tax: item.tax || 0,

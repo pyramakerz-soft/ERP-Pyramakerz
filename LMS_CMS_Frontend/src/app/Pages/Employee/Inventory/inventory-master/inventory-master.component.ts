@@ -15,9 +15,10 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryFlag } from '../../../../Models/Inventory/inventory-flag';
 import { InventoryMasterService } from '../../../../Services/Employee/Inventory/inventory-master.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-inventory-master',
   standalone: true,
@@ -45,7 +46,7 @@ export class InventoryMasterComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'storeName', 'invoiceNumber', 'date', 'total'];
+  keysArray: string[] = ['id', 'storeName', 'invoiceNumber', 'total'];
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -67,7 +68,8 @@ export class InventoryMasterComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public salesServ: InventoryMasterService,
-    private languageService: LanguageService
+    private translate: TranslateService,
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,20 +95,27 @@ export class InventoryMasterComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/${this.FlagId}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/${this.FlagId}`)
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Invoice?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Invoice') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.salesServ.Delete(id, this.DomainName).subscribe((D) => {
@@ -117,7 +126,7 @@ export class InventoryMasterComponent {
   }
 
   Edit(row: InventoryMaster) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/Edit/${row.flagId}/${row.id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/Edit/${row.flagId}/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -250,7 +259,7 @@ export class InventoryMasterComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/View/${id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/View/${id}`)
   }
 
   validateNumber(event: any): void {

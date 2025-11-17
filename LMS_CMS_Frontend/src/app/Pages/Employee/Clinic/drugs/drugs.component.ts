@@ -8,10 +8,11 @@ import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { ApiService } from '../../../../Services/api.service';
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
-import { Drug } from '../../../../Models/Clinic/drug';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { DrugClass } from '../../../../Models/Clinic/drug-class';
 @Component({
   selector: 'app-drugs',
   standalone: true,
@@ -21,37 +22,83 @@ import {  Subscription } from 'rxjs';
     SearchComponent,
     ModalComponent,
     TableComponent,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './drugs.component.html',
   styleUrls: ['./drugs.component.css'],
 })
 export class DrugsComponent implements OnInit {
-  drug: Drug = new Drug(0, '', new Date());
+  drug: DrugClass = new DrugClass(0, '', new Date());
   editDrug = false;
   validationErrors: { [key: string]: string } = {};
   keysArray: string[] = ['id', 'name'];
   key: string = 'id';
   value: any = '';
   isModalVisible = false;
-  drugs: Drug[] = [];
+  drugs: DrugClass[] = [];
   DomainName: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   constructor(
     private drugService: DrugService,
-    private apiService: ApiService ,
-      private languageService: LanguageService
+    private apiService: ApiService,
+    private languageService: LanguageService, 
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getDrugs();
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   async getDrugs() {
@@ -84,7 +131,7 @@ export class DrugsComponent implements OnInit {
 
   closeModal() {
     this.isModalVisible = false;
-    this.drug = new Drug(0, '', new Date());
+    this.drug = new DrugClass(0, '', new Date());
     this.editDrug = false;
     this.validationErrors = {};
   }
@@ -93,13 +140,13 @@ export class DrugsComponent implements OnInit {
     if (id) {
       this.editDrug = true;
       const originalDrug = this.drugs.find((drug) => drug.id === id)!;
-      this.drug = new Drug(
+      this.drug = new DrugClass(
         originalDrug.id,
         originalDrug.name,
         new Date(originalDrug.insertedAt)
       );
     } else {
-      this.drug = new Drug(0, '', new Date());
+      this.drug = new DrugClass(0, '', new Date());
       this.editDrug = false;
     }
     this.isModalVisible = true;
@@ -113,7 +160,6 @@ export class DrugsComponent implements OnInit {
       const domainName = this.DomainName;
       const drug = { ...this.drug };
 
-      // Disable the save button during submission
       this.isSaving = true;
 
       const operation = isEditing
@@ -124,11 +170,10 @@ export class DrugsComponent implements OnInit {
         next: () => {
           this.getDrugs();
           this.closeModal();
-          Swal.fire(
-            'Success',
-            `Drug ${isEditing ? 'updated' : 'created'} successfully`,
-            'success'
-          );
+          const successMessage = isEditing
+            ? this.translate.instant('Updated successfully')
+            : this.translate.instant('Created successfully');
+          this.showSuccessAlert(successMessage);
           this.isSaving = false;
         },
         error: (err) => {
@@ -136,11 +181,12 @@ export class DrugsComponent implements OnInit {
             `Error ${isEditing ? 'updating' : 'creating'} drug:`,
             err
           );
-          Swal.fire(
-            'Error',
-            `Failed to ${isEditing ? 'update' : 'create'} drug`,
-            'error'
-          );
+          const errorMessage =
+            err.error?.message ||
+            this.translate.instant(
+              `Failed to ${isEditing ? 'update' : 'create'} drug`
+            );
+          this.showErrorAlert(errorMessage);
           this.isSaving = false;
         },
       });
@@ -148,39 +194,48 @@ export class DrugsComponent implements OnInit {
   }
 
   deleteDrug(row: any) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this drug?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.drugService.Delete(row.id, this.DomainName).subscribe({
-          next: (response) => {
-            this.getDrugs();
-          },
-          error: (error) => {
-            console.error('Error deleting drug:', error);
-            Swal.fire('Error!', 'Failed to delete the drug.', 'error');
-          },
-        });
-      }
+      const translatedTitle = this.translate.instant('Are you sure?');
+      const translatedText = this.translate.instant('You will not be able to recover this item!');
+      const translatedConfirm = this.translate.instant('Yes, delete it!');
+      const translatedCancel = this.translate.instant('No, keep it');
+      const successMessage = this.translate.instant('Deleted successfully');
+    
+      Swal.fire({
+        title: translatedTitle,
+        text: translatedText,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: translatedConfirm,
+        cancelButtonText: translatedCancel,
+      }).then((result) => {
+        if (result.isConfirmed) {
+    this.drugService.Delete(row.id, this.DomainName).subscribe({
+      next: (response) => {
+        this.getDrugs();
+        this.showSuccessAlert(this.translate.instant('Deleted successfully'));
+      },
+      error: (error) => {
+        console.error('Error deleting drug:', error);
+        const errorMessage =
+          error.error?.message ||
+          this.translate.instant('Failed to delete the drug');
+        this.showErrorAlert(errorMessage);
+      },
+    });
+  }
     });
   }
 
-  validateForm(): boolean {
-    let isValid = true;
-    if (!this.drug.name) {
-      this.validationErrors['name'] = '*Name is required';
-      isValid = false;
-    } else {
-      this.validationErrors['name'] = '';
-    }
-    return isValid;
+validateForm(): boolean {
+  this.validationErrors = {};
+  if (!this.drug.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Drug');
+    return false;
   }
+  return true;
+}
 
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;
@@ -207,14 +262,11 @@ export class DrugsComponent implements OnInit {
       });
     }
   }
-GetTableHeaders(){
-   
-if(!this.isRtl){
-  return ['ID', 'Drug Name', 'Date', 'Actions']
-}else{
-  return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات']
-}
-}
-
-
+  GetTableHeaders() {
+    if (!this.isRtl) {
+      return ['ID', 'Drug Name', 'Actions'];
+    } else {
+      return ['المعرف', 'اسم الدواء', 'الإجراءات'];
+    }
+  }
 }

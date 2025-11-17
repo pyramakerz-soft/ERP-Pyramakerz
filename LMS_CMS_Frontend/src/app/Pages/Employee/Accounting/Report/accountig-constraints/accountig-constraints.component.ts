@@ -13,6 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { AccountingConstraintsResponse } from '../../../../../Models/Accounting/accounting-constraints-report';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-accountig-constraints',
@@ -49,7 +50,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
     public ApiServ: ApiService,
     public reportsService: ReportsService,
     public sharedReportsService: SharedReportsService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -63,11 +64,13 @@ export class AccountigConstraintsComponent implements OnDestroy {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+  
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
       Swal.fire({
@@ -217,7 +220,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
       ];
 
       const dataRows = this.DataToPrint.map((row: any) =>
-        headers.map((header) => row[header] ?? 'N/A')
+        headers.map((header) => row[header] ?? '-')
       );
 
       this.sharedReportsService.generateExcelReport({
@@ -228,7 +231,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
         filename: 'Accounting Constraints Report.xlsx',
         tables: [
           {
-            title: 'Accounting Constraints Report',
+            // title: 'Accounting Constraints Report',
             headers,
             data: dataRows,
           },
@@ -272,10 +275,10 @@ export class AccountigConstraintsComponent implements OnDestroy {
                   'Debit',
                 ],
                 data: dateGroup.entries.map((entry: any) => ({
-                  Account: entry.account || 'N/A',
-                  'Invoice Number': entry.invoiceNumber || 'N/A',
-                  'Main Account': entry.mainAccount || 'N/A',
-                  'Sub Account': entry.subAccount || 'N/A',
+                  Account: entry.account || '-',
+                  'Invoice Number': entry.invoiceNumber || '-',
+                  'Main Account': entry.mainAccount || '-',
+                  'Sub Account': entry.subAccount || '-',
                   Credit: entry.credit,
                   Debit: entry.debit,
                 })),

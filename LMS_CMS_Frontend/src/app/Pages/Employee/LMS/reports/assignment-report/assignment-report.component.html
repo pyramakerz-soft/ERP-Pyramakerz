@@ -1,0 +1,277 @@
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-bold text-2xl leading-9">
+        {{ 'Assignment Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <!-- Date From -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateFrom"
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- School Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
+            [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()" required>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option *ngIf="schools.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+    <!-- Academic Year Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="academicYear">{{ 'Academic Year' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="academicYear"
+            [(ngModel)]="selectedAcademicYearId" (change)="onAcademicYearChange()" [disabled]="!selectedSchoolId" required>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
+            <option *ngIf="academicYears.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let academicYear of academicYears" [ngValue]="academicYear.id">{{ academicYear.name }}</option>
+        </select>
+    </div>
+
+    <!-- Grade Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
+            [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId" required>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngIf="grades.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
+        </select>
+    </div>
+
+    <!-- Subject Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="subject">{{ 'Subject' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="subject"
+            [(ngModel)]="selectedSubjectId" (change)="onSubjectChange()" [disabled]="!selectedGradeId" required>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
+            <option *ngIf="subjects.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let subject of subjects" [ngValue]="subject.id">{{ subject.en_name || subject.ar_name }}</option>
+        </select>
+    </div>
+
+    <!-- Empty div to maintain layout -->
+    <div class="w-[24%] mb-4"></div>
+
+    <!-- View Report Button -->
+    <div class="w-[24%] flex justify-end">
+        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
+            'secondaryBg text-white': showViewReportBtn && !isLoading
+        }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div> 
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse"> 
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="downloadAsPDFWithChart()" title="Export to PDF with Chart">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="printReportWithChart()" title="Print Report with Chart">
+</div>
+
+<!-- Chart Container with dynamic height and responsive wrapping -->
+<div #chartContainer 
+     class="flex flex-wrap justify-center items-end gap-x-16 gap-y-10"
+     [style.minHeight.px]="maxChartValue * 2.5 + 60">
+    <ng-container *ngFor="let item of chartData; let i = index">
+        <div class="flex flex-col items-center space-y-3 min-w-[140px] max-w-[180px] mx-4 my-2">
+            <!-- Assignment Name -->
+            <div class="text-sm text-gray-700 font-medium text-center max-w-[120px] truncate mb-2">
+                {{ item.name }}
+            </div>
+
+            <!-- Bars -->
+            <div class="flex items-end justify-center gap-x-10"
+                 [style.height.px]="maxChartValue * 2.5">
+                <!-- Successful -->
+                <div class="flex flex-col items-center">
+                    <div class="relative group">
+                        <div
+                            class="secondaryBg rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                            [style.height.px]="getBarHeight(item.successful, item.total) * 2.5"
+                            [style.minHeight.px]="item.successful > 0 ? 30 : 0">
+                            <span class="text-white text-xs font-semibold mb-2" *ngIf="item.successful > 0">
+                                {{ item.successful }}
+                            </span>
+                        </div>
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
+                                    group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {{ 'Successful' | translate }}: {{ item.successful }}
+                        </div>
+                    </div>
+                    <span class="text-xs secondaryTxt mt-1 font-semibold">
+                        {{ 'Successful' | translate }}
+                    </span>
+                </div>
+
+                <!-- Failed -->
+                <div class="flex flex-col items-center">
+                    <div class="relative group">
+                        <div
+                            class="bg-red-600 rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                            [style.height.px]="getBarHeight(item.failed, item.total) * 2.5"
+                            [style.minHeight.px]="item.failed > 0 ? 30 : 0">
+                            <span class="text-white text-xs font-semibold mb-2" *ngIf="item.failed > 0">
+                                {{ item.failed }}
+                            </span>
+                        </div>
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
+                                    group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {{ 'Failed' | translate }}: {{ item.failed }}
+                        </div>
+                    </div>
+                    <span class="text-xs text-red-600 mt-1 font-semibold">
+                        {{ 'Failed' | translate }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
+
+<!-- Legend -->
+<!-- <div class="flex justify-center items-center space-x-8 mt-6">
+    <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-green-400 rounded"></div>
+        <span class="text-sm text-gray-700">{{ 'Successful' | translate }}</span>
+    </div>
+    <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-[#F97316] rounded"></div>
+        <span class="text-sm text-gray-700">{{ 'Failed' | translate }}</span>
+    </div>
+</div> -->
+<!-- </div> -->
+
+<!-- Summary Statistics -->
+<!-- <div *ngIf="showTable && assignmentReports.length > 0" class="mb-5">
+    <div class="bg-white p-4 rounded-2xl border border-[#BDBDBD] shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">{{ 'Summary Statistics' | translate }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">
+                    {{ getTotalSuccessful() }}
+                </div>
+                <div class="text-sm text-gray-600">{{ 'Total Successful' | translate }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-orange-500">
+                    {{ getTotalFailed() }}
+                </div>
+                <div class="text-sm text-gray-600">{{ 'Total Failed' | translate }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600">
+                    {{ getTotalAttendance() }}
+                </div>
+                <div class="text-sm text-gray-600">{{ 'Total Attendance' | translate }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600">
+                    {{ getTotalAssignments() }}
+                </div>
+                <div class="text-sm text-gray-600">{{ 'Total Assignments' | translate }}</div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- Results Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Assignment Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Subject Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Attendance' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Successful' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Failed' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Success Rate' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="assignmentReports.length === 0">
+                <td colspan="6" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <tr *ngFor="let report of assignmentReports; let i = index"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.assignmentName }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.subjectName }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.attendanceNumber }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.numberSuccessful }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.numberFailed }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md text-center">
+    <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+    <p class="mt-2 text-gray-600">{{'Loading assignment data...' | translate }}</p>
+</div>
+
+<!-- Exporting Indicator -->
+<div *ngIf="isExporting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <i class="fas fa-spinner fa-spin text-2xl text-blue-600 mb-2"></i>
+        <p class="text-gray-700">{{'Generating report...' | translate }}</p>
+    </div>
+</div>
+
+<!-- Hidden PDF Container (for legacy PDF export) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Assignment Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Assignment Name', 'Subject', 'Attendance', 'Successful', 'Failed', 'Success Rate']"
+            [tableData]="reportsForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

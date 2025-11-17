@@ -12,8 +12,10 @@ import { RegistrationCategoryService } from '../../../../Services/Employee/Regis
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-form-field',
   standalone: true,
@@ -23,18 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class RegistrationFormFieldComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -45,7 +36,8 @@ export class RegistrationFormFieldComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   mode: string = 'Create'
 
   isModalVisible: boolean = false;
@@ -66,7 +58,9 @@ export class RegistrationFormFieldComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-    public CategoryServ: RegistrationCategoryService
+    public CategoryServ: RegistrationCategoryService,
+    private languageService: LanguageService,
+    private translate: TranslateService, 
   ) { }
 
   ngOnInit() {
@@ -89,6 +83,18 @@ export class RegistrationFormFieldComponent {
     });
 
     this.GetAllData();
+      this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -106,13 +112,13 @@ export class RegistrationFormFieldComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Form Field Category?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.CategoryServ.Delete(id, this.DomainName).subscribe(
@@ -157,7 +163,7 @@ export class RegistrationFormFieldComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -173,7 +179,7 @@ export class RegistrationFormFieldComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -201,8 +207,9 @@ export class RegistrationFormFieldComponent {
         const field = key as keyof RegistrationCategory;
         if (!this.Category[field]) {
           if (field == "arName" || field == "enName" || field == "orderInForm") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
+            const displayName = field === 'arName' ? 'Arabic Name' : field === 'enName' ? 'English Name' : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
@@ -258,12 +265,25 @@ export class RegistrationFormFieldComponent {
   }
 
   validateNumber(event: any, field: keyof RegistrationCategory): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.Category[field] === 'string') {
         this.Category[field] = '' as never;
       }
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

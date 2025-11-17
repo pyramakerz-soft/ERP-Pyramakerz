@@ -199,12 +199,19 @@ search(
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
 
-  let url = `${this.baseUrl}/InventoryMaster/Search?DateFrom=${dateFrom}&DateTo=${dateTo}`;
+  // Start with StoredId first, then DateFrom and DateTo
+  let url = `${this.baseUrl}/InventoryMaster/Search`;
   
-  // Add storeId if provided (or skip if null for "All Stores")
+  // Add StoredId first (if provided)
   if (storeId !== null) {
-    url += `&storeId=${storeId}`;
+    url += `?StoredId=${storeId}`;
+  } else {
+    url += `?`;
   }
+  
+  // Then add DateFrom and DateTo
+  url += `&DateFrom=${dateFrom}&DateTo=${dateTo}`;
+  
   // Add each flagId as a separate parameter
   flagIds.forEach(id => {
     url += `&FlagIds=${id}`;

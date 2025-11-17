@@ -60,8 +60,7 @@
                 <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
                 <option *ngIf="classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
-            <span *ngIf="validationErrors['class']" class="text-red-500 ml-3 font-normal">{{ validationErrors['class']
-                }}</span>
+            <span *ngIf="validationErrors['class']" class="text-red-500 ml-3 font-normal">{{ validationErrors['class']}}</span>
         </div>
 
         <!-- Date Input -->
@@ -69,12 +68,16 @@
 
             <label class="mb-2 primaryTxt" for="date">{{ 'Date' | translate }}</label>
             <input type="date" id="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!selectedClass">
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3" >
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date']
                 }}</span>
         </div>
     </div>
 
     <!-- Table Section -->
-    <app-hygiene-form-table [students]="students" [hygieneTypes]="hygieneTypes"></app-hygiene-form-table>
+    <app-hygiene-form-table 
+        [students]="students" 
+        [hygieneTypes]="hygieneTypes"
+        (hygieneTypeChange)="onHygieneTypeChange()">
+    </app-hygiene-form-table>
 </div>

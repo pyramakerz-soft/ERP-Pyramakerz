@@ -19,6 +19,8 @@ import { StudentService } from '../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-student',
   standalone: true,
@@ -27,18 +29,8 @@ import {  Subscription } from 'rxjs';
   styleUrl: './accounting-student.component.css'
 })
 export class AccountingStudentComponent {
-User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -52,14 +44,14 @@ User_Data_After_Login: TokenData = new TokenData(
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'user_Name', 'en_name' ,'ar_name' ,'mobile' ,'phone' ,'email'];
-  AccountNumbers:AccountingTreeChart[]=[];
-  
+  keysArray: string[] = ['id', 'user_Name', 'en_name', 'ar_name', 'mobile', 'phone', 'email'];
+  AccountNumbers: AccountingTreeChart[] = [];
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -68,11 +60,12 @@ User_Data_After_Login: TokenData = new TokenData(
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
-    public ApiServ: ApiService ,
+    public ApiServ: ApiService,
     public StudentServ: StudentService,
     public accountServ:AccountingTreeChartService ,
-  private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -92,21 +85,27 @@ User_Data_After_Login: TokenData = new TokenData(
     });
 
     this.GetAllData();
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   GetAllData() {
-    this.StudentServ.GetAll(this.DomainName).subscribe((d)=>{
-      this.TableData=d
+    this.StudentServ.GetAll(this.DomainName).subscribe((d) => {
+      this.TableData = d
     })
   }
 
 
   Edit(row: Student) {
-    this.router.navigateByUrl(`Employee/Student Edit Accounting/${row.id}`)
+    this.router.navigateByUrl(`Employee/Student Accounting/${row.id}`)
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -138,7 +137,7 @@ User_Data_After_Login: TokenData = new TokenData(
       this.TableData = [];
     }
   }
-  
+
   IsAllowEdit(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(
       InsertedByID,

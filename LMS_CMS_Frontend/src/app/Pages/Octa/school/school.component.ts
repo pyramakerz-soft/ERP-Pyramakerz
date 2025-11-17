@@ -10,11 +10,14 @@ import { SchoolType } from '../../../Models/Octa/school-type';
 import { SchoolTypeService } from '../../../Services/Octa/school-type.service';
 import { SchoolService } from '../../../Services/Employee/school.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-school',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent , TranslateModule],
   templateUrl: './school.component.html',
   styleUrl: './school.component.css'
 })
@@ -29,13 +32,25 @@ export class SchoolComponent {
   schoolData :School[] = []
   school :School  = new School()
   editSchool = false
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof School]?: string } = {};
 
-  constructor(public DomainServ: DomainService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService){}
+  constructor(public DomainServ: DomainService,private languageService: LanguageService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService , private translate: TranslateService){}
 
   ngOnInit(){
     this.getAllDomains();
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllDomains() {
@@ -160,23 +175,36 @@ export class SchoolComponent {
       if (this.school.hasOwnProperty(key)) {
         const field = key as keyof School;
         if (!this.school[field]) {
-          if(field == "name" || field == 'schoolTypeID'){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          if (field == "name" || field == 'schoolTypeID') {
+            this.validationErrors[field] = `*${this.getRequiredErrorMessage(field as string)}`;
             isValid = false;
           }
         } else {
-          if(field == "name"){
-            if(this.school.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
+          if (field == "name") {
+            if (this.school.name.length > 100) {
+              const fieldTranslated = this.translate.instant(field as string);
+              const lengthMsg = this.translate.instant('cannot be longer than 100 characters');
+              this.validationErrors[field] = `*${fieldTranslated} ${lengthMsg}`;
               isValid = false;
             }
-          } else{
+          } else {
             this.validationErrors[field] = '';
           }
         }
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof School, value: any }) {

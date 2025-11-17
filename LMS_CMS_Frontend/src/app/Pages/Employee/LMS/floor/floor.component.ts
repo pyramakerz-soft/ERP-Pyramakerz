@@ -10,16 +10,16 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ActivatedRoute, Router } from '@angular/router';
 import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-floor',
   standalone: true,
@@ -49,19 +49,14 @@ export class FloorComponent {
   DomainName: string = '';
   UserID: number = 0;
   buildingId: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     public account: AccountService,
@@ -70,10 +65,11 @@ export class FloorComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public floorService: FloorService,
     public employeeService: EmployeeService,
     public router: Router,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -92,7 +88,7 @@ export class FloorComponent {
     );
 
     this.getBuildingData();
-    this.getFloorData();
+    this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -110,6 +106,13 @@ export class FloorComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   getBuildingData() {
     this.buildingService
       .GetByID(this.buildingId, this.DomainName)
@@ -118,14 +121,49 @@ export class FloorComponent {
       });
   }
 
-  getFloorData() {
+  // getFloorData() {
+  //   this.floorData = [];
+  //   this.floorService
+  //     .GetByBuildingId(this.buildingId, this.DomainName)
+  //     .subscribe((data) => {
+  //       this.floorData = data;
+  //     });
+  // }
+
+  getFloorData(DomainName: string, pageNumber: number, pageSize: number) {
     this.floorData = [];
-    this.floorService
-      .GetByBuildingId(this.buildingId, this.DomainName)
-      .subscribe((data) => {
-        this.floorData = data;
-      });
+    this.floorService.GetByBuildingIdWithPaggination(this.buildingId ,DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.floorData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+      }
+    );
   }
+
 
   getMonitorData() {
     this.employeeService.GetWithTypeId(1, this.DomainName).subscribe((data) => {
@@ -165,6 +203,9 @@ export class FloorComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
@@ -265,7 +306,7 @@ export class FloorComponent {
         this.floorService.Add(this.floor, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
-            this.getFloorData();
+            this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
           },
           (error) => {
@@ -273,7 +314,7 @@ export class FloorComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -283,7 +324,7 @@ export class FloorComponent {
         this.floorService.Edit(this.floor, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
-            this.getFloorData();
+            this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
           },
           (error) => {
@@ -291,7 +332,7 @@ export class FloorComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -303,20 +344,64 @@ export class FloorComponent {
 
   deleteFloor(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Floor?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Floor') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.floorService.Delete(id, this.DomainName).subscribe((data: any) => {
           this.floorData = [];
-          this.getFloorData();
+          this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
   }
+
+    changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getFloorData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }    
 }

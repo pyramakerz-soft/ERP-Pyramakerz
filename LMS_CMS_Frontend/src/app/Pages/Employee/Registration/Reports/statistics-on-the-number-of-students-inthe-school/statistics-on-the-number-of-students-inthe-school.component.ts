@@ -16,28 +16,20 @@ import { MenuService } from '../../../../../Services/shared/menu.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { SectionService } from '../../../../../Services/Employee/LMS/section.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-statistics-on-the-number-of-students-inthe-school',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl:
     './statistics-on-the-number-of-students-inthe-school.component.html',
   styleUrl: './statistics-on-the-number-of-students-inthe-school.component.css',
 })
 export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');  
 
   File: any;
   DomainName: string = '';
@@ -52,7 +44,8 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
   academicYears: AcademicYear[] = [];
   Students: Student[] = [];
   isLoading: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   SelectedStudentId: number = 0;
   SelectedYearId: number = 0;
@@ -75,13 +68,14 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private SectionServ: SectionService,
-    public reportsService: ReportsService
+    public reportsService: ReportsService, 
   ) {}
 
   ngOnInit() {
@@ -103,7 +97,20 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     });
     this.getAllSchools();
     this.getAllYears();
+
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   getAllSchools() {
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
@@ -223,7 +230,7 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
       filename: "Student Information Report.xlsx",
       tables: [
         {
-          title: "Students List",
+          // title: "Students List",
           headers,
           data: dataRows
         }

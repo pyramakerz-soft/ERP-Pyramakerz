@@ -19,9 +19,10 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-lesson-resource',
@@ -72,12 +73,13 @@ export class LessonResourceComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,  
     public router: Router,
+    private translate: TranslateService,
     public lessonResourceService:LessonResourceService,
     public lessonService:LessonService,
     private sanitizer: DomSanitizer,
     private classroomService: ClassroomService,
     public lessonResourceTypeService:LessonResourceTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -110,6 +112,12 @@ export class LessonResourceComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }  
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -145,16 +153,16 @@ export class LessonResourceComponent {
 
   GetClasses(){
     this.classes = []
-    this.classroomService.Get(this.DomainName).subscribe((data) => {
+    this.classroomService.GetByLessonID(this.lessonId, this.DomainName).subscribe((data) => {
       this.classes = data 
     });
   }
 
   GetLessonResourceById(id:number){
     this.lessonResourceService.GetByID(id, this.DomainName).subscribe((data) => {
-      this.lessonResource = data; 
+      this.lessonResource = data;  
       if(this.lessonResource.attachmentLink != null && this.lessonResource.attachmentLink != ''){
-        if (this.lessonResource.attachmentLink?.includes('Uploads/')) {
+        if (this.lessonResource.attachmentLink?.includes('LMS/LessonResource')) {
           this.selectedAttachmentType = 'file'
         }else{
           this.selectedAttachmentType = 'text'
@@ -362,7 +370,7 @@ export class LessonResourceComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -380,7 +388,7 @@ export class LessonResourceComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -422,13 +430,13 @@ export class LessonResourceComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson Resource?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +this.translate.instant('Lesson Resource') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.lessonResourceService.Delete(id, this.DomainName).subscribe((data: any) => {

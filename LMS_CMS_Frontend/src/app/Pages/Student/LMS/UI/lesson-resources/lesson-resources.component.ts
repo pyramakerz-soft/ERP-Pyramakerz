@@ -2,11 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson-resources',
   standalone: true,
-  imports: [CommonModule , FormsModule],
+  imports: [CommonModule , FormsModule , TranslateModule],
   templateUrl: './lesson-resources.component.html',
   styleUrl: './lesson-resources.component.css'
 })
@@ -25,10 +28,12 @@ Sheets: string[] = [
 ];
 
   selectedWeek: string | null = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private languageService: LanguageService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -38,8 +43,16 @@ Sheets: string[] = [
         this.subjectName = this.formatSubjectName(subjectId);
       }
     });
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
   formatSubjectName(subjectId: string): string {
     return subjectId.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

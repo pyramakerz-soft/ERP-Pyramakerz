@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-registered-employee',
@@ -38,7 +39,7 @@ export class RegisteredEmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService, 
     public registeredEmployeeService: RegisteredEmployeeService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() { 
@@ -54,6 +55,12 @@ export class RegisteredEmployeeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   GetAllData(){
     this.TableData = [];
     this.registeredEmployeeService.Get(this.DomainName).subscribe((d) => {
@@ -63,7 +70,7 @@ export class RegisteredEmployeeComponent {
 
   Delete(id: number){
     Swal.fire({
-      title: 'Are you sure you want to Reject This Employee?',
+      title: 'Are you sure you want to Reject and Delete This Employee?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

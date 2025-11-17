@@ -20,9 +20,9 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-admission-test',
   standalone: true,
@@ -32,18 +32,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 })
 export class AdmissionTestComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -89,7 +78,8 @@ export class AdmissionTestComponent {
     public GradeServ: GradeService,
     public AcadimicYearServ: AcadimicYearService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService
+    private translate: TranslateService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -118,9 +108,14 @@ export class AdmissionTestComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
+
+
 
   onSchoolChange(selectedSchoolId: number) {
     this.test.academicYearID = 0
@@ -192,14 +187,14 @@ export class AdmissionTestComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Test?',
+        Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Admission Test') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.testServ.Delete(id, this.DomainName).subscribe(
@@ -247,7 +242,7 @@ export class AdmissionTestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -264,7 +259,7 @@ export class AdmissionTestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -301,8 +296,17 @@ export class AdmissionTestComponent {
       if (this.test.hasOwnProperty(key)) {
         const field = key as keyof Test;
         if (!this.test[field]) {
-          if (field == "title" || field == "totalMark" || field == "subjectID" || field == "gradeID" || field == "academicYearID") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          // required fields for Test
+          if (
+            field === 'title' ||
+            field === 'totalMark' ||
+            field === 'subjectID' ||
+            field === 'academicYearID' ||
+            field === 'gradeID' ||
+            field === 'schoolID'
+          ) {
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
@@ -364,4 +368,28 @@ export class AdmissionTestComponent {
       }
     }
   }
+
+  private getFieldDisplayName(field: keyof Test): string {
+    const map: { [key in keyof Test]?: string } = {
+      title: 'Title',
+      totalMark: 'Total Mark',
+      subjectID: 'Subject',
+      academicYearID: 'Academic Year',
+      gradeID: 'Grade',
+      schoolID: 'School',
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+  
 }

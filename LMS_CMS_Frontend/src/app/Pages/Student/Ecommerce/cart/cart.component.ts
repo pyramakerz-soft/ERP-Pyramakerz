@@ -13,11 +13,17 @@ import { CartShopItem } from '../../../../Models/Student/ECommerce/cart-shop-ite
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { StudentService } from '../../../../Services/student.service';
+import { Student } from '../../../../Models/student';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
@@ -27,19 +33,21 @@ export class CartComponent {
   StuID: number = 0;
   emplyeeStudent: EmplyeeStudent[] = [];
   DomainName: string = "";
-    
+  isRtl: boolean = false;
+  subscription!: Subscription;
   cart:Cart = new Cart()
   totalSalesPrices: number = 0;
   totalVat: number = 0;
+  students: Student[] = [];
 
   cartShopItem:CartShopItem = new CartShopItem()
 
   filteredCartShopItem: CartShopItem[] = [] 
   searchTerm: string = '';
   
-  constructor(public account: AccountService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
-    private router: Router, private cartService: CartService, 
-    private orderService: OrderService, public cartShopItemService:CartShopItemService){}
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
+    private router: Router, private cartService: CartService, public StudentService: StudentService,
+    private orderService: OrderService, public cartShopItemService:CartShopItemService ){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -54,11 +62,25 @@ export class CartComponent {
     if(this.User_Data_After_Login.type == 'student'){
       this.StuID = this.UserID
     }
+    
+    if(this.User_Data_After_Login.type == 'parent'){
+      this.getStudentsByParent()
+    }
 
     this.getCart() 
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void {  
+    if (this.subscription) {  
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){
+    this.emplyeeStudent = []
     this.employeeStudentService.Get(this.UserID, this.DomainName).subscribe(
       data => {
         this.emplyeeStudent = data
@@ -69,10 +91,21 @@ export class CartComponent {
   goToOrder() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Order")
-    } else{
-      this.router.navigateByUrl("Student/Ecommerce/Order")
+    } else if(this.User_Data_After_Login.type == 'student'){
+      this.router.navigateByUrl("Student/Order")
+    }else{
+      this.router.navigateByUrl("Parent/Order")
     }
   } 
+
+  getStudentsByParent(){ 
+    this.students = []
+    this.StudentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }  
   
   getCart(){
     this.cart = new Cart()

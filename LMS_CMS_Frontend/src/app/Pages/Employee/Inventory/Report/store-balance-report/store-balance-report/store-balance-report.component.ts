@@ -13,11 +13,16 @@ import {
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { ReportsService } from '../../../../../../Services/shared/reports.service';
 
 @Component({
   selector: 'app-store-balance-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './store-balance-report.component.html',
   styleUrls: ['./store-balance-report.component.css'],
 })
@@ -36,7 +41,8 @@ export class StoreBalanceReportComponent implements OnInit {
   hasBalance: boolean = true;
   overdrawnBalance: boolean = true;
   zeroBalances: boolean = true;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   stores: any[] = [];
   categories: any[] = [];
   reportData: StoreBalanceReport | null = null;
@@ -60,7 +66,9 @@ export class StoreBalanceReportComponent implements OnInit {
     private inventoryDetailsService: InventoryDetailsService,
     private storesService: StoresService,
     private categoryService: InventoryCategoryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,    
+    private languageService: LanguageService, 
+    private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -69,30 +77,58 @@ export class StoreBalanceReportComponent implements OnInit {
       this.setPageTitle();
       this.loadStores();
       this.loadCategories();
-      this.getPdfTableHeaders()
+      this.getPdfTableHeaders();
     });
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   private setPageTitle() {
     switch (this.reportType) {
       case 'QuantityOnly':
         this.pageTitle = 'Store Items Balance';
+        this.school.reportHeaderOneEn = 'Store Items Balance';
+        this.school.reportHeaderTwoEn = '';
+        this.school.reportHeaderOneAr = 'تقرير أرصدة مخزون المستودع';
+        this.school.reportHeaderTwoAr = ''; 
         break;
       case 'PurchasePrice':
-        this.pageTitle = 'Purchase Price Report';
+        this.pageTitle = 'Store Items Balance with Purchase';
+        this.school.reportHeaderOneEn = 'Store Items Balance with Purchase';
+        this.school.reportHeaderTwoEn = '';
+        this.school.reportHeaderOneAr = 'تقرير أسعار الشراء';
+        this.school.reportHeaderTwoAr = '';
         break;
       case 'SalesPrice':
-        this.pageTitle = 'Sales Price Report';
+        this.pageTitle = 'Store Items Balance with Sales';
+        this.school.reportHeaderOneEn = 'Store Items Balance with Sales';
+        this.school.reportHeaderTwoEn = '';
+        this.school.reportHeaderOneAr = 'تقرير أسعار البيع';
+        this.school.reportHeaderTwoAr = '';
         break;
       case 'Cost':
-        this.pageTitle = 'Cost Report';
+        this.pageTitle = 'Store Items Balance with Average Cost';
+        this.school.reportHeaderOneEn = 'Store Items Balance with Average Cost';
+        this.school.reportHeaderTwoEn = '';
+        this.school.reportHeaderOneAr = 'تقرير التكاليف';
+        this.school.reportHeaderTwoAr = '';
         break;
       case 'ItemsUnderLimit':
-        this.pageTitle = 'Items Under Limit Report';
+        this.pageTitle = 'Store Limited Items';
+        this.school.reportHeaderOneEn = 'Store Limited Items';
+        this.school.reportHeaderTwoEn = '';
+        this.school.reportHeaderOneAr = 'تقرير الأصناف تحت الحد الأدنى';
+        this.school.reportHeaderTwoAr = '';
         break;
-    }
-    this.school.reportHeaderOneEn = this.pageTitle;
-    this.school.reportHeaderOneAr = this.pageTitle;
+    }  
   }
 
   private getReportFlagType(): number {
@@ -148,16 +184,6 @@ export class StoreBalanceReportComponent implements OnInit {
   }
 
   viewReport() {
-    // if (!this.dateTo || !this.selectedStoreId) {
-    //   Swal.fire({
-    //     title: 'Missing Information',
-    //     text: 'Please select both Store and Date',
-    //     icon: 'warning',
-    //     confirmButtonText: 'OK',
-    //   });
-    //   return;
-    // }
-
     this.isLoading = true;
     this.showTable = false;
 
@@ -184,14 +210,47 @@ export class StoreBalanceReportComponent implements OnInit {
           this.reportData = null;
           this.showTable = true;
           this.isLoading = false;
-          // Swal.fire({
-          //   icon: 'error',
-          //   title: 'Error',
-          //   text: 'Failed to load report data',
-          //   confirmButtonText: 'OK',
-          // });
         },
       });
+  }
+
+  // Helper method to format numbers - remove decimals for whole numbers, keep for decimals
+  formatNumber(value: any): string | number {
+    if (value === null || value === undefined) return '';
+    
+    const numValue = Number(value);
+    if (isNaN(numValue)) return value;
+    
+    // Check if the number is a whole number (no decimal part or .00)
+    if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
+      return Math.round(numValue); // Return as integer
+    } else {
+      // Return with 2 decimal places for actual decimals
+      return Math.round(numValue * 100) / 100;
+    }
+  }
+
+  // Format number for display in HTML template (with proper decimal places)
+  formatNumberForDisplay(value: any): string {
+    if (value === null || value === undefined) return '';
+    
+    const numValue = Number(value);
+    if (isNaN(numValue)) return String(value);
+    
+    // Check if the number is a whole number
+    if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
+      return Math.round(numValue).toString(); // Return as integer string
+    } else {
+      // Return with minimum 1 and maximum 2 decimal places
+      return numValue.toFixed(2).replace(/\.?0+$/, '');
+    }
+  }
+
+  // Format number for display in HTML template (with proper decimal places) - LTR support
+  formatNumberForDisplayWithLTR(value: number): string {
+    if (value == null) return '';
+    // Add LTR mark before negative numbers
+    return value < 0 ? '\u200E' + this.formatNumberForDisplay(value) : this.formatNumberForDisplay(value);
   }
 
   private prepareExportData(): void {
@@ -202,32 +261,32 @@ export class StoreBalanceReportComponent implements OnInit {
         const baseData = {
           'Item Code': item.itemCode,
           'Item Name': item.itemName,
-          Quantity: item.quantity,
+          'Quantity': this.formatNumber(item.quantity),
         };
 
         switch (this.reportType) {
           case 'PurchasePrice':
             return {
               ...baseData,
-              'Purchase Price': item.purchasePrice,
-              'Total Purchase': item.totalPurchase,
+              'Purchase Price': this.formatNumber(item.purchasePrice),
+              'Total Purchase': this.formatNumber(item.totalPurchase),
             };
           case 'SalesPrice':
             return {
               ...baseData,
-              'Sales Price': item.salesPrice,
-              'Total Sales': item.totalSales,
+              'Sales Price': this.formatNumber(item.salesPrice),
+              'Total Sales': this.formatNumber(item.totalSales),
             };
           case 'Cost':
             return {
               ...baseData,
-              'Average Cost': item.averageCost,
-              'Total Cost': item.totalCost,
+              'Average Cost': this.formatNumber(item.averageCost),
+              'Total Cost': this.formatNumber(item.totalCost),
             };
           case 'ItemsUnderLimit':
             return {
               ...baseData,
-              Limit: item.limit,
+              'Limit': this.formatNumber(item.limit),
             };
           default:
             return baseData;
@@ -236,53 +295,29 @@ export class StoreBalanceReportComponent implements OnInit {
     );
   }
 
-  // getInfoRows(): any[] {
-  //   const selectedStore = this.stores.find(
-  //     (s) => s.id === this.selectedStoreId
-  //   );
-  //   return [
-  //     { keyEn: 'Report Type: ' + this.pageTitle },
-  //     { keyEn: 'To Date: ' + this.dateTo },
-  //     { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
-  //     {
-  //       keyEn:
-  //         'Category: ' +
-  //         (this.selectedCategoryId
-  //           ? this.categories.find((c) => c.id === this.selectedCategoryId)
-  //               ?.name
-  //           : 'All'),
-  //     },
-  //     { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
-  //     { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
-  //     { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') },
-  //   ];
-  // }
-  
-
   getStoreName(): string {
-  if (!this.selectedStoreId) return 'N/A';
-  const store = this.stores.find(s => s.id === this.selectedStoreId);
-  return store?.name || 'N/A';
-}
+    if (!this.selectedStoreId) return '-';
+    const store = this.stores.find(s => s.id === this.selectedStoreId);
+    return store?.name || '-';
+  }
 
-getCategoryName(): string {
-  if (!this.selectedCategoryId) return 'All Categories';
-  const category = this.categories.find(c => c.id === this.selectedCategoryId);
-  return category?.name || 'N/A';
-}
+  getCategoryName(): string {
+    if (!this.selectedCategoryId) return 'All Categories';
+    const category = this.categories.find(c => c.id === this.selectedCategoryId);
+    return category?.name || '-';
+  }
 
-getDateInfo(): string {
-  return this.dateTo ? new Date(this.dateTo).toLocaleDateString() : 'N/A';
-}
+  getDateInfo(): string {
+    return this.dateTo ? new Date(this.dateTo).toLocaleDateString() : '-';
+  }
 
-getBalanceFiltersInfo(): string {
-  const filters = [];
-  if (this.hasBalance) filters.push('Has Balance');
-  if (this.overdrawnBalance) filters.push('Overdrawn');
-  if (this.zeroBalances) filters.push('Zero Balances');
-  return filters.length > 0 ? filters.join(', ') : 'No Filters';
-}
-
+  getBalanceFiltersInfo(): string {
+    const filters = [];
+    if (this.hasBalance) filters.push('Has Balance');
+    if (this.overdrawnBalance) filters.push('Overdrawn');
+    if (this.zeroBalances) filters.push('Zero Balances');
+    return filters.length > 0 ? filters.join(', ') : 'No Filters';
+  }
 
   getPdfTableHeaders() {
     this.baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
@@ -290,19 +325,19 @@ getBalanceFiltersInfo(): string {
     switch (this.reportType) {
       case 'PurchasePrice':
         this.baseHeaders = [...this.baseHeaders, 'Purchase Price', 'Total Purchase'];
-        break
+        break;
       case 'SalesPrice':
-          this.baseHeaders = [...this.baseHeaders, 'Sales Price', 'Total Sales'];
-          break
+        this.baseHeaders = [...this.baseHeaders, 'Sales Price', 'Total Sales'];
+        break;
       case 'Cost':
         this.baseHeaders = [...this.baseHeaders, 'Average Cost', 'Total Cost'];
-        break
+        break;
       case 'ItemsUnderLimit':
         this.baseHeaders = [...this.baseHeaders, 'Limit'];
         break;
       default:
         this.baseHeaders;
-        break
+        break;
     }
   }
 
@@ -363,18 +398,49 @@ getBalanceFiltersInfo(): string {
     }, 500);
   }
 
-  exportExcel() {
+  async exportExcel() {
     if (!this.reportForExport.length) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
-    const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(
-      workbook,
-      `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
-    );
+
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: this.school.reportHeaderOneEn,
+        ar: this.school.reportHeaderOneAr
+      },
+      // subHeaders: [
+      //   { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
+      // ],
+      infoRows: [
+        { key: 'Report Type', value: this.pageTitle },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'Store', value: this.getStoreName() },
+        { key: 'Category', value: this.getCategoryName() },
+        { key: 'Balance Filters', value: this.getBalanceFiltersInfo() }
+      ],
+      reportImage: '',
+      filename: `${this.pageTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      tables: [{
+        headers: this.getExcelHeaders(),
+        data: this.reportForExport.map(item => Object.values(item))
+      }]
+    });
+  }
+
+  // Helper method to get Excel headers based on report type
+  private getExcelHeaders(): string[] {
+    switch (this.reportType) {
+      case 'PurchasePrice':
+        return ['Item Code', 'Item Name', 'Quantity', 'Purchase Price', 'Total Purchase'];
+      case 'SalesPrice':
+        return ['Item Code', 'Item Name', 'Quantity', 'Sales Price', 'Total Sales'];
+      case 'Cost':
+        return ['Item Code', 'Item Name', 'Quantity', 'Average Cost', 'Total Cost'];
+      case 'ItemsUnderLimit':
+        return ['Item Code', 'Item Name', 'Quantity', 'Limit'];
+      default: // QuantityOnly
+        return ['Item Code', 'Item Name', 'Quantity'];
+    }
   }
 }

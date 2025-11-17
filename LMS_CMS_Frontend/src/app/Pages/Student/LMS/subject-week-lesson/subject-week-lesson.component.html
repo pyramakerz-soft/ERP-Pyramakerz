@@ -1,31 +1,31 @@
-<div class="flex justify-start items-center space-x-5">
+<div class="flex justify-start items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
     <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} {{WeekName}}</h1>
 </div>
 
-<div *ngIf="mode=='Activity'" class="flex justify-start items-center space-x-5 mt-5">
+<div *ngIf="mode=='Activity'" class="flex justify-start items-center space-x-5 rtl:space-x-reverse mt-5">
     <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
         (click)="GetActivityData()">
         <i class="fa-solid fa-puzzle-piece"></i>
-        Lessons Activity
+         {{ 'Lessons Activity' | translate }}
     </button>
     <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
         (click)="GetResourceData()">
         <i class="fas fa-solid fa-book-open"></i>
-        Lessons Resources
+         {{ 'Lessons Resources' | translate }}
     </button>
 </div>
 
-<div *ngIf="mode=='Resource'" class="flex justify-start items-center space-x-5 mt-5">
+<div *ngIf="mode=='Resource'" class="flex justify-start items-center space-x-5 rtl:space-x-reverse mt-5">
     <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
         (click)="GetActivityData()">
         <i class="fa-solid fa-puzzle-piece"></i>
-        Lessons Activity
+         {{ 'Lessons Activity' | translate }}
     </button>
     <button class="secondaryBg text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2"
         (click)="GetResourceData()">
         <i class="fas fa-solid fa-book-open"></i>
-        Lessons Resources
+         {{ 'Lessons Resources' | translate }}
     </button>
 </div>
 
@@ -36,7 +36,7 @@
             <div [ngStyle]="{ 'background-color': getRandomColor(i) }"
                 class="flex justify-between items-center px-4 py-3 rounded-lg shadow-sm cursor-pointer transition"
                 (click)="toggleActivity(i)">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse">
                     <img src="Icons/sheet.png" alt="icon" class="w-6 h-6" />
                     <span class="font-semibold text-[#003366] text-lg">{{ sheet.englishName }}</span>
                 </div>
@@ -48,7 +48,7 @@
             <!-- Activity list -->
             <div *ngIf="toggledIndexesActivity.has(i)" class="mt-2 space-y-2 ml-8">
                 <div *ngFor="let activity of sheet.activities" (click)="openLinkActivity(activity.attachmentLink)"
-                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 transition">
+                    class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer hover:bg-gray-100 rounded px-2 py-1 transition">
                     <i class="fas fa-file-pdf"></i>
                     <span class="text-gray-700">{{ activity.englishTitle }}</span>
                 </div>
@@ -64,7 +64,7 @@
             <div [ngStyle]="{ 'background-color': getRandomColor(i) }"
                 class="flex justify-between items-center px-4 py-3 rounded-lg shadow-sm cursor-pointer transition"
                 (click)="toggleResource(i)">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse">
                     <img src="Icons/sheet.png" alt="icon" class="w-6 h-6" />
                     <span class="font-semibold text-[#003366] text-lg">{{ sheet.englishName }}</span>
                 </div>
@@ -76,7 +76,7 @@
             <!-- Activity list -->
             <div *ngIf="toggledIndexesResource.has(i)" class="mt-2 space-y-2 ml-8">
                 <div *ngFor="let activity of sheet.resources" (click)="openLinkResource(activity.attachmentLink)"
-                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 transition">
+                    class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer hover:bg-gray-100 rounded px-2 py-1 transition">
                     <i class="fas fa-file-pdf"></i>
                     <span class="text-gray-700">{{ activity.englishTitle }}</span>
                 </div>

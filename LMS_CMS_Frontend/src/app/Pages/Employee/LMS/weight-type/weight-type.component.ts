@@ -13,9 +13,10 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-weight-type',
   standalone: true,
@@ -58,7 +59,8 @@ export class WeightTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public weightTypeService: WeightTypeService,
     public ApiServ: ApiService ,
-    private languageService: LanguageService,
+    private translate: TranslateService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -85,6 +87,13 @@ export class WeightTypeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAllData() {
     this.TableData = [];
@@ -126,30 +135,28 @@ export class WeightTypeComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.weightType) {
-      if (this.weightType.hasOwnProperty(key)) {
-        const field = key as keyof WeightType;
-        if (!this.weightType[field]) {
-          if(field == "englishName" || field == "arabicName"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          if(field == "englishName" || field == 'arabicName'){
-            if(this.weightType.englishName.length > 100 || this.weightType.arabicName.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  if (!this.weightType.englishName) {
+    this.validationErrors['englishName'] = this.getRequiredErrorMessage('English Name');
+    isValid = false;
+  } else if (this.weightType.englishName.length > 100) {
+    this.validationErrors['englishName'] = `*English Name cannot be longer than 100 characters`;
+    isValid = false;
   }
+  
+  if (!this.weightType.arabicName) {
+    this.validationErrors['arabicName'] = this.getRequiredErrorMessage('Arabic Name');
+    isValid = false;
+  } else if (this.weightType.arabicName.length > 100) {
+    this.validationErrors['arabicName'] = `*Arabic Name cannot be longer than 100 characters`;
+    isValid = false;
+  }
+  
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof WeightType, value: any }) {
     const { field, value } = event;
@@ -171,13 +178,13 @@ export class WeightTypeComponent {
 
   Delete(id: number){
     Swal.fire({
-      title: 'Are you sure you want to delete this Weight Type?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.weightTypeService.Delete(id, this.DomainName).subscribe(
@@ -204,7 +211,7 @@ export class WeightTypeComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -222,7 +229,7 @@ export class WeightTypeComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -261,4 +268,16 @@ export class WeightTypeComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

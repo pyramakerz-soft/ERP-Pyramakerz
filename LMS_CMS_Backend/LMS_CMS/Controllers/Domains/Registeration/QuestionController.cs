@@ -7,6 +7,8 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,18 +26,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
+        private readonly FileImageValidationService _fileImageValidationService;
+        private readonly FileVideoValidationService _fileVideoValidationService;
 
-        public QuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public QuestionController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService, FileImageValidationService fileImageValidationService, FileVideoValidationService fileVideoValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
+            _fileImageValidationService = fileImageValidationService;
+            _fileVideoValidationService = fileVideoValidationService;
         }
 
         [HttpGet]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee"}
-         ,
+         allowedTypes: new[] { "octa", "employee"},
          pages: new[] { "Admission Test" }
          )]
         public async Task<IActionResult> GetAsync()
@@ -115,6 +122,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             questionGetDTO questionDTO = mapper.Map<questionGetDTO>(questions);
 
+            if(questionDTO.Image != null && questionDTO.Image != "")
+            {
+                questionDTO.Image = _fileService.GetFileUrl(questionDTO.Image, Request, HttpContext);
+            }
+            if(questionDTO.Video != null && questionDTO.Video != "")
+            {
+                questionDTO.Video = _fileService.GetFileUrl(questionDTO.Video, Request, HttpContext);
+            }
+
             return Ok(questionDTO);
         }
 
@@ -153,6 +169,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             List<questionGetDTO> questionDTO = mapper.Map<List<questionGetDTO>>(questions);
+
+            foreach (var item in questionDTO)
+            {
+                if (item.Image != null && item.Image != "")
+                {
+                    item.Image = _fileService.GetFileUrl(item.Image, Request, HttpContext);
+                }
+                if (item.Video != null && item.Video != "")
+                {
+                    item.Video = _fileService.GetFileUrl(item.Video, Request, HttpContext);
+                }
+            }
 
             return Ok(questionDTO);
         }
@@ -193,6 +221,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             // Map questions to DTO
             List<questionGetDTO> questionDTO = mapper.Map<List<questionGetDTO>>(questions);
+
+            foreach (var item in questionDTO)
+            {
+                if (item.Image != null && item.Image != "")
+                {
+                    item.Image = _fileService.GetFileUrl(item.Image, Request, HttpContext);
+                }
+                if (item.Video != null && item.Video != "")
+                {
+                    item.Video = _fileService.GetFileUrl(item.Video, Request, HttpContext);
+                }
+            }
+
             foreach (var question in questionDTO)
             {
                 List<MCQQuestionOption> MCQQuestionOptions = Unit_Of_Work.mCQQuestionOption_Repository.FindBy(d => d.IsDeleted != true && d.Question_ID == question.ID);
@@ -263,10 +304,26 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 if (newQuestion.CorrectAnswerName == "")
                 {
                     return BadRequest("CorrectAnswer in msq question is required");
-                }
-
-
+                } 
             }
+
+            if (newQuestion.ImageFile != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newQuestion.ImageFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+            if (newQuestion.VideoFile != null)
+            {
+                string returnFileInput = await _fileVideoValidationService.ValidateVideoFileAsync(newQuestion.VideoFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             Question question = mapper.Map<Question>(newQuestion);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             question.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -319,39 +376,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Questions");
 
-            if (newQuestion.ImageFile != null || newQuestion.VideoFile != null)
+            if (newQuestion.ImageFile != null)
             {
-                var questionFolder = Path.Combine(baseFolder, question.ID.ToString());
-
-                if (!Directory.Exists(questionFolder))
-                {
-                    Directory.CreateDirectory(questionFolder);
-                }
-
-                if (newQuestion.ImageFile != null)
-                {
-                    var imagePath = Path.Combine(questionFolder, newQuestion.ImageFile.FileName);
-
-                    using (var stream = new FileStream(imagePath, FileMode.Create))
-                    {
-                        newQuestion.ImageFile.CopyTo(stream);
-                    }
-                    //question.Image = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.ImageFile.FileName);
-                    question.Image = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.ImageFile.FileName}";
-                }
-
-                if (newQuestion.VideoFile != null)
-                {
-                    var videoPath = Path.Combine(questionFolder, newQuestion.VideoFile.FileName);
-
-                    using (var stream = new FileStream(videoPath, FileMode.Create))
-                    {
-                        await newQuestion.VideoFile.CopyToAsync(stream);
-                    }
-                    //question.Video = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.VideoFile.FileName);
-                    question.Video = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.VideoFile.FileName}";
-                }
+                question.Image = await _fileService.UploadFileAsync(newQuestion.ImageFile, "Registration/Questions", question.ID, HttpContext); 
             }
+            if (newQuestion.VideoFile != null)
+            {
+                question.Video = await _fileService.UploadFileAsync(newQuestion.VideoFile, "Registration/Questions", question.ID, HttpContext); 
+            } 
 
             Unit_Of_Work.question_Repository.Update(question);
             await Unit_Of_Work.SaveChangesAsync();
@@ -501,6 +533,78 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     await Unit_Of_Work.SaveChangesAsync();
                 }
             }
+
+            if (newQuestion.ImageFile != null)
+            {
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newQuestion.ImageFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+            if (newQuestion.VideoFile != null)
+            {
+                string returnFileInput = await _fileVideoValidationService.ValidateVideoFileAsync(newQuestion.VideoFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
+            if (newQuestion.ImageFile != null)
+            {
+                var oldFile = "";
+
+                if (question.Image != null)
+                {
+                    oldFile = question.Image;
+                }
+                else if (question.Video != null)
+                {
+                    oldFile = question.Video;
+                }
+                else
+                {
+                    oldFile = null;
+                }
+
+                newQuestion.Image = await _fileService.ReplaceFileAsync(
+                    newQuestion.ImageFile,
+                    oldFile,
+                    "Registration/Questions",
+                    question.ID,
+                    HttpContext
+                );
+            }else if (newQuestion.VideoFile != null)
+            {
+                var oldFile = "";
+
+                if (question.Image != null)
+                {
+                    oldFile = question.Image;
+                }else if(question.Video != null)
+                {
+                    oldFile = question.Video;
+                }
+                else
+                {
+                    oldFile = null;
+                }
+
+                newQuestion.Video = await _fileService.ReplaceFileAsync(
+                    newQuestion.VideoFile,
+                    oldFile,
+                    "Registration/Questions",
+                    question.ID,
+                    HttpContext
+                );
+            }
+            else
+            {
+                newQuestion.Image = question.Image;
+                newQuestion.Video = question.Video;
+            }
+
             mapper.Map(newQuestion, question);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             question.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -621,51 +725,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 question.CorrectAnswerID = null;
                 question.mCQQuestionOption = null; 
             }
-
-            ////// image
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Questions");
-
-            if (newQuestion.ImageFile != null || newQuestion.VideoFile != null)
-            {
-                var questionFolder = Path.Combine(baseFolder, question.ID.ToString());
-                if (Directory.Exists(questionFolder))
-                {
-                    var files = Directory.GetFiles(questionFolder);
-
-                    foreach (var file in files)
-                    {
-                        System.IO.File.Delete(file);
-                    }
-                }
-
-                if (!Directory.Exists(questionFolder))
-                {
-                    Directory.CreateDirectory(questionFolder);
-                }
-
-                if (newQuestion.ImageFile != null)
-                {
-                    var imagePath = Path.Combine(questionFolder, newQuestion.ImageFile.FileName);
-
-                    using (var stream = new FileStream(imagePath, FileMode.Create))
-                    {
-                        newQuestion.ImageFile.CopyTo(stream);
-                    }
-                    question.Image = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.ImageFile.FileName}";
-                }
-
-                // Save VideoFile if provided
-                if (newQuestion.VideoFile != null)
-                {
-                    var videoPath = Path.Combine(questionFolder, newQuestion.VideoFile.FileName);
-
-                    using (var stream = new FileStream(videoPath, FileMode.Create))
-                    {
-                        newQuestion.VideoFile.CopyTo(stream);
-                    }
-                    question.Video = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.VideoFile.FileName}";
-                }
-            }
+             
             if (newQuestion.QuestionTypeID != 3 && newQuestion.correctAnswerName!= null)
             {
                 var Correctoptions = Unit_Of_Work.mCQQuestionOption_Repository

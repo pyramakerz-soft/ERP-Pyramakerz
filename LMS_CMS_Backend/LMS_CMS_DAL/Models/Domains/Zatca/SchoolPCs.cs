@@ -1,4 +1,5 @@
-﻿using LMS_CMS_DAL.Models.Domains.LMS;
+﻿using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,5 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.Zatca
         public long SchoolId { get; set; }
         public School? School { get; set; }
         public DateOnly? CertificateDate { get; set; }
+        public ICollection<Stocking> Stocking { get; set; } = new HashSet<Stocking>();
+
     }
 }

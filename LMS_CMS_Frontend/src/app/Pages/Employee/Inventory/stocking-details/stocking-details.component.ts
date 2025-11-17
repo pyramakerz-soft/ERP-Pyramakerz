@@ -28,29 +28,23 @@ import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { SearchDropdownComponent } from '../../../../Component/search-dropdown/search-dropdown.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { School } from '../../../../Models/school';
+import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-stocking-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, TranslateModule],
   templateUrl: './stocking-details.component.html',
   styleUrl: './stocking-details.component.css',
 })
 export class StockingDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -75,6 +69,8 @@ export class StockingDetailsComponent {
   SelectedCategoryId: number | null = null;
   SelectedSubCategoryId: number | null = null;
   SelectedSopItem: ShopItem | null = null;
+  schools: School[] = []
+  schoolPCs: SchoolPCs[] = []
 
   TableData: StockingDetails[] = [];
   Item: StockingDetails = new StockingDetails();
@@ -124,11 +120,14 @@ export class StockingDetailsComponent {
     public SubCategoriesServ: InventorySubCategoriesService,
     public shopitemServ: ShopItemService,
     public StockingServ: StockingService,
+    public SchoolServ: SchoolService,
+    public schoolpcsServ: SchoolPCsService,
     public StockingDetailsServ: StockingDetailsService,
     public InventoryMastrServ: InventoryMasterService,
     private cdr: ChangeDetectorRef,
     public printservice: ReportsService,
-      private languageService: LanguageService
+    private languageService: LanguageService,
+    private translate: TranslateService, 
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -141,6 +140,7 @@ export class StockingDetailsComponent {
     this.MasterId = Number(this.activeRoute.snapshot.paramMap.get('id'));
 
     await this.GetAllStores();
+    await this.GetAllSchools();
     if (!this.MasterId) {
       this.mode = 'Create';
       this.Data.date = new Date().toISOString().split('T')[0];
@@ -164,10 +164,17 @@ export class StockingDetailsComponent {
       this.AllShopItems = d;
     });
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';       
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToMaster() {
@@ -182,15 +189,45 @@ export class StockingDetailsComponent {
     });
   }
 
+  GetAllSchools() {
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+      if (this.schools.length == 1) {
+        this.Data.schoolId = this.schools[0].id
+        this.GetAllSchoolPCs()
+      }
+    })
+  }
+
+  GetAllSchoolPCs() {
+    this.schoolPCs = []
+    this.Data.schoolPCId = 0
+    this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+      this.schoolPCs = d
+      if (this.schoolPCs.length == 1) {
+        this.Data.schoolPCId = this.schoolPCs[0].id
+        this.validationErrors['schoolPCId'] = ""
+      }
+    })
+  }
+
   GetMasterInfo() {
     this.StockingServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+        this.schoolPCs = d
+      })
       this.GetCategories();
     });
   }
 
   onStoreChange(storeID: number) {
     this.onInputValueChange({ field: 'storeID', value: storeID });
+    this.Data.stockingDetails = []
+    this.subCategories = [];
+    this.ShopItems = [];
+    this.SelectedCategoryId = null;
+    this.SelectedSubCategoryId = null;
     if (storeID) {
       this.SelectedCategoryId = null;
       this.GetCategories();
@@ -399,7 +436,7 @@ export class StockingDetailsComponent {
           theDifference: -1 * d.currentStock,
           shopItemID: d.id,
           stockingId: this.MasterId,
-          shopItemName: d.arName,
+          shopItemName: d.enName,
           barCode: d.barCode,
           ItemPrice: d.purchasePrice ?? 0,
         };
@@ -480,7 +517,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Stocking Added Succeessfully',
+              text: 'Stocking Added Successfully',
               confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);
@@ -490,7 +527,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -525,7 +562,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'success',
               title: 'Done',
-              text: 'Stocking Edited Succeessfully',
+              text: 'Stocking Edited Successfully',
               confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);
@@ -535,7 +572,7 @@ export class StockingDetailsComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -552,13 +589,13 @@ export class StockingDetailsComponent {
   Delete(row: StockingDetails) {
     if (this.mode == 'Edit') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
@@ -577,13 +614,13 @@ export class StockingDetailsComponent {
       });
     } else if (this.mode == 'Create') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           this.Data.stockingDetails = this.Data.stockingDetails.filter(
@@ -610,7 +647,7 @@ export class StockingDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof Stocking;
         if (!this.Data[field]) {
-          if (field == 'date') {
+          if (field == 'date' || field == 'storeID' || field == 'schoolId' || field == 'schoolPCId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -754,6 +791,8 @@ export class StockingDetailsComponent {
     var date = `${year}-${month}-${day}T${hours}:${minutes}`;
     this.adiustmentDisbursement.date = date
     this.adiustmentDisbursement.storeID = this.Data.storeID;
+    this.adiustmentDisbursement.schoolId = this.Data.schoolId;
+    this.adiustmentDisbursement.schoolPCId = this.Data.schoolPCId;
     this.adiustmentDisbursement.flagId = flagId;
 
     this.adiustmentDisbursement.inventoryDetails = this.TableData
@@ -763,8 +802,8 @@ export class StockingDetailsComponent {
         const price = foundItem?.purchasePrice ?? 0;
         const quantity = item.theDifference ?? 0;
 
-        const adjustedQuantity = flagId === 4 ? -1 * quantity : quantity;
-        const adjustedTotalPrice = flagId === 4 ? -1 * price * quantity : price * quantity;
+        const adjustedQuantity = flagId === 5 ? -1 * quantity : quantity;
+        const adjustedTotalPrice = flagId === 5 ? -1 * price * quantity : price * quantity;
 
         return {
           id: Date.now() + Math.floor(Math.random() * 1000),
@@ -850,7 +889,6 @@ export class StockingDetailsComponent {
       }, 300)
     );
   }
-
 
   async Differences(): Promise<void> {
     const isEditMode = this.mode === 'Edit';
@@ -1071,24 +1109,33 @@ export class StockingDetailsComponent {
   }
 
   validateNumberRow(event: any, field: keyof StockingDetails, row: StockingDetails): void {
-    const value = event.target.value;
-    const numValue = Number(value);
-    if (field === 'actualStock') {
-      const integerRegex = /^\d+$/;
-
-      if (!integerRegex.test(value) || numValue <= 0) {
-        // Invalid input (decimal, letters, negative, etc.)
-        row[field] = '';
-        event.target.value = 0;
-      } else {
-        // Valid integer value
-        row[field] = numValue;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;  
       }
-      this.onStockChangeWhenEditRow(row);
-      return;
     }
+    // const numValue = Number(value);
+    // if (field === 'actualStock') {
+    //   const integerRegex = /^\d+$/;
+
+    //   if (!integerRegex.test(value) || numValue <= 0) {
+    //     // Invalid input (decimal, letters, negative, etc.)
+    //     row[field] = '';
+    //     event.target.value = 0;
+    //   } else {
+    //     // Valid integer value
+    //     row[field] = numValue;
+    //   }
+    //   this.onStockChangeWhenEditRow(row);
+    //   return;
+    // }
   }
 
+  
 }
 
 

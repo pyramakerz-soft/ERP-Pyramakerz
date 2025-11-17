@@ -66,7 +66,7 @@ export class OctaService {
     return this.http.delete(`${this.baseUrl}/Octa/${id}`, { headers })
   }
 
-  EditPassword(editpass: EditPass, DomainName?: string) { 
+  EditPassword(editpass: EditPass, DomainName?: string) {   // nav
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders() 
       .set('Authorization', `Bearer ${token}`)

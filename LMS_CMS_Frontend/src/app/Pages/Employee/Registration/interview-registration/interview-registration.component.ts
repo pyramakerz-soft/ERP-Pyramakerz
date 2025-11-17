@@ -15,6 +15,9 @@ import { InterviewState } from '../../../../Models/Registration/interview-state'
 import { InterviewStateService } from '../../../../Services/Employee/Registration/interview-state.service';
 import { TranslateModule } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-interview-registration',
@@ -28,14 +31,16 @@ export class InterviewRegistrationComponent {
   DomainName: string = "";
   interviewTimeID  = 0
   interviewTimeTable:InterviewTimeTable = new InterviewTimeTable()
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   registrationFormInterviewData:RegistrationFormInterview[] = []
   registrationFormInterview:RegistrationFormInterview = new RegistrationFormInterview()
   StateData:InterviewState[] = []
 
   isLoading=false
 
-  constructor(public ApiServ: ApiService, public activeRoute: ActivatedRoute, public router:Router, public interviewStateService: InterviewStateService,
+  constructor(public ApiServ: ApiService, 
+    private languageService: LanguageService, public activeRoute: ActivatedRoute, public router:Router, public interviewStateService: InterviewStateService,
     public interviewTimeTableService: InterviewTimeTableService, public registrationFormInterviewService: RegistrationFormInterviewService ){}
   
   ngOnInit(){
@@ -44,6 +49,17 @@ export class InterviewRegistrationComponent {
     this.interviewTimeID = Number(this.activeRoute.snapshot.paramMap.get('Id'))
     this.getRegistrationFormInterviewData()
     this.getInterviewTimeByID()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getRegistrationFormInterviewData(){
@@ -113,7 +129,7 @@ export class InterviewRegistrationComponent {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });

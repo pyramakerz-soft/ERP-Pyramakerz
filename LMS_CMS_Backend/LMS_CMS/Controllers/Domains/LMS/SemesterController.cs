@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] {"octa", "employee", "student", "parent" },
             pages: new[] { "Semester" }
         )]
         public async Task<IActionResult> GetAsync()
@@ -66,8 +66,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByAcademicYear/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Semester" }
+            allowedTypes: new[] {"octa", "employee", "student", "parent" },
+            pages: new[] { "Semester" , "Bus Students" , "Lessons" }
         )]
         public async Task<IActionResult> GetAsyncByAcademicYear(long id)
         {
@@ -84,6 +84,40 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             List<Semester> Semesters = await Unit_Of_Work.semester_Repository.Select_All_With_IncludesById<Semester>(
                     sem => sem.IsDeleted != true && sem.AcademicYearID == id,
+                    query => query.Include(emp => emp.AcademicYear));
+
+            if (Semesters == null || Semesters.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Semester_GetDTO> SemesterDTO = mapper.Map<List<Semester_GetDTO>>(Semesters);
+
+            return Ok(SemesterDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetBySchool/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] {"octa", "employee", "student", "parent" },
+            pages: new[] { "Semester" }
+        )]
+        public async Task<IActionResult> GetBySchool(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            List<Semester> Semesters = await Unit_Of_Work.semester_Repository.Select_All_With_IncludesById<Semester>(
+                    sem => sem.IsDeleted != true && sem.AcademicYear.SchoolID == id,
                     query => query.Include(emp => emp.AcademicYear));
 
             if (Semesters == null || Semesters.Count == 0)

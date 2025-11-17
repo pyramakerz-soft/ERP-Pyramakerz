@@ -1,0 +1,150 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }}</h1>
+    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+        <app-search *ngIf="IsViewTable" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+
+        <button (click)="Create()"
+            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+              {{ 'Create' | translate }} {{ 'Attendance' | translate }}
+        </button>
+    </div>
+</div>
+
+
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse mt-5">
+    <div class="w-[49%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId" (change)="GetAllAcademicYearsBySchool(); GetAllGradesBySchool(); IsViewTable=false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }}  {{ 'School' | translate }}</option>
+            <option *ngFor="let school of Schools" [value]="school.id">
+                {{ school.name }}
+            </option>
+            <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+    <div class="w-[49%]">
+        <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Academic Year' | translate }}</label>
+        <select id="SelectedAcademicYearId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedAcademicYearId" (change)="IsViewTable=false" [disabled]="!SelectedSchoolId">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }}  {{ 'Academic Year' | translate }}</option>
+            <option *ngFor="let ac of AcademicYears" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="AcademicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+    <div class="w-[49%]">
+        <label for="SelectedGradeId" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Grade' | translate }}</label>
+        <select id="SelectedGradeId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGradeId" (change)="GetAllclassesBygrade(); IsViewTable=false"   [disabled]="!SelectedSchoolId">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }}  {{ 'Grade' | translate }}</option>
+            <option *ngFor="let grade of Grades" [value]="grade.id">
+                {{ grade.name }}
+            </option>
+            <option *ngIf="Grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+    <div class="w-[49%]">
+        <label for="SelectedClassId" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classroom' | translate }}</label>
+        <select id="SelectedClassId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedClassId" (change)="IsViewTable=false"   [disabled]="!SelectedGradeId">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }}  {{ 'Classroom' | translate }}</option>
+            <option *ngFor="let class of Classes" [value]="class.id">
+                {{ class.name }}
+            </option>
+            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg"
+             [disabled]="!SelectedSchoolId || !SelectedAcademicYearId || !SelectedGradeId || !SelectedClassId" (click)="GetAllAttendance(this.CurrentPage, this.PageSize)"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedAcademicYearId || !SelectedGradeId || !SelectedClassId, 'secondaryBg text-white': SelectedSchoolId && SelectedAcademicYearId && SelectedGradeId && SelectedClassId }">
+             {{ 'View' | translate }}
+        </button>
+    </div>
+    <div *ngIf="SelectedSchoolId" class="rounded-full p-2 border-4 cursor-pointer" (click)="ResetFilter(); IsViewTable=false">
+            <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+    </div>
+</div>
+
+<div *ngIf="IsViewTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                     {{ 'ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                     {{ 'Date' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                     {{ 'Actions' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="TableData.length === 0">
+                <td colspan="7"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                     {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr *ngFor="let row of TableData; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.date }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                            (click)="Delete(row.id)">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row.id)">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div *ngIf="IsViewTable" class="mt-8 flex justify-between items-center">
+  <div class="flex items-center space-x-4 rtl:space-x-reverse">
+    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+      [disabled]="CurrentPage === 1 || TableData.length == 0"
+      [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
+      <i class="fa-solid fa-arrow-left"></i>
+      <p> {{'Previous'| translate }}</p>
+    </button>
+    <div class="flex">
+        <div *ngFor="let page of visiblePages"
+            class="rounded-lg py-[10px] w-[40px]"
+            [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+            (click)="changeCurrentPage(page)">
+            <p class="cursor-pointer text-center">{{ page }}</p>
+        </div>
+    </div>
+    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+      [disabled]="CurrentPage === TotalPages || TableData.length == 0"
+      [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
+      <p>{{'Next'| translate }}</p>
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <div class="flex items-center space-x-2 rtl:space-x-reverse">
+    <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1"
+      (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+    <p>{{'items Per Page'| translate }}</p>
+  </div>
+
+  <div>
+    <p>{{CurrentPage}}{{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
+  </div>
+</div>

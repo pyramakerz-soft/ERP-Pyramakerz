@@ -26,11 +26,14 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { Employee } from '../../../../Models/Employee/employee';
 import { Day } from '../../../../Models/day';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-remedial-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule, DragDropModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, DragDropModule, PdfPrintComponent, TranslateModule],
   templateUrl: './remedial-time-table-view.component.html',
   styleUrl: './remedial-time-table-view.component.css'
 })
@@ -46,7 +49,8 @@ export class RemedialTimeTableViewComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   RTimeTableId: number = 0;
   SelectedGradeId: number = 0;
   remedialTimeTable: RemedialTimeTable = new RemedialTimeTable();
@@ -86,7 +90,8 @@ export class RemedialTimeTableViewComponent {
     public reportsService: ReportsService,
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
-    public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,
+    public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -98,7 +103,16 @@ export class RemedialTimeTableViewComponent {
     });
     this.RTimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+  ngOnDestroy(): void { 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllGradeBySchool() {
     this.GradeServ.GetBySchoolId(this.remedialTimeTable.schoolID, this.DomainName).subscribe((d) => {
@@ -121,8 +135,13 @@ export class RemedialTimeTableViewComponent {
       });
       this.remedialClasses.forEach(cl => {
         const used = classUsageCount[cl.id] || 0;
-        cl.numberOfSession -= used;
-        if (cl.numberOfSession < 0) {
+        if(cl.numberOfSession){
+          cl.numberOfSession -= used;
+        }else{
+          cl.numberOfSession = 0;
+          cl.numberOfSession -= used;
+        }
+        if (cl.numberOfSession && cl.numberOfSession < 0) {
           cl.numberOfSession = 0
         }
       });
@@ -162,7 +181,7 @@ export class RemedialTimeTableViewComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: ' Dragged session teachers conflict with other sessions in the target session day/period',
+        text: ' Some teachers in the dragged session already have another class in the target session’s time',
         confirmButtonColor: '#089B41',
       });
       return;
@@ -191,7 +210,7 @@ export class RemedialTimeTableViewComponent {
     }
 
     const droppedClass = this.remedialClasses.find(s => s.id === draggedItem.id);
-    if (droppedClass && droppedClass.numberOfSession > 0) {
+    if (droppedClass && droppedClass.numberOfSession && droppedClass.numberOfSession > 0) {
       droppedClass.numberOfSession--;
     } else if (droppedClass && droppedClass.numberOfSession == 0) {
       this.remedialClasses = this.remedialClasses.filter(s => s.id != draggedItem.id);
@@ -351,13 +370,13 @@ export class RemedialTimeTableViewComponent {
     const data = this.remedialTimeTable.groupDays.map((day: any) => {
       const row: any = { Day: day.dayName };
       for (let i = 0; i < this.remedialTimeTable.maximumPeriodCountRemedials; i++) {
-        const period = day.periods.find((p: any) => p.periodIndex === i);
+        // FIX: use i + 1 if periodIndex starts from 1
+        const period = day.periods.find((p: any) => p.periodIndex === i + 1);
         const classes = period?.remedialTimeTableClasses || [];
 
-        // Join multiple classes in same period
-        row[`Session ${i + 1}`] = classes.map((c: any) =>
-          `${c.remedialClassroomName} / ${c.teacherEnName}`
-        ).join(', ');
+        row[`Session ${i + 1}`] = classes
+          .map((c: any) => `${c.remedialClassroomName} / ${c.teacherEnName}`)
+          .join(', ');
       }
       return row;
     });
@@ -450,7 +469,7 @@ export class RemedialTimeTableViewComponent {
       filename: `${this.remedialTimeTable?.name ?? 'RemedialTimeTable'}.xlsx`,
       tables: [
         {
-          title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
+          // title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
           headers: headerKeyMap.map(h => h.header),
           data: dataMatrix   // ✅ array of arrays
         }

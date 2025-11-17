@@ -9,54 +9,66 @@
     <!-- Filter Controls -->
     <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
         <!-- School Selector -->
-        <div class="w-full md:w-1/4">
+        <div *ngIf="this.reportType=='employee'" class="w-full md:w-1/4">
             <label class="block mb-2 text-sm font-medium text-gray-900" for="school"> {{ 'School' | translate }}</label>
             <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
                 [(ngModel)]="selectedSchool" (ngModelChange)="onSchoolChange()" required>
-                <option [ngValue]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+                <option value=0 disabled selected hidden> {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                 <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
             </select>
         </div>
 
         <!-- Grade Selector -->
-        <div class="w-full md:w-1/4">
+        <div *ngIf="this.reportType=='employee'" class="w-full md:w-1/4">
             <label class="block mb-2 text-sm font-medium text-gray-900" for="grade"> {{ 'Grade' | translate }}</label>
             <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
                 [(ngModel)]="selectedGrade" (ngModelChange)="onGradeChange()" [disabled]="!selectedSchool" required>
-                <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+                <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                 <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
             </select>
         </div>
 
         <!-- Class Selector -->
-        <div class="w-full md:w-1/4">
+        <div *ngIf="this.reportType=='employee'" class="w-full md:w-1/4">
             <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
             <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
                 [(ngModel)]="selectedClass" (ngModelChange)="onClassChange()" [disabled]="!selectedGrade" required>
-                <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+                <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                 <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
             </select>
         </div>
 
         <!-- Student Selector -->
-        <div class="w-full md:w-1/4">
+        <div *ngIf="this.reportType=='employee'" class="w-full md:w-1/4">
             <label class="block mb-2 text-sm font-medium text-gray-900" for="student"> {{ 'Student' | translate }}</label>
             <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
                 [(ngModel)]="selectedStudent" (ngModelChange)="resetTable()"
                 [disabled]="!selectedClass || students.length === 0" required>
-                <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+                <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
                 <option *ngFor="let student of students" [ngValue]="student.id">
                     {{ student.name }}
                 </option>
             </select>
         </div>
 
+        <div *ngIf="this.reportType=='parent'" class="w-full">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="student"> {{ 'Student' | translate }}</label>
+            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+                [(ngModel)]="selectedStudent" (ngModelChange)="resetTable()" required>
+                <option value=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+                <option *ngFor="let student of students" [ngValue]="student.id">
+                    {{ student.en_name }}
+                </option>
+            </select>
+        </div>
+
+
         <!-- View Report Button -->
         <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
             <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-                [disabled]="!selectedSchool || !selectedGrade || !selectedClass || !selectedStudent" [ngClass]="{
-                    'bg-gray-100 text-gray-300': !selectedSchool || !selectedGrade || !selectedClass || !selectedStudent,
-                    'secondaryBg text-white': selectedSchool && selectedGrade && selectedClass && selectedStudent
+                [disabled]="OrCheck()" [ngClass]="{
+                    'bg-gray-100 text-gray-300':OrCheck(),
+                    'secondaryBg text-white': AndCheck()
                 }">
                  {{ 'View Report' | translate }}
             </button>
@@ -69,7 +81,7 @@
             'bg-[#089B41] text-white': selectedTab === tab,
             'bg-gray-200 text-gray-700': selectedTab !== tab
         }" class="px-4 py-3 text-sm font-medium rounded-sm focus:outline-none transition-colors duration-200">
-            {{ tab }}
+            {{ tab | translate }}
         </button>
     </div>
 
@@ -80,39 +92,47 @@
         <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="printTable()" title="Print Report">
     </div>
 
-    <!-- Table -->
-    <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-                <tr>
-                    <th *ngFor="let header of getCurrentHeaders()"
-                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ header }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngIf="tableData.length === 0 && showTable">
-                    <td [attr.colspan]="getCurrentHeaders().length"
-                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        <div class="flex flex-col items-center justify-center py-4">
-                            <span class="mt-2 text-gray-500"> {{ 'No data available' | translate }}</span>
-                        </div>
-                    </td>
-                </tr>
+<!-- Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th *ngFor="let header of getCurrentHeaders()"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ header | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="tableData.length === 0 && showTable">
+                <td [attr.colspan]="getCurrentHeaders().length"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    <div class="flex flex-col items-center justify-center py-4">
+                        <span class="mt-2 text-gray-500"> {{ 'No data available' | translate }}</span>
+                    </div>
+                </td>
+            </tr>
 
-                <tr *ngFor="let row of tableData; let i = index" [ngClass]="{ 
-                        'bg-[#F7F7F7]': i % 2 === 1, 
-                        'bg-white': i % 2 !== 1
-                    }" class="border-t border-gray-300 text-xs md:text-sm">
-                    <td *ngFor="let header of getCurrentHeaders()"
-                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ getCellValue(row, header) }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+            <tr *ngFor="let row of tableData; let i = index" [ngClass]="{ 
+        'bg-[#F7F7F7]': i % 2 === 1, 
+        'bg-white': i % 2 !== 1
+    }" class="border-t border-gray-300 text-xs md:text-sm">
+                <td *ngFor="let header of getCurrentHeaders()"
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- Use the new method to display check/X for hygiene types -->
+                    <span [innerHTML]="getCellDisplay(row, header)"></span>
+                </td>
+                <!-- Action column - only for medical history tabs -->
+                <td *ngIf="selectedTab === 'MH By Parent' || selectedTab === 'MH By Doctor'" 
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <button (click)="viewDetails(row.id)">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
     <!-- Hidden PDF container -->
     <div class="absolute -top-[9999px] -left-[9999px]">

@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Registration
     public class RegisterationFormSubmittionGetDTO
     {
         public long? ID { get; set; }
-        public string TextAnswer { get; set; }
+        public string? TextAnswer { get; set; }
         public long RegisterationFormParentID { get; set; }
         public string? RegistrationFormParentName { get; set; }
         public long CategoryFieldID { get; set; }

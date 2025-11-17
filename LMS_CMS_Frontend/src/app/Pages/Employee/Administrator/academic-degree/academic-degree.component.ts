@@ -14,9 +14,10 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AcademicDegreeService } from '../../../../Services/Employee/Administration/academic-degree.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-academic-degree',
   standalone: true,
@@ -25,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './academic-degree.component.css',
 })
 export class AcademicDegreeComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -50,7 +40,7 @@ export class AcademicDegreeComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';
@@ -67,13 +57,14 @@ export class AcademicDegreeComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AcademicDegreeServ: AcademicDegreeService,
-        private languageService: LanguageService  
-  ) {}
+    private languageService: LanguageService, 
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -93,11 +84,18 @@ export class AcademicDegreeComponent {
     });
 
     this.GetAllData();
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAllData() {
     this.TableData = [];
@@ -115,13 +113,13 @@ export class AcademicDegreeComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Academic Degree?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Academic Degree') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.AcademicDegreeServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -172,7 +170,7 @@ export class AcademicDegreeComponent {
           },
           (error) => {
             this.isLoading = false; // Hide spinner
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -180,14 +178,14 @@ export class AcademicDegreeComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }
@@ -203,7 +201,7 @@ export class AcademicDegreeComponent {
           },
           (error) => {
             this.isLoading = false; // Hide spinner
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -211,18 +209,18 @@ export class AcademicDegreeComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }
-    } 
+    }
   }
 
   closeModal() {

@@ -17,11 +17,14 @@ import { Student } from '../../../../../Models/student';
 import { StudentService } from '../../../../../Services/student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
   templateUrl: './students-names-in-class.component.html',
   styleUrl: './students-names-in-class.component.css'
 })
@@ -41,7 +44,8 @@ export class StudentsNamesInClassComponent {
   school: School = new School()
   date: string = ""
   studentsCount = 0
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   showTable = false
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -61,10 +65,11 @@ export class StudentsNamesInClassComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
+    private languageService: LanguageService,
     public classroomService: ClassroomService,
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
-    public reportsService: ReportsService,
+    public reportsService: ReportsService, 
   ) { }
 
   ngOnInit() {
@@ -75,6 +80,16 @@ export class StudentsNamesInClassComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getSchool()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchool() {
@@ -243,13 +258,23 @@ export class StudentsNamesInClassComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => this.showPDF = false, 2000);
-    }, 500);
-  }
+  preparePDFData(): any[] {
+  return this.StudentData.map((student) => ({
+    'ID': student.id,
+    'Name': student.en_name,
+    // 'Mobile': student.mobile,
+    'Nationality': student.nationalityEnName,
+    'Gender': student.genderName
+  }));
+}
+
+DownloadAsPDF() {
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => this.showPDF = false, 2000);
+  }, 500);
+}
 
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
@@ -264,7 +289,7 @@ export class StudentsNamesInClassComponent {
         { key: 'Class', value: this.class.name },
         { key: 'Number of Students', value: this.studentsCount },
         { key: 'Date', value: this.date },
-        { key: 'Session', value: '2024/2025' },
+        // { key: 'Session', value: '2024/2025' },
         { key: 'School', value: this.school.name },
         { key: 'Year', value: this.AcademicYearName },
         { key: 'Grade', value: this.GradeName }
@@ -274,12 +299,23 @@ export class StudentsNamesInClassComponent {
       filename: "List of students' names in class.xlsx",
       tables: [
         {
-          title: "Students List",
-          headers: ['id', 'en_name', 'mobile', 'nationalityName', 'genderName'],
-          data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
+          // title: "Students List",
+          headers: ['id', 'en_name', 'Nationality', 'genderName'],
+          data: this.StudentData.map((row) => [row.id, row.en_name, row.nationalityEnName, row.genderName])
         }
       ]
     });
   }
 
+inforows() {
+  return [
+          { keyEn: 'Class : ' + (this.class?.name || this.Classrooms.find(c => c.id == this.ClassId)?.name || '')},
+          { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
+          { keyEn: 'School : ' + (this.school?.name || this.Schools.find(s => s.id == this.SchoolId)?.name || '') },
+          { keyEn: 'Year : ' + this.AcademicYearName },
+          { keyEn: 'Grade : ' + this.GradeName },
+          { keyEn: 'Generated On : ' + (this.date || this.formatDate(new Date().toISOString(), this.direction)) },
+
+      ];
+    }
 }

@@ -1,64 +1,67 @@
-import { Component } from '@angular/core';
-import { AccountService } from '../../../Services/account.service';
-import { TokenData } from '../../../Models/token-data';
-import { ChartPieComponent } from '../../../Component/Employee/Home/chart-pie/chart-pie.component';
-import { RevenueChartComponent } from '../../../Component/Employee/Home/revenue-chart/revenue-chart.component';
-import { SalesAnalyticsComponent } from '../../../Component/Employee/Home/sales-analytics/sales-analytics.component';
-import { FilterHeaderComponent } from '../../../Component/Employee/Home/filter-header/filter-header.component';
-import { EmployeeService } from '../../../Services/Employee/employee.service';
+import { Component } from '@angular/core'; 
+import { AnnouncementService } from '../../../Services/Employee/Administration/announcement.service';
+import { Announcement } from '../../../Models/Administrator/announcement';
 import { ApiService } from '../../../Services/api.service';
-import { Employee } from '../../../Models/Employee/employee';
 import { CommonModule } from '@angular/common';
-import { RevenueChartSalesComponent } from '../../../Component/Employee/Home/revenue-chart-sales/revenue-chart-sales.component';
-import { TranslateModule } from '@ngx-translate/core';
-import { LanguageService } from '../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-employee-home',
   standalone: true,
-  imports: [
-    ChartPieComponent,
-    RevenueChartComponent,
-    RevenueChartSalesComponent,
-    SalesAnalyticsComponent,
-    FilterHeaderComponent,
-    CommonModule , TranslateModule
-  ],
+  imports: [CommonModule],
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.css',
 })
-export class EmployeeHomeComponent {
-  tab: 'Week' | 'Month' | 'Year' | 'Custom' = 'Month';
-  User_Data_After_Login :TokenData =new TokenData("", 0, 0, 0, 0, "", "", "", "", "") 
-  DomainName: string = "";
-    isRtl: boolean = false;
-    subscription!: Subscription;
-  employee:Employee = new Employee()
+export class EmployeeHomeComponent { 
+  announcements: Announcement[] = []  
+  DomainName = ''
+  selectedIndex = 0;
+  private intervalId: any;
 
-  constructor(public account:AccountService, 
-    public employeeService:EmployeeService, 
-    public ApiServ:ApiService,private languageService: LanguageService){}
-
-  ngOnInit(){
-    this.User_Data_After_Login = this.account.Get_Data_Form_Token(); 
-    this.DomainName=this.ApiServ.GetHeader();
-    this.getEmployeeByID()
-
-         this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+  constructor(private announcementService: AnnouncementService, public ApiServ: ApiService){}
+    
+  ngOnInit(){ 
+    this.DomainName = this.ApiServ.GetHeader();
+    this.getMyAnnouncement()     
+    this.startAutoSlide();
   }
 
-  getEmployeeByID(){
-    this.employeeService.Get_Employee_By_ID(this.User_Data_After_Login.id, this.DomainName).subscribe(
-      data =>{
-        this.employee = data 
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  getMyAnnouncement(){
+    this.announcements = []
+    this.announcementService.GetMyAnnouncement(this.DomainName).subscribe(
+      data => {
+        this.announcements = data
       }
     )
   }
 
-  selectTab(tab: 'Week' | 'Month' | 'Year' | 'Custom') {
-    this.tab = tab;
+  setSelectedIndex(index: number): void {
+    this.selectedIndex = index;
+  }
+
+  nextSlide(): void {
+    if (this.selectedIndex < this.announcements.length - 1) {
+      this.selectedIndex++;
+    } else {
+      this.selectedIndex = 0;  
+    }
+  }
+
+  prevSlide(): void {
+    if (this.selectedIndex > 0) {
+      this.selectedIndex--;
+    } else {
+      this.selectedIndex = this.announcements.length - 1;  
+    }
+  }
+
+  startAutoSlide() {
+    this.intervalId = setInterval(() => {
+      this.nextSlide();  
+    }, 5000); 
   }
 }

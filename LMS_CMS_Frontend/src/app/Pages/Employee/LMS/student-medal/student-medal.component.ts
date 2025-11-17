@@ -26,6 +26,7 @@ import { Medal } from '../../../../Models/LMS/medal';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-student-medal',
@@ -93,7 +94,7 @@ export class StudentMedalComponent {
     private ClassroomServ: ClassroomService,
     public studentMedalServ : StudentMedalService ,
     public MedalServ : MedalService,
-    private languageService: LanguageService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -118,6 +119,13 @@ export class StudentMedalComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }  
+
 
   getAllSchools() {
     this.schools=[]
@@ -201,7 +209,7 @@ export class StudentMedalComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' }
               });

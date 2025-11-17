@@ -1,0 +1,244 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Certificates' | translate }} </h1>
+    </div>
+</div>
+
+<div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
+
+    <div *ngIf="this.User_Data_After_Login.type =='parent'" class="w-[24%]">
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
+        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedStudentId" (change)="OnStudentChange()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
+            </option>
+            <option *ngFor="let c of studentOfParent" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="studentOfParent.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="this.User_Data_After_Login.type=='employee'" class="w-[24%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId"
+            (change)="getAllGradesBySchoolId(); IsShowTabls = false;  SelectedSearchType='';">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'School' | translate }}</option>
+            <option *ngFor="let stu of schools" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[24%]">
+        <label for="SelectedSearchType" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Search Types' |
+            translate }}</label>
+        <select id="SelectedSearchType"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSearchType" [disabled]="!SelectedSchoolId" (change)="OnSearchTypeChange()">
+            <option [value]="''" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Search Type' | translate }}
+            </option>
+            <option *ngFor="let c of SearchType" [value]="c">{{ c }}</option>
+            <option *ngIf="SearchType.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="SelectedSearchType=='Academic Year' || SelectedSearchType=='Summer Course'" class="w-[24%]">
+        <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Academic Year' |
+            translate }}</label>
+        <select id="SelectedAcademicYearId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedAcademicYearId" (change)="SelectAcadimicYear(); getAllClassByGradeIdAndAcYearId()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
+            </option>
+            <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="SelectedSearchType=='Semester'" class="w-[24%]">
+        <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Academic Year' |
+            translate }}</label>
+        <select id="SelectedAcademicYearId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedAcademicYearId" (change)="getSemestersBySchool(); getAllClassByGradeIdAndAcYearId()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
+            </option>
+            <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="SelectedSearchType=='Semester'" class="w-[24%]">
+        <label for="selected" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Semester' |
+            translate }}</label>
+        <select id="SelectedSemesterId" [disabled]="!SelectedAcademicYearId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSemesterId" (change)="SelectSemester()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Semester' | translate }}
+            </option>
+            <option *ngFor="let c of semester" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="semester.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="SelectedSearchType=='Month'" class="w-[24%]">
+        <label for="monthInput" class="block mb-2 text-sm font-medium text-gray-900">
+            {{ 'Month' | translate }}
+        </label>
+        <input id="monthInput" type="month"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            (change)="onMonthChange($event)" />
+    </div>
+ 
+    <div *ngIf="IsMonthChoosen" class="w-[24%]">
+        <label for="SelectedAcademicYearId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Academic Year' |
+            translate }}</label>
+        <select id="SelectedAcademicYearId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedAcademicYearId" (change)="getAllClassByGradeIdAndAcYearId()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
+            </option>
+            <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="academicYears.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[24%]">
+        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Grade' | translate }}</label>
+        <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId"
+            (change)="getAllClassByGradeIdAndAcYearId(); IsShowTabls = false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngFor="let ac of Grades" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[24%]">
+        <label for="Class" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Class' | translate }}</label>
+        <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedClassId" [disabled]="!SelectedGradeId || !SelectedAcademicYearId" (change)="getAllStudentByClass()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngFor="let c of Classes" [value]="c.id">{{ c.name }}</option>
+            <option *ngIf="Classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="mode=='employee'" class="w-[24%]">
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
+        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedStudentId" [disabled]="!SelectedClassId" (change)="OnStudentChange()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
+            </option>
+            <option *ngFor="let c of Students" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div> 
+    
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" [disabled]="ValidateViewOr()" (click)="Apply()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300':ValidateViewOr(), 'secondaryBg text-white': ValidateViewAnd()}">
+            {{ 'View' | translate }}
+        </button>
+    </div>
+</div>
+
+<div *ngIf="IsShowTabls" class="my-5 flex justify-end items-center space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="IsShowTabls">
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD]">
+                <tr>
+                    <!-- First column header -->
+                    <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                        {{ 'Subjects' | translate }}
+                    </th>
+
+                    <!-- Dynamic headers for weight types -->
+                    <th *ngFor="let wt of weightTypes" class="py-3 px-4 min-w-[100px] border border-[#EAECF0]">
+                        {{ wt.englishName }}
+                    </th>
+
+                    <!-- Last column header -->
+                    <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                        {{ 'Total' | translate }}
+                    </th>
+
+                    <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]">
+                        {{ 'Percentage' | translate }}
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="subjects.length === 0">
+                    <td [attr.colspan]="weightTypes.length + 3"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        {{ 'No Data Found' | translate }}
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let subject of subjects; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <!-- Subject Column -->
+                    <td class="py-2 px-4 border border-[#EAECF0] font-medium">
+                        {{ subject.subjectEnglishNameInCertificate ? subject.subjectEnglishNameInCertificate : subject.en_name }}
+                    </td>
+
+                    <!-- Cells per weight type -->
+                    <td *ngFor="let wt of weightTypes" class="py-2 px-4 text-center border border-[#EAECF0]">
+                        {{ getDegree(subject.id, wt.id) }}
+                    </td>
+
+                    <td class="py-2 px-4 text-center border border-[#EAECF0]">
+                        {{ getTotal(subject.id) }}
+                    </td>
+
+                    <td class="py-2 px-4 text-center border border-[#EAECF0]">
+                        {{ getPercentage(subject.id) }}
+                    </td>
+                </tr>
+                <!-- Data Rows -->
+                <tr class="border-t border-gray-300 text-xs md:text-sm">
+                    <!-- Subject Column -->
+                    <td class="py-2 px-4 border border-[#EAECF0] font-medium">
+                        Total
+                    </td>
+                    <td *ngFor="let subject of weightTypes; let i = index"
+                        class="py-2 px-4 text-center border border-[#EAECF0]">
+                        -
+                    </td>
+                    <td class="py-2 px-4 text-center border border-[#EAECF0]">
+                        {{ getSum() }}
+                    </td>
+                    <td class="py-2 px-4 text-center border border-[#EAECF0]">
+                        {{ getSumPercentage() }}
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="SelectedSchool" [fileName]="'Certificate Report'"
+        [infoRows]="infoRows"
+            [tableHeaders]="tableHeadersForPDF"
+             [tableData]="tableDataForPDF" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

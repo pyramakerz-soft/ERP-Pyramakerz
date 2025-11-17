@@ -29,7 +29,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" } ,
-          pages: new[] { "Book Correction" }
+          pages: new[] { "Book Correction" , "Evaluation" }
       )]
         public IActionResult Get()
         {

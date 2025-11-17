@@ -62,6 +62,18 @@ export class AssignmentService {
     return this.http.get<any>(`${this.baseUrl}/Assignment/GetByStudentID/${StudentId}/${SubjectId}`, { headers })
   }
 
+  CheckIfHaveAccess(StudentId: number, AssignmentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/Assignment/CheckIfHaveAccess/${StudentId}/${AssignmentId}`, { headers })
+  }
+
   Add(Assignment: Assignment, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
@@ -121,5 +133,35 @@ export class AssignmentService {
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Assignment/${id}`, { headers })
   }
+
+GetAssignmentReport(
+  DomainName: string,
+  fromDate: string,
+  toDate: string,
+  schoolId: number,
+  academicYearId: number,
+  gradeId: number,
+  subjectId: number
+) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  let params = new URLSearchParams();
+  params.append('FromDate', fromDate);
+  params.append('ToDate', toDate);
+  params.append('SchoolId', schoolId.toString());
+  params.append('AcademicYearId', academicYearId.toString());
+  params.append('GradeId', gradeId.toString());
+  params.append('SubjectId', subjectId.toString());
+
+  return this.http.get<any[]>(`${this.baseUrl}/Assignment/AssignmentReport?${params.toString()}`, { headers });
+}
 
 }

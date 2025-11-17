@@ -15,12 +15,13 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         public string? Message { get; set; }
         public string? Link { get; set; }
         public string? FileLink { get; set; }
-        public bool SeenOrNot { get; set; }
+        public bool SeenOrNot { get; set; } 
         public bool ForwardedOrNot { get; set; }
         public bool? ApprovedOrNot { get; set; }
         public long SenderID { get; set; }
         public long ReceiverID { get; set; }
-        public long? TransfereeID { get; set; }
+        public long? ForwardedToID { get; set; }
+        public long? ForwardedFromID { get; set; }
 
         [ForeignKey("SenderUserType")]
         public long SenderUserTypeID { get; set; }
@@ -29,5 +30,6 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         [ForeignKey("ReceiverUserType")]
         public long ReceiverUserTypeID { get; set; }
         public UserType ReceiverUserType { get; set; }
+        public DateTime? ForwardedAt { get; set; }
     }
 }

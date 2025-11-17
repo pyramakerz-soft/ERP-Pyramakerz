@@ -58,12 +58,16 @@
             <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Registration Form Action' | translate }}</h1>
         </div>
         
-        <div> 
+        <div class="flex gap-3"> 
             <button (click)="reject()"
                 class="border border-red-500 text-red-500 rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-                 {{ 'Reject' | translate }}
+                 {{ 'Reject And Delete' | translate }}
             </button>
-        </div>
+            <button (click)="openEditModal()"
+                class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+                 {{ 'Edit' | translate }}
+            </button>
+        </div> 
     </div>
 
     <div class="flex justify-between items-center mt-3">
@@ -91,5 +95,43 @@
             class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
              {{ 'Accept' | translate }}
         </button>
+    </div>
+</div>
+
+
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center"> 
+            <h1 class="font-semibold text-2xl leading-9">  {{ 'Edit' | translate }} {{ 'Registered Employee' | translate }}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Username"> {{ 'Username' | translate }}</label>
+                <input id="Username" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Username" [(ngModel)]="employeeToEdit.user_Name"
+                    (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
+                <span *ngIf="validationErrors['user_Name']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['user_Name'] }}</span>
+            </div>   
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="email"> {{ 'Email' | translate }}</label>
+                <input id="email" type="email" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Email" [(ngModel)]="employeeToEdit.email"
+                    (ngModelChange)="onInputValueChange({ field: 'email', value: $event })" />
+                <span *ngIf="validationErrors['email']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['email'] }}</span>
+            </div>   
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
     </div>
 </div>

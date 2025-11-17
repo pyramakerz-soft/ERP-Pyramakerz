@@ -1,0 +1,374 @@
+<!-- account-subledger-report.component.html -->
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">
+        {{ 'Accounts Subledger Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="fromDate">{{ 'From Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="fromDate" [(ngModel)]="fromDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'To Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="toDate" [(ngModel)]="toDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Account Type Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
+            [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
+            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">
+                {{ isRtl && option.arName ? option.arName : option.name | translate }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Account Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="accountID">{{ 'Account' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="accountID"
+            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
+            <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option>
+            <option *ngFor="let account of accountOptions" [ngValue]="account.id">
+                {{ account.name }}
+            </option>
+            <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
+                {{ 'No accounts available' | translate }}
+            </option>
+        </select>
+    </div>
+
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!fromDate || !toDate || !linkFileID || isLoading" [ngClass]="{
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || isLoading,
+                'secondaryBg text-white': fromDate && toDate && linkFileID && !isLoading
+            }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <span *ngIf="isLoading">{{ 'Loading...' | translate }}</span>
+        </button>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="flex justify-center items-center py-8">
+    <i class="fas fa-spinner fa-spin"></i>
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+</div>
+
+<!-- Horizontal Table Layout (Similar to all-store-balance) -->
+<div *ngIf="showTable && reportData" class="mt-5 overflow-x-auto">
+    <div class="flex space-x-4 rtl:space-x-reverse pb-2">
+        
+        <!-- Fixed Columns Table (ID and Name) -->
+        <div class="flex-shrink-0">
+            <!-- Accounts Header - Styled as section title -->
+            <div class="primaryTxt font-semibold text-2xl leading-9 mb-3">
+                {{ 'Accounts' | translate }}
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                <table class="w-full table inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th class="py-3 px-4 min-w-[80px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'ID' | translate }}
+                            </th>
+                            <th class="py-3 px-4 min-w-[200px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Name' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="getAllAccountIds().length === 0">
+                            <td colspan="2" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
+                        <tr *ngFor="let accountId of getAllAccountIds(); let i = index" 
+                            [ngClass]="{ 
+                                'bg-[#F7F7F7]': i % 2 === 1, 
+                                'bg-white': i % 2 !== 1
+                            }" 
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ accountId }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountNameById(accountId) }}
+                            </td>
+                        </tr>
+                            <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td colspan="2" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold text-center">
+                                {{ 'Totals' | translate }}:
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Opening Balance Table -->
+        <div class="flex-shrink-0">
+            <!-- Opening Balance Header - Styled as section title -->
+            <div class="primaryTxt font-semibold text-2xl leading-9 mb-3">
+                {{ 'Opening Balance' | translate }}
+            </div>
+            
+            <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                <table class="w-full table inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Debit' | translate }}
+                            </th>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Credit' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="getAllAccountIds().length === 0">
+                            <td colspan="2" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
+                        <tr *ngFor="let accountId of getAllAccountIds(); let i = index" 
+                            [ngClass]="{ 
+                                'bg-[#F7F7F7]': i % 2 === 1, 
+                                'bg-white': i % 2 !== 1
+                            }" 
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('opening', accountId).debit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('opening', accountId).credit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Opening Balance Total Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.firstPeriodTotals.total.totalDebit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.firstPeriodTotals.total.totalCredit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Opening Balance Difference Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td colspan="2" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold text-center">
+                                {{ 'Difference' | translate }}: {{ reportData.firstPeriodTotals.total.difference | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions Period Table -->
+        <div class="flex-shrink-0">
+            <!-- Transactions Period Header - Styled as section title -->
+            <div class="primaryTxt font-semibold text-2xl leading-9 mb-3">
+                {{ 'Transactions Period' | translate }}
+            </div>
+            
+            <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                <table class="w-full table inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Debit' | translate }}
+                            </th>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Credit' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="getAllAccountIds().length === 0">
+                            <td colspan="2" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
+                        <tr *ngFor="let accountId of getAllAccountIds(); let i = index" 
+                            [ngClass]="{ 
+                                'bg-[#F7F7F7]': i % 2 === 1, 
+                                'bg-white': i % 2 !== 1
+                            }" 
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('transactions', accountId).debit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('transactions', accountId).credit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Transactions Period Total Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.transactionsPeriodTotals.total.totalDebit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.transactionsPeriodTotals.total.totalCredit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Transactions Period Difference Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td colspan="2" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold text-center">
+                                {{ 'Difference' | translate }}: {{ reportData.transactionsPeriodTotals.total.difference | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Closing Balance Table -->
+        <div class="flex-shrink-0">
+            <!-- Closing Balance Header - Styled as section title -->
+            <div class="primaryTxt font-semibold text-2xl leading-9 mb-3">
+                {{ 'Closing Balance' | translate }}
+            </div>
+            
+            <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                <table class="w-full table inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Debit' | translate }}
+                            </th>
+                            <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ 'Credit' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="getAllAccountIds().length === 0">
+                            <td colspan="2" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                {{ 'No Data Found' | translate }}
+                            </td>
+                        </tr>
+                        <tr *ngFor="let accountId of getAllAccountIds(); let i = index" 
+                            [ngClass]="{ 
+                                'bg-[#F7F7F7]': i % 2 === 1, 
+                                'bg-white': i % 2 !== 1
+                            }" 
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('closing', accountId).debit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getAccountDataForPeriod('closing', accountId).credit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Closing Balance Total Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.lastPeriodTotals.total.totalDebit | number:'1.2-2' }}
+                            </td>
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                {{ reportData.lastPeriodTotals.total.totalCredit | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                        <!-- Closing Balance Difference Row -->
+                        <tr *ngIf="getAllAccountIds().length > 0" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td colspan="2" class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold text-center">
+                                {{ 'Difference' | translate }}: {{ reportData.lastPeriodTotals.total.difference | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div *ngIf="showTable && reportData" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !reportData.firstPeriodTotals.balance.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !reportData.firstPeriodTotals.balance.length}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>{{'Previous'| translate }}</p>
+        </button>
+
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || !reportData.firstPeriodTotals.balance.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !reportData.firstPeriodTotals.balance.length}">
+            <p>{{'Next'| translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input type="number" (input)="validateNumberForPagination($event)" 
+               class="rounded-lg border py-3 px-4 w-[73px]" 
+               [(ngModel)]="PageSize" min="1" 
+               (input)="validatePageSize($event)" 
+               (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>{{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
+    </div>
+</div>
+
+<!-- No Data Message -->
+<div *ngIf="showTable && !reportData" class="text-center py-8 text-gray-500">
+    {{ 'No data available for the selected filters' | translate }}
+</div>
+
+<!-- PDF Export Component (Original code preserved) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+  <div id="accountSubledgerData" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" 
+                   [fileName]="'Accounts Subledger Report'"
+[infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
+      },
+      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                   #pdfComponentRef>
+    </app-pdf-print>
+  </div>
+</div>

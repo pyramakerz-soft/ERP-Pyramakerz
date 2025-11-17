@@ -13,7 +13,9 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-school-configuration',
   standalone: true,
@@ -29,7 +31,8 @@ export class SchoolConfigurationComponent {
 
   schoolData: School[] = [];
   school: School = new School();
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false;
   path: string = '';
@@ -40,7 +43,8 @@ export class SchoolConfigurationComponent {
   isLoading = false;
    
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,private menuService: MenuService, 
-    public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router) {}
+    public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router,
+    private languageService: LanguageService,) {}
 
   ngOnInit(): void { 
     const currentUrl = this.router.url;
@@ -68,6 +72,16 @@ export class SchoolConfigurationComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchoolData() {
@@ -145,7 +159,7 @@ export class SchoolConfigurationComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });
@@ -163,7 +177,7 @@ export class SchoolConfigurationComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });

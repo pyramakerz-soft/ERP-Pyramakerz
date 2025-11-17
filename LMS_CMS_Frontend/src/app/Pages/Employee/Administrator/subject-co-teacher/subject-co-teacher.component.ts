@@ -3,7 +3,6 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
 import { TokenData } from '../../../../Models/token-data';
@@ -18,6 +17,8 @@ import { ClassroomSubjectCoTeacher } from '../../../../Models/LMS/classroom-subj
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
 @Component({
   selector: 'app-subject-co-teacher',
   standalone: true,
@@ -27,18 +28,8 @@ import {  Subscription } from 'rxjs';
 })
 export class SubjectCoTeacherComponent {
 
- User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  ); 
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
@@ -50,7 +41,7 @@ export class SubjectCoTeacherComponent {
   subject: ClassroomSubject[] = []
   validationErrors: { [key in keyof ClassroomSubjectCoTeacher]?: string } = {};
   isLoading = false;
-  employee: EmployeeGet = new EmployeeGet()
+  employee: Employee = new Employee()
   SelectedClassId : number =0
   IsSelectedClassId : string =""
 
@@ -85,8 +76,14 @@ export class SubjectCoTeacherComponent {
     this.isRtl = document.documentElement.dir === 'rtl';   
   }
 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   moveToEmployee() {
-    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectCoTeacher.coTeacherID}`)
+    this.router.navigateByUrl(`Employee/Employee/${this.SupjectCoTeacher.coTeacherID}`)
   }
 
   GetData() {

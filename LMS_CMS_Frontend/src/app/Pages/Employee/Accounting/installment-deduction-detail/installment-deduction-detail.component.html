@@ -2,13 +2,13 @@
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
         <h1 *ngIf="mode=='Create'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'Create Installment Deduction' | translate }}
+            {{ 'Create' | translate }} {{'Installment Deduction' | translate }}
         </h1>
         <h1 *ngIf="mode=='Edit'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'Edit Installment Deduction' | translate }}
+            {{ 'Edit' | translate }} {{'Installment Deduction' | translate }}
         </h1>
         <h1 *ngIf="mode=='View'" class="primaryTxt font-semibold text-2xl leading-9">
-            {{ 'View Installment Deduction' | translate }}
+            {{ 'View' | translate }} {{'Installment Deduction' | translate }}
         </h1>
     </div>
 </div>
@@ -17,32 +17,39 @@
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="docNumber"> {{ 'Doc Number' | translate }}</label>
-        <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="mode=='View' "
-        placeholder="{{ 'Enter Doc Number' | translate }}"   
- [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
-        <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors["docNumber"]}}</span>
+        <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            [disabled]="mode=='View' " placeholder="{{ 'Enter Doc Number' | translate }}" [(ngModel)]="Data.docNumber"
+            (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
+        <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["docNumber"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
-            <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
+            placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date"
+            (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' " />
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["date"]}}</span>
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2" for="employeeID"> {{ 'Employees' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"  [disabled]="mode=='View' "
-            [(ngModel)]="Data.employeeID" (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })" (change)="onEmployeeChange()">
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
+            [disabled]="mode=='View' " [(ngModel)]="Data.employeeID"
+            (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })" (change)="onEmployeeChange()">
             <option [value]=0 disabled selected hidden> {{ 'Choose Employee' | translate }}</option>
-            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.user_Name }}</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.en_name }}</option>
             <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
-        <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["employeeID"]}}</span>
-    </div>  
+        <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["employeeID"]}}</span>
+    </div>
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }"> {{ 'Child' | translate }}</label>
+        <label class="mb-2" for="studentID"
+            [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }"> {{ 'Child' | translate
+            }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
             [disabled]="!Data.employeeID || mode=='View' " [ngClass]="{ 'bg-[#EBEBEB]': !Data.employeeID }"
             [(ngModel)]="Data.studentID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
@@ -50,7 +57,8 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
             <option *ngFor="let stu of emplyeeStudents" [value]="stu.studentID">{{ stu.studentName }}</option>
             <option *ngIf="emplyeeStudents.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
-        <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["studentID"]}}</span>
+        <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["studentID"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-full">
@@ -59,9 +67,7 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
             <div class="flex flex-col w-full">
                 <textarea [disabled]="mode=='View' "
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    [(ngModel)]="Data.notes" 
-                    placeholder="{{ 'Enter Notes' | translate }}"
-></textarea>
+                    [(ngModel)]="Data.notes" placeholder="{{ 'Enter Notes' | translate }}"></textarea>
             </div>
         </div>
     </div>
@@ -69,11 +75,10 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
 </div>
 
 <div *ngIf="mode!='View'" class="flex justify-end mb-3">
-    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-    (click)="Save()">
-    <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
-    <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-  </button>
+    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+        <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+    </button>
 </div>
 
 <div *ngIf="mode=='Edit'" class="flex justify-end">
@@ -90,36 +95,37 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'ID' | translate }}
+                        {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Child Name' | translate }}
+                        {{ 'Child Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Fees Type' | translate }}
+                        {{ 'Fees Type' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Amount' | translate }}
+                        {{ 'Amount' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Due Date' | translate }}
+                        {{ 'Due Date' | translate }}
                     </th>
-                    <th *ngIf="mode=='Edit'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Actions' | translate }}
+                    <th *ngIf="mode=='Edit'"
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <!-- No Data Row -->
-                <tr *ngIf="TableData.length === 0 && IsOpenToAdd==false">
+                <tr *ngIf="(Data.installmentDeductionDetails?.length || 0) === 0 && (Data.newDetails?.length || 0) === 0">
                     <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                         {{ 'No Data Found' | translate }}
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
                 <!-- Data Rows -->
-                <tr *ngFor="let row of TableData; let i = index"
+                <tr *ngFor="let row of Data.installmentDeductionDetails; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -129,66 +135,73 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
                         {{ Data.studentName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textModeFeesType">
-                            <select [(ngModel)]="row.feeTypeID" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                                <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
-                            </select>
-                        </ng-container>
-                        <ng-template #textModeFeesType>{{ row.feeTypeName }}</ng-template>
+                        <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <option value=0 disabled selected hidden>Select Fees Type</option>
+                            <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
+                        </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['feeTypeID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['feeTypeID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textMode">
-                            <input [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                        </ng-container>
-                        <ng-template #textMode>{{ row.amount }}</ng-template>
+                        <input (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textModeDate">
-                            <input [(ngModel)]="row.date" type="date" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                        </ng-container>
-                        <ng-template #textModeDate>{{ row.date }}</ng-template>
+                        <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['date']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['date'] }}
+                        </span>                   
                     </td>
                     <td *ngIf="mode=='Edit'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button *ngIf="editingRowId === row.id" (click)="SaveEdit(row)">
+                            <!-- <button *ngIf="editingRowId === row.id" (click)="SaveEdit(row)">
                                 <i class="far fa-check-circle secondaryTxt"></i>
                             </button>
                             <button *ngIf="editingRowId !== row.id" (click)="Edit(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </td>
                 </tr>
-                <!-- Data Rows -->
-                <tr *ngIf="IsOpenToAdd==true"
-                    class="border-t border-gray-300 text-xs md:text-sm bg-[#F7F7F7]">
+
+                <tr *ngFor="let row of Data.newDetails; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        ___
+                        __
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ Data.studentName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select [(ngModel)]="Detail.feeTypeID" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                            <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
+                        <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <option value=0 disabled selected hidden>Select Fees Type</option>
+                            <option *ngFor="let type of FeesType" [value]="type.id">{{ type.name }}</option>
                         </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['feeTypeID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['feeTypeID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input [(ngModel)]="Detail.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <input (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="date" [(ngModel)]="Detail.date" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['date']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['date'] }}
+                        </span> 
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td *ngIf="mode=='Edit'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button (click)="CancelAdd()">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="DeleteNew(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                            <button (click)="SaveRow()">
-                                <i class="far fa-check-circle secondaryTxt"></i>
                             </button>
                         </div>
                     </td>

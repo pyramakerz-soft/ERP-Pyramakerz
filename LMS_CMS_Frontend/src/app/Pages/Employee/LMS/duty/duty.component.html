@@ -5,7 +5,7 @@
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-              {{ 'Create' | translate }} {{ 'Duty' | translate }}
+              {{ 'Create' | translate }} {{ 'duty' | translate }}
         </button>
     </div>
 </div>
@@ -19,9 +19,6 @@
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                      {{ 'Class' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{ 'Date' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                      {{ 'Period' | translate }}
@@ -50,7 +47,6 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.className }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.date }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.period }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherEnName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -75,8 +71,8 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Duty' | translate }}</h1>
-            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Duty' | translate }}</h1>
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'duty' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'duty' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>

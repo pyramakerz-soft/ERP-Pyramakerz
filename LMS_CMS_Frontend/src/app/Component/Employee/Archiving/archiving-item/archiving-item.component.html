@@ -1,0 +1,28 @@
+<div *ngFor="let archiving of archivingData" [ngClass]="{ 'ml-11': archiving.archivingTreeParentID != 0, 'my-4':  archiving.fileLink == '' }">
+    <div>
+        <div class="flex items-center space-x-2 p-2 rounded" [ngClass]="{'primaryBg text-white': archiving.fileLink == ''}">
+            <div *ngIf="archiving.fileLink == ''" class="px-3 py-[6px] rounded bg-white secondaryTxt" 
+            (click)="toggleChildren(archiving)">
+                <i class="fa-solid" [ngClass]="{
+                    'fa-chevron-down': !archiving.isOpen,
+                    'fa-chevron-up': archiving.isOpen
+                  }"></i>
+            </div>  
+            <div [class.cursor-pointer]="archiving.fileLink === '' || archiving.fileLink == null" class="flex items-center space-x-2" 
+            (click)="archiving.fileLink === '' || archiving.fileLink == null ? getData(archiving) : null">
+                <i *ngIf="archiving.fileLink === '' || archiving.fileLink == null" class="fa-solid fa-folder-open text-white text-lg"></i>
+                <i *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="fa-regular fa-file primaryTxt text-2xl"></i>
+                <div class="flex items-center gap-1">
+                    <p>{{archiving.name}}</p>
+                    <span *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="text-gray-500 text-sm">
+                        {{getFileExtension(archiving.fileLink)}}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <app-archiving-item *ngIf="archiving.isOpen && archiving.children && archiving.children.length > 0"
+            [archivingData]="archiving.children" (Selected)="Selected.emit($event)">
+        </app-archiving-item>
+    </div>
+</div>

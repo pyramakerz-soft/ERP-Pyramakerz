@@ -8,6 +8,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,21 +25,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
+        private readonly FileUploadsService _fileService;
 
-        public ViolationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ViolationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
         ///////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -52,10 +57,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Violation> violations = await Unit_Of_Work.violations_Repository.Select_All_With_IncludesById<Violation>(sem => sem.IsDeleted != true,
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.violations_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Violation> violations = await Unit_Of_Work.violations_Repository.Select_All_With_IncludesById_Pagination<Violation>(sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.ViolationType),
                     query => query.Include(emp => emp.Employee.EmployeeType),
-                    query => query.Include(emp => emp.Employee));
+                    query => query.Include(emp => emp.Employee))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
 
             if (violations == null || violations.Count == 0)
             {
@@ -63,16 +77,85 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             }
 
             List<ViolationGetDTO> violationDTOs = mapper.Map<List<ViolationGetDTO>>(violations);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+             
             foreach (var v in violationDTOs)
             {
-                if (!string.IsNullOrEmpty(v.Attach))
-                {
-                    v.Attach = $"{serverUrl}{v.Attach.Replace("\\", "/")}";
-                }
+                v.Attach = _fileService.GetFileUrl(v.Attach, Request, HttpContext);
             }
 
-            return Ok(violationDTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = violationDTOs, Pagination = paginationMetadata });
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("ViolationReport")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "violation Report" })]
+        public async Task<IActionResult> GetViolationReport(
+         [FromQuery] long? employeeTypeId,[FromQuery] long? violationTypeId,
+         [FromQuery] DateOnly? fromDate, [FromQuery] DateOnly? toDate)
+        {
+
+            if (!fromDate.HasValue || !toDate.HasValue)
+                return BadRequest("Both FromDate and ToDate are required.");
+
+            if (fromDate.Value > toDate.Value)
+                return BadRequest("FromDate cannot be greater than ToDate.");
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            IQueryable<Violation> query = Unit_Of_Work.violations_Repository.Query()
+                .Include(v => v.ViolationType)
+                .Include(v => v.Employee)
+                    .ThenInclude(e => e.EmployeeType)
+                .Where(v => !v.IsDeleted.HasValue || !v.IsDeleted.Value);
+
+
+            if (employeeTypeId.HasValue)
+            {
+                query = query.Where(v => v.Employee.EmployeeTypeID == employeeTypeId.Value);
+            }
+
+            if (violationTypeId.HasValue)
+            {
+                query = query.Where(v => v.ViolationTypeID == violationTypeId.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(v => v.Date >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(v => v.Date <= toDate.Value);
+            }
+
+            var violations = await query
+           .OrderBy(v => v.Date)
+           .ToListAsync();
+
+            var violationReports = mapper.Map<List<ViolationReportDTO>>(violations);
+             
+            foreach (var report in violationReports)
+            {
+                report.AttachmentUrl = _fileService.GetFileUrl(report.AttachmentUrl, Request, HttpContext);
+            }
+            return Ok(violationReports);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +163,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public async Task<IActionResult> GetAsyncByID(long id)
         {
@@ -107,12 +190,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             }
 
             ViolationGetDTO violationDTOs = mapper.Map<ViolationGetDTO>(violations);
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(violationDTOs.Attach))
-            {
-                violationDTOs.Attach = $"{serverUrl}{violationDTOs.Attach.Replace("\\", "/")}";
-            }
+            
+            violationDTOs.Attach = _fileService.GetFileUrl(violationDTOs.Attach, Request, HttpContext); 
 
             return Ok(violationDTOs);
         }
@@ -122,7 +201,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public async Task<IActionResult> Add([FromForm]ViolationAddDTO Newviolation)
         {
@@ -141,6 +220,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             {
                 return NotFound();
             }
+
+            if (Newviolation.AttachFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(Newviolation.AttachFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             Violation violation = mapper.Map<Violation>(Newviolation);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -156,65 +245,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             Unit_Of_Work.violations_Repository.Add(violation);
             Unit_Of_Work.SaveChanges();
-
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Violation");
-            var violationFolder = Path.Combine(baseFolder, violation.ID.ToString());
-            if (!Directory.Exists(violationFolder))
-            {
-                Directory.CreateDirectory(violationFolder);
-            }
-
+             
             if (Newviolation.AttachFile != null)
             {
-
-                var allowedMimeTypes = new[] {
-                    "application/pdf",
-                    "application/msword", // .doc
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-                    "image/jpeg",
-                    "image/png",
-                };
-
-                var contentType = Newviolation.AttachFile.ContentType;
-                var fileExtension = Path.GetExtension(Newviolation.AttachFile.FileName).ToLower();
-
-                if (!allowedMimeTypes.Contains(contentType))
-                {
-                    return BadRequest("Only image, PDF, or Word files are allowed.");
-                }
-
-                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest("File extension is not supported.");
-                } 
-
-                if (Newviolation.AttachFile.Length > 0)
-                {
-                    var filePath = Path.Combine(violationFolder, Newviolation.AttachFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await Newviolation.AttachFile.CopyToAsync(stream);
-                    }
-                }
-
-                violation.Attach = $"Uploads/Violation/{violation.ID.ToString()}/{Newviolation.AttachFile.FileName}";
-
+                violation.Attach = await _fileService.UploadFileAsync(Newviolation.AttachFile, "Violation/Violation", violation.ID, HttpContext); 
                 Unit_Of_Work.violations_Repository.Update(violation);
                 Unit_Of_Work.SaveChanges();
-            }
-
+            } 
 
             return Ok(Newviolation);
         }
-
         ////////////////////////////////////////////////////
 
         [HttpPut]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
          allowEdit: 1,
-         pages: new[] { "Violation Types" }
+         pages: new[] { "violation" }
         )]
         public async Task<IActionResult> EditAsync([FromForm] ViolationEditDTO Newviolation)
         {
@@ -236,32 +283,59 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             {
                 return BadRequest("Violation cannot be null");
             }
-            Violation violation = Unit_Of_Work.violations_Repository.First_Or_Default(v => v.ID == Newviolation.ID);
+
+            Violation violation = Unit_Of_Work.violations_Repository.First_Or_Default(v => v.ID == Newviolation.ID && v.IsDeleted != true);
             if (violation == null)
             {
                 return NotFound();
             }
+
             if (userTypeClaim == "employee")
             {
-                Page page = Unit_Of_Work.page_Repository.First_Or_Default(page => page.en_name == "Violation Types");
-                if (page != null)
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "violation", roleId, userId, violation);
+                if (accessCheck != null)
                 {
-                    Role_Detailes roleDetails = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(RD => RD.Page_ID == page.ID && RD.Role_ID == roleId);
-                    if (roleDetails != null && roleDetails.Allow_Edit_For_Others == false)
-                    {
-                        if (violation.InsertedByUserId != userId)
-                        {
-                            return Unauthorized();
-                        }
-                    }
-                }
-                else
-                {
-                    return BadRequest("Violations page doesn't exist");
+                    return accessCheck;
                 }
             }
-            ////mapper.Map<Violation>(Newviolation);
+
+            if (Newviolation.AttachFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(Newviolation.AttachFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
+            if (Newviolation.AttachFile != null)
+            {
+                violation.Attach = await _fileService.ReplaceFileAsync(
+                    Newviolation.AttachFile,
+                    violation.Attach,
+                    "Violation/Violation",
+                    violation.ID,
+                    HttpContext
+                );
+            }
+            else
+            {
+                violation.Attach = violation.Attach;
+            }
+
+
             mapper.Map(Newviolation, violation);
+            if ((Newviolation.DeletedFile != null || Newviolation.DeletedFile != "") && Newviolation.AttachFile == null)
+            {
+                await _fileService.DeleteFileAsync(
+                    Newviolation.DeletedFile,
+                    "Violation/Violation",
+                    Newviolation.ID,
+                    HttpContext
+                );
+                violation.Attach = null;
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             violation.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -280,49 +354,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 {
                     violation.UpdatedByOctaId = null;
                 }
-            }
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Violation");
-            var violationFolder = Path.Combine(baseFolder, violation.ID.ToString());
-            if (!Directory.Exists(violationFolder))
-            {
-                Directory.CreateDirectory(violationFolder);
-            }
-
-            if (Newviolation.AttachFile != null)
-            {
-
-                var allowedMimeTypes = new[] {
-                    "application/pdf",
-                    "application/msword", // .doc
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-                    "image/jpeg",
-                    "image/png",
-                };
-
-                var contentType = Newviolation.AttachFile.ContentType;
-                var fileExtension = Path.GetExtension(Newviolation.AttachFile.FileName).ToLower();
-
-                if (!allowedMimeTypes.Contains(contentType))
-                {
-                    return BadRequest("Only image, PDF, or Word files are allowed.");
-                }
-
-                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest("File extension is not supported.");
-                }
-
-                if (Newviolation.AttachFile.Length > 0)
-                {
-                    var filePath = Path.Combine(violationFolder, Newviolation.AttachFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await Newviolation.AttachFile.CopyToAsync(stream);
-                    }
-                }
-                violation.Attach = $"Uploads/Violation/{violation.ID.ToString()}/{Newviolation.AttachFile.FileName}";
-            }
+            } 
 
             Unit_Of_Work.violations_Repository.Update(violation);
             Unit_Of_Work.SaveChanges();
@@ -336,7 +368,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public IActionResult Delete(long id)
         {
@@ -367,7 +399,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Violation Types", roleId, userId, violation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "violation", roleId, userId, violation);
                 if (accessCheck != null)
                 {
                     return accessCheck;

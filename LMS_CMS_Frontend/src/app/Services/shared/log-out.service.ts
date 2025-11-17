@@ -30,8 +30,7 @@ export class LogOutService {
     }
   }
 
-  logOut() {
-    
+  logOut() { 
     this.getAllTokens();
     const count = parseInt(localStorage.getItem("count") ?? "0", 10);
     let currentTokenn = localStorage.getItem("current_token") ?? "";

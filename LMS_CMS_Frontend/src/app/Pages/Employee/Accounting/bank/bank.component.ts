@@ -16,9 +16,14 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
+import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 @Component({
   selector: 'app-bank',
   standalone: true,
@@ -27,18 +32,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './bank.component.css'
 })
 export class BankComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -46,7 +40,7 @@ export class BankComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Bank[] = [];
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -57,7 +51,7 @@ isRtl: boolean = false;
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name', "iban", "bankName", "bankAccountNumber", "accountClosingDate", "accountOpeningDate", "accountNumberName"];
+  keysArray: string[] = ['id', 'name', "iban", "bankName", "bankAccountNumber", "accountNumberName"];
 
   bank: Bank = new Bank();
 
@@ -65,18 +59,26 @@ isRtl: boolean = false;
   AccountNumbers: AccountingTreeChart[] = [];
   isLoading = false
 
+  bankId = 0
+  Employees: Employee[] = [];
+  BankEmployees: BankEmployee[] = [];
+  selectedEmployees: any[] = [];
+
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public BankServ: BankService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService,
+    private languageService: LanguageService, 
+    private employeeService: EmployeeService,
+    private bankEmployeeService: BankEmployeeService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -99,17 +101,23 @@ isRtl: boolean = false;
     this.GetAllData();
     this.GetAllAccount();
 
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   GetAllData() {
     this.TableData = []
     this.BankServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d; 
+      this.TableData = d;
     })
   }
 
@@ -128,13 +136,13 @@ isRtl: boolean = false;
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Bank?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Bank'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.BankServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -181,45 +189,38 @@ isRtl: boolean = false;
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
-      this.isLoading = true
+CreateOREdit() {
+  if (this.isFormValid()) {
+    this.isLoading = true
 
-      if (this.mode == 'Create') {
-        this.BankServ.Add(this.bank, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+    if (this.mode == 'Create') {
+      this.BankServ.Add(this.bank, this.DomainName).subscribe((d) => {
+        this.GetAllData()
+        this.isLoading = false
+        this.closeModal()
+        this.showSuccessAlert(this.translate.instant('Created successfully'));
+      },
+        error => {
           this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          });
-      }
-      if (this.mode == 'Edit') {
-        this.BankServ.Edit(this.bank, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+          const errorMessage = error.error || this.translate.instant('Failed to create bank');
+          this.showErrorAlert(errorMessage);
+        });
+    }
+    if (this.mode == 'Edit') {
+      this.BankServ.Edit(this.bank, this.DomainName).subscribe((d) => {
+        this.GetAllData()
+        this.isLoading = false
+        this.closeModal()
+        this.showSuccessAlert(this.translate.instant('Updated successfully'));
+      },
+        error => {
           this.isLoading = false
-        },
-          err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          });
-      }
-      this.closeModal()
+          const errorMessage = error.error || this.translate.instant('Failed to update bank');
+          this.showErrorAlert(errorMessage);
+        });
     }
   }
+}
 
   closeModal() {
     this.validationErrors = {}
@@ -230,50 +231,97 @@ isRtl: boolean = false;
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.bank) {
-      if (this.bank.hasOwnProperty(key)) {
-        const field = key as keyof Bank;
-        if (!this.bank[field]) {
-          if (
-            field == 'name' ||
-            field == 'bankAccountName' ||
-            field == 'bankName' ||
-            field == 'iban' ||
-            field == 'accountOpeningDate' ||
-            field == 'accountClosingDate' ||
-            field == 'bankAccountNumber' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.bank.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
+  }
+  
+  if (!this.bank.bankAccountName) {
+    this.validationErrors['bankAccountName'] = this.getRequiredErrorMessage('Bank Account Name');
+    isValid = false;
+  }
+  
+  if (!this.bank.bankName) {
+    this.validationErrors['bankName'] = this.getRequiredErrorMessage('Bank Name');
+    isValid = false;
+  }
+  
+  if (!this.bank.iban) {
+    this.validationErrors['iban'] = this.getRequiredErrorMessage('IBAN');
+    isValid = false;
+  }
+  
+  if (!this.bank.accountOpeningDate) {
+    this.validationErrors['accountOpeningDate'] = this.getRequiredErrorMessage('Account Opening Date');
+    isValid = false;
+  }
+  
+  if (!this.bank.accountClosingDate) {
+    this.validationErrors['accountClosingDate'] = this.getRequiredErrorMessage('Account Closing Date');
+    isValid = false;
+  }
+  
+  if (!this.bank.bankAccountNumber) {
+    this.validationErrors['bankAccountNumber'] = this.getRequiredErrorMessage('Bank Account Number');
+    isValid = false;
+  }
+  
+  if (!this.bank.accountNumberID) {
+    this.validationErrors['accountNumberID'] = this.getRequiredErrorMessage('Account Number');
+    isValid = false;
+  }
+
+  // Validate date logic
+  if (this.bank.accountOpeningDate && this.bank.accountClosingDate) {
     const openingDate = new Date(this.bank.accountOpeningDate);
     const closingDate = new Date(this.bank.accountClosingDate);
 
     if (closingDate < openingDate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Invalid Dates',
-        text: 'Account Closing Date must be after Account Opening Date!',
-        confirmButtonText: 'OK',
-      });
+      this.showErrorAlert(this.translate.instant('Account Closing Date must be after Account Opening Date'));
       isValid = false;
     }
-
-    if (this.bank.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
-    }
-    
-    return isValid;
   }
+
+  // Validate name length
+  if (this.bank.name && this.bank.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters');
+  }
+
+  return isValid;
+}
+
+private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
   capitalizeField(field: keyof Bank): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -314,4 +362,98 @@ isRtl: boolean = false;
       this.TableData = [];
     }
   }
+
+  getEmployees() {
+    this.Employees = []
+    this.employeeService.Get_Employees(this.DomainName).subscribe(
+      data => {
+        this.Employees = data
+      }
+    )
+  }
+
+  getBankEmployees() {
+    this.BankEmployees = []
+    this.bankEmployeeService.Get(this.bankId, this.DomainName).subscribe(
+      data => {
+        this.BankEmployees = data
+
+        this.selectedEmployees = this.BankEmployees.map(emp => ({
+          employeeID: emp.employeeID,
+          employeeEnglishName: emp.employeeEnglishName,
+          employeeArabicName: emp.employeeArabicName
+        }));
+      }
+    )
+  }
+
+  AddEmployee(bankId: number) {
+    document.getElementById('Add_Employee')?.classList.remove('hidden');
+    document.getElementById('Add_Employee')?.classList.add('flex');
+
+    this.bankId = bankId
+    this.getEmployees()
+    this.getBankEmployees()
+  }
+
+  closeAddModal() {
+    document.getElementById('Add_Employee')?.classList.remove('flex');
+    document.getElementById('Add_Employee')?.classList.add('hidden');
+    this.bankId = 0
+    this.Employees = []
+    this.selectedEmployees = []
+  }
+
+
+  onEmployeeSelect(event: any) {
+    const selectedId = +event.target.value;
+    const emp = this.Employees.find(e => e.id === selectedId);
+
+    if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
+      const newEmp = {
+        employeeID: emp.id,
+        employeeEnglishName: emp.en_name,
+        employeeArabicName: emp.ar_name
+      };
+      this.selectedEmployees.push(newEmp);
+    }
+
+    event.target.value = "";
+  }
+
+  removeEmployee(emp: any) {
+    this.selectedEmployees = this.selectedEmployees.filter(e => e.employeeID !== emp.employeeID);
+  }
+  
+Save() {
+  this.isLoading = true;
+
+  let bankEmp = new BankEmployee()
+  bankEmp.bankID = this.bankId
+  bankEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
+
+  this.bankEmployeeService.Add(bankEmp, this.DomainName).subscribe(
+    data => {
+      this.isLoading = false;
+      this.closeAddModal()
+      this.showSuccessAlert(this.translate.instant('Employees added successfully'));
+    },
+    error => {
+      this.isLoading = false;
+      const errorMessage = error.error || this.translate.instant('Failed to add employees');
+      this.showErrorAlert(errorMessage);
+    }
+  )
+}
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

@@ -8,6 +8,7 @@ export class ReceivableDetails {
         public linkFileName: string = '',
         public linkFileTypeID: number = 0, 
         public linkFileTypeName: string = '',
+        public linkFileTypesData : any[]=[],
         public insertedByUserId: number = 0
     ) {}
 }

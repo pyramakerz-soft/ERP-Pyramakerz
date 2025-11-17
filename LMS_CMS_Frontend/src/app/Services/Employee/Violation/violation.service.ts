@@ -1,44 +1,45 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Violation } from '../../../Models/Violation/violation';
 import { ApiService } from '../../api.service';
+import { ViolationReport } from '../../../Models/Violation/violation-report';
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ViolationService {
-
-  baseUrl = ""
-  header = ""
+  baseUrl = '';
+  header = '';
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
-    this.baseUrl = ApiServ.BaseUrl
+    this.baseUrl = ApiServ.BaseUrl;
   }
 
-  Get(DomainName?: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Violation[]>(`${this.baseUrl}/Violation`, { headers });
+    return this.http.get<{ data: Violation[], pagination: any }>(`${this.baseUrl}/Violation?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
-
 
   GetByID(id: number, DomainName?: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Violation>(`${this.baseUrl}/Violation/${id}`, { headers });
+    return this.http.get<Violation>(`${this.baseUrl}/Violation/${id}`, {
+      headers,
+    });
   }
 
   Add(Violation: Violation, DomainName: string) {
@@ -51,14 +52,24 @@ export class ViolationService {
       .set('Authorization', `Bearer ${token}`);
 
     const formData = new FormData();
-    formData.append('employeeTypeId', Violation.employeeTypeId.toString() ?? '');
-    formData.append('violationTypeID', Violation.violationTypeID.toString() ?? '');
+    formData.append(
+      'employeeTypeId',
+      Violation.employeeTypeId.toString() ?? ''
+    );
+    formData.append(
+      'violationTypeID',
+      Violation.violationTypeID.toString() ?? ''
+    );
     formData.append('employeeID', Violation.employeeID.toString() ?? '');
     formData.append('date', Violation.date ?? '');
     formData.append('details', Violation.details ?? '');
 
     if (Violation.attachFile) {
-      formData.append('attachFile', Violation.attachFile, Violation.attachFile.name);
+      formData.append(
+        'attachFile',
+        Violation.attachFile,
+        Violation.attachFile.name
+      );
     }
     return this.http.post(`${this.baseUrl}/Violation`, formData, {
       headers: headers,
@@ -76,14 +87,25 @@ export class ViolationService {
       .set('Authorization', `Bearer ${token}`);
     const formData = new FormData();
     formData.append('id', Violation.id.toString() ?? '');
-    formData.append('employeeTypeId', Violation.employeeTypeId.toString() ?? '');
-    formData.append('violationTypeID', Violation.violationTypeID.toString() ?? '');
+    formData.append(
+      'employeeTypeId',
+      Violation.employeeTypeId.toString() ?? ''
+    );
+    formData.append(
+      'violationTypeID',
+      Violation.violationTypeID.toString() ?? ''
+    );
     formData.append('employeeID', Violation.employeeID.toString() ?? '');
     formData.append('date', Violation.date ?? '');
     formData.append('details', Violation.details ?? '');
+    formData.append('deletedAttach', Violation.deletedAttach ?? '');
 
     if (Violation.attachFile) {
-      formData.append('attachFile', Violation.attachFile, Violation.attachFile.name);
+      formData.append(
+        'attachFile',
+        Violation.attachFile,
+        Violation.attachFile.name
+      );
     }
 
     return this.http.put(`${this.baseUrl}/Violation`, formData, {
@@ -94,13 +116,51 @@ export class ViolationService {
 
   Delete(id: number, DomainName?: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Violation/${id}`, { headers });
+  }
+
+  GetViolationReport(
+    employeeTypeId: number,
+    violationTypeId: number,
+    fromDate: string,
+    toDate: string,
+    DomainName?: string
+  ) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    let params = new HttpParams()
+      .set('fromDate', fromDate)
+      .set('toDate', toDate);
+
+    if (employeeTypeId && employeeTypeId !== 0) {
+      params = params.set('employeeTypeId', employeeTypeId.toString());
+    }
+
+    if (violationTypeId && violationTypeId !== 0) {
+      params = params.set('violationTypeId', violationTypeId.toString());
+    }
+
+    return this.http.get<ViolationReport[]>(
+      `${this.baseUrl}/Violation/ViolationReport`,
+      {
+        headers: headers,
+        params: params,
+      }
+    );
   }
 }

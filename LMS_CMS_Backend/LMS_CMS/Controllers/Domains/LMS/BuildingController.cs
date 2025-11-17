@@ -31,11 +31,52 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             _checkPageAccessService = checkPageAccessService;
         }
 
-        [HttpGet]
+        [HttpGet("WithPaggination")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Building" }
+            pages: new[] { "Building", "Classroom" }
         )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.building_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Building> Building = await Unit_Of_Work.building_Repository.Select_All_With_IncludesById_Pagination<Building>(
+                    b => b.IsDeleted != true,
+                    query => query.Include(emp => emp.school))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (Building == null || Building.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<BuildingGetDTO> BuildingDTO = mapper.Map<List<BuildingGetDTO>>(Building);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = BuildingDTO, Pagination = paginationMetadata });
+        }
+
+        ///////
+
+        [HttpGet]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Building", "Classroom" }
+       )]
         public async Task<IActionResult> GetAsync()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -54,7 +95,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(BuildingDTO);
         }
-        
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

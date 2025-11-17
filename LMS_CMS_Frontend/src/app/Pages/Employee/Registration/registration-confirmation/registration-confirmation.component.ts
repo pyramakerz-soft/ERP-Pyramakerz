@@ -18,7 +18,9 @@ import { RegistrationFormStateService } from '../../../../Services/Employee/Regi
 import { RegistrationFormState } from '../../../../Models/Registration/registration-form-state';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-confirmation',
   standalone: true,
@@ -30,7 +32,8 @@ export class RegistrationConfirmationComponent {
   keysArray: string[] = ['id', 'studentEnName', 'studentArName','phone','gradeName','academicYearName','schoolName','email'];
   key: string= "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -40,9 +43,10 @@ export class RegistrationConfirmationComponent {
   path: string = ""
 
   registerationFormParentData: RegisterationFormParent[] = []
-  registerationFormParentDataByYear: RegisterationFormParent[] = []
-  registerationFormParentDataBySchool: RegisterationFormParent[] = []
-  registerationFormParentDataByState: RegisterationFormParent[] = []
+  OriginalregisterationFormParentData: RegisterationFormParent[] = []
+  // registerationFormParentDataByYear: RegisterationFormParent[] = []
+  // registerationFormParentDataBySchool: RegisterationFormParent[] = []
+  // registerationFormParentDataByState: RegisterationFormParent[] = []
   SchoolData: School[] = []
   AcademicYearData: AcademicYear[] = []
   StateData: RegistrationFormState[] = []
@@ -54,7 +58,8 @@ export class RegistrationConfirmationComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
         private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, 
         public registerationFormParentServicea:RegisterationFormParentService, public yearService: AcadimicYearService, 
-        public schoolService: SchoolService, public stateService: RegistrationFormStateService){}
+        public schoolService: SchoolService, public stateService: RegistrationFormStateService, 
+    private languageService: LanguageService,){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -67,8 +72,7 @@ export class RegistrationConfirmationComponent {
     });
 
     this.getRegisterationFormParentData()
-    this.getSchools()
-    this.getYears()
+    this.getSchools() 
     this.getState()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -78,6 +82,17 @@ export class RegistrationConfirmationComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   IsAllowEdit(InsertedByID: number) {
@@ -127,6 +142,7 @@ export class RegistrationConfirmationComponent {
     return new Promise((resolve, reject) => {
       this.registerationFormParentServicea.Get(this.DomainName).subscribe(
         (data) => {  
+          this.OriginalregisterationFormParentData = data;
           this.registerationFormParentData = data;
           resolve();  // Resolve the promise when data is received
         },
@@ -145,13 +161,13 @@ export class RegistrationConfirmationComponent {
       }
     )
   }
-
-  getYears(){
-    this.yearService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.AcademicYearData = data;
-      }
-    )
+ 
+  GetAllAcademicYearBySchool() {
+    this.AcademicYearData = [];
+    this.selectedYear = 0
+    this.yearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe((data) => {
+      this.AcademicYearData = data;
+    });
   }
 
   getState(){
@@ -161,86 +177,90 @@ export class RegistrationConfirmationComponent {
       }
     )
   }
-  
-  async Search() {
 
-    this.registerationFormParentDataByYear = []
-    this.registerationFormParentDataBySchool = []
-    this.registerationFormParentDataByState = []
-
-    await this.getRegisterationFormParentData()
-
-    if (this.selectedSchool !== 0) {
-      try {
-        this.registerationFormParentDataBySchool = await firstValueFrom(
-          this.registerationFormParentServicea.GetBySchoolId(this.selectedSchool, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching school data:", error);
-      }
-    }
-  
-    if (this.selectedYear !== 0) {
-      try {
-        
-        this.registerationFormParentDataByYear = await firstValueFrom(
-          this.registerationFormParentServicea.GetByYearId(this.selectedYear, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching year data:", error);
-      }
-    }
-    
-    if (this.selectedState !== 0) {
-      try {
-        
-        this.registerationFormParentDataByState = await firstValueFrom(
-          this.registerationFormParentServicea.GetByStateId(this.selectedState, this.DomainName)
-        );
-      } catch (error) {
-        console.error("Error fetching year data:", error);
-      }
-    }
-    
-    let filteredData = [...this.registerationFormParentData];
-
-    if (this.selectedSchool !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataBySchool.some(schoolItem => schoolItem.id === item.id)
-      );
-    }
-
-    if (this.selectedYear !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataByYear.some(yearItem => yearItem.id === item.id)
-      );
-
-    }
-
-    if (this.selectedState !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.registerationFormParentDataByState.some(stateItem => stateItem.id === item.id)
-      );
-    }
-
-    if((this.selectedSchool != 0 && this.registerationFormParentDataBySchool.length == 0) ||
-    (this.selectedYear != 0 && this.registerationFormParentDataByYear.length == 0) ||
-    (this.selectedState != 0 && this.registerationFormParentDataByState.length == 0)){
-      filteredData = []
-    }
-    
-    this.registerationFormParentData = filteredData;
+  FilterData(){
+    this.registerationFormParentData =[]
+    this.registerationFormParentData = this.OriginalregisterationFormParentData.filter(s => 
+        (this.selectedSchool == 0 || s.schoolID == this.selectedSchool) &&
+        (this.selectedYear == 0 || s.academicYearID == this.selectedYear) &&
+        (this.selectedState == 0 || s.registerationFormStateID == this.selectedState)
+    );
   }
+  
+  // async Search() {
+
+  //   this.registerationFormParentDataByYear = []
+  //   this.registerationFormParentDataBySchool = []
+  //   this.registerationFormParentDataByState = []
+
+  //   await this.getRegisterationFormParentData()
+
+  //   if (this.selectedSchool !== 0) {
+  //     try {
+  //       this.registerationFormParentDataBySchool = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetBySchoolId(this.selectedSchool, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching school data:", error);
+  //     }
+  //   }
+  
+  //   if (this.selectedYear !== 0) {
+  //     try {
+        
+  //       this.registerationFormParentDataByYear = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetByYearId(this.selectedYear, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching year data:", error);
+  //     }
+  //   }
+    
+  //   if (this.selectedState !== 0) {
+  //     try {
+        
+  //       this.registerationFormParentDataByState = await firstValueFrom(
+  //         this.registerationFormParentServicea.GetByStateId(this.selectedState, this.DomainName)
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching year data:", error);
+  //     }
+  //   }
+    
+  //   let filteredData = [...this.registerationFormParentData];
+
+  //   if (this.selectedSchool !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataBySchool.some(schoolItem => schoolItem.id === item.id)
+  //     );
+  //   }
+
+  //   if (this.selectedYear !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataByYear.some(yearItem => yearItem.id === item.id)
+  //     );
+
+  //   }
+
+  //   if (this.selectedState !== 0) {
+  //     filteredData = filteredData.filter(item =>
+  //       this.registerationFormParentDataByState.some(stateItem => stateItem.id === item.id)
+  //     );
+  //   }
+
+  //   if((this.selectedSchool != 0 && this.registerationFormParentDataBySchool.length == 0) ||
+  //   (this.selectedYear != 0 && this.registerationFormParentDataByYear.length == 0) ||
+  //   (this.selectedState != 0 && this.registerationFormParentDataByState.length == 0)){
+  //     filteredData = []
+  //   }
+    
+  //   this.registerationFormParentData = filteredData;
+  // }
 
   ResetFilter(){
     this.selectedYear = 0
     this.selectedSchool = 0
     this.selectedState = 0
-
-    this.registerationFormParentDataByYear = []
-    this.registerationFormParentDataBySchool = []
-    this.registerationFormParentDataByState = []
-
     this.getRegisterationFormParentData()
   }
 

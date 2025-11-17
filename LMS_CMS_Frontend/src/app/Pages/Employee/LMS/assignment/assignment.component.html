@@ -1,11 +1,11 @@
-<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Assignments' | translate }}</h1>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-               {{ 'Create' | translate }}  {{ 'Assignment' | translate }}
+               {{ 'Create' | translate }} {{ 'Assignment' | translate }}
         </button>
     </div>
 </div>
@@ -17,7 +17,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }}{{ 'School' | translate }}</option>
+            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -30,7 +30,7 @@
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
 
-            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }}{{ 'Grade' | translate }}</option>
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
             <ng-container *ngIf="Grades.length > 0; else noDataGrade">
                 <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
             </ng-container>
@@ -211,7 +211,7 @@
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Subject"> {{ 'School' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="School"> {{ 'School' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
                     [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
                     (change)="onSchoolModalChange()" [(ngModel)]="assignment.schoolID"
@@ -224,11 +224,33 @@
                     validationErrors['schoolID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Grade">{{ 'Grade' | translate }}</label>
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !assignment.schoolID || assignment.id != 0 , 'primaryTxt': assignment.schoolID }"
+                    for="year">{{ 'Academic Year' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="year"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 ||!assignment.schoolID  }"
+                    [disabled]="(!assignment.schoolID) || assignment.id != 0" (change)="onYearModalChange()"
+                    [(ngModel)]="assignment.academicYearID"
+                    (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="assignment.academicYearID == 0">{{ 'Choose' |
+                        translate
+                        }} {{ 'Year' | translate }}</option>
+                    <ng-container *ngIf="years.length > 0; else noDataYearForCreate">
+                        <option *ngFor="let ac of years" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataYearForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['academicYearID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['academicYearID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" [ngClass]="{ 'text-gray-400': !assignment.schoolID || assignment.id != 0 , 'primaryTxt': assignment.schoolID }" for="Grade">{{ 'Grade' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
-                    [disabled]="!assignment.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }"
-                    [disabled]="assignment.id != 0" (change)="onGradeModalChange()" [(ngModel)]="assignment.gradeID"
-                    (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 ||!assignment.schoolID  }"
+                    [disabled]="(!assignment.schoolID) || assignment.id != 0" (change)="onGradeModalChange()" [(ngModel)]="assignment.gradeID"
+                    (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
                     <option [ngValue]="0" disabled hidden [selected]="assignment.gradeID == 0">{{ 'Choose' | translate }}  {{ 'Grade' | translate }}</option>
                     <ng-container *ngIf="GradesForCreate.length > 0; else noDataGradesForCreate">
                         <option *ngFor="let ac of GradesForCreate" [ngValue]="ac.id">{{ ac.name }}</option>
@@ -237,14 +259,13 @@
                         <option disabled>{{ 'No Data Found' | translate }}</option>
                     </ng-template>
                 </select>
-                <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
-                    validationErrors['subjectID'] }}</span>
+                <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{validationErrors['gradeID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Subject"> {{ 'Subject' | translate }}</label>
+                <label class="mb-2 primaryTxt"  [ngClass]="{ 'text-gray-400': !assignment.gradeID, 'primaryTxt': assignment.gradeID }" for="Subject"> {{ 'Subject' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
-                    [disabled]="!assignment.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }"
-                    [disabled]="assignment.id != 0" (change)="onSubjectModalChange()" [(ngModel)]="assignment.subjectID"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 ||!assignment.gradeID  }"
+                    [disabled]="(!assignment.gradeID) || assignment.id != 0" (change)="onSubjectModalChange()" [(ngModel)]="assignment.subjectID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
                     <option [ngValue]="0" disabled hidden [selected]="assignment.subjectID == 0">{{ 'Choose' | translate }}  {{ 'Subject' | translate }}</option>
                     <ng-container *ngIf="subjectsForCreate.length > 0; else noDatasubjectsForCreate">
@@ -288,7 +309,7 @@
                 <span *ngIf="validationErrors['arabicName']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['arabicName'] }}</span>
             </div>
-            <div class="flex flex-col mb-4 w-[49%]">
+            <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="AssignmentType"> {{ 'Assignment Type' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="AssignmentType" [(ngModel)]="assignment.assignmentTypeID"
@@ -306,6 +327,14 @@
                     placeholder="{{ 'Enter' | translate }} {{ 'Mark' | translate }}" [(ngModel)]="assignment.mark" (input)="validateNumber($event, 'mark')"
                     (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
                 <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mark']
+                    }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="passMark">  {{ 'Pass Mark' | translate }}</label>
+                <input id="passMark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Pass Mark' | translate }}" [(ngModel)]="assignment.passMark" (input)="validateNumber($event, 'passMark')"
+                    (ngModelChange)="onInputValueChange({ field: 'passMark', value: $event })" />
+                <span *ngIf="validationErrors['passMark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['passMark']
                     }}</span>
             </div>
             <div class="flex flex-col mb-4 w-[30%]">
@@ -333,7 +362,7 @@
                 <input type="checkbox" id="isVisibleToStudent" class="w-5 h-5"
                     [(ngModel)]="assignment.isVisibleToStudent">
                 <label for="isVisibleToStudent" class="text-sm">  {{ 'Is Visible To Student?' | translate }}</label>
-            </div>
+            </div> 
             <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                 <input type="checkbox" id="specific" class="w-5 h-5" (change)="onIsSpecificChange($event)"
                     [checked]="assignment.isSpecificStudents">

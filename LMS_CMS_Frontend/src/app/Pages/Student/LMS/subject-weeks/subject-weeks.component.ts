@@ -10,11 +10,15 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { Subject } from '../../../../Models/LMS/subject';
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-subject-weeks',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './subject-weeks.component.html',
   styleUrl: './subject-weeks.component.css'
 })
@@ -25,10 +29,12 @@ export class SubjectWeeksComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public SemesterWorkingWeekServ: SemesterWorkingWeekService) { }
 
   ngOnInit() {
@@ -40,6 +46,17 @@ export class SubjectWeeksComponent {
     });
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.getSemesterWorkingWeekData()
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getRandomColor(index: number): string {
@@ -51,6 +68,16 @@ export class SubjectWeeksComponent {
       (data) => {
         this.WorkingWeekData = data.weeks;
         this.SubjectName = data.subjectName;
+      },error=>{
+        console.log(error)
+        this.SubjectName = error.error.subjectName;
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
       }
     )
   }

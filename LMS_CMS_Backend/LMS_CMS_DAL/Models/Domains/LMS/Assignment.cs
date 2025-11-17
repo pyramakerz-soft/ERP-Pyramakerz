@@ -19,11 +19,12 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [StringLength(100, ErrorMessage = "Arabic Name cannot be longer than 100 characters.")]
         public string ArabicName { get; set; }
         public float Mark { get; set; }
-        public DateOnly OpenDate { get; set; }
+        public float PassMark { get; set; }  
+        public DateOnly OpenDate { get; set; }  
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }
         public bool IsSpecificStudents { get; set; }
-        public bool IsVisibleToStudent { get; set; }
+        public bool IsVisibleToStudent { get; set; } 
         public string? LinkFile{ get; set; }
 
         [ForeignKey("Subject")]
@@ -37,7 +38,10 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("SubjectWeightType")]
         public long SubjectWeightTypeID { get; set; }
         public SubjectWeightType SubjectWeightType { get; set; }
-     
+
+        [ForeignKey("AcademicYear")]
+        public long? AcademicYearID { get; set; }
+        public AcademicYear? AcademicYear { get; set; }
         public ICollection<AssignmentQuestion> AssignmentQuestions { get; set; } = new HashSet<AssignmentQuestion>();
         public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
         public ICollection<AssignmentStudentIsSpecific> AssignmentStudentIsSpecifics { get; set; } = new HashSet<AssignmentStudentIsSpecific>();

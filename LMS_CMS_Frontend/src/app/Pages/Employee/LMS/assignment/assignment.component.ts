@@ -28,13 +28,16 @@ import { Student } from '../../../../Models/student';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 @Component({
   selector: 'app-assignment',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './assignment.component.html',
   styleUrl: './assignment.component.css'
 })
@@ -53,7 +56,7 @@ export class AssignmentComponent {
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   assignment: Assignment = new Assignment();
   assignmentData: Assignment[] = [];
@@ -63,6 +66,7 @@ export class AssignmentComponent {
   choosedStudentsClass: ClassroomStudent[] = [];
   choosedClass: StudentClassWhenSubject[] = [];
   studentClassWhenSubject: StudentClassWhenSubject[] = [];
+  years: AcademicYear[] = [];
   studentClassWhenSelectClass: StudentClassWhenSubject = new StudentClassWhenSubject();
   subjectID: number = 0
 
@@ -95,13 +99,14 @@ export class AssignmentComponent {
     public activeRoute: ActivatedRoute,
     private SchoolServ: SchoolService,
     private GradeServ: GradeService,
-    private ClassroomServ: ClassroomService,
+    private acadimicYearService: AcadimicYearService,
     public subjectService: SubjectService,
     public subjectWeightService: SubjectWeightService,
     public classroomSubjectService: ClassroomSubjectService,
     public assignmentTypeService: AssignmentTypeService,
     public router: Router,
-        private languageService: LanguageService
+    private translate: TranslateService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -115,7 +120,7 @@ export class AssignmentComponent {
     });
 
     // this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getSubjectData();
+    // this.getSubjectData();
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -127,11 +132,17 @@ export class AssignmentComponent {
       }
     });
     this.getAllSchools()
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {
@@ -166,12 +177,12 @@ export class AssignmentComponent {
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
-    this.assignmentData = []
-    this.IsView = true
-    this.CurrentPage = 1
-    this.TotalPages = 1
-    this.TotalRecords = 0
     if (this.subjectID != 0) {
+      this.assignmentData = []
+      this.IsView = true
+      this.CurrentPage = 1
+      this.TotalPages = 1
+      this.TotalRecords = 0
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
         (data) => {
           this.CurrentPage = data.pagination.currentPage
@@ -198,31 +209,31 @@ export class AssignmentComponent {
         }
       )
     } else {
-      this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          this.CurrentPage = data.pagination.currentPage
-          this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
-          this.TotalRecords = data.pagination.totalRecords
-          this.assignmentData = data.data
-        },
-        (error) => {
-          if (error.status == 404) {
-            if (this.TotalRecords != 0) {
-              let lastPage = this.TotalRecords / this.PageSize
-              if (lastPage >= 1) {
-                if (this.isDeleting) {
-                  this.CurrentPage = Math.floor(lastPage)
-                  this.isDeleting = false
-                } else {
-                  this.CurrentPage = Math.ceil(lastPage)
-                }
-                this.GetAllData(this.CurrentPage, this.PageSize)
-              }
-            }
-          }
-        }
-      )
+      //   this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
+      //     (data) => {
+      //       this.CurrentPage = data.pagination.currentPage
+      //       this.PageSize = data.pagination.pageSize
+      //       this.TotalPages = data.pagination.totalPages
+      //       this.TotalRecords = data.pagination.totalRecords
+      //       this.assignmentData = data.data
+      //     },
+      //     (error) => {
+      //       if (error.status == 404) {
+      //         if (this.TotalRecords != 0) {
+      //           let lastPage = this.TotalRecords / this.PageSize
+      //           if (lastPage >= 1) {
+      //             if (this.isDeleting) {
+      //               this.CurrentPage = Math.floor(lastPage)
+      //               this.isDeleting = false
+      //             } else {
+      //               this.CurrentPage = Math.ceil(lastPage)
+      //             }
+      //             this.GetAllData(this.CurrentPage, this.PageSize)
+      //           }
+      //         }
+      //       }
+      //     }
+      //   )
     }
   }
 
@@ -277,7 +288,7 @@ export class AssignmentComponent {
     }
 
     this.assignment = new Assignment();
-    this.getSubjectData();
+    // this.getSubjectData();
     this.getAssignmentTypeData();
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
@@ -310,6 +321,9 @@ export class AssignmentComponent {
     this.assignmentService.GetByID(Id, this.DomainName).subscribe(
       data => {
         this.assignment = data
+        this.acadimicYearService.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
+          this.years = d
+        })
         this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
           this.subjectsForCreate = []
@@ -324,14 +338,14 @@ export class AssignmentComponent {
     )
   }
 
-  getSubjectData() {
-    this.subjects = []
-    this.subjectService.Get(this.DomainName).subscribe(
-      data => {
-        this.subjects = data
-      }
-    )
-  }
+  // getSubjectData() {
+  //   this.subjects = []
+  //   this.subjectService.Get(this.DomainName).subscribe(
+  //     data => {
+  //       this.subjects = data
+  //     }
+  //   )
+  // }
 
   getSubjectWeightData() {
     this.subjectWeights = []
@@ -355,7 +369,7 @@ export class AssignmentComponent {
     this.studentClassWhenSubject = []
     this.choosedClass = [];
     this.choosedStudentsClass = [];
-    this.classroomSubjectService.GetClassBySubjectIDWithStudentsIncluded(this.assignment.subjectID, this.DomainName).subscribe(
+    this.classroomSubjectService.GetClassBySubjectIDWithStudentsIncluded(this.assignment.subjectID, this.assignment.academicYearID, this.DomainName).subscribe(
       data => {
         this.studentClassWhenSubject = data
         if (this.assignment.assignmentStudentIsSpecifics.length != 0) {
@@ -424,6 +438,7 @@ export class AssignmentComponent {
     this.assignment.subjectWeightTypeID = 0
     this.choosedClass = []
     this.choosedStudentsClass = []
+    this.years = []
     this.viewStudents = false
     this.viewClassStudents = false
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
@@ -432,9 +447,22 @@ export class AssignmentComponent {
     this.subjectsForCreate = []
     this.assignment.gradeID = 0
     this.assignment.subjectID = 0
+    this.assignment.academicYearID = 0
     this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
     })
+    this.acadimicYearService.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
+      this.years = d
+    })
+  }
+
+  onYearModalChange() { 
+    this.choosedClass = []
+    this.choosedStudentsClass = []
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.studentClassWhenSubject = []
+    this.getClassesData()
   }
 
   onGradeModalChange() {
@@ -578,7 +606,7 @@ export class AssignmentComponent {
     this.viewStudents = false
     this.validationErrors['studentClassroomIDs'] = '';
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
-    if (this.assignment.subjectID) {
+    if (this.assignment.subjectID && this.assignment.academicYearID) {
       if (this.viewClassStudents == false) {
         this.viewClassStudents = true
       } else {
@@ -588,7 +616,7 @@ export class AssignmentComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Oops...',
-        text: 'Please Choose Subject First',
+        text: 'Please Choose Subject and Academic Year First',
         confirmButtonText: 'Okay',
         customClass: { confirmButton: 'secondaryBg' },
       });
@@ -615,8 +643,9 @@ export class AssignmentComponent {
       if (this.assignment.hasOwnProperty(key)) {
         const field = key as keyof Assignment;
         if (!this.assignment[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'passMark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'academicYearID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         } else {
@@ -656,6 +685,12 @@ export class AssignmentComponent {
               this.validationErrors['cutOfDate'] = '*Cut Off Date must be after both Open Date and Due Date';
               isValid = false;
             }
+
+            if ((this.assignment.passMark && this.assignment.mark) && Number(this.assignment.passMark) > Number(this.assignment.mark)) {
+              console.log(1234, this.assignment)
+              this.validationErrors['passMark'] = '*Pass Mark must be smaller than Mark';
+              isValid = false;
+            }
           } else {
             this.validationErrors[field] = '';
           }
@@ -665,7 +700,7 @@ export class AssignmentComponent {
     return isValid;
   }
 
-  Save() { 
+  Save() {
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.assignment.isSpecificStudents == true) {
@@ -678,7 +713,7 @@ export class AssignmentComponent {
       }
 
       if (this.assignment.id == 0) {
-        if(this.assignment.dueDate == ''){
+        if (this.assignment.dueDate == '') {
           this.assignment.dueDate == null
         }
         this.assignmentService.Add(this.assignment, this.DomainName).subscribe(
@@ -692,7 +727,7 @@ export class AssignmentComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -710,7 +745,7 @@ export class AssignmentComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -722,13 +757,13 @@ export class AssignmentComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Assignment?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Assignment') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.assignmentService.Delete(id, this.DomainName).subscribe((D) => {
@@ -768,6 +803,34 @@ export class AssignmentComponent {
       }
     } catch (error) {
       this.assignmentData = [];
+    }
+  }
+
+  private getFieldDisplayName(field: keyof Assignment): string {
+    const map: { [key in keyof Assignment]?: string } = {
+      englishName: 'English Name',
+      arabicName: 'Arabic Name',
+      mark: 'Mark',
+      passMark: 'Pass Mark',
+      assignmentTypeID: 'Assignment Type',
+      subjectID: 'Subject',
+      subjectWeightTypeID: 'Subject Weight Type',
+      openDate: 'Open Date',
+      dueDate: 'Due Date',
+      cutOfDate: 'Cut Off Date',
+      studentClassroomIDs: 'Students'
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

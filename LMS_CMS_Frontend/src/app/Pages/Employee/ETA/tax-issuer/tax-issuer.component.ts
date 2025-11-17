@@ -14,6 +14,7 @@ import { TaxTypeService } from '../../../../Services/Employee/ETA/tax-type.servi
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-tax-issuer',
   standalone: true,
@@ -40,7 +41,7 @@ export class TaxIssuerComponent {
     public countryService: CountryService,     
     public taxTypeService: TaxTypeService,     
     public taxIssuerService: TaxIssuerService,
-     private languageService: LanguageService
+    private languageService: LanguageService, 
   ) {}
 
   ngOnInit() {
@@ -56,6 +57,12 @@ export class TaxIssuerComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+ ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetById(){
@@ -103,7 +110,7 @@ export class TaxIssuerComponent {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });

@@ -1,22 +1,22 @@
 <div class="flex justify-between items-center mb-5">
-  <div class="flex justify-between items-center space-x-5">
+  <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
-    <h1 class="font-semibold text-2xl leading-9">{{remedialTimeTable.name}}</h1>
+    <h1 class="font-semibold text-2xl leading-9">{{remedialTimeTable.name|translate}}</h1>
   </div>
 
   <button (click)="Save()"
     class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-    <span *ngIf="!isLoading">Save</span>
+    <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
   </button>
 </div>
 
-<div class="flex justify-start items-center space-x-4">
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
   <div class="w-[49%]">
-    <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
+    <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Grade' | translate }}</label>
     <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
       [(ngModel)]="SelectedGradeId" [disabled]="!this.remedialTimeTable.schoolID" (change)="getAllClassByGradeId();">
-      <option value=0 disabled selected hidden>Select a grade</option>
+      <option value=0 disabled selected hidden>{{ 'Select' | translate }}  {{ 'Grade' | translate }}</option>
       <option *ngFor="let ac of Grades" [value]="ac.id">
         {{ ac.name }}
       </option>
@@ -24,38 +24,38 @@
   </div>
 
   <div class="w-[49%]">
-    <label class="block mb-2 text-sm font-medium text-gray-900">Classes</label>
+    <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classes' | translate }}</label>
     <div cdkDropList [cdkDropListData]="remedialClasses" [cdkDropListConnectedTo]="connectedDropLists"
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full min-h-[50px] flex flex-wrap gap-2">
       <div *ngFor="let class of remedialClasses" cdkDrag [cdkDragDisabled]="class.numberOfSession === 0"
         class="bg-gray-100 text-sm px-3 py-1 rounded-full cursor-move border-l-4" [ngClass]="{
-          'border-blue-500': class.numberOfSession > 0,
+          'border-blue-500': class.numberOfSession && class.numberOfSession > 0,
           'border-[#707070]': class.numberOfSession === 0
         }">
         {{ class.name }} / {{ class.numberOfSession }}
       </div>
 
-      <div *ngIf="remedialClasses.length === 0" class="text-gray-500">No Class</div>
+      <div *ngIf="remedialClasses.length === 0" class="text-gray-500"> {{ 'No Class' | translate }}</div>
     </div>
   </div>
 
 </div>
 
-<div class="my-5 flex justify-end space-x-4">
+<div class="my-5 flex justify-end space-x-4 rtl:space-x-reverse">
   <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
   <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
   <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="openPrintModal()">
 </div>
 
 <div id="Data" class="overflow-x-auto mt-5">
-  <table class="min-w-full text-sm text-left text-gray-900 border border-gray-300">
+  <table class="min-w-full text-sm text-left rtl:text-right text-gray-900 border border-gray-300">
     <!-- Header -->
     <thead class="bg-gray-400 text-white">
       <tr>
-        <th class="py-3 px-4 w-[120px]">Days</th>
+        <th class="py-3 px-4 w-[120px]">{{ 'Days' | translate }}</th>
         <th class="border p-2"
           *ngFor="let i of [].constructor(remedialTimeTable.maximumPeriodCountRemedials); let period = index">
-          Session {{ period + 1 }}
+          {{ 'Session' | translate }} {{ period + 1 }}
         </th>
       </tr>
     </thead>
@@ -93,56 +93,56 @@
 <div id="Print_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
   <div class="bg-white rounded-2xl p-12 w-[669px]">
     <div class="flex justify-between items-center">
-      <h1 class="font-semibold text-2xl leading-9">Print Time Table</h1>
+      <h1 class="font-semibold text-2xl leading-9"> {{ 'Print Time Table' | translate }}</h1>
       <button (click)="closePrintModal()" type="button"
         class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
     </div>
 
     <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
       <div class="flex flex-col mb-4">
-        <label class="mb-2 primaryTxt" for="Type">Type</label>
+        <label class="mb-2 primaryTxt" for="Type">{{ 'Type' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Type"
           [(ngModel)]="PrintType" (click)="GetTypes()">
           <option *ngFor="let type of types" [value]="type">
-            {{ type | titlecase }}
+            {{ type | titlecase|translate }}
           </option>
         </select>
       </div>
 
       <div class="flex flex-col mb-4" *ngIf="PrintType=='Teacher'">
-        <label class="mb-2 primaryTxt" for="Teacher">Teacher</label>
+        <label class="mb-2 primaryTxt" for="Teacher">{{ 'Teacher' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Teacher"
           [(ngModel)]="SelectedTeacherForPrintId">
-          <option [value]="0" disabled selected hidden>Choose Teacher</option>
+          <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Teacher' | translate }}</option>
           <option *ngFor="let t of Teachers" [value]="t.id">{{ t.en_name }}</option>
-          <option *ngIf="Teachers.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="Teachers.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
       </div>
 
       <div class="flex flex-col mb-4" *ngIf="PrintType=='Grade'">
-        <label class="mb-2 primaryTxt" for="Grade">Grade</label>
+        <label class="mb-2 primaryTxt" for="Grade">{{ 'Grade' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
           [(ngModel)]="SelectedGradeForPrintId">
-          <option [value]="0" disabled selected hidden>Choose Grade</option>
+          <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
           <option *ngFor="let t of Grades" [value]="t.id">{{ t.name }}</option>
-          <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="Grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
       </div>
 
       <div class="flex flex-col mb-4" *ngIf="PrintType=='Day'">
-        <label class="mb-2 primaryTxt" for="Day">Day</label>
+        <label class="mb-2 primaryTxt" for="Day">{{ 'Day' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Day"
           [(ngModel)]="SelectedDayForPrintId">
-          <option [value]="0" disabled selected hidden>Choose Day</option>
+          <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Day' | translate }}</option>
           <option *ngFor="let t of day" [value]="t.id">{{ t.name }}</option>
-          <option *ngIf="day.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="day.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
       </div>
     </div>
 
     <div class="flex justify-end">
       <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Print()">
-        <span *ngIf="!isLoading">Print</span>
+        <span *ngIf="!isLoading"> {{ 'Print' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
       </button>
     </div>
@@ -160,13 +160,13 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
   <div id="Print" class="overflow-x-auto mt-5">
-    <table class="min-w-full text-sm text-left text-gray-900 border border-gray-300">
+    <table class="min-w-full text-sm text-left rtl:text-right text-gray-900 border border-gray-300">
       <thead class="bg-gray-400 text-white">
         <tr>
-          <th class="py-3 px-4 w-[120px]">Days</th>
+          <th class="py-3 px-4 w-[120px]"> {{ 'Days' | translate }}</th>
           <th class="border p-2"
             *ngFor="let i of [].constructor(remedialTimeTableForPrint.maximumPeriodCountRemedials); let period = index">
-            Session {{ period + 1 }}
+            {{ 'Session' | translate }} {{ period + 1 }}
           </th>
         </tr>
       </thead>

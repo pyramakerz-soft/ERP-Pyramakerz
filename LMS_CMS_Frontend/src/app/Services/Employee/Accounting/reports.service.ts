@@ -140,4 +140,70 @@ export class ReportsService {
       { headers }
     );
   }
+
+GetSupplierStatement(
+  startDate: string,
+  endDate: string,
+  subAccountNumber: number,
+  DomainName: string,
+  pageNumber: number,
+  pageSize: number
+) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  return this.http.get<any>(
+    `${this.baseUrl}/AccountStatementReports/GetSupplierStatement?fromDate=${startDate}&toDate=${endDate}&SubAccountNumber=${subAccountNumber}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    { headers }
+  );
+}
+
+GetSafeStatement(
+  startDate: string,
+  endDate: string,
+  subAccountNumber: number,
+  DomainName: string,
+  pageNumber: number,
+  pageSize: number
+) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  return this.http.get<any>(
+    `${this.baseUrl}/AccountStatementReports/GetSafeStatement?fromDate=${startDate}&toDate=${endDate}&SubAccountNumber=${subAccountNumber}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    { headers }
+  );
+}
+
+GetBankStatement(
+  startDate: string,
+  endDate: string,
+  subAccountNumber: number,
+  DomainName: string,
+  pageNumber: number,
+  pageSize: number
+) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  return this.http.get<any>(
+    `${this.baseUrl}/AccountStatementReports/GetBankStatement?fromDate=${startDate}&toDate=${endDate}&SubAccountNumber=${subAccountNumber}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    { headers }
+  );
+}
 }

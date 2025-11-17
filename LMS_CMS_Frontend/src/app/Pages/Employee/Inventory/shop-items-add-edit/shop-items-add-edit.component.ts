@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop-items-add-edit',
@@ -32,18 +33,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './shop-items-add-edit.component.css'
 })
 export class ShopItemsAddEditComponent { 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
  
   DomainName: string = '';
   UserID: number = 0;
@@ -84,7 +74,7 @@ export class ShopItemsAddEditComponent {
     public inventoryCategoryService: InventoryCategoryService,
     public genderService: GenderService,
     public shopItemService: ShopItemService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -107,6 +97,12 @@ export class ShopItemsAddEditComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl'; 
+  }
+
+ ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetShopItemData() {

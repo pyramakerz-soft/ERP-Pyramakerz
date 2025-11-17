@@ -6,11 +6,14 @@ import { TokenData } from '../../../Models/token-data';
 import { AccountService } from '../../../Services/account.service';
 import { ApiService } from '../../../Services/api.service';
 import { CommonModule } from '@angular/common';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-my-notification',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './my-notification.component.html',
   styleUrl: './my-notification.component.css'
 })
@@ -19,12 +22,14 @@ export class MyNotificationComponent {
   notification: Notification = new Notification() 
   DomainName: string = ''; 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');  
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,  
     public activeRoute: ActivatedRoute, 
-    public notificationService: NotificationService
+    public notificationService: NotificationService,
+    private languageService: LanguageService, 
   ) { }
 
   ngOnInit() {
@@ -37,8 +42,16 @@ export class MyNotificationComponent {
     this.notificationService.notificationOpened$.subscribe(() => {
       this.getAllData();
     });
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
   getAllData(){
     this.TableData = []
     this.notificationService.ByUserID(this.DomainName).subscribe(
@@ -78,6 +91,7 @@ export class MyNotificationComponent {
   }
 
   viewNotification(notificationShared:Notification){
+    this.notification = new Notification()
     this.notificationService.ByUserIDAndNotificationSharedByID(notificationShared.id, this.DomainName).subscribe(
       data => {
         notificationShared.seenOrNot = true

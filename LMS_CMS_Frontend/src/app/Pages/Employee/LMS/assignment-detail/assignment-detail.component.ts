@@ -19,12 +19,13 @@ import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-assignment-detail',
   standalone: true,
-  imports: [FormsModule, CommonModule , TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-detail.component.html',
   styleUrl: './assignment-detail.component.css'
 })
@@ -66,7 +67,7 @@ export class AssignmentDetailComponent {
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
     public assignmentServ: AssignmentService,
-    private languageService: LanguageService
+    private languageService: LanguageService, 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -77,11 +78,18 @@ export class AssignmentDetailComponent {
     });
     this.AssignmentStudentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
 
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
@@ -137,9 +145,12 @@ export class AssignmentDetailComponent {
 
   save() {
     this.isLoading = true;
-    const today = new Date(); // current date
-    const dueDate = new Date(this.assignmentStudent.dueDate); // ensure dueDate is a Date object
-    if (today > dueDate) {
+    const TheSubmittedDate = new Date(this.assignmentStudent.insertedAt); // current date
+    const dueDate = new Date(this.assignmentStudent.dueDate);
+    TheSubmittedDate.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
+    console.log(343, TheSubmittedDate, dueDate)
+    if (TheSubmittedDate > dueDate) {
       Swal.fire({
         title: 'Apply Late Submission Penalty?',
         text: 'If The student submitted after the due date. Do you want to apply the late submission penalty?',

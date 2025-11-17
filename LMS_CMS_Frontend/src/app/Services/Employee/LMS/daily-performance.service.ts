@@ -56,4 +56,36 @@ export class DailyPerformanceService {
     });
   }
 
+GetDailyPerformanceReport(schoolId: number, gradeId: number, classroomId: number, studentId: number, fromDate: string, toDate: string, DomainName: string) {
+  if (DomainName != null) {
+    this.header = DomainName
+  }
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  
+  return this.http.get<any[]>(
+    `${this.baseUrl}/DailyPerformance/DailyPerformanceReport?schoolId=${schoolId}&gradeId=${gradeId}&classroomId=${classroomId}&studentId=${studentId}&fromDate=${fromDate}&toDate=${toDate}`,
+    { headers }
+  );
+}
+
+GetClassroomDailyPerformanceAverages(schoolId: number, gradeId: number, classroomId: number, fromDate: string, toDate: string, DomainName: string) {
+  if (DomainName != null) {
+    this.header = DomainName
+  }
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  
+  return this.http.get<any[]>(
+    `${this.baseUrl}/DailyPerformance/ClassRoomDailyPerformanceAverages?schoolId=${schoolId}&gradeId=${gradeId}&classroomId=${classroomId}&fromDate=${fromDate}&toDate=${toDate}`,
+    { headers }
+  );
+}
+
 }

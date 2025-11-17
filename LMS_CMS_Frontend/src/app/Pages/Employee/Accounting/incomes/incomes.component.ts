@@ -15,16 +15,16 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { IncomeService } from '../../../../Services/Employee/Accounting/income.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-incomes',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './incomes.component.html',
-  styleUrl: './incomes.component.css'
+  styleUrl: './incomes.component.css',
 })
 export class IncomesComponent {
   User_Data_After_Login: TokenData = new TokenData(
@@ -46,7 +46,7 @@ export class IncomesComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Income[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -62,22 +62,22 @@ export class IncomesComponent {
   income: Income = new Income();
   AccountNumbers: AccountingTreeChart[] = [];
 
-
   validationErrors: { [key in keyof Income]?: string } = {};
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public IncomeServ: IncomeService,
     public accountServ: AccountingTreeChartService,
-private languageService: LanguageService
-  ) { }
+    private languageService: LanguageService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -97,47 +97,64 @@ private languageService: LanguageService
     });
 
     this.GetAllData();
-    this.GetAllAccount()
-      this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.GetAllAccount();
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
 
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.IncomeServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-    })
+    });
   }
 
   GetAllAccount() {
-    this.accountServ.GetBySubAndFileLinkID(7, this.DomainName).subscribe((d) => {
-      this.AccountNumbers = d;
-    })
+    this.accountServ
+      .GetBySubAndFileLinkID(7, this.DomainName)
+      .subscribe((d) => {
+        this.AccountNumbers = d;
+      });
   }
   Create() {
     this.mode = 'Create';
     this.income = new Income();
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Income?',
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذه') +
+        ' ' +
+        this.translate.instant('Income') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.IncomeServ.Delete(id, this.DomainName).subscribe((D) => {
           this.GetAllData();
-        })
+        });
       }
     });
   }
@@ -146,9 +163,9 @@ private languageService: LanguageService
     this.mode = 'Edit';
     this.income = row;
     this.IncomeServ.GetById(row.id, this.DomainName).subscribe((d) => {
-      this.income = d
-    })
-    this.validationErrors = {}
+      this.income = d;
+    });
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -172,48 +189,50 @@ private languageService: LanguageService
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.IncomeServ.Add(this.income, this.DomainName).subscribe(data => {
-          this.closeModal();
-          this.GetAllData();
-          this.isLoading = false
-
-        },
-          err => {
-            this.isLoading = false
+        this.IncomeServ.Add(this.income, this.DomainName).subscribe(
+          (data) => {
+            this.closeModal();
+            this.GetAllData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          });
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.IncomeServ.Edit(this.income, this.DomainName).subscribe(data => {
-          this.closeModal();
-          this.GetAllData();
-          this.isLoading = false
-
-        },
-          err => {
-            this.isLoading = false
+        this.IncomeServ.Edit(this.income, this.DomainName).subscribe(
+          (data) => {
+            this.closeModal();
+            this.GetAllData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          });
+          }
+        );
       }
-    } 
+    }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -227,13 +246,10 @@ private languageService: LanguageService
       if (this.income.hasOwnProperty(key)) {
         const field = key as keyof Income;
         if (!this.income[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name' || field == 'accountNumberID') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -242,10 +258,13 @@ private languageService: LanguageService
 
     if (this.income.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
     return isValid;
   }
+
   capitalizeField(field: keyof Income): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -277,13 +296,23 @@ private languageService: LanguageService
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

@@ -17,10 +17,12 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { FollowUp } from '../../../../Models/Clinic/FollowUp';
 import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
-import { Drug } from '../../../../Models/Clinic/drug';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { DrugClass } from '../../../../Models/Clinic/drug-class';
+import { consumerPollProducersForChange } from '@angular/core/primitives/signals';
 @Component({
   selector: 'app-follow-up',
   standalone: true,
@@ -29,8 +31,8 @@ import {  Subscription } from 'rxjs';
     CommonModule,
     SearchComponent,
     TableComponent,
-    ModalComponent, 
-    TranslateModule
+    ModalComponent,
+    TranslateModule,
   ],
   templateUrl: './follow-up.component.html',
   styleUrls: ['./follow-up.component.css'],
@@ -45,6 +47,7 @@ export class FollowUpComponent implements OnInit {
     'Complaints',
     'Diagnosis',
     'Recommendation',
+    'Date',
     'Actions',
   ];
   followUps: any[] = [];
@@ -57,7 +60,7 @@ export class FollowUpComponent implements OnInit {
     'studentName',
     'complaints',
     'diagnosisName',
-    'recommendation',
+    'recommendation'
   ];
   followUp: FollowUp = new FollowUp();
   schools: any[] = [];
@@ -68,11 +71,12 @@ export class FollowUpComponent implements OnInit {
   diagnoses: any[] = [];
   drugs: any[] = [];
   doses: any[] = [];
-     isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedDrugId: number | null = null;
   selectedDoseId: number | null = null;
   drugDoseList: any[] = [];
+  isAddingDrugDose: boolean = false;
   keysArray: string[] = [
     'id',
     'schoolName',
@@ -87,7 +91,7 @@ export class FollowUpComponent implements OnInit {
   validationErrors: { [key: string]: string } = {};
 
   isDrugModalVisible: boolean = false;
-  drug: Drug = new Drug(0, '', new Date().toISOString());
+  drug: DrugClass = new DrugClass(0, '', new Date().toISOString());
   editDrug: boolean = false;
   drugValidationErrors: { [key: string]: string } = {};
 
@@ -95,6 +99,9 @@ export class FollowUpComponent implements OnInit {
   dose: Dose = new Dose(0, '', new Date().toISOString());
   editDose: boolean = false;
   doseValidationErrors: { [key: string]: string } = {};
+
+  isSavingDrug: boolean = false;
+  isSavingDose: boolean = false;
 
   constructor(
     private followUpService: FollowUpService,
@@ -106,16 +113,51 @@ export class FollowUpComponent implements OnInit {
     private drugService: DrugService,
     private doseService: DoseService,
     private apiService: ApiService,
-      private languageService: LanguageService
+    private languageService: LanguageService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.loadFollowUps();
     this.loadDropdownOptions();
-     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -187,6 +229,12 @@ export class FollowUpComponent implements OnInit {
     delete this.validationErrors['studentId'];
   }
 
+  onDateChange(event: Event) {
+    const selectedStudentId = (event.target as HTMLSelectElement).value;
+    // Clear student validation error when student changes
+    delete this.validationErrors['date'];
+  }
+
   onDiagnosisChange(event: Event) {
     const selectedDiagnosisId = (event.target as HTMLSelectElement).value;
     // Clear diagnosis validation error when diagnosis changes
@@ -200,8 +248,7 @@ export class FollowUpComponent implements OnInit {
         this.gradeService.GetBySchoolId(schoolId, domainName)
       );
     } catch (error) {
-      console.error('Error loading grades:', error);
-      Swal.fire('Error', 'Failed to load grades.', 'error');
+console.log(error);
     }
   }
 
@@ -212,8 +259,7 @@ export class FollowUpComponent implements OnInit {
         this.classroomService.GetByGradeId(gradeId, domainName)
       );
     } catch (error) {
-      console.error('Error loading classes:', error);
-      Swal.fire('Error', 'Failed to load classes.', 'error');
+      console.log(error);
     }
   }
 
@@ -228,8 +274,7 @@ export class FollowUpComponent implements OnInit {
         name: student.en_name,
       }));
     } catch (error) {
-      console.error('Error loading students:', error);
-      Swal.fire('Error', 'Failed to load students.', 'error');
+console.log(error);
     }
   }
 
@@ -249,20 +294,20 @@ export class FollowUpComponent implements OnInit {
         return {
           id: item.id,
           schoolId: item.schoolId,
-          schoolName: item.school || 'N/A',
+          schoolName: item.school || '-',
           gradeId: item.gradeId,
-          gradeName: item.grade || 'N/A',
+          gradeName: item.grade || '-',
           classroomId: item.classroomId,
-          className: item.classroom || 'N/A',
+          className: item.classroom || '-',
           studentId: item.studentId,
-          studentName: item.student || 'N/A',
+          studentName: item.student || '-',
           complains: item.complains || 'No Complaints',
           diagnosisId: item.diagnosisId,
+          date: item.date,
           diagnosisName:
-            this.diagnoses.find((d) => d.id === item.diagnosisId)?.name ||
-            'N/A',
-          recommendation: item.recommendation || 'No Recommendation',
-          sendSMSToParent: item.sendSMSToParent || false,
+            this.diagnoses.find((d) => d.id === item.diagnosisId)?.name || '-',
+          recommendation: item.recommendation || '-',
+          sendSMS: item.sendSMS || false,
           followUpDrugs: item.followUpDrugs || [],
           actions: { edit: true, delete: true },
         };
@@ -299,7 +344,7 @@ export class FollowUpComponent implements OnInit {
 
   openDrugModal() {
     this.isDrugModalVisible = true;
-    this.drug = new Drug(0, '', new Date().toISOString());
+    this.drug = new DrugClass(0, '', new Date().toISOString());
     this.editDrug = false;
     this.drugValidationErrors = {};
   }
@@ -314,19 +359,28 @@ export class FollowUpComponent implements OnInit {
   async saveDrug() {
     this.drugValidationErrors = {};
     if (!this.drug.name) {
-      this.drugValidationErrors['name'] = '*Name is required';
+      this.drugValidationErrors['name'] = `${this.translate.instant(
+        'Field Is Required'
+      )} ${this.translate.instant('name')}`;
       return;
     }
+
+    if (this.isSavingDrug) return;
+
+    this.isSavingDrug = true;
 
     try {
       const domainName = this.apiService.GetHeader();
       await firstValueFrom(this.drugService.Add(this.drug, domainName));
       this.loadDropdownOptions();
       this.closeDrugModal();
-      Swal.fire('Success', 'Drug saved successfully', 'success');
+      this.showSuccessAlert(this.translate.instant('Saved successfully'));
     } catch (error) {
       console.error('Error saving drug:', error);
-      Swal.fire('Error', 'Failed to save drug', 'error');
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSavingDrug = false;
     }
   }
 
@@ -347,19 +401,28 @@ export class FollowUpComponent implements OnInit {
   async saveDose() {
     this.doseValidationErrors = {};
     if (!this.dose.doseTimes) {
-      this.doseValidationErrors['doseTimes'] = '*Dose Times is required';
+      this.doseValidationErrors['doseTimes'] = `${this.translate.instant(
+        'Field Is Required'
+      )} ${this.translate.instant('dose times')}`;
       return;
     }
+
+    if (this.isSavingDose) return;
+
+    this.isSavingDose = true;
 
     try {
       const domainName = this.apiService.GetHeader();
       await firstValueFrom(this.doseService.Add(this.dose, domainName));
       this.loadDropdownOptions();
       this.closeDoseModal();
-      Swal.fire('Success', 'Dose saved successfully', 'success');
+      this.showSuccessAlert(this.translate.instant('Saved successfully'));
     } catch (error) {
       console.error('Error saving dose:', error);
-      Swal.fire('Error', 'Failed to save dose', 'error');
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
+    } finally {
+      this.isSavingDose = false;
     }
   }
 
@@ -390,8 +453,8 @@ export class FollowUpComponent implements OnInit {
             const drug = this.drugs.find((d) => d.id === fd.drugId);
             const dose = this.doses.find((d) => d.id === fd.doseId);
             return {
-              drugName: drug ? drug.name : 'N/A',
-              doseTimes: dose ? dose.doseTimes : 'N/A',
+              drugName: drug ? drug.name : '-',
+              doseTimes: dose ? dose.doseTimes : '-',
             };
           }) || [];
       }
@@ -426,23 +489,63 @@ export class FollowUpComponent implements OnInit {
     let isValid = true;
 
     if (!this.followUp.schoolId || this.followUp.schoolId === 0) {
-      this.validationErrors['schoolId'] = '*School is required';
+      this.validationErrors['schoolId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'School'
+          )}`
+        : `${this.translate.instant('School')} ${this.translate.instant(
+            'Is Required'
+          )}`;
       isValid = false;
     }
     if (!this.followUp.gradeId || this.followUp.gradeId === 0) {
-      this.validationErrors['gradeId'] = '*Grade is required';
+      this.validationErrors['gradeId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Grade'
+          )}`
+        : `${this.translate.instant('Grade')} ${this.translate.instant(
+            'Is Required'
+          )}`;
       isValid = false;
     }
     if (!this.followUp.classroomId || this.followUp.classroomId === 0) {
-      this.validationErrors['classroomId'] = '*Class is required';
+      this.validationErrors['classroomId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Class'
+          )}`
+        : `${this.translate.instant('Class')} ${this.translate.instant(
+            'Is Required'
+          )}`;
       isValid = false;
     }
     if (!this.followUp.studentId || this.followUp.studentId === 0) {
-      this.validationErrors['studentId'] = '*Student is required';
+      this.validationErrors['studentId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Student'
+          )}`
+        : `${this.translate.instant('Student')} ${this.translate.instant(
+            'Is Required'
+          )}`;
       isValid = false;
     }
     if (!this.followUp.diagnosisId || this.followUp.diagnosisId === 0) {
-      this.validationErrors['diagnosisId'] = '*Diagnosis is required';
+      this.validationErrors['diagnosisId'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Diagnosis'
+          )}`
+        : `${this.translate.instant('Diagnosis')} ${this.translate.instant(
+            'Is Required'
+          )}`;
+      isValid = false;
+    }
+    if (!this.followUp.date) {
+      this.validationErrors['date'] = this.isRtl
+        ? `${this.translate.instant('Is Required')} ${this.translate.instant(
+            'Date'
+          )}`
+        : `${this.translate.instant('Date')} ${this.translate.instant(
+            'Is Required'
+          )}`;
       isValid = false;
     }
 
@@ -451,66 +554,66 @@ export class FollowUpComponent implements OnInit {
     }
 
     try {
-      // Disable the save button during submission
       this.isSaving = true;
-
       const domainName = this.apiService.GetHeader();
+
       if (this.followUp.id) {
         await firstValueFrom(
           this.followUpService.Edit(this.followUp, domainName)
         );
-        Swal.fire('Success', 'Follow-up updated successfully!', 'success');
+        this.showSuccessAlert(this.translate.instant('Updated successfully'));
       } else {
         await firstValueFrom(
           this.followUpService.Add(this.followUp, domainName)
         );
-        Swal.fire('Success', 'Follow-up created successfully!', 'success');
+        this.showSuccessAlert(this.translate.instant('Created successfully'));
       }
+
       this.loadFollowUps();
       this.closeModal();
-    } catch (error) {
-      console.error('Error saving follow-up:', error);
-      Swal.fire(
-        'Error',
-        'Failed to save follow-up. Please try again later.',
-        'error'
-      );
+    } catch (error) { 
+      const errorMessage = this.translate.instant('Failed to save the item');
+      this.showErrorAlert(errorMessage);
     } finally {
       this.isSaving = false;
     }
   }
-
   addDrugAndDose() {
+    if (this.isAddingDrugDose) return;
     if (this.selectedDrugId && this.selectedDoseId) {
-      let selectedDrug = new Drug();
-      let selectedDose = new Dose();
+      this.isAddingDrugDose = true;
+      setTimeout(() => {
+        let selectedDrug = new DrugClass();
+        let selectedDose = new Dose();
 
-      this.drugs.forEach((element) => {
-        if (element.id == this.selectedDrugId) {
-          selectedDrug = element;
-        }
-      });
-
-      this.doses.forEach((element) => {
-        if (element.id == this.selectedDoseId) {
-          selectedDose = element;
-        }
-      });
-
-      if (selectedDrug && selectedDose) {
-        this.drugDoseList.push({
-          drugName: selectedDrug.name,
-          doseTimes: selectedDose.doseTimes,
+        this.drugs.forEach((element) => {
+          if (element.id == this.selectedDrugId) {
+            selectedDrug = element;
+          }
         });
 
-        this.followUp.followUpDrugs.push({
-          drugId: selectedDrug.id,
-          doseId: selectedDose.id,
+        this.doses.forEach((element) => {
+          if (element.id == this.selectedDoseId) {
+            selectedDose = element;
+          }
         });
 
-        this.selectedDrugId = null;
-        this.selectedDoseId = null;
-      }
+        if (selectedDrug && selectedDose) {
+          this.drugDoseList.push({
+            drugName: selectedDrug.name,
+            doseTimes: selectedDose.doseTimes,
+          });
+
+          this.followUp.followUpDrugs.push({
+            drugId: selectedDrug.id,
+            doseId: selectedDose.id,
+          });
+
+          this.selectedDrugId = null;
+          this.selectedDoseId = null;
+        }
+        this.isAddingDrugDose = false;
+      }, 500); // simulate async, can be removed if not needed
     } else {
       Swal.fire('Error', 'Please select both a drug and a dose.', 'error');
     }
@@ -522,15 +625,23 @@ export class FollowUpComponent implements OnInit {
   }
 
   deleteFollowUp(row: any) {
+    const translatedTitle = this.translate.instant('Are you sure?');
+    const translatedText = this.translate.instant(
+      'You will not be able to recover this item!'
+    );
+    const translatedConfirm = this.translate.instant('Yes, delete it!');
+    const translatedCancel = this.translate.instant('No, keep it');
+    const successMessage = this.translate.instant('Deleted successfully');
+
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover this follow-up!',
+      title: translatedTitle,
+      text: translatedText,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#2E3646',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'No, keep it',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
     }).then((result) => {
       if (result.isConfirmed) {
         const domainName = this.apiService.GetHeader();
@@ -540,34 +651,45 @@ export class FollowUpComponent implements OnInit {
               this.followUps = [];
             }
             this.loadFollowUps();
-            Swal.fire('Deleted!', 'The follow-up has been deleted.', 'success');
+            this.showSuccessAlert(successMessage);
           },
           error: (error) => {
             console.error('Error deleting follow-up:', error);
-            Swal.fire(
-              'Error',
-              'Failed to delete follow-up. Please try again later.',
-              'error'
-            );
+            const errorMessage =
+              error.error?.message ||
+              this.translate.instant('Failed to delete the item');
+            this.showErrorAlert(errorMessage);
           },
         });
       }
     });
   }
 
-
-
-GetTableHeaders(){
-   
-if(!this.isRtl){
-  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Actions']
-}else{
-  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التشخيص', 'التوصية', 'الإجراءات']
-}
-}
-
-
-
-
-
+  GetTableHeaders() {
+    if (!this.isRtl) {
+      return [
+        'ID',
+        'School',
+        'Grade',
+        'Class',
+        'Student',
+        'Diagnosis',
+        'Recommendation',
+        'Date',
+        'Actions',
+      ];
+    } else {
+      return [
+        'المعرف',
+        'المدرسة',
+        'الصف',
+        'الفصل',
+        'الطالب',
+        'التشخيص',
+        'التوصية',
+        'التاريخ',
+        'الإجراءات',
+      ];
+    }
+  }
 }

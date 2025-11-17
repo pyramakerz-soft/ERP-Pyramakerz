@@ -1,29 +1,32 @@
-<div class="flex justify-start items-center space-x-5">
+<div class="flex justify-start items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Assignments</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Assignments' | translate }}</h1>
 </div>
 
-<div *ngIf="mode=='solved'" class="flex justify-start items-center space-x-5 mt-5">
-    <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
-        (click)="TurnChoice('solved')">
-        Solved
-    </button>
-    <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
-        (click)="TurnChoice('unsolved')">
-        UnSolved
-    </button>
+<!-- 🔹 Tab Buttons -->
+<div class="flex justify-start items-center space-x-5 rtl:space-x-reverse mt-5">
+  <button 
+    [ngClass]="mode === 'all' ? 'secondaryBg text-white' : 'bg-[#EBEBEB] text-[#6F6F6F]'"
+    class="rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+    (click)="TurnChoice('all')">
+    {{ 'All' | translate }}
+  </button>
+
+  <button 
+    [ngClass]="mode === 'solved' ? 'secondaryBg text-white' : 'bg-[#EBEBEB] text-[#6F6F6F]'"
+    class="rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+    (click)="TurnChoice('solved')">
+    {{ 'Solved' | translate }}
+  </button>
+
+  <button 
+    [ngClass]="mode === 'unsolved' ? 'secondaryBg text-white' : 'bg-[#EBEBEB] text-[#6F6F6F]'"
+    class="rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+    (click)="TurnChoice('unsolved')">
+    {{ 'UnSolved' | translate }}
+  </button>
 </div>
 
-<div *ngIf="mode=='unsolved'" class="flex justify-start items-center space-x-5 mt-5">
-    <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
-        (click)="TurnChoice('solved')">
-        Solved
-    </button>
-    <button class="secondaryBg text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2"
-        (click)="TurnChoice('unsolved')">
-        UnSolved
-    </button>
-</div>
 
 <div *ngIf="mode=='solved'" class=" mt-5">
     <div *ngFor="let Assginment of SolvedAssignment; let i = index">
@@ -32,30 +35,30 @@
             <div class="space-y-1">
                 <h2 class="text-[#003366] font-semibold text-sm">{{Assginment.assignmentEnglishName}}</h2>
                 <p class="text-sm text-[#6F6F6F]">
-                    <span class="font-medium">By</span> {{Assginment.insertedByUserName}}
+                    <span class="font-medium">{{ 'By' | translate }}</span> {{Assginment.insertedByUserName}}
                 </p>
             </div>
             <div class="flex flex-col items-end space-y-2">
-                <div *ngIf="Assginment.isVisibleToStudent" class="flex items-center space-x-2 text-sm">
+                <div *ngIf="Assginment.isVisibleToStudent" class="flex items-center space-x-2 rtl:space-x-reverse text-sm">
                     <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
                         (click)="MoveToAssignmentView(Assginment.id)">
-                        View Answers
+                         {{ 'View Answers' | translate }}
                     </button>
                 </div>
-                <div class="flex items-center space-x-2 text-sm">
-                    <span class="text-green-600">Finished</span>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse text-sm">
+                    <span class="text-green-600">{{ 'Finished' | translate }}</span>
                     <span *ngIf="Assginment.degree!=null"class="text-[#1A1A1A]">{{Assginment.degree}}/{{Assginment.assignmentDegree}}</span>
                     <span *ngIf="Assginment.degree==null" class="text-[#1A1A1A]">--/{{Assginment.assignmentDegree}}</span>
                 </div>
-                <div class="flex space-x-4 text-xs text-gray-400">
-                    <div class="flex items-center space-x-1">
+                <div class="flex space-x-4 rtl:space-x-reverse text-xs text-gray-400">
+                    <div class="flex items-center space-x-1 rtl:space-x-reverse">
                         <i class="fa-solid fa-hourglass-half"></i>
-                        <span class="font-semibold text-gray-500">Due Date</span>
+                        <span class="font-semibold text-gray-500">{{ 'Due Date' | translate }}</span>
                         <span>{{Assginment.dueDate}}</span>
                     </div>
-                    <div class="flex items-center space-x-1">
+                    <div class="flex items-center space-x-1 rtl:space-x-reverse">
                         <i class="fa-solid fa-hourglass-half"></i>
-                        <span class="font-semibold text-gray-500">Cutoff Date</span>
+                        <span class="font-semibold text-gray-500">{{ 'Cutoff Date' | translate }}</span>
                         <span>{{Assginment.cutOfDate}}</span>
                     </div>
                 </div>
@@ -71,31 +74,101 @@
             <div class="space-y-1">
                 <h2 class="text-[#003366] font-semibold text-sm">{{ Assginment.englishName }}</h2>
                 <p class="text-sm text-[#6F6F6F]">
-                    <span class="font-medium">By</span> {{ Assginment.insertedByUserName }}
+                    <span class="font-medium">{{ 'By' | translate }}</span> {{ Assginment.insertedByUserName }}
                 </p>
             </div>
             <div class="flex flex-col items-end space-y-2">
                 <button *ngIf="!isPastCutoff(Assginment.cutOfDate)"
                     class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
                     (click)="MoveToAssignmentToSolve(Assginment.id)">
-                    Solve
+                      {{ 'Solve' | translate }}
                 </button>
                 <div *ngIf="isPastCutoff( Assginment.cutOfDate)">
-                    <span class="text-[#E03138]">Submission Closed</span>
+                    <span class="text-[#E03138]">{{ 'Submission Closed' | translate }}</span>
                 </div>
-                <div class="flex space-x-4 text-xs text-gray-400">
-                    <div class="flex items-center space-x-1">
+                <div class="flex space-x-4 rtl:space-x-reverse text-xs text-gray-400">
+                    <div class="flex items-center space-x-1 rtl:space-x-reverse">
                         <i class="fa-solid fa-hourglass-half"></i>
-                        <span class="font-semibold text-gray-500">Due Date</span>
+                        <span class="font-semibold text-gray-500">{{ 'Due Date' | translate }}</span>
                         <span>{{ Assginment.dueDate }}</span>
                     </div>
-                    <div class="flex items-center space-x-1">
+                    <div class="flex items-center space-x-1 rtl:space-x-reverse">
                         <i class="fa-solid fa-hourglass-half"></i>
-                        <span class="font-semibold text-gray-500">Cutoff Date</span>
+                        <span class="font-semibold text-gray-500">{{ 'Cutoff Date' | translate }}</span>
                         <span>{{ Assginment.cutOfDate }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div *ngIf="mode === 'all'" class="mt-5">
+  <div *ngFor="let assignment of AllAssignment; let i = index">
+    <div
+      class="flex justify-between items-start bg-white rounded-xl shadow-sm p-4 mb-4 border-l-4"
+      [ngClass]="isPastDueOrCutoff(assignment.dueDate, assignment.cutOfDate) ? 'border-[#E03138]' : 'border-green-700'">
+      
+      <div class="space-y-1">
+        <h2 class="text-[#003366] font-semibold text-sm">
+          {{ assignment.assignmentEnglishName || assignment.englishName }}
+        </h2>
+        <p class="text-sm text-[#6F6F6F]">
+          <span class="font-medium">{{ 'By' | translate }}</span> {{ assignment.insertedByUserName }}
+        </p>
+      </div>
+
+      <div class="flex flex-col items-end space-y-2">
+        <!-- 🔹 Solved -->
+        <ng-container *ngIf="assignment.isSolved">
+          <div *ngIf="assignment.isVisibleToStudent" class="flex items-center space-x-2 rtl:space-x-reverse text-sm">
+            <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+              (click)="MoveToAssignmentView(assignment.id)">
+              {{ 'View Answers' | translate }}
+            </button>
+          </div>
+          <div class="flex items-center space-x-2 rtl:space-x-reverse text-sm">
+            <span class="text-green-600">{{ 'Finished' | translate }}</span>
+            <span *ngIf="assignment.degree != null" class="text-[#1A1A1A]">
+              {{ assignment.degree }}/{{ assignment.assignmentDegree }}
+            </span>
+            <span *ngIf="assignment.degree == null" class="text-[#1A1A1A]">
+              --/{{ assignment.assignmentDegree }}
+            </span>
+          </div>
+        </ng-container>
+
+        <!-- 🔹 Unsolved -->
+        <ng-container *ngIf="!assignment.isSolved">
+          <button *ngIf="!isPastCutoff(assignment.cutOfDate)"
+            class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+            (click)="MoveToAssignmentToSolve(assignment.id)">
+            {{ 'Solve' | translate }}
+          </button>
+          <div *ngIf="isPastCutoff(assignment.cutOfDate)">
+            <span class="text-[#E03138]">{{ 'Submission Closed' | translate }}</span>
+          </div>
+        </ng-container>
+
+        <!-- 🔹 Dates -->
+        <div class="flex space-x-4 rtl:space-x-reverse text-xs text-gray-400">
+          <div class="flex items-center space-x-1 rtl:space-x-reverse">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span class="font-semibold text-gray-500">{{ 'Open Date' | translate }}</span>
+            <span>{{ assignment.openDate }}</span>
+          </div>
+          <div class="flex items-center space-x-1 rtl:space-x-reverse">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span class="font-semibold text-gray-500">{{ 'Due Date' | translate }}</span>
+            <span>{{ assignment.dueDate }}</span>
+          </div>
+          <div class="flex items-center space-x-1 rtl:space-x-reverse">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span class="font-semibold text-gray-500">{{ 'Cutoff Date' | translate }}</span>
+            <span>{{ assignment.cutOfDate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

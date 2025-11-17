@@ -2,26 +2,190 @@
     <div class="flex items-center justify-between">
         <div>
             <img src="Images/OctaWhiteLogo3.png">
-        </div>
-        <div>
-            <input type="text"
-                class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
-                placeholder="{{ 'Enter Key Word' | translate }}" />
         </div> 
-        <div class="flex space-x-4 items-center"> 
-            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
-                <i class="fi fi-rr-comment-alt-dots text-white text-3xl"></i> 
-                <span *ngIf="notificationsUnSeenCount > 0"
-                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                    {{ notificationsUnSeenCount }}
-                </span>
+        <div class="relative w-full lg:w-[543px]">
+            <input type="text" [(ngModel)]="searchText" (focus)="onFocus()" (input)="onSearchChange()" (blur)="onBlur()"
+                placeholder="{{ 'Enter Key Word' | translate }}"
+                class="w-full lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"/>
+ 
+            <ul *ngIf="showSuggestions && filteredKeywords.length" class="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-[8px] shadow-lg z-10 max-h-60 overflow-auto" >
+                <li *ngFor="let keyword of filteredKeywords" (mousedown)="selectKeyword(keyword)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {{ keyword }}
+                </li>
+            </ul>
+        </div>
+        <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="flex space-x-4 rtl:space-x-reverse items-center"> 
+            <div class="relative dropdown-container"> 
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleMessagePopup()" >
+                    <i class="fi fi-rr-comment-alt-dots text-white text-3xl flex items-center"></i> 
+                    <span *ngIf="messagesUnSeenCount > 0"
+                        class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                        {{ messagesUnSeenCount }}
+                    </span>
+                </div>
+                <div *ngIf="isMessagePopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
+                    <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
+                        <h3 class="primaryTxt font-semibold"> {{ 'Messages' | translate }}</h3>
+                        <div class="flex space-x-2 rtl:space-x-reverse"> 
+                            <button (click)="viewAllMessages()" class="text-gray-500 text-sm hover:text-gray-700 transition">  {{ 'View' | translate }} {{ 'All' | translate }}<i class="fas fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+                    <ul>
+                        <li *ngFor="let chatMessage of chatMessages; let i = index" class="relative cursor-pointer" (click)="moveToMessageInMyChat(chatMessage)">
+                            <div> 
+                                <div *ngIf="chatMessage.unreadCount > 0"
+                                    class="absolute top-2 left-2 w-5 h-5 border border-[#4d8db4] bg-[#8ccff8b6] text-blue-700 text-xs font-bold rounded-full flex items-center justify-center z-10">
+                                    {{ chatMessage.unreadCount }}
+                                </div> 
+                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot && chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type}">
+                                    <div class="flex-shrink-0"> 
+                                        <div class="relative">
+                                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">   
+                                            <span *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                                'bg-green-500': chatMessage.senderConnectionStatusID=== 1,
+                                                'bg-red-500': chatMessage.senderConnectionStatusID === 2,
+                                                'bg-yellow-500': chatMessage.senderConnectionStatusID === 3,
+                                            }"></span>
+                                            <span *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                                'bg-green-500': chatMessage.receiverConnectionStatusID=== 1,
+                                                'bg-red-500': chatMessage.receiverConnectionStatusID === 2,
+                                                'bg-yellow-500': chatMessage.receiverConnectionStatusID === 3,
+                                            }"></span>
+                                        </div> 
+                                    </div>
+                                    <div class="ml-4 text-start w-full"> 
+                                        <p *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span>  {{ 'Sent you a message' | translate }}</p>
+                                        <p *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.receiverEnglishName }}</span></p>
+                                        <div class="mt-4 flex flex-col space-y-3">
+                                            <div *ngIf="chatMessage.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
+                                                {{chatMessage.message}}
+                                            </div> 
+                                            <div *ngIf="chatMessage.chatMessageAttachments.length != 0" class="space-y-2">
+                                                <div *ngIf="chatMessage.chatMessageAttachments.length === 1" class="flex space-x-2 rtl:space-x-reverse items-center">
+                                                    <img src="Images/Icon frame.png" 
+                                                        class="border p-[4px] w-10 h-10 rounded-md object-contain" 
+                                                        alt="File icon">
+                                                    <span class="primaryTxt text-sm font-semibold truncate max-w-[150px]">
+                                                        {{getFileName(chatMessage.chatMessageAttachments[0].fileLink)}}
+                                                    </span>
+                                                </div>
+                                                <div *ngIf="chatMessage.chatMessageAttachments.length > 1" class="flex items-center space-x-2 rtl:space-x-reverse">
+                                                    <div class="flex space-x-1 rtl:space-x-reverse">
+                                                        <div *ngFor="let att of chatMessage.chatMessageAttachments | slice:0:1" class="relative">
+                                                            <img src="Images/Icon frame.png" 
+                                                                class="border p-1 w-8 h-8 rounded-md object-contain" 
+                                                                alt="File icon">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="bg-gray-200 rounded-full px-2 py-1">
+                                                        <span class="primaryTxt text-xs font-semibold">
+                                                            +{{chatMessage.chatMessageAttachments.length - 1}} {{ 'files' | translate }}
+                                                        </span>
+                                                    </div> 
+                                                </div>
+                                            </div>  
+                                        </div>
+                                        <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(chatMessage.insertedAt) }}</p>
+                                    </div> 
+                                </div>
+                            </div> 
+                        </li>
+                        <li *ngIf="chatMessages.length == 0"> 
+                            <div class="flex justify-center">
+                                <p class="text-[#BDBDBD]">{{ 'No Messages Yet' | translate }}</p>
+                            </div>  
+                        </li>
+                    </ul> 
+                </div>
             </div>
-            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" > 
-                <i class="fi fi-rs-paper-plane text-white text-3xl"></i> 
-                <span *ngIf="notificationsUnSeenCount > 0"
-                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                    {{ notificationsUnSeenCount }}
-                </span>
+            <div class="relative dropdown-container"> 
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleRequestPopup()" > 
+                    <i class="fi fi-rs-paper-plane text-white text-3xl flex items-center"></i> 
+                    <span *ngIf="requestsUnSeenCount > 0"
+                        class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                        {{ requestsUnSeenCount }}
+                    </span>
+                </div>
+                <div *ngIf="isRequuestPopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
+                    <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
+                        <h3 class="primaryTxt font-semibold"> {{ 'Requests' | translate }}</h3>
+                        <div class="flex space-x-2 rtl:space-x-reverse">
+                            <button (click)="sendRequest()"
+                                class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                 {{ 'Send Request' | translate }}
+                            </button>
+                            <button (click)="viewAllRequests()" class="text-gray-500 text-sm hover:text-gray-700 transition">  {{ 'View' | translate }} {{ 'All' | translate }}<i class="fas fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+                    <ul>
+                        <li *ngFor="let request of requests; let i = index" class="relative cursor-pointer" (click)="viewRequest(request)">
+                            <div>
+                                <div *ngIf="!request.seenOrNot"
+                                    class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
+                                </div>
+                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != requests.length, 'bg-[#e3ebf0b6]': !request.seenOrNot}">
+                                    <div class="flex-shrink-0">
+                                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                                    </div>
+                                    <div class="ml-4 text-start w-[80%]"> 
+                                        <p *ngIf="request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.forwardedFromEnglishName }} ({{ 'Employee' | translate }})</span> {{ 'Forwarded You This Request From' | translate }} <span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                                        <p *ngIf="!request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span> {{ 'Requested From You' | translate }}</p>
+                                        <div class="mt-4 flex flex-col space-y-3">
+                                            <div *ngIf="request.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
+                                                {{request.message}}
+                                            </div> 
+                                            <div *ngIf="request.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">
+                                                <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                                <span class="primaryTxt text-sm font-semibold">{{getFileName(request.fileLink)}}</span>
+                                            </div> 
+                                            <div *ngIf="request.link" class="secondaryTxt text-sm font-semibold">        
+                                                <a [href]="request.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
+                                                    target="_blank" (click)="$event.stopPropagation();"
+                                                    rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
+                                                     {{ 'View' | translate }} {{ 'Link' | translate }}
+                                                </a>                                    
+                                            </div> 
+                                            <div *ngIf="!request.forwardedOrNot && request.approvedOrNot == null" class="flex space-x-2 rtl:space-x-reverse">
+                                                <button (click)="$event.stopPropagation(); Accept(request)"
+                                                    class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Accept' | translate }}
+                                                </button>
+                                                <button *ngIf="request.receiverUserTypeID == 1" (click)="$event.stopPropagation(); Forward(request)"
+                                                    class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Forward' | translate }}
+                                                </button>
+                                                <button (click)="$event.stopPropagation(); Decline(request)"
+                                                    class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Decline' | translate }}
+                                                </button>
+                                            </div>
+                                            <div *ngIf="request.forwardedOrNot">
+                                                <p class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Forwarded To' | translate }} {{request.forwardedToEnglishName}}
+                                                </p> 
+                                            </div>
+                                            <div *ngIf="request.approvedOrNot != null" >
+                                                <p *ngIf="request.approvedOrNot == true" class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Accepted' | translate }}
+                                                </p> 
+                                                <p *ngIf="request.approvedOrNot == false" class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                                    {{ 'Declined' | translate }}
+                                                </p> 
+                                            </div>
+                                        </div>
+                                        <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(request.insertedAt) }}</p>
+                                    </div>
+                                </div>
+                            </div> 
+                        </li>
+                        <li *ngIf="requests.length == 0"> 
+                            <div class="flex justify-center">
+                                <p class="text-[#BDBDBD]">{{ 'No Requests Yet' | translate }}</p>
+                            </div>  
+                        </li>
+                    </ul> 
+                </div>
             </div>
             <div class="relative dropdown-container">  
                 <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
@@ -33,11 +197,11 @@
                 </div>
                 <div *ngIf="isNotificationPopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
                     <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
-                        <h3 class="primaryTxt font-semibold">Notifications</h3>
-                        <button (click)="viewAllNotifications()" class="text-gray-500 text-sm hover:text-gray-700 transition">View All <i class="fas fa-arrow-right ml-2"></i></button>
+                        <h3 class="primaryTxt font-semibold">{{ 'Notifications' | translate }}</h3>
+                        <button (click)="viewAllNotifications()" class="text-gray-500 text-sm hover:text-gray-700 transition">  {{ 'View' | translate }} {{ 'All' | translate }}<i class="fas fa-arrow-right ml-2"></i></button>
                     </div>
                     <ul>
-                        <li *ngFor="let notification of notifications; let i = index" class="relative" (click)="viewNotification(notification)">
+                        <li *ngFor="let notification of notifications; let i = index" class="relative cursor-pointer" (click)="viewNotification(notification)">
                              <div *ngIf="!notification.seenOrNot"
                                 class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
                             </div>
@@ -46,20 +210,20 @@
                                     <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                                 </div>
                                 <div class="ml-4 text-start w-full"> 
-                                    <p class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> Notifed You</p>
+                                    <p *ngIf="notification.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span>  {{ 'Notifed You' | translate }}</p>
                                     <div class="mt-4 flex flex-col space-y-3">
                                         <div *ngIf="notification.text" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
                                             {{notification.text}}
                                         </div> 
-                                        <div *ngIf="notification.imageLink" class="flex space-x-2 items-center">
+                                        <div *ngIf="notification.imageLink" class="flex space-x-2 rtl:space-x-reverse items-center">
                                             <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
-                                            <span class="primaryTxt text-sm font-semibold">{{getImageName(notification.imageLink)}}</span>
+                                            <span class="primaryTxt text-sm font-semibold">{{getFileName(notification.imageLink)}}</span>
                                         </div> 
                                         <div *ngIf="notification.link" class="secondaryTxt text-sm font-semibold">        
                                             <a [href]="notification.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
                                                 target="_blank" (click)="$event.stopPropagation(); LinkOpened(notification)"
                                                 rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
-                                                View Link
+                                                  {{ 'View' | translate }} {{ 'Link' | translate }}
                                             </a>                                    
                                         </div> 
                                     </div>
@@ -69,7 +233,7 @@
                         </li>
                         <li *ngIf="notifications.length == 0"> 
                             <div class="flex justify-center">
-                                <p class="text-[#BDBDBD]">No Notifications Yet</p>
+                                <p class="text-[#BDBDBD]"> {{ 'No Notifications Yet' | translate }}</p>
                             </div>  
                         </li>
                     </ul> 
@@ -93,9 +257,16 @@
             </div>
         </div>
         <div>
-            <div class="relative dropdown-container">
+            <div class="relative cursor-pointer dropdown-container">
                 <div class="flex items-center justify-between space-x-3 rtl:space-x-reverse" (click)="togglePopup()">
-                    <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                    <div class="relative">
+                        <img src="Images/person-dummy.jpg" class="rounded-full w-14" alt="Profile Photo">   
+                        <span *ngIf="this.User_Data_After_Login.type != 'octa'" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                            'bg-green-500': currentState.id === 1,
+                            'bg-red-500': currentState.id === 2,
+                            'bg-yellow-500': currentState.id === 3,
+                        }"></span>
+                    </div> 
                     <div class="hidden font-semibold text-white lg:flex flex-col space-y-2">
                         <div class="text-xl">
                             {{userName}}
@@ -107,23 +278,57 @@
                 </div>
                 <div *ngIf="isPopupOpen"
                     class="absolute ltr:right-0 rtl:left-0 mt-2 w-60 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50">
-                    <h3 class="font-semibold text-gray-700">Account Options</h3>
+                    <h3 class="font-semibold text-gray-700"> {{ 'Account Options' | translate }}</h3>
+
+                    <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="relative mt-4">  
+                        <button (click)="toggleStateDropdown()"
+                            class="text-start w-full hover:bg-gray-100 p-2 rounded-md flex justify-between items-center"> 
+                            <span class="flex items-center">
+                                <span [ngClass]="{
+                                    'text-green-500': currentState.id === 1,
+                                    'text-red-500': currentState.id === 2,
+                                    'text-yellow-500': currentState.id === 3
+                                }" class="mr-2 font-semibold">{{ currentState.en_Title }}</span>
+ 
+                                <span [ngClass]="{
+                                    'bg-green-500': currentState.id === 1,
+                                    'bg-red-500': currentState.id === 2,
+                                    'bg-yellow-500': currentState.id === 3
+                                }" class="w-3 h-3 rounded-full"></span>
+                            </span> 
+                        </button>
+
+                        <div *ngIf="isStateDropdownOpen" class="absolute right-0 w-full bg-white shadow-lg rounded-lg mt-2 z-50 border border-gray-300">
+                            <ul class="max-h-60 overflow-y-auto">
+                                <li *ngFor="let state of connectionStatus" 
+                                    (click)="selectState(state)"
+                                    class="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center">
+                                    <span>{{ state.en_Title }}</span> 
+                                    <span [ngClass]="{
+                                            'bg-green-500': state.id === 1,
+                                            'bg-red-500': state.id === 2,
+                                            'bg-yellow-500': state.id === 3
+                                        }"
+                                        class="w-3 h-3 rounded-full">
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <ul class="mt-2">
                         <li *ngFor="let token of allTokens">
                             <button (click)="ChangeAccount(token.id)" [ngClass]="{'border bg-gray-100':token.key == userName && token.UserType == User_Type}"
                                 class="text-start w-full hover:bg-gray-100 p-2 rounded-md"> 
-                                <p class="primaryTxt">{{ token.key }}</p>
+                                <p class="primaryTxt truncate" [title]="token.key">{{ token.key }}</p>
                                 <p class="text-gray-500 text-xs">{{ token.UserType }}</p>
                             </button>
                         </li>
                     </ul>
-                    <button (click)="openModal()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Change Password</button>
-                    <button (click)="gotologin()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Add New
-                        Account</button>
-                    <button (click)="logOut()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Log
-                        Out</button>
-                    <button (click)="logOutAll()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Log Out
-                        From All Accounts</button>
+                    <button (click)="openModal()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md"> {{ 'Change Password' | translate }}</button>
+                    <button (click)="gotologin()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md"> {{ 'Add New Account' | translate }}</button>
+                    <button (click)="logOut()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">{{ 'Log Out' | translate }}</button>
+                    <button (click)="logOutAll()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md"> {{ 'Log Out From All Accounts' | translate }}</button>
 
                 </div>
             </div>
@@ -137,26 +342,26 @@
 <div id="ChangePassModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl px-12 py-9 w-1/3">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">Change Password</h1> 
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Change Password' | translate }} </h1> 
             <button (click)="closeModal()" type="button" class="text-gray-500 hover:text-gray-600 font-bold text-xl">X</button>
         </div>
 
         <div class="mt-6 flex flex-wrap justify-between mb-4">
-            <div class="flex flex-col w-full mb-4"> 
-                <label class="primaryTxt mb-2 font-medium" for="OldPassword">Old Password</label>
-                <input id="OldPassword" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Old password"
+            <!-- <div class="flex flex-col w-full mb-4"> 
+                <label class="primaryTxt mb-2 font-medium" for="OldPassword"> {{ 'Old Password' | translate }}</label>
+                <input id="OldPassword" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Old Password' | translate }}"
                 (input)="onoldPasswordChange()" autocomplete="new-password" [(ngModel)]="editpasss.oldPassword"/> 
                 <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
-            </div> 
+            </div>  -->
             <div class="flex flex-col w-full mb-4"> 
-                <label class="primaryTxt mb-2 font-medium" for="Password">Password</label>
-                <input id="Password" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter the password"
+                <label class="primaryTxt mb-2 font-medium" for="Password"> {{ 'Password' | translate }}</label>
+                <input id="Password" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }}  {{ 'the password' | translate }}"
                 (input)="onPasswordChange()" [(ngModel)]="password"/>
                 <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
             </div> 
             <div class="flex flex-col w-full mb-4"> 
-                <label class="primaryTxt mb-2 font-medium" for="confirmPassword">Confirm Password</label>
-                <input id="confirmPassword" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter the password Again"
+                <label class="primaryTxt mb-2 font-medium" for="confirmPassword"> {{ 'Confirm Password' | translate }}</label>
+                <input id="confirmPassword" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'the password' | translate }} {{ 'Again' | translate }}"
                 [(ngModel)]="confirmPassword"/> 
             </div> 
         </div> 
@@ -165,7 +370,7 @@
                 [disabled]="isLoading" 
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" 
                 (click)="Save()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
               </button>
         </div>
@@ -184,16 +389,16 @@
                 <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
             </div>
             <div class="ml-4 text-start"> 
-                <p class="primaryTxt text-sm"><span class="font-semibold">{{ notificationByID.insertedByUserName }}</span> Notifed You</p>
+                <p *ngIf="notificationByID.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notificationByID.insertedByUserName }}</span> {{ 'Notifed You' | translate }}</p>
                 <div class="mt-4 flex flex-col space-y-3 ">
-                    <div *ngIf="notificationByID.imageLink" class="flex space-x-2 items-center"> 
+                    <div *ngIf="notificationByID.imageLink" class="flex space-x-2 rtl:space-x-reverse items-center"> 
                         <img [src]="notificationByID.imageLink" class="w-[200px] object-cover rounded-md"> 
                     </div> 
                     <div *ngIf="notificationByID.link" class="secondaryTxt text-sm font-semibold">        
                         <a [href]="notificationByID.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
                         target="_blank" (click)="LinkOpened(notificationByID)"
                         rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
-                        View Link
+                          {{ 'View' | translate }} {{ 'Link' | translate }}
                         </a>                                    
                     </div> 
                     <div *ngIf="notificationByID.text" class="w-full border-l-4 border-gray-300 pl-4 primaryTxt text-base">
@@ -204,6 +409,310 @@
                 </div>
                 <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(notificationByID.insertedAt) }}</p>
             </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- RequestModal -->
+<div id="RequestModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden overflow-x-hide">
+    <div class="bg-white rounded-2xl p-5 w-1/3 max-h-[75vh] overflow-y-auto overflow-x-hide"> 
+        <div class="flex justify-end">  
+            <button (click)="closeRequestModal()" type="button" class="text-gray-500 hover:text-gray-600 font-bold text-xl">X</button>
+        </div>
+ 
+        <div class="flex p-3 items-start max-w-full overflow-y-auto overflow-x-hide">
+            <div class="flex-shrink-0">
+                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+            </div>  
+            <div class="ml-4 text-start"> 
+                <p *ngIf="requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ requestByID.forwardedFromEnglishName }} ({{ 'Employee' | translate }})</span> {{ 'Forwarded You This Request From' | translate }}<span class="font-semibold">{{ requestByID.senderEnglishName }} ({{ requestByID.senderUserTypeName.charAt(0).toUpperCase() + requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                <p *ngIf="!requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ requestByID.senderEnglishName }} ({{ requestByID.senderUserTypeName.charAt(0).toUpperCase() + requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span> {{ 'Requested From You' | translate }}</p>
+                <div class="mt-4 flex flex-col space-y-3 ">
+                    <div *ngIf="requestByID.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">  
+                        <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                        <a href={{requestByID.fileLink}} class="secondaryTxt" target="_blank">
+                             {{ 'Click to' | translate }} {{ 'Download' | translate }}
+                        </a>
+                    </div> 
+                    <div *ngIf="requestByID.link" class="secondaryTxt text-sm font-semibold">        
+                        <a [href]="notificationByID.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
+                        target="_blank"
+                        rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
+                          {{ 'View' | translate }} {{ 'Link' | translate }}
+                        </a>                                    
+                    </div> 
+                    <div *ngIf="requestByID.message" class="w-full border-l-4 border-gray-300 pl-4 primaryTxt text-base">
+                        <p class="break-words">
+                            {{requestByID.message}}
+                        </p>
+                    </div> 
+                    <div *ngIf="!requestByID.forwardedOrNot && requestByID.approvedOrNot == null" class="flex space-x-2 rtl:space-x-reverse">
+                        <button (click)="$event.stopPropagation(); Accept(requestByID)"
+                            class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            {{ 'Accept' | translate }}
+                        </button>
+                        <button *ngIf="requestByID.receiverUserTypeID == 1" (click)="$event.stopPropagation(); Forward(requestByID)"
+                            class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                            {{ 'Forward' | translate }}
+                        </button>
+                        <button (click)="$event.stopPropagation(); Decline(requestByID)"
+                            class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            {{ 'Decline' | translate }}
+                        </button>
+                    </div>
+                    <div *ngIf="requestByID.forwardedOrNot">
+                        <p class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                             {{ 'Forwarded To' | translate }}{{requestByID.forwardedToEnglishName}}
+                        </p> 
+                    </div>
+                    <div *ngIf="requestByID.approvedOrNot != null" >
+                        <p *ngIf="requestByID.approvedOrNot == true" class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            {{ 'Accepted' | translate }}
+                        </p> 
+                        <p *ngIf="requestByID.approvedOrNot == false" class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            {{ 'Declined' | translate }}
+                        </p> 
+                    </div>
+                </div>
+                <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(notificationByID.insertedAt) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Forward_Modal -->
+<div id="Forward_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Forward Request' | translate }}</h1> 
+            <button (click)="closeForwardModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap">  
+            <div class="w-full"> 
+                <div class="flex flex-col w-full mb-4">
+                    <label class="primaryTxt mb-2" for="DepartmentToForwardInNav"> {{ 'Department' | translate }}</label>
+                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentToForwardInNav" 
+                    [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Department' | translate }}</option>
+                        <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                        <option *ngIf="departments.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    </select>
+                </div>
+                <div class="flex flex-col w-full mb-4">
+                    <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !departmentID, 'primaryTxt': departmentID }">
+                       {{ 'Choose' | translate }} {{ 'Employee' | translate }}</label>
+                    <select
+                    class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="requestToBeForwarded.forwardToID"
+                    [disabled]="!departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !departmentID }">
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
+                        <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                        <option *ngIf="employees.length === 0 && departmentID" disabled selected>{{ 'No Data Found' | translate }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="SendForward()">
+                <span *ngIf="!isLoading"> {{ 'Forward' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- SendRequest_Modal -->
+ <div id="SendRequest_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Send Request' | translate }}</h1> 
+            <button (click)="closeSendRequestModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div *ngIf="User_Data_After_Login.type == 'employee'" class="w-full m-auto mt-5"> 
+                <div class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
+                    <div>
+                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        (click)="selectType(2)">
+                    </div>
+                    <div>
+                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        (click)="selectType(3)">
+                    </div>
+                    <div>
+                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        (click)="selectType(1)">
+                    </div>
+                </div> 
+            </div>
+            
+            <div *ngIf="User_Data_After_Login.type != 'employee'" class="w-full my-5 flex space-x-5 rtl:space-x-reverse justify-center">  
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(2)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isTeacherHovered,
+                            'text-gray-500': !isTeacherHovered }" class="cursor-pointer pb-1 transition-all"> 
+                        {{ 'Teacher' | translate }}
+                    </p>
+                </div>
+                <div>
+                    <p (click)="selectTypeForStudentAndParent(1)" [ngClass]="{
+                            'font-bold text-[#089B41] border-b-2 border-[#089B41]': isEmployeeHovered,
+                            'text-gray-500': !isEmployeeHovered
+                        }" class="cursor-pointer pb-1 transition-all">
+                        {{ 'Employee' | translate }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <div *ngIf="isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="DepartmentInNav">{{ 'Department' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentInNav" 
+                        [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
+                            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Department' | translate }}</option>
+                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departments.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !departmentID, 'primaryTxt': departmentID }"> {{ 'Employee' | translate }}</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="requestToBeSend.receiverID"
+                        [disabled]="!departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !departmentID }">
+                            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div *ngIf="!isEmployeeHovered && User_Data_After_Login.type =='employee'" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="School">{{ 'School' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School" 
+                        [(ngModel)]="schoolID" (change)="onSchoolChange($event)">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+                            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                            <option *ngIf="schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !schoolID, 'primaryTxt': schoolID }">{{ 'Section' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Section" 
+                        [(ngModel)]="sectionID" (change)="onSectionChange($event)"
+                        [disabled]="!schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !schoolID }">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Section' | translate }}</option>
+                            <option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</option>
+                            <option *ngIf="sections.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !sectionID, 'primaryTxt': sectionID }">{{ 'Grade' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" 
+                        [(ngModel)]="gradeID" (change)="onGradeChange($event)"
+                        [disabled]="!sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !sectionID }">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+                            <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                            <option *ngIf="grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !gradeID, 'primaryTxt': gradeID }">{{ 'Classroom' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroom" 
+                        [(ngModel)]="classroomID" (change)="onClassroomChange($event)"
+                        [disabled]="!gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !gradeID }">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Classroom' | translate }}</option>
+                            <option *ngFor="let classroom of classrooms" [value]="classroom.id">{{ classroom.name }}</option>
+                            <option *ngIf="classrooms.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !classroomID, 'primaryTxt': classroomID }">{{ 'Student' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
+                        [(ngModel)]="requestToBeSend.receiverID"
+                        [disabled]="!classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !classroomID }">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                </div> 
+
+                <div *ngIf="isTeacherHovered" class="w-full">
+                    <div *ngIf="User_Data_After_Login.type == 'parent'" class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="StudentParent">{{ 'Student' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="StudentParent" 
+                        [(ngModel)]="requestToBeSend.studentID" (change)="onStudentChange($event)">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Subject" [ngClass]="{ 'text-gray-400': !requestToBeSend.studentID, 'primaryTxt': requestToBeSend.studentID }">{{ 'Subject' | translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject" 
+                        [(ngModel)]="subjectID" (change)="onSubjectChange($event)"
+                        [disabled]="!requestToBeSend.studentID" [ngClass]="{ 'bg-[#EBEBEB]': !requestToBeSend.studentID }">
+                            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
+                            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.en_name }}</option>
+                            <option *ngIf="subjects.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Teacher" [ngClass]="{ 'text-gray-400': !subjectID, 'primaryTxt': subjectID }">{{ 'Teacher' | translate }}</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Teacher" [(ngModel)]="requestToBeSend.receiverID"
+                        [disabled]="!subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !subjectID }">
+                            <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Teacher' | translate }}</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                        </select>
+                    </div>
+                </div> 
+    
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="textInNav">{{ 'Message' | translate }}</label>
+                    <input id="textInNav" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                    placeholder="{{ 'Enter' | translate }} {{ 'Message' | translate }}" [(ngModel)]="requestToBeSend.message" /> 
+                </div> 
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="linkInNav">{{ 'Link' | translate }}</label>
+                    <input id="linkInNav" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        placeholder="{{ 'Enter' | translate }} {{ 'Link' | translate }}" [(ngModel)]="requestToBeSend.link" /> 
+                </div> 
+                <div class="w-full mb-4"> 
+                    <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+                        <div class="flex justify-center w-full">
+                            <label for="fileFileInNav" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                                <img *ngIf="!requestToBeSend.fileFile" src="Images/Icon frame.png" class="w-1/4">
+                                <img *ngIf="requestToBeSend.fileFile" src="Images/FileAttached.png" class="w-1/4"> 
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{ 'Click to' | translate }} {{ 'Upload' | translate }}</span></p>
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' | translate }}</p>
+                            </label>
+                            <input id="fileFileInNav" type="file" class="hidden"
+                                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov"
+                                (change)="onFileSelected($event)" />
+                        </div>
+                    </div> 
+                </div>   
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Send()">
+                <span *ngIf="!isLoading">{{ 'Send' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
         </div>
     </div>
 </div>
