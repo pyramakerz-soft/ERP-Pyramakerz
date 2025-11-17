@@ -618,5 +618,4 @@ async exportExcel() {
     }]
   });
 }
-
 }

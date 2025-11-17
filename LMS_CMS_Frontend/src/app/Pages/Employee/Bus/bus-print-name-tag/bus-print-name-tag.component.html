@@ -47,6 +47,13 @@
 </div>
 
 <div *ngIf="busId!=-1">
+    <div class="flex justify-end mt-3 space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" 
+             [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" 
+             [title]="'Print' | translate">
+    </div>
+
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -115,17 +122,46 @@
             </tbody>
         </table>
     </div>
-    <!-- <div class="flex justify-end mt-3">
-        <button 
-            [ngClass]="{ 
-                'text-gray-500': !IsChoosenDomain, 
-                'border border-gray-500': !IsChoosenDomain,
-                'cursor-not-allowed': !IsChoosenDomain,
-                'secondaryBg': IsChoosenDomain,
-                'text-white': IsChoosenDomain
-            }" 
-            class="rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Print
-        </button>
-    </div> -->
+</div>
+
+<!-- Name Tag Template (Hidden until PDF/Print) -->
+<div *ngIf="showPDF" #nameTagContainer 
+     style="padding: 20px; font-family: Arial, sans-serif; background: white; max-width: 210mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px;">
+
+  <!-- Grid of Name Tags (2 columns) -->
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px;">
+    
+    <div *ngFor="let student of busStudentData" 
+         style="border: 3px dashed #333; border-radius: 6px; padding: 15px; background: white; page-break-inside: avoid; min-height: 180px; display: flex; flex-direction: column;">
+      
+      <!-- School Name Header -->
+      <div style="text-align: center; margin-bottom: 10px;">
+        <div style="font-size: 16px; font-weight: bold; color: #000;">
+          {{ student.schoolName }}
+        </div>
+      </div>
+
+      <!-- Student Info -->
+      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="margin-bottom: 8px;">
+          <span style="font-size: 14px; font-weight: bold; color: #000;">Name: </span>
+          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.studentName }}</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <span style="font-size: 14px; font-weight: bold; color: #000;">Class: </span>
+          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.className }}</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 13px; font-weight: bold; color: #000;">{{ student.busCategoryName }}</div>
+        </div>
+      </div>
+
+      <!-- Bus Info -->
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 12px; font-weight: bold; color: #000;">{{ selectedBusName }}</div>
+        <div style="font-size: 11px; color: #666;">{{ student.gradeName }}</div>
+      </div>
+    </div>
+
+  </div>
 </div>
