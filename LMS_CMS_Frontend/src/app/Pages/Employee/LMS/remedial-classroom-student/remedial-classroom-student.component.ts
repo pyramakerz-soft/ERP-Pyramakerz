@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subscription } from 'rxjs';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-remedial-classroom-student',
   standalone: true,
@@ -25,6 +27,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './remedial-classroom-student.component.html',
   styleUrl: './remedial-classroom-student.component.css',
 })
+
+@InitLoader()
 export class RemedialClassroomStudentComponent {
   keysArray: string[] = [
     'id',
@@ -73,6 +77,7 @@ export class RemedialClassroomStudentComponent {
     private translate: TranslateService,
     public RemedialClassroomServ: RemedialClassroomService,   
     private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

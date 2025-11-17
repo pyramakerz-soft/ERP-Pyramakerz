@@ -10,6 +10,8 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import { FormsModule } from '@angular/forms';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-failed-student',
@@ -18,6 +20,8 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './failed-student.component.html',
   styleUrl: './failed-student.component.css'
 })
+
+@InitLoader()
 export class FailedStudentComponent {
   keysArray: string[] = ['id', 'StudentEnglishName', 'StudentArabicName', 'GradeName', 'SubjectEnglishName', 'SubjectArabicName', 'AcademicYearName'];
   key: string = 'id';
@@ -35,7 +39,8 @@ export class FailedStudentComponent {
     public account: AccountService,
     public ApiServ: ApiService,  
     public failedStudentsService: FailedStudentsService, 
-    public acadimicYearService: AcadimicYearService 
+    public acadimicYearService: AcadimicYearService ,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

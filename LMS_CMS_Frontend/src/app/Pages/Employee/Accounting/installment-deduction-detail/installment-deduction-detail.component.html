@@ -159,12 +159,6 @@
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <!-- <button *ngIf="editingRowId === row.id" (click)="SaveEdit(row)">
-                                <i class="far fa-check-circle secondaryTxt"></i>
-                            </button>
-                            <button *ngIf="editingRowId !== row.id" (click)="Edit(row.id)">
-                                <i class="fa-solid fa-pencil"></i>
-                            </button> -->
                         </div>
                     </td>
                 </tr>

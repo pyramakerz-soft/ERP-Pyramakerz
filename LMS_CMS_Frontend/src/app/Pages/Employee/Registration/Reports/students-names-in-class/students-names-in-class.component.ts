@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './students-names-in-class.component.html',
   styleUrl: './students-names-in-class.component.css'
 })
+
+@InitLoader()
 export class StudentsNamesInClassComponent {
 
   SchoolId: number = 0
@@ -69,7 +73,8 @@ export class StudentsNamesInClassComponent {
     public classroomService: ClassroomService,
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
-    public reportsService: ReportsService, 
+    public reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

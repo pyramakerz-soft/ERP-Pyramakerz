@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-announcement',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './announcement.component.html',
   styleUrl: './announcement.component.css'
 })
+
+@InitLoader()
 export class AnnouncementComponent {
   announcement= new Announcement();
   TableData:Announcement[] = []
@@ -61,6 +65,7 @@ export class AnnouncementComponent {
     public announcementService: AnnouncementService,
     public userTypeService: UserTypeService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

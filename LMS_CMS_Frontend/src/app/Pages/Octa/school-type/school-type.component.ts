@@ -10,6 +10,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 @Component({
   selector: 'app-school-type',
   standalone: true,
@@ -17,6 +19,8 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './school-type.component.html',
   styleUrl: './school-type.component.css'
 })
+
+@InitLoader()
 export class SchoolTypeComponent {
   keysArray: string[] = ['id', 'name' ];
   key: string= "id";
@@ -30,7 +34,8 @@ export class SchoolTypeComponent {
 
   isSaved = false
 
-  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService){}
+  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService,
+    private loadingService: LoadingService ){}
 
   ngOnInit(){
     this.getSchoolTypeData()

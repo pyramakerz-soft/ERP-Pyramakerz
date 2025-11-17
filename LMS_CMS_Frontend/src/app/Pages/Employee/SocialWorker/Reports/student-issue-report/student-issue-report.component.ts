@@ -20,6 +20,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-student-issue-report',
@@ -28,6 +30,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './student-issue-report.component.html',
   styleUrl: './student-issue-report.component.css'
 })
+
+@InitLoader()
 export class StudentIssueReportComponent  implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -84,7 +88,8 @@ export class StudentIssueReportComponent  implements OnInit {
     private languageService: LanguageService,
     public account: AccountService,   
     private route: ActivatedRoute, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

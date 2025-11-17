@@ -16,6 +16,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-role',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './role.component.html',
   styleUrl: './role.component.css',
 })
+
+@InitLoader()
 export class RoleComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -52,6 +56,7 @@ export class RoleComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

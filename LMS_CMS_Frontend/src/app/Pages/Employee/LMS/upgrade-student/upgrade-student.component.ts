@@ -10,6 +10,8 @@ import { ApiService } from '../../../../Services/api.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { UpgradeStudentsService } from '../../../../Services/Employee/LMS/upgrade-students.service';
 import Swal from 'sweetalert2';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-upgrade-student',
@@ -18,6 +20,8 @@ import Swal from 'sweetalert2';
   templateUrl: './upgrade-student.component.html',
   styleUrl: './upgrade-student.component.css'
 })
+
+@InitLoader()
 export class UpgradeStudentComponent {
   schools: School[] = [];
   SelectedSchoolId: number = 0;
@@ -35,7 +39,9 @@ export class UpgradeStudentComponent {
 
   isLoading: boolean = false;
 
-  constructor(public account: AccountService, public ApiServ: ApiService, public schoolService: SchoolService, public acadimicYearService: AcadimicYearService, public upgradeStudentsService: UpgradeStudentsService) { }
+  constructor(public account: AccountService, public ApiServ: ApiService, public schoolService: SchoolService, public acadimicYearService: AcadimicYearService, 
+    public upgradeStudentsService: UpgradeStudentsService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

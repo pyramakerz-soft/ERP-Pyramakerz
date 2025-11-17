@@ -8,6 +8,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../../Services/loading.service';
 @Component({
   selector: 'app-average-cost-calc',
   standalone: true,
@@ -15,6 +17,8 @@ import { RealTimeNotificationServiceService } from '../../../../../../../Service
   templateUrl: './average-cost-calc.component.html',
   styleUrl: './average-cost-calc.component.css',
 })
+
+@InitLoader()
 export class AverageCostCalcComponent {
   dateFrom: string = '';
   dateTo: string = '';
@@ -31,6 +35,7 @@ export class AverageCostCalcComponent {
     private inventoryDetailsService: InventoryDetailsService,
     private router: Router,
     private languageService: LanguageService, 
+    private loadingService: LoadingService 
   ) {}
 
 

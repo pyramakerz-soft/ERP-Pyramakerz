@@ -18,6 +18,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Student } from '../../../../Models/student';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-shop-item',
@@ -26,6 +28,8 @@ import { Student } from '../../../../Models/student';
   templateUrl: './shop-item.component.html',
   styleUrl: './shop-item.component.css'
 })
+
+@InitLoader()
 export class ShopItemComponent {
   ShopItemId = 0
   
@@ -48,7 +52,8 @@ export class ShopItemComponent {
   selectedImage: string | null = null;
   
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
-    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService, 
+    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService,
+    private loadingService: LoadingService
   ){}
 
   ngOnInit(){

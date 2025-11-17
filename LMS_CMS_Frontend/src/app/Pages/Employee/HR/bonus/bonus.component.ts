@@ -20,6 +20,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-bonus',
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bonus.component.html',
   styleUrl: './bonus.component.css',
 })
+
+@InitLoader()
 export class BonusComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -75,7 +79,8 @@ export class BonusComponent {
     public ApiServ: ApiService,
     public BonusServ: BonusService,
     public BounsTypeServ: BounsTypeService,
-    public EmployeeServ: EmployeeService, 
+    public EmployeeServ: EmployeeService,
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -372,10 +377,8 @@ isFormValid(): boolean {
     this.validationErrors['numberOfBounsDays'] = this.getRequiredErrorMessage('numberOfBounsDays');
   }
 
-  if (
-    this.bouns.bounsTypeID == 1 &&
-    (this.bouns.hours == 0 || this.bouns.hours == null)
-  ) {
+  // if (this.bouns.bounsTypeID == 1 &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
+  if (this.bouns.bounsTypeID == 1 && (this.bouns.minutes == 0 || this.bouns.minutes == null) &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
     isValid = false;
     this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
   }

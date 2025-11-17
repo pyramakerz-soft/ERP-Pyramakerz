@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-registration-confirmation-test-details',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registration-confirmation-test-details.component.html',
   styleUrl: './registration-confirmation-test-details.component.css'
 })
+
+@InitLoader()
 export class RegistrationConfirmationTestDetailsComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -63,6 +67,7 @@ export class RegistrationConfirmationTestDetailsComponent {
     private router: Router,
     public testServ: TestService,
     public registrationserv: RegisterationFormTestService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

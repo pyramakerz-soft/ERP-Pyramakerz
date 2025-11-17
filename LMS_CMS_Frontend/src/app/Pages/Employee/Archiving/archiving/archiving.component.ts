@@ -13,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 import { ArchivingItemComponent } from '../../../../Component/Employee/Archiving/archiving-item/archiving-item.component';
 import { ArchivingTree } from '../../../../Models/Archiving/archiving-tree';
 import Swal from 'sweetalert2';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-archiving',
@@ -21,6 +23,8 @@ import Swal from 'sweetalert2';
   templateUrl: './archiving.component.html',
   styleUrl: './archiving.component.css'
 })
+
+@InitLoader()
 export class ArchivingComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
  
@@ -47,7 +51,8 @@ export class ArchivingComponent {
     public account: AccountService,  
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService, 
-    public archivingService:ArchivingService
+    public archivingService:ArchivingService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

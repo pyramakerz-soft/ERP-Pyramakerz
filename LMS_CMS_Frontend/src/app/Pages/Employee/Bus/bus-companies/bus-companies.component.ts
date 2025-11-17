@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bus-companies',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bus-companies.component.html',
   styleUrl: './bus-companies.component.css'
 })
+
+@InitLoader()
 export class BusCompaniesComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   busCompany: BusType = new BusType(0, "", 0);
@@ -68,7 +72,8 @@ export class BusCompaniesComponent {
     private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService) { }
+    private languageService: LanguageService,
+    private loadingService: LoadingService) { }
 
   ngOnInit() {
 

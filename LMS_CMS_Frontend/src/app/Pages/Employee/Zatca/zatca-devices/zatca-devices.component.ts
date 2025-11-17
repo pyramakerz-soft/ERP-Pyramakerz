@@ -20,6 +20,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-zatca-devices',
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrls: ['./zatca-devices.component.css'],
   providers: [DatePipe]
 })
+
+@InitLoader()
 export class ZatcaDevicesComponent implements OnInit {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "");
   TableData: ZatcaDevice[] = [];
@@ -72,6 +76,7 @@ export class ZatcaDevicesComponent implements OnInit {
     private datePipe: DatePipe,
     private zatcaService: ZatcaService, 
     private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

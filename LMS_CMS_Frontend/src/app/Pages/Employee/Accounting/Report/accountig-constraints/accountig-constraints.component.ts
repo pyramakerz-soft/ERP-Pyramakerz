@@ -14,6 +14,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { Subscription } from 'rxjs';
 import { AccountingConstraintsResponse } from '../../../../../Models/Accounting/accounting-constraints-report';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-accountig-constraints',
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './accountig-constraints.component.html',
   styleUrls: ['./accountig-constraints.component.css'],
 })
+
+@InitLoader()
 export class AccountigConstraintsComponent implements OnDestroy {
   DomainName: string = '';
   SelectedStartDate: string = '';
@@ -51,6 +55,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
     public reportsService: ReportsService,
     public sharedReportsService: SharedReportsService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

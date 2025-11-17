@@ -14,6 +14,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-hygiene-types',
   standalone: true,
@@ -47,7 +48,8 @@ export class HygieneTypesComponent implements OnInit {
     private hygieneTypesService: HygieneTypesService,
     private apiService: ApiService,
     private languageService: LanguageService, 
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {

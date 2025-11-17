@@ -24,6 +24,8 @@ import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { Student } from '../../../../../Models/student';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-evaluation-report',
@@ -32,6 +34,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './evaluation-report.component.html',
   styleUrl: './evaluation-report.component.css',
 })
+
+@InitLoader()
 export class EvaluationReportComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -101,7 +105,8 @@ export class EvaluationReportComponent {
     public employeeService: EmployeeService,
     public SchoolServ: SchoolService,
     public templateServ: EvaluationTemplateService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService
 
   ) {}
 

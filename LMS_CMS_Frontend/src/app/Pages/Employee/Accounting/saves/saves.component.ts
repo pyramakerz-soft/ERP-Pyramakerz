@@ -25,6 +25,8 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { Employee } from '../../../../Models/Employee/employee';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-saves',
@@ -33,6 +35,8 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
   templateUrl: './saves.component.html',
   styleUrl: './saves.component.css',
 })
+
+@InitLoader()
 export class SavesComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -92,7 +96,8 @@ export class SavesComponent {
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
     private employeeService: EmployeeService,
-    private safeEmployeeService: SafeEmployeeService
+    private safeEmployeeService: SafeEmployeeService,
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

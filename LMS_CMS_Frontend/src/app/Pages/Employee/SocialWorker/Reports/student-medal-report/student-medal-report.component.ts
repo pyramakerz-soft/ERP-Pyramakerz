@@ -21,6 +21,8 @@ import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { SocialWorkerMedalStudent } from '../../../../../Models/SocialWorker/social-worker-medal-student';
 import { Student } from '../../../../../Models/student';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-student-medal-report',
@@ -29,6 +31,8 @@ import { Student } from '../../../../../Models/student';
   templateUrl: './student-medal-report.component.html',
   styleUrl: './student-medal-report.component.css'
 })
+
+@InitLoader()
 export class StudentMedalReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -80,7 +84,8 @@ export class StudentMedalReportComponent implements OnInit {
     public account: AccountService,   
     private route: ActivatedRoute,
     private languageService: LanguageService, 
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

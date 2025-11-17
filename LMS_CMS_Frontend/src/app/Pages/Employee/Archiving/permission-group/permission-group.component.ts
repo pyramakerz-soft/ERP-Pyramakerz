@@ -13,6 +13,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-permission-group',
@@ -21,6 +23,8 @@ import { SearchComponent } from '../../../../Component/search/search.component';
   templateUrl: './permission-group.component.html',
   styleUrl: './permission-group.component.css'
 })
+
+@InitLoader()
 export class PermissionGroupComponent {
  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -56,7 +60,8 @@ export class PermissionGroupComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public permissionGroupService:PermissionGroupService
+    public permissionGroupService:PermissionGroupService,
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

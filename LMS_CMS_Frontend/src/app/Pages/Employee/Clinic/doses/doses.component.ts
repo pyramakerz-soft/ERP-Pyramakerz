@@ -13,6 +13,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-doses',
   standalone: true,
@@ -21,6 +23,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './doses.component.html',
   styleUrls: ['./doses.component.css'],
 })
+
+@InitLoader()
 export class DosesComponent implements OnInit {
   dose: Dose = new Dose(0, '', '');
   editDose = false;
@@ -36,8 +40,9 @@ export class DosesComponent implements OnInit {
 
   constructor(private doseService: DoseService, 
     private apiService: ApiService,
-      private languageService: LanguageService,
-      private translate: TranslateService
+    private languageService: LanguageService,
+    private translate: TranslateService,
+    private loadingService: LoadingService
 ) {}
 
   ngOnInit(): void {

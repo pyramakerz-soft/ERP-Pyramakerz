@@ -16,6 +16,8 @@ import { MaintenanceItemService } from '../../../../Services/Employee/Maintenanc
 import { ApiService } from '../../../../Services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-maintenance-items',
@@ -24,6 +26,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
   templateUrl: './maintenance-items.component.html',
   styleUrl: './maintenance-items.component.css'
 })
+
+@InitLoader()
 export class MaintenanceItemsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   UserID: number = 0;
@@ -58,7 +62,8 @@ export class MaintenanceItemsComponent {
     private deleteEditPermissionServ: DeleteEditPermissionService, 
     private activeRoute: ActivatedRoute,
     private menuService: MenuService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {

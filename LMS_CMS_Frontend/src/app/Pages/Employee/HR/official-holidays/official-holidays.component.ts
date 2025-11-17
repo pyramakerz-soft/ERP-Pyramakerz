@@ -16,6 +16,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-official-holidays',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './official-holidays.component.html',
   styleUrl: './official-holidays.component.css'
 })
+
+@InitLoader()
 export class OfficialHolidaysComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -61,7 +65,8 @@ export class OfficialHolidaysComponent {
     private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public OfficialHolidaysServ: OfficialHolidaysService, 
+    public OfficialHolidaysServ: OfficialHolidaysService,
+    private loadingService: LoadingService  
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -261,6 +266,7 @@ export class OfficialHolidaysComponent {
     if(this.officialHoliday.dateTo=='' || this.officialHoliday.dateTo < this.officialHoliday.dateFrom){
       this.officialHoliday.dateTo = this.officialHoliday.dateFrom
     }
+    this.validationErrors['dateTo'] = ''
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

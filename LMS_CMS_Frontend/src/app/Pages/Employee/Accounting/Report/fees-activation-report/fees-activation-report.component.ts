@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-fees-activation-report',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './fees-activation-report.component.html',
   styleUrl: './fees-activation-report.component.css'
 })
+
+@InitLoader()
 export class FeesActivationReportComponent {
   DomainName: string = '';  
   SelectedStartDate: string = '';
@@ -49,6 +53,7 @@ export class FeesActivationReportComponent {
     public reportsService: ReportsService, 
     public sharedReportsService: SharedReportsService ,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() { 

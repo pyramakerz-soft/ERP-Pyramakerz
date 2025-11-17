@@ -22,6 +22,8 @@ import { QuestionOption } from '../../../../Models/Registration/question-option'
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-questions',
   standalone: true,
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './questions.component.html',
   styleUrl: './questions.component.css',
 })
+
+@InitLoader()
 export class QuestionsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -85,6 +89,7 @@ export class QuestionsComponent {
     public QuestionServ: QuestionService,
     public QuestionTypeServ: QuestionTypeService, 
     private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

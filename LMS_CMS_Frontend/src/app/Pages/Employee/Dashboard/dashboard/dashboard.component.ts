@@ -22,6 +22,7 @@ import { CategoryRankingsComponent } from '../../../../Component/Employee/Home/c
 import { RequestProgressComponent } from '../../../../Component/Employee/Home/request-progresss/request-progresss.component';
 import { DashboardService } from '../../../../Services/Dashboard/dashboard.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -72,7 +73,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public employeeService: EmployeeService,
     public ApiServ: ApiService,
     private languageService: LanguageService, 
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {  

@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-role-add-edit',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './role-add-edit.component.html',
   styleUrl: './role-add-edit.component.css'
 })
+
+@InitLoader()
 export class RoleAddEditComponent {
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -68,7 +72,8 @@ export class RoleAddEditComponent {
     public RoleServ: RoleService,
     private router: Router,
     private languageService: LanguageService, 
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) { }
 
   async ngOnInit() {

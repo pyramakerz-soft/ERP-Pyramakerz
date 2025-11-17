@@ -20,6 +20,8 @@ import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.
 import { ActivatedRoute } from '@angular/router';
 import { Student } from '../../../../../Models/student';
 import { StudentService } from '../../../../../Services/student.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-accounting-statement-report',
@@ -28,6 +30,8 @@ import { StudentService } from '../../../../../Services/student.service';
   templateUrl: './accounting-statement-report.component.html',
   styleUrl: './accounting-statement-report.component.css'
 })
+
+@InitLoader()
 export class AccountingStatementReportComponent implements OnInit {
   // Filter parameters
   fromDate: string = '';
@@ -85,7 +89,8 @@ export class AccountingStatementReportComponent implements OnInit {
     private linkFileService: LinkFileService,   
     private route: ActivatedRoute,
     public StudentService: StudentService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

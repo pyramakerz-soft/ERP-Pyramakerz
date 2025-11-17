@@ -146,15 +146,9 @@ import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-liv
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
-import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
-import { SubjectDetailsComponent } from './Pages/Student/LMS/UI/subject-details/subject-details.component';
-import { WeekDetailsComponent } from './Pages/Student/LMS/UI/week-details/week-details.component';
 import { ElectronicInvoiceComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice/electronic-invoice.component';
-import { LessonResourcesComponent } from './Pages/Student/LMS/UI/lesson-resources/lesson-resources.component';
-import { AssignmentsComponent } from './Pages/Student/LMS/UI/assignments/assignments.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
-import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
-import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
+import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component'; 
 import { WeightTypeComponent } from './Pages/Employee/LMS/weight-type/weight-type.component';
 import { ClassroomStudentsComponent } from './Pages/Employee/LMS/classroom-students/classroom-students.component';
 import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subjects/classroom-subjects.component';

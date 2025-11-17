@@ -31,6 +31,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-lesson',
   standalone: true,
@@ -38,6 +40,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css'
 })
+
+@InitLoader()
 export class LessonComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -151,6 +155,7 @@ export class LessonComponent {
     public SemesterWorkingWeekServ: SemesterWorkingWeekService,
     public acadimicYearService: AcadimicYearService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

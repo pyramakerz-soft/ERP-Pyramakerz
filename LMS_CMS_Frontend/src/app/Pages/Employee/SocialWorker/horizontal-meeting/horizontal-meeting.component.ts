@@ -17,6 +17,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-horizontal-meeting',
   standalone: true,
@@ -24,6 +26,8 @@ import {  Subscription } from 'rxjs';
   templateUrl: './horizontal-meeting.component.html',
   styleUrl: './horizontal-meeting.component.css'
 })
+
+@InitLoader()
 export class HorizontalMeetingComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -61,8 +65,8 @@ export class HorizontalMeetingComponent {
     public ApiServ: ApiService,
     public HorizontalMeetingServ: HorizontalMeetingService, 
     private languageService: LanguageService,
-    private translate: TranslateService,
-
+    private translate: TranslateService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

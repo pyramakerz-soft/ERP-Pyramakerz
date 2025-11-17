@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-shop-items',
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './shop-items.component.html',
   styleUrl: './shop-items.component.css'
 })
+
+@InitLoader()
 export class ShopItemsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -48,8 +52,13 @@ export class ShopItemsComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'enName', 'arName', 'purchasePrice', 'salesPrice', 'barCode', 'vatForForeign', 'limit', 'schoolName', 'inventorySubCategoriesName'];
-
   validationErrors: { [key in keyof ShopItem]?: string } = {};
+
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -63,6 +72,7 @@ export class ShopItemsComponent {
     public shopItemService: ShopItemService,
     private translate: TranslateService,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -83,7 +93,7 @@ export class ShopItemsComponent {
       }
     });
 
-    this.GetAllData();
+    this.GetAllData(this.CurrentPage, this.PageSize)
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -96,13 +106,35 @@ export class ShopItemsComponent {
     }
   }
 
-  GetAllData() {
-    this.shopItemService.Get(this.DomainName).subscribe(
-      data => {
-        this.TableData = data
+  GetAllData(pageNumber: number, pageSize: number) {
+    this.shopItemService.GetWithPaggination(this.DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage
+        this.PageSize = data.pagination.pageSize
+        this.TotalPages = data.pagination.totalPages
+        this.TotalRecords = data.pagination.totalRecords
+        this.TableData = data.data
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage = this.TotalRecords / this.PageSize
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
+                this.isDeleting = false
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
+              }
+              this.GetAllData(this.CurrentPage, this.PageSize)
+            }
+          }
+        }
+        this.TableData = []
       }
     )
   }
+
 
   Create() {
     this.router.navigateByUrl(`Employee/Shop Item/Create`)
@@ -121,7 +153,7 @@ export class ShopItemsComponent {
       if (result.isConfirmed) {
         this.shopItemService.Delete(id, this.DomainName).subscribe(
           data => {
-            this.GetAllData()
+            this.GetAllData(this.CurrentPage, this.PageSize)
           }
         )
       }
@@ -173,6 +205,50 @@ export class ShopItemsComponent {
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+    changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage
+    this.GetAllData(this.CurrentPage, this.PageSize)
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0
     }
   }
 }

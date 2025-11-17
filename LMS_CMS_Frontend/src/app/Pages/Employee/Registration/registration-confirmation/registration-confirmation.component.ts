@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-registration-confirmation',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registration-confirmation.component.html',
   styleUrl: './registration-confirmation.component.css'
 })
+
+@InitLoader()
 export class RegistrationConfirmationComponent {
   keysArray: string[] = ['id', 'studentEnName', 'studentArName','phone','gradeName','academicYearName','schoolName','email'];
   key: string= "id";
@@ -58,8 +62,7 @@ export class RegistrationConfirmationComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
         private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, 
         public registerationFormParentServicea:RegisterationFormParentService, public yearService: AcadimicYearService, 
-        public schoolService: SchoolService, public stateService: RegistrationFormStateService, 
-    private languageService: LanguageService,){}
+        public schoolService: SchoolService, public stateService: RegistrationFormStateService, private languageService: LanguageService, private loadingService: LoadingService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

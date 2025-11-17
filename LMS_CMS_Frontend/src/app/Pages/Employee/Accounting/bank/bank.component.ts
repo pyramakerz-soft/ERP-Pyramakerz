@@ -24,6 +24,8 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bank',
   standalone: true,
@@ -31,6 +33,8 @@ import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
   templateUrl: './bank.component.html',
   styleUrl: './bank.component.css'
 })
+
+@InitLoader()
 export class BankComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -78,7 +82,8 @@ export class BankComponent {
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService, 
     private employeeService: EmployeeService,
-    private bankEmployeeService: BankEmployeeService
+    private bankEmployeeService: BankEmployeeService,
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

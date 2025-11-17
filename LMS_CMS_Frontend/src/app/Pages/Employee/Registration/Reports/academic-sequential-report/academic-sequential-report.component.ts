@@ -19,6 +19,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-academic-sequential-report',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './academic-sequential-report.component.html',
   styleUrl: './academic-sequential-report.component.css'
 })
+
+@InitLoader()
 export class AcademicSequentialReportComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -76,6 +80,7 @@ export class AcademicSequentialReportComponent {
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
     public reportsService: ReportsService, 
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {

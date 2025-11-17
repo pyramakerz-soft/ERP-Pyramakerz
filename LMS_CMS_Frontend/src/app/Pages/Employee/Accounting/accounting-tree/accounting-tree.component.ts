@@ -26,6 +26,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-accounting-tree',
@@ -34,6 +36,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './accounting-tree.component.html',
   styleUrl: './accounting-tree.component.css'
 })
+
+@InitLoader()
 export class AccountingTreeComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -84,7 +88,7 @@ export class AccountingTreeComponent {
     public endTypeService: EndTypeService,
     private languageService: LanguageService, 
     private translate: TranslateService,
-
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {

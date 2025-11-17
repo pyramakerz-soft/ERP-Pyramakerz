@@ -20,6 +20,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-interview-time-table',
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './interview-time-table.component.html',
   styleUrl: './interview-time-table.component.css'
 })
+
+@InitLoader()
 export class InterviewTimeTableComponent {
   keysArray: string[] = ['id', 'date', 'fromTime', 'toTime', 'capacity', 'reserved', 'academicYearName'];
   key: string = "id";
@@ -78,7 +82,8 @@ export class InterviewTimeTableComponent {
     private languageService: LanguageService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router,
     public yearService: AcadimicYearService, public interviewTimeTableService: InterviewTimeTableService,
-    public schoolService: SchoolService) { }
+    public schoolService: SchoolService,
+    private loadingService: LoadingService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

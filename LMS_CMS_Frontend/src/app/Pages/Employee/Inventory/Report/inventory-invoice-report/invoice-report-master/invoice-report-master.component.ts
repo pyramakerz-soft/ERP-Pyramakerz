@@ -17,6 +17,8 @@ import { LanguageService } from '../../../../../../Services/shared/language.serv
 import {  Subscription } from 'rxjs';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../Services/loading.service';
 interface FlagOption {
   id: number;
   name: string;
@@ -30,6 +32,7 @@ interface FlagOption {
   styleUrl: './invoice-report-master.component.css',
 })
 
+@InitLoader()
 export class InventoryTransactionReportComponent implements OnInit {
 
   dateFrom: string = '';
@@ -118,7 +121,8 @@ school = {
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
     private languageService: LanguageService,
-    private reportsService: ReportsService, 
+    private reportsService: ReportsService,  
+    private loadingService: LoadingService 
   ) {}
 
 ngOnInit() {

@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-report-item-card',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../../../Services/s
   imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './report-item-card.component.html',
 })
+
+@InitLoader()
 export class ReportItemCardComponent implements OnInit {
   dateFrom: string = '';
   dateTo: string = '';
@@ -56,6 +60,7 @@ export class ReportItemCardComponent implements OnInit {
     private shopItemService: ShopItemService,
     private route: ActivatedRoute,
     private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {

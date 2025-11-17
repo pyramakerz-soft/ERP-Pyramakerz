@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-parent-meeting',
   standalone: true,
@@ -24,6 +26,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './parent-meeting.component.html',
   styleUrl: './parent-meeting.component.css'
 })
+
+@InitLoader()
 export class ParentMeetingComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -60,7 +64,8 @@ export class ParentMeetingComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public ParentMeetingServ: ParentMeetingService,    
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

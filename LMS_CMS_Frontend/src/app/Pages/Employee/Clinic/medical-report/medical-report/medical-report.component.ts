@@ -20,6 +20,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
@@ -27,6 +29,8 @@ import { AccountService } from '../../../../../Services/account.service';
   imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   standalone: true,
 })
+
+@InitLoader()
 export class MedicalReportComponent implements OnInit {
   tabs = ['MH By Parent', 'MH By Doctor', 'Hygiene Form', 'Follow Up'];
   selectedTab = this.tabs[0];
@@ -85,7 +89,8 @@ export class MedicalReportComponent implements OnInit {
     public account: AccountService,
     public ApiServ: ApiService,
     private route: ActivatedRoute,
-    private reportsService: ReportsService // Add this
+    private reportsService: ReportsService, // Add this
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {

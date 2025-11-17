@@ -25,6 +25,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bus-details',
   standalone: true,
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bus-details.component.html',
   styleUrl: './bus-details.component.css'
 })
+
+@InitLoader()
 export class BusDetailsComponent {
   User_Data_After_Login :TokenData =new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   DomainData: Domain[] = []
@@ -68,7 +72,8 @@ export class BusDetailsComponent {
   constructor(public busService:BusService,
     private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
-    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService){}
+    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService,
+    private loadingService: LoadingService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

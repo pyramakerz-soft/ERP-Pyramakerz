@@ -23,6 +23,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { DirectMarkClassesService } from '../../../../Services/Employee/LMS/direct-mark-classes.service';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-direct-mark-student',
@@ -31,6 +33,8 @@ import Swal from 'sweetalert2';
   templateUrl: './direct-mark-student.component.html',
   styleUrl: './direct-mark-student.component.css'
 })
+
+@InitLoader()
 export class DirectMarkStudentComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -75,7 +79,8 @@ export class DirectMarkStudentComponent {
     public classServ: ClassroomService,
     public DirectMarkClassesStudentServ: DirectMarkClassesStudentService,
     public DirectMarkClassesServ: DirectMarkClassesService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
