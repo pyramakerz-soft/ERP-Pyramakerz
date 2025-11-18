@@ -29,7 +29,7 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ 'Deduction Value' | translate }}
+                            {{ 'Value' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -144,7 +144,7 @@
             <div *ngIf="deduction.deductionTypeID==2" class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="minutes"> {{ 'Number Of deduction Days' | translate }}</label>
                 <input id="numberOfDeductionDays" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter numberOfDeductionDays' | translate }}" [(ngModel)]="deduction.numberOfDeductionDays" (input)="validateNumber($event,'numberOfDeductionDays')"
+                    placeholder="{{ 'Enter Number Of Deduction Days' | translate }}" [(ngModel)]="deduction.numberOfDeductionDays" (input)="validateNumber($event,'numberOfDeductionDays')"
                     (ngModelChange)="onInputValueChange({ field: 'numberOfDeductionDays', value: $event })" />
                 <span *ngIf="validationErrors['numberOfDeductionDays']" class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfDeductionDays']}}</span>
             </div>

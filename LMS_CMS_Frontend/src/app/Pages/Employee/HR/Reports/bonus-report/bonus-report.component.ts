@@ -243,7 +243,7 @@ export class BonusReportComponent implements OnInit {
             'Bonus Type': bonus.bounsTypeName,
             'Hours': bonus.hours || '-',
             'Minutes': bonus.minutes || '-',
-            'Number of Bonus Days': bonus.numberOfBounsDays || '-',
+            'Number of Bonus Days': bonus.numberOfBonusDays || '-',
             'Amount': bonus.amount || '-',
             'Notes': bonus.notes || '-'
           });
@@ -280,7 +280,7 @@ export class BonusReportComponent implements OnInit {
             bonus.bounsTypeName,
             bonus.hours || '-',
             bonus.minutes || '-',
-            bonus.numberOfBounsDays || '-',
+            bonus.numberOfBonusDays || '-',
             bonus.amount || '-',
             bonus.notes || '-'
           ]);

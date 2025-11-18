@@ -623,19 +623,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 }
 
                 /// bouns
-                List<Bouns> Allbouns = Unit_Of_Work.bouns_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID && m.IsDeleted != true);
+                List<Bonus> Allbouns = Unit_Of_Work.bouns_Repository.FindBy(m => m.Date >= periodStart && m.Date <= periodEnd && m.EmployeeID == employee.ID && m.IsDeleted != true);
                 foreach (var item in Allbouns)
                 {
-                    if(item.BounsTypeID == 1) // hours
+                    if(item.BonusTypeID == 1) // hours
                     {
                         salaryHistory.TotalBonus += (decimal)((hourlyRate * item.Hours) + (minuteRate * item.Minutes));
 
                     }
-                    else if(item.BounsTypeID == 2) // day
+                    else if(item.BonusTypeID == 2) // day
                     {
-                        salaryHistory.TotalBonus += (decimal)(dailyRate * item.NumberOfBounsDays);
+                        salaryHistory.TotalBonus += (decimal)(dailyRate * item.NumberOfBonusDays);
                     }
-                    else if (item.BounsTypeID == 3) // Amount
+                    else if (item.BonusTypeID == 3) // Amount
                     {
                         salaryHistory.TotalBonus += (decimal)(item.Amount);
 

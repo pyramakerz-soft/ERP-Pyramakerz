@@ -6,11 +6,11 @@ export class Bonus {
         public amount: number | null = null,
         public hours: number | null = null,
         public minutes: number | null = null,
-        public numberOfBounsDays: number | null = null,
+        public numberOfBonusDays: number | null = null,
         public employeeID: number = 0,
         public employeeEnName: string = '',
         public employeeArName: string = '',
-        public bounsTypeID: number = 0,
-        public bounsTypeName: string = '',
+        public bonusTypeID: number = 0,
+        public bonusTypeName: string = '',
     ) { }
 }

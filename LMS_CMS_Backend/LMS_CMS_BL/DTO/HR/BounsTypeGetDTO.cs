@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.HR
 {
-    public class BounsTypeGetDTO
+    public class BonusTypeGetDTO
     {
         public long ID { get; set; }
         public string Name { get; set; }

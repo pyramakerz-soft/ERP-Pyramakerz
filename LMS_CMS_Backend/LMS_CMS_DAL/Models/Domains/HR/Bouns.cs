@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.HR
 {
-    public class Bouns : AuditableEntity
+    public class Bonus : AuditableEntity
     {
         [Key]
         public long ID { get; set; }
         public DateOnly Date { get; set; }
-        public int NumberOfBounsDays { get; set; }
+        public int NumberOfBonusDays { get; set; }
         public int Hours { get; set; }
         public int Minutes { get; set; }
         public long Amount { get; set; }
@@ -25,9 +25,9 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public long EmployeeID { get; set; }
         public Employee Employee { get; set; }
 
-        [ForeignKey("BounsType")]
-        public long BounsTypeID { get; set; }
-        public BounsType BounsType { get; set; }
+        [ForeignKey("BonusType")]
+        public long BonusTypeID { get; set; }
+        public BonusType BonusType { get; set; }
 
     }
 }

@@ -85,14 +85,14 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                           <input type="datetime-local"
-                            [ngModel]="formatDateTime(row.clockIn)"
-                            (ngModelChange)="onTimeChange(row, 'clockIn', $event)"
+                            [ngModel]="formatDateTime(row.checkIn)"
+                            (ngModelChange)="onTimeChange(row, 'checkIn', $event)"
                             class="w-[80%] px-2 py-1 border border-gray-300 rounded"/>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="datetime-local" [ngModel]="formatDateTime(row.clockOut )"
-                            (ngModelChange)="onTimeChange(row, 'clockOut', $event)" class="border rounded p-1 w-full" />
-                        <!-- <span *ngIf=" row.clockOut!=null && row.clockIn!=null && row.clockOut < row.clockIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span> -->
+                        <input type="datetime-local" [ngModel]="formatDateTime(row.checkOut )"
+                            (ngModelChange)="onTimeChange(row, 'checkOut', $event)" class="border rounded p-1 w-full" />
+                        <!-- <span *ngIf=" row.checkOut!=null && row.checkIn!=null && row.checkOut < row.checkIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span> -->
                     </td>
                 </tr>
             </tbody>
@@ -130,23 +130,23 @@
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
             </div> -->
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="clockIn"> {{ 'Check In' | translate }}</label>
-                <input id="clockIn" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Check In' | translate }}" [(ngModel)]="employeeClocks.clockIn"
-                    (ngModelChange)="onInputValueChange({ field: 'clockIn', value: $event })" />
-                <span *ngIf="validationErrors['clockIn']" class="text-red-500 ml-3 font-normal">{{validationErrors['clockIn']}}</span>
+                <label class="mb-2 primaryTxt" for="checkIn"> {{ 'Check In' | translate }}</label>
+                <input id="checkIn" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter Check In' | translate }}" [(ngModel)]="employeeClocks.checkIn"
+                    (ngModelChange)="onInputValueChange({ field: 'checkIn', value: $event })" />
+                <span *ngIf="validationErrors['checkIn']" class="text-red-500 ml-3 font-normal">{{validationErrors['checkIn']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="clockOut"> {{ 'Check Out' | translate }}</label>
-                <input id="clockOut" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Check Out' | translate }}" [(ngModel)]="employeeClocks.clockOut"
-                    (ngModelChange)="onInputValueChange({ field: 'clockOut', value: $event })" />
-                <span *ngIf="validationErrors['clockOut']" class="text-red-500 ml-3 font-normal">{{validationErrors['clockOut']}}</span>
+                <label class="mb-2 primaryTxt" for="checkOut"> {{ 'Check Out' | translate }}</label>
+                <input id="checkOut" type="datetime-local" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter Check Out' | translate }}" [(ngModel)]="employeeClocks.checkOut"
+                    (ngModelChange)="onInputValueChange({ field: 'checkOut', value: $event })" />
+                <span *ngIf="validationErrors['checkOut']" class="text-red-500 ml-3 font-normal">{{validationErrors['checkOut']}}</span>
             </div>
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-                (click)="AddClockIn()">
+                (click)="AddcheckIn()">
                 <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>

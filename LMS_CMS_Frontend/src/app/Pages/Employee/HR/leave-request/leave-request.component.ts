@@ -194,6 +194,7 @@ export class LeaveRequestComponent {
         this.leaveRequest.monthlyLeaveRequestBalance = emp.monthlyLeaveRequestBalance
         this.leaveRequest.used = emp.monthlyLeaveRequestUsed
         this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
+        this.MonthlyLeaveRequestBalanceError = false
         this.CalculateRemains();
       }, error => {
         console.log(error.error)

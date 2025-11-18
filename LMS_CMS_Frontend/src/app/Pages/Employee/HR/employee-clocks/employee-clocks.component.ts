@@ -144,7 +144,7 @@ private showSuccessAlert(message: string) {
     } else {
       row[field] = null;
     }
-    if(field == 'clockIn'){
+    if(field == 'checkIn'){
       row.date=value.slice(0,10)
     }
   }
@@ -195,7 +195,7 @@ private showSuccessAlert(message: string) {
     }
   }
 
-  AddClockIn() {
+  AddcheckIn() {
     if (this.isFormValid()) {
       this.isLoading = true;
       this.EmployeeClocksServ.Add(
@@ -235,16 +235,16 @@ private showSuccessAlert(message: string) {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
-          if (field == 'date' || field == 'employeeID' || field == 'clockIn' || field == 'clockOut' ) {
+          if (field == 'date' || field == 'employeeID' || field == 'checkIn' || field == 'checkOut' ) {
           this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
           isValid = false;
           }
         }
-        if(this.employeeClocks.clockIn){
-          this.employeeClocks.date=this.employeeClocks.clockIn.slice(0,10)
+        if(this.employeeClocks.checkIn){
+          this.employeeClocks.date=this.employeeClocks.checkIn.slice(0,10)
         }
-        if(this.employeeClocks.clockIn &&this.employeeClocks.clockOut && this.employeeClocks.clockIn > this.employeeClocks.clockOut){
-          this.validationErrors['clockOut'] = `Check Out time must be after the Check In time`;
+        if(this.employeeClocks.checkIn &&this.employeeClocks.checkOut && this.employeeClocks.checkIn > this.employeeClocks.checkOut){
+          this.validationErrors['checkOut'] = `Check Out time must be after the Check In time`;
           isValid = false;      
         }
       }

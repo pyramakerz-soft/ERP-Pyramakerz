@@ -13,7 +13,7 @@ export class Loans {
         public employeeEnName: string = '',
         public employeeArName: string = '',
         public safeID: number = 0,
-        public saveName: string = '',
+        public safeName: string = '',
     ) { }
 }
 

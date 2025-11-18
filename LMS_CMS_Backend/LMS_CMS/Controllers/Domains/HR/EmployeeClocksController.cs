@@ -185,7 +185,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 NewClock.LocationID = null;
             }
 
-            if(NewClock.ClockIn == null || NewClock.ClockOut== null)
+            if(NewClock.CheckIn == null || NewClock.CheckOut == null)
             {
                 return BadRequest("ClockIn and ClockOut are required");
             }
