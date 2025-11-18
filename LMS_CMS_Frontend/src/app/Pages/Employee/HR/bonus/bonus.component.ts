@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Bonus } from '../../../../Models/HR/bonus';
-import { BounsType } from '../../../../Models/HR/bouns-type';
+import { BonusType } from '../../../../Models/HR/bouns-type';
 import { BounsTypeService } from '../../../../Services/Employee/HR/bouns-type.service';
 import { BonusService } from '../../../../Services/Employee/HR/bonus.service';
 import { CommonModule } from '@angular/common';
@@ -53,14 +53,14 @@ export class BonusComponent {
   value: any = '';
   keysArray: string[] = ['id', 'employeeEnName' ,'bounsTypeName'];
 
-  bouns: Bonus = new Bonus();
+  bonus: Bonus = new Bonus();
 
   validationErrors: { [key in keyof Bonus]?: string } = {};
   isLoading = false;
 
   SelectedEmployee: Employee = new Employee();
   employees: Employee[] = [];
-  bounsType: BounsType[] = [];
+  bonusType: BonusType[] = [];
   CurrentPage: number = 1;
   PageSize: number = 10;
   TotalPages: number = 1;
@@ -182,7 +182,7 @@ export class BonusComponent {
 
   Create() {
     this.mode = 'Create';
-    this.bouns = new Bonus();
+    this.bonus = new Bonus();
     this.validationErrors = {};
     this.openModal();
   }
@@ -216,7 +216,7 @@ export class BonusComponent {
   Edit(id: number) {
     this.mode = 'Edit';
     this.BonusServ.GetByID(id, this.DomainName).subscribe((d) => {
-      this.bouns = d;
+      this.bonus = d;
     });
     this.openModal();
   }
@@ -242,9 +242,9 @@ export class BonusComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.bouns);
+      console.log(this.bonus);
       if (this.mode == 'Create') {
-        this.BonusServ.Add(this.bouns, this.DomainName).subscribe(
+        this.BonusServ.Add(this.bonus, this.DomainName).subscribe(
           (d) => {
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
@@ -264,7 +264,7 @@ export class BonusComponent {
         );
       }
       if (this.mode == 'Edit') {
-        this.BonusServ.Edit(this.bouns, this.DomainName).subscribe(
+        this.BonusServ.Edit(this.bonus, this.DomainName).subscribe(
           (d) => {
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
@@ -305,7 +305,7 @@ export class BonusComponent {
 
   getAllTypes() {
     this.BounsTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.bounsType = d;
+      this.bonusType = d;
     });
   }
 
@@ -313,32 +313,32 @@ export class BonusComponent {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.bouns[field] === 'string') {
-        this.bouns[field] = 0 as never;
+      if (typeof this.bonus[field] === 'string') {
+        this.bonus[field] = 0 as never;
       }
     }
     if (field == 'minutes') {
-      if (this.bouns.minutes &&this.bouns.minutes > 60) {
-        this.bouns.minutes = 0;
+      if (this.bonus.minutes &&this.bonus.minutes > 60) {
+        this.bonus.minutes = 0;
       }
     }
   }
 
 isFormValid(): boolean {
   this.SelectedEmployee =
-    this.employees.find((e) => e.id == this.bouns.employeeID) ||
+    this.employees.find((e) => e.id == this.bonus.employeeID) ||
     new Employee();
   
   let isValid = true;
   
   // Basic field validation
-  for (const key in this.bouns) {
-    if (this.bouns.hasOwnProperty(key)) {
+  for (const key in this.bonus) {
+    if (this.bonus.hasOwnProperty(key)) {
       const field = key as keyof Bonus;
-      if (!this.bouns[field]) {
+      if (!this.bonus[field]) {
         if (
           field == 'date' ||
-          field == 'bounsTypeID' ||
+          field == 'bonusTypeID' ||
           field == 'employeeID'
         ) {
           this.validationErrors[field] = this.getRequiredErrorMessage(
@@ -353,32 +353,32 @@ isFormValid(): boolean {
   // Business logic validations
   if (
     this.SelectedEmployee.hasAttendance != true &&
-    (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)
+    (this.bonus.bonusTypeID == 1 || this.bonus.bonusTypeID == 2)
   ) {
     isValid = false;
-    this.validationErrors['bounsTypeID'] = this.translate.instant(
-      'This Employee Has No Attendance so should take bouns by amount only'
+    this.validationErrors['bonusTypeID'] = this.translate.instant(
+      'This Employee Has No Attendance so should take bonus by amount only'
     );
   }
 
   if (
-    this.bouns.bounsTypeID == 3 &&
-    (this.bouns.amount == 0 || this.bouns.amount == null)
+    this.bonus.bonusTypeID == 3 &&
+    (this.bonus.amount == 0 || this.bonus.amount == null)
   ) {
     isValid = false;
     this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
   }
 
   if (
-    this.bouns.bounsTypeID == 2 &&
-    (this.bouns.numberOfBounsDays == 0 || this.bouns.numberOfBounsDays == null)
+    this.bonus.bonusTypeID == 2 &&
+    (this.bonus.numberOfBonusDays == 0 || this.bonus.numberOfBonusDays == null)
   ) {
     isValid = false;
-    this.validationErrors['numberOfBounsDays'] = this.getRequiredErrorMessage('numberOfBounsDays');
+    this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('numberOfBonusDays');
   }
 
-  // if (this.bouns.bounsTypeID == 1 &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
-  if (this.bouns.bounsTypeID == 1 && (this.bouns.minutes == 0 || this.bouns.minutes == null) &&(this.bouns.hours == 0 || this.bouns.hours == null)) {
+  // if (this.bonus.bonusTypeID == 1 &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
+  if (this.bonus.bonusTypeID == 1 && (this.bonus.minutes == 0 || this.bonus.minutes == null) &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
     isValid = false;
     this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
   }
@@ -392,7 +392,7 @@ isFormValid(): boolean {
 
   onInputValueChange(event: { field: keyof Bonus; value: any }) {
     const { field, value } = event;
-    (this.bouns as any)[field] = value;
+    (this.bonus as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
     }

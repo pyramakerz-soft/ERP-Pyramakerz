@@ -25,6 +25,6 @@ namespace LMS_CMS_BL.DTO.HR
         public string EmployeeEnName { get; set; }
         public string EmployeeArName { get; set; }
         public long SafeID { get; set; }
-        public string SaveName { get; set; }
+        public string SafeName { get; set; }
     }
 }

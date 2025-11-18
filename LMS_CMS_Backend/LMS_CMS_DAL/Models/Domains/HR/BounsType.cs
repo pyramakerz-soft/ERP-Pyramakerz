@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.HR
 {
-    public class BounsType
+    public class BonusType
     {
         [Key]
         public long ID { get; set; }
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public ICollection<Bouns> Bouns { get; set; } = new HashSet<Bouns>();
+        public ICollection<Bonus> Bonus { get; set; } = new HashSet<Bonus>();
 
     }
 }

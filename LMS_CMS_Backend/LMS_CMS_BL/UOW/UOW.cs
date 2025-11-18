@@ -252,8 +252,8 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
         GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
         GenericRepo<Maintenance> Maintenance_Repository; 
-        GenericRepo<Bouns> Bouns_Repository;
-        GenericRepo<BounsType> BounsType_Repository;
+        GenericRepo<Bonus> Bonus_Repository;
+        GenericRepo<BonusType> BonusType_Repository;
         GenericRepo<Deduction> Deduction_Repository;
         GenericRepo<DeductionType> DeductionType_Repository;
         GenericRepo<LeaveRequest> LeaveRequest_Repository;
@@ -2915,27 +2915,27 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
-        public GenericRepo<Bouns> bouns_Repository
+        public GenericRepo<Bonus> bouns_Repository
         {
             get
             {
-                if (Bouns_Repository == null)
+                if (Bonus_Repository == null)
                 {
-                    Bouns_Repository = new GenericRepo<Bouns>(db);
+                    Bonus_Repository = new GenericRepo<Bonus>(db);
                 }
-                return Bouns_Repository;
+                return Bonus_Repository;
             }
         }
 
-        public GenericRepo<BounsType> bounsType_Repository
+        public GenericRepo<BonusType> bounsType_Repository
         {
             get
             {
-                if (BounsType_Repository == null)
+                if (BonusType_Repository == null)
                 {
-                    BounsType_Repository = new GenericRepo<BounsType>(db);
+                    BonusType_Repository = new GenericRepo<BonusType>(db);
                 }
-                return BounsType_Repository;
+                return BonusType_Repository;
             }
         }
 
