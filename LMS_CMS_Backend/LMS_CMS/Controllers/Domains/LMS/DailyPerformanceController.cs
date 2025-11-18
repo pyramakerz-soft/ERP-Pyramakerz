@@ -221,7 +221,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<DailyPerformanceMaster>? masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
                 .Select_All_With_IncludesById<DailyPerformanceMaster>(
-                    m => m.IsDeleted != true && 
+                    m => m.IsDeleted != true &&
+                         m.Subject.IsDeleted != true &&
+                         m.Classroom.IsDeleted != true &&
                          m.InsertedAt.HasValue &&
                          DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
                          DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate,
@@ -311,6 +313,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
                 .Select_All_With_IncludesById<DailyPerformanceMaster>(
                     m => m.IsDeleted != true &&
+                         m.Subject.IsDeleted != true &&
                          m.ClassroomID == classroomId &&
                          m.InsertedAt.HasValue &&
                          DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
