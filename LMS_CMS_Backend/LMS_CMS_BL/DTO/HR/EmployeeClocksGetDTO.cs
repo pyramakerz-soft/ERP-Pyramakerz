@@ -14,8 +14,8 @@ namespace LMS_CMS_BL.DTO.HR
     {
         public long ID { get; set; }
         public DateOnly Date { get; set; }
-        public DateTime? ClockIn { get; set; }
-        public DateTime? ClockOut { get; set; }
+        public DateTime? CheckIn { get; set; }
+        public DateTime? CheckOut { get; set; }
         public long LocationID { get; set; }
         public string LocationName { get; set; }
         public long EmployeeID { get; set; }
