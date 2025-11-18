@@ -315,19 +315,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             int totalRecords = await Unit_Of_Work.shopItem_Repository
                 .CountAsync(f => f.IsDeleted != true);
-             
-            var shopItemQuery = Unit_Of_Work.shopItem_Repository
-                .Select_All_With_IncludesById_Pagination<ShopItem>(
-                    b => b.IsDeleted != true && b.InventorySubCategoriesID == SubCategoryID && b.AvailableInShop == true,
-                    query => query.Include(sub => sub.InventorySubCategories),
-                    query => query.Include(sub => sub.School)
-                    //query => query.Include(sub => sub.Grade),
-                    //query => query.Include(sub => sub.Gender),
-                    //query => query.Include(sub => sub.ShopItemColor),
-                    //query => query.Include(sub => sub.ShopItemSize)
-                );
-
-
+              
             Student student = Unit_Of_Work.student_Repository.First_Or_Default(
                 d => d.ID == StudentID && d.IsDeleted != true
                 );
@@ -343,7 +331,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             //    d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
             //    );
 
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true);
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync
+                ( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true, query => query.Include(d => d.AcademicYear));
 
             if(studentGrade != null)
             {
@@ -354,6 +343,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
             }
+
+            var shopItemQuery = Unit_Of_Work.shopItem_Repository
+                .Select_All_With_IncludesById_Pagination<ShopItem>(
+                    b => b.IsDeleted != true && b.InventorySubCategoriesID == SubCategoryID && b.AvailableInShop == true && b.SchoolID == studentGrade.AcademicYear.SchoolID,
+                    query => query.Include(sub => sub.InventorySubCategories),
+                    query => query.Include(sub => sub.School)
+                    //query => query.Include(sub => sub.Grade),
+                    //query => query.Include(sub => sub.Gender),
+                    //query => query.Include(sub => sub.ShopItemColor),
+                    //query => query.Include(sub => sub.ShopItemSize)
+                );
 
             shopItemQuery = shopItemQuery.Where(s => s.GenderID == genderID || s.GenderID == null);
             shopItemQuery = shopItemQuery.Where(s => s.GradeID == gradeID || s.GradeID == null); 
@@ -472,7 +472,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             genderID = student.GenderId;
 
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true);
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync
+                ( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true, query => query.Include(d => d.AcademicYear));
 
             if(studentGrade != null)
             {
@@ -484,7 +485,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
             }
 
-            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == ItemID && (d.GenderID == genderID || d.GenderID == null) && (d.GradeID == gradeID || d.GradeID == null));
+            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.ID == ItemID && d.SchoolID == studentGrade.AcademicYear.SchoolID &&(d.GenderID == genderID || d.GenderID == null) && (d.GradeID == gradeID || d.GradeID == null));
              
             if (shopItem == null)
             {

@@ -109,7 +109,7 @@
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
             [(ngModel)]="ShopItem.schoolID" (change)="onSchoolChange($event)"
             (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'School' | translate }}</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
             <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
@@ -123,7 +123,7 @@
         </label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="ShopItem.gradeID">
-            <option [value]="0 || null" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'Grade' | translate }}{{ 'Level' | translate }}</option>
+            <option [value]="0 || null" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Grade' | translate }} {{ 'Level' | translate }}</option>
             <option *ngIf="Grades.length > 0" value="0">  {{ 'All' | translate }} {{ 'Grades' | translate }}</option>
             <option *ngFor="let g of Grades" [value]="g.id">{{ g.name }}</option>
             <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
@@ -145,7 +145,7 @@
         <label class="mb-2 primaryTxt font-medium" for="limit">{{ 'limit' | translate }}</label>
         <input id="limit" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (input)="validateNumber($event, 'limit')"
-            (ngModelChange)="onInputValueChange({ field: 'limit', value: $event })" placeholder="  {{ 'Enter' | translate }} {{ 'limit' | translate }}"
+            (ngModelChange)="onInputValueChange({ field: 'limit', value: $event })" placeholder="{{ 'Enter' | translate }} {{ 'limit' | translate }}"
             [(ngModel)]="ShopItem.limit" />
         <span *ngIf="validationErrors['limit']" class="text-red-500 ml-3 font-normal">{{ validationErrors['limit']
             }}</span>
@@ -177,7 +177,7 @@
                 </button>
             </span>
             <input type="text" class="flex-grow outline-none" [(ngModel)]="inputValueSize" id="size"
-                (keydown.enter)="addSize()" placeholder="  {{ 'Enter' | translate }} {{ 'options' | translate }}" />
+                (keydown.enter)="addSize()" placeholder="{{ 'Enter' | translate }} {{ 'options' | translate }}" />
         </div>
     </div>
 
@@ -191,19 +191,19 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt font-medium" for="itemCode">{{ 'Item' | translate }} {{ 'Code' | translate }}</label>
         <input id="itemCode" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder=" {{ 'Enter' | translate }} {{ 'Item' | translate }} {{ 'Code' | translate }}" [(ngModel)]="ShopItem.itemCode" />
+            placeholder="{{ 'Enter' | translate }} {{ 'Item' | translate }} {{ 'Code' | translate }}" [(ngModel)]="ShopItem.itemCode" />
     </div>
     
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt font-medium" for="unitType">  {{ 'Unit' | translate }} {{ 'Type' | translate }}</label>
         <input id="unitType" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="{{ 'Enter' | translate }} {{ 'Unit' | translate }}{{ 'Type' | translate }}" [(ngModel)]="ShopItem.unitType" />
+            placeholder="{{ 'Enter' | translate }} {{ 'Unit' | translate }} {{ 'Type' | translate }}" [(ngModel)]="ShopItem.unitType" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt font-medium" for="barCode">{{ 'Generate' | translate }} {{ 'Bar Code' | translate }}</label>
         <input id="barCode" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[49%]"
-            placeholder="  {{ 'Generate' | translate }} {{ 'Bar Code' | translate }}" [(ngModel)]="ShopItem.barCode" />
+            placeholder="{{ 'Generate' | translate }} {{ 'Bar Code' | translate }}" [(ngModel)]="ShopItem.barCode" />
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
