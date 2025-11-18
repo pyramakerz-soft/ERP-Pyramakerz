@@ -100,6 +100,11 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadJobs() {
+      this.jobs = [];
+      this.selectedJobId = 0;
+      this.employees = [];
+      this.selectedEmployeeId = 0;
+      this.onFilterChange();
     if (this.selectedJobCategoryId) {
       try {
         const domainName = this.apiService.GetHeader();
@@ -115,11 +120,7 @@ export class DeductionReportComponent  implements OnInit {
         console.error('Error loading jobs:', error);
       }
     } else {
-      this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
+
     }
   }
 

@@ -321,15 +321,16 @@ async viewReport() {
            'All Employees';
   }
 
+
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ];
+    return [{ keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+    { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+    { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+    { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+    { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
+    ]
   }
+
 
   DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {

@@ -98,6 +98,11 @@ export class BonusReportComponent implements OnInit {
   }
 
   async loadJobs() {
+    this.jobs = [];
+    this.selectedJobId = 0;
+    this.employees = [];
+    this.selectedEmployeeId = 0;
+    this.onFilterChange();
     if (this.selectedJobCategoryId) {
       try {
         const domainName = this.apiService.GetHeader();
@@ -112,13 +117,7 @@ export class BonusReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading jobs:', error);
       }
-    } else {
-      this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
-    }
+    } 
   }
 
   async loadEmployees() {
@@ -237,10 +236,8 @@ export class BonusReportComponent implements OnInit {
           this.reportsForExport.push({
             'Employee ID': employeeBonus.employeeId,
             'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-            'Total Amount': employeeBonus.totalAmount,
-            'Bonus ID': bonus.id,
             'Bonus Date': new Date(bonus.date).toLocaleDateString(),
-            'Bonus Type': bonus.bounsTypeName,
+            'Bonus Type': bonus.bonusTypeName,
             'Hours': bonus.hours || '-',
             'Minutes': bonus.minutes || '-',
             'Number of Bonus Days': bonus.numberOfBonusDays || '-',
@@ -253,8 +250,6 @@ export class BonusReportComponent implements OnInit {
         this.reportsForExport.push({
           'Employee ID': employeeBonus.employeeId,
           'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-          'Total Amount': employeeBonus.totalAmount,
-          'Bonus ID': '-',
           'Bonus Date': '-',
           'Bonus Type': '-',
           'Hours': '-',
@@ -277,7 +272,7 @@ export class BonusReportComponent implements OnInit {
             employeeBonus.totalAmount,
             bonus.id,
             new Date(bonus.date).toLocaleDateString(),
-            bonus.bounsTypeName,
+            bonus.bonusTypeName,
             bonus.hours || '-',
             bonus.minutes || '-',
             bonus.numberOfBonusDays || '-',
@@ -425,7 +420,6 @@ export class BonusReportComponent implements OnInit {
             headers: [
               'Employee ID',
               'Employee Name',
-              'Total Amount',
               'Bonus ID',
               'Bonus Date',
               'Bonus Type',

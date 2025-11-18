@@ -51,7 +51,7 @@ export class BonusComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'bounsTypeName'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'bonusTypeName'];
 
   bonus: Bonus = new Bonus();
 

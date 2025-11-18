@@ -26,7 +26,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="jobCategory"
             [(ngModel)]="selectedJobCategoryId" (change)="loadJobs()">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
-            <option *ngIf="jobCategories.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="jobCategories.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="jobCategories.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let category of jobCategories" [value]="category.id">
                 {{ category.name || category.ar_name }}
@@ -40,7 +40,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="job"
             [(ngModel)]="selectedJobId" (change)="loadEmployees()" [disabled]="!selectedJobCategoryId">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job' | translate }}</option>
-            <option *ngIf="jobs.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="jobs.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="jobs.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let job of jobs" [value]="job.id">
                 {{ job.name || job.ar_name }}
@@ -54,7 +54,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
             [(ngModel)]="selectedEmployeeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedJobId">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
-            <option *ngIf="employees.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="employees.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="employees.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let employee of employees" [value]="employee.id">
                 {{ employee.en_name || employee.ar_name || 'Unknown' }}
@@ -166,7 +166,7 @@
                             {{ bonus.date | date:'mediumDate' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ bonus.bounsTypeName }}
+                            {{ bonus.bonusTypeName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.hours || '-' }}
@@ -198,7 +198,6 @@
             [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 
-                'Total Amount', 
                 'Bonus Date', 
                 'Bonus Type',
                 'Hours',

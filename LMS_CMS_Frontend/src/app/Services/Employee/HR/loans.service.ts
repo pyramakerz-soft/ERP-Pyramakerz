@@ -109,6 +109,7 @@ export class LoansService {
       dateTo: dateTo
     };
 
+    console.log(1213,jobCategoryId, jobId, employeeId, dateFrom, dateTo, DomainName)
     console.log(requestBody)
     return this.http.post<any[]>(`${this.baseUrl}/Loans/report`, requestBody, { headers });
   }

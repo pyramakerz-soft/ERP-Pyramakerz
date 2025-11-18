@@ -90,6 +90,11 @@ export class VacationEmployeeReportComponent implements OnInit {
   }
 
   async loadJobs() {
+      this.jobs = [];
+      this.selectedJobId = 0;
+      this.employees = [];
+      this.selectedEmployeeId = 0;
+      this.onFilterChange();
     if (this.selectedJobCategoryId) {
       try {
         const domainName = this.apiService.GetHeader();
@@ -105,11 +110,7 @@ export class VacationEmployeeReportComponent implements OnInit {
         console.error('Error loading jobs:', error);
       }
     } else {
-      this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
+
     }
   }
 
@@ -281,15 +282,16 @@ async viewReport() {
            'All Employees';
   }
 
+
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ];
+    return [{ keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+    { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+    { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+    { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+    { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
+    ]
   }
+
 
   DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
