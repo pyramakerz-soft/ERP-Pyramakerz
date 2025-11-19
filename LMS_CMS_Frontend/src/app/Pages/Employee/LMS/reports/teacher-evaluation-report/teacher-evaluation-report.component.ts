@@ -120,7 +120,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
       this.DomainName
     ).subscribe(
       (data) => {
-        console.log('Fetched Evaluation Data:', data);
+        // console.log('Fetched Evaluation Data:', data);
         this.evaluationData = data;
         this.hasData = data.length > 0;
         
@@ -418,40 +418,39 @@ async downloadAsPDF() {
   }
 }
 
-// Add this helper method to get unique employee count
 private getUniqueEmployeeCount(): number {
   if (!this.hasData) return 0;
   const uniqueEmployees = new Set(this.evaluationData.map(item => item.employeeId));
   return uniqueEmployees.size;
 }
 
-  private setupPrintWindowCloseDetection(printWindow: Window) {
-    // Check if print window is closed
-    const checkPrintWindowClosed = setInterval(() => {
-      if (printWindow.closed) {
-        clearInterval(checkPrintWindowClosed);
-        // Return focus to the main window
-        window.focus();
-      }
-    }, 500);
+  // private setupPrintWindowCloseDetection(printWindow: Window) {
+  //   // Check if print window is closed
+  //   const checkPrintWindowClosed = setInterval(() => {
+  //     if (printWindow.closed) {
+  //       clearInterval(checkPrintWindowClosed);
+  //       // Return focus to the main window
+  //       window.focus();
+  //     }
+  //   }, 500);
 
-    // Also detect print completion (for browsers that support it)
-    if ('matchMedia' in printWindow) {
-      const mediaQueryList = printWindow.matchMedia('print');
-      mediaQueryList.addListener((mql) => {
-        if (!mql.matches) {
-          // Printing completed or canceled
-          setTimeout(() => {
-            // Give user a moment to see the print dialog closed
-            // before automatically closing the window
-            if (!printWindow.closed) {
-              printWindow.close();
-            }
-          }, 1000);
-        }
-      });
-    }
-  }
+  //   // Also detect print completion (for browsers that support it)
+  //   if ('matchMedia' in printWindow) {
+  //     const mediaQueryList = printWindow.matchMedia('print');
+  //     mediaQueryList.addListener((mql) => {
+  //       if (!mql.matches) {
+  //         // Printing completed or canceled
+  //         setTimeout(() => {
+  //           // Give user a moment to see the print dialog closed
+  //           // before automatically closing the window
+  //           if (!printWindow.closed) {
+  //             printWindow.close();
+  //           }
+  //         }, 1000);
+  //       }
+  //     });
+  //   }
+  // }
 
 printReport() {
   if (!this.hasData) {
@@ -784,7 +783,6 @@ private getSummaryTableHTML(): string {
     return employee ? employee.en_name : 'All Employee';
   }
 
-  // Summary data for potential table export
   getSummaryData(): any[] {
     if (!this.hasData) return [];
 

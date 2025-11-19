@@ -83,7 +83,7 @@ export class BusPrintNameTagComponent {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
-    if (this.User_Data_After_Login.type === "employee") {
+    if (this.User_Data_After_Login.type == "employee") {
       this.IsChoosenDomain = true;
       this.DomainName = this.ApiServ.GetHeader();
       this.activeRoute.url.subscribe(url => {
@@ -100,16 +100,16 @@ export class BusPrintNameTagComponent {
           this.AllowDeleteForOthers = settingsPage.allow_Edit_For_Others
         }
       });
-    } else if (this.User_Data_After_Login.type === "octa") {
+    } else if (this.User_Data_After_Login.type == "octa") {
       this.GetAllDomains();
       this.IsEmployee = false;
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+      this.isRtl = direction == 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir == 'rtl';
   }
 
   ngOnDestroy(): void {
@@ -146,7 +146,7 @@ export class BusPrintNameTagComponent {
     this.busId = selectedValue;
     
     // Get the selected bus name and driver number
-    const selectedBus = this.BusData.find(bus => bus.id === selectedValue);
+    const selectedBus = this.BusData.find(bus => bus.id == selectedValue);
     if (selectedBus) {
       this.selectedBusName = selectedBus.name || '';
       // Assuming bus has a driverPhone or driverNo property, adjust as needed
@@ -178,10 +178,10 @@ export class BusPrintNameTagComponent {
       const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
       this.busStudentData = this.busStudentData.filter(t => {
         const fieldValue = t[this.key as keyof typeof t];
-        if (typeof fieldValue === 'string') {
+        if (typeof fieldValue == 'string') {
           return fieldValue.toLowerCase().includes(this.value.toLowerCase());
         }
-        if (typeof fieldValue === 'number') {
+        if (typeof fieldValue == 'number') {
           return fieldValue.toString().includes(numericValue.toString())
         }
         return fieldValue == this.value;

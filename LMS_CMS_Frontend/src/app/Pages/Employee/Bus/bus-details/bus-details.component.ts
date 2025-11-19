@@ -21,7 +21,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -73,7 +73,7 @@ export class BusDetailsComponent {
     private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
     private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService,
-    private loadingService: LoadingService){}
+    private loadingService: LoadingService , private translate: TranslateService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -254,30 +254,32 @@ export class BusDetailsComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.bus) {
-      if (this.bus.hasOwnProperty(key)) {
-        const field = key as keyof Bus;
-        if (!this.bus[field]) {
-          if(field == "name" || field == 'capacity'|| field == 'backPrice'|| field == 'twoWaysPrice'|| field == 'morningPrice'){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.bus) {
+    if (this.bus.hasOwnProperty(key)) {
+      const field = key as keyof Bus;
+      if (!this.bus[field]) {
+        if(field == "name" || field == 'capacity'|| field == 'backPrice'|| field == 'twoWaysPrice'|| field == 'morningPrice'){
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
+        }
+      } else {
+        if(field == "name"){
+          if(this.bus.name.length > 100){
+            this.validationErrors[field] = this.translate.instant('Name cannot be longer than 100 characters.');
             isValid = false;
           }
-        } else {
-          if(field == "name"){
-            if(this.bus.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
+        } else{
+          this.validationErrors[field] = '';
         }
       }
     }
-    return isValid;
   }
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof Bus, value: any }) {
     const { field, value } = event;
@@ -397,4 +399,16 @@ export class BusDetailsComponent {
     }
   }
   
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
+
 }
