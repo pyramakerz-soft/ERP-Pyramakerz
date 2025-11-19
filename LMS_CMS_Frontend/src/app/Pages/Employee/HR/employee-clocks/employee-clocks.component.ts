@@ -236,7 +236,7 @@ private showSuccessAlert(message: string) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
           if (field == 'date' || field == 'employeeID' || field == 'checkIn' || field == 'checkOut' ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
           }
         }

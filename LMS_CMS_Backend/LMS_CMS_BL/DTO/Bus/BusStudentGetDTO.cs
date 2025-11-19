@@ -37,5 +37,7 @@ namespace LMS_CMS_BL.DTO.Bus
         public string ClassName { get; set; }
         public long AcademicYearID { get; set; } 
         public string StudentAcademicYear { get; set; }
+        public string? SchoolImage { get; set; } 
+        public string? DriverNumber { get; set; } 
     }
 }

@@ -26,10 +26,10 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="jobCategory"
             [(ngModel)]="selectedJobCategoryId" (change)="loadJobs()">
             <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
-            <option *ngIf="jobCategories.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="jobCategories.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="jobCategories.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let category of jobCategories" [value]="category.id">
-                {{ category.name || category.ar_name }}
+                {{ category.name  }} 
             </option>
         </select>
     </div>

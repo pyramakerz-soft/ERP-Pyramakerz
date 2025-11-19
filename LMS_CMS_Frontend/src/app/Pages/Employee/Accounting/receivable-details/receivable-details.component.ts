@@ -241,8 +241,7 @@ export class ReceivableDetailsComponent {
             field == 'receivableDocTypesID' ||
             field == 'bankOrSaveID' ||
             field == 'linkFileID' ||
-            field == 'date' ||
-            field == 'docNumber'
+            field == 'date' 
           ) {
             // Handle the specific case for bankOrSaveID field name correction
             const displayFieldName =
