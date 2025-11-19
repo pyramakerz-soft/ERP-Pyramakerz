@@ -27,12 +27,12 @@ import { JobCategories } from '../../../../../Models/Administrator/job-categorie
 
 @InitLoader()
 export class LoansReportComponent implements OnInit {
-  // Filter properties
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+// Filter properties
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   // Data sources
   jobCategories: JobCategories[] = [];
@@ -55,6 +55,7 @@ export class LoansReportComponent implements OnInit {
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
   reportsForExport: any[] = [];
+  tableSectionsForPDF: any[] = [];
   school = {
     reportHeaderOneEn: 'Loans Report',
     reportHeaderTwoEn: 'Employee Loans Records',
@@ -100,11 +101,11 @@ export class LoansReportComponent implements OnInit {
   }
 
 async loadJobs() {
-  this.selectedJobId = 0;
+  this.selectedJobId = null;
   this.employees = [];
-  this.selectedEmployeeId = 0;
+  this.selectedEmployeeId = null;
   
-  if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+  if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
     try {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(
@@ -123,9 +124,9 @@ async loadJobs() {
 }
 
 async loadEmployees() {
-  this.selectedEmployeeId = 0;
+  this.selectedEmployeeId = null;
   
-  if (this.selectedJobId && this.selectedJobId !== 0) {
+  if (this.selectedJobId && this.selectedJobId !== null) {
     try {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(
@@ -194,15 +195,15 @@ async viewReport() {
     };
 
 
-    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-      params.employeeId = this.selectedEmployeeId;
-    }
-    if (this.selectedJobId && this.selectedJobId !== 0 && this.selectedJobId !== null) {
-      params.jobId = this.selectedJobId;
-    }
-    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0 && this.selectedJobCategoryId !== null) {
-      params.categoryId = this.selectedJobCategoryId;
-    }
+if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
+  params.employeeId = this.selectedEmployeeId;
+}
+if (this.selectedJobId && this.selectedJobId !== null) {
+  params.jobId = this.selectedJobId;
+}
+if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
+  params.categoryId = this.selectedJobCategoryId;
+}
 
     console.log('Sending parameters:', params);
 
@@ -240,75 +241,112 @@ async viewReport() {
 }
 
 
-  private prepareExportData(): void {
-    this.reportsForExport = [];
-    this.loansReports.forEach(employeeLoan => {
-      const employeeName =
-        employeeLoan.employeeEnName ||
-        employeeLoan.employeeName ||
-        employeeLoan.employeeArName ||
-        employeeLoan.en_name ||
-        employeeLoan.ar_name ||
-        '-';
+private prepareExportData(): void {
+  // For PDF sections (similar to deduction report)
+  this.tableSectionsForPDF = [];
+  
+  // For regular table display
+  this.reportsForExport = [];
+  
+  this.loansReports.forEach(employeeLoan => {
+    const employeeName =
+      employeeLoan.employeeEnName ||
+      employeeLoan.employeeName ||
+      employeeLoan.employeeArName ||
+      employeeLoan.en_name ||
+      employeeLoan.ar_name ||
+      '-';
 
-      if (employeeLoan.loans && employeeLoan.loans.length > 0) {
-        employeeLoan.loans.forEach((loan: any) => {
-          this.reportsForExport.push({
-            'ID': employeeLoan.employeeId,
-            'Employee Name': employeeName,
-            'Total Amount': employeeLoan.totalAmount,
-            'Loan Date': new Date(loan.date).toLocaleDateString(),
-            'Loan Amount': loan.amount,
-            'Notes': loan.notes || '-'
-          });
+    // Create section for PDF (similar to deduction report)
+    const section = {
+      header: `Employee: ${employeeName}`,
+      data: [
+        { key: 'Employee ID', value: employeeLoan.employeeId },
+        { key: 'Employee Name', value: employeeName },
+        { key: 'Total Amount', value: employeeLoan.totalAmount }
+      ],
+      tableHeaders: [
+        'Loan Date', 
+        'Loan Amount', 
+        'Notes'
+      ],
+      tableData: [] as any[]
+    };
+
+    if (employeeLoan.loans && employeeLoan.loans.length > 0) {
+      employeeLoan.loans.forEach((loan: any) => {
+        // For PDF sections
+        section.tableData.push({
+          'Loan Date': new Date(loan.date).toLocaleDateString(),
+          'Loan Amount': loan.amount,
+          'Notes': loan.notes || '-'
         });
-      } else {
-        // If no loans, still show employee summary
+
+        // For regular export
         this.reportsForExport.push({
           'ID': employeeLoan.employeeId,
           'Employee Name': employeeName,
           'Total Amount': employeeLoan.totalAmount,
-          'Loan Date': '-',
-          'Loan Amount': '-',
-          'Notes': '-'
+          'Loan Date': new Date(loan.date).toLocaleDateString(),
+          'Loan Amount': loan.amount,
+          'Notes': loan.notes || '-'
         });
-      }
-    });
+      });
+    } else {
+      // If no loans, add placeholder
+      section.tableData.push({
+        'Loan Date': '-',
+        'Loan Amount': '-',
+        'Notes': 'No loans found'
+      });
 
-    // For Excel (array format) - include Employee Name (same visible columns)
-    this.reportsForExcel = [];
-    this.loansReports.forEach(employeeLoan => {
-      const employeeName =
-        employeeLoan.employeeEnName ||
-        employeeLoan.employeeName ||
-        employeeLoan.employeeArName ||
-        employeeLoan.en_name ||
-        employeeLoan.ar_name ||
-        '-';
+      this.reportsForExport.push({
+        'ID': employeeLoan.employeeId,
+        'Employee Name': employeeName,
+        'Total Amount': employeeLoan.totalAmount,
+        'Loan Date': '-',
+        'Loan Amount': '-',
+        'Notes': '-'
+      });
+    }
 
-      if (employeeLoan.loans && employeeLoan.loans.length > 0) {
-        employeeLoan.loans.forEach((loan: any) => {
-          this.reportsForExcel.push([
-            employeeLoan.employeeId,
-            employeeName,
-            employeeLoan.totalAmount,
-            new Date(loan.date).toLocaleDateString(),
-            loan.amount,
-            loan.notes || '-'
-          ]);
-        });
-      } else {
+    this.tableSectionsForPDF.push(section);
+  });
+
+  // For Excel (array format) - keep existing logic
+  this.reportsForExcel = [];
+  this.loansReports.forEach(employeeLoan => {
+    const employeeName =
+      employeeLoan.employeeEnName ||
+      employeeLoan.employeeName ||
+      employeeLoan.employeeArName ||
+      employeeLoan.en_name ||
+      employeeLoan.ar_name ||
+      '-';
+
+    if (employeeLoan.loans && employeeLoan.loans.length > 0) {
+      employeeLoan.loans.forEach((loan: any) => {
         this.reportsForExcel.push([
           employeeLoan.employeeId,
           employeeName,
           employeeLoan.totalAmount,
-          '-',
-          '-',
-          '-'
+          new Date(loan.date).toLocaleDateString(),
+          loan.amount,
+          loan.notes || '-'
         ]);
-      }
-    });
-  }
+      });
+    } else {
+      this.reportsForExcel.push([
+        employeeLoan.employeeId,
+        employeeName,
+        employeeLoan.totalAmount,
+        '-',
+        '-',
+        '-'
+      ]);
+    }
+  });
+}
 
   getJobCategoryName(): string {
     return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name ||

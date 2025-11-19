@@ -28,7 +28,7 @@
     id="jobCategory"
     [(ngModel)]="selectedJobCategoryId" 
     (change)="loadJobs()">
-    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
     <!-- <option *ngIf="jobCategories.length > 0" [ngValue] = null>{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
     <option *ngIf="jobCategories.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
     <option *ngFor="let category of jobCategories" [value]="category.id">
@@ -45,7 +45,7 @@
     [(ngModel)]="selectedJobId" 
     (change)="loadEmployees()" 
     [disabled]="selectedJobCategoryId == 0 || selectedJobCategoryId == null">
-    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Job' | translate }}</option>
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
     <!-- <option *ngIf="jobs.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
     <option *ngIf="jobs.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
     <option *ngFor="let job of jobs" [value]="job.id">
@@ -62,7 +62,7 @@
     [(ngModel)]="selectedEmployeeId" 
     (ngModelChange)="onFilterChange()" 
     [disabled]="selectedJobId == 0 || selectedJobId == null">
-    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
     <!-- <option *ngIf="employees.length > 0" [value]="0">{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
     <option *ngIf="employees.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
     <option *ngFor="let employee of employees" [value]="employee.id">
@@ -205,8 +205,14 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Bonus Report'"
-            [infoRows]="getInfoRows()"
-            [tableHeaders]="[
+        [infoRows]="[
+          { keyEn: 'Date From: ' + this.dateFrom,        keyAr: this.dateFrom + ': من تاريخ' },
+          { keyEn: 'Date To: ' + this.dateTo,            keyAr: this.dateTo + ': إلى تاريخ' },
+          { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
+          { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
+          { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getEmployeeName() + ': الموظف' }
+        ]"
+        [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 
                 'Bonus Date', 
@@ -217,7 +223,8 @@
                 'Amount', 
                 'Notes'
             ]"
-            [tableData]="reportsForExport" #pdfComponentRef>
+            [tableDataWithHeaderArray]="tableSectionsForPDF"
+            #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

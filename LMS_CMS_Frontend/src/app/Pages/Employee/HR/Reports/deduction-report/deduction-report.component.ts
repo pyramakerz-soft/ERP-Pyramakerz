@@ -26,12 +26,12 @@ import { LoadingService } from '../../../../../Services/loading.service';
 
 @InitLoader()
 export class DeductionReportComponent  implements OnInit {
-  // Filter properties
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+// Filter properties
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   // Data sources
   jobCategories: any[] = [];
@@ -100,11 +100,11 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadJobs() {
-    this.selectedJobId = 0;
+    this.selectedJobId = null;
     this.employees = [];
-    this.selectedEmployeeId = 0;
+    this.selectedEmployeeId = null;
     
-    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -123,9 +123,9 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadEmployees() {
-    this.selectedEmployeeId = 0;
+    this.selectedEmployeeId = null;
     
-    if (this.selectedJobId && this.selectedJobId !== 0) {
+    if (this.selectedJobId && this.selectedJobId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -151,15 +151,15 @@ export class DeductionReportComponent  implements OnInit {
     this.deductionReports = [];
   }
 
-        ResetFilter() {
-    this.selectedJobCategoryId = 0;
-    this.selectedJobId = 0;
-    this.dateTo = '';
-    this.dateFrom = '';
-    this.selectedEmployeeId = 0;
-    this.showTable = false;
-    this.showViewReportBtn = false;
-  }
+ResetFilter() {
+  this.selectedJobCategoryId = null;
+  this.selectedJobId = null;
+  this.dateTo = '';
+  this.dateFrom = '';
+  this.selectedEmployeeId = null;
+  this.showTable = false;
+  this.showViewReportBtn = false;
+}
 
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
@@ -195,13 +195,13 @@ export class DeductionReportComponent  implements OnInit {
       };
 
       // Only add optional parameters if they have meaningful values
-      if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
         params.employeeId = this.selectedEmployeeId;
       }
-      if (this.selectedJobId && this.selectedJobId !== 0 && this.selectedJobId !== null) {
+      if (this.selectedJobId && this.selectedJobId !== null && this.selectedJobId !== null) {
         params.jobId = this.selectedJobId;
       }
-      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0 && this.selectedJobCategoryId !== null) {
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null && this.selectedJobCategoryId !== null) {
         params.categoryId = this.selectedJobCategoryId;
       }
 

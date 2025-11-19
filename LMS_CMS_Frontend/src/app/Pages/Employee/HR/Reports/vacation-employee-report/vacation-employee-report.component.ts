@@ -24,11 +24,12 @@ import { LoadingService } from '../../../../../Services/loading.service';
 
 @InitLoader()
 export class VacationEmployeeReportComponent implements OnInit {
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+// Filter properties
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   jobCategories: any[] = [];
   jobs: any[] = [];
@@ -47,6 +48,7 @@ export class VacationEmployeeReportComponent implements OnInit {
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
   reportsForExport: any[] = [];
+  tableSectionsForPDF: any[] = [];
   school = {
     reportHeaderOneEn: 'Vacation Employee Report',
     reportHeaderTwoEn: 'Employee Vacation Records',
@@ -89,53 +91,50 @@ export class VacationEmployeeReportComponent implements OnInit {
     }
   }
 
-  async loadJobs() {
+async loadJobs() {
+  this.selectedJobId = null;
+  this.employees = [];
+  this.selectedEmployeeId = null;
+  
+  if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
+      );
+      this.jobs = data;
+    } catch (error) {
+      console.error('Error loading jobs:', error);
       this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
-    if (this.selectedJobCategoryId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
-        );
-        this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
-      } catch (error) {
-        console.error('Error loading jobs:', error);
-      }
-    } else {
-
     }
+  } else {
+    this.jobs = [];
   }
+  
+  this.onFilterChange();
+}
 
-  async loadEmployees() {
-    if (this.selectedJobId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.employeeService.GetWithJobId(this.selectedJobId, domainName)
-        );
-        this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
-      } catch (error) {
-        console.error('Error loading employees:', error);
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
-      }
-    } else {
+async loadEmployees() {
+  this.selectedEmployeeId = null;
+  
+  if (this.selectedJobId && this.selectedJobId !== null) {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.employeeService.GetWithJobId(this.selectedJobId, domainName)
+      );
+      this.employees = data;
+      console.log('this.employees:', this.employees);
+    } catch (error) {
+      console.error('Error loading employees:', error);
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+  } else {
+    this.employees = [];
   }
+  
+  this.onFilterChange();
+}
 
   onFilterChange() {
     this.showTable = false;
@@ -143,126 +142,182 @@ export class VacationEmployeeReportComponent implements OnInit {
     this.vacationEmployeeReports = [];
   }
 
-async viewReport() {
-  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  if (!this.dateFrom || !this.dateTo) {
-    Swal.fire({
-      title: 'Incomplete Selection',
-      text: 'Please select both Date From and Date To to generate the report.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  this.isLoading = true;
+  ResetFilter() {
+  this.selectedJobCategoryId = null;
+  this.selectedJobId = null;
+  this.dateTo = '';
+  this.dateFrom = '';
+  this.selectedEmployeeId = null;
   this.showTable = false;
-
-  try {
-    const domainName = this.apiService.GetHeader();
-    
-    // Create parameters object with only non-zero values
-    const params: any = {
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo
-    };
-
-    // Only add optional parameters if they have meaningful values
-    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-      params.employeeId = this.selectedEmployeeId;
-    }
-    if (this.selectedJobId && this.selectedJobId !== 0) {
-      params.jobId = this.selectedJobId;
-    }
-    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
-      params.categoryId = this.selectedJobCategoryId;
-    }
-
-    console.log('Sending parameters:', params);
-
-    const response = await firstValueFrom(
-      this.vacationEmployeeService.GetVacationReport(
-        params.categoryId,    // Will be undefined if not provided
-        params.jobId,         // Will be undefined if not provided  
-        params.employeeId,    // Will be undefined if not provided
-        params.dateFrom,      // Always provided (mandatory)
-        params.dateTo,        // Always provided (mandatory)
-        domainName
-      )
-    );
-
-    console.log('API Response:', response);
-    
-    if (Array.isArray(response)) {
-      this.vacationEmployeeReports = response;
-      console.log('Leave request reports loaded:', this.vacationEmployeeReports.length);
-    } else {
-      console.log('Response is not an array:', response);
-      this.vacationEmployeeReports = [];
-    }
-
-    this.prepareExportData();
-    this.showTable = true;
-  } catch (error) {
-    console.error('Error loading leave request reports:', error);
-    this.vacationEmployeeReports = [];
-    this.showTable = true;
-  } finally {
-    this.isLoading = false;
-  }
+  this.showViewReportBtn = false;
 }
 
-  private prepareExportData(): void {
-    this.reportsForExport = [];
-    this.vacationEmployeeReports.forEach(employee => {
-      if (employee.vacationEmployees && employee.vacationEmployees.length > 0) {
-        employee.vacationEmployees.forEach((vac: any) => {
-          this.reportsForExport.push({
-            'Employee ID': employee.employeeId,
-            'Employee Name': employee.employeeEnName || employee.employeeArName || 'Unknown',
-            // 'Total Amount'  
-            'Vacation ID': vac.id,
-            'Vacation Type': vac.vacationTypesName,
-            'Date': vac.date,
-            'Half Day': vac.halfDay ? 'Yes' : 'No',
-            'Date From': vac.dateFrom,
-            'Date To': vac.dateTo || '-',
-            'Balance': vac.balance,
-            'Used': vac.used,
-            // 'Remains': vac.remains,
-            'Notes': vac.notes || '-'
-          });
-        });
+  async viewReport() {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (!this.dateFrom || !this.dateTo) {
+      Swal.fire({
+        title: 'Incomplete Selection',
+        text: 'Please select both Date From and Date To to generate the report.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.showTable = false;
+
+    try {
+      const domainName = this.apiService.GetHeader();
+
+      // Create parameters object with only non-zero values
+      const params: any = {
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo
+      };
+
+      // Only add optional parameters if they have meaningful values
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
+        params.employeeId = this.selectedEmployeeId;
+      }
+      if (this.selectedJobId && this.selectedJobId !== null && this.selectedJobId !== null) {
+        params.jobId = this.selectedJobId;
+      }
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null && this.selectedJobCategoryId !== null) {
+        params.categoryId = this.selectedJobCategoryId;
+      }
+
+      console.log('Sending parameters:', params);
+
+      const response = await firstValueFrom(
+        this.vacationEmployeeService.GetVacationReport(
+          params.categoryId,    // Will be undefined if not provided
+          params.jobId,         // Will be undefined if not provided  
+          params.employeeId,    // Will be undefined if not provided
+          params.dateFrom,      // Always provided (mandatory)
+          params.dateTo,        // Always provided (mandatory)
+          domainName
+        )
+      );
+
+      console.log('API Response:', response);
+
+      if (Array.isArray(response)) {
+        this.vacationEmployeeReports = [];
+        this.vacationEmployeeReports = response;
+        console.log('Bonus reports loaded:', this.vacationEmployeeReports.length);
       } else {
+        console.log('Response is not an array:', response);
+        this.vacationEmployeeReports = [];
+      }
+
+      this.prepareExportData();
+      this.showTable = true;
+    } catch (error) {
+      console.error('Error loading bonus reports:', error);
+      this.vacationEmployeeReports = [];
+      this.showTable = true;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+private prepareExportData(): void {
+  // For PDF sections (similar to deduction report)
+  this.tableSectionsForPDF = [];
+  
+  // For regular table display
+  this.reportsForExport = [];
+  
+  this.vacationEmployeeReports.forEach(employee => {
+    const employeeName = employee.employeeEnName || employee.employeeArName || 'Unknown';
+
+    // Create section for PDF (similar to deduction report)
+    const section = {
+      header: `Employee: ${employeeName}`,
+      data: [
+        { key: 'Employee ID', value: employee.employeeId },
+        { key: 'Employee Name', value: employeeName }
+      ],
+      tableHeaders: [
+        'Vacation Type',
+        'Date',
+        'Half Day',
+        'Date From',
+        'Date To',
+        'Notes'
+      ],
+      tableData: [] as any[]
+    };
+
+    if (employee.vacationEmployees && employee.vacationEmployees.length > 0) {
+      employee.vacationEmployees.forEach((vac: any) => {
+        // For PDF sections
+        section.tableData.push({
+          'Vacation Type': vac.vacationTypesName,
+          'Date': vac.date,
+          'Half Day': vac.halfDay ? 'Yes' : 'No',
+          'Date From': vac.dateFrom,
+          'Date To': vac.dateTo || '-',
+          'Notes': vac.notes || '-'
+        });
+
+        // For regular export
         this.reportsForExport.push({
           'Employee ID': employee.employeeId,
-          'Employee Name': employee.employeeEnName || employee.employeeArName || 'Unknown',
-          // 'Total Amount'  
-          'Vacation ID': '-',
-          'Vacation Type': '-',
-          'Date': '-',
-          'Half Day': '-',
-          'Date From': '-',
-          'Date To': '-',
-          'Balance': '-',
-          'Used': '-',
-          // 'Remains': '-',
-          'Notes': '-'
+          'Employee Name': employeeName,
+          'Vacation ID': vac.id,
+          'Vacation Type': vac.vacationTypesName,
+          'Date': vac.date,
+          'Half Day': vac.halfDay ? 'Yes' : 'No',
+          'Date From': vac.dateFrom,
+          'Date To': vac.dateTo || '-',
+          'Balance': vac.balance,
+          'Used': vac.used,
+          'Notes': vac.notes || '-'
         });
-      }
-    });
-    // rebuild excel rows from reportsForExport (now without Total Amount)
-    this.reportsForExcel = this.reportsForExport.map(obj => Object.values(obj));
-  }
+      });
+    } else {
+      // If no vacation records, add placeholder
+      section.tableData.push({
+        'Vacation Type': '-',
+        'Date': '-',
+        'Half Day': '-',
+        'Date From': '-',
+        'Date To': '-',
+        'Notes': 'No vacation records found'
+      });
+
+      this.reportsForExport.push({
+        'Employee ID': employee.employeeId,
+        'Employee Name': employeeName,
+        'Vacation ID': '-',
+        'Vacation Type': '-',
+        'Date': '-',
+        'Half Day': '-',
+        'Date From': '-',
+        'Date To': '-',
+        'Balance': '-',
+        'Used': '-',
+        'Notes': '-'
+      });
+    }
+
+    this.tableSectionsForPDF.push(section);
+  });
+
+  // For Excel (array format) - keep existing logic
+  this.reportsForExcel = this.reportsForExport.map(obj => Object.values(obj));
+}
 
   getJobCategoryName(): string {
     return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 

@@ -157,12 +157,12 @@ export class EmployeeJobReportComponent  implements OnInit {
       console.error('Error loading job reports:', error);
       this.jobReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load job reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load job reports',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     } finally {
       this.isLoading = false;
     }
