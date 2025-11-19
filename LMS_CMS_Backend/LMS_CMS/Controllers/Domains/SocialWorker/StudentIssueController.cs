@@ -69,6 +69,62 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         ////////////////////////////////
 
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+               allowedTypes: new[] { "octa", "employee" },
+               pages: new[] { "Student Issues" }
+               )]
+        public async Task<IActionResult> GetWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.studentIssue_Repository
+            .CountAsync(t => t.IsDeleted != true && t.Student.IsDeleted != true && t.Classroom.IsDeleted != true && t.Classroom.Grade.IsDeleted != true && t.Classroom.Grade.Section.IsDeleted != true && t.Classroom.Grade.Section.school.IsDeleted != true);
+
+
+            List<StudentIssue> studentIssue = await Unit_Of_Work.studentIssue_Repository.Select_All_With_IncludesById_Pagination<StudentIssue>(t => t.IsDeleted != true && t.Student.IsDeleted != true && t.Classroom.IsDeleted != true && t.Classroom.Grade.IsDeleted != true && t.Classroom.Grade.Section.IsDeleted != true && t.Classroom.Grade.Section.school.IsDeleted != true,
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.Classroom)
+                                  .ThenInclude(c => c.Grade)
+                                  .ThenInclude(g => g.Section)
+                                  .ThenInclude(s => s.school),
+                    query => query.Include(emp => emp.IssuesType))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (studentIssue == null || studentIssue.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<StudentIssueGetDTO> Dto = mapper.Map<List<StudentIssueGetDTO>>(studentIssue);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+        }
+
+        ////////////////////////////////
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },

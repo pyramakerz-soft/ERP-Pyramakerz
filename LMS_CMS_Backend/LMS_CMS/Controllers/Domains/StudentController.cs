@@ -787,12 +787,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             ClassroomGetDTO classDTO = mapper.Map<ClassroomGetDTO>(cls);
 
             StudentGetDTO studentDTO = mapper.Map<StudentGetDTO>(student);
-            Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(studentDTO.Nationality);
-
-            if (nationality != null)
+            if(studentDTO.Nationality != null && studentDTO.Nationality != 0)
             {
-                studentDTO.NationalityEnName = nationality.Name;
-                studentDTO.NationalityArName = nationality.ArName;
+                Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(studentDTO.Nationality);
+
+                if (nationality != null)
+                {
+                    studentDTO.NationalityEnName = nationality.Name;
+                    studentDTO.NationalityArName = nationality.ArName;
+                }
             }
 
             RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
@@ -808,11 +811,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                     (d => d.CategoryFieldID == 19 && d.RegisterationFormParentID == student.RegistrationFormParentID);
 
             if (registerationFormSubmittion != null)
-            {
-                studentDTO.GuardianPassportNo = registerationFormSubmittion.TextAnswer; 
-                studentDTO.GuardianNationalID = registerationFormSubmittion2.TextAnswer;
-                studentDTO.GuardianQualification = registerationFormSubmittion3.TextAnswer;
-                studentDTO.GuardianWorkPlace = registerationFormSubmittion4.TextAnswer;
+            { 
+                studentDTO.GuardianPassportNo = registerationFormSubmittion?.TextAnswer ?? "";
+                studentDTO.GuardianNationalID = registerationFormSubmittion2?.TextAnswer ?? "";
+                studentDTO.GuardianQualification = registerationFormSubmittion3?.TextAnswer ?? "";
+                studentDTO.GuardianWorkPlace = registerationFormSubmittion4?.TextAnswer ?? "";
             }
 
 
