@@ -321,7 +321,6 @@ private prepareExportData(): void {
         this.reportsForExcel.push([
           employeeLeaveRequest.employeeId,
           employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
-          leaveRequest.id,
           new Date(leaveRequest.date).toLocaleDateString(),
           leaveRequest.hours || '-',
           leaveRequest.minutes || '-',

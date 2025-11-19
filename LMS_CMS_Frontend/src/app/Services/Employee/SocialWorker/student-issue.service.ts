@@ -28,6 +28,18 @@ export class StudentIssueService {
     return this.http.get<StudentIssue[]>(`${this.baseUrl}/StudentIssue`, { headers });
   }
 
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: StudentIssue[], pagination: any }>(`${this.baseUrl}/StudentIssue/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetByID(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
