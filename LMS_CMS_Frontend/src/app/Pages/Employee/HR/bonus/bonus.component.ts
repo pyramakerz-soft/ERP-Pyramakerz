@@ -374,7 +374,7 @@ isFormValid(): boolean {
     (this.bonus.numberOfBonusDays == 0 || this.bonus.numberOfBonusDays == null)
   ) {
     isValid = false;
-    this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('numberOfBonusDays');
+    this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('Number Of Bonus Days');
   }
 
   // if (this.bonus.bonusTypeID == 1 &&(this.bonus.hours == 0 || this.bonus.hours == null)) {

@@ -1378,6 +1378,7 @@
   "bonusTypeID": "bonus Type",
   "amount": "amount",
   "numberOfBonusDays": "numberOfBonusDays",
+  "Number Of Bonus Days": "Number Of Bonus Days",
   "hours": "hours",
   "Updated successfully": "Updated successfully",
   "Created successfully": "Created successfully",
@@ -1432,7 +1433,10 @@
   "DeductionTypeID" : "Deduction Type",
   "Leave Request"   : "Leave Request",
   "DateFrom" : "Date From",
-  "VacationTypesID" : "Vacation Type"
+  "VacationTypesID" : "Vacation Type",
+  "BackPrice" : "Back Price",
+  "MorningPrice" : "Morning Price",
+  "TwoWaysPrice" : "Two Ways Price"
 
 
 
