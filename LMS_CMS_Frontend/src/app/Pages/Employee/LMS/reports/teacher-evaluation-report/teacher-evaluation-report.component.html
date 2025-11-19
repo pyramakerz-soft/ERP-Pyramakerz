@@ -3,6 +3,20 @@
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+        <!-- Start Date -->
+    <div class="w-full md:w-1/4">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <!-- End Date -->
+    <div class="w-full md:w-1/4">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
     <!-- Department Select -->
     <div class="w-full md:w-1/4">
         <label for="department" class="block mb-2 text-sm font-medium text-gray-900">{{'Department'| translate }}</label>
@@ -26,20 +40,6 @@
                 {{ employee.en_name }} 
             </option>
         </select>
-    </div>
-
-    <!-- Start Date -->
-    <div class="w-full md:w-1/4">
-        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
-        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-    </div>
-
-    <!-- End Date -->
-    <div class="w-full md:w-1/4">
-        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
-        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
     <div class="w-full md:w-1/6 flex justify-end space-x-2 mt-4 md:mt-0">
