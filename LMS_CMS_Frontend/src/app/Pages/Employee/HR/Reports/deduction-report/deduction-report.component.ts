@@ -161,84 +161,86 @@ ResetFilter() {
   this.showViewReportBtn = false;
 }
 
-  async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (!this.dateFrom || !this.dateTo) {
-      Swal.fire({
-        title: 'Incomplete Selection',
-        text: 'Please select both Date From and Date To to generate the report.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    try {
-      const domainName = this.apiService.GetHeader();
-
-      // Create parameters object with only non-zero values
-      const params: any = {
-        dateFrom: this.dateFrom,
-        dateTo: this.dateTo
-      };
-
-      // Only add optional parameters if they have meaningful values
-      if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
-        params.employeeId = this.selectedEmployeeId;
-      }
-      if (this.selectedJobId && this.selectedJobId !== null && this.selectedJobId !== null) {
-        params.jobId = this.selectedJobId;
-      }
-      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null && this.selectedJobCategoryId !== null) {
-        params.categoryId = this.selectedJobCategoryId;
-      }
-
-      console.log('Sending parameters:', params);
-
-      const response = await firstValueFrom(
-        this.deductionService.GetDeductionReport(
-          params.categoryId,    // Will be undefined if not provided
-          params.jobId,         // Will be undefined if not provided  
-          params.employeeId,    // Will be undefined if not provided
-          params.dateFrom,      // Always provided (mandatory)
-          params.dateTo,        // Always provided (mandatory)
-          domainName
-        )
-      );
-
-      console.log('API Response:', response);
-
-      if (Array.isArray(response)) {
-        this.deductionReports = [];
-        this.deductionReports = response;
-        console.log('Bonus reports loaded:', this.deductionReports.length);
-      } else {
-        console.log('Response is not an array:', response);
-        this.deductionReports = [];
-      }
-
-      this.prepareExportData();
-      this.showTable = true;
-    } catch (error) {
-      console.error('Error loading bonus reports:', error);
-      this.deductionReports = [];
-      this.showTable = true;
-    } finally {
-      this.isLoading = false;
-    }
+async viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  if (!this.dateFrom || !this.dateTo) {
+    Swal.fire({
+      title: 'Incomplete Selection',
+      text: 'Please select both Date From and Date To to generate the report.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    
+    const params: any = {
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo
+    };
+
+    // Add optional filters - FIXED: Check for null/undefined properly
+    if (this.selectedEmployeeId) {
+      params.employeeId = this.selectedEmployeeId;
+    }
+    if (this.selectedJobId) {
+      params.jobId = this.selectedJobId;
+    }
+    if (this.selectedJobCategoryId) {
+      params.categoryId = this.selectedJobCategoryId;
+    }
+
+    console.log('Sending parameters:', params);
+    this.reportsForExport = [];
+
+    // FIX: Use the params object properly in the API call
+    const response = await firstValueFrom(
+      this.deductionService.GetDeductionReport(
+        params.categoryId || null,  // Use null if undefined
+        params.jobId || null,       // Use null if undefined  
+        params.employeeId || null,  // Use null if undefined
+        params.dateFrom,
+        params.dateTo,
+        domainName
+      )
+    );
+
+    console.log('API Response:', response);
+    
+    if (Array.isArray(response)) {
+      this.deductionReports = [];
+      this.deductionReports = response;
+      console.log('Deduction reports loaded:', this.deductionReports.length);
+    } else {
+      console.log('Response is not an array:', response);
+      this.deductionReports = [];
+      this.reportsForExport = [];
+    }
+
+    this.prepareExportData();
+    this.showTable = true;
+  } catch (error) {
+    console.error('Error loading deduction reports:', error);
+    this.deductionReports = [];
+    this.showTable = true;
+  } finally {
+    this.isLoading = false;
+  }
+}
 
 private prepareExportData(): void {
   // For PDF (object format) - Flatten the data for the table
