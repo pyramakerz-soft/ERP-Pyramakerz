@@ -538,36 +538,38 @@ getGeneratedDate(): string {
     }, 500);
   }
 
-  async exportExcel() {
-    if (this.reportData.length === 0) {
-      Swal.fire({
-        title: 'Warning',
-        text: 'No data to export!',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+async exportExcel() {
+  if (this.reportData.length === 0) {
+    Swal.fire({
+      title: 'Warning',
+      text: 'No data to export!',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
-    try {
-      const selectedTemplate = this.Templates.find(
-        (t) => t.id == this.filterParams.templateId
-      );
-      const selectedEmployee = this.Employees.find(
-        (e) => e.id == this.filterParams.employeeId
-      );
-      const selectedSchool = this.Schools.find(
-        (s) => s.id == this.filterParams.schoolId
-      );
-      const selectedClass = this.Classs.find(
-        (c) => c.id == this.filterParams.classroomId
-      );
+  try {
+    const selectedTemplate = this.Templates.find(
+      (t) => t.id == this.filterParams.templateId
+    );
+    const selectedEmployee = this.Employees.find(
+      (e) => e.id == this.filterParams.employeeId
+    );
+    const selectedSchool = this.Schools.find(
+      (s) => s.id == this.filterParams.schoolId
+    );
+    const selectedClass = this.Classs.find(
+      (c) => c.id == this.filterParams.classroomId
+    );
 
-      // Prepare tables data
-      const tables: any[] = [];
+    // Prepare tables data - FIXED VERSION
+    const tables: any[] = [];
 
-      // Process each evaluation
-      this.reportData.forEach((evaluation: any) => {
+    // Process each employee
+    this.reportData.forEach((employee: any) => {
+      // Process each evaluation for this employee
+      employee.reportsByDate.forEach((evaluation: any) => {
         const evaluationDate = evaluation.date;
 
         // Process question groups
@@ -578,8 +580,8 @@ getGeneratedDate(): string {
           evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
             const tableData: any[][] = [];
             
-            // Add headers
-            // tableData.push(['Question', 'Rating', 'Notes']);
+            // Add headers as first row
+            tableData.push(['Question', 'Rating', 'Notes']);
 
             // Add questions
             if (
@@ -597,7 +599,7 @@ getGeneratedDate(): string {
             }
 
             tables.push({
-              title: `Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+              title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
               headers: ['Question', 'Rating', 'Notes'],
               data: tableData
             });
@@ -611,8 +613,8 @@ getGeneratedDate(): string {
         ) {
           const tableData: any[][] = [];
           
-          // Add headers
-          // tableData.push(['Student', 'Correction Book', 'Status', 'Notes']);
+          // Add headers as first row
+          tableData.push(['Student', 'Correction Book', 'Status', 'Notes']);
 
           // Add student corrections
           evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
@@ -626,51 +628,52 @@ getGeneratedDate(): string {
           });
 
           tables.push({
-            title: `Evaluation: ${evaluationDate} - Student Corrections`,
+            title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
             headers: ['Student', 'Correction Book', 'Status', 'Notes'],
             data: tableData
           });
         }
       });
+    });
 
-      // Prepare info rows
-      const infoRows = [
-        { key: 'Template', value: selectedTemplate?.englishTitle || 'All' },
-        { key: 'Employee', value: selectedEmployee?.en_name || 'All' },
-        { key: 'School', value: selectedSchool?.name || 'All' },
-        { key: 'Class', value: selectedClass?.name || 'All' },
-        { key: 'Start Date', value: this.filterParams.fromDate },
-        { key: 'End Date', value: this.filterParams.toDate },
-        { key: 'Generated On', value: new Date().toLocaleDateString() }
-      ];
+    // Prepare info rows
+    const infoRows = [
+      { key: 'Template', value: selectedTemplate?.englishTitle || 'All' },
+      { key: 'Employee', value: selectedEmployee?.en_name || 'All' },
+      { key: 'School', value: selectedSchool?.name || 'All' },
+      { key: 'Class', value: selectedClass?.name || 'All' },
+      { key: 'Start Date', value: this.filterParams.fromDate },
+      { key: 'End Date', value: this.filterParams.toDate },
+      { key: 'Generated On', value: new Date().toLocaleDateString() }
+    ];
 
-      // Generate Excel using ReportsService
-      await this.reportsService.generateExcelReport({
-        mainHeader: {
-          en: 'EVALUATION REPORT',
-          ar: 'تقرير التقييم'
-        },
-        // subHeaders: [
-        //   {
-        //     en: 'Employee Performance Evaluation Summary',
-        //     ar: 'ملخص تقييم أداء الموظفين'
-        //   }
-        // ],
-        infoRows: infoRows,
-        // reportImage: 'assets/images/logo.png',
-        tables: tables,
-        filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-      });
+    // Generate Excel using ReportsService
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'EVALUATION REPORT',
+        ar: 'تقرير التقييم'
+      },
+      subHeaders: [
+        {
+          en: 'Employee Performance Evaluation Summary',
+          ar: 'ملخص تقييم أداء الموظفين'
+        }
+      ],
+      infoRows: infoRows,
+      // reportImage: 'assets/images/logo.png',
+      tables: tables,
+      filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
 
-    } catch (error) {
-      console.error('Error generating Excel report:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to generate Excel report',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-    }
+  } catch (error) {
+    console.error('Error generating Excel report:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'Failed to generate Excel report',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
   }
+}
 
 }

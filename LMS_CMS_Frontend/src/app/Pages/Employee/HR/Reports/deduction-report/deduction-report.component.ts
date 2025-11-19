@@ -26,12 +26,12 @@ import { LoadingService } from '../../../../../Services/loading.service';
 
 @InitLoader()
 export class DeductionReportComponent  implements OnInit {
-  // Filter properties
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+// Filter properties
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   // Data sources
   jobCategories: any[] = [];
@@ -78,9 +78,9 @@ export class DeductionReportComponent  implements OnInit {
     this.loadJobCategories();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+      this.isRtl = direction == 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir == 'rtl';
   }
 
   ngOnDestroy(): void { 
@@ -100,62 +100,66 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadJobs() {
-      this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
-    if (this.selectedJobCategoryId) {
+    this.selectedJobId = null;
+    this.employees = [];
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
         );
         this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading jobs:', error);
+        this.jobs = [];
       }
     } else {
-
+      this.jobs = [];
     }
+    
+    this.onFilterChange();
   }
 
   async loadEmployees() {
-    if (this.selectedJobId) {
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobId && this.selectedJobId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading employees:', error);
         this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       }
     } else {
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
     this.showTable = false;
-    // Enable View Report when both dates are selected.
-    // Keep previous full-selection behavior as well (optional).
     const datesSelected = !!this.dateFrom && !!this.dateTo;
     const fullSelection = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
     this.showViewReportBtn = datesSelected || fullSelection;
     this.deductionReports = [];
   }
+
+ResetFilter() {
+  this.selectedJobCategoryId = null;
+  this.selectedJobId = null;
+  this.dateTo = '';
+  this.dateFrom = '';
+  this.selectedEmployeeId = null;
+  this.showTable = false;
+  this.showViewReportBtn = false;
+}
 
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
@@ -183,23 +187,43 @@ export class DeductionReportComponent  implements OnInit {
 
     try {
       const domainName = this.apiService.GetHeader();
+
+      // Create parameters object with only non-zero values
+      const params: any = {
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo
+      };
+
+      // Only add optional parameters if they have meaningful values
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
+        params.employeeId = this.selectedEmployeeId;
+      }
+      if (this.selectedJobId && this.selectedJobId !== null && this.selectedJobId !== null) {
+        params.jobId = this.selectedJobId;
+      }
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null && this.selectedJobCategoryId !== null) {
+        params.categoryId = this.selectedJobCategoryId;
+      }
+
+      console.log('Sending parameters:', params);
+
       const response = await firstValueFrom(
-        // pass undefined for filters that are not selected so service omits them
         this.deductionService.GetDeductionReport(
-          this.selectedJobCategoryId || undefined,
-          this.selectedJobId || undefined,
-          this.selectedEmployeeId || undefined,
-          this.dateFrom || undefined,
-          this.dateTo || undefined,
+          params.categoryId,    // Will be undefined if not provided
+          params.jobId,         // Will be undefined if not provided  
+          params.employeeId,    // Will be undefined if not provided
+          params.dateFrom,      // Always provided (mandatory)
+          params.dateTo,        // Always provided (mandatory)
           domainName
         )
       );
 
       console.log('API Response:', response);
-      
+
       if (Array.isArray(response)) {
+        this.deductionReports = [];
         this.deductionReports = response;
-        console.log('Deduction reports loaded:', this.deductionReports.length);
+        console.log('Bonus reports loaded:', this.deductionReports.length);
       } else {
         console.log('Response is not an array:', response);
         this.deductionReports = [];
@@ -208,7 +232,7 @@ export class DeductionReportComponent  implements OnInit {
       this.prepareExportData();
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading deduction reports:', error);
+      console.error('Error loading bonus reports:', error);
       this.deductionReports = [];
       this.showTable = true;
     } finally {
@@ -233,7 +257,7 @@ private prepareExportData(): void {
         { key: 'Total Amount', value: employeeDeduction.totalAmount }
       ],
       tableHeaders: [
-        'Deduction ID', 
+        // 'Deduction ID', 
         'Deduction Date', 
         'Deduction Type',
         'Hours',
@@ -249,7 +273,7 @@ private prepareExportData(): void {
     if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
       employeeDeduction.deductions.forEach((deduction: any) => {
         section.tableData.push({
-          'Deduction ID': deduction.id,
+          // 'Deduction ID': deduction.id,
           'Deduction Date': new Date(deduction.date).toLocaleDateString(),
           'Deduction Type': deduction.deductionTypeName,
           'Hours': deduction.hours || '-',
@@ -282,7 +306,7 @@ private prepareExportData(): void {
           'Employee ID': employeeDeduction.employeeId,
           'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
           'Total Amount': employeeDeduction.totalAmount,
-          'Deduction ID': deduction.id,
+          // 'Deduction ID': deduction.id,
           'Deduction Date': new Date(deduction.date).toLocaleDateString(),
           'Deduction Type': deduction.deductionTypeName,
           'Hours': deduction.hours || '-',
@@ -297,7 +321,7 @@ private prepareExportData(): void {
         'Employee ID': employeeDeduction.employeeId,
         'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
         'Total Amount': employeeDeduction.totalAmount,
-        'Deduction ID': '-',
+        // 'Deduction ID': '-',
         'Deduction Date': '-',
         'Deduction Type': '-',
         'Hours': '-',
@@ -350,13 +374,13 @@ private prepareExportData(): void {
 }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
            this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
            'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
            this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
            'All Jobs';
   }
@@ -377,7 +401,7 @@ private prepareExportData(): void {
   }
 
   DownloadAsPDF() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -390,7 +414,7 @@ private prepareExportData(): void {
   }
 
   Print() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -439,7 +463,7 @@ private prepareExportData(): void {
   }
 
   async exportExcel() {
-    if (this.reportsForExcel.length === 0) {
+    if (this.reportsForExcel.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -472,7 +496,7 @@ private prepareExportData(): void {
               'Employee ID', 
               'Employee Name', 
               'Total Amount', 
-              'Deduction ID', 
+              // 'Deduction ID', 
               'Deduction Date', 
               'Deduction Type',
               'Hours',

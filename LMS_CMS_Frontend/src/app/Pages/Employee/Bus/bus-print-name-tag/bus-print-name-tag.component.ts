@@ -19,9 +19,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import html2pdf from 'html2pdf.js';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import html2pdf from 'html2pdf.js';
 @Component({
   selector: 'app-bus-print-name-tag',
   standalone: true,

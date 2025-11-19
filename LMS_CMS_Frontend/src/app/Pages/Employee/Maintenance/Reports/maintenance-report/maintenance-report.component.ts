@@ -60,8 +60,8 @@ export class MaintenanceReportComponent implements OnInit {
   showPDF = false;
   reportsForExport: any[] = [];
   school = {
-    reportHeaderOneEn: 'Maintenance Report', 
-    reportHeaderOneAr: 'تقرير الصيانة', 
+    reportHeaderOneEn: 'Maintenance Report',
+    reportHeaderOneAr: 'تقرير الصيانة',
   };
 
   constructor(
