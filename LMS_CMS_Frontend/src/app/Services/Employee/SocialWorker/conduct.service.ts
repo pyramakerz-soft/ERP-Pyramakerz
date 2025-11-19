@@ -28,6 +28,18 @@ export class ConductService {
     return this.http.get<Conduct[]>(`${this.baseUrl}/Conduct/BySchool/${SchoolId}`, { headers });
   }
 
+  GetBySchoolIdWithPaggination(SchoolId:number ,DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Conduct[], pagination: any }>(`${this.baseUrl}/Conduct/BySchoolWithPaggination/${SchoolId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetByID(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

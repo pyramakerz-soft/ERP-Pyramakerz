@@ -85,9 +85,10 @@
 
 
 <!-- Modal -->
-<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}"
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-    <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md">
+
+    <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md max-h-[90vh] overflow-y-auto">
         <!-- Close Icon -->
         <button (click)="closeModal()"
             class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">

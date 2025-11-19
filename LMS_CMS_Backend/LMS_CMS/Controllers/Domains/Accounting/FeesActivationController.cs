@@ -37,19 +37,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Fees Activation" }
         )]
-        public async Task<IActionResult> GetAsync(int gradeID, int yearID,  int? classID = null, int? studentID = null)
+        public async Task<IActionResult> GetAsync(int gradeID, int yearID,  int? classID = null, int? studentID = null ,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            //List<StudentAcademicYear> studentsAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository
-            //    .Select_All_With_IncludesById<StudentAcademicYear>(
-            //        sem => sem.IsDeleted != true,
-            //        query => query.Include(emp => emp.Student),
-            //        query => query.Include(emp => emp.Grade).ThenInclude(g => g.Section),
-            //        query => query.Include(emp => emp.Classroom),
-            //        query => query.Include(emp => emp.School)
-            //    );
-            
             Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == gradeID);
             if(grade == null)
             {
@@ -129,41 +120,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     query => query.Include(Income => Income.TuitionFeesType)
                 );
 
-            //var result = studentsAcademicYear
-            //    .SelectMany(student =>
-            //        feesActivations
-            //            .Where(fee => fee.StudentID == student.StudentID)
-            //            .DefaultIfEmpty(),
-            //        (student, fee) => new FeesActivationGetDTO
-            //        {
-            //            StudentAcademicYearID = student.ID,
-            //            StudentID = student.StudentID,
-            //            StudentName = student.Student.User_Name,
-            //            SchoolID = student.SchoolID,
-            //            SchoolName = student.School?.Name ?? "",
-            //            ClassID = student.ClassID,
-            //            ClassName = student.Classroom?.Name ?? "",
-            //            GradeID = student.GradeID,
-            //            GradeName = student.Grade?.Name ?? "",
-            //            SectionId = student.Grade?.Section?.ID ?? 0,
-            //            SectionName = student.Grade?.Section?.Name ?? "",
-
-            //            FeeActivationID = fee?.ID ?? 0,
-            //            Amount = fee?.Amount ?? 0,
-            //            Discount = fee?.Discount ?? 0,
-            //            Net = fee?.Net ?? 0,
-            //            AcademicYearId = fee?.AcademicYearId ?? 0,
-            //            AcademicYearName = fee?.AcademicYear?.Name ?? "",
-            //            Date = fee?.Date ?? "",
-            //            FeeTypeID = fee?.FeeTypeID ?? 0,
-            //            FeeTypeName = fee?.TuitionFeesType?.Name ?? null,
-            //            FeeDiscountTypeID = fee?.FeeDiscountTypeID ?? 0,
-            //            FeeDiscountTypeName = fee?.TuitionDiscountType?.Name ?? null,
-            //            InsertedByUserId = fee?.InsertedByUserId ?? 0,
-            //        }
-            //    )
-            //    .ToList();
-
             var result = gradeStudents
                 .SelectMany(student =>
                     feesActivations
@@ -189,7 +145,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 )
                 .ToList();
 
-            return Ok(result);
+            int totalRecords = result.Count;
+
+            // ------------------------------
+            // Apply Pagination
+            // ------------------------------
+            var paginatedData = result
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = paginatedData, Pagination = paginationMetadata });
         }
         /////
 

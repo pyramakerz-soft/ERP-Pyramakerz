@@ -96,6 +96,11 @@ export class FeesActivationComponent {
   validationErrors: { [key in keyof FeesActivationAddPut]?: string } = {};
   isLoading = false
   isSearchLoading = false
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private menuService: MenuService,
@@ -152,16 +157,74 @@ export class FeesActivationComponent {
     }
   } 
 
-  GetAllFeesData() {
+  // GetAllFeesData(DomainName: string, pageNumber: number, pageSize: number) {
+  //   this.TableData = []
+  //   this.OriginalTableData = []
+  //   this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, DomainName, pageNumber, pageSize ).subscribe((d) => {
+  //     this.OriginalTableData = d;
+  //     this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
+  //     this.isSearchLoading = false
+  //   },err=>{
+  //    this.isSearchLoading = false
+  //   })
+  // }
+
+  GetAllFeesData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = []
     this.OriginalTableData = []
-    this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
-      this.OriginalTableData = d;
-      this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
-      this.isSearchLoading = false
-    },err=>{
-     this.isSearchLoading = false
-    })
+    this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId ,DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+        this.OriginalTableData = data.data;
+        this.TableData = this.OriginalTableData.filter(row=>row.feeActivationID != 0 && row.feeActivationID != null);
+        this.isSearchLoading = false
+      },
+      (error) => {
+        this.isSearchLoading = false
+        console.log(error)
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Bonus');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }    
+
+  private showErrorAlert(errorMessage: string) {
+      const translatedTitle = this.translate.instant('Error');
+      const translatedButton = this.translate.instant('Okay');
+  
+      Swal.fire({
+        icon: 'error',
+        title: translatedTitle,
+        text: errorMessage,
+        confirmButtonText: translatedButton,
+        customClass: { confirmButton: 'secondaryBg' },
+      });
   }
 
   Delete(id: number) {
@@ -176,7 +239,7 @@ export class FeesActivationComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.feesActivationServ.Delete(id, this.DomainName).subscribe((D) => {
-          this.GetAllFeesData();
+          this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
         })
       }
     });
@@ -350,7 +413,7 @@ export class FeesActivationComponent {
   Search() {
     this.IsSearch = true
     this.isSearchLoading = true
-    this.GetAllFeesData()
+    this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
   GetAllTuitionFeesType() {
@@ -392,7 +455,7 @@ export class FeesActivationComponent {
         this.Fees = new FeesActivationAddPut();
         this.DiscountPercentage = null;
 
-        await this.GetAllFeesData();
+        await this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
         await this.Search();
 
         await Swal.fire({
@@ -455,7 +518,7 @@ export class FeesActivationComponent {
     fee.studentID = row.studentID;
     fee.feeActivationID = row.feeActivationID;
     this.feesActivationServ.Edit(fee, this.DomainName).subscribe((d) => {
-      this.GetAllFeesData();
+      this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
       Swal.fire({
         title: 'Fees Updated Successfully',
         icon: 'success',
@@ -497,4 +560,60 @@ export class FeesActivationComponent {
       this.validationErrors[field] = '';
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+ 
 }
