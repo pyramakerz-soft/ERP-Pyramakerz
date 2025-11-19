@@ -76,6 +76,69 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             return Ok(Dto);
         }
 
+        ////////////////////////////////
+
+        [HttpGet("BySchoolWithPaggination/{SchoolId}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Conducts" }
+        )]
+        public async Task<IActionResult> GetBySchoolWithPaggination(long SchoolId , [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.conduct_Repository
+               .CountAsync(f => f.IsDeleted != true && f.ConductType.SchoolID == SchoolId);
+
+
+            List<Conduct> conducts = await Unit_Of_Work.conduct_Repository.Select_All_With_IncludesById_Pagination<Conduct>(
+                    sem => sem.IsDeleted != true && sem.ConductType.SchoolID == SchoolId,
+                    query => query.Include(emp => emp.ConductType).ThenInclude(a => a.School),
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.ProcedureType))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+
+            if (conducts == null || conducts.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ConductGetDTO> Dto = mapper.Map<List<ConductGetDTO>>(conducts);
+
+            foreach (var item in Dto)
+            {
+                item.File = _fileService.GetFileUrl(item.File, Request, HttpContext);
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+
+        }
+
+
         ////////////////////////////////     
 
         [HttpGet("{id}")]
