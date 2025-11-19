@@ -8,6 +8,7 @@ using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
+using ZXing;
 using BusModel = LMS_CMS_DAL.Models.Domains.BusModule.Bus;
 
 namespace LMS_CMS_PL.Controllers.Domains.Bus
@@ -27,12 +29,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileUploadsService _fileService;
 
-        public BusStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public BusStudentController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileUploadsService fileService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileService = fileService;
         }
 
         [HttpGet("GetByBusId/{busId}")]
@@ -98,10 +102,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
 
             busStudents = busStudents.Where(bs => bs.IsDeleted != true).ToList();
 
+            var driverMobile = "";
+            if(bus.DriverID != null)
+            {
+                Employee driver = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == bus.DriverID); 
+                if(driver != null && driver.Mobile != null)
+                {
+                    driverMobile = driver.Mobile;
+                }
+            }
+
             List<BusStudentGetDTO> busStudentDTOs = mapper.Map<List<BusStudentGetDTO>>(busStudents);
 
             foreach (var dto in busStudentDTOs)
             {
+                dto.DriverNumber = driverMobile;
+
                 var busStudent = Unit_Of_Work.busStudent_Repository.Select_By_Id(dto.ID);
                 if (busStudent != null)
                 {
@@ -139,6 +155,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
 
                     if (studentGrade != null)
                     {
+                        AcademicYear academicYear = await Unit_Of_Work.academicYear_Repository.FindByIncludesAsync(d => d.IsDeleted != true && d.ID == studentGrade.AcademicYearID, query => query.Include(d => d.School));
+                        if (academicYear != null && academicYear.School.ReportImage != null)
+                        { 
+                            dto.SchoolImage = _fileService.GetFileUrl(academicYear.School.ReportImage, Request, HttpContext); ;
+                        }
+
                         dto.GradeID = studentGrade.GradeID;
                         var grade = Unit_Of_Work.grade_Repository.Select_By_Id(dto.GradeID);
                         dto.GradeName = grade.Name;
