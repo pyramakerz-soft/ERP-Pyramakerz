@@ -177,7 +177,7 @@
                             {{ bonus.date | date:'mediumDate' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ bonus.bounsTypeName }}
+                            {{ bonus.bonusTypeName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.hours || '-' }}
@@ -186,7 +186,7 @@
                             {{ bonus.minutes || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ bonus.numberOfBounsDays || '-' }}
+                            {{ bonus.numberOfBonusDays || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.amount || '-' }}
@@ -209,7 +209,6 @@
             [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 
-                'Total Amount', 
                 'Bonus Date', 
                 'Bonus Type',
                 'Hours',

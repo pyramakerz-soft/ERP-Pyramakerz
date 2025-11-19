@@ -231,15 +231,13 @@ export class PayableDetailsComponent {
             field == 'bankOrSaveID' ||
             field == 'payableDocTypeID' ||
             field == 'linkFileID' ||
-            field == 'date' ||
-            field == 'docNumber'
+            field == 'date' 
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
-              this.validationErrors[field] = `*bankOrSafeID is required`;
-            }
+            const displayFieldName =
+              field === 'bankOrSaveID' ? 'bankOrSafeID' : field;
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(displayFieldName as keyof Payable)
+            );
             isValid = false;
           }
         } else {

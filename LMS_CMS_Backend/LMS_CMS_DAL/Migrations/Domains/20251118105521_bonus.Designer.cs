@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20251118105521_bonus")]
+    partial class bonus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5091,7 +5094,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("Amount")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("BonusTypeID")
+                    b.Property<long>("BounsTypeID")
                         .HasColumnType("bigint");
 
                     b.Property<DateOnly>("Date")
@@ -5144,7 +5147,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BonusTypeID");
+                    b.HasIndex("BounsTypeID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -17353,9 +17356,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Bonus", b =>
                 {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.HR.BonusType", "BonusType")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.HR.BonusType", "BounsType")
                         .WithMany("Bonus")
-                        .HasForeignKey("BonusTypeID")
+                        .HasForeignKey("BounsTypeID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -17378,7 +17381,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
-                    b.Navigation("BonusType");
+                    b.Navigation("BounsType");
 
                     b.Navigation("DeletedByEmployee");
 

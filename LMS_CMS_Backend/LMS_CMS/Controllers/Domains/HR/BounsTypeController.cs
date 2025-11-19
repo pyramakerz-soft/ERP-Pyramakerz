@@ -47,14 +47,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<BounsType> bounsTypes = Unit_Of_Work.bounsType_Repository.Select_All();
+            List<BonusType> bounsTypes = Unit_Of_Work.bounsType_Repository.Select_All();
 
             if (bounsTypes == null || bounsTypes.Count == 0)
             {
                 return NotFound();
             }
 
-            List<BounsTypeGetDTO> Dto = mapper.Map<List<BounsTypeGetDTO>>(bounsTypes);
+            List<BonusTypeGetDTO> Dto = mapper.Map<List<BonusTypeGetDTO>>(bounsTypes);
 
             return Ok(Dto);
         }

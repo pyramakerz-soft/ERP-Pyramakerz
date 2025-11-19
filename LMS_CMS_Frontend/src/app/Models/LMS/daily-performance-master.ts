@@ -11,6 +11,6 @@ export class DailyPerformanceMaster {
         public gradeName: string = "",
         public dailyPerformances: DailyPerformance[] = [],
         public insertedByUserId: number = 0 ,
-        public InsertedAt: string = "",
+        public insertedAt: string = "",
       ) { }
 }

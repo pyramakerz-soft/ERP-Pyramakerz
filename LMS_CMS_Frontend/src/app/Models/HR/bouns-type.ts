@@ -1,4 +1,4 @@
-export class BounsType {
+export class BonusType {
     constructor(
         public id: number = 0,
         public name: string = '',

@@ -15,6 +15,7 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { JobCategories } from '../../../../../Models/Administrator/job-categories';
 
 @Component({
   selector: 'app-loans-report',
@@ -34,7 +35,7 @@ export class LoansReportComponent implements OnInit {
   dateTo: string = '';
 
   // Data sources
-  jobCategories: any[] = [];
+  jobCategories: JobCategories[] = [];
   jobs: any[] = [];
   employees: any[] = [];
 
@@ -92,6 +93,7 @@ export class LoansReportComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(this.jobCategoriesService.Get(domainName));
       this.jobCategories = data;
+      console.log(this.jobCategories)
     } catch (error) {
       console.error('Error loading job categories:', error);
     }
@@ -159,7 +161,7 @@ async loadEmployees() {
   }
 
 async viewReport() {
-  console.log('this.selectedEmployeeId:', this.selectedEmployeeId);
+  console.log('this.selectedEmployeeId:', this.selectedEmployeeId ,this.selectedJobId);
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
     Swal.fire({
       title: 'Invalid Date Range',
@@ -309,8 +311,7 @@ async viewReport() {
   }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
-           this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name ||
            'All Job Categories';
   }
 

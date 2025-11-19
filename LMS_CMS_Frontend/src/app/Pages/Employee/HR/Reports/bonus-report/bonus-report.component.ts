@@ -256,10 +256,10 @@ export class BonusReportComponent implements OnInit {
             'Total Amount': employeeBonus.totalAmount,
             'Bonus ID': bonus.id,
             'Bonus Date': new Date(bonus.date).toLocaleDateString(),
-            'Bonus Type': bonus.bounsTypeName,
+            'Bonus Type': bonus.bonusTypeName,
             'Hours': bonus.hours || '-',
             'Minutes': bonus.minutes || '-',
-            'Number of Bonus Days': bonus.numberOfBounsDays || '-',
+            'Number of Bonus Days': bonus.numberOfBonusDays || '-',
             'Amount': bonus.amount || '-',
             'Notes': bonus.notes || '-'
           });
@@ -301,10 +301,10 @@ export class BonusReportComponent implements OnInit {
             employeeBonus.totalAmount,
             bonus.id,
             new Date(bonus.date).toLocaleDateString(),
-            bonus.bounsTypeName,
+            bonus.bonusTypeName,
             bonus.hours || '-',
             bonus.minutes || '-',
-            bonus.numberOfBounsDays || '-',
+            bonus.numberOfBonusDays || '-',
             bonus.amount || '-',
             bonus.notes || '-'
           ]);
@@ -443,7 +443,6 @@ export class BonusReportComponent implements OnInit {
             headers: [
               'Employee ID',
               'Employee Name',
-              'Total Amount',
               'Bonus ID',
               'Bonus Date',
               'Bonus Type',

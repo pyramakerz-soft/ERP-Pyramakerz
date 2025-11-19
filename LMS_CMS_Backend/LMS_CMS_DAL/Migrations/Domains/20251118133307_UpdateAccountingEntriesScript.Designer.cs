@@ -4,16 +4,19 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LMS_CMS_DAL.Migrations.Domains
+namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20251118133307_UpdateAccountingEntriesScript")]
+    partial class UpdateAccountingEntriesScript
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5080,7 +5083,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("AnnualVacationEmployee");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Bonus", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Bouns", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -5091,7 +5094,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("Amount")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("BonusTypeID")
+                    b.Property<long>("BounsTypeID")
                         .HasColumnType("bigint");
 
                     b.Property<DateOnly>("Date")
@@ -5130,7 +5133,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NumberOfBonusDays")
+                    b.Property<int>("NumberOfBounsDays")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -5144,7 +5147,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BonusTypeID");
+                    b.HasIndex("BounsTypeID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -5154,10 +5157,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("Bonus");
+                    b.ToTable("Bouns");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.BonusType", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.BounsType", b =>
                 {
                     b.Property<long>("ID")
                         .HasColumnType("bigint");
@@ -5169,7 +5172,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.ToTable("BonusType");
+                    b.ToTable("BounsType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.DayStatus", b =>
@@ -17351,11 +17354,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("VacationTypes");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Bonus", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.Bouns", b =>
                 {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.HR.BonusType", "BonusType")
-                        .WithMany("Bonus")
-                        .HasForeignKey("BonusTypeID")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.HR.BounsType", "BounsType")
+                        .WithMany("Bouns")
+                        .HasForeignKey("BounsTypeID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -17365,7 +17368,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
-                        .WithMany("Bonus")
+                        .WithMany("Bouns")
                         .HasForeignKey("EmployeeID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -17378,7 +17381,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
-                    b.Navigation("BonusType");
+                    b.Navigation("BounsType");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -22522,7 +22525,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("BankEmployees");
 
-                    b.Navigation("Bonus");
+                    b.Navigation("Bouns");
 
                     b.Navigation("ClassroomSubjectCoTeachers");
 
@@ -22599,9 +22602,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.BonusType", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.BounsType", b =>
                 {
-                    b.Navigation("Bonus");
+                    b.Navigation("Bouns");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.DayStatus", b =>

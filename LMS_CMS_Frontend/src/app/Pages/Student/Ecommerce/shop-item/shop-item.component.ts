@@ -178,9 +178,7 @@ export class ShopItemComponent {
               Swal.fire({
                 title: "Added Successfully!",
                 icon: "success"
-              }).then((result) => {
-                this.goToCart();
-              }); 
+              }) 
             }
           )
         }else{

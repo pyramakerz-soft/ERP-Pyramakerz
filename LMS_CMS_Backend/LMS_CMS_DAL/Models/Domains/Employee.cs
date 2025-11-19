@@ -130,7 +130,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
         public ICollection<MaintenanceEmployee> MaintenanceEmployees { get; set; } = new HashSet<MaintenanceEmployee>();
         public ICollection<Loans> Loans { get; set; } = new HashSet<Loans>();
-        public ICollection<Bouns> Bouns { get; set; } = new HashSet<Bouns>();
+        public ICollection<Bonus> Bonus { get; set; } = new HashSet<Bonus>();
         public ICollection<Deduction> Deduction { get; set; } = new HashSet<Deduction>();
         public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
         public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();

@@ -141,9 +141,11 @@ export class DailyPerformanceMasterComponent {
 
   getAllGradesBySchoolId() {
     this.Grades = []
+    this.subjects = []
     this.IsView = false
     this.SelectedGradeId = 0
     this.SelectedClassId = 0
+    this.SelectedSubjectId = 0
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
