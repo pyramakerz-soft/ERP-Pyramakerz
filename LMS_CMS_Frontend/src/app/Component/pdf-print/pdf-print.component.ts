@@ -280,26 +280,36 @@ export class PdfPrintComponent implements OnChanges {
 printPDF() {
   const element = this.printContainer.nativeElement;
   
-  // Simple, clean configuration
+  // Create a clone for PDF generation
+  const elementClone = element.cloneNode(true);
+  
+  // Apply print styles to the clone
+  this.applyPrintStyles(elementClone);
+  
+  // Add to document for rendering
+  document.body.appendChild(elementClone);
+  
   const options = {
-    margin: 0.5,
+    margin: [10, 10, 10, 10], // [top, left, bottom, right] in mm
     filename: `${this.fileName}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { 
       scale: 2,
       useCORS: true,
-      logging: false
+      logging: false,
+      width: elementClone.scrollWidth,
+      height: elementClone.scrollHeight,
+      windowWidth: elementClone.scrollWidth,
+      windowHeight: elementClone.scrollHeight
     },
     jsPDF: { 
       unit: 'mm', 
       format: 'a4', 
-      orientation: 'portrait' 
+      orientation: 'portrait',
+      compress: true
     }
   };
 
-  const elementClone = element.cloneNode(true);
-  document.body.appendChild(elementClone);
-  
   // Generate PDF
   html2pdf()
     .from(elementClone)
@@ -309,6 +319,32 @@ printPDF() {
       // Clean up
       document.body.removeChild(elementClone);
     });
+}
+
+private applyPrintStyles(element: HTMLElement) {
+  // Add print-specific classes
+  element.classList.add('pdf-export-mode');
+  
+  // Apply the same styles that are used in print media query
+  const style = document.createElement('style');
+  style.textContent = `
+    .pdf-export-mode table {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    
+    .pdf-export-mode .pdf-table-container {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      margin-bottom: 20px !important;
+    }
+    
+    .pdf-export-mode tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+  `;
+  element.appendChild(style);
 }
 
   getColumnWidth(header: string, totalColumns: number): any {
