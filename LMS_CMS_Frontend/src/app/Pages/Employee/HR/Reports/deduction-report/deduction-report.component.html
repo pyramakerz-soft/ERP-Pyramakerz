@@ -97,9 +97,6 @@
                     {{ 'Total Amount' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Deduction ID' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Deduction Date' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -158,9 +155,6 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getDeductionCount(employeeDeduction)">
                             {{ employeeDeduction.totalAmount }}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ deduction.id }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ deduction.date | date:'mediumDate' }}

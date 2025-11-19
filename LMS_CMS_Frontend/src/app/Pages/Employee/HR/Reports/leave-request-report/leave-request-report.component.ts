@@ -238,7 +238,6 @@ async viewReport() {
             'Employee ID': employeeLeaveRequest.employeeId,
             'Employee Name': employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
             // 'Total Amount'  
-            'Leave Request ID': leaveRequest.id,
             'Leave Date': new Date(leaveRequest.date).toLocaleDateString(),
             'Hours': leaveRequest.hours || '-',
             'Minutes': leaveRequest.minutes || '-',
@@ -254,7 +253,6 @@ async viewReport() {
           'Employee ID': employeeLeaveRequest.employeeId,
           'Employee Name': employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
           // 'Total Amount'  
-          'Leave Request ID': '-',
           'Leave Date': '-',
           'Hours': '-',
           'Minutes': '-',
@@ -275,7 +273,6 @@ async viewReport() {
             employeeLeaveRequest.employeeId,
             employeeLeaveRequest.employeeEnName || employeeLeaveRequest.employeeArName || 'Unknown',
             //   totalAmount
-            leaveRequest.id,
             new Date(leaveRequest.date).toLocaleDateString(),
             leaveRequest.hours || '-',
             leaveRequest.minutes || '-',
@@ -406,7 +403,7 @@ async viewReport() {
       await this.reportsService.generateExcelReport({
         mainHeader: {
           en: 'Leave Request Report',
-          ar: 'تقرير طلبات الإجازة'
+          ar: 'تقرير طلبات الإجازة' 
         },
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
@@ -421,7 +418,6 @@ async viewReport() {
               'Employee ID', 
               'Employee Name',
               // 'Total Amount'  
-              'Leave Request ID', 
               'Leave Date', 
               'Hours',
               'Minutes',

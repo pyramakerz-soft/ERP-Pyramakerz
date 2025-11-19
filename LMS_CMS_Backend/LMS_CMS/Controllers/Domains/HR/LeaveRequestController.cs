@@ -790,7 +790,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     EmployeeEnName = g.Key.EmployeeEnName,
                     EmployeeArName = g.Key.EmployeeArName,
                     //TotalAmount = g.Sum(x => x.Used),
-                    LeaveRequests = g.ToList()
+                    LeaveRequests = g.OrderBy(a=>a.Date).ToList()
                 })
                 .ToList();
 

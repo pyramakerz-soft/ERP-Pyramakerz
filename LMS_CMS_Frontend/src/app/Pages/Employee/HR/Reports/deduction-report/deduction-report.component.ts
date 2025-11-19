@@ -403,27 +403,27 @@ private prepareExportData(): void {
         return;
       }
       
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) { display: none !important; }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-      
+           const printStyle = `
+            <style>
+              @page { size: auto; margin: 0mm; }
+              body { margin: 0; }
+              @media print {
+                body > *:not(#print-container) { display: none !important; }
+                #print-container {
+                  display: block !important;
+                  position: static !important;
+                  top: auto !important;
+                  left: auto !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  background: white !important;
+                  box-shadow: none !important;
+                  margin: 0 !important;
+                }
+              }
+            </style>
+          `;
+          
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;

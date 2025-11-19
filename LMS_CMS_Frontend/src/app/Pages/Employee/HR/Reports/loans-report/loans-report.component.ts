@@ -155,7 +155,6 @@ export class LoansReportComponent implements OnInit {
   }
 
 async viewReport() {
-  console.log('this.selectedEmployeeId:', this.selectedEmployeeId ,this.selectedJobId);
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
     Swal.fire({
       title: 'Invalid Date Range',
@@ -200,6 +199,7 @@ async viewReport() {
     }
 
     console.log('Sending parameters:', params);
+    this.reportsForExport = [];
 
     const response = await firstValueFrom(
       this.loansService.GetLoansReport(
@@ -221,6 +221,7 @@ async viewReport() {
     } else {
       console.log('Response is not an array:', response);
       this.loansReports = [];
+      this.reportsForExport = [];
     }
 
     this.prepareExportData();
