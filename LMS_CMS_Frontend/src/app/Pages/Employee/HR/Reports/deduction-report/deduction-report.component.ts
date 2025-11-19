@@ -257,7 +257,7 @@ private prepareExportData(): void {
         { key: 'Total Amount', value: employeeDeduction.totalAmount }
       ],
       tableHeaders: [
-        'Deduction ID', 
+        // 'Deduction ID', 
         'Deduction Date', 
         'Deduction Type',
         'Hours',
@@ -273,7 +273,7 @@ private prepareExportData(): void {
     if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
       employeeDeduction.deductions.forEach((deduction: any) => {
         section.tableData.push({
-          'Deduction ID': deduction.id,
+          // 'Deduction ID': deduction.id,
           'Deduction Date': new Date(deduction.date).toLocaleDateString(),
           'Deduction Type': deduction.deductionTypeName,
           'Hours': deduction.hours || '-',
@@ -306,7 +306,7 @@ private prepareExportData(): void {
           'Employee ID': employeeDeduction.employeeId,
           'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
           'Total Amount': employeeDeduction.totalAmount,
-          'Deduction ID': deduction.id,
+          // 'Deduction ID': deduction.id,
           'Deduction Date': new Date(deduction.date).toLocaleDateString(),
           'Deduction Type': deduction.deductionTypeName,
           'Hours': deduction.hours || '-',
@@ -321,7 +321,7 @@ private prepareExportData(): void {
         'Employee ID': employeeDeduction.employeeId,
         'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
         'Total Amount': employeeDeduction.totalAmount,
-        'Deduction ID': '-',
+        // 'Deduction ID': '-',
         'Deduction Date': '-',
         'Deduction Type': '-',
         'Hours': '-',
@@ -374,13 +374,13 @@ private prepareExportData(): void {
 }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
            this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
            'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
            this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
            'All Jobs';
   }
@@ -496,7 +496,7 @@ private prepareExportData(): void {
               'Employee ID', 
               'Employee Name', 
               'Total Amount', 
-              'Deduction ID', 
+              // 'Deduction ID', 
               'Deduction Date', 
               'Deduction Type',
               'Hours',
