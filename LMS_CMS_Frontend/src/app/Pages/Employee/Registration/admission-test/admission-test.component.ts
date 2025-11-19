@@ -194,7 +194,7 @@ export class AdmissionTestComponent {
         } else {
           const errorMessage =
             error.error?.message ||
-            this.translate.instant('Failed to load Bonus');
+            this.translate.instant('Failed to load Data');
           this.showErrorAlert(errorMessage);
         }
       }
