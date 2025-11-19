@@ -20,6 +20,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
             <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Employee Type'| translate }}</option>
             <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
+            <option *ngIf="empTypes.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
         </select>
     </div>
 
@@ -32,6 +33,7 @@
             <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
                 {{ violationType.name }}
             </option>
+            <option *ngIf="violationTypes.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
         </select>
     </div>
 

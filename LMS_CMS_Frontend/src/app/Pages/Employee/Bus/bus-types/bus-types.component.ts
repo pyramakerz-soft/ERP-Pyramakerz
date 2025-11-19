@@ -182,31 +182,31 @@ export class BusTypesComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.busType) {
-      if (this.busType.hasOwnProperty(key)) {
-        const field = key as keyof BusType;
-        if (!this.busType[field]) {
-          if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.busType) {
+    if (this.busType.hasOwnProperty(key)) {
+      const field = key as keyof BusType;
+      if (!this.busType[field]) {
+        if (field == 'name') {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
+      } else {
+        this.validationErrors[field] = '';
       }
     }
-
-    if (this.busType.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
-    }
-
-    return isValid;
   }
+
+  if (this.busType.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters.');
+  }
+
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof BusType; value: any }) {
     const { field, value } = event;
@@ -316,4 +316,15 @@ export class BusTypesComponent {
       });
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }
