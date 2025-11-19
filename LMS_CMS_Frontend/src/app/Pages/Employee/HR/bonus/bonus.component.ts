@@ -173,7 +173,7 @@ export class BonusComponent {
         } else {
           const errorMessage =
             error.error?.message ||
-            this.translate.instant('Failed to load bonuses');
+            this.translate.instant('Failed to load Bonus');
           this.showErrorAlert(errorMessage);
         }
       }

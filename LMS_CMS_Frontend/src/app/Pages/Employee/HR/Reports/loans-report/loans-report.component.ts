@@ -162,7 +162,6 @@ async loadEmployees() {
   }
 
 async viewReport() {
-  console.log('this.selectedEmployeeId:', this.selectedEmployeeId ,this.selectedJobId);
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
     Swal.fire({
       title: 'Invalid Date Range',
@@ -206,6 +205,7 @@ if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
 }
 
     console.log('Sending parameters:', params);
+    this.reportsForExport = [];
 
     const response = await firstValueFrom(
       this.loansService.GetLoansReport(
@@ -227,6 +227,7 @@ if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
     } else {
       console.log('Response is not an array:', response);
       this.loansReports = [];
+      this.reportsForExport = [];
     }
 
     this.prepareExportData();

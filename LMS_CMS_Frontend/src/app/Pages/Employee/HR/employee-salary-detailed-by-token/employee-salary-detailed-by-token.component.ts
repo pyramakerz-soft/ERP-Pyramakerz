@@ -64,6 +64,12 @@ export class EmployeeSalaryDetailedByTokenComponent {
   year: number = 0
   selectedMonth: string = '';
   SelectedEmpName: string = '';
+  SelectedArEmpName: string = '';
+
+  school = {
+    reportHeaderOneEn: 'Employee Salary Detailed Report',
+    reportHeaderOneAr: 'تقرير الراتب التفصيلي',
+  };
 
   constructor(
     private router: Router,
@@ -144,6 +150,7 @@ export class EmployeeSalaryDetailedByTokenComponent {
   GetEmployeeName(){
     this.EmployeeServ.Get_Employee_By_ID(this.UserID,this.DomainName).subscribe((d)=>{
       this.SelectedEmpName=d.en_name
+      this.SelectedArEmpName=d.ar_name
     })
   }
 
@@ -225,8 +232,8 @@ export class EmployeeSalaryDetailedByTokenComponent {
     await this.GetEmployeeName();
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        en: "Employee_Salary_Detailed Report",
+        ar: "تقرير الراتب التفصيلي"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -242,7 +249,7 @@ export class EmployeeSalaryDetailedByTokenComponent {
         { key: 'Final Salary', value: this.salaryHistory.netSalary || '' }
       ],
       reportImage: '', // Add image URL if available
-      filename: "Salary_Summary_Report.xlsx",
+      filename: "Employee_Salary_Detailed_Report.xlsx",
       tables: [
         {
           // title: "Payable Details",

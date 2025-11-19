@@ -447,7 +447,7 @@ private prepareExportData(): void {
       await this.reportsService.generateExcelReport({
         mainHeader: {
           en: 'Leave Request Report',
-          ar: 'تقرير طلبات الإجازة'
+          ar: 'تقرير طلبات الإجازة' 
         },
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
@@ -462,7 +462,6 @@ private prepareExportData(): void {
               'Employee ID', 
               'Employee Name',
               // 'Total Amount'  
-              'Leave Request ID', 
               'Leave Date', 
               'Hours',
               'Minutes',
