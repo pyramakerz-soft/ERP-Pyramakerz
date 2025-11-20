@@ -14,15 +14,18 @@
     <None Remove="DbScripts\GetAccountLedger.sql" />
     <None Remove="DbScripts\GetAccountStatement.sql" />
     <None Remove="DbScripts\GetAccountSummary.sql" />
+    <None Remove="DbScripts\GetDistinctDateCount.sql" />
     <None Remove="DbScripts\GetEntriesCount.sql" />
     <None Remove="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DbScripts\EntriesFunV03.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFunV02.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFun.sql" />
     <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountBalanceV02.sql" />
+    <EmbeddedResource Include="DbScripts\GetAccountingEntriesV04.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntriesV03.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntriesV02.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntries.sql" />
@@ -34,6 +37,7 @@
     <EmbeddedResource Include="DbScripts\GetAccountStatementV02.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountStatement.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountSummary.sql" />
+    <EmbeddedResource Include="DbScripts\GetDistinctDateCount.sql" />
     <EmbeddedResource Include="DbScripts\GetEntriesCountV02.sql" />
     <EmbeddedResource Include="DbScripts\GetEntriesCount.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountInfoV02.sql" />

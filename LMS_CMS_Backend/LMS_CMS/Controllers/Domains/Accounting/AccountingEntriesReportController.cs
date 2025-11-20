@@ -81,12 +81,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 )
                 .ToListAsync();
 
-                // 3. Get Count
                 var totalRecords = await context.Database
-                    .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
+                    .SqlQueryRaw<long>("SELECT dbo.GetDistinctDateCount(@DateFrom, @DateTo) AS Value",
                         new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                         new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
                     .FirstAsync();
+
 
                 // 4. Process Results in Memory (This is fast)
                 var groupedResults = results
