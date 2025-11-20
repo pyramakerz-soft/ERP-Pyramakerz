@@ -1,6 +1,6 @@
-<div class=" w-full" *ngFor="let archiving of archivingData" [ngClass]="{ 'ml-11': archiving.archivingTreeParentID != 0, 'my-4':  archiving.fileLink == '' }">
+<div class="w-full" *ngFor="let archiving of archivingData" [ngClass]="{ 'ml-11': archiving.archivingTreeParentID != 0, 'my-4':  archiving.fileLink == '' }">
     <div>
-        <div class="flex items-center space-x-2 p-2 rounded w-full" [ngClass]="{'primaryBg text-white': archiving.fileLink == ''}">
+        <div class="flex items-center space-x-2 p-2 rounded w-[91%]" [ngClass]="{'primaryBg text-white': archiving.fileLink == ''}">
             <div *ngIf="archiving.fileLink == ''" class="px-3 py-[6px] rounded bg-white secondaryTxt" 
             (click)="toggleChildren(archiving)">
                 <i class="fa-solid" [ngClass]="{
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <app-archiving-item *ngIf="!archiving.isOpen && archiving.children && archiving.children.length > 0"
+        <app-archiving-item *ngIf="archiving.isOpen && archiving.children && archiving.children.length > 0"
             [archivingData]="archiving.children" (Selected)="Selected.emit($event)">
         </app-archiving-item>
     </div>
