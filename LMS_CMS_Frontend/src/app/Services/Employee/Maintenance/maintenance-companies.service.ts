@@ -29,18 +29,30 @@ export class MaintenanceCompaniesService {
     return this.http.get<MaintenanceCompanies[]>(`${this.baseUrl}/MaintenanceCompany`, { headers });
   }
 
-    GetByID(id: number, DomainName: string) {
-      if (DomainName != null) {
-        this.header = DomainName
-      }
-      const token = localStorage.getItem("current_token");
-      const headers = new HttpHeaders()
-        .set('domain-name', this.header)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Content-Type', 'application/json');
-      return this.http.get<MaintenanceCompanies[]>(`${this.baseUrl}/MaintenanceCompany/${id}`, { headers })
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
     }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header) 
+      .set('Authorization', `Bearer ${token}`) 
+      .set('accept', '*/*'); 
+        return this.http.get<{ data: MaintenanceCompanies[], pagination: any }>(`${this.baseUrl}/MaintenanceCompany/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    
+  }
 
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<MaintenanceCompanies[]>(`${this.baseUrl}/MaintenanceCompany/${id}`, { headers })
+  }
 
   Add(MaintenanceCompany: MaintenanceCompanies, DomainName: string): Observable<any> {
     if (DomainName != null) {
@@ -82,8 +94,6 @@ export class MaintenanceCompaniesService {
     .set('Authorization', `Bearer ${token}`)
     .set('accept', '*/*')
     .set('Content-Type', 'application/json');
-
-  
   return this.http.delete(`${this.baseUrl}/MaintenanceCompany?id=${id}`, { headers, responseType: 'text' });
 }
 }

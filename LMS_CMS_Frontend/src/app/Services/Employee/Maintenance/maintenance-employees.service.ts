@@ -30,7 +30,17 @@ export class MaintenanceEmployeesService {
     return this.http.get<MaintenanceEmployees[]>(`${this.baseUrl}/MaintenanceEmployee`, { headers });
   }
 
-
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header) 
+      .set('Authorization', `Bearer ${token}`) 
+      .set('accept', '*/*'); 
+    return this.http.get<{ data: MaintenanceEmployees[], pagination: any }>(`${this.baseUrl}/MaintenanceEmployee/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
 
   Add(MaintenanceEmployee: { employeeId: number }, DomainName: string): Observable<any> {
     if (DomainName != null) {
