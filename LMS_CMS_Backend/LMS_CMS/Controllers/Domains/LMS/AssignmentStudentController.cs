@@ -166,6 +166,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .ToList();
                     }
 
+                    qb.QuestionBankOptions = qb.QuestionBankOptions.OrderBy(x => Guid.NewGuid()).ToList();
+
                     // Filter SubBankQuestions
                     if (qb?.SubBankQuestions != null)
                     {
@@ -173,6 +175,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .Where(sub => sub.IsDeleted != true)
                             .ToList();
                     }
+
+
+
+
                 }
             }
 
