@@ -72,7 +72,7 @@ export class SalarySummaryComponent {
   selectedMonth: string = '';
   school = {
     reportHeaderOneEn: 'Salary Summary Report',
-    reportHeaderOneAr: 'ملخص الرواتب'
+    reportHeaderOneAr: ' تقرير ملخص الرواتب '
   };
 
   constructor(
@@ -243,7 +243,7 @@ export class SalarySummaryComponent {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Salary Summary Report",
-        ar: "ملخص الرواتب"
+        ar: "تقرير ملخص الرواتب"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },

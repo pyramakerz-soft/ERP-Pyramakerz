@@ -27,6 +27,18 @@ Get(DomainName: string): Observable<HygieneForm[]> {
   return this.http.get<HygieneForm[]>(`${this.baseUrl}/HygieneForm`, { headers });
 }
 
+GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('Domain-Name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('accept', '*/*');
+  return this.http.get<{ data: HygieneForm[], pagination: any }>(`${this.baseUrl}/HygieneForm/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+}
+
 GetById(id: number, DomainName: string): Observable<HygieneForm> {
   if (DomainName != null) {
     this.header = DomainName;

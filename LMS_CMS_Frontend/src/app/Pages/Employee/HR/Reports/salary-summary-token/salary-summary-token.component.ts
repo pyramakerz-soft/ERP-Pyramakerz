@@ -61,7 +61,12 @@ export class SalarySummaryTokenComponent {
   month: number = 0
   year: number = 0
   SelectedEmpName: string = '';
+  SelectedArEmpName: string = '';
   selectedMonth: string = '';
+  school = {
+    reportHeaderOneEn: 'Salary Summary Report',
+    reportHeaderOneAr: ' تقرير ملخص الراتب '
+  };
 
   constructor(
     private router: Router,
@@ -126,6 +131,7 @@ export class SalarySummaryTokenComponent {
   GetEmployeeName() {
     this.EmployeeServ.Get_Employee_By_ID(this.UserID, this.DomainName).subscribe((d) => {
       this.SelectedEmpName = d.en_name
+      this.SelectedArEmpName = d.ar_name
     })
   }
 
@@ -190,7 +196,7 @@ export class SalarySummaryTokenComponent {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        ar: "تقرير ملخص الراتب"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },

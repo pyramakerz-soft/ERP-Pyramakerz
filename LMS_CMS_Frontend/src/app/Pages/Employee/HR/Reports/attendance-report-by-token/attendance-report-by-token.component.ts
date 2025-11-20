@@ -63,7 +63,11 @@ export class AttendanceReportByTokenComponent {
   year: number = 0
   selectedMonth: string = '';
   SelectedEmpName: string = '';
-
+  school = {
+    reportHeaderOneEn: 'Attendance Report',
+    reportHeaderOneAr: ' تقرير الحضور '
+  };
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -202,12 +206,13 @@ export class AttendanceReportByTokenComponent {
     }, 500);
   }
 
+
   async DownloadAsExcel() {
     await this.GetEmployeeName();
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        en: "Attendance Report",
+        ar: "تقرير الحضور"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -217,7 +222,7 @@ export class AttendanceReportByTokenComponent {
         { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
       ],
       reportImage: '', // Add image URL if available
-      filename: "Salary_Summary_Report.xlsx",
+      filename: "Attendance_Report_Report.xlsx",
       tables: [
         {
           // title: "Payable Details",
