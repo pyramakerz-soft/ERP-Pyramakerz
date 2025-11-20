@@ -443,6 +443,7 @@ export class AssignmentEditComponent {
     this.assignmentQuestion.questionIds = this.selectedQuestions;
     this.assignmentQuestion.lessonId = this.SelectedLessonID;
     this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
+    console.log(this.assignmentQuestion)
     if (this.isFormValid()) {
       this.isLoading = true;
       this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe({

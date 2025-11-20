@@ -215,21 +215,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 && questionBankIds.Contains(q.ID)
                         );
 
+                        // Randomize
                         var random = new Random();
                         var randomizedQuestions = filteredQuestions
                             .OrderBy(q => random.Next())
                             .ToList();
 
+                        int addedCount = 0; // <<=== Track how many questions added
+
                         foreach (var q in randomizedQuestions)
                         {
+                            if (addedCount >= item.NumberOfQuestion)
+                                break;   // <<=== STOP after required number
+
                             if (activeQuestionIds.Contains(q.ID))
-                                continue; // Skip already added
+                                continue;
 
                             if (softDeletedQuestions.TryGetValue(q.ID, out var softDeletedAssignment))
                             {
-                                // Restore soft-deleted question
                                 softDeletedAssignment.IsDeleted = false;
                                 softDeletedAssignment.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"));
+
                                 if (userTypeClaim == "octa")
                                     softDeletedAssignment.UpdatedByOctaId = userId;
                                 else if (userTypeClaim == "employee")
@@ -237,12 +243,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                                 Unit_Of_Work.assignmentQuestion_Repository.Update(softDeletedAssignment);
                                 Unit_Of_Work.SaveChanges();
+
+                                activeQuestionIds.Add(q.ID);
+                                addedCount++;  // <<=== Count it
                                 count++;
-                                activeQuestionIds.Add(q.ID); // track restored
                                 continue;
                             }
 
-                            // Add new assignment question
                             var assignmentQuestion = new AssignmentQuestion
                             {
                                 QuestionBankID = q.ID,
@@ -253,10 +260,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             };
 
                             Unit_Of_Work.assignmentQuestion_Repository.Add(assignmentQuestion);
-                            count++;
                             Unit_Of_Work.SaveChanges();
 
                             activeQuestionIds.Add(q.ID);
+                            addedCount++; // <<=== Count it
+                            count++;
+
+                            if (addedCount >= item.NumberOfQuestion)
+                                break;   // <<=== STOP
                         }
                     }
                 }
