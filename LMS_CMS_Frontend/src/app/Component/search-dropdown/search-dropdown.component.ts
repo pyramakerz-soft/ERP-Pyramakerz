@@ -35,12 +35,18 @@ export class SearchDropdownComponent {
     // If a display name is passed, show it in the input
     if (this.selectedName && !this.searchTerm) {
       this.searchTerm = this.selectedName;
+      console.log(1,this.searchTerm)
     }
 
     // Optional: log to confirm it works
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // if(!this.searchTerm || this.searchTerm == ''){
+    //   this.selectedValue = 0
+    //   this.selectedValueChange.emit(0);
+    //   console.log(2,this.searchTerm)
+    // }
     if (changes['selectedName'] && !changes['selectedName'].firstChange) {
       this.searchTerm = changes['selectedName'].currentValue || '';
     }
@@ -56,6 +62,14 @@ export class SearchDropdownComponent {
   onClickOutside(event: Event): void {
     if (!this._eref.nativeElement.contains(event.target)) {
       this.hideDropdown();
+    }
+  }
+
+  onInputChange() {
+    if (this.searchTerm === '') {
+      this.selectedValue = 0;  
+      this.selectedValueChange.emit(0);  // Notify parent
+      this.items = [];                   // Hide dropdown list
     }
   }
 
