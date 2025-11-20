@@ -27,7 +27,7 @@
     <label class="mb-2" for="store"> {{'Store'| translate }}</label>
     <select *ngIf="!IsPrint" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Store"
       (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
-      [disabled]="mode === 'Edit'" [(ngModel)]="Data.storeID">
+      [disabled]="mode === 'Edit'" [(ngModel)]="Data.storeID" [ngClass]="{ 'bg-[#EBEBEB]': mode === 'Edit' }">
       <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Store'| translate }}</option>
       <option *ngFor="let s of Stores" [value]="s.id">{{ s.name }}</option>
       <option *ngIf="Stores.length === 0" disabled selected>

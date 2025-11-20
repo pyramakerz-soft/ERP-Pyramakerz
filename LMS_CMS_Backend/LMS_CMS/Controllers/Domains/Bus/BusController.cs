@@ -5,6 +5,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Migrations;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.BusModule;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -70,6 +71,63 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             List<Bus_GetDTO> busDTOs = mapper.Map<List<Bus_GetDTO>>(buses);
 
             return Ok(busDTOs);
+        }
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Bus Details", "Print Name Tag" }
+        )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<BusModel> buses;
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.bus_Repository
+            .CountAsync(sem => sem.IsDeleted != true);
+
+
+            buses = await Unit_Of_Work.bus_Repository.Select_All_With_IncludesById_Pagination<BusModel>(
+                    bus => bus.IsDeleted != true,
+                    query => query.Include(emp => emp.Driver),
+                    query => query.Include(assisstant => assisstant.DriverAssistant),
+                    query => query.Include(type => type.BusType),
+                    query => query.Include(District => District.BusDistrict),
+                    query => query.Include(StatusCode => StatusCode.BusStatus),
+                    query => query.Include(company => company.BusCompany))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (buses == null || buses.Count == 0)
+            {
+                return NotFound("No buses");
+            }
+
+            List<Bus_GetDTO> busDTOs = mapper.Map<List<Bus_GetDTO>>(buses);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = busDTOs, Pagination = paginationMetadata });
         }
 
         [HttpGet("{Id}")]
