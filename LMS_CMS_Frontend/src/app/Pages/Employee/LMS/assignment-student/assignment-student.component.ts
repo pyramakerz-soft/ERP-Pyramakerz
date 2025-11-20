@@ -229,6 +229,8 @@ export class AssignmentStudentComponent {
   IsLate(row: AssignmentStudent) :boolean{
     const TheSubmittedDate = new Date(row.insertedAt); // current date
     const dueDate = new Date(row.dueDate);
+    TheSubmittedDate.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
     if (TheSubmittedDate > dueDate) {
       return true
     }
