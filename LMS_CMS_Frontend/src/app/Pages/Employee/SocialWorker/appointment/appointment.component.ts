@@ -54,7 +54,7 @@ export class AppointmentComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'title'];
   schools: School[] = [];
   schoolsToCreate: School[] = [];
   isLoading = false;

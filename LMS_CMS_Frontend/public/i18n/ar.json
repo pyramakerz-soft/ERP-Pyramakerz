@@ -1444,16 +1444,6 @@
   "VacationTypesID" : "أنواع الإجازات",
   "BackPrice" : "سعر الاسترجاع",
   "MorningPrice" : "سعر الصباح",
-  "TwoWaysPrice" : "سعر الذهاب والعودة"
-
-
-
-
-
-
-
-
-
-
-
+  "TwoWaysPrice" : "سعر الذهاب والعودة",
+  "Deduction Percentage after cutoff date": "نسبة الخصم بعد تاريخ القطع" 
 }
