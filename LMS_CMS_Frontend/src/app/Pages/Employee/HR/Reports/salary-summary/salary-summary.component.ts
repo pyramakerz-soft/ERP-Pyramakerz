@@ -70,6 +70,10 @@ export class SalarySummaryComponent {
   SelectedJobCatName: string = '';
   SelectedEmpName: string = '';
   selectedMonth: string = '';
+  school = {
+    reportHeaderOneEn: 'Salary Summary Report',
+    reportHeaderOneAr: 'ملخص الرواتب'
+  };
 
   constructor(
     private router: Router,
@@ -160,9 +164,25 @@ export class SalarySummaryComponent {
     })
   }
 
-  GetEmployeeName(){
-    const selectedEmp = this.employees.find(c => c.id == this.SelectedEmpId);
-    this.SelectedEmpName = selectedEmp ? selectedEmp.en_name : '';
+  getJobCategoryName(): string {
+    return this.jobscat.find(jc => jc.id == this.SelectedJobCatId)?.name || 
+           'All Job Categories';
+  }
+
+  getJobName(): string {
+    return this.jobs.find(j => j.id == this.SelectedJobId)?.name || 
+           'All Jobs';
+  }
+
+  getEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.en_name || 
+           this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           'All Employees';
+  }
+
+  getArEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           'All Employees';
   }
 
   DownloadAsPDF() {
@@ -223,7 +243,7 @@ export class SalarySummaryComponent {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        ar: "ملخص الرواتب"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
