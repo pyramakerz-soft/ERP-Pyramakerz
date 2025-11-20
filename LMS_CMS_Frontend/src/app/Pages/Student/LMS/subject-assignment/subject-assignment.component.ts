@@ -107,7 +107,7 @@ export class SubjectAssignmentComponent {
     today.setHours(0, 0, 0, 0);
     due.setHours(0, 0, 0, 0);
     cutoff.setHours(0, 0, 0, 0);
-    return today >= due || today >= cutoff;
+    return today > due || today > cutoff;
   }
 
   isPastCutoff(cutOfDate: string): boolean {
@@ -115,6 +115,6 @@ export class SubjectAssignmentComponent {
     const cutoff = new Date(cutOfDate);
     today.setHours(0, 0, 0, 0);
     cutoff.setHours(0, 0, 0, 0);
-    return today >= cutoff;
+    return today > cutoff;
   }
 }

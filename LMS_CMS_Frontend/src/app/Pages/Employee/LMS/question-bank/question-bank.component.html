@@ -341,8 +341,7 @@
       </div>
 
       <div>
-        <div class="flex flex-col mb-4 w-full"
-          *ngIf="questionBank.questionTypeID!=4 &&questionBank.questionTypeID!=5 &&questionBank.questionTypeID!=0">
+        <div class="flex flex-col mb-4 w-full" >
           <label class="mb-2 primaryTxt"> {{ 'description' | translate }}</label>
           <quill-editor #quillEditor (onEditorCreated)="onEditorCreated($event)"
             (ngModelChange)="onInputValueChange({ field: 'description', value: $event })"

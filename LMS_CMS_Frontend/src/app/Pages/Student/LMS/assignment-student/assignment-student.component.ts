@@ -92,8 +92,9 @@ export class AssignmentStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
     this.assignmentServ.CheckIfHaveAccess(this.UserID, this.AssignmentId, this.DomainName).subscribe((d) => {
-      console.log(d)
+      console.log(3243,d)
     }, error => {
+      console.log(123,error)
       this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
     })
   }
@@ -111,7 +112,9 @@ export class AssignmentStudentComponent {
       this.assignmentStudent.studentID = this.UserID;
       const today = new Date();
       const cutoff = new Date(this.assignment.cutOfDate);
-      if (today >= cutoff) {
+      today.setHours(0, 0, 0, 0);
+      cutoff.setHours(0, 0, 0, 0);
+      if (today > cutoff) {
         this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
       }
 
