@@ -121,14 +121,13 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
-                    {
-                        keyEn: 'Month: ' + this.month + '/' +this.year,
-                    }, 
-                    {
-                        keyEn: 'Employee: ' + this.SelectedEmpName,
-                    }
-                    ]" [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Attendance Report'" 
+                 [infoRows]="[
+                { keyEn: 'Month: ' + this.month + '/' +this.year,  keyAr: this.month+ '/' +this.year + ': شهر' },
+                { keyEn: 'Employee: ' + this.SelectedEmpName,     keyAr: this.SelectedEmpName + ': الموظف' }
+                ]" 
+                [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" 
+                [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

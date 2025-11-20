@@ -279,7 +279,7 @@ console.log(error);
         name: student.en_name,
       }));
     } catch (error) {
-console.log(error);
+      console.log(error);
     }
   }
 
