@@ -961,13 +961,13 @@ export class InventoryDetailsComponent {
     }
 
     if (this.mode == 'Create' && this.Data.inventoryDetails.length == 0) {
-      this.showWarningAlert(this.translate.instant('Items') + this.translate.instant('Are Required'));
+      this.showWarningAlert(this.translate.instant('Items') + ' ' + this.translate.instant('Are Required'));
       return false;
     }
 
     if (this.mode == 'Edit' && this.TableData.length == 0) {
       this.showWarningAlert(
-        this.translate.instant('Items') + this.translate.instant('Are Required')
+        this.translate.instant('Items') + ' ' + this.translate.instant('Are Required')
       );
       return false;
     }

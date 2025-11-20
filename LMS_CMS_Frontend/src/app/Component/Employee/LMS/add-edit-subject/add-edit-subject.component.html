@@ -145,7 +145,7 @@
             </div>
              <div class="flex flex-col w-full mb-4">
                 <label class="mb-2 primaryTxt" for="assignmentCutOffDatePercentage"> {{ 'Assignment Cut Off Date Percentage' | translate }}</label>
-                <input id="assignmentCutOffDatePercentage" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number of session per week' | translate }} " 
+                <input id="assignmentCutOffDatePercentage" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Deduction Percentage after cutoff date' | translate }} " 
                 [(ngModel)]="subject.assignmentCutOffDatePercentage"
                 (ngModelChange)="onInputValueChange({ field: 'assignmentCutOffDatePercentage', value: $event })"
                 (input)="validateNumber($event, 'assignmentCutOffDatePercentage')"/>

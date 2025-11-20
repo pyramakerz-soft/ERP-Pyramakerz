@@ -10,6 +10,7 @@ using LMS_CMS_PL.Services.S3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
@@ -68,6 +69,57 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             List<ParentMeetingGetDTO> Dto = mapper.Map<List<ParentMeetingGetDTO>>(parentMeetings);
 
             return Ok(Dto);
+        }
+
+        ////////////////////////////////
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee", "parent" },
+        pages: new[] { "Parent Meeting" }
+        )]
+        public async Task<IActionResult> GetWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.parentMeeting_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<ParentMeeting> parentMeetings = await Unit_Of_Work.parentMeeting_Repository.Select_All_With_IncludesById_Pagination<ParentMeeting>(
+                t => t.IsDeleted != true)
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (parentMeetings == null || parentMeetings.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ParentMeetingGetDTO> Dto = mapper.Map<List<ParentMeetingGetDTO>>(parentMeetings);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
         }
 
         ////////////////////////////////

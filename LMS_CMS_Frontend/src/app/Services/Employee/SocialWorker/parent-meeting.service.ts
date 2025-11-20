@@ -29,6 +29,18 @@ export class ParentMeetingService {
     return this.http.get<ParentMeeting[]>(`${this.baseUrl}/ParentMeeting`, { headers });
   }
 
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: ParentMeeting[], pagination: any }>(`${this.baseUrl}/ParentMeeting/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }  
+
   GetByID(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
