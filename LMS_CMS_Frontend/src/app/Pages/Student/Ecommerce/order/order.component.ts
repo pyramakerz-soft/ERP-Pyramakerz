@@ -159,8 +159,7 @@ export class OrderComponent {
       this.filteredOrders = this.orders.filter(order =>
         order.cartID.toString().toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         order.totalPrice.toString().toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.orderStateName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.insertedAt.toLowerCase().includes(this.searchTerm.toLowerCase())
+        order.orderStateName.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
   }
