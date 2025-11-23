@@ -76,7 +76,11 @@
                         <td class="border p-2" *ngFor="let session of classroom.sessions; let periodIndex = index"
                             draggable="true" (dragstart)="onDragStart($event, session)" (dragover)="onDragOver($event); autoScroll($event)"
                             (drop)="onDrop($event, session, day, periodIndex)"
-                            class="border p-2 bg-gray-50 cursor-move">
+                            class="border p-2 bg-gray-50 cursor-move"
+                            [ngClass]="{
+                                'bg-sky-200': IsThisSessionReplaced(session.sessionId) && session.subjects.length >0, 
+                                'bg-gray-50': !IsThisSessionReplaced(session.sessionId)
+                            }">
 
                             <div *ngFor="let subject of session.subjects"
                                 class="p-1 border border-gray-300 rounded mb-1 bg-white">

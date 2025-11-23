@@ -822,14 +822,14 @@ export class InventoryDetailsComponent {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
-    this.Data.date = date;
-    this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
+    this.Data.date = `${year}-${month}-${day}`;
+    console.log(this.Data)
+    this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
       this.showSuccessAlert(this.translate.instant('Convert Successfully'));
       this.router.navigateByUrl(`Employee/Purchases`);
-    });
+  },error=>{
+    console.log(123,error)
+  });
   }
 
   onImageFileSelected(event: any) {

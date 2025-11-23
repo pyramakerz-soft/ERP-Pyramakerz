@@ -177,7 +177,6 @@ export class MedicalHistoryComponent implements OnInit {
     }
   }
 
-
   closeModal() {
     this.isModalVisible = false;
   }
@@ -218,7 +217,6 @@ export class MedicalHistoryComponent implements OnInit {
     });
   }
 
-
   GetTableHeaders() {
 
     if (!this.isRtl) {
@@ -227,8 +225,5 @@ export class MedicalHistoryComponent implements OnInit {
       return this.headersarabic
     }
   }
-
-
-
 
 }
