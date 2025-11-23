@@ -79,6 +79,20 @@ td {
 
 /* Print-specific styles */
 @media print {
+  .pdf-table-container {
+    margin-bottom: 15px !important;
+  }
+
+  .my-4 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .my-10 {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
   .pdf-table-container td,
   .pdf-table-container th {
     white-space: normal !important;
