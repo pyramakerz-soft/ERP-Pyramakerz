@@ -156,21 +156,15 @@ async viewReport() {
       if (request[key] === 0 || request[key] === null || request[key] === undefined) {
         delete request[key];
       }
-    });
-
-    console.log('Sending request:', request);
+    }); 
 
     const response = await firstValueFrom(
       this.maintenanceReportService.getMaintenanceReport(domainName, request)
-    );
-
-    console.log('API Response:', response);
+    ); 
     
     if (Array.isArray(response)) {
-      this.maintenanceReports = response;
-      console.log('Maintenance reports loaded:', this.maintenanceReports.length);
-    } else {
-      console.log('Response is not an array:', response);
+      this.maintenanceReports = response; 
+    } else { 
       this.maintenanceReports = [];
     }
 

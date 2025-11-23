@@ -29,6 +29,18 @@ export class MaintenanceService {
     return this.http.get<Maintenance[]>(`${this.baseUrl}/Maintenance`, { headers });
   }
 
+  getAllWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('accept', '*/*');
+    return this.http.get<{ data: Maintenance[], pagination: any }>(`${this.baseUrl}/Maintenance/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   getById(id: number, DomainName: string): Observable<Maintenance> {
     if (DomainName != null) {
       this.header = DomainName;

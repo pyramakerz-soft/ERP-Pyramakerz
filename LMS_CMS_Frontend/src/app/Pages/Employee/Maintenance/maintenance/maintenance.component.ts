@@ -46,6 +46,7 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
 
   // Data
   maintenanceList: any[] = []; // Changed to any[] to include actions property
+  TableData: any[] = []; // Changed to any[] to include actions property
   maintenanceItems: MaintenanceItem[] = [];
   maintenanceCompanies: MaintenanceCompanies[] = [];
   maintenanceEmployees: MaintenanceEmployees[] = [];
@@ -76,7 +77,13 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   
   maintenanceForm: Maintenance = new Maintenance();
-
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
+  DomainName: string = '';
+  
   constructor(
     private maintenanceService: MaintenanceService,
     private languageService: LanguageService,
@@ -94,8 +101,9 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.User_Data_After_Login = this.accountService.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-    
-    this.loadMaintenance();
+    this.DomainName = this.apiService.GetHeader();
+
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.loadDropdownData();
     this.setupPermissions();
     this.setupLanguage();
@@ -149,12 +157,51 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
   }
 
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.maintenanceList = [];
+    this.TableData = [];
+    this.maintenanceService.getAllWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+        this.loadMaintenance()
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }
+
   async loadMaintenance(): Promise<void> {
     try {
       const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
-      
-      this.maintenanceList = data.map(item => {
+      this.maintenanceList = this.TableData.map(item => {
         // Keep dates as strings for proper binding to HTML date input
         const maintenanceItem: any = {
           ...item,
@@ -201,7 +248,7 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   async onSearchEvent(event: { key: string, value: any }): Promise<void> {
     this.searchKey = event.key;
     this.searchValue = event.value;
-    await this.loadMaintenance();
+    await this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
   openModal(item?: any): void {
@@ -375,7 +422,7 @@ async saveMaintenance(): Promise<void> {
       this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
     }
 
-    this.loadMaintenance();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.closeModal();
   } catch (error: any) {
     console.error('Error saving maintenance record:', error);
@@ -499,7 +546,7 @@ private getErrorMessageFromResponse(error: any): string {
         const domainName = this.apiService.GetHeader();
         this.maintenanceService.delete(row.id, domainName).subscribe({
           next: () => {
-            this.loadMaintenance();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.showSuccessAlert(this.translate.instant('Maintenance record deleted successfully'));
           },
           error: (error) => {
@@ -527,4 +574,59 @@ private getErrorMessageFromResponse(error: any): string {
       this.AllowEditForOthers
     );
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }
