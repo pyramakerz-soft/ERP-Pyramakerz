@@ -6,13 +6,13 @@
 
 <div class="flex flex-wrap justify-start items-center gap-2 rtl:space-x-reverse">
 
-    <div class="w-[90%]">
+    <div class="w-[80%]">
         <label for="SelectedEmpId" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Employee' | translate
             }}</label>
         <select id="SelectedEmpId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedEmpId" (change)=" IsShowTabls = false">
-            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+            <option value=0 > {{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngFor="let ac of employees" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
@@ -159,7 +159,7 @@
         <div class="w-full h-1 bg-gray-500 my-5"></div>
     </div>
 
-    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+    <div class="flex justify-between items-center gap-4 rtl:space-x-reverse">
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Loans' | translate}} : {{totalLoansAll}} </h1>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Total Deducted' | translate}} : {{totalDeductedAll }} </h1>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Remaining' | translate}} : {{ remainingAll > 0 ? remainingAll : 0 }}</h1>
