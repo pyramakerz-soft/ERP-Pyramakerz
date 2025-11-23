@@ -135,16 +135,16 @@
     <div *ngFor="let student of busStudentData" 
          style="border: 2px dashed #333; border-radius: 6px; padding: 10px; background: white; page-break-inside: avoid; min-height: 160px; display: flex; flex-direction: column; box-sizing: border-box; position: relative;">
       
-      <!-- School Image in Top Left Corner -->
+      <!-- School Image in Top Left Corner - LARGER SIZE -->
       <div *ngIf="student.schoolImage" 
            style="position: absolute; top: 5px; left: 5px;">
         <img [src]="student.schoolImage" 
              alt="School Logo"
-             style="width: 25px; height: 25px; object-fit: contain;">
+             style="width: 40px; height: 40px; object-fit: contain;"> <!-- Increased from 25px to 40px -->
       </div>
 
       <!-- School Name Header (Centered) -->
-      <div style="text-align: center; margin-bottom: 8px; padding-left: 30px; padding-right: 30px;">
+      <div style="text-align: center; margin-bottom: 8px; padding-left: 45px; padding-right: 45px;"> <!-- Increased padding to accommodate larger image -->
         <div style="font-size: 14px; font-weight: bold; color: #000; line-height: 1.2;">
           {{ student.schoolName }}
         </div>
@@ -172,9 +172,6 @@
           <div *ngIf="student.driverNumber" style="font-size: 11px; font-weight: bold; color: #000;">
             Driver Number: {{ student.driverNumber }}
           </div>
-          <!-- <div *ngIf="!student.driverNumber" style="font-size: 11px; font-weight: bold; color: #000;">
-            Driver Number: N/A
-          </div> -->
         </div>
         <div style="font-size: 10px; color: #666; text-align: right;">
           <div>{{ student.gradeName }}</div>
