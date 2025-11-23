@@ -64,6 +64,39 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok(dtoList);
         }
 
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
+        public async Task<IActionResult> GetAllAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            List<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> records = await uow.maintenance_Repository
+                .Select_All_With_IncludesById<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance>(
+                    t => t.IsDeleted != true,
+                    query => query
+                        .Include(m => m.Item)
+                        .Include(m => m.Company)
+                        .Include(m => m.MaintenanceEmployee.Employee)
+                );
+
+
+            if (records == null || !records.Any())
+                return NotFound("No Maintenance records found.");
+
+            List<MaintenanceGetDto> dtoList = mapper.Map<List<MaintenanceGetDto>>(records);
+
+            return Ok(dtoList);
+        }
+
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
         public async Task<IActionResult> GetByIdAsync(long id)
