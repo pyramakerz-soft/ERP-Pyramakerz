@@ -12,6 +12,8 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { FormsModule } from '@angular/forms';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { School } from '../../../../Models/school';
+import { SchoolService } from '../../../../Services/Employee/school.service';
 
 @Component({
   selector: 'app-failed-student',
@@ -28,7 +30,9 @@ export class FailedStudentComponent {
   value: any = ''; 
   FailedStudentsData: FailedStudents[] = []; 
   yearID: number = 0; 
+  SchoolId: number = 0; 
   AcademicYearsData: AcademicYear[] = []; 
+  Schools: School[] = []; 
   isView: boolean = false
   
   DomainName: string = '';
@@ -40,6 +44,7 @@ export class FailedStudentComponent {
     public ApiServ: ApiService,  
     public failedStudentsService: FailedStudentsService, 
     public acadimicYearService: AcadimicYearService ,
+    public schoolService: SchoolService ,
     private loadingService: LoadingService 
   ) { }
 
@@ -48,13 +53,22 @@ export class FailedStudentComponent {
     this.UserID = this.User_Data_After_Login.id;
 
     this.DomainName = this.ApiServ.GetHeader(); 
-    this.getAcademicYear()
+    this.getSchools()
   }
  
   getAcademicYear() {
+    this.isView = false
+    this.yearID = 0
     this.AcademicYearsData = []
-    this.acadimicYearService.Get(this.DomainName).subscribe((data) => {
+    this.acadimicYearService.GetBySchoolId(this.SchoolId, this.DomainName).subscribe((data) => {
       this.AcademicYearsData = data;
+    });
+  }
+ 
+  getSchools() {
+    this.Schools = []
+    this.schoolService.Get(this.DomainName).subscribe((data) => {
+      this.Schools = data;
     });
   }
  

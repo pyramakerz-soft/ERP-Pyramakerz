@@ -190,7 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             Unit_Of_Work.cart_Repository.Update(cart);
 
             //shopItem.Limit = shopItem.Limit - cartShopItem.Quantity;
-            Unit_Of_Work.shopItem_Repository.Update(shopItem);
+            //Unit_Of_Work.shopItem_Repository.Update(shopItem);
 
             cartShopItem.CartID = cart.ID;
 
@@ -199,7 +199,17 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             newCartShopItem.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-            Unit_Of_Work.cart_ShopItem_Repository.Add(newCartShopItem);
+            Cart_ShopItem cart_ShopItem = Unit_Of_Work.cart_ShopItem_Repository.First_Or_Default(d => d.CartID == cartShopItem.CartID && d.IsDeleted != true && d.ShopItemID == cartShopItem.ShopItemID);
+            if (cart_ShopItem != null )
+            {
+                cart_ShopItem.Quantity = cart_ShopItem.Quantity + cartShopItem.Quantity;
+                Unit_Of_Work.cart_ShopItem_Repository.Update(cart_ShopItem);
+            }
+            else
+            {
+                Unit_Of_Work.cart_ShopItem_Repository.Add(newCartShopItem);
+            }
+
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
