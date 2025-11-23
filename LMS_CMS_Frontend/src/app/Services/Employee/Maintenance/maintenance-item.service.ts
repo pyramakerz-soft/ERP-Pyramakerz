@@ -29,17 +29,32 @@ export class MaintenanceItemService {
     return this.http.get<MaintenanceItem[]>(`${this.baseUrl}/MaintenanceItem`, { headers });
   }
 
-    GetByID(id: number, DomainName: string) {
-      if (DomainName != null) {
-        this.header = DomainName
-      }
-      const token = localStorage.getItem("current_token");
-      const headers = new HttpHeaders()
-        .set('domain-name', this.header)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Content-Type', 'application/json');
-      return this.http.get<MaintenanceItem[]>(`${this.baseUrl}/MaintenanceItem/${id}`, { headers })
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
     }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header) 
+      .set('Authorization', `Bearer ${token}`) 
+      .set('accept', '*/*'); 
+    return this.http.get<{ data: MaintenanceItem[], pagination: any }>(
+      `${this.baseUrl}/MaintenanceItem/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      { headers }
+    );
+  }  
+
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<MaintenanceItem[]>(`${this.baseUrl}/MaintenanceItem/${id}`, { headers })
+  }
 
 
   Add(MaintenanceItem: MaintenanceItem, DomainName: string): Observable<any> {
