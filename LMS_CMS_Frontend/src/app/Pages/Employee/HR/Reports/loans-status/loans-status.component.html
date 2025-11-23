@@ -12,7 +12,7 @@
         <select id="SelectedEmpId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedEmpId" (change)=" IsShowTabls = false">
-            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+            <option value=0 selected> {{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngFor="let ac of employees" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
