@@ -34,6 +34,21 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
     return this.http.get<Notification[]>(`${this.baseUrl}/Notification`, { headers })
   }
+
+  GetWithPaggination(DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Notification[], pagination: any }>(
+      `${this.baseUrl}/Notification/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      { headers }
+    );
+  }
  
   GetByUserTypeID(userTypeID:number, DomainName: string) {
     if (DomainName != null) {
@@ -46,6 +61,20 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
     return this.http.get<Notification[]>(`${this.baseUrl}/Notification/GetByUserTypeID/${userTypeID}`, { headers })
   }
+
+  GetByUserTypeIDWithPaggination(userTypeID:number, DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: Notification[], pagination: any }>(`${this.baseUrl}/Notification/GetByUserTypeIDWithPaggination/${userTypeID}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      { headers }
+    );
+  }  
  
   ByUserIDFirst5(DomainName: string) {
     if (DomainName != null) {

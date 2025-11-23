@@ -618,14 +618,24 @@ export class QuestionBankComponent {
       const options = this.questionBank.questionBankOptionsDTO || [];
 
       if (options.length === 0) {
-        this.validationErrors['questionBankOptionsDTO'] = 'Options are required';
+        if(this.questionBank.questionTypeID == 3){
+          this.validationErrors['questionBankOptionsDTO'] = 'Answers are required';
+        }
+        else{
+          this.validationErrors['questionBankOptionsDTO'] = 'Options are required';
+        }
         isValid = false;
         return isValid;
       } else {
         // Check for empty option values
         const anyEmpty = options.some(o => !o.option || o.option.trim() === '');
         if (anyEmpty) {
-          this.validationErrors['questionBankOptionsDTO'] = 'All options must have non-empty values.';
+          if(this.questionBank.questionTypeID == 3){
+            this.validationErrors['questionBankOptionsDTO'] = 'All Answers must have non-empty values';
+          }
+          else{
+            this.validationErrors['questionBankOptionsDTO'] = 'All options must have non-empty values.';
+          }
           isValid = false;
         }
 
@@ -636,7 +646,9 @@ export class QuestionBankComponent {
 
         const hasDuplicates = normalizedOptions.length !== new Set(normalizedOptions).size;
         if (hasDuplicates) {
-          this.validationErrors['questionBankOptionsDTO'] = 'All options must be unique.';
+          if(this.questionBank.questionTypeID != 3){
+            this.validationErrors['questionBankOptionsDTO'] = 'All options must be unique';
+          }
           isValid = false;
         }
       }
@@ -927,7 +939,7 @@ export class QuestionBankComponent {
     } else {
       if (this.NewOption != "") {
         const exist = this.questionBank.questionBankOptionsDTO.find(s => s.option == this.NewOption)
-        if (exist) {
+        if (exist && this.questionBank.questionTypeID != 3) {
           this.validationErrors['questionBankOptionsDTO'] = 'This Option already exist';
         } else {
           var opt = new QuestionBankOption()
