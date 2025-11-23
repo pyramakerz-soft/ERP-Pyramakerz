@@ -361,4 +361,199 @@ printPDF() {
   isLargeTable(data: any[]): boolean {
     return data && data.length > 10;
   }
+
+  // Add this method to PdfPrintComponent class
+generateEmployeeSalaryDetailedLayout() {
+  const element = this.printContainer.nativeElement;
+  
+  // Clear existing content
+  element.innerHTML = '';
+
+  // Create the detailed salary report structure with salary slip
+  const detailedSalaryHTML = `
+    <div class="employee-salary-detailed-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+      <!-- Header Section -->
+      <div class="flex justify-between items-center mb-6">
+        <div class="w-[40%]">
+          <p class="text-base font-semibold mb-1">
+            ${this.isRtl ? (this.school?.reportHeaderOneAr || this.school?.reportHeaderOneEn) : this.school?.reportHeaderOneEn}
+          </p>
+          <p class="text-sm">
+            ${this.isRtl ? (this.school?.reportHeaderTwoAr || this.school?.reportHeaderTwoEn) : this.school?.reportHeaderTwoEn}
+          </p>
+        </div>
+        
+        <div class="flex justify-center w-[15%]">
+          ${this.school?.reportImage ? `<img src="${this.school.reportImage}" style="max-width: 120px; max-height: 120px; width: auto; height: auto;" />` : ''}
+        </div>
+        
+        <div class="w-[40%]" style="${this.isRtl ? 'text-align: left;' : 'text-align: right;'}">
+          <p class="text-base font-semibold mb-1">
+            ${!this.isRtl ? (this.school?.reportHeaderOneAr || this.school?.reportHeaderOneEn) : this.school?.reportHeaderOneEn}
+          </p>
+          <p class="text-sm">
+            ${!this.isRtl ? (this.school?.reportHeaderTwoAr || this.school?.reportHeaderTwoEn) : this.school?.reportHeaderTwoEn}
+          </p>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="my-4 text-center">
+        <h1 class="text-2xl font-bold tracking-wide">${this.Title || 'Employee Salary Detailed Report'}</h1>
+      </div>
+
+      <!-- Info Rows -->
+      <div class="my-4 space-y-2" dir="ltr">
+        ${this.infoRows.map(info => `
+          <div class="flex justify-between">
+            <div class="w-1/2 text-left">
+              <div class="text-lg leading-8">${info.keyEn || ''}</div>
+            </div>
+            <div class="w-1/2 text-right" ${!info.keyAr ? 'style="display: none;"' : ''}>
+              <div class="text-lg leading-8">${info.keyAr || ''}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Main Content - Two Column Layout -->
+      <div class="flex justify-between items-start space-x-4 mt-6">
+        <!-- Left Column - Attendance Table (80%) -->
+        <div class="w-[80%]">
+          <div class="border border-gray-400 rounded-lg shadow-md p-4 bg-white">
+            <div class="text-center font-bold text-lg border-b pb-2 mb-3">
+              Monthly Attendance Details
+            </div>
+            
+            <!-- Attendance Table -->
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-200">
+                <tr>
+                  ${this.tableHeaders?.map(header => `
+                    <th class="p-2 border border-gray-300 font-semibold text-left">${header}</th>
+                  `).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${this.tableData && this.tableData.length > 0 ? this.tableData.map((row, index) => `
+                  <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                    ${this.tableHeaders?.map(header => `
+                      <td class="p-2 border border-gray-300">${row[header] || '-'}</td>
+                    `).join('')}
+                  </tr>
+                `).join('') : `
+                  <tr>
+                    <td colspan="${this.tableHeaders?.length || 1}" class="p-4 text-center border border-gray-300">
+                      No Data Found
+                    </td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right Column - Salary Slip (20%) -->
+        <div class="w-[20%]">
+          <div class="border border-gray-400 rounded-lg shadow-md p-4 bg-white">
+            <!-- Header -->
+            <div class="text-center font-bold text-lg border-b pb-2 mb-3">
+              Salary Slip
+            </div>
+
+            <!-- Earnings Section -->
+            <div class="bg-gray-200 text-center py-1 font-semibold mb-2 text-sm">
+              Earnings
+            </div>
+            <div class="flex justify-between py-1 border-b text-sm">
+              <span>Basic Salary</span>
+              <span>${this.getSalaryValue('Salary')}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b text-sm">
+              <span>Bonus</span>
+              <span>${this.getSalaryValue('Total Bonus')}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b text-sm">
+              <span>Overtime</span>
+              <span>${this.getSalaryValue('Total Overtime')}</span>
+            </div>
+            <div class="flex justify-between py-1 font-semibold text-sm">
+              <span>Total Earnings</span>
+              <span>${this.calculateTotalEarnings()}</span>
+            </div>
+
+            <!-- Deductions Section -->
+            <div class="bg-gray-200 text-center py-1 font-semibold mt-3 mb-2 text-sm">
+              Deductions
+            </div>
+            <div class="flex justify-between py-1 border-b text-sm">
+              <span>Loans</span>
+              <span>${this.getSalaryValue('Total Loans')}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b text-sm">
+              <span>Deductions</span>
+              <span>${this.getSalaryValue('Total Deduction')}</span>
+            </div>
+            <div class="flex justify-between py-1 font-semibold text-sm">
+              <span>Total Deductions</span>
+              <span>${this.calculateTotalDeductions()}</span>
+            </div>
+
+            <!-- Net Salary -->
+            <div class="bg-gray-100 text-center font-bold text-sm mt-4 py-2 border rounded">
+              Net Salary: ${this.getSalaryValue('Final Salary')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  element.innerHTML = detailedSalaryHTML;
+}
+
+// Helper methods for salary calculations
+private getSalaryValue(key: string): string {
+  const info = this.infoRows.find(row => 
+    row.keyEn?.includes(key) || row.keyAr?.includes(key)
+  );
+  
+  if (info) {
+    const value = this.isRtl ? info.valueAr : info.valueEn;
+    return this.formatCurrency(value);
+  }
+  
+  return '0.00';
+}
+
+private calculateTotalEarnings(): string {
+  const basicSalary = this.extractNumberValue('Salary');
+  const bonus = this.extractNumberValue('Total Bonus');
+  const overtime = this.extractNumberValue('Total Overtime');
+  return this.formatCurrency(basicSalary + bonus + overtime);
+}
+
+private calculateTotalDeductions(): string {
+  const loans = this.extractNumberValue('Total Loans');
+  const deductions = this.extractNumberValue('Total Deduction');
+  return this.formatCurrency(loans + deductions);
+}
+
+private extractNumberValue(key: string): number {
+  const info = this.infoRows.find(row => 
+    row.keyEn?.includes(key) || row.keyAr?.includes(key)
+  );
+  
+  if (info) {
+    const value = this.isRtl ? info.valueAr : info.valueEn;
+    return parseFloat(value?.toString().replace(/[^\d.-]/g, '') || '0');
+  }
+  
+  return 0;
+}
+
+private formatCurrency(value: any): string {
+  const num = typeof value === 'number' ? value : parseFloat(value?.toString().replace(/[^\d.-]/g, '') || '0');
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 }
