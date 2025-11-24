@@ -290,7 +290,6 @@ private prepareExportData(): void {
         this.reportsForExport.push({
           'Employee ID': employeeBonus.employeeId,
           'Employee Name': employeeName,
-          'Total Amount': employeeBonus.totalAmount,
           'Bonus ID': bonus.id,
           'Bonus Date': new Date(bonus.date).toLocaleDateString(),
           'Bonus Type': bonus.bonusTypeName,
@@ -316,7 +315,6 @@ private prepareExportData(): void {
       this.reportsForExport.push({
         'Employee ID': employeeBonus.employeeId,
         'Employee Name': employeeName,
-        'Total Amount': employeeBonus.totalAmount,
         'Bonus ID': '-',
         'Bonus Date': '-',
         'Bonus Type': '-',
@@ -347,7 +345,6 @@ private prepareExportData(): void {
         this.reportsForExcel.push([
           employeeBonus.employeeId,
           employeeName,
-          employeeBonus.totalAmount,
           bonus.id,
           new Date(bonus.date).toLocaleDateString(),
           bonus.bonusTypeName,
@@ -362,7 +359,6 @@ private prepareExportData(): void {
       this.reportsForExcel.push([
         employeeBonus.employeeId,
         employeeName,
-        employeeBonus.totalAmount,
         '-',
         '-',
         '-',

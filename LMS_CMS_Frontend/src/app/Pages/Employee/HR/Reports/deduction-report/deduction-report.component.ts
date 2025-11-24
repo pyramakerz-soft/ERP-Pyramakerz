@@ -256,7 +256,6 @@ private prepareExportData(): void {
       data: [
         { key: 'Employee ID', value: employeeDeduction.employeeId },
         { key: 'Employee Name', value: employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown' },
-        { key: 'Total Amount', value: employeeDeduction.totalAmount }
       ],
       tableHeaders: [
         // 'Deduction ID', 
@@ -307,7 +306,6 @@ private prepareExportData(): void {
         this.reportsForExport.push({
           'Employee ID': employeeDeduction.employeeId,
           'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-          'Total Amount': employeeDeduction.totalAmount,
           // 'Deduction ID': deduction.id,
           'Deduction Date': new Date(deduction.date).toLocaleDateString(),
           'Deduction Type': deduction.deductionTypeName,
@@ -322,7 +320,6 @@ private prepareExportData(): void {
       this.reportsForExport.push({
         'Employee ID': employeeDeduction.employeeId,
         'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-        'Total Amount': employeeDeduction.totalAmount,
         // 'Deduction ID': '-',
         'Deduction Date': '-',
         'Deduction Type': '-',
@@ -343,8 +340,6 @@ private prepareExportData(): void {
         this.reportsForExcel.push([
           employeeDeduction.employeeId,
           employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-          employeeDeduction.totalAmount,
-          deduction.id,
           new Date(deduction.date).toLocaleDateString(),
           deduction.deductionTypeName,
           deduction.hours || '-',
@@ -358,7 +353,6 @@ private prepareExportData(): void {
       this.reportsForExcel.push([
         employeeDeduction.employeeId,
         employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-        employeeDeduction.totalAmount,
         '-',
         '-',
         '-',
@@ -497,7 +491,6 @@ private prepareExportData(): void {
             headers: [
               'Employee ID', 
               'Employee Name', 
-              'Total Amount', 
               // 'Deduction ID', 
               'Deduction Date', 
               'Deduction Type',

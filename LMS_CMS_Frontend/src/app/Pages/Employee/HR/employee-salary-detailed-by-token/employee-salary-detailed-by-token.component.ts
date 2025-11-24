@@ -154,79 +154,98 @@ export class EmployeeSalaryDetailedByTokenComponent {
     })
   }
 
-  async DownloadAsPDF() {
-    await this.GetEmployeeName();
-    await this.getPDFData();
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
-    }, 500);
-  }
+async DownloadAsPDF() {
+  await this.GetEmployeeName();
+  await this.getPDFData();
+  this.showPDF = true;
+  setTimeout(() => {
+    // Use the new detailed salary layout with salary slip
+    this.pdfComponentRef.generateEmployeeSalaryDetailedLayout();
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => this.showPDF = false, 2000);
+  }, 500);
+}
 
-  async getPDFData() {
-    // Build rows for each subject
-    this.tableDataForPDF = this.monthlyAttendenc.map(d => {
-      const row: Record<string, string> = {};
-      row['Day'] = d.day;
-      row['Day Status'] = d.dayStatusName;
-      row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
-      row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
-      row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
-      row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
-      return row;
-    });
+// Update the Print method
+async Print() {
+  await this.GetEmployeeName();
+  await this.getPDFData();
+  this.showPDF = true;
+  setTimeout(() => {
+    // Use the new detailed salary layout with salary slip
+    this.pdfComponentRef.generateEmployeeSalaryDetailedLayout();
+    
+    const printContents = document.getElementById("Data")?.innerHTML;
+    if (!printContents) {
+      console.error("Element not found!");
+      return;
+    }
 
-    console.log('Prepared PDF data:', this.tableDataForPDF);
-  }
-
-  async Print() {
-    await this.GetEmployeeName();
-    await this.getPDFData();
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { margin: 0; }
+        @media print {
+          body > *:not(#print-container) {
+            display: none !important;
           }
-        </style>
-      `;
+          #print-container {
+            display: block !important;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
 
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
 
-      document.body.appendChild(printContainer);
-      window.print();
+    document.body.appendChild(printContainer);
+    window.print();
 
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
+    setTimeout(() => {
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
+    }, 100);
+  }, 500);
+}
+
+// Update the getPDFData method to include totals
+async getPDFData() {
+  // Build rows for each day
+  this.tableDataForPDF = this.monthlyAttendenc.map(d => {
+    const row: Record<string, string> = {};
+    row['Day'] = d.day?.toString() || '';
+    row['Day Status'] = d.dayStatusName || '';
+    row['Total Working Hours'] = `${d.workingHours || 0}:${(d.workingMinutes || 0).toString().padStart(2, '0')}`;
+    row['Leave Request in Hours'] = `${d.leaveRequestHours || 0}:${(d.leaveRequestMinutes || 0).toString().padStart(2, '0')}`;
+    row['Overtime in Hours'] = `${d.overtimeHours || 0}:${(d.overtimeMinutes || 0).toString().padStart(2, '0')}`;
+    row['Deduction in Hours'] = `${d.deductionHours || 0}:${(d.deductionMinutes || 0).toString().padStart(2, '0')}`;
+    return row;
+  });
+
+  // Add total row
+  if (this.monthlyAttendenc.length > 0) {
+    const totalRow: Record<string, string> = {};
+    totalRow['Day'] = 'Total';
+    totalRow['Day Status'] = '';
+    totalRow['Total Working Hours'] = '';
+    totalRow['Leave Request in Hours'] = this.getTotal('leaveRequestHours', 'leaveRequestMinutes');
+    totalRow['Overtime in Hours'] = this.getTotal('overtimeHours', 'overtimeMinutes');
+    totalRow['Deduction in Hours'] = this.getTotal('deductionHours', 'deductionMinutes');
+    this.tableDataForPDF.push(totalRow);
   }
+
+  console.log('Prepared PDF data:', this.tableDataForPDF);
+}
 
   async DownloadAsExcel() {
     await this.GetEmployeeName();

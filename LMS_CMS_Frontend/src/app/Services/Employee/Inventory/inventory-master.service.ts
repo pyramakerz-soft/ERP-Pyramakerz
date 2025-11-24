@@ -56,8 +56,9 @@ export class InventoryMasterService {
 
   Add(master: InventoryMaster, DomainName: string): Observable<any> {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
+
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
@@ -65,43 +66,43 @@ export class InventoryMasterService {
 
     const formData = new FormData();
 
-    formData.append('invoiceNumber', master.invoiceNumber.toString());
-    formData.append('date', master.date);
-    formData.append('isCash', master.isCash.toString());
-    formData.append('isVisa', master.isVisa.toString());
-    formData.append('cashAmount', master.cashAmount.toString());
-    formData.append('visaAmount', master.visaAmount.toString());
-    formData.append('remaining', master.remaining.toString());
-    formData.append('total', master.total.toString());
-    formData.append('notes', master.notes);
-    formData.append('storeID', master.storeID.toString());
-    formData.append('flagId', master.flagId.toString());
-    formData.append('studentID', master.studentID.toString());
-    formData.append('saveID', master.saveID.toString());
-    formData.append('bankID', master.bankID.toString());
-    formData.append('supplierId', master.supplierId.toString());
-    formData.append('schoolId', master.schoolId.toString());
-    formData.append('schoolPCId', master.schoolPCId.toString());
-    formData.append('storeToTransformId', master.storeToTransformId.toString());
+    formData.append('invoiceNumber', (master.invoiceNumber ?? '').toString());
+    formData.append('date', master.date ?? '');
+    formData.append('isCash', (master.isCash ?? false).toString());
+    formData.append('isVisa', (master.isVisa ?? false).toString());
+    formData.append('cashAmount', (master.cashAmount ?? 0).toString());
+    formData.append('visaAmount', (master.visaAmount ?? 0).toString());
+    formData.append('remaining', (master.remaining ?? 0).toString());
+    formData.append('total', (master.total ?? 0).toString());
+    formData.append('notes', master.notes ?? '');
+    formData.append('storeID', (master.storeID ?? 0).toString());
+    formData.append('flagId', (master.flagId ?? 0).toString());
+    formData.append('studentID', (master.studentID ?? 0).toString());
+    formData.append('saveID', (master.saveID ?? 0).toString());
+    formData.append('bankID', (master.bankID ?? 0).toString());
+    formData.append('supplierId', (master.supplierId ?? 0).toString());
+    formData.append('schoolId', (master.schoolId ?? 0).toString());
+    formData.append('schoolPCId', (master.schoolPCId ?? 0).toString());
+    formData.append('storeToTransformId', (master.storeToTransformId ?? 0).toString());
 
     if (master.attachment && master.attachment.length > 0) {
-      master.attachment.forEach((file, index) => {
+      master.attachment.forEach(file => {
         formData.append('attachment', file);
       });
     }
 
     if (master.inventoryDetails && master.inventoryDetails.length > 0) {
       master.inventoryDetails.forEach((item, index) => {
-        formData.append(`inventoryDetails[${index}][price]`, item.price.toString());
-        formData.append(`inventoryDetails[${index}][totalPrice]`, item.totalPrice.toString());
-        formData.append(`inventoryDetails[${index}][quantity]`, item.quantity.toString());
-        formData.append(`inventoryDetails[${index}][notes]`, item.notes.toString());
-        formData.append(`inventoryDetails[${index}][shopItemID]`, item.shopItemID.toString());
-        formData.append(`inventoryDetails[${index}][salesId]`, item.salesId.toString());
-        formData.append(`inventoryDetails[${index}][inventoryMasterId]`, item.inventoryMasterId.toString());
-
+        formData.append(`inventoryDetails[${index}][price]`, (item.price ?? 0).toString());
+        formData.append(`inventoryDetails[${index}][totalPrice]`, (item.totalPrice ?? 0).toString());
+        formData.append(`inventoryDetails[${index}][quantity]`, (item.quantity ?? 0).toString());
+        formData.append(`inventoryDetails[${index}][notes]`, (item.notes ?? '').toString());
+        formData.append(`inventoryDetails[${index}][shopItemID]`, (item.shopItemID ?? 0).toString());
+        formData.append(`inventoryDetails[${index}][salesId]`, (item.salesId ?? 0).toString());
+        formData.append(`inventoryDetails[${index}][inventoryMasterId]`, (item.inventoryMasterId ?? 0).toString());
       });
     }
+
     return this.http.post<any>(`${this.baseUrl}/InventoryMaster`, formData, { headers });
   }
 
