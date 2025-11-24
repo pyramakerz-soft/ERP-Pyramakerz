@@ -48,6 +48,7 @@ using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
+using System.IO.Compression;
 
 namespace LMS_CMS
 {
@@ -64,6 +65,30 @@ namespace LMS_CMS
 
             // Add services to the container.
             builder.Services.AddControllers();
+
+            /*
+             When your API sends data to Angular (JSON, HTML, JS, CSS…): 
+                Without compression → the full size is sent (maybe 300 KB, 1 MB, etc.)
+                With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
+             Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
+            */
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            });
+
+            builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest; // Fast and good
+            });
+
+            builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest;
+            });
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -235,8 +260,7 @@ namespace LMS_CMS
             builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.Limits.MaxRequestBodySize = 104857600; // 100 MB
-            });
-
+            }); 
 
             // 1) SignalR 
             //builder.Services.AddSignalR();
@@ -270,6 +294,11 @@ namespace LMS_CMS
                     appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
                     appBuilder.UseMiddleware<SuspendMiddleware>();
                 });
+
+            
+            // To Allow Compression (Brotli - Gzip)
+            app.UseResponseCompression(); 
+
 
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization

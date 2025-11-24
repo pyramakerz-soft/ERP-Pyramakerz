@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "parent", "student" },
            pages: new[] { "Academic Years", "Bus Students", "Classroom", "Student", "Lesson Live", "Registration Confirmation", "Interview Time Table" }
-       )]
+        )]
         public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

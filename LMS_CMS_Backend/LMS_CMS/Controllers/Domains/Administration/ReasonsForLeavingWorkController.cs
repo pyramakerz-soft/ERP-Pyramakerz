@@ -31,9 +31,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
         [HttpGet]
         [Authorize_Endpoint_(
-       allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
-       )]
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
+        )]
+        [ResponseCache(Duration = 300)] // cache 5 minutes
         public async Task<IActionResult> GetAsync()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
