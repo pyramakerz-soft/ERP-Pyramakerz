@@ -48,8 +48,7 @@ using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
-using System.IO.Compression;
-using StackExchange.Redis;
+//using System.IO.Compression; 
 
 namespace LMS_CMS
 {
@@ -73,22 +72,22 @@ namespace LMS_CMS
                 With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
              Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
             */
-            builder.Services.AddResponseCompression(options =>
-            {
-                options.EnableForHttps = true;
-                options.Providers.Add<BrotliCompressionProvider>();
-                options.Providers.Add<GzipCompressionProvider>();
-            });
+            //builder.Services.AddResponseCompression(options =>
+            //{
+            //    options.EnableForHttps = true;
+            //    options.Providers.Add<BrotliCompressionProvider>();
+            //    options.Providers.Add<GzipCompressionProvider>();
+            //});
 
-            builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
-            {
-                opts.Level = CompressionLevel.Fastest; // Fast and good
-            });
+            //builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+            //{
+            //    opts.Level = CompressionLevel.Fastest; // Fast and good
+            //});
 
-            builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
-            {
-                opts.Level = CompressionLevel.Fastest;
-            });
+            //builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+            //{
+            //    opts.Level = CompressionLevel.Fastest;
+            //});
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -216,8 +215,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<HR_Service>();
             builder.Services.AddScoped<Inventory_Service>();
             builder.Services.AddScoped<LMS_Service>();
-            builder.Services.AddScoped<Registration_Service>();
-            //builder.Services.AddScoped<RedisCacheService>();
+            builder.Services.AddScoped<Registration_Service>(); 
 
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
@@ -272,26 +270,8 @@ namespace LMS_CMS
                 hubOptions.EnableDetailedErrors = true; 
                 hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // send ping every 15s
                 hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // allow up to 60s silence
-            });
-
-
-
-            //builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-            //{
-            //    var config = new ConfigurationOptions
-            //    {
-            //        EndPoints = { "chaching-zrmg1e.serverless.use1.cache.amazonaws.com:6379" },
-            //        Ssl = true,
-            //        Password = "YOUR_AUTH_TOKEN",
-            //        AbortOnConnectFail = false
-            //    };
-
-            //    return ConnectionMultiplexer.Connect(config);
-            //});
-
-
-
-
+            }); 
+             
             var app = builder.Build();
 
             /// 1) For DB Check
@@ -318,7 +298,7 @@ namespace LMS_CMS
 
             
             // To Allow Compression (Brotli - Gzip)
-            app.UseResponseCompression();
+            //app.UseResponseCompression();
 
 
             /// For Endpoint, to check if the user has access for this endpoint or not

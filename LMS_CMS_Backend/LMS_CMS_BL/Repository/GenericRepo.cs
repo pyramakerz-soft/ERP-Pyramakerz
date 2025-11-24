@@ -167,7 +167,7 @@ namespace LMS_CMS_BL.Repository
             Expression<Func<TEntity, bool>> predicate,
             params Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>[] includes)
         {
-            IQueryable<TEntity> query = db.Set<TEntity>().AsNoTracking();
+            IQueryable<TEntity> query = db.Set<TEntity>();
 
             foreach (var include in includes)
             {

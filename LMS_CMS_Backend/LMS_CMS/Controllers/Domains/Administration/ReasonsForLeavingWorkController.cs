@@ -37,26 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
            pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
         )] 
         public async Task<IActionResult> GetAsync()
-        {
-            //string cacheKey = "reasonsForLeavingWork";
-
-            //// 1. Try to get from cache
-            //List<ReasonsForLeavingWorkGetDTO> cachedData = await _redisCacheService.GetAsync<List<ReasonsForLeavingWorkGetDTO>>(cacheKey);
-            //if (cachedData != null) return Ok(cachedData);
-
-            //// 2. Fetch from DB if not in cache
-            //UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            //List<ReasonForLeavingWork> data = await Unit_Of_Work.reasonForLeavingWork_Repository
-            //             .Select_All_With_IncludesById<ReasonForLeavingWork>(b => b.IsDeleted != true);
-
-            //if (data == null || data.Count == 0) return NotFound();
-
-            //List<ReasonsForLeavingWorkGetDTO> dto = mapper.Map<List<ReasonsForLeavingWorkGetDTO>>(data);
-
-            //// 3. Save to Redis for next requests
-            //await _redisCacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5)); // cache 5 minutes
-
-            //return Ok(dto);
+        { 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
             List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
                     b => b.IsDeleted != true);
