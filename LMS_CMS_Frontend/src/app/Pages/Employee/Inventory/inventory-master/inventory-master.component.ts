@@ -39,7 +39,7 @@ export class InventoryMasterComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: InventoryMaster[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;

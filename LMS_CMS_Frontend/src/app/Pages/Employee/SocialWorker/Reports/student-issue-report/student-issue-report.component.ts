@@ -285,6 +285,8 @@ export class StudentIssueReportComponent  implements OnInit {
     } catch (error) {
       console.error('Error loading student issue reports:', error);
       this.studentIssueReports = [];
+      this.reportsForExport = []
+      this.reportsForExcel = []
       this.showTable = true;
     } finally {
       this.isLoading = false;

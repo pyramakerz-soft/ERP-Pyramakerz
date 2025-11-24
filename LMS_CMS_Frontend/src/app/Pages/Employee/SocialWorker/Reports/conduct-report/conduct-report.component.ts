@@ -308,6 +308,8 @@ constructor(
     } catch (error) {
       console.error('Error loading conduct reports:', error);
       this.conductReports = [];
+      this.reportsForExport =[]
+      this.reportsForPDF =[]
       this.showTable = true;
       // Swal.fire({
       //   title: 'Error',

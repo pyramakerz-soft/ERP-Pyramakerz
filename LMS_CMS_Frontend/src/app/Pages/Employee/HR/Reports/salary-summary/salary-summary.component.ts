@@ -193,7 +193,8 @@ export class SalarySummaryComponent {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    await this.getPDFData();
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
@@ -237,6 +238,23 @@ export class SalarySummaryComponent {
         this.showPDF = false;
       }, 100);
     }, 500);
+  }
+
+    async getPDFData() {
+    // Build rows for each subject
+    this.tableDataForPDF = this.salaryHistory.map(d => {
+      const row: Record<string, any> = {};
+      row['Employee EnName'] = d.employeeEnName;
+      row['Basic Salary'] = d.basicSalary;
+      row['Total Bonus'] = d.totalBonus ;
+      row['Total Overtime'] =  d.totalOvertime ;
+      row['Total Deductions'] =   d.totalDeductions  ;
+      row['Total Loans'] = d.totalLoans ;
+      row['netSalary'] = d.netSalary ;
+      return row;
+    });
+
+    console.log('Prepared PDF data:', this.tableDataForPDF);
   }
 
   async DownloadAsExcel() {

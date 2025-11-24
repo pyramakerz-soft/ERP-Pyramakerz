@@ -141,7 +141,7 @@
         <div class="flex flex-col w-full">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Bank Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankName" placeholder="{{ 'Enter bankName' | translate }}"
+            [(ngModel)]="bank.bankName" placeholder="{{ 'Enter Bank Name' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'bankName', value: $event })" />
           <span *ngIf="validationErrors['bankName']" class="text-red-500 font-normal">
             {{ validationErrors['bankName'] }}
