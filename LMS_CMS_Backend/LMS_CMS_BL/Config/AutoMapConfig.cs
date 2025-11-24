@@ -1095,14 +1095,15 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.Assignment.InsertedByEmployee.en_name))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
 
-            // In AutoMapConfig.cs, add mappings if needed for basic properties (custom logic will handle counts in the controller)-77
-            CreateMap<Assignment, AssignmentReportDTO>()
-                .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.EnglishName))
-                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
-             
-                .ForMember(dest => dest.AttendanceNumber, opt => opt.Ignore())
-                .ForMember(dest => dest.NumberSuccessful, opt => opt.Ignore())
-                .ForMember(dest => dest.NumberFailed, opt => opt.Ignore());
+            //In AutoMapConfig.cs, add mappings if needed for basic properties (custom logic will handle counts in the controller)-77
+
+           CreateMap<Assignment, AssignmentReportDTO>()
+               .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.EnglishName))
+               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+
+               .ForMember(dest => dest.AttendanceNumber, opt => opt.Ignore())
+               .ForMember(dest => dest.NumberSuccessful, opt => opt.Ignore())
+               .ForMember(dest => dest.NumberFailed, opt => opt.Ignore());
             //-77
             CreateMap<POSAddDTO, ETAPOS>();
             CreateMap<POSEditDTO, ETAPOS>();
