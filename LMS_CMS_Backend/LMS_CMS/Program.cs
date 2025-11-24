@@ -174,9 +174,7 @@ namespace LMS_CMS
 
 
             //////// DB
-            //builder.Services.AddDbContext<Octa_DbContext>(
-            //    op => op.UseSqlServer(builder.Configuration.GetConnectionString("con")));
-            builder.Services.AddDbContextPool<Octa_DbContext>(
+            builder.Services.AddDbContext<Octa_DbContext>(
                 op => op.UseSqlServer(builder.Configuration.GetConnectionString("con")));
 
 

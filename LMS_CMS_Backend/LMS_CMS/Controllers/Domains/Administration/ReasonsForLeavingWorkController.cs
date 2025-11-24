@@ -57,8 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             //await _redisCacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5)); // cache 5 minutes
 
             //return Ok(dto);
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            Console.WriteLine($"DbContext Hash: {_dbContextFactory.GetHashCode()}");
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
             List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
                     b => b.IsDeleted != true);
 
