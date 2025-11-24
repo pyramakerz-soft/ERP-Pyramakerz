@@ -8,6 +8,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Amazon.Runtime.Internal.Util;
 
 namespace LMS_CMS_PL.Controllers.Domains.Administration
 {
@@ -19,12 +20,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly RedisCacheService _redisCacheService;
 
-        public ReasonsForLeavingWorkController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ReasonsForLeavingWorkController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, RedisCacheService redisCacheService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _redisCacheService = redisCacheService;
         }
 
         ///////////////////////////////////////////
@@ -36,19 +39,38 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         )] 
         public async Task<IActionResult> GetAsync()
         {
+            string cacheKey = "reasonsForLeavingWork";
+
+            // 1. Try to get from cache
+            List<ReasonsForLeavingWorkGetDTO> cachedData = await _redisCacheService.GetAsync<List<ReasonsForLeavingWorkGetDTO>>(cacheKey);
+            if (cachedData != null) return Ok(cachedData);
+
+            // 2. Fetch from DB if not in cache
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            List<ReasonForLeavingWork> data = await Unit_Of_Work.reasonForLeavingWork_Repository
+                         .Select_All_With_IncludesById<ReasonForLeavingWork>(b => b.IsDeleted != true);
 
-            List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
-                    b => b.IsDeleted != true);
+            if (data == null || data.Count == 0) return NotFound();
 
-            if (reasonForLeavingWorks == null || reasonForLeavingWorks.Count == 0)
-            {
-                return NotFound();
-            }
+            List<ReasonsForLeavingWorkGetDTO> dto = mapper.Map<List<ReasonsForLeavingWorkGetDTO>>(data);
 
-            List<ReasonsForLeavingWorkGetDTO> Dto = mapper.Map<List<ReasonsForLeavingWorkGetDTO>>(reasonForLeavingWorks);
+            // 3. Save to Redis for next requests
+            await _redisCacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5)); // cache 5 minutes
 
-            return Ok(Dto);
+            return Ok(dto);
+            //UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            //List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
+            //        b => b.IsDeleted != true);
+
+            //if (reasonForLeavingWorks == null || reasonForLeavingWorks.Count == 0)
+            //{
+            //    return NotFound();
+            //}
+
+            //List<ReasonsForLeavingWorkGetDTO> Dto = mapper.Map<List<ReasonsForLeavingWorkGetDTO>>(reasonForLeavingWorks);
+
+            //return Ok(Dto);
         }
 
         //////////////////////////////////////////////////////////////////////////////
