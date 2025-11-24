@@ -275,7 +275,6 @@ private prepareExportData(): void {
         this.reportsForExport.push({
           'Employee ID': employee.employeeId,
           'Employee Name': employeeName,
-          'Vacation ID': vac.id,
           'Vacation Type': vac.vacationTypesName,
           'Date': vac.date,
           'Half Day': vac.halfDay ? 'Yes' : 'No',
@@ -300,7 +299,6 @@ private prepareExportData(): void {
       this.reportsForExport.push({
         'Employee ID': employee.employeeId,
         'Employee Name': employeeName,
-        'Vacation ID': '-',
         'Vacation Type': '-',
         'Date': '-',
         'Half Day': '-',
@@ -429,7 +427,6 @@ private prepareExportData(): void {
               'Employee ID',
               'Employee Name',
               // 'Total Amount'  
-              'Vacation ID',
               'Vacation Type',
               'Date',
               'Half Day',

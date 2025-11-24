@@ -8,14 +8,16 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class AssignmentReportDTO
     {
-        public long ID { get; set; }
-        public string AssignmentName { get; set; } // Using EnglishName as default; can adjust to include Arabic if needed
-        public long SubjectID { get; set; }
-        public string SubjectName { get; set; } // Using en_name as default; can adjust to include ar_name if needed
-        public int AttendanceNumber { get; set; }
-        public int NumberSuccessful { get; set; }
-        public int NumberFailed { get; set; }
-        public int Assigned { get; set; } 
-        public int Absent { get; set; }  
+        public string AssignmentName { get; set; }// Using EnglishName as default; can adjust to include Arabic if needed
+        public string SubjectName { get; set; }// Using en_name as default; can adjust to ar_name if needed
+
+        public int AssignedStudents { get; set; }
+        public int AttendanceStudents { get; set; }
+        public int SuccessfulStudents { get; set; }
+        public int FailedStudents { get; set; }
+        public int PendingStudents { get; set; }
+
+        public double SuccessRate { get; set; }
     }
 }
+
