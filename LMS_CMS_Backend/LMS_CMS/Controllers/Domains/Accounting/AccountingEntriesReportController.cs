@@ -37,11 +37,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
                 var context = Unit_Of_Work.DbContext;
 
-                // FIX 1: Increase Timeout for Reports
-                // Reports on large tables often take > 30s. Set to 3 minutes (180s) or more.
                 context.Database.SetCommandTimeout(180);
 
-                // 1. Get Data
                 var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
                     "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @PageNumber, @PageSize",
                     new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
@@ -52,13 +49,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .AsNoTracking()
                 .ToListAsync();
 
-                // Handle empty result early to save processing time on Totals/Counts if main data is empty
-                // (Unless your totals need to show even if the specific page is empty, 
-                // but usually if the filter yields nothing, totals are 0).
                 if (results == null || !results.Any())
                 {
-                    // Check if it's just a pagination issue (page 5 empty, but total records > 0)
-                    // We run count to verify.
                     var checkCount = await context.Database
                        .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
                            new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
@@ -69,11 +61,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     {
                         return Ok(new { Data = new List<object>(), FullTotals = new List<object>(), Pagination = new { TotalRecords = 0, PageSize = pageSize, CurrentPage = pageNumber, TotalPages = 0 } });
                     }
-                    // If count > 0 but results empty, it means pageNumber is out of range, 
-                    // usually frontend handles this via the pagination metadata returned below.
                 }
 
-                // 2. Get Full Totals (Likely the most expensive query)
                 var fullTotals = await context.Set<TotalResult>().FromSqlRaw(
                     "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
                     new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
@@ -88,7 +77,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .FirstAsync();
 
 
-                // 4. Process Results in Memory (This is fast)
                 var groupedResults = results
                 .GroupBy(x => x.Date.Value.Date)
                 .Select((g, index) =>
@@ -126,15 +114,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return Ok(new
                 {
                     Data = groupedResults,
-                    FullTotals = fullTotals.FirstOrDefault(), // Usually Totals return 1 row, cleaner to unwrap
+                    FullTotals = fullTotals.FirstOrDefault(), 
                     Pagination = paginationMetadata
                 });
             }
             catch (Exception ex)
             {
-                // Log the error to your console/file/logger to see the REAL issue
-                Console.WriteLine($"Report Error: {ex.Message}");
-                // Return 500 but with the message in Dev environment, or generic in Prod
                 return StatusCode(500, new { error = "Internal Server Error", details = ex.Message });
             }
         }
