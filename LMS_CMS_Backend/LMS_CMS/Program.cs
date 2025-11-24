@@ -73,22 +73,22 @@ namespace LMS_CMS
                 With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
              Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
             */
-            //builder.Services.AddResponseCompression(options =>
-            //{
-            //    options.EnableForHttps = true;
-            //    options.Providers.Add<BrotliCompressionProvider>();
-            //    options.Providers.Add<GzipCompressionProvider>();
-            //});
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            });
 
-            //builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
-            //{
-            //    opts.Level = CompressionLevel.Fastest; // Fast and good
-            //});
+            builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest; // Fast and good
+            });
 
-            //builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
-            //{
-            //    opts.Level = CompressionLevel.Fastest;
-            //});
+            builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest;
+            });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -174,7 +174,9 @@ namespace LMS_CMS
 
 
             //////// DB
-            builder.Services.AddDbContext<Octa_DbContext>(
+            //builder.Services.AddDbContext<Octa_DbContext>(
+            //    op => op.UseSqlServer(builder.Configuration.GetConnectionString("con")));
+            builder.Services.AddDbContextPool<Octa_DbContext>(
                 op => op.UseSqlServer(builder.Configuration.GetConnectionString("con")));
 
 
@@ -318,7 +320,7 @@ namespace LMS_CMS
 
             
             // To Allow Compression (Brotli - Gzip)
-            //app.UseResponseCompression(); 
+            app.UseResponseCompression();
 
 
             /// For Endpoint, to check if the user has access for this endpoint or not

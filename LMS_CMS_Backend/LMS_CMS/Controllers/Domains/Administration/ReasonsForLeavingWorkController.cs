@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Amazon.Runtime.Internal.Util;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Administration
 {
@@ -57,7 +58,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             //return Ok(dto);
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+            Console.WriteLine($"DbContext Hash: {_dbContextFactory.GetHashCode()}");
             List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
                     b => b.IsDeleted != true);
 
