@@ -217,7 +217,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<Inventory_Service>();
             builder.Services.AddScoped<LMS_Service>();
             builder.Services.AddScoped<Registration_Service>();
-            builder.Services.AddScoped<RedisCacheService>();
+            //builder.Services.AddScoped<RedisCacheService>();
 
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
@@ -276,18 +276,18 @@ namespace LMS_CMS
 
 
 
-            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-            {
-                var config = new ConfigurationOptions
-                {
-                    EndPoints = { "chaching-zrmg1e.serverless.use1.cache.amazonaws.com:6379" },
-                    Ssl = true,
-                    Password = "YOUR_AUTH_TOKEN",
-                    AbortOnConnectFail = false
-                };
+            //builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            //{
+            //    var config = new ConfigurationOptions
+            //    {
+            //        EndPoints = { "chaching-zrmg1e.serverless.use1.cache.amazonaws.com:6379" },
+            //        Ssl = true,
+            //        Password = "YOUR_AUTH_TOKEN",
+            //        AbortOnConnectFail = false
+            //    };
 
-                return ConnectionMultiplexer.Connect(config);
-            });
+            //    return ConnectionMultiplexer.Connect(config);
+            //});
 
 
 
