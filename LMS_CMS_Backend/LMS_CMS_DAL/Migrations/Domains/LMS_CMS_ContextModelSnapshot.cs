@@ -6297,6 +6297,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("IsCash")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsConvertedToPurchase")
+                        .HasColumnType("bit");
+
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 

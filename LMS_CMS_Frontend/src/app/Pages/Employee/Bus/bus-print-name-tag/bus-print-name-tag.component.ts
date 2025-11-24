@@ -140,21 +140,19 @@ export class BusPrintNameTagComponent {
     }
   }
 
-  getDataByBusId(event: Event) {
-    this.IsChoosenDomain = true;
-    const selectedValue: number = Number((event.target as HTMLSelectElement).value);
-    this.busId = selectedValue;
-    
-    // Get the selected bus name and driver number
-    const selectedBus = this.BusData.find(bus => bus.id == selectedValue);
-    if (selectedBus) {
-      this.selectedBusName = selectedBus.name || '';
-      // Assuming bus has a driverPhone or driverNo property, adjust as needed
-      this.selectedBusDriverNo = (selectedBus as any).driverPhone || (selectedBus as any).driverNo || '';
-    }
-    
-    this.GetTableData(this.busId);
+getDataByBusId(event: Event) {
+  this.IsChoosenDomain = true;
+  const selectedValue: number = Number((event.target as HTMLSelectElement).value);
+  this.busId = selectedValue;
+  
+  // Get the selected bus name only
+  const selectedBus = this.BusData.find(bus => bus.id == selectedValue);
+  if (selectedBus) {
+    this.selectedBusName = selectedBus.name || '';
   }
+  
+  this.GetTableData(this.busId);
+}
 
   DomainIsChanged(event: Event) {
     this.BusData = []
@@ -204,51 +202,81 @@ export class BusPrintNameTagComponent {
     }, 500);
   }
 
-  printNameTagPDF() {
-    const opt = {
-      margin: [0.2, 0.2, 0.2, 0.2],
-      filename: `Bus-Name-Tags-${this.selectedBusName || 'bus'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
-    };
+printNameTagPDF() {
+  const opt = {
+    margin: [0.2, 0.2, 0.2, 0.2],
+    filename: `Bus-Name-Tags-${this.selectedBusName || 'bus'}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2, 
+      useCORS: true, 
+      letterRendering: true, 
+      allowTaint: false,
+      width: 794, // A4 width in pixels at 96 DPI (210mm ≈ 794px)
+      windowWidth: 794
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait', 
+      compress: true 
+    }
+  };
 
-    const container = this.nameTagContainer.nativeElement as HTMLElement;
-    const clone = container.cloneNode(true) as HTMLElement;
+  const container = this.nameTagContainer.nativeElement as HTMLElement;
+  const clone = container.cloneNode(true) as HTMLElement;
 
-    clone.style.position = 'static';
-    clone.style.top = 'auto';
-    clone.style.left = 'auto';
-    clone.style.display = 'block';
-    clone.style.width = '210mm';
-    clone.style.maxWidth = '210mm';
-    clone.style.margin = '0 auto';
-    clone.style.background = 'white';
-    clone.style.padding = '20px';
-    clone.style.boxSizing = 'border-box';
+  // Fix styling to ensure proper PDF rendering
+  clone.style.position = 'static';
+  clone.style.top = 'auto';
+  clone.style.left = 'auto';
+  clone.style.display = 'block';
+  clone.style.width = '200mm'; // Reduced from 210mm to provide margin
+  clone.style.maxWidth = '200mm';
+  clone.style.margin = '0 auto';
+  clone.style.background = 'white';
+  clone.style.padding = '15px'; // Reduced padding
+  clone.style.boxSizing = 'border-box';
+  clone.style.overflow = 'hidden'; // Prevent overflow
 
-    const wrapper = document.createElement('div');
-    wrapper.style.width = '100%';
-    wrapper.style.display = 'block';
-    wrapper.style.background = 'white';
-    wrapper.appendChild(clone);
-
-    document.body.appendChild(wrapper);
-
-    html2pdf()
-      .from(clone)
-      .set(opt)
-      .save()
-      .then(() => {
-        document.body.removeChild(wrapper);
-        this.showPDF = false;
-      })
-      .catch((error: any) => {
-        console.error('PDF generation failed:', error);
-        document.body.removeChild(wrapper);
-        this.showPDF = false;
-      });
+  // Also update the inner grid container to be narrower
+  const gridContainer = clone.querySelector('div[style*="grid-template-columns"]') as HTMLElement;
+  if (gridContainer) {
+    gridContainer.style.width = '100%';
+    gridContainer.style.margin = '0';
+    gridContainer.style.padding = '5px'; // Reduced padding
+    gridContainer.style.gap = '10px'; // Reduced gap
   }
+
+  // Update individual name tag styles
+  const nameTags = clone.querySelectorAll('div[style*="border: 3px dashed"]');
+  nameTags.forEach(tag => {
+    (tag as HTMLElement).style.padding = '10px'; // Reduced padding
+    (tag as HTMLElement).style.minHeight = '160px'; // Slightly reduced height
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.style.width = '100%';
+  wrapper.style.display = 'block';
+  wrapper.style.background = 'white';
+  wrapper.appendChild(clone);
+
+  document.body.appendChild(wrapper);
+
+  html2pdf()
+    .from(clone)
+    .set(opt)
+    .save()
+    .then(() => {
+      document.body.removeChild(wrapper);
+      this.showPDF = false;
+    })
+    .catch((error: any) => {
+      console.error('PDF generation failed:', error);
+      document.body.removeChild(wrapper);
+      this.showPDF = false;
+    });
+}
 
   printNameTag() {
     const printContents = this.nameTagContainer.nativeElement.innerHTML;

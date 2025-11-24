@@ -5,13 +5,28 @@
     </div>
 </div>
 
-<div class="mt-5 flex w-full flex-col mb-4">     
-    <select class="rounded-lg border border-solid border-gray-300 p-3 overflow-y-auto" id="ACY" 
-    [(ngModel)]="yearID" (ngModelChange)="getFailedStudentDataByAcademicYear(); isView = true">
-        <option [value]="0" disabled selected hidden>Choose Academic Year</option>
-        <option *ngFor="let s of AcademicYearsData" [value]="s.id">{{ s.name }}</option>
-        <option *ngIf="AcademicYearsData.length === 0" disabled selected>No Data Found</option>
-    </select> 
+<div class="mt-5 flex w-full justify-between mb-4">
+    <div class="w-[49%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SchoolId" (change)="getAcademicYear()">
+            <option value=0 disabled selected hidden>Select School</option>
+            <option *ngFor="let school of Schools" [value]="school.id">
+                {{ school.name }}
+            </option>
+        </select>
+    </div>
+    <div class="w-[49%]">  
+        <label for="ACY" class="block mb-2 text-sm font-medium"
+        [ngClass]="{'text-gray-500': !SchoolId, 'text-gray-900' : SchoolId}">Academic Year</label>
+        <select id="ACY" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+        [disabled]="!SchoolId"
+            [(ngModel)]="yearID" (ngModelChange)="getFailedStudentDataByAcademicYear(); isView = true">
+            <option [value]="0" disabled selected hidden>Choose Academic Year</option>
+            <option *ngFor="let s of AcademicYearsData" [value]="s.id">{{ s.name }}</option>
+            <option *ngIf="AcademicYearsData.length === 0" disabled selected>No Data Found</option>
+        </select> 
+    </div>
 </div>
 
 <div *ngIf="isView" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">

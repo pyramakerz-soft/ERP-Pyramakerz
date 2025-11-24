@@ -97,9 +97,9 @@ export class LoansStatusComponent {
     });
 
     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+      this.isRtl = direction == 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir == 'rtl';
     this.getEmployee()
   }
 
@@ -118,7 +118,7 @@ export class LoansStatusComponent {
       this.remainingAll = this.LoanStatus.reduce((sum, x) => sum + (x.remaining || 0), 0);
       
       // Find selected employee
-      this.selectedEmployee = this.employees.find(emp => emp.id === this.SelectedEmpId);
+      this.selectedEmployee = this.employees.find(emp => emp.id == this.SelectedEmpId);
       
       // Prepare data for export
       this.prepareExportData();
@@ -147,8 +147,11 @@ export class LoansStatusComponent {
         const loansSection = {
           header: `Employee: ${employeeLoan.employeeEnName || employeeLoan.employeeArName} - Loans Details`,
           data: [
-            { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
-          ],
+          { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
+          { key: 'Total Loans', value: employeeLoan.totalLoans || 0 },
+          { key: 'Total Deducted', value: employeeLoan.totalDeducted || 0 },
+          { key: 'Remaining', value: employeeLoan.remaining || 0 },
+                  ],
           tableHeaders: ['Date', 'Amount', 'Deduction Start Month', 'Number Of Deduction', 'Deduction End Month'],
           tableData: [] as any[],
         };
@@ -170,9 +173,9 @@ export class LoansStatusComponent {
       if (employeeLoan.employeeLoansGetDTO && employeeLoan.employeeLoansGetDTO.length > 0) {
         const deductionsSection = {
           header: `Employee: ${employeeLoan.employeeEnName || employeeLoan.employeeArName} - Monthly Deductions`,
-          data: [
-            { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
-          ],
+          // data: [
+          //   // { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
+          // ],
           tableHeaders: ['Month', 'Deducted Value'],
           tableData: [] as any[],
         };
@@ -188,51 +191,51 @@ export class LoansStatusComponent {
       }
 
       // Summary Section
-      const summarySection = {
-        header: `Employee: ${employeeLoan.employeeEnName || employeeLoan.employeeArName} - Summary`,
-        data: [
-          { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
-          { key: 'Total Loans', value: employeeLoan.totalLoans || 0 },
-          { key: 'Total Deducted', value: employeeLoan.totalDeducted || 0 },
-          { key: 'Remaining', value: employeeLoan.remaining || 0 },
-        ],
-        tableHeaders: [],
-        tableData: [],
-      };
+      // const summarySection = {
+      //   header: `Employee: ${employeeLoan.employeeEnName || employeeLoan.employeeArName} - Summary`,
+      //   data: [
+      //     { key: 'Employee', value: employeeLoan.employeeEnName || employeeLoan.employeeArName || '-' },
+      //     { key: 'Total Loans', value: employeeLoan.totalLoans || 0 },
+      //     { key: 'Total Deducted', value: employeeLoan.totalDeducted || 0 },
+      //     { key: 'Remaining', value: employeeLoan.remaining || 0 },
+      //   ],
+      //   tableHeaders: [],
+      //   tableData: [],
+      // };
 
-      this.cachedTableDataForPDF.push(summarySection);
+      // this.cachedTableDataForPDF.push(summarySection);
     });
 
-    // Overall Summary
-    if (this.LoanStatus.length > 0) {
-      const overallSummary = {
-        header: 'Overall Summary - All Employees',
-        data: [
-          { key: 'Total Loans (All)', value: this.totalLoansAll },
-          { key: 'Total Deducted (All)', value: this.totalDeductedAll },
-          { key: 'Remaining (All)', value: this.remainingAll },
-        ],
-        tableHeaders: [],
-        tableData: [],
-      };
-      this.cachedTableDataForPDF.push(overallSummary);
-    }
-
-    if (this.cachedTableDataForPDF.length === 0) {
-      this.cachedTableDataForPDF = [
-        {
-          header: 'No Loans Data Found',
-          data: [],
-          tableHeaders: [],
-          tableData: [],
-        },
-      ];
-    }
+  // Overall Summary - As a table with single column showing the values
+  if (this.LoanStatus.length > 0) {
+    const overallSummary = {
+      header: 'Overall Summary - All Employees',
+      data: [],
+      tableHeaders: ['Summary'],
+      tableData: [
+        { 'Summary': `Total Loans (All): ${this.totalLoansAll}` },
+        { 'Summary': `Total Deducted (All): ${this.totalDeductedAll}` },
+        { 'Summary': `Remaining (All): ${this.remainingAll}` }
+      ],
+    };
+    this.cachedTableDataForPDF.push(overallSummary);
   }
 
+  if (this.cachedTableDataForPDF.length == 0) {
+    this.cachedTableDataForPDF = [
+      {
+        header: 'No Loans Data Found',
+        data: [],
+        tableHeaders: [],
+        tableData: [],
+      },
+    ];
+  }
+}
+
   getEmployeeName(): string {
-    if (!this.SelectedEmpId) return 'All Employees';
-    return this.selectedEmployee?.en_name || '-';
+    // if (!this.SelectedEmpId) return 'All Employees';
+    return this.selectedEmployee?.en_name || 'All Employees';
   }
 
   getGeneratedDate(): string {
@@ -243,17 +246,17 @@ export class LoansStatusComponent {
     return [
       {
         keyEn: 'Employee: ' + this.getEmployeeName(),
-        keyAr: 'الموظف: ' + this.getEmployeeName(),
+        keyAr: this.getEmployeeName() + ' :الموظف' ,
       },
       {
         keyEn: 'Generated On: ' + this.getGeneratedDate(),
-        keyAr: 'تم الإنشاء في: ' + this.getGeneratedDate(),
+        keyAr: this.getGeneratedDate() + ' :تم الإنشاء في',
       },
     ];
   }
 
   Print() {
-    if (this.cachedTableDataForPDF.length === 0) {
+    if (this.cachedTableDataForPDF.length == 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -299,7 +302,7 @@ export class LoansStatusComponent {
   }
 
   DownloadAsPDF() {
-    if (this.cachedTableDataForPDF.length === 0) {
+    if (this.cachedTableDataForPDF.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -312,7 +315,7 @@ export class LoansStatusComponent {
   }
 
   async exportExcel() {
-    if (this.LoanStatus.length === 0) {
+    if (this.LoanStatus.length == 0) {
       Swal.fire({
         title: 'Warning',
         text: 'No data to export!',

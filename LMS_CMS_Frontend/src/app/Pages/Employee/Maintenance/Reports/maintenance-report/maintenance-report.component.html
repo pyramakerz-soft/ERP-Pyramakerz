@@ -26,6 +26,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="item"
             [(ngModel)]="selectedItemId" (ngModelChange)="onFilterChange()">
             <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Item' | translate }}</option>
+            <option [ngValue]="0">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
             <option *ngIf="maintenanceItems.length == 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let item of maintenanceItems" [ngValue]="item.id">
                 {{ item.en_Name || item.ar_Name }}
@@ -33,31 +34,33 @@
         </select>
     </div>`
 
-<!-- Company Selector -->
-<div class="w-[24%] mb-4">
-    <label class="block mb-2 text-sm font-medium text-gray-900" for="company">{{ 'Company' | translate }}</label>
-    <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="company"
-        [(ngModel)]="selectedCompanyId" (ngModelChange)="onCompanyChange()">
-        <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Company' | translate }}</option>
-        <option *ngIf="maintenanceCompanies.length == 0" disabled>{{ 'No Data' | translate }}</option>
-        <option *ngFor="let company of maintenanceCompanies" [ngValue]="company.id">
-            {{ company.en_Name || company.ar_Name }}
-        </option>
-    </select>
-</div>
+    <!-- Company Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="company">{{ 'Company' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="company"
+            [(ngModel)]="selectedCompanyId" (ngModelChange)="onCompanyChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Company' | translate }}</option>
+            <option [ngValue]="0">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="maintenanceCompanies.length == 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let company of maintenanceCompanies" [ngValue]="company.id">
+                {{ company.en_Name || company.ar_Name }}
+            </option>
+        </select>
+    </div>
 
-<!-- Employee Selector -->
-<div class="w-[24%] mb-4">
-    <label class="block mb-2 text-sm font-medium text-gray-900" for="employee">{{ 'Employee' | translate }}</label>
-    <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
-        [(ngModel)]="selectedEmployeeId" (ngModelChange)="onEmployeeChange()">
-        <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
-        <option *ngIf="maintenanceEmployees.length == 0" disabled>{{ 'No Data' | translate }}</option>
-        <option *ngFor="let employee of maintenanceEmployees" [ngValue]="employee.id">
-            {{ employee.en_Name || employee.ar_Name }}
-        </option>
-    </select>
-</div>
+    <!-- Employee Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="employee">{{ 'Employee' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
+            [(ngModel)]="selectedEmployeeId" (ngModelChange)="onEmployeeChange()">
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
+            <option [ngValue]="0">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+            <option *ngIf="maintenanceEmployees.length == 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let employee of maintenanceEmployees" [ngValue]="employee.id">
+                {{ employee.en_Name || employee.ar_Name }}
+            </option>
+        </select>
+    </div>
 
     <!-- View Report Button -->
     <div class="w-[24%] flex justify-end">

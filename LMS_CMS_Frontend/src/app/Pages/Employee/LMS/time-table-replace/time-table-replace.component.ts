@@ -65,6 +65,7 @@ export class TimeTableReplaceComponent {
   grades: Grade[] = [];
   days: Day[] = [];
 
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -114,6 +115,12 @@ export class TimeTableReplaceComponent {
         this.MaxPeriods = d.maxPeriods;
         this.ExtractDaysAndGrades();
       });
+  }
+
+  IsThisSessionReplaced(sessionId: number): boolean {
+    return this.SessionReplaced.some(
+      s => (s.fisrtSessionId === sessionId || s.secondSessionId === sessionId )
+    );
   }
 
   ExtractDaysAndGrades() {

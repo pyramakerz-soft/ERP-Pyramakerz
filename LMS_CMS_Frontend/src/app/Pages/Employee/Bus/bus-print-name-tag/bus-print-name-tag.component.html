@@ -124,44 +124,59 @@
     </div>
 </div>
 
+
 <!-- Name Tag Template (Hidden until PDF/Print) -->
 <div *ngIf="showPDF" #nameTagContainer 
-     style="padding: 20px; font-family: Arial, sans-serif; background: white; max-width: 210mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px;">
+     style="padding: 15px; font-family: Arial, sans-serif; background: white; width: 200mm; max-width: 200mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px; box-sizing: border-box;">
 
   <!-- Grid of Name Tags (2 columns) -->
-  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px;">
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 5px; width: 100%; box-sizing: border-box;">
     
     <div *ngFor="let student of busStudentData" 
-         style="border: 3px dashed #333; border-radius: 6px; padding: 15px; background: white; page-break-inside: avoid; min-height: 180px; display: flex; flex-direction: column;">
+         style="border: 2px dashed #333; border-radius: 6px; padding: 10px; background: white; page-break-inside: avoid; min-height: 160px; display: flex; flex-direction: column; box-sizing: border-box; position: relative;">
       
-      <!-- School Name Header -->
-      <div style="text-align: center; margin-bottom: 10px;">
-        <div style="font-size: 16px; font-weight: bold; color: #000;">
+      <!-- School Image in Top Left Corner - LARGER SIZE -->
+      <div *ngIf="student.schoolImage" 
+           style="position: absolute; top: 5px; left: 5px;">
+        <img [src]="student.schoolImage" 
+             alt="School Logo"
+             style="width: 40px; height: 40px; object-fit: contain;"> <!-- Increased from 25px to 40px -->
+      </div>
+
+      <!-- School Name Header (Centered) -->
+      <div style="text-align: center; margin-bottom: 8px; padding-left: 45px; padding-right: 45px;"> <!-- Increased padding to accommodate larger image -->
+        <div style="font-size: 14px; font-weight: bold; color: #000; line-height: 1.2;">
           {{ student.schoolName }}
         </div>
       </div>
 
       <!-- Student Info -->
-      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
-        <div style="margin-bottom: 8px;">
-          <span style="font-size: 14px; font-weight: bold; color: #000;">Name: </span>
-          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.studentName }}</span>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; margin-top: 5px;">
+        <div style="margin-bottom: 6px;">
+          <span style="font-size: 13px; font-weight: bold; color: #000;">Name: </span>
+          <span style="font-size: 13px; font-weight: normal; color: #000;">{{ student.studentName }}</span>
         </div>
-        <div style="margin-bottom: 8px;">
-          <span style="font-size: 14px; font-weight: bold; color: #000;">Class: </span>
-          <span style="font-size: 14px; font-weight: normal; color: #000;">{{ student.className }}</span>
+        <div style="margin-bottom: 6px;">
+          <span style="font-size: 13px; font-weight: bold; color: #000;">Class: </span>
+          <span style="font-size: 13px; font-weight: normal; color: #000;">{{ student.className }}</span>
         </div>
-        <div style="margin-bottom: 8px;">
-          <div style="font-size: 13px; font-weight: bold; color: #000;">{{ student.busCategoryName }}</div>
+        <div style="margin-bottom: 6px;">
+          <div style="font-size: 12px; font-weight: bold; color: #000;">{{ student.busCategoryName }}</div>
         </div>
       </div>
 
-      <!-- Bus Info -->
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: 12px; font-weight: bold; color: #000;">{{ selectedBusName }}</div>
-        <div style="font-size: 11px; color: #666;">{{ student.gradeName }}</div>
+      <!-- Bus Info with Driver Number -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+        <div>
+          <div style="font-size: 11px; font-weight: bold; color: #000;">Bus: {{ selectedBusName }}</div>
+          <div *ngIf="student.driverNumber" style="font-size: 11px; font-weight: bold; color: #000;">
+            Driver Number: {{ student.driverNumber }}
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #666; text-align: right;">
+          <div>{{ student.gradeName }}</div>
+        </div>
       </div>
     </div>
-
   </div>
 </div>

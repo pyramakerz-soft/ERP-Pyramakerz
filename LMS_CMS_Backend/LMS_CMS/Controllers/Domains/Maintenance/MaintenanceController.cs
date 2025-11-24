@@ -78,6 +78,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await uow.maintenance_Repository
+            .CountAsync(f => f.IsDeleted != true);
+
             List<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> records = await uow.maintenance_Repository
                 .Select_All_With_IncludesById<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance>(
                     t => t.IsDeleted != true,
@@ -92,8 +98,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return NotFound("No Maintenance records found.");
 
             List<MaintenanceGetDto> dtoList = mapper.Map<List<MaintenanceGetDto>>(records);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
-            return Ok(dtoList);
+            return Ok(new { Data = dtoList, Pagination = paginationMetadata });
         }
 
 

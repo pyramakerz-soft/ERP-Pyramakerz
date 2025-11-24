@@ -25,11 +25,11 @@
         </div>
     </div>
 
-    <div class="my-4 flex justify-center">
-        <h1 class="text-2xl font-bold tracking-wide">{{ Title | translate }}</h1>
+    <div class="my-10 flex justify-center">
+        <h1 class="text-3xl font-bold tracking-wide ">{{ Title | translate }}</h1>
     </div>
 
-    <div class="my-4 space-y-2" dir="ltr">
+    <div class="my-10 space-y-4" dir="ltr">
         <div *ngFor="let info of infoRows" class="flex justify-between">
             <!-- English content (left side) -->
             <div class="w-1/2 text-left ltr">
@@ -43,13 +43,13 @@
     </div>
 
     <div *ngIf="tableDataWithHeaderArray">
-        <div *ngFor="let section of tableDataWithHeaderArray; let last = last" 
-             class="mb-4 pdf-table-container"
-             [ngClass]="{
-               'small-table-section': isSmallTable(section.tableData),
-               'large-table-section': isLargeTable(section.tableData),
-               'table-section': !isSmallTable(section.tableData) && !isLargeTable(section.tableData)
-             }">
+<div *ngFor="let section of tableDataWithHeaderArray; let last = last" 
+     class="mb-8 pdf-table-container page-break-avoid"
+     [ngClass]="{
+       'small-table-section': isSmallTable(section.tableData),
+       'large-table-section': isLargeTable(section.tableData),
+       'table-section': !isSmallTable(section.tableData) && !isLargeTable(section.tableData)
+     }">
             <!-- Combined box for both summary and table -->
             <div class="border rounded-2xl shadow-sm overflow-hidden">
                 <!-- Summary section -->
@@ -104,13 +104,13 @@
         </div>
     </div>
     
-    <div *ngFor="let chunk of tableChunks" 
-         class="mt-4 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
-         [ngClass]="{
-           'small-table-section': isSmallTable(chunk.data),
-           'large-table-section': isLargeTable(chunk.data),
-           'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
-         }">
+<div *ngFor="let chunk of tableChunks" 
+     class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container page-break-avoid"
+     [ngClass]="{
+       'small-table-section': isSmallTable(chunk.data),
+       'large-table-section': isLargeTable(chunk.data),
+       'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
+     }">
         <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
             <colgroup>
                 <col *ngFor="let header of chunk.headers" 
@@ -162,7 +162,7 @@
     </div>
 
     <!-- FIXED: Display both English and Arabic notes side by side -->
-    <div class="my-4 space-y-2">
+    <div class="my-6 space-y-4">
         <div *ngFor="let info of PsNotes" class="flex justify-between">
             <!-- English notes (left side) -->
             <div class="w-1/2 text-left ltr">

@@ -74,6 +74,53 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             return Ok(notificationGetDTO);
         }
 
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Notification" }
+       )]
+        public async Task<IActionResult> GetAllAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.notification_Repository
+            .CountAsync(f => f.IsDeleted != true);
+
+            List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById_Pagination<Notification>(
+                    f => f.IsDeleted != true,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType),
+                    query => query.Include(d => d.InsertedByEmployee))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (notifications == null || notifications.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
+
+            foreach (var notification in notificationGetDTO)
+            {
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = notificationGetDTO, Pagination = paginationMetadata });
+        }
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetByUserTypeID/{userTypeID}")]
@@ -108,7 +155,51 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
+        [HttpGet("GetByUserTypeIDWithPaggination/{userTypeID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Notification" }
+        )]
+        public async Task<IActionResult> GetByUserTypeIDWithPaggination(long userTypeID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.notification_Repository
+            .CountAsync(f => f.IsDeleted != true && f.UserTypeID == userTypeID);
+
+            List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById_Pagination<Notification>(
+                    f => f.IsDeleted != true && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType),
+                    query => query.Include(d => d.InsertedByEmployee))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+
+            List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
+
+            foreach (var notification in notificationGetDTO)
+            {
+                notification.ImageLink = _fileService.GetFileUrl(notification.ImageLink, Request, HttpContext);
+            }
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = notificationGetDTO, Pagination = paginationMetadata });
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
