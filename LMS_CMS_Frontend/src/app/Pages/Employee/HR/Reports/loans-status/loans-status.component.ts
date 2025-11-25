@@ -62,6 +62,9 @@ export class LoansStatusComponent {
   totalDeductedAll: number = 0;
   remainingAll: number = 0;
 
+  isLoading: boolean = false;
+
+
   // School info for PDF
   school = {
     reportHeaderOneEn: 'Loans Status Report',
@@ -109,25 +112,29 @@ export class LoansStatusComponent {
     }
   }
 
-  GetAllData() {
+ GetAllData() {
+    this.isLoading = true; // Start loading
     this.LoanStatus = []
-    this.LoansServ.GetLoansStatus(this.SelectedEmpId, this.DomainName).subscribe((d) => {
-      this.LoanStatus = d
-      this.totalLoansAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalLoans || 0), 0);
-      this.totalDeductedAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalDeducted || 0), 0);
-      this.remainingAll = this.LoanStatus.reduce((sum, x) => sum + (x.remaining || 0), 0);
-      
-      // Find selected employee
-      this.selectedEmployee = this.employees.find(emp => emp.id == this.SelectedEmpId);
-      
-      // Prepare data for export
-      this.prepareExportData();
-    })
-  }
-
-  Apply() {
-    this.IsShowTabls = true
-    this.GetAllData()
+    this.LoansServ.GetLoansStatus(this.SelectedEmpId, this.DomainName).subscribe({
+      next: (d) => {
+        this.LoanStatus = d
+        this.totalLoansAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalLoans || 0), 0);
+        this.totalDeductedAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalDeducted || 0), 0);
+        this.remainingAll = this.LoanStatus.reduce((sum, x) => sum + (x.remaining || 0), 0);
+        
+        // Find selected employee
+        this.selectedEmployee = this.employees.find(emp => emp.id == this.SelectedEmpId);
+        
+        // Prepare data for export
+        this.prepareExportData();
+        this.isLoading = false; // End loading
+      },
+      error: (error) => {
+        console.error('Error loading loan status:', error);
+        this.isLoading = false; // End loading even on error
+        // You might want to show an error message here
+      }
+    });
   }
 
   getEmployee() {
@@ -136,6 +143,18 @@ export class LoansStatusComponent {
       this.employees = d
     })
   }
+
+  Apply() {
+    this.IsShowTabls = true
+    this.GetAllData()
+  }
+
+  // getEmployee() {
+  //   this.employees = []
+  //   this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
+  //     this.employees = d
+  //   })
+  // }
 
   // PDF and Print Methods
   private prepareExportData(): void {
