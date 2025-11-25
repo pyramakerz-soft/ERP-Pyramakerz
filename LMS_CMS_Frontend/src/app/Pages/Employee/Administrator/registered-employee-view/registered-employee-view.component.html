@@ -91,10 +91,13 @@
             </select> 
         </div>
         
-        <button (click)="accept()"
-            class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-             {{ 'Accept' | translate }}
-        </button>
+        <div>
+            <button [disabled]="isLoading" (click)="accept()"
+                class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"> 
+                 <span *ngIf="!isLoading"> {{ 'Accept' | translate }}</span>
+                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button> 
+        </div>
     </div>
 </div>
 

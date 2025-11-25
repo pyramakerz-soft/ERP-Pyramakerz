@@ -84,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         allowedTypes: new[] { "octa", "employee" },
         pages: new[] { "Item Card Report", "Item Card Report With Average" })]
         public async Task<IActionResult> GetInventoryNetCombinedAsync(
-            long storeId,long shopItemId, DateOnly fromDate,DateOnly toDate,int page = 1,int pageSize = 10)
+            long storeId,long shopItemId, DateOnly fromDate,DateOnly toDate,int pageNumber = 1,int pageSize = 10)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
                 var paginatedTransactions = transactionsResult
-                    .Skip((page - 1) * pageSize)
+                    .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
 
@@ -106,7 +106,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     Transactions = paginatedTransactions,
                     Pagination = new
                     {
-                        Page = page,
+                        Page = pageNumber,
                         PageSize = pageSize,
                         TotalCount = totalCount,
                         TotalPages = totalPages
@@ -205,12 +205,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
 
-                var transactionData = allData
-                .Where(d =>
-                    d.InventoryMaster.Date >= parsedFromDate &&
-                    d.InventoryMaster.Date <= parsedToDate)
-                .OrderBy(d => d.InventoryMaster.Date)
-                .ToList();
+
+
+            var transactionData = allData
+            .Where(d =>
+                d.InventoryMaster.Date > parsedFromDate &&
+                d.InventoryMaster.Date <= parsedToDate)
+            .OrderBy(d => d.InventoryMaster.Date)
+            .ToList();
+
+
+
 
             var runningBalance = previousBalance;
             var transactions = new List<InventoryNetTransactionDTO>();
@@ -223,7 +228,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
                 transactions.Add(new InventoryNetTransactionDTO
                 {
-                    Date = d.InventoryMaster.Date,
+                    Date = d.InventoryMaster.Date.AddDays(-1),
                     FlagId = d.InventoryMaster.FlagId,
                     FlagName = d.InventoryMaster.InventoryFlags.enName,
                     InvoiceNumber = d.InventoryMaster.InvoiceNumber,
@@ -373,9 +378,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 currentDate = currentDate.AddDays(1);
             }
 
-            // ============================
             //     ADD PAGINATION HERE
-            // ============================
 
             var resultData = allInventoryData
                 .SelectMany(im => im.InventoryDetails)

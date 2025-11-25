@@ -58,6 +58,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(d => d.IsDeleted != true && d.ClassroomID == classId);
 
             List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(d => d.IsDeleted != true && d.GradeID == classroom.GradeID);
+            if (subjects == null || subjects.Count == 0)
+            {
+                return BadRequest("This Grade doesn't have subjects");
+            }
 
             var classroomSubjectIds = new HashSet<long>(classroomSubjects.Select(cs => cs.SubjectID));
             var subjectIds = new HashSet<long>(subjects.Select(s => s.ID));
