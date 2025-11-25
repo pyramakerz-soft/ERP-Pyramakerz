@@ -9,7 +9,7 @@
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="store">{{ 'Store' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="store"
-            [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
+            [(ngModel)]="selectedStoreId" (ngModelChange)="onStoreSelected()" required>
             <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Store' | translate }}</option>
             <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
         </select>
@@ -22,13 +22,17 @@
             id="dateTo" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 
-    <!-- Category Selector -->
+    <!-- Category Selector - Updated to depend on store selection -->
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="category">{{ 'Category' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="category"
-            [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()">
+            [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()"
+            [disabled]="!selectedStoreId">
             <option [ngValue]="null">{{ 'All' | translate }} {{ 'Categories' | translate }}</option>
             <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+            <option *ngIf="selectedStoreId && categories.length === 0" [ngValue]="null" disabled>
+                {{ 'No Categories Available' | translate }}
+            </option>
         </select>
     </div>
 

@@ -175,9 +175,17 @@ totalRecords: number = 0;
   }
 
   loadCategories() {
+    if (!this.selectedStoreId) {
+      this.categories = [];
+      return;
+    }
+
     this.isLoading = true;
     this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
+      .GetByStoreId(
+        this.categoryService.ApiServ.GetHeader(),
+        this.selectedStoreId,
+      )
       .subscribe({
         next: (categories) => {
           this.categories = categories;
@@ -185,9 +193,23 @@ totalRecords: number = 0;
         },
         error: (error) => {
           console.error('Error loading categories:', error);
+          this.categories = [];
           this.isLoading = false;
         },
       });
+  }
+
+  onStoreSelected() {
+    this.selectedCategoryId = null;
+    this.categories = [];
+    
+    if (this.selectedStoreId) {
+      this.loadCategories();
+    } else {
+      this.categories = [];
+    }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
@@ -195,7 +217,7 @@ totalRecords: number = 0;
     this.reportData = null;
   }
 
-  viewReport() {
+ viewReport() {
     this.isLoading = true;
     this.showTable = false;
 
@@ -210,14 +232,13 @@ totalRecords: number = 0;
       this.overdrawnBalance,
       this.zeroBalances,
       this.inventoryDetailsService.ApiServ.GetHeader(),
-      this.currentPage,    // استخدم currentPage بدلاً من pageNumber
-      this.pageSize        // استخدم pageSize
+      this.currentPage,
+      this.pageSize
     )
     .subscribe({
       next: (response) => {
         this.reportData = response;
         
-        // تحديث بيانات Pagination من الـ response
         if (response) {
           this.currentPage = response.pageNumber || this.currentPage;
           this.pageSize = response.pageSize || this.pageSize;
@@ -233,30 +254,24 @@ totalRecords: number = 0;
         this.reportData = null;
         this.showTable = true;
         this.isLoading = false;
-        // إعادة تعيين Pagination في حالة الخطأ
         this.totalPages = 1;
         this.totalRecords = 0;
       },
     });
   }
-
-  // Helper method to format numbers - remove decimals for whole numbers, keep for decimals
-  formatNumber(value: any): string | number {
+ formatNumber(value: any): string | number {
     if (value === null || value === undefined) return '';
     
     const numValue = Number(value);
     if (isNaN(numValue)) return value;
     
-    // Check if the number is a whole number (no decimal part or .00)
     if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
-      return Math.round(numValue); // Return as integer
+      return Math.round(numValue);
     } else {
-      // Return with 2 decimal places for actual decimals
       return Math.round(numValue * 100) / 100;
     }
   }
 
-  // Format number for display in HTML template (with proper decimal places)
   formatNumberForDisplay(value: any): string {
     if (value === null || value === undefined) return '';
     
@@ -265,17 +280,14 @@ totalRecords: number = 0;
     
     // Check if the number is a whole number
     if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
-      return Math.round(numValue).toString(); // Return as integer string
+      return Math.round(numValue).toString();
     } else {
-      // Return with minimum 1 and maximum 2 decimal places
       return numValue.toFixed(2).replace(/\.?0+$/, '');
     }
   }
 
-  // Format number for display in HTML template (with proper decimal places) - LTR support
   formatNumberForDisplayWithLTR(value: number): string {
     if (value == null) return '';
-    // Add LTR mark before negative numbers
     return value < 0 ? '\u200E' + this.formatNumberForDisplay(value) : this.formatNumberForDisplay(value);
   }
 
@@ -435,9 +447,6 @@ totalRecords: number = 0;
         en: this.school.reportHeaderOneEn,
         ar: this.school.reportHeaderOneAr
       },
-      // subHeaders: [
-      //   { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
-      // ],
       infoRows: [
         { key: 'Report Type', value: this.pageTitle },
         { key: 'To Date', value: this.dateTo },
@@ -472,60 +481,58 @@ totalRecords: number = 0;
 
   // ==================== Pagination Functions ====================
   get visiblePages(): number[] {
-  const total = this.totalPages;
-  const current = this.currentPage;
-  const maxVisible = 5;
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
 
-  if (total <= maxVisible) {
-    return Array.from({ length: total }, (_, i) => i + 1);
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  const half = Math.floor(maxVisible / 2);
-  let start = current - half;
-  let end = current + half;
-
-  if (start < 1) {
-    start = 1;
-    end = maxVisible;
-  } else if (end > total) {
-    end = total;
-    start = total - maxVisible + 1;
+  changeCurrentPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) {
+      return;
+    }
+    
+    this.currentPage = page;
+    this.viewReport();
   }
 
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-
-changeCurrentPage(page: number): void {
-  if (page < 1 || page > this.totalPages || page === this.currentPage) {
-    return;
+  onPageSizeChange(newSize: any): void {
+    const numValue = parseInt(newSize);
+    
+    if (isNaN(numValue) || numValue < 1) {
+      this.pageSize = 10; // default value
+    } else {
+      this.pageSize = numValue;
+    }
+    
+    this.currentPage = 1; // Return to first page
+    this.viewReport();
   }
-  
-  this.currentPage = page;
-  this.viewReport();
-}
 
-onPageSizeChange(newSize: any): void {
-  const numValue = parseInt(newSize);
-  
-  if (isNaN(numValue) || numValue < 1) {
-    this.pageSize = 10; // قيمة افتراضية
-  } else {
-    this.pageSize = numValue;
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    const numValue = parseInt(value);
+    
+    if (isNaN(numValue) || numValue < 1) {
+      event.target.value = this.pageSize; 
+      return;
+    }
   }
-  
-  this.currentPage = 1; // العودة للصفحة الأولى
-  this.viewReport();
-}
-
-validateNumber(event: any): void {
-  const value = event.target.value;
-  const numValue = parseInt(value);
-  
-  if (isNaN(numValue) || numValue < 1) {
-    event.target.value = this.pageSize; 
-    return;
-  }
-}
-
-
 }
