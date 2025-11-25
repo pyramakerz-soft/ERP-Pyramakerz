@@ -329,7 +329,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("LoansStatus")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Loans" }
+            pages: new[] { "Loans" , "Loans Status" }
           )]
         public async Task<IActionResult> GetLoansStatus(long EmpId)
         {
@@ -375,6 +375,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 loansStatusDetailsGetDTO1.LoansDTO= mapper.Map<List<loansGetDTO>>(loans);
                 loansStatusDetailsGetDTO1.EmployeeLoansGetDTO = mapper.Map<List<EmployeeLoansGetDTO>>(employeeLoans);
+                loansStatusDetailsGetDTO1.EmployeeLoansGetDTO = loansStatusDetailsGetDTO1.EmployeeLoansGetDTO.OrderBy(l=>l.Month).ThenBy(a=>a.Year).ToList();   
 
                 loansStatusDetailsGetDTO1.TotalLoans = (decimal)loans.Select(a=>a.Amount).Sum();
                 loansStatusDetailsGetDTO1.TotalDeducted = employeeLoans.Select(a => a.Amount).Sum();
@@ -490,6 +491,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
          
             var loans = await uow.loans_Repository.Select_All_With_IncludesById<Loans>(
                 l => employeeIds.Contains(l.EmployeeID)
+                     && l.IsDeleted != true
                      && l.Date >= request.DateFrom
                      && l.Date <= request.DateTo,
                 q => q.Include(l => l.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory),

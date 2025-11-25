@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 
 @Component({
   selector: 'app-interview-registration',
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './interview-registration.component.html',
   styleUrl: './interview-registration.component.css'
 })
+
+@InitLoader()
 export class InterviewRegistrationComponent {
 
   User_Data_After_Login: TokenData = new TokenData( '', 0, 0, 0, 0, '', '', '', '', '' );
@@ -54,8 +58,8 @@ export class InterviewRegistrationComponent {
   currentMonthDays: DayWithInterviews[] = [];
 
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
-    public interviewTimeTableService:InterviewTimeTableService,
-    private realTimeService: RealTimeNotificationServiceService, public registrationFormInterview: RegistrationFormInterviewService){}
+    public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService,
+    private loadingService: LoadingService ){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -70,11 +74,10 @@ export class InterviewRegistrationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   
   trackByInterview(index: number, interview: InterviewTimeTable): number {

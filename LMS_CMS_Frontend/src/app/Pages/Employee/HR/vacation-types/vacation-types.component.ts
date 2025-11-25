@@ -16,6 +16,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-vacation-types',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './vacation-types.component.html',
   styleUrl: './vacation-types.component.css'
 })
+
+@InitLoader()
 export class VacationTypesComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -62,7 +66,7 @@ export class VacationTypesComponent {
     private translate: TranslateService,
     public ApiServ: ApiService,
     public VacationTypesServ: VacationTypesService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,11 +94,10 @@ export class VacationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private showErrorAlert(errorMessage: string) {
@@ -236,7 +239,7 @@ CreateOREdit() {
           if (
             field == 'name'
           ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
           }
         }

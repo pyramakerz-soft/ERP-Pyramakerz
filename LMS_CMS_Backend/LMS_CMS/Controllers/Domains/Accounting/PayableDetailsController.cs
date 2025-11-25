@@ -703,7 +703,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Payable Details" }
+            pages: new[] { "Payable" }
         )]
         public IActionResult Delete(long id)
         {

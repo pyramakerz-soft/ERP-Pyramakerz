@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-job-categories',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './job-categories.component.html',
   styleUrl: './job-categories.component.css',
 })
+
+@InitLoader()
 export class JobCategoriesComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -65,7 +69,7 @@ export class JobCategoriesComponent {
     private translate: TranslateService,
     public JobCategoryServ: JobCategoriesService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,8 +97,7 @@ export class JobCategoriesComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

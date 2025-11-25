@@ -41,8 +41,7 @@ export class LoginComponent {
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading: boolean = false
 
-  constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService,
-    private realTimeService: RealTimeNotificationServiceService, private employeeService: EmployeeService, private translate: TranslateService
+  constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService, private employeeService: EmployeeService, private translate: TranslateService
   ) { }
 
   ngOnInit() {
@@ -60,8 +59,7 @@ export class LoginComponent {
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('popstate', this.checkLocalStorageOnNavigate);
-    this.realTimeService.stopConnection();
+    window.removeEventListener('popstate', this.checkLocalStorageOnNavigate); 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

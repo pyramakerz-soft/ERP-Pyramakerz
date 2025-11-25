@@ -22,6 +22,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 
 @Component({
@@ -31,6 +33,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './conduct.component.html',
   styleUrl: './conduct.component.css'
 })
+
+@InitLoader()
 export class ConductComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -54,6 +58,11 @@ export class ConductComponent {
   keysArray: string[] = ['id', 'studentEnName' ,'conductTypeEnName'];
   schools: School[] = [];
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -69,8 +78,8 @@ export class ConductComponent {
     public ConductLevelServ: ConductLevelService,
     public SectionServ: SectionService,
     public ConductServ: ConductService,
-    public ConductTypeServ: ConductTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public ConductTypeServ: ConductTypeService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,19 +106,62 @@ export class ConductComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
-  GetAllData() {
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
-    this.ConductServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.TableData = d;
-      console.log(d , this.TableData)
-    });
+    this.ConductServ.GetBySchoolIdWithPaggination(this.SelectedSchoolId ,DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Bonus');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }  
+
+  private showErrorAlert(errorMessage: string) {
+      const translatedTitle = this.translate.instant('Error');
+      const translatedButton = this.translate.instant('Okay');
+  
+      Swal.fire({
+        icon: 'error',
+        title: translatedTitle,
+        text: errorMessage,
+        confirmButtonText: translatedButton,
+        customClass: { confirmButton: 'secondaryBg' },
+      });
   }
 
   GetSchools() {
@@ -135,7 +187,7 @@ export class ConductComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.ConductServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -163,14 +215,17 @@ export class ConductComponent {
     return IsAllow;
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
+    async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Conduct[] = await firstValueFrom(
-        this.ConductServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      const data: any = await firstValueFrom(
+        this.ConductServ.GetBySchoolIdWithPaggination(this.SelectedSchoolId ,this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -183,7 +238,7 @@ export class ConductComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -192,5 +247,60 @@ export class ConductComponent {
       this.TableData = [];
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 
 }

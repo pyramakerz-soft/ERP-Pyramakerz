@@ -64,6 +64,52 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok(dtoList);
         }
 
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
+        public async Task<IActionResult> GetAllAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await uow.maintenance_Repository
+            .CountAsync(f => f.IsDeleted != true);
+
+            List<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> records = await uow.maintenance_Repository
+                .Select_All_With_IncludesById<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance>(
+                    t => t.IsDeleted != true,
+                    query => query
+                        .Include(m => m.Item)
+                        .Include(m => m.Company)
+                        .Include(m => m.MaintenanceEmployee.Employee)
+                );
+
+
+            if (records == null || !records.Any())
+                return NotFound("No Maintenance records found.");
+
+            List<MaintenanceGetDto> dtoList = mapper.Map<List<MaintenanceGetDto>>(records);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = dtoList, Pagination = paginationMetadata });
+        }
+
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
         public async Task<IActionResult> GetByIdAsync(long id)
@@ -130,7 +176,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
              
             if (hasEmployee)
             {
-                var emp = uow.employee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
+                var emp = uow.maintenanceEmployee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
                 if (emp == null)
                     return NotFound($"Employee with this ID is not found."); 
             }
@@ -214,7 +260,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             if (hasEmployee)
             {
-                var emp = uow.employee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
+                var emp = uow.maintenanceEmployee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
                 if (emp == null) return NotFound("Employee not found");
             }
             else if (hasCompany)
@@ -303,7 +349,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok();
         }
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance", "Maintenance Report" })]
         public async Task<IActionResult> GetReport([FromBody] MaintenanceReportRequestDto request)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);

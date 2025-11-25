@@ -25,16 +25,31 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { Employee } from '../../../../Models/Employee/employee';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-saves',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './saves.component.html',
-  styleUrl: './saves.component.css'
+  styleUrl: './saves.component.css',
 })
+
+@InitLoader()
 export class SavesComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -45,7 +60,7 @@ export class SavesComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -60,9 +75,9 @@ export class SavesComponent {
   validationErrors: { [key in keyof Saves]?: string } = {};
 
   AccountNumbers: AccountingTreeChart[] = [];
-  isLoading = false
+  isLoading = false;
 
-  safeId = 0
+  safeId = 0;
   Employees: Employee[] = [];
   safeEmployees: SafeEmployee[] = [];
   selectedEmployees: any[] = [];
@@ -80,10 +95,10 @@ export class SavesComponent {
     public SaveServ: SaveService,
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
     private employeeService: EmployeeService,
-    private safeEmployeeService: SafeEmployeeService
-  ) { }
+    private safeEmployeeService: SafeEmployeeService,
+    private loadingService: LoadingService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -103,44 +118,53 @@ export class SavesComponent {
     });
 
     this.GetAllData();
-    this.GetAllAccount()
-          this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.GetAllAccount();
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
-
-
+  }
 
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.SaveServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
   GetAllAccount() {
-    this.accountServ.GetBySubAndFileLinkID(5, this.DomainName).subscribe((d) => {
-      this.AccountNumbers = d;
-    })
+    this.accountServ
+      .GetBySubAndFileLinkID(5, this.DomainName)
+      .subscribe((d) => {
+        this.AccountNumbers = d;
+      });
   }
 
   Create() {
     this.mode = 'Create';
     this.save = new Saves();
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " +  this.translate.instant('Safe')+ this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذه') +
+        ' ' +
+        this.translate.instant('Safe') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -150,8 +174,8 @@ export class SavesComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.SaveServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+          this.GetAllData();
+        });
       }
     });
   }
@@ -159,9 +183,9 @@ export class SavesComponent {
   Edit(id: number) {
     this.mode = 'Edit';
     this.SaveServ.GetById(id, this.DomainName).subscribe((d) => {
-      this.save = d
-    })
-    this.validationErrors = {}
+      this.save = d;
+    });
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -185,16 +209,16 @@ export class SavesComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.SaveServ.Add(this.save, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-
-        },
-          error => {
-            this.isLoading = false
+        this.SaveServ.Add(this.save, this.DomainName).subscribe(
+          (d) => {
+            this.closeModal();
+            this.GetAllData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -202,17 +226,18 @@ export class SavesComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.SaveServ.Edit(this.save, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-
-        },
-          error => {
-            this.isLoading = false
+        this.SaveServ.Edit(this.save, this.DomainName).subscribe(
+          (d) => {
+            this.closeModal();
+            this.GetAllData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -220,13 +245,14 @@ export class SavesComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
-    } 
+    }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -236,29 +262,31 @@ export class SavesComponent {
 
   isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.save) {
-      if (this.save.hasOwnProperty(key)) {
-        const field = key as keyof Saves;
-        if (!this.save[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
+    this.validationErrors = {}; // Clear previous errors
+
+    // Validate required fields with translation
+    if (!this.save.name) {
+      this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+      isValid = false;
     }
 
-    if (this.save.name.length > 100) {
+    if (!this.save.accountNumberID) {
+      this.validationErrors['accountNumberID'] =
+        this.getRequiredErrorMessage('Account Number');
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
     }
+
+    // Validate name length
+    if (this.save.name && this.save.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters'
+      );
+    }
+
     return isValid;
   }
+
   capitalizeField(field: keyof Saves): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -290,7 +318,7 @@ export class SavesComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -299,80 +327,89 @@ export class SavesComponent {
       this.TableData = [];
     }
   }
-  
-  getEmployees(){
-    this.Employees = [] 
-    this.employeeService.Get_Employees(this.DomainName).subscribe(
-      data => {
-        this.Employees = data
-      }
-    )
+
+  getEmployees() {
+    this.Employees = [];
+    this.employeeService.Get_Employees(this.DomainName).subscribe((data) => {
+      this.Employees = data;
+    });
   }
 
-  getBankEmployees(){
-    this.safeEmployees = [] 
-    this.safeEmployeeService.Get(this.safeId, this.DomainName).subscribe(
-      data => {
-        this.safeEmployees = data 
+  getBankEmployees() {
+    this.safeEmployees = [];
+    this.safeEmployeeService
+      .Get(this.safeId, this.DomainName)
+      .subscribe((data) => {
+        this.safeEmployees = data;
 
-        this.selectedEmployees = this.safeEmployees.map(emp => ({
+        this.selectedEmployees = this.safeEmployees.map((emp) => ({
           employeeID: emp.employeeID,
           employeeEnglishName: emp.employeeEnglishName,
-          employeeArabicName: emp.employeeArabicName
+          employeeArabicName: emp.employeeArabicName,
         }));
-      }
-    )
+      });
   }
 
-  AddEmployee(safeId: number) { 
+  AddEmployee(safeId: number) {
     document.getElementById('Add_Employee')?.classList.remove('hidden');
     document.getElementById('Add_Employee')?.classList.add('flex');
 
-    this.safeId = safeId
-    this.getEmployees()
-    this.getBankEmployees()
+    this.safeId = safeId;
+    this.getEmployees();
+    this.getBankEmployees();
   }
 
   closeAddModal() {
     document.getElementById('Add_Employee')?.classList.remove('flex');
-    document.getElementById('Add_Employee')?.classList.add('hidden'); 
-    this.safeId = 0
-    this.Employees = [] 
-    this.selectedEmployees = [] 
+    document.getElementById('Add_Employee')?.classList.add('hidden');
+    this.safeId = 0;
+    this.Employees = [];
+    this.selectedEmployees = [];
   }
- 
+
   onEmployeeSelect(event: any) {
     const selectedId = +event.target.value;
-    const emp = this.Employees.find(e => e.id === selectedId); 
-    
-    if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
+    const emp = this.Employees.find((e) => e.id === selectedId);
+
+    if (emp && !this.selectedEmployees.some((e) => e.employeeID === emp.id)) {
       const newEmp = {
         employeeID: emp.id,
         employeeEnglishName: emp.en_name,
-        employeeArabicName: emp.ar_name
+        employeeArabicName: emp.ar_name,
       };
       this.selectedEmployees.push(newEmp);
     }
- 
-    event.target.value = "";
+
+    event.target.value = '';
   }
 
   removeEmployee(emp: any) {
-    this.selectedEmployees = this.selectedEmployees.filter(e => e.employeeID !== emp.employeeID);
+    this.selectedEmployees = this.selectedEmployees.filter(
+      (e) => e.employeeID !== emp.employeeID
+    );
   }
 
   Save() {
     this.isLoading = true;
-    
-    let safeEmp = new SafeEmployee()
-    safeEmp.saveID = this.safeId
-    safeEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
-    
-    this.safeEmployeeService.Add(safeEmp, this.DomainName).subscribe(
-      data =>{
-        this.isLoading = false;
-        this.closeAddModal()
-      }
-    ) 
+
+    let safeEmp = new SafeEmployee();
+    safeEmp.saveID = this.safeId;
+    safeEmp.employeeIDs = this.selectedEmployees.map((e) => e.employeeID);
+
+    this.safeEmployeeService.Add(safeEmp, this.DomainName).subscribe((data) => {
+      this.isLoading = false;
+      this.closeAddModal();
+    });
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 }

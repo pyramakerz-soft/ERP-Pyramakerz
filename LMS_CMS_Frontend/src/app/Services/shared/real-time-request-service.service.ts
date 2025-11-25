@@ -23,7 +23,7 @@ export class RealTimeRequestServiceService {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
  
     this.requestHubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.ApiServ.BaseUrlSignalR}requestHub`, {
+      .withUrl(`${this.ApiServ.BaseUrlSignalR}  `, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => localStorage.getItem("current_token") || '',
@@ -35,6 +35,20 @@ export class RealTimeRequestServiceService {
           Math.min(retryContext.previousRetryCount * 1000, 10000)
       })
       .build();
+ 
+    // this.requestHubConnection = new signalR.HubConnectionBuilder()
+    //   .withUrl(`${this.ApiServ.BaseUrlSignalR}requestHub`, {
+    //     skipNegotiation: true,
+    //     transport: signalR.HttpTransportType.WebSockets,
+    //     accessTokenFactory: () => localStorage.getItem("current_token") || '',
+    //     headers: { "Domain-Name": this.DomainName }
+    //   })
+    //   .configureLogging(signalR.LogLevel.Debug)
+    //   .withAutomaticReconnect({
+    //     nextRetryDelayInMilliseconds: retryContext => 
+    //       Math.min(retryContext.previousRetryCount * 1000, 10000)
+    //   })
+    //   .build();
    
       
     // Connection state handlers
@@ -61,9 +75,13 @@ export class RealTimeRequestServiceService {
         setTimeout(() => this.startRequestConnection(), 5000);
       });
 
-    this.requestHubConnection.on('NewRequest', (data: any) => { 
+    this.requestHubConnection.on('ReceiveRequestUpdate', (data: any) => { 
       this.requestService.notifyRequestOpened(); 
     }); 
+
+    // this.requestHubConnection.on('NewRequest', (data: any) => { 
+    //   this.requestService.notifyRequestOpened(); 
+    // }); 
   } 
 
   private joinRequestGroup() { 

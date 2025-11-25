@@ -18,6 +18,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Student } from '../../../../Models/student';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-shop-item',
@@ -26,6 +28,8 @@ import { Student } from '../../../../Models/student';
   templateUrl: './shop-item.component.html',
   styleUrl: './shop-item.component.css'
 })
+
+@InitLoader()
 export class ShopItemComponent {
   ShopItemId = 0
   
@@ -44,9 +48,12 @@ export class ShopItemComponent {
   selectedSize: number = 0;
   students: Student[] = [];
   
+  imageList: string[] = [];
+  selectedImage: string | null = null;
+  
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
     , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,public StudentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService
   ){}
 
   ngOnInit(){
@@ -77,10 +84,9 @@ export class ShopItemComponent {
   }
 
   ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){
@@ -97,6 +103,19 @@ export class ShopItemComponent {
         this.shopItem = data
         if(this.shopItem.vatForForeign != 0){
           this.CalculatedVat = (this.shopItem.salesPrice ? this.shopItem.salesPrice : 0) + (this.shopItem.salesPrice ? this.shopItem.salesPrice : 0) * ((this.shopItem.vatForForeign ? this.shopItem.vatForForeign : 0) / 100)
+        }
+
+        const images = [];
+        if (this.shopItem.mainImage) images.push(this.shopItem.mainImage);
+        if (this.shopItem.otherImage) images.push(this.shopItem.otherImage);
+        this.imageList = images;
+ 
+        if (this.shopItem.mainImage) {
+          this.selectedImage = this.shopItem.mainImage;
+        } else if (this.shopItem.otherImage) {
+          this.selectedImage = this.shopItem.otherImage;
+        } else {
+          this.selectedImage = null;
         }
       }
     )
@@ -141,24 +160,36 @@ export class ShopItemComponent {
   } 
 
   addShopItemToCart(id: number) { 
-    this.cartShopItem.studentID = this.StuID
-    this.cartShopItem.quantity = 1
-    this.cartShopItem.shopItemID = id
-    if(this.selectedColor != 0){
-      this.cartShopItem.shopItemColorID = this.selectedColor
-    }
-    if(this.selectedSize != 0){
-      this.cartShopItem.shopItemSizeID = this.selectedSize
-    }
-
-    this.cartShopItemService.Add(this.cartShopItem, this.DomainName).subscribe(
-      data => {
-        Swal.fire({
-          title: "Added Successfully!",
-          icon: "success"
-        }).then((result) => {
-          this.goToCart();
-        }); 
+    this.shopItemService.CheckIfHeCanAddItem(id, this.StuID, this.DomainName).subscribe(
+      data =>{
+        if(data == true){
+          this.cartShopItem.studentID = this.StuID
+          this.cartShopItem.quantity = 1
+          this.cartShopItem.shopItemID = id
+          if(this.selectedColor != 0){
+            this.cartShopItem.shopItemColorID = this.selectedColor
+          }
+          if(this.selectedSize != 0){
+            this.cartShopItem.shopItemSizeID = this.selectedSize
+          }
+      
+          this.cartShopItemService.Add(this.cartShopItem, this.DomainName).subscribe(
+            data => {
+              Swal.fire({
+                title: "Added Successfully!",
+                icon: "success"
+              }) 
+            }
+          )
+        }else{
+          Swal.fire({
+            icon: 'warning',
+            title: 'Oops...',
+            text: "This item isn't available for your selected student",
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
       }
     )
   }

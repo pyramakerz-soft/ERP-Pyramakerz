@@ -755,7 +755,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             var leaveRequests = await uow.leaveRequest_Repository.Select_All_With_IncludesById<LeaveRequest>(
                 b => employeeIds.Contains(b.EmployeeID)
                      && b.Date >= request.DateFrom
-                     && b.Date <= request.DateTo,
+                     && b.Date <= request.DateTo
+                     && b.IsDeleted != true,
                 q => q.Include(b => b.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory)
             );
 
@@ -788,8 +789,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     EmployeeId = g.Key.EmployeeID,
                     EmployeeEnName = g.Key.EmployeeEnName,
                     EmployeeArName = g.Key.EmployeeArName,
-                    TotalAmount = g.Sum(x => x.Used),
-                    LeaveRequests = g.ToList()
+                    //TotalAmount = g.Sum(x => x.Used),
+                    LeaveRequests = g.OrderBy(a=>a.Date).ToList()
                 })
                 .ToList();
 

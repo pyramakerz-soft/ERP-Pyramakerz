@@ -28,6 +28,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool IsSummerCourse { get; set; }
         public List<DirectMarkClassesStudentGetDTO> DirectMarkClassesStudent { get; set; } = new List<DirectMarkClassesStudentGetDTO>();
         public List<DirectMarkClassesGetDTO> DirectMarkClasses { get; set; } = new List<DirectMarkClassesGetDTO>();
+        public long? AcademicYearID { get; set; }
 
     }
 }

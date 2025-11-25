@@ -25,6 +25,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-assignment-student',
   standalone: true,
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './assignment-student.component.html',
   styleUrl: './assignment-student.component.css',
 })
+
+@InitLoader()
 export class AssignmentStudentComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -67,6 +71,7 @@ export class AssignmentStudentComponent {
   SelectedGradeId: number = 0;
 
   DegreeError: string = '';
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -83,7 +88,7 @@ export class AssignmentStudentComponent {
     public classServ: ClassroomService,
     public assignmentServ: AssignmentService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,7 +100,7 @@ export class AssignmentStudentComponent {
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment();
     this.GetAllData(this.CurrentPage, this.PageSize);
-    this.getAllSchools();
+    // this.getAllSchools();
 
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
@@ -105,8 +110,7 @@ export class AssignmentStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -117,27 +121,8 @@ export class AssignmentStudentComponent {
       .GetByID(this.AssignmentId, this.DomainName)
       .subscribe((d) => {
         this.assignment = d;
+        this.getAllClassByGradeId()
       });
-  }
-
-  getAllSchools() {
-    this.schools = [];
-    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d;
-    });
-  }
-
-  getAllGradesBySchoolId() {
-    this.Grades = [];
-    this.IsShowTabls = false;
-    this.SelectedGradeId = 0;
-    this.ClassId = 0;
-    this.GradeServ.GetBySchoolId(
-      this.SelectedSchoolId,
-      this.DomainName
-    ).subscribe((d) => {
-      this.Grades = d;
-    });
   }
 
   getAllClassByGradeId() {
@@ -145,7 +130,7 @@ export class AssignmentStudentComponent {
     this.ClassId = 0;
     this.IsShowTabls = false;
     this.classServ
-      .GetByGradeId(this.SelectedGradeId, this.DomainName)
+      .GetBySubjectId(this.assignment.subjectID, this.DomainName)
       .subscribe((d) => {
         this.classes = d;
       });
@@ -241,6 +226,19 @@ export class AssignmentStudentComponent {
     this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`);
   }
 
+  IsLate(row: AssignmentStudent) :boolean{
+    const TheSubmittedDate = new Date(row.insertedAt); // current date
+    const dueDate = new Date(row.dueDate);
+    TheSubmittedDate.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+    if (TheSubmittedDate > dueDate) {
+      return true
+    }
+    else {
+      return false
+    }
+  }
+
   openFile(link: string | null) {
     if (link) {
       window.open(link, '_blank');
@@ -249,71 +247,94 @@ export class AssignmentStudentComponent {
     }
   }
 
-  saveDegree(row: AssignmentStudent): void {
-    const TheSubmittedDate = new Date(row.insertedAt); // current date
-    const dueDate = new Date(row.dueDate);
-    TheSubmittedDate.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
-    console.log(343, TheSubmittedDate, dueDate);
-    if (this.IsFormValid(row)) {
-      if (TheSubmittedDate > dueDate) {
-        Swal.fire({
-          title: 'Apply Late Submission Penalty?',
-          text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#089B41',
-          cancelButtonColor: '#17253E',
-          confirmButtonText: 'Apply Penalty',
-          cancelButtonText: 'Forgive Delay',
-        }).then((result) => {
-          row.evaluationConsideringTheDelay = result.isConfirmed;
-          this.assignmentStudentServ.Edit(row, this.DomainName).subscribe(
-            (d) => {
-              this.editDegreeId = null;
-              this.GetAllData(this.CurrentPage, this.PageSize);
-            },
-            (error) => {
-              this.editDegreeId = null;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error.error,
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-              this.GetAllData(this.CurrentPage, this.PageSize);
-            }
-          );
-        });
-      } else {
-        row.evaluationConsideringTheDelay = false;
-        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updated Successfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.editDegreeId = null;
-            this.GetAllData(this.CurrentPage, this.PageSize);
-          },
-          error: (err) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong, please try again.',
-              confirmButtonColor: '#d33',
-            });
-            this.editDegreeId = null;
-            this.GetAllData(this.CurrentPage, this.PageSize);
-            console.error('Edit error:', err);
-          },
-        });
-      }
+  saveDegree(): void {
+    if (this.IsFormValid()) {
+      this.isLoading = true;
+      this.assignmentStudentServ.EditAll(this.TableData, this.DomainName).subscribe(
+        (d) => {
+          this.isLoading = false;
+          this.GetAllData(this.CurrentPage, this.PageSize);
+        },
+        (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+          this.isLoading = false;
+          this.GetAllData(this.CurrentPage, this.PageSize);
+        }
+      );
     }
   }
+
+  // saveDegree(row: AssignmentStudent): void {
+  //   const TheSubmittedDate = new Date(row.insertedAt); // current date
+  //   const dueDate = new Date(row.dueDate);
+  //   TheSubmittedDate.setHours(0, 0, 0, 0);
+  //   dueDate.setHours(0, 0, 0, 0); // ensure dueDate is a Date object
+  //   console.log(343, TheSubmittedDate, dueDate);
+  //   if (this.IsFormValid(row)) {
+  //     if (TheSubmittedDate > dueDate) {
+  //       Swal.fire({
+  //         title: 'Apply Late Submission Penalty?',
+  //         text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
+  //         icon: 'warning',
+  //         showCancelButton: true,
+  //         confirmButtonColor: '#089B41',
+  //         cancelButtonColor: '#17253E',
+  //         confirmButtonText: 'Apply Penalty',
+  //         cancelButtonText: 'Forgive Delay',
+  //       }).then((result) => {
+  //         row.evaluationConsideringTheDelay = result.isConfirmed;
+  //         this.assignmentStudentServ.Edit(row, this.DomainName).subscribe(
+  //           (d) => {
+  //             this.editDegreeId = null;
+  //             this.GetAllData(this.CurrentPage, this.PageSize);
+  //           },
+  //           (error) => {
+  //             this.editDegreeId = null;
+  //             Swal.fire({
+  //               icon: 'error',
+  //               title: 'Oops...',
+  //               text: error.error,
+  //               confirmButtonText: 'Okay',
+  //               customClass: { confirmButton: 'secondaryBg' },
+  //             });
+  //             this.GetAllData(this.CurrentPage, this.PageSize);
+  //           }
+  //         );
+  //       });
+  //     } else {
+  //       row.evaluationConsideringTheDelay = false;
+  //       this.assignmentStudentServ.Edit(row, this.DomainName).subscribe({
+  //         next: () => {
+  //           Swal.fire({
+  //             icon: 'success',
+  //             title: 'Done',
+  //             text: 'Updated Successfully',
+  //             confirmButtonColor: '#089B41',
+  //           });
+  //           this.editDegreeId = null;
+  //           this.GetAllData(this.CurrentPage, this.PageSize);
+  //         },
+  //         error: (err) => {
+  //           Swal.fire({
+  //             icon: 'error',
+  //             title: 'Error',
+  //             text: 'Something went wrong, please try again.',
+  //             confirmButtonColor: '#d33',
+  //           });
+  //           this.editDegreeId = null;
+  //           this.GetAllData(this.CurrentPage, this.PageSize);
+  //           console.error('Edit error:', err);
+  //         },
+  //       });
+  //     }
+  //   }
+  // }
 
   validateNumberAssignmentStudent(
     event: any,
@@ -329,16 +350,19 @@ export class AssignmentStudentComponent {
     }
   }
 
-  IsFormValid(row: AssignmentStudent): boolean {
+  IsFormValid(): boolean {
     let isValid = true;
-    if (row.degree == null) {
-      isValid = false;
-      this.DegreeError = 'Degree Can not be empty';
-    }
-    if (row.degree != null && row.degree > row.assignmentDegree) {
-      isValid = false;
-      this.DegreeError = 'Degree cannot exceed ' + row.assignmentDegree;
-    }
+    this.DegreeError = '';  // reset error
+    this.TableData.forEach(row => {
+      console.log(this.TableData)
+      if (!row.degree && row.degree !== 0){
+        isValid = false;
+      }
+      else if (row.degree && row.assignmentDegree &&row.degree > row.assignmentDegree) {
+        isValid = false;
+      }
+    });
+
     return isValid;
   }
 

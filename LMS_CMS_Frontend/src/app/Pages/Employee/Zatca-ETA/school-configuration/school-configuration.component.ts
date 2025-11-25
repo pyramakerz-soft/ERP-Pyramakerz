@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-school-configuration',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './school-configuration.component.html',
   styleUrl: './school-configuration.component.css'
 })
+
+@InitLoader()
 export class SchoolConfigurationComponent {
   ETA_Zatca: string = '';
   keysArray: string[] = ['id', 'name', 'address'];
@@ -44,8 +48,7 @@ export class SchoolConfigurationComponent {
    
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,private menuService: MenuService, 
     public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router,
-    private realTimeService: RealTimeNotificationServiceService,
-    private languageService: LanguageService,) {}
+    private languageService: LanguageService, private loadingService: LoadingService ) {}
 
   ngOnInit(): void { 
     const currentUrl = this.router.url;
@@ -79,11 +82,10 @@ export class SchoolConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchoolData() {

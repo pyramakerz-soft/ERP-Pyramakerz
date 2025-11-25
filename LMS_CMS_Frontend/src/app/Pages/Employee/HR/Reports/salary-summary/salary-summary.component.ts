@@ -23,6 +23,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-salary-summary',
@@ -31,6 +33,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './salary-summary.component.html',
   styleUrl: './salary-summary.component.css'
 })
+
+@InitLoader()
 export class SalarySummaryComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -66,6 +70,10 @@ export class SalarySummaryComponent {
   SelectedJobCatName: string = '';
   SelectedEmpName: string = '';
   selectedMonth: string = '';
+  school = {
+    reportHeaderOneEn: 'Salary Summary Report',
+    reportHeaderOneAr: ' تقرير ملخص الرواتب '
+  };
 
   constructor(
     private router: Router,
@@ -83,7 +91,7 @@ export class SalarySummaryComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -101,8 +109,7 @@ export class SalarySummaryComponent {
     this.getJobsCategory()
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -157,9 +164,25 @@ export class SalarySummaryComponent {
     })
   }
 
-  GetEmployeeName(){
-    const selectedEmp = this.employees.find(c => c.id == this.SelectedEmpId);
-    this.SelectedEmpName = selectedEmp ? selectedEmp.en_name : '';
+  getJobCategoryName(): string {
+    return this.jobscat.find(jc => jc.id == this.SelectedJobCatId)?.name || 
+           'All Job Categories';
+  }
+
+  getJobName(): string {
+    return this.jobs.find(j => j.id == this.SelectedJobId)?.name || 
+           'All Jobs';
+  }
+
+  getEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.en_name || 
+           this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           'All Employees';
+  }
+
+  getArEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           'All Employees';
   }
 
   DownloadAsPDF() {
@@ -170,7 +193,8 @@ export class SalarySummaryComponent {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    await this.getPDFData();
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
@@ -216,11 +240,28 @@ export class SalarySummaryComponent {
     }, 500);
   }
 
+    async getPDFData() {
+    // Build rows for each subject
+    this.tableDataForPDF = this.salaryHistory.map(d => {
+      const row: Record<string, any> = {};
+      row['Employee EnName'] = d.employeeEnName;
+      row['Basic Salary'] = d.basicSalary;
+      row['Total Bonus'] = d.totalBonus ;
+      row['Total Overtime'] =  d.totalOvertime ;
+      row['Total Deductions'] =   d.totalDeductions  ;
+      row['Total Loans'] = d.totalLoans ;
+      row['netSalary'] = d.netSalary ;
+      return row;
+    });
+
+    console.log('Prepared PDF data:', this.tableDataForPDF);
+  }
+
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        ar: "تقرير ملخص الرواتب"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },

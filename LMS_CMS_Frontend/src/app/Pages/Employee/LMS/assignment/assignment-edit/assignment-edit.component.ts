@@ -27,6 +27,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
@@ -34,6 +36,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
+
+@InitLoader()
 export class AssignmentEditComponent {
 
   assignment: Assignment = new Assignment();
@@ -89,8 +93,8 @@ export class AssignmentEditComponent {
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
     public QuestionBankTypeServ: QuestionBankTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,  
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -112,8 +116,7 @@ export class AssignmentEditComponent {
     document.addEventListener('click', this.handleClickOutside);
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -135,8 +138,7 @@ export class AssignmentEditComponent {
       this.DomainName
     ).subscribe((d) => {
       this.assignment = d;
-      this.getLessons();
-      console.log(this.assignment)
+      this.getLessons(); 
     });
   }
 
@@ -441,6 +443,7 @@ export class AssignmentEditComponent {
     this.assignmentQuestion.questionIds = this.selectedQuestions;
     this.assignmentQuestion.lessonId = this.SelectedLessonID;
     this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
+    console.log(this.assignmentQuestion)
     if (this.isFormValid()) {
       this.isLoading = true;
       this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe({
@@ -454,8 +457,7 @@ export class AssignmentEditComponent {
           this.closeModal();
           this.getAssignmentData();
         },
-        error: (err) => {
-          console.error('Error adding questions:', err);
+        error: (err) => { 
           this.isLoading = false;
           this.closeModal();
 

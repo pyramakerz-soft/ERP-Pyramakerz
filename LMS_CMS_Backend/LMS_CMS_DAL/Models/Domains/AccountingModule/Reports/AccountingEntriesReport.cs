@@ -10,6 +10,7 @@
         public string? MainAccount { get; set; }
         public long? SubAccountNo { get; set; }
         public string? SubAccount { get; set; }
+        public string? InvoiceNumber { get; set; }
         public decimal? Debit { get; set; }
         public decimal? Credit { get; set; }
         public DateTime? Date { get; set; }

@@ -21,6 +21,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-view',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject-view.component.html',
   styleUrl: './subject-view.component.css'
 })
+
+@InitLoader()
 export class SubjectViewComponent {
   subject: Subject = new Subject()
   subjectId = 0;
@@ -56,7 +60,8 @@ export class SubjectViewComponent {
 
   constructor(private languageService: LanguageService, public subjectService: SubjectService, public activeRoute: ActivatedRoute, public router: Router, public EditDeleteServ: DeleteEditPermissionService,
     public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService: SubjectWeightService,private translate: TranslateService,
-    public subjectResourceService: SubjectResourceService, private realTimeService: RealTimeNotificationServiceService, public weightTypeService: WeightTypeService) { }
+    public subjectResourceService: SubjectResourceService, public weightTypeService: WeightTypeService,
+    private loadingService: LoadingService) { }
 
   async ngOnInit() {
     this.subjectId = await Number(this.activeRoute.snapshot.paramMap.get('SubId'))
@@ -89,8 +94,7 @@ export class SubjectViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -326,7 +330,7 @@ isFormValidForSubjectWeight(): boolean {
       const field = key as keyof SubjectWeight;
       if (!this.subjectWeightElement[field]) {
         if (field == "weightTypeID" || field == "weight") {
-          this.validationErrorsForWeights[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`; 
+          this.validationErrorsForWeights[field] =`${this.translate.instant(field)} ${this.translate.instant('Field is required')} `; 
           isValid = false;
         }
       } else {
@@ -344,7 +348,7 @@ isFormValidForSubjectResource(): boolean {
       const field = key as keyof SubjectResource;
       if (!this.SubjectResourceElement[field]) {
         if (field == "file" || field == "englishName" || field == 'arabicName') {
-          this.validationErrorsForResources[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrorsForResources[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
         }
       } else {
@@ -424,7 +428,7 @@ SaveSubjectWeight() {
         },
         error => {
           this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to add weight');
+          const errorMessage = error.error || this.translate.instant('Failed to update weight');
           this.showErrorAlert(errorMessage);
         }
       );
@@ -438,7 +442,7 @@ SaveSubjectWeight() {
         },
         error => {
           this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update weight');
+          const errorMessage = error.error || this.translate.instant('Failed to update weight');
           this.showErrorAlert(errorMessage);
         }
       );

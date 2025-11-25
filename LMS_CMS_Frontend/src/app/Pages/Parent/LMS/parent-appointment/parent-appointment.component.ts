@@ -13,6 +13,8 @@ import { ApiService } from '../../../../Services/api.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-parent-appointment',
@@ -21,6 +23,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './parent-appointment.component.html',
   styleUrl: './parent-appointment.component.css'
 })
+
+@InitLoader()
 export class ParentAppointmentComponent {
   path: string = ""
   DomainName: string = "";
@@ -35,7 +39,7 @@ export class ParentAppointmentComponent {
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AppointmentParentServ: AppointmentParentService,
     public activeRoute: ActivatedRoute, private menuService: MenuService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private loadingService: LoadingService  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -52,8 +56,7 @@ export class ParentAppointmentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

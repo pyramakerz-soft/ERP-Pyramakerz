@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cmp;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -81,7 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Installment Deduction" }
-       )]
+        )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -102,6 +103,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             InstallmentDeductionMasterGetDTO Dto = mapper.Map<InstallmentDeductionMasterGetDTO>(installmentDeductionMaster);
+
+            List<InstallmentDeductionDetails> details = await Unit_Of_Work.installmentDeductionDetails_Repository.Select_All_With_IncludesById<InstallmentDeductionDetails>(
+                f => f.IsDeleted != true && f.InstallmentDeductionMasterID == id,
+                query => query.Include(Income => Income.TuitionFeesType));
+
+
+            Dto.InstallmentDeductionDetails = mapper.Map<List<InstallmentDeductionDetailsGetDTO>>(details);
 
             return Ok(Dto);
         }
@@ -159,6 +167,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             Unit_Of_Work.installmentDeductionMaster_Repository.Add(installmentDeductionMaster);
             Unit_Of_Work.SaveChanges();
+
+
+
             return Ok(installmentDeductionMaster.ID);
         }
 
@@ -234,6 +245,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             Unit_Of_Work.installmentDeductionMaster_Repository.Update(master);
             Unit_Of_Work.SaveChanges();
+
+            if(newMaster.NewDetails != null && newMaster.NewDetails.Count > 0)
+            {
+                foreach (var item in newMaster.NewDetails)
+                {
+                    InstallmentDeductionDetails installmentDeductionDetails = mapper.Map<InstallmentDeductionDetails>(item);
+
+                    installmentDeductionDetails.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        installmentDeductionDetails.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        installmentDeductionDetails.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.installmentDeductionDetails_Repository.Add(installmentDeductionDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
+
             return Ok(newMaster);
         }
 

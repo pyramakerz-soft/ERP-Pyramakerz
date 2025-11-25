@@ -75,6 +75,68 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
+        [HttpGet("BySchoolIdWithPaggination/{SchoolId}")]
+        [Authorize_Endpoint_(
+              allowedTypes: new[] { "octa", "employee" },
+               pages: new[] { "Remedial Classes" }
+          )]
+        public async Task<IActionResult> GetAsyncWithPaggination(long SchoolId ,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == SchoolId & s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a => a.SchoolID == SchoolId & a.IsDeleted != true && a.IsActive == true);
+            if (academicYear == null)
+            {
+                return BadRequest("No active academic year in this school");
+            }
+
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.remedialClassroom_Repository
+               .CountAsync(t => t.IsDeleted != true && t.AcademicYearID == academicYear.ID);
+
+            List<RemedialClassroom> RemedialClassroom = await Unit_Of_Work.remedialClassroom_Repository.Select_All_With_IncludesById_Pagination<RemedialClassroom>(t => t.IsDeleted != true && t.AcademicYearID == academicYear.ID,
+                    query => query.Include(x => x.Subject),
+                    query => query.Include(x => x.Subject.Grade),
+                    query => query.Include(x => x.Teacher),
+                    query => query.Include(x => x.AcademicYear.School),
+                    query => query.Include(emp => emp.AcademicYear))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (RemedialClassroom == null)
+            {
+                return NotFound();
+            }
+            List<RemedialClassRoomGetDTO> Dto = mapper.Map<List<RemedialClassRoomGetDTO>>(RemedialClassroom);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+        }
+
+        /////////////////
+
         [HttpGet("ByGradeId/{gradeId}")]
         [Authorize_Endpoint_(
               allowedTypes: new[] { "octa", "employee" },

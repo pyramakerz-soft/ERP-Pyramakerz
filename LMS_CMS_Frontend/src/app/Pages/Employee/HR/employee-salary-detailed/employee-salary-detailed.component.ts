@@ -25,6 +25,8 @@ import { MonthlyAttendance } from '../../../../Models/HR/monthly-attendance';
 import { SalaryHistory } from '../../../../Models/HR/salary-history';
 import { SalaryCalculationService } from '../../../../Services/Employee/HR/salary-calculation.service';
 import { SalaryReportsService } from '../../../../Services/Employee/HR/salary-reports.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-salary-detailed',
@@ -33,6 +35,8 @@ import { SalaryReportsService } from '../../../../Services/Employee/HR/salary-re
   templateUrl: './employee-salary-detailed.component.html',
   styleUrl: './employee-salary-detailed.component.css'
 })
+
+@InitLoader()
 export class EmployeeSalaryDetailedComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -69,6 +73,12 @@ export class EmployeeSalaryDetailedComponent {
   SelectedJobName: string = '';
   SelectedJobCatName: string = '';
   SelectedEmpName: string = '';
+  SelectedArEmpName: string = '';
+
+  school = {
+    reportHeaderOneEn: 'Employee Salary Detailed Report',
+    reportHeaderOneAr: 'تقرير الراتب التفصيلي',
+  };
 
   constructor(
     private router: Router,
@@ -86,7 +96,7 @@ export class EmployeeSalaryDetailedComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -104,8 +114,7 @@ export class EmployeeSalaryDetailedComponent {
     this.getJobsCategory()
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -179,6 +188,7 @@ export class EmployeeSalaryDetailedComponent {
   GetEmployeeName() {
     const selectedEmp = this.employees.find(c => c.id == this.SelectedEmpId);
     this.SelectedEmpName = selectedEmp ? selectedEmp.en_name : '';
+    this.SelectedArEmpName=selectedEmp ? selectedEmp.ar_name : '';
   }
 
   async DownloadAsPDF() {
@@ -256,8 +266,8 @@ export class EmployeeSalaryDetailedComponent {
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        en: "Employee Salary Detailed Report",
+        ar: "تقرير الراتب التفصيلي"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -275,7 +285,7 @@ export class EmployeeSalaryDetailedComponent {
         { key: 'Final Salary', value: this.salaryHistory.netSalary || '' }
       ],
       reportImage: '', // Add image URL if available
-      filename: "Salary_Summary_Report.xlsx",
+      filename: "Employee_Salary_Detailed_Report.xlsx",
       tables: [
         {
           // title: "Payable Details",

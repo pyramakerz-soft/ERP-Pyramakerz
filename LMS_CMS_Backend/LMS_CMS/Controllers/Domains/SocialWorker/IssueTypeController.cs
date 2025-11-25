@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
                allowedTypes: new[] { "octa", "employee" },
-               pages: new[] { "Issues Types" }
+               pages: new[] { "Issues Types" , "Student Issues", "Student Issue Report" }
                )]
         public IActionResult Get()
         {

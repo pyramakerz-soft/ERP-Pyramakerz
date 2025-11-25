@@ -96,6 +96,105 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         }
         #endregion
 
+        #region GetWithPaggination
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Hygiene Form Medical Report" }
+        )]
+        public async Task<IActionResult> GetWithPaggination(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (!long.TryParse(userIdClaim, out long userId) || userTypeClaim == null)
+            {
+                return Unauthorized("User claims are missing or invalid.");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            // Count Active Records
+            int totalRecords = await Unit_Of_Work.hygieneForm_Repository
+                .CountAsync(h => h.IsDeleted != true);
+
+            // Query with Includes
+            var query = Unit_Of_Work.hygieneForm_Repository
+                .Select_All_With_IncludesById_Pagination<HygieneForm>(
+                    h => h.IsDeleted != true,
+                    q => q.Include(x => x.School),
+                    q => q.Include(x => x.Grade),
+                    q => q.Include(x => x.Classroom),
+                    q => q.Include(x => x.StudentHygieneTypes)
+                          .ThenInclude(sht => sht.Student),
+                    q => q.Include(x => x.StudentHygieneTypes)
+                          .ThenInclude(sht => sht.HygieneTypes)
+                );
+
+            // Apply pagination
+            var hygieneForms = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (hygieneForms == null || hygieneForms.Count == 0)
+            {
+                return NotFound("No hygiene forms found.");
+            }
+
+            // Manually map to DTO
+            var hygieneFormsDto = hygieneForms.Select(h => new HygieneFormGetDTO
+            {
+                ID = h.Id,
+                Date = h.Date,
+                SchoolId = h.SchoolId,
+                School = h.School?.Name,
+                GradeId = h.GradeId,
+                Grade = h.Grade?.Name,
+                ClassRoomID = h.ClassRoomID,
+                ClassRoom = h.Classroom?.Name,
+
+                StudentHygieneTypes = h.StudentHygieneTypes
+                    .Where(x => x.IsDeleted != true)
+                    .Select(sht => new StudentHygieneTypesGetDTO
+                    {
+                        ID = sht.Id,
+                        StudentId = sht.StudentId,
+                        Student = sht.Student?.en_name,
+                        Attendance = sht.Attendance,
+                        Comment = sht.Comment,
+                        ActionTaken = sht.ActionTaken,
+
+                        HygieneTypes = sht.HygieneTypes
+                            .Where(ht => ht.IsDeleted != true)
+                            .Select(ht => new HygieneTypeGetDTO
+                            {
+                                ID = ht.Id,
+                                Type = ht.Type
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            // Pagination Meta
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = hygieneFormsDto, Pagination = paginationMetadata });
+        }
+        #endregion
+
         #region GetByID
         [HttpGet("id")]
         [Authorize_Endpoint_(

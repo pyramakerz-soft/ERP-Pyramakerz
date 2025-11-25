@@ -48,6 +48,7 @@ using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
+//using System.IO.Compression; 
 
 namespace LMS_CMS
 {
@@ -64,6 +65,30 @@ namespace LMS_CMS
 
             // Add services to the container.
             builder.Services.AddControllers();
+
+            /*
+             When your API sends data to Angular (JSON, HTML, JS, CSS…): 
+                Without compression → the full size is sent (maybe 300 KB, 1 MB, etc.)
+                With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
+             Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
+            */
+            //builder.Services.AddResponseCompression(options =>
+            //{
+            //    options.EnableForHttps = true;
+            //    options.Providers.Add<BrotliCompressionProvider>();
+            //    options.Providers.Add<GzipCompressionProvider>();
+            //});
+
+            //builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+            //{
+            //    opts.Level = CompressionLevel.Fastest; // Fast and good
+            //});
+
+            //builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+            //{
+            //    opts.Level = CompressionLevel.Fastest;
+            //});
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -132,11 +157,15 @@ namespace LMS_CMS
 
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                 (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
                             {
                                 context.Token = accessToken;
-                            }
+                            } 
+                            //if (!string.IsNullOrEmpty(accessToken) &&
+                            //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+                            //{
+                            //    context.Token = accessToken;
+                            //}
                             return Task.CompletedTask;
                         }
                     };
@@ -186,7 +215,8 @@ namespace LMS_CMS
             builder.Services.AddScoped<HR_Service>();
             builder.Services.AddScoped<Inventory_Service>();
             builder.Services.AddScoped<LMS_Service>();
-            builder.Services.AddScoped<Registration_Service>();
+            builder.Services.AddScoped<Registration_Service>(); 
+
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
@@ -231,17 +261,17 @@ namespace LMS_CMS
             builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.Limits.MaxRequestBodySize = 104857600; // 100 MB
-            });
-
+            }); 
 
             // 1) SignalR 
             //builder.Services.AddSignalR();
             builder.Services.AddSignalR(hubOptions =>
             {
-                hubOptions.EnableDetailedErrors = true;
-                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
-            });
-
+                hubOptions.EnableDetailedErrors = true; 
+                hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // send ping every 15s
+                hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // allow up to 60s silence
+            }); 
+             
             var app = builder.Build();
 
             /// 1) For DB Check
@@ -266,6 +296,11 @@ namespace LMS_CMS
                     appBuilder.UseMiddleware<SuspendMiddleware>();
                 });
 
+            
+            // To Allow Compression (Brotli - Gzip)
+            //app.UseResponseCompression();
+
+
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
@@ -274,10 +309,10 @@ namespace LMS_CMS
 
             app.MapControllers();
             // 2) SignalR
-            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
-            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
-            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
-
+            //app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+            //app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            //app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+            app.MapHub<AppHub>("/appHub").RequireAuthorization();
 
             app.MapFallbackToFile("index.html");
 

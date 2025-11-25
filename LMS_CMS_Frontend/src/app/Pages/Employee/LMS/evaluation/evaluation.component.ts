@@ -28,6 +28,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-evaluation',
   standalone: true,
@@ -35,6 +37,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './evaluation.component.html',
   styleUrl: './evaluation.component.css'
 })
+
+@InitLoader()
 export class EvaluationComponent {
   EvaluationEmployee:EvaluationEmployeeAdd = new EvaluationEmployeeAdd()
   Templates: Template[] = []
@@ -74,8 +78,8 @@ export class EvaluationComponent {
     public evaluationBookCorrectionService: EvaluationBookCorrectionService,
     public studentService: StudentService,
     public evaluationEmployeeService: EvaluationEmployeeService,
-    private languageService: LanguageService ,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService ,  
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -94,9 +98,8 @@ export class EvaluationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-      if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }

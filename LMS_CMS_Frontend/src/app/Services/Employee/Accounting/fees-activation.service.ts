@@ -17,7 +17,7 @@ export class FeesActivationService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(gradeID:number, yearID:number, classID:number, studentID:number, DomainName:string){
+  Get(gradeID:number, yearID:number, classID:number, studentID:number, DomainName:string, pageNumber: number, pageSize: number){
      if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -26,10 +26,13 @@ export class FeesActivationService {
     .set('domain-name', this.header)
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
-    return this.http.get<FeesActivation[]>(`${this.baseUrl}/FeesActivation?gradeID=${gradeID}&yearID=${yearID}&classID=${classID}&studentID=${studentID}`, { headers })
+    return this.http.get<{ data: FeesActivation[], pagination: any }>(
+      `${this.baseUrl}/FeesActivation?gradeID=${gradeID}&yearID=${yearID}&classID=${classID}&studentID=${studentID}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      { headers }
+    );  
   }
 
-   Add(fees: FeesActivationAddPut[], DomainName: string): Observable<any> {
+  Add(fees: FeesActivationAddPut[], DomainName: string): Observable<any> {
       if (DomainName != null) {
         this.header = DomainName
       }

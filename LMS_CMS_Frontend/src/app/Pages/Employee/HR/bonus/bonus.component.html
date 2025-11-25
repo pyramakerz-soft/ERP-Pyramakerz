@@ -57,7 +57,7 @@
                             {{ row.date }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.bounsTypeName }}
+                            {{ row.bonusTypeName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.employeeEnName }}
@@ -97,7 +97,7 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="employeeID">{{ 'Employee' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
-                    [(ngModel)]="bouns.employeeID"(ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })">
+                    [(ngModel)]="bonus.employeeID"(ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })">
                     <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' |translate }}</option>
                     <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.en_name }}
                     </option>
@@ -110,51 +110,51 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="bouns.date"
+                    placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="bonus.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2" for="bounsTypeID">{{ 'Type' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bounsTypeID"
-                    [(ngModel)]="bouns.bounsTypeID" (ngModelChange)="onInputValueChange({ field: 'bounsTypeID', value: $event })">
+                <label class="mb-2" for="bonusTypeID">{{ 'Type' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bonusTypeID"
+                    [(ngModel)]="bonus.bonusTypeID" (ngModelChange)="onInputValueChange({ field: 'bonusTypeID', value: $event })">
                     <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Type' |translate }} </option>
-                    <option *ngFor="let safe of bounsType" [value]="safe.id">{{ safe.name }}</option>
-                    <option *ngIf="bounsType.length === 0" disabled selected> {{ 'No Data Found' | translate }} </option>
+                    <option *ngFor="let safe of bonusType" [value]="safe.id">{{ safe.name }}</option>
+                    <option *ngIf="bonusType.length === 0" disabled selected> {{ 'No Data Found' | translate }} </option>
                 </select>
-                <span *ngIf="validationErrors['bounsTypeID']"class="text-red-500 ml-3 font-normal">{{validationErrors["bounsTypeID"]}}</span>
+                <span *ngIf="validationErrors['bonusTypeID']"class="text-red-500 ml-3 font-normal">{{validationErrors["bonusTypeID"]}}</span>
             </div>
 
-            <div *ngIf="bouns.bounsTypeID==3" class="flex flex-col mb-4 w-full">
+            <div *ngIf="bonus.bonusTypeID==3" class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="amount"> {{ 'Amount' | translate }}</label>
                 <input id="amount" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Amount' | translate }}" [(ngModel)]="bouns.amount" (input)="validateNumber($event,'amount')"
+                    placeholder="{{ 'Enter Amount' | translate }}" [(ngModel)]="bonus.amount" (input)="validateNumber($event,'amount')"
                     (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })" />
                 <span *ngIf="validationErrors['amount']" class="text-red-500 ml-3 font-normal">{{validationErrors['amount']}}</span>
             </div>
 
-            <div *ngIf="bouns.bounsTypeID==2" class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="minutes"> {{ 'Number Of Bouns Days' | translate }}</label>
-                <input id="numberOfBounsDays" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter numberOfBounsDays' | translate }}" [(ngModel)]="bouns.numberOfBounsDays" (input)="validateNumber($event,'numberOfBounsDays')"
-                    (ngModelChange)="onInputValueChange({ field: 'numberOfBounsDays', value: $event })" />
-                <span *ngIf="validationErrors['numberOfBounsDays']" class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfBounsDays']}}</span>
+            <div *ngIf="bonus.bonusTypeID==2" class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="minutes"> {{ 'Number Of Bonus Days' | translate }}</label>
+                <input id="numberOfBonusDays" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter number Of Bonus Days' | translate }}" [(ngModel)]="bonus.numberOfBonusDays" (input)="validateNumber($event,'numberOfBonusDays')"
+                    (ngModelChange)="onInputValueChange({ field: 'numberOfBonusDays', value: $event })" />
+                <span *ngIf="validationErrors['numberOfBonusDays']" class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfBonusDays']}}</span>
             </div>
 
 
-           <div *ngIf="bouns.bounsTypeID==1" class="flex flex-col mb-4 w-[49%]">
+           <div *ngIf="bonus.bonusTypeID==1" class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="hours"> {{ 'Hours' | translate }}</label>
                 <input id="hours" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter hours' | translate }}" [(ngModel)]="bouns.hours" (input)="validateNumber($event,'hours')"
+                    placeholder="{{ 'Enter hours' | translate }}" [(ngModel)]="bonus.hours" (input)="validateNumber($event,'hours')"
                     (ngModelChange)="onInputValueChange({ field: 'hours', value: $event })" />
                 <span *ngIf="validationErrors['hours']" class="text-red-500 ml-3 font-normal">{{validationErrors['hours']}}</span>
             </div>
 
-            <div *ngIf="bouns.bounsTypeID==1" class="flex flex-col mb-4 w-[49%]">
+            <div *ngIf="bonus.bonusTypeID==1" class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="minutes"> {{ 'Minutes' | translate }}</label>
                 <input id="minutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter minutes' | translate }}" [(ngModel)]="bouns.minutes" (input)="validateNumber($event,'minutes')"
+                    placeholder="{{ 'Enter minutes' | translate }}" [(ngModel)]="bonus.minutes" (input)="validateNumber($event,'minutes')"
                     (ngModelChange)="onInputValueChange({ field: 'minutes', value: $event })" />
                 <span *ngIf="validationErrors['minutes']" class="text-red-500 ml-3 font-normal">{{validationErrors['minutes']}}</span>
             </div>
@@ -163,7 +163,7 @@
                 <label class="mb-2 primaryTxt" for="notes"> {{ 'Notes' | translate }}</label>
                 <textarea id="notes" class="w-full rounded-lg border border-solid border-gr ay-300 px-4 py-3"
                     placeholder="{{ 'Add Notes' | translate }}"
-                    [(ngModel)]="bouns.notes">
+                    [(ngModel)]="bonus.notes">
                 </textarea>
             </div>
 

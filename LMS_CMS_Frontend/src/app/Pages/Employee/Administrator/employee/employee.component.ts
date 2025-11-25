@@ -17,6 +17,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service'; 
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee',
@@ -25,6 +27,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './employee.component.html',
   styleUrl: './employee.component.css'
 })
+
+@InitLoader()
 export class EmployeeComponent {
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -44,6 +48,11 @@ export class EmployeeComponent {
   keysArray: string[] = ['id', 'user_Name', 'ar_name', 'en_name', 'mobile', 'phone', 'email', 'address', 'role_Name', 'employeeTypeName'];
   key: string = "id";
   value: any = "";
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -55,7 +64,7 @@ export class EmployeeComponent {
     private router: Router,
     public EmpServ: EmployeeService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -65,7 +74,7 @@ export class EmployeeComponent {
       this.DomainName = this.ApiServ.GetHeader();
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path
-        this.GetEmployee();
+        this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         this.menuService.menuItemsForEmployee$.subscribe((items) => {
           const settingsPage = this.menuService.findByPageName(this.path, items);
           if (settingsPage) {
@@ -86,54 +95,93 @@ export class EmployeeComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
-
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
-
-private showLoadingAlert(message: string) {
-  Swal.fire({
-    title: message,
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    },
-  });
-}
-
-  GetEmployee() {
-    this.EmpServ.Get_Employees(this.DomainName).subscribe((data) => {
-      this.TableData = data
-    })
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
   }
+
+  private showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private showLoadingAlert(message: string) {
+    Swal.fire({
+      title: message,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+  }
+
+  // GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+  //   this.EmpServ.GeTWithPaggination(this.DomainName, this.CurrentPage, this.PageSize).subscribe((data) => {
+  //     this.TableData = data
+  //   })
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.TableData = [];
+    this.EmpServ.GeTWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Employees');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }
+
 
   Create() {
     this.router.navigateByUrl("Employee/Employee/Create")
@@ -164,7 +212,7 @@ Delete(id: number) {
       this.EmpServ.Delete(id, this.DomainName).subscribe({
         next: () => {
           this.showSuccessAlert(this.translate.instant('Employee deleted successfully'));
-          this.GetEmployee();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         },
         error: (error) => {
           const errorMessage = error.error?.message || this.translate.instant('Failed to delete employee');
@@ -209,7 +257,7 @@ suspend(emp: Employee) {
             : this.translate.instant('Employee unsuspended successfully');
           
           this.showSuccessAlert(successMessage);
-          this.GetEmployee();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         },
         error: (error) => {
           const errorMessage = error.error?.message || this.translate.instant('Failed to update employee status');
@@ -255,4 +303,48 @@ suspend(emp: Employee) {
       this.TableData = [];
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }  
 }

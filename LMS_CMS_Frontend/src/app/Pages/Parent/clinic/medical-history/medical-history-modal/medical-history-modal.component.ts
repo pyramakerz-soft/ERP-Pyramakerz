@@ -56,8 +56,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     private medicalHistoryService: MedicalHistoryService,
     private studentService: StudentService,
     private languageService: LanguageService,
-    private apiService: ApiService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private apiService: ApiService, 
     private translate: TranslateService
   ) {}
 
@@ -69,8 +68,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     this.loadParentStudents();
   }
 
-  ngOnDestroy(): void { 
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void {  
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -104,8 +102,7 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
           this.medicalHistory.studentId = 0;
         }
       }
-    } catch (error) {
-      console.error('Error loading students:', error);
+    } catch (error) { 
       this.showErrorAlert('Failed to load students');
     }
   }
@@ -239,9 +236,9 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
 
         this.onSave.emit();
         this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        this.showErrorAlert('Failed to save medical history. Please try again later.');
+      } catch (error:any) {
+        const errorMessage = error.error?.message || error.error || this.translate.instant('Failed to save the item');
+        this.showErrorAlert(errorMessage);
       } finally {
         this.isSaving = false;
       }

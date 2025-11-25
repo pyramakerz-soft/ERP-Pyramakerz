@@ -18,15 +18,30 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-receivable-doc-type',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './receivable-doc-type.component.html',
-  styleUrl: './receivable-doc-type.component.css'
+  styleUrl: './receivable-doc-type.component.css',
 })
+
+@InitLoader()
 export class ReceivableDocTypeComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -50,7 +65,7 @@ export class ReceivableDocTypeComponent {
   data: ReceivableDocType = new ReceivableDocType();
 
   validationErrors: { [key in keyof ReceivableDocType]?: string } = {};
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -64,8 +79,8 @@ export class ReceivableDocTypeComponent {
     public ApiServ: ApiService,
     public ReceivableDocTypeServ: ReceivableDocTypeService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
-  ) { }
+    private loadingService: LoadingService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -85,35 +100,44 @@ export class ReceivableDocTypeComponent {
     });
 
     this.GetAllData();
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.ReceivableDocTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+      this.TableData = d;
+    });
   }
 
   Create() {
     this.mode = 'Create';
-    this.data = new ReceivableDocType()
+    this.data = new ReceivableDocType();
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Type') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -122,19 +146,23 @@ export class ReceivableDocTypeComponent {
       cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.ReceivableDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+        this.ReceivableDocTypeServ.Delete(id, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+          }
+        );
       }
     });
   }
 
   Edit(row: ReceivableDocType) {
     this.mode = 'Edit';
-    this.ReceivableDocTypeServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.data = d
-    })
-    this.validationErrors = {}
+    this.ReceivableDocTypeServ.GetByID(row.id, this.DomainName).subscribe(
+      (d) => {
+        this.data = d;
+      }
+    );
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -158,15 +186,16 @@ export class ReceivableDocTypeComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.ReceivableDocTypeServ.Add(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-          this.isLoading = false
-        },
-          error => {
-            this.isLoading = false
+        this.ReceivableDocTypeServ.Add(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -174,16 +203,18 @@ export class ReceivableDocTypeComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        this.ReceivableDocTypeServ.Edit(this.data, this.DomainName).subscribe((d) => {
-          this.GetAllData();
-          this.closeModal()
-          this.isLoading = false
-        },
-          error => {
-            this.isLoading = false
+        this.ReceivableDocTypeServ.Edit(this.data, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.closeModal();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -191,13 +222,14 @@ export class ReceivableDocTypeComponent {
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
-          })
+          }
+        );
       }
     }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -211,12 +243,10 @@ export class ReceivableDocTypeComponent {
       if (this.data.hasOwnProperty(key)) {
         const field = key as keyof ReceivableDocType;
         if (!this.data[field]) {
-          if (
-            field == 'name'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -225,10 +255,13 @@ export class ReceivableDocTypeComponent {
 
     if (this.data.name.length > 100) {
       isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
     return isValid;
   }
+
   capitalizeField(field: keyof ReceivableDocType): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -260,13 +293,24 @@ export class ReceivableDocTypeComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

@@ -21,6 +21,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { VacationTypesService } from '../../../../Services/Employee/HR/vacation-types.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-vacation-employee',
@@ -29,6 +31,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './vacation-employee.component.html',
   styleUrl: './vacation-employee.component.css'
 })
+
+@InitLoader()
 export class VacationEmployeeComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -49,7 +53,7 @@ export class VacationEmployeeComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'vacationTypesName'];
 
   vacationEmployee: VacationEmployee = new VacationEmployee();
   OldVacationEmployee: VacationEmployee = new VacationEmployee();
@@ -81,7 +85,7 @@ export class VacationEmployeeComponent {
     public EmployeeServ: EmployeeService,
     private translate: TranslateService,
     public VacationTypesServ: VacationTypesService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -109,8 +113,7 @@ export class VacationEmployeeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -405,24 +408,28 @@ export class VacationEmployeeComponent {
     })
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.vacationEmployee) {
-      if (this.vacationEmployee.hasOwnProperty(key)) {
-        const field = key as keyof VacationEmployee;
-        if (!this.vacationEmployee[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.vacationEmployee) {
+    if (this.vacationEmployee.hasOwnProperty(key)) {
+      const field = key as keyof VacationEmployee;
+      if (!this.vacationEmployee[field]) {
+        if (
+          field == 'date' ||
+          field == 'employeeID' ||
+          field == 'vacationTypesID' ||
+          field == 'dateFrom' 
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
+  }
     if (this.vacationEmployee.used > this.vacationEmployee.balance) {
       isValid = false;
     }
@@ -529,4 +536,15 @@ export class VacationEmployeeComponent {
     }
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+
+  }
 }

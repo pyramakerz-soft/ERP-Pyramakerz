@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-inventory-master',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './inventory-master.component.html',
   styleUrl: './inventory-master.component.css'
 })
+
+@InitLoader()
 export class InventoryMasterComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -35,7 +39,7 @@ export class InventoryMasterComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: InventoryMaster[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -69,8 +73,8 @@ export class InventoryMasterComponent {
     public ApiServ: ApiService,
     public salesServ: InventoryMasterService,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,16 +101,15 @@ export class InventoryMasterComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/${this.FlagId}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/${this.FlagId}`)
   }
 
   Delete(id: number) {
@@ -128,7 +131,7 @@ export class InventoryMasterComponent {
   }
 
   Edit(row: InventoryMaster) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/Edit/${row.flagId}/${row.id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/Edit/${row.flagId}/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -261,7 +264,7 @@ export class InventoryMasterComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/View/${id}`)
+    this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/View/${id}`)
   }
 
   validateNumber(event: any): void {

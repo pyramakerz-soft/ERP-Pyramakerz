@@ -32,7 +32,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Stores" }
+            pages: new[] { "Stores" , "Sales Returns" , "Sales" , "Purchase Returns" , "Purchase Order", "Purchases", "Opening Balances", "Addition" 
+                , "Damaged", "Transfer to Store", "Gifts", "Disbursement Adjustment", "Disbursement", "Addition Adjustment" , "Stocking" , "Inventory Transaction Report"
+                , "Inventory Transaction Report", "Sales Transaction Report", "Purchase Transaction Report", "Inventory Transaction Detailed Report", "Purchase Transaction Detailed Report"
+                , "Sales Transaction Detailed Report" ,"Item Card Report" ,"Item Card Report With Average" ,"Store Items Balance" , "Store Items Balance with Purchase" ,"Store Items Balance with Sales"
+                ,"Store Items Balance with Average Cost" ,"Store Limited Items" ,""
+            }
         )]
         public async Task<IActionResult> GetAsync()
         {

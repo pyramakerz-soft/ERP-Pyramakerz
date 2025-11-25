@@ -86,6 +86,10 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Subject' | translate }} {{ 'Arabic Name' | translate }}</th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Subject Weight Type' | translate }} {{ 'English Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Subject Weight Type' | translate }} {{ 'Arabic Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Summer Course' | translate }}</th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Actions' | translate }}</th>
@@ -94,7 +98,7 @@
             <tbody>
                 <!-- No Data Row -->
                 <tr *ngIf="TableData.length === 0">
-                    <td colspan="8"
+                    <td colspan="10"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         {{ 'No Data Found' | translate }}
                     </td>
@@ -123,6 +127,12 @@
                         {{ row.subjectArabicName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectWeightTypeEnglishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectWeightTypeArabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.isSummerCourse ? ( 'Yes' | translate ) : ( 'No' | translate ) }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -133,7 +143,7 @@
                             <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
-                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="View(row.id)">
+                            <button (click)="View(row.id)">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
@@ -211,6 +221,28 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt"
                     [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
+                    for="year">{{ 'Academic Year' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="year"
+                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
+                    [disabled]="(!directMark.schoolID) || directMark.id != 0" (change)="onYearModalChange()"
+                    [(ngModel)]="directMark.academicYearID"
+                    (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="directMark.academicYearID == 0">{{ 'Choose' |
+                        translate
+                        }} {{ 'Year' | translate }}</option>
+                    <ng-container *ngIf="years.length > 0; else noDataYearForCreate">
+                        <option *ngFor="let ac of years" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataYearForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['academicYearID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['academicYearID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
                     for="Grade">{{ 'Grade' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
                     [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
@@ -231,8 +263,8 @@
             </div>
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt"
-                    [ngClass]="{ 'text-gray-400': !directMark.gradeID, 'primaryTxt': directMark.gradeID }"
-                    for="subj"> {{ 'Subject' | translate }}</label>
+                    [ngClass]="{ 'text-gray-400': !directMark.gradeID, 'primaryTxt': directMark.gradeID }" for="subj">
+                    {{ 'Subject' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subj"
                     [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.gradeID  }"
                     [disabled]="(!directMark.gradeID) || directMark.id != 0" (change)="onSubjectModalChange()"
@@ -253,15 +285,15 @@
             <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                 <input type="checkbox" id="Summer" class="w-5 h-5" (change)="onSummerChange()"
                     [(ngModel)]="directMark.isSummerCourse" [disabled]="directMark.id != 0" />
-                <label for="Summer" class="text-sm">  {{ 'Summer Course' | translate }}</label>
+                <label for="Summer" class="text-sm"> {{ 'Summer Course' | translate }}</label>
             </div>
             <div *ngIf="!directMark.isSummerCourse" class="flex flex-col mb-4 w-full">
                 <label class="mb-2" for="Subjectweight"
                     [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
                     {{ 'Subject Weight Type' | translate }} </label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subjectweight"
-                    [disabled]="!directMark.subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !directMark.subjectID }"
-                    [(ngModel)]="directMark.subjectWeightTypeID"
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+                    id="Subjectweight" [disabled]="!directMark.subjectID"
+                    [ngClass]="{ 'bg-[#EBEBEB]': !directMark.subjectID }" [(ngModel)]="directMark.subjectWeightTypeID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectWeightTypeID', value: $event })">
                     <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Subject Weight Type' |
                         translate }}</option>
@@ -281,71 +313,72 @@
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['date'] }}</span>
-            </div> 
+            </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2" for="classids"
-                    [ngClass]="{
-                        'text-gray-400':
-                        (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
-                        (!directMark.isSummerCourse && !directMark.subjectID),
+                <label class="mb-2" for="classids" [ngClass]="{
                         'primaryTxt':
-                        (!directMark.isSummerCourse && directMark.subjectID) ||
-                        (directMark.isSummerCourse && directMark.date && directMark.subjectID)
-                    }"
-                    >
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID) ||
+                            (directMark.isSummerCourse && directMark.date && directMark.subjectID && directMark.academicYearID),
+                        'text-gray-400': !(
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID) ||
+                            (directMark.isSummerCourse && directMark.date && directMark.subjectID && directMark.academicYearID)
+                        )
+                        }">
                     {{ 'Classes' | translate }}
                 </label>
 
                 <div class="relative">
-                    <!-- Main box --> 
-                    <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
-                        [class.opacity-50]="
-                            (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
-                            (!directMark.isSummerCourse && !directMark.subjectID)
-                        "
-                        [class.cursor-not-allowed]="
-                            (directMark.isSummerCourse && (!directMark.date || !directMark.subjectID)) ||
-                            (!directMark.isSummerCourse && !directMark.subjectID)
-                        "
-                        (click)="
-                            ((directMark.isSummerCourse && directMark.date && directMark.subjectID) ||
-                            (!directMark.isSummerCourse && directMark.subjectID)) &&
-                            toggleClassDropdown();
+                    <!-- Main box -->
+                    <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer" [class.opacity-50]="
+                            !(
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID) ||
+                            (directMark.isSummerCourse && directMark.date && directMark.subjectID && directMark.academicYearID)
+                            )
+                        " [class.cursor-not-allowed]="
+                            !(
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID) ||
+                            (directMark.isSummerCourse && directMark.date && directMark.subjectID && directMark.academicYearID)
+                            )
+                        " (click)="
+                            (
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID) ||
+                            (directMark.isSummerCourse && directMark.date && directMark.subjectID && directMark.academicYearID)
+                            ) && toggleClassDropdown();
                             $event.stopPropagation()
-                        "
-                        tabindex="0"
-                        >
+                        " tabindex="0">
                         <!-- Selected classes -->
                         <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder"
                             class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-gray-200 rounded text-sm flex items-center"
                                 *ngFor="let selected of directMark.directMarkClasses">
-                                {{ selected.classroomName }}                           
-                            <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1"
-                                (click)="removeClass(selected.classroomID, $event)">
-                                &times;
-                            </button>
+                                {{ selected.classroomName }}
+                                <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1"
+                                    (click)="removeClass(selected.classroomID, $event)">
+                                    &times;
+                                </button>
                             </span>
                         </div>
 
                         <!-- Placeholder -->
                         <ng-template #placeholder>
                             <span>{{ 'Choose' | translate }} {{ 'Classroom' |
-                        translate }}</span>
+                                translate }}</span>
                         </ng-template>
                     </div>
 
                     <!-- Dropdown -->
-                    <div #classDropdown class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
+                    <div #classDropdown
+                        class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
                         *ngIf="
                             directMark.directMarkClasses &&
                             (
-                            (directMark.isSummerCourse && directMark.date && classDropdownOpen) ||
-                            (!directMark.isSummerCourse && directMark.subjectID && classDropdownOpen)
+                            (directMark.isSummerCourse && directMark.date && directMark.academicYearID && classDropdownOpen) ||
+                            (!directMark.isSummerCourse && directMark.subjectID && directMark.academicYearID && classDropdownOpen)
                             )
                         ">
                         <ul>
-                            <li *ngIf="classrooms.length !== 0" class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            <li *ngIf="classrooms.length !== 0"
+                                class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                 <input id="all" type="checkbox" class="mr-2" [checked]="directMark.allClasses"
                                     (change)="toggleSelectAll($event)">
                                 <label for="all">{{ 'Choose All' | translate }}</label>
@@ -355,7 +388,7 @@
                                 class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                 <input [id]="c.id" type="checkbox" class="mr-2" [checked]="IfClassExist(c.id)"
                                     (change)="toggleClass($event,c)">
-                                <label [for]="c.id"> {{ c.name }}</label> 
+                                <label [for]="c.id"> {{ c.name }}</label>
                             </li>
 
                             <li *ngIf="classrooms.length === 0" class="px-4 py-2 text-gray-400 cursor-not-allowed">
@@ -405,7 +438,7 @@
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['date'] }}</span>
-            </div> 
+            </div>
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading"

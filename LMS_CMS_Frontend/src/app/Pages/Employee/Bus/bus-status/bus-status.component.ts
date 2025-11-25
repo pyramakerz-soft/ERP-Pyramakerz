@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bus-status',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bus-status.component.html',
   styleUrl: './bus-status.component.css',
 })
+
+@InitLoader()
 export class BusStatusComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -67,7 +71,8 @@ export class BusStatusComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -104,12 +109,13 @@ export class BusStatusComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-            ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
   Create() {
     this.mode = 'add';
     this.openModal();
@@ -175,32 +181,31 @@ export class BusStatusComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.busStatus) {
-      if (this.busStatus.hasOwnProperty(key)) {
-        const field = key as keyof BusType;
-        if (!this.busStatus[field]) {
-          if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.busStatus) {
+    if (this.busStatus.hasOwnProperty(key)) {
+      const field = key as keyof BusType;
+      if (!this.busStatus[field]) {
+        if (field == 'name') {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
+      } else {
+        this.validationErrors[field] = '';
       }
     }
-
-    if (this.busStatus.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
-    }
-    
-    return isValid;
   }
 
+  if (this.busStatus.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters.');
+  }
+  
+  return isValid;
+}
   onInputValueChange(event: { field: keyof BusType; value: any }) {
     const { field, value } = event;
     if (field == 'name') {
@@ -309,4 +314,15 @@ export class BusStatusComponent {
       });
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

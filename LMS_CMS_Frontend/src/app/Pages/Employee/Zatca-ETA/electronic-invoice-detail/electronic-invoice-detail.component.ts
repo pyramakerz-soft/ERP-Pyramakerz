@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-electronic-invoice-detail',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrls: ['./electronic-invoice-detail.component.css'],
   providers: [DatePipe],
 })
+
+@InitLoader()
 export class ElectronicInvoiceDetailComponent implements OnInit {
   @ViewChild('pdfPrint') pdfPrint!: PdfPrintComponent;
 
@@ -81,8 +85,8 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     public ApiServ: ApiService,
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
-    private etaService: EtaService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private etaService: EtaService, 
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -99,11 +103,10 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   // Update the loadInvoice() method in electronic-invoice-detail.component.ts

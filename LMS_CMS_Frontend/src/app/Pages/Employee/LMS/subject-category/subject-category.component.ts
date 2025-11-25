@@ -16,6 +16,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-subject-category',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject-category.component.html',
   styleUrl: './subject-category.component.css'
 })
+
+@InitLoader()
 export class SubjectCategoryComponent {
   keysArray: string[] = ['id', 'name'];
   key: string= "id";
@@ -47,15 +51,15 @@ export class SubjectCategoryComponent {
   isLoading = false;
   
   constructor( 
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     public account: AccountService, 
     public subjectCategoryService: SubjectCategoryService, 
     private translate: TranslateService, 
     public ApiServ: ApiService, 
     public EditDeleteServ: DeleteEditPermissionService, 
     public activeRoute: ActivatedRoute, 
-    private menuService: MenuService
+    private menuService: MenuService,
+    private loadingService: LoadingService
   ){}
   
   ngOnInit(){
@@ -86,8 +90,7 @@ export class SubjectCategoryComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

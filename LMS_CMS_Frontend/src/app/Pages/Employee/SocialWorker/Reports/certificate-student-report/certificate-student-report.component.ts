@@ -20,6 +20,8 @@ import { ActivatedRoute } from '@angular/router';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { Student } from '../../../../../Models/student';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 
 @Component({
@@ -29,6 +31,8 @@ import { Student } from '../../../../../Models/student';
   templateUrl: './certificate-student-report.component.html',
   styleUrl: './certificate-student-report.component.css'
 })
+
+@InitLoader()
 export class CertificateStudentReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -81,9 +85,9 @@ export class CertificateStudentReportComponent implements OnInit {
     private apiService: ApiService,
     public account: AccountService,   
     private route: ActivatedRoute,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService 
+    private languageService: LanguageService, 
+    private reportsService: ReportsService ,
+    private loadingService: LoadingService 
 
   ) {}
 
@@ -118,8 +122,7 @@ export class CertificateStudentReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -31,6 +31,8 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../Services/student.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
@@ -38,6 +40,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css'
 })
+
+@InitLoader()
 export class NotificationComponent {
 
   TableData:Notification[] = []
@@ -69,6 +73,11 @@ export class NotificationComponent {
   grades:Grade[] = []
   classrooms:Classroom[] = []
   students:Student[] = []
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     public account: AccountService,
@@ -86,10 +95,9 @@ export class NotificationComponent {
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
-    public studentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
-
+    public studentService: StudentService, 
+    private translate: TranslateService,
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {
@@ -109,7 +117,7 @@ export class NotificationComponent {
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others; 
       }
     });
-    this.getAllData()
+    this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.getUserTypeData()
     this.subscription = this.languageService.language$.subscribe(direction => {
     this.isRtl = direction === 'rtl';
@@ -117,11 +125,10 @@ export class NotificationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   private showErrorAlert(errorMessage: string) {
@@ -163,13 +170,52 @@ private showWarningAlert(message: string) {
   });
 }
 
-  getAllData(){
-    this.TableData = []
-    this.notificationService.Get(this.DomainName).subscribe(
-      data => {
-        this.TableData = data
+  // getAllData(){
+  //   this.TableData = []
+  //   this.notificationService.Get(this.DomainName).subscribe(
+  //     data => {
+  //       this.TableData = data
+  //     }
+  //   )
+  // }
+
+  getAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.TableData = [];
+    this.notificationService.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
       }
-    )
+    );
   }
 
   getNotificationById(id: number){
@@ -426,7 +472,13 @@ Save(){
     this.notificationService.Add(this.notification, this.DomainName).subscribe(
       (result: any) => {
         this.closeModal();
-        this.getAllData();
+        console.log(this.selectedUserTypeId)
+        if(this.selectedUserTypeId == 0){
+          this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);;
+        }
+        else{
+          this.filterByTypeID(this.selectedUserTypeId);
+        }
         this.showSuccessAlert(this.translate.instant('Notification created successfully'));
       },
       error => {
@@ -455,7 +507,12 @@ Delete(id: number) {
     if (result.isConfirmed) {
       this.notificationService.Delete(id, this.DomainName).subscribe(
         (d) => {
-          this.getAllData();
+          if(this.selectedUserTypeId == 0){
+            this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);;
+          }
+          else{
+            this.filterByTypeID(this.selectedUserTypeId);
+          }
           this.showSuccessAlert(this.translate.instant('Notification deleted successfully'));
         },
         (error) => {
@@ -467,19 +524,127 @@ Delete(id: number) {
   });  
 }
 
-  filterByTypeID($event: Event) {
-    const selectedId = ($event.target as HTMLSelectElement).value; 
+  // filterByTypeID($event: Event) {
+  //   const selectedId = ($event.target as HTMLSelectElement).value; 
+  //   this.TableData = []
+  //   this.notificationService.GetByUserTypeID(+selectedId, this.DomainName).subscribe(
+  //     data => {
+  //       this.TableData = data
+  //     }
+  //   )
+  // }
+
+  resetPagginationData(){
+    this.CurrentPage= 1;
+    this.PageSize= 10;
+    this.TotalPages= 1;
+    this.TotalRecords= 0;
+    this.filterByTypeID(this.selectedUserTypeId);
+  }
+
+  filterByTypeID(selectedUserTypeId : number) {
     this.TableData = []
-    this.notificationService.GetByUserTypeID(+selectedId, this.DomainName).subscribe(
-      data => {
-        this.TableData = data
+    this.notificationService.GetByUserTypeIDWithPaggination(selectedUserTypeId ,this.DomainName, this.CurrentPage, this.PageSize).subscribe(
+      (data) => {
+        console.log(data)
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.filterByTypeID(this.selectedUserTypeId);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
       }
-    )
+    );
   }
 
   ResetFilter(){
     this.selectedUserTypeId = 0
-    this.getAllData()
+    this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
 
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    if(this.selectedUserTypeId == 0){
+      this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    }
+    else{
+      this.filterByTypeID(this.selectedUserTypeId);
+    }
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

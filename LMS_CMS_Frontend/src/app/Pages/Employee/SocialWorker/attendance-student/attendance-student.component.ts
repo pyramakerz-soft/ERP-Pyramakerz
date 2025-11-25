@@ -26,6 +26,8 @@ import { AttendanceStudent } from '../../../../Models/SocialWorker/attendance-st
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-attendance-student',
   standalone: true,
@@ -33,6 +35,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './attendance-student.component.html',
   styleUrl: './attendance-student.component.css'
 })
+
+@InitLoader()
 export class AttendanceStudentComponent {
   keysArray: string[] = ['id', 'date'];
   key: string = "id";
@@ -51,6 +55,7 @@ export class AttendanceStudentComponent {
   mode: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  today: string = new Date().toISOString().split('T')[0]; // Get today's date in yyyy-MM-dd format
 
   Schools: School[] = []
   AcademicYears: AcademicYear[] = []
@@ -66,10 +71,10 @@ export class AttendanceStudentComponent {
   validationErrors: { [key in keyof Attendance]?: string } = {};
   validationIsLateErrors: { [studentId: number]: string } = {};
 
-  constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public StudentServ: StudentService,
-    public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceServ: AttendanceService) { }
+    public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceServ: AttendanceService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,11 +100,10 @@ export class AttendanceStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAttendance() {
@@ -235,6 +239,11 @@ export class AttendanceStudentComponent {
             isValid = false;
           }
         });
+
+        if (this.attendance.date > this.today) {
+          this.validationErrors['date'] = 'Date cannot be after today.';
+          isValid = false;
+        }
       }
     }
 
@@ -294,6 +303,13 @@ export class AttendanceStudentComponent {
           });
         })
       }
+    }
+  }
+
+  IsLateChanged(event: Event, row: AttendanceStudent): void {
+    // const isChecked = (event.target as HTMLInputElement).checked;
+    if(!row.isLate){
+      row.lateTimeInMinutes=0
     }
   }
 

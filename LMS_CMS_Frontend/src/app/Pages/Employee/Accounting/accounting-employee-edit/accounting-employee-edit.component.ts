@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -36,6 +36,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -43,6 +45,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './accounting-employee-edit.component.html',
   styleUrl: './accounting-employee-edit.component.css'
 })
+
+@InitLoader()
 export class AccountingEmployeeEditComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -84,6 +88,7 @@ export class AccountingEmployeeEditComponent {
   subscription!: Subscription;
   selectedDays: { id: number; name: string }[] = [];
   isLoading = false
+  @ViewChild('DaysDropDown') DaysDropDown!: ElementRef;
 
   isDropdownOpen = false;
 
@@ -123,8 +128,8 @@ export class AccountingEmployeeEditComponent {
     public jobCategoryServ: JobCategoriesService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -160,8 +165,7 @@ export class AccountingEmployeeEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -171,7 +175,8 @@ export class AccountingEmployeeEditComponent {
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
       this.Data = d; 
-      this.JobCategoryId = this.Data.jobCategoryID
+      console.log(this.Data)
+      this.JobCategoryId = this.Data.jobCategoryID || 0
       this.GetAllJobCategories();
       this.GetAllJobs()
       this.selectedDays = this.days
@@ -266,7 +271,7 @@ export class AccountingEmployeeEditComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Employee Edited Succeessfully',
+          text: 'Employee Edited Successfully',
           confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Employee/Employee Accounting`)
@@ -325,7 +330,8 @@ export class AccountingEmployeeEditComponent {
     this.Data.days = this.Data.days.filter((id) => id !== dayId);
   }
 
-  toggleDropdown() {
+  toggleDropdown(event: MouseEvent): void {
+    event.stopPropagation(); // prevent document click from triggering immediately
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
@@ -362,8 +368,8 @@ export class AccountingEmployeeEditComponent {
   }
 
   OnSelectJobCategory() {
-    this.Data.jobID = 0
-    this.JobCategoryId = this.Data.jobCategoryID;
+    this.Data.jobID = null
+    this.JobCategoryId = this.Data.jobCategoryID || 0
     this.GetAllJobs();
   }
 
@@ -486,6 +492,7 @@ export class AccountingEmployeeEditComponent {
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
+  
   onInputValueChange(event: { field: keyof Employee; value: any }) {
     const { field, value } = event;
     (this.Data as any)[field] = value;
@@ -548,5 +555,18 @@ export class AccountingEmployeeEditComponent {
     return h * 60 + m;
   }
 
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (this.isDropdownOpen && this.DaysDropDown) {
+      const clickedInside = this.DaysDropDown.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.isDropdownOpen = false;
+      }
+    }
+  }
 }
 

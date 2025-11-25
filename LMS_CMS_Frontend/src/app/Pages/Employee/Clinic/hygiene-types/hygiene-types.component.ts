@@ -13,6 +13,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-hygiene-types',
   standalone: true,
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './hygiene-types.component.html',
   styleUrls: ['./hygiene-types.component.css'],
 })
+
+@InitLoader()
 export class HygieneTypesComponent implements OnInit {
   hygieneType: HygieneTypes = new HygieneTypes(0, '', 0);
   editHygieneType = false;
@@ -43,9 +47,9 @@ export class HygieneTypesComponent implements OnInit {
   constructor(
     private hygieneTypesService: HygieneTypesService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
+    private languageService: LanguageService, 
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -59,8 +63,7 @@ export class HygieneTypesComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

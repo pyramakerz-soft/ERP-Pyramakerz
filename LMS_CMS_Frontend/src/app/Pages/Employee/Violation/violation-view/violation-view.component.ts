@@ -14,6 +14,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-violation-view',
@@ -22,6 +24,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './violation-view.component.html',
   styleUrl: './violation-view.component.css'
 })
+
+@InitLoader()
 export class ViolationViewComponent {
   DomainName: string = "";
   ViolationId: number = 0
@@ -38,7 +42,7 @@ export class ViolationViewComponent {
 
   constructor(public account: AccountService,private languageService: LanguageService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute,
     public router: Router, private menuService: MenuService, public ViolationServ: ViolationService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader();
@@ -56,11 +60,10 @@ export class ViolationViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToViolation() {

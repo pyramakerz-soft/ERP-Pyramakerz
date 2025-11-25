@@ -24,6 +24,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-attendance-report',
@@ -32,6 +34,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './attendance-report.component.html',
   styleUrl: './attendance-report.component.css'
 })
+
+@InitLoader()
 export class AttendanceReportComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -68,6 +72,10 @@ export class AttendanceReportComponent {
   SelectedJobName: string = '';
   SelectedJobCatName: string = '';
   SelectedEmpName: string = '';
+  school = {
+    reportHeaderOneEn: 'Attendance Report',
+    reportHeaderOneAr: ' تقرير الحضور '
+  };
 
   constructor(
     private router: Router,
@@ -85,7 +93,7 @@ export class AttendanceReportComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -103,8 +111,7 @@ export class AttendanceReportComponent {
     this.getJobsCategory()
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -239,8 +246,8 @@ export class AttendanceReportComponent {
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        en: "Attendance Report",
+        ar: "تقرير الحضور" 
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -252,7 +259,7 @@ export class AttendanceReportComponent {
         { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
       ],
       reportImage: '', // Add image URL if available
-      filename: "Salary_Summary_Report.xlsx",
+      filename: "Attendance_Report.xlsx",
       tables: [
         {
           // title: "Payable Details",
@@ -269,6 +276,30 @@ export class AttendanceReportComponent {
       ]
     });
   }
+
+  
+  getJobCategoryName(): string {
+    return this.jobscat.find(jc => jc.id == this.SelectedJobCatId)?.name || 
+           'All Job Categories';
+  }
+
+  getJobName(): string {
+    return this.jobs.find(j => j.id == this.SelectedJobId)?.name || 
+           'All Jobs';
+  }
+
+  getEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.en_name || 
+           this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           'All Employees';
+  }
+
+  getArEmployeeName(): string {
+    return this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
+           this.employees.find(e => e.id == this.SelectedEmpId)?.en_name || 
+           'All Employees';
+  }
+
 
   getTotal(fieldHours: keyof MonthlyAttendance, fieldMinutes: keyof MonthlyAttendance): string {
   let totalMinutes = this.monthlyAttendenc.reduce((acc, row) => {

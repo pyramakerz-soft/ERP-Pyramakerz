@@ -3,7 +3,7 @@ import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Rout
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';  
 import { LoadingOverlayComponent } from './Component/loading-overlay/loading-overlay.component';
-import { LoadingService } from './Services/loading.service';
+import { LoadingService } from './Services/loading.service'; 
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -12,17 +12,26 @@ import { LoadingService } from './Services/loading.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'ERP_System'; 
-  constructor(private router: Router, private loadingService: LoadingService) {
+  title = 'ERP_System';  
+
+   constructor(private router: Router, private loadingService: LoadingService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.loadingService.show();
-      } else if (
+        this.loadingService.show(); // Start loader immediately when navigating
+      } 
+      else if (
         event instanceof NavigationEnd ||
         event instanceof NavigationCancel ||
         event instanceof NavigationError
       ) {
-        this.loadingService.hide();
+        // Wait for active requests (from ngOnInit) to finish
+        const interval = setInterval(() => {
+          // if (!this.loadingService['activeRequests']) { 
+          if (this.loadingService.pendingRequests === 0) {
+            this.loadingService.hide();
+            clearInterval(interval);
+          }
+        }, 100); // checks every 100ms
       }
     });
   }

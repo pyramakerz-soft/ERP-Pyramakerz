@@ -32,6 +32,10 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public SubjectWeightType? SubjectWeightType { get; set; }
 
         public bool IsSummerCourse { get; set; }
+        
+        [ForeignKey("AcademicYear")]
+        public long? AcademicYearID { get; set; }
+        public AcademicYear? AcademicYear { get; set; }
 
         public ICollection<DirectMarkClasses> DirectMarkClasses { get; set; } = new HashSet<DirectMarkClasses>();
         public ICollection<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; } = new HashSet<DirectMarkClassesStudent>(); 

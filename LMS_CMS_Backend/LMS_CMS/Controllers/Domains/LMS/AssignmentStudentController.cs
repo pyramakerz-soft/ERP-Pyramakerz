@@ -166,6 +166,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .ToList();
                     }
 
+                    qb.QuestionBankOptions = qb.QuestionBankOptions.OrderBy(x => Guid.NewGuid()).ToList();
+
                     // Filter SubBankQuestions
                     if (qb?.SubBankQuestions != null)
                     {
@@ -173,6 +175,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             .Where(sub => sub.IsDeleted != true)
                             .ToList();
                     }
+
+
+
+
                 }
             }
 
@@ -578,7 +584,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
                 else
                 {
-                   assignmentStudent.Degree= newData.Degree;
+                   assignmentStudent.Degree= newData.Degree; ///////////////////////
                 }
             }
             else
@@ -658,6 +664,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
+            if (assignmentStudent.Degree.HasValue)
+            {
+                float degreeValue = assignmentStudent.Degree.Value;
+                float integerPart = (float)Math.Floor(degreeValue);
+                float decimalPart = degreeValue - integerPart;
+
+                if (decimalPart < 0.25f)
+                    assignmentStudent.Degree = integerPart;               // round down
+                else if (decimalPart < 0.75f)
+                    assignmentStudent.Degree = integerPart + 0.5f;         // round to .5
+                else
+                    assignmentStudent.Degree = integerPart + 1.0f;         // round up
+            }
+            else
+            {
+                assignmentStudent.Degree = 0;
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -678,6 +702,111 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             unitOfWork.assignmentStudent_Repository.Update(assignmentStudent);
             await unitOfWork.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /////////////////////////////////////
+
+        [HttpPut("EditAll")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Assignment Student", "Assignment Student Answer" }
+        )]
+        public async Task<IActionResult> EditAllAsync(List<AssignmentStudentEditDTO> AllDegree)
+        {
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userId == 0 || string.IsNullOrEmpty(userTypeClaim))
+                return Unauthorized("User ID or type is invalid.");
+
+            var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            foreach (var newData in AllDegree)
+            {
+                var assignmentStudent = await unitOfWork.assignmentStudent_Repository.FindByIncludesAsync(
+                    s => s.ID == newData.ID && s.IsDeleted != true,
+                    q => q.Include(e => e.Assignment)
+                          .ThenInclude(a => a.AssignmentQuestions)
+                              .ThenInclude(aq => aq.QuestionBank),
+                    q => q.Include(e => e.AssignmentStudentQuestions)
+                          .ThenInclude(sq => sq.QuestionBank),
+                    q => q.Include(e => e.Assignment)
+                          .ThenInclude(a => a.Subject)
+                );
+
+                if (assignmentStudent == null)
+                    return NotFound("Assignment student not found.");
+                if (assignmentStudent.Assignment.AssignmentTypeID == 1)
+                {
+                    if (assignmentStudent.Degree > assignmentStudent.Assignment.Mark)
+                    {
+                        return BadRequest($"Degree cannot exceed assignment mark");
+                    }
+                    else
+                    {
+                        assignmentStudent.Degree = newData.Degree; ///////////////////////
+                    }
+                }
+
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student", roleId, userId, assignmentStudent);
+                    if (accessCheck != null)
+                    {
+                        IActionResult? accessCheck2 = _checkPageAccessService.CheckIfDeletePageAvailable(unitOfWork, "Assignment Student Answer", roleId, userId, assignmentStudent);
+                        if (accessCheck2 != null)
+                        {
+                            return accessCheck2;
+                        }
+                    }
+                }
+
+                if (assignmentStudent.Degree.HasValue)
+                {
+                    float degreeValue = assignmentStudent.Degree.Value;
+                    float integerPart = (float)Math.Floor(degreeValue);
+                    float decimalPart = degreeValue - integerPart;
+
+                    if (decimalPart < 0.25f)
+                        assignmentStudent.Degree = integerPart;               // round down
+                    else if (decimalPart < 0.75f)
+                        assignmentStudent.Degree = integerPart + 0.5f;         // round to .5
+                    else
+                        assignmentStudent.Degree = integerPart + 1.0f;         // round up
+                }
+                else
+                {
+                    assignmentStudent.Degree = 0;
+                }
+
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                assignmentStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    assignmentStudent.UpdatedByOctaId = userId;
+                    if (assignmentStudent.UpdatedByUserId != null)
+                    {
+                        assignmentStudent.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    assignmentStudent.UpdatedByUserId = userId;
+                    if (assignmentStudent.UpdatedByOctaId != null)
+                    {
+                        assignmentStudent.UpdatedByOctaId = null;
+                    }
+                }
+                unitOfWork.assignmentStudent_Repository.Update(assignmentStudent);
+                await unitOfWork.SaveChangesAsync();
+            }
 
             return Ok();
         }

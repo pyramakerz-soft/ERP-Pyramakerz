@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             var employeeClocks = Unit_Of_Work.employeeClocks_Repository
                 .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId)
-                .OrderByDescending(t => t.Date)
+                .OrderByDescending(t => t.ClockIn)
                 .ToList();
 
             if (employeeClocks == null || employeeClocks.Count == 0)
@@ -185,7 +185,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 NewClock.LocationID = null;
             }
 
-            if(NewClock.ClockIn == null || NewClock.ClockOut== null)
+            if(NewClock.CheckIn == null || NewClock.CheckOut == null)
             {
                 return BadRequest("ClockIn and ClockOut are required");
             }

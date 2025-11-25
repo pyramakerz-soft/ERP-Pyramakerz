@@ -25,5 +25,7 @@ export class BusStudent {
         public sectionName: string | null = null,
         public academicYearID: number | null = null,
         public studentAcademicYear: string | null = null, 
+        public schoolImage: string | null = null, 
+        public driverNumber: string | null = null, 
     ) {}
 }

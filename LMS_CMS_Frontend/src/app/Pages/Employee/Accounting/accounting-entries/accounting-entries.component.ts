@@ -17,6 +17,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-accounting-entries',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './accounting-entries.component.html',
   styleUrl: './accounting-entries.component.css'
 })
+
+@InitLoader()
 export class AccountingEntriesComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -62,7 +66,7 @@ export class AccountingEntriesComponent {
     public ApiServ: ApiService,
     public accountingEntriesService: AccountingEntriesService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    public loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -92,8 +96,7 @@ export class AccountingEntriesComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

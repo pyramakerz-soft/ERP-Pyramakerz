@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Diagnosis" }
+            pages: new[] { "Diagnosis", "Follow Up" }
         )]
         public async Task<IActionResult> Get()
         {

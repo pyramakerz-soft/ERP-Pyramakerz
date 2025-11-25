@@ -144,9 +144,9 @@
             validationErrors["expireDate"]}}</span>
     </div>
 
-    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4 space-x-3 rtl:space-x-reverse">
+    <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
         <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="bus"
             [(ngModel)]="Data.busCompanyID">
             <option [value]="0" disabled selected hidden>  {{ 'Choose Bus Company' | translate }}</option>
             <option *ngFor="let bus of BusCompany" [value]="bus.id">{{ bus.name }}</option>
@@ -172,7 +172,7 @@
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
             <input type="checkbox" id="isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" (change)="onLocationChange()">
-            <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Loctaion' | translate }}</label>
+            <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Location' | translate }}</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion" >
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Location' | translate }}</label>

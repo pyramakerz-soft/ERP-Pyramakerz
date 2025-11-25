@@ -19,6 +19,8 @@ import { Test } from '../../../../Models/Registration/test';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-registration-form-test-answer',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registration-form-test-answer.component.html',
   styleUrl: './registration-form-test-answer.component.css'
 })
+
+@InitLoader()
 export class RegistrationFormTestAnswerComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -64,8 +68,8 @@ export class RegistrationFormTestAnswerComponent {
     public testService: TestService,
     public registrationserv: RegisterationFormTestService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    
+    private realTimeService: RealTimeNotificationServiceService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -106,11 +110,10 @@ export class RegistrationFormTestAnswerComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {

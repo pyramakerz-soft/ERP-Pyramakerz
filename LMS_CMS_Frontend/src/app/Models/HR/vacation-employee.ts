@@ -13,7 +13,7 @@ export class VacationEmployee {
     public employeeEnName: string = '',
     public employeeArName: string = '',
     public vacationTypesID: number = 0,
-    public vacationTypeName: string = ''
+    public vacationTypesName: string = ''
   ) {}
 }
 

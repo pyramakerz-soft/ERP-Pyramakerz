@@ -20,16 +20,31 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-tuition-discount-types',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './tuition-discount-types.component.html',
-  styleUrl: './tuition-discount-types.component.css'
+  styleUrl: './tuition-discount-types.component.css',
 })
+
+@InitLoader()
 export class TuitionDiscountTypesComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -54,7 +69,7 @@ export class TuitionDiscountTypesComponent {
 
   validationErrors: { [key in keyof TuitionDiscountTypes]?: string } = {};
   AccountNumbers: AccountingTreeChart[] = [];
-  isLoading = false
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -69,8 +84,8 @@ export class TuitionDiscountTypesComponent {
     public tuitionServ: TuitionDiscountTypeService,
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
-  ) { }
+    private loadingService: LoadingService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -90,45 +105,54 @@ export class TuitionDiscountTypesComponent {
     });
 
     this.GetAllData();
-    this.GetAllAccount()
+    this.GetAllAccount();
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-
   GetAllData() {
-    this.TableData = []
+    this.TableData = [];
     this.tuitionServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-    })
-
+    });
   }
 
   GetAllAccount() {
-    this.accountServ.GetBySubAndFileLinkID(12, this.DomainName).subscribe((d) => {
-      this.AccountNumbers = d;
-    })
+    this.accountServ
+      .GetBySubAndFileLinkID(12, this.DomainName)
+      .subscribe((d) => {
+        this.AccountNumbers = d;
+      });
   }
   Create() {
     this.mode = 'Create';
     this.tuitionDiscountTypes = new TuitionDiscountTypes();
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('Type') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -138,8 +162,8 @@ export class TuitionDiscountTypesComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.tuitionServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData()
-        })
+          this.GetAllData();
+        });
       }
     });
   }
@@ -147,9 +171,9 @@ export class TuitionDiscountTypesComponent {
   Edit(row: TuitionDiscountTypes) {
     this.mode = 'Edit';
     this.tuitionServ.GetById(row.id, this.DomainName).subscribe((d) => {
-      this.tuitionDiscountTypes = d
-    })
-    this.validationErrors = {}
+      this.tuitionDiscountTypes = d;
+    });
+    this.validationErrors = {};
     this.openModal();
   }
 
@@ -173,46 +197,54 @@ export class TuitionDiscountTypesComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true
+      this.isLoading = true;
       if (this.mode == 'Create') {
-        this.tuitionServ.Add(this.tuitionDiscountTypes, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-        },
-          error => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.tuitionServ
+          .Add(this.tuitionDiscountTypes, this.DomainName)
+          .subscribe(
+            (d) => {
+              this.closeModal();
+              this.GetAllData();
+              this.isLoading = false;
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
       }
       if (this.mode == 'Edit') {
-        this.tuitionServ.Edit(this.tuitionDiscountTypes, this.DomainName).subscribe((d) => {
-          this.closeModal();
-          this.GetAllData()
-          this.isLoading = false
-        },
-          error => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          })
+        this.tuitionServ
+          .Edit(this.tuitionDiscountTypes, this.DomainName)
+          .subscribe(
+            (d) => {
+              this.closeModal();
+              this.GetAllData();
+              this.isLoading = false;
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
       }
     }
   }
 
   closeModal() {
-    this.validationErrors = {}
+    this.validationErrors = {};
     this.isModalVisible = false;
   }
 
@@ -226,13 +258,10 @@ export class TuitionDiscountTypesComponent {
       if (this.tuitionDiscountTypes.hasOwnProperty(key)) {
         const field = key as keyof TuitionDiscountTypes;
         if (!this.tuitionDiscountTypes[field]) {
-          if (
-            field == 'name' ||
-            field == 'accountNumberID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+          if (field == 'name' || field == 'accountNumberID') {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
             isValid = false;
           }
         }
@@ -241,7 +270,9 @@ export class TuitionDiscountTypesComponent {
 
     if (this.tuitionDiscountTypes.name.length > 100) {
       isValid = false;
-      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = this.translate.instant(
+        'Name cannot be longer than 100 characters.'
+      );
     }
     return isValid;
   }
@@ -277,13 +308,23 @@ export class TuitionDiscountTypesComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 }

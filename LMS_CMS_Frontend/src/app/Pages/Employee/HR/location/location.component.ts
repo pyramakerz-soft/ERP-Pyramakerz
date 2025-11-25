@@ -18,6 +18,9 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import 'leaflet-control-geocoder';
 import * as L from 'leaflet';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+
 
 @Component({
   selector: 'app-location',
@@ -26,6 +29,8 @@ import * as L from 'leaflet';
   templateUrl: './location.component.html',
   styleUrl: './location.component.css',
 })
+
+@InitLoader()
 export class LocationComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -66,7 +71,7 @@ export class LocationComponent {
     public ApiServ: ApiService,
     private translate: TranslateService,
     public LocationServ: LocationService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,8 +100,7 @@ export class LocationComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -250,6 +254,7 @@ CreateOREdit() {
 
   closeModal() {
     this.isModalVisible = false;
+    this.location = new Location();
   }
 
   openModal() {
@@ -269,8 +274,8 @@ CreateOREdit() {
       if (this.location.hasOwnProperty(key)) {
         const field = key as keyof Location;
         if (!this.location[field]) {
-          if (field == 'name') {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          if (field == 'name' || field == 'latitude' || field == 'longitude' || field == 'range') {
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
           }
         }
@@ -326,38 +331,56 @@ CreateOREdit() {
   }
 
   private initMap(): void {
-    this.map = L.map('map').setView([30.0444, 31.2357], 13); // Default Cairo
 
+    // Create map
+    this.map = L.map('map').setView([30.0444, 31.2357], 13);
+
+    // Tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
-    // Marker
-    this.marker = L.marker([30.0444, 31.2357], { draggable: true }).addTo(
-      this.map
-    );
+    // Custom Font Awesome marker
+    const faIcon = L.divIcon({
+      html: '<i class="fa-solid fa-location-dot" style="font-size:34px;color:red;"></i>',
+      className: 'fa-map-marker-icon',
+      iconSize: [34, 34],
+      iconAnchor: [17, 34], // bottom center
+    });
 
-    // Drag marker updates lat/lng
+    // Marker
+    this.marker = L.marker([30.0444, 31.2357], {
+      draggable: true,
+      icon: faIcon
+    }).addTo(this.map);
+
+    // Drag event
     this.marker.on('dragend', (e: any) => {
       const pos = e.target.getLatLng();
       this.location.latitude = pos.lat;
       this.location.longitude = pos.lng;
+      this.updateCircle();
     });
 
-    // Click event to update lat/lng
+    // Click on map → move marker
     this.map.on('click', (e: any) => {
       this.marker.setLatLng(e.latlng);
       this.location.latitude = e.latlng.lat;
       this.location.longitude = e.latlng.lng;
-      this.updateCircle(); // update circle when map clicked
+      this.updateCircle();
     });
 
+    // Save zoom
     this.map.on('zoomend', () => {
       this.location.zoom = this.map.getZoom();
     });
-    // Add search bar
+
+    // Geocoder Search Bar
     // @ts-ignore
     L.Control.geocoder().addTo(this.map);
+
+    // Draw initial circle if needed
+    this.updateCircle();
   }
 
   /** Called when latitude or longitude inputs change */
@@ -397,4 +420,5 @@ CreateOREdit() {
       ).addTo(this.map);
     }
   }
+
 }

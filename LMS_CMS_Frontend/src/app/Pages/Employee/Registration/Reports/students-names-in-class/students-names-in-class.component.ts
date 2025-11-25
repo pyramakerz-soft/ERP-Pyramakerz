@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './students-names-in-class.component.html',
   styleUrl: './students-names-in-class.component.css'
 })
+
+@InitLoader()
 export class StudentsNamesInClassComponent {
 
   SchoolId: number = 0
@@ -70,7 +74,7 @@ export class StudentsNamesInClassComponent {
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
     public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -87,11 +91,10 @@ export class StudentsNamesInClassComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSchool() {

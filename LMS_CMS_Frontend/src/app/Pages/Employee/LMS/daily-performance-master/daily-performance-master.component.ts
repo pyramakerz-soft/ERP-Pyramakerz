@@ -28,6 +28,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-daily-performance-master',
   standalone: true,
@@ -35,6 +37,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './daily-performance-master.component.html',
   styleUrl: './daily-performance-master.component.css'
 })
+
+@InitLoader()
 export class DailyPerformanceMasterComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -85,7 +89,7 @@ export class DailyPerformanceMasterComponent {
     public PerformanceTypeServ: PerformanceTypeService,
     public DailyPerformanceServ: DailyPerformanceService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -113,11 +117,10 @@ export class DailyPerformanceMasterComponent {
 
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -138,9 +141,11 @@ export class DailyPerformanceMasterComponent {
 
   getAllGradesBySchoolId() {
     this.Grades = []
+    this.subjects = []
     this.IsView = false
     this.SelectedGradeId = 0
     this.SelectedClassId = 0
+    this.SelectedSubjectId = 0
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })

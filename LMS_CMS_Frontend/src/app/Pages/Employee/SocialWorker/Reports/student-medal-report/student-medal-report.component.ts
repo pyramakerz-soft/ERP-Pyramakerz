@@ -21,6 +21,8 @@ import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { SocialWorkerMedalStudent } from '../../../../../Models/SocialWorker/social-worker-medal-student';
 import { Student } from '../../../../../Models/student';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-student-medal-report',
@@ -29,6 +31,8 @@ import { Student } from '../../../../../Models/student';
   templateUrl: './student-medal-report.component.html',
   styleUrl: './student-medal-report.component.css'
 })
+
+@InitLoader()
 export class StudentMedalReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -79,9 +83,9 @@ export class StudentMedalReportComponent implements OnInit {
     private apiService: ApiService,
     public account: AccountService,   
     private route: ActivatedRoute,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
+    private languageService: LanguageService, 
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -114,8 +118,7 @@ export class StudentMedalReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -242,6 +245,8 @@ export class StudentMedalReportComponent implements OnInit {
       this.showTable = true;
     } catch (error: any) { 
       this.medalReports = [];
+      this.reportsForExcel=[]
+      this.reportsForExport =[]
       this.showTable = true;
       if(error.status !== 404){
         Swal.fire({

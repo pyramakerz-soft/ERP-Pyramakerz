@@ -16,6 +16,8 @@ import { LinkFileService } from '../../../../../Services/Employee/Accounting/lin
 import { LinkFile } from '../../../../../Models/Accounting/link-file';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-accounting-subledger',
@@ -24,6 +26,8 @@ import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.
   templateUrl: './accounting-subledger.component.html',
   styleUrl: './accounting-subledger.component.css'
 })
+
+@InitLoader()
 export class AccountingSubledgerComponent implements OnInit {
   // Filter parameters
   fromDate: string = '';
@@ -76,7 +80,8 @@ export class AccountingSubledgerComponent implements OnInit {
     public account: AccountService,
     public ApiServ: ApiService,
     private linkFileService: LinkFileService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {

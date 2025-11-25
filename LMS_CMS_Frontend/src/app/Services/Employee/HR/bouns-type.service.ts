@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
-import { BounsType } from '../../../Models/HR/bouns-type';
+import { BonusType } from '../../../Models/HR/bouns-type';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,7 @@ export class BounsTypeService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.get<BounsType[]>(`${this.baseUrl}/BounsType`, { headers });
+    return this.http.get<BonusType[]>(`${this.baseUrl}/BounsType`, { headers });
   }
 
 }

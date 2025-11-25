@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-reasonsforleavingwork',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './reasonsforleavingwork.component.html',
   styleUrl: './reasonsforleavingwork.component.css',
 })
+
+@InitLoader()
 export class ReasonsforleavingworkComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', ''); 
 
@@ -64,7 +68,7 @@ export class ReasonsforleavingworkComponent {
     public ApiServ: ApiService,
     public reasonServ: ReasonsforleavingworkService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,14 +96,12 @@ export class ReasonsforleavingworkComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
-
-
-    ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+ 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.TableData = [];

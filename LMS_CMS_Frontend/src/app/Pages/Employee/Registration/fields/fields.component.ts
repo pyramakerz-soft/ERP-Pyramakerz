@@ -22,6 +22,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-fields',
   standalone: true,
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './fields.component.html',
   styleUrl: './fields.component.css',
 })
+
+@InitLoader()
 export class FieldsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -79,9 +83,9 @@ export class FieldsComponent {
     private translate: TranslateService,
     public CategoryServ: RegistrationCategoryService,
     public fieldServ: FieldsService,
-    public fieldTypeServ: FieldTypeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public fieldTypeServ: FieldTypeService, 
     private languageService: LanguageService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -114,11 +118,10 @@ export class FieldsComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToEmployee() {

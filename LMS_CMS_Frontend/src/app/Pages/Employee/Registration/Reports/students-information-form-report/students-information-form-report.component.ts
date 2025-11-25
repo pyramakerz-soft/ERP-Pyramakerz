@@ -23,6 +23,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-students-information-form-report',
   standalone: true,
@@ -30,6 +32,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './students-information-form-report.component.html',
   styleUrl: './students-information-form-report.component.css',
 })
+
+@InitLoader()
 export class StudentsInformationFormReportComponent {
   showViewReportBtn = false;
 
@@ -68,8 +72,8 @@ export class StudentsInformationFormReportComponent {
     private studentServ: StudentService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
-    public reportsService: ReportsService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public reportsService: ReportsService,  
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -87,11 +91,10 @@ export class StudentsInformationFormReportComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllSchools() {

@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }, 
-            pages: new[] { "Maintenance Employees" }
+            pages: new[] { "Maintenance Employees", "Maintenance", "Maintenance Report" }
         )]
         public async Task<IActionResult> GetAllAsync()
         {
@@ -60,6 +60,54 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             return Ok(dtoList);
         }
+
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Maintenance Employees", "Maintenance", "Maintenance Report" }
+        )]
+        public async Task<IActionResult> GetAllAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await uow.maintenanceEmployee_Repository
+               .CountAsync(f => f.IsDeleted != true); 
+
+            List<MaintenanceEmployee> Employees = await uow.maintenanceEmployee_Repository.Select_All_With_IncludesById_Pagination<MaintenanceEmployee>(
+                t => t.IsDeleted != true,
+                quer => quer.Include(e => e.Employee)
+                ).Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (Employees == null || !Employees.Any())
+                return NotFound("No Maintenance employees found.");
+
+
+            List<MaintenanceEmployeeGetDto> dtoList = mapper.Map<List<MaintenanceEmployeeGetDto>>(Employees);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = dtoList, Pagination = paginationMetadata });
+        }
+
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(

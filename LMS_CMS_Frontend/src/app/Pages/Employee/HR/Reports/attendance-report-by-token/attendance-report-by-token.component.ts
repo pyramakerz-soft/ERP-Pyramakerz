@@ -24,6 +24,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-attendance-report-by-token',
@@ -32,6 +34,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './attendance-report-by-token.component.html',
   styleUrl: './attendance-report-by-token.component.css'
 })
+
+@InitLoader()
 export class AttendanceReportByTokenComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -59,7 +63,11 @@ export class AttendanceReportByTokenComponent {
   year: number = 0
   selectedMonth: string = '';
   SelectedEmpName: string = '';
-
+  school = {
+    reportHeaderOneEn: 'Attendance Report',
+    reportHeaderOneAr: ' تقرير الحضور '
+  };
+  
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -74,7 +82,7 @@ export class AttendanceReportByTokenComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -91,8 +99,7 @@ export class AttendanceReportByTokenComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -199,12 +206,13 @@ export class AttendanceReportByTokenComponent {
     }, 500);
   }
 
+
   async DownloadAsExcel() {
     await this.GetEmployeeName();
     await this.reportsService.generateExcelReport({
       mainHeader: {
-        en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        en: "Attendance Report",
+        ar: "تقرير الحضور"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
@@ -214,7 +222,7 @@ export class AttendanceReportByTokenComponent {
         { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
       ],
       reportImage: '', // Add image URL if available
-      filename: "Salary_Summary_Report.xlsx",
+      filename: "Attendance_Report_Report.xlsx",
       tables: [
         {
           // title: "Payable Details",

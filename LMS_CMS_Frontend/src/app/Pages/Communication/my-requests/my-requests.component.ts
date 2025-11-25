@@ -30,6 +30,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 @Component({
   selector: 'app-my-requests',
   standalone: true,
@@ -37,6 +39,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
   templateUrl: './my-requests.component.html',
   styleUrl: './my-requests.component.css'
 })
+
+@InitLoader()
 export class MyRequestsComponent {
   requests: Request[] = []
   requestByID:Request = new Request()
@@ -96,7 +100,7 @@ export class MyRequestsComponent {
     public subjectService: SubjectService,
     public requestService: RequestService,    
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {
@@ -125,8 +129,7 @@ export class MyRequestsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

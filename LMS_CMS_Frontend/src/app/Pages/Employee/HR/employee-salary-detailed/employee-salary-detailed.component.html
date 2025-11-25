@@ -177,7 +177,7 @@
                     <span>{{ salaryHistory.basicSalary | number:'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between py-1 border-b">
-                    <span>Bonuses</span>
+                    <span>Bonus</span>
                     <span>{{ salaryHistory.totalBonus | number:'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between py-1 border-b">
@@ -221,40 +221,42 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
-                    {
-                        keyEn: 'Month: ' + this.month + '/' +this.year,
-                    }, 
-                    {
-                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
-                    },
-                    {
-                        keyEn: 'Job: ' + this.SelectedJobName,
-                    },
-                    {
-                        keyEn: 'Employee: ' + this.SelectedEmpName,
-                    },
-                    {
-                        keyEn: 'Salary: ' + this.salaryHistory.basicSalary
-                    },
-                    {
-                        keyEn: 'Total Bonus: ' + this.salaryHistory.totalBonus,
-                    },
-                    {
-                        keyEn: 'Total Overtime: ' + this.salaryHistory.totalOvertime,
-                    },
-                    {
-                        keyEn: 'Total Loans: ' + this.salaryHistory.totalLoans,
-                    },
-                    {
-                        keyEn: 'Total Deduction: ' + this.salaryHistory.totalDeductions,
-                    },
-                    {
-                        keyEn: 'Final Salary: ' + this.salaryHistory.netSalary,
-                    }
-                    ]"
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Employee Salary Detailed Report'" [infoRows]="[
+            {
+                keyEn: 'Month: ' + this.month + '/' + this.year,
+                keyAr: 'الشهر: ' + this.month + '/' + this.year
+            },
+            {
+                keyEn: 'Employee: ' + this.SelectedEmpName,
+                keyAr: 'الموظف: ' + this.SelectedArEmpName
+            },
+            {
+                keyEn: 'Salary: ' + this.salaryHistory.basicSalary,
+                keyAr: 'الراتب الأساسي: ' + this.salaryHistory.basicSalary
+            },
+            {
+                keyEn: 'Total Bonus: ' + this.salaryHistory.totalBonus,
+                keyAr: 'إجمالي المكافآت: ' + this.salaryHistory.totalBonus
+            },
+            {
+                keyEn: 'Total Overtime: ' + this.salaryHistory.totalOvertime,
+                keyAr: 'إجمالي الساعات الإضافية: ' + this.salaryHistory.totalOvertime
+            },
+            {
+                keyEn: 'Total Loans: ' + this.salaryHistory.totalLoans,
+                keyAr: 'إجمالي السلف: ' + this.salaryHistory.totalLoans
+            },
+            {
+                keyEn: 'Total Deduction: ' + this.salaryHistory.totalDeductions,
+                keyAr: 'إجمالي الخصومات: ' + this.salaryHistory.totalDeductions
+            },
+            {
+                keyEn: 'Final Salary: ' + this.salaryHistory.netSalary,
+                keyAr: 'الراتب النهائي: ' + this.salaryHistory.netSalary
+            }
+            ]"
             [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']"
-            [tableData]="tableDataForPDF" #pdfComponentRef>
+            [school]="school" [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

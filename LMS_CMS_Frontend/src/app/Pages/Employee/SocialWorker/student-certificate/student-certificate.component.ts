@@ -25,6 +25,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-student-certificate',
@@ -33,6 +35,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './student-certificate.component.html',
   styleUrl: './student-certificate.component.css'
 })
+
+@InitLoader()
 export class StudentCertificateComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -94,7 +98,7 @@ export class StudentCertificateComponent {
     public CertificateStudentServ: CertificateStudentService,
     public CertificateTypeServ: CertificateTypeService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -120,8 +124,7 @@ export class StudentCertificateComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

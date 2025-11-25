@@ -21,6 +21,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-stores',
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './stores.component.html',
   styleUrl: './stores.component.css',
 })
+
+@InitLoader()
 export class StoresComponent {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -82,8 +86,8 @@ export class StoresComponent {
     private router: Router,
     public StoresServ: StoresService,
     public CategoryServ: InventoryCategoryService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -143,8 +147,7 @@ export class StoresComponent {
     this.validationErrors = translatedErrors;
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

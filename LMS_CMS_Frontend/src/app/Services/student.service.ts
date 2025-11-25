@@ -30,6 +30,19 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student`, { headers })
   }
 
+  GetAllWithPaginnation(DomainName: string, pageNumber: number, pageSize: number ){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<{ data: Student[], pagination: any }>(`${this.baseUrl}/Student/WithPaginnation?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetAllWithSearch(SchoolId:number ,KeyWord:string,PageNumber:number =1 ,pageSize:number =10 ,DomainName?:string){
     if(DomainName!=null) {
       this.header=DomainName 
@@ -89,6 +102,15 @@ export class StudentService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ClassID/${id}`, { headers });
+  }
+
+  GetByClassNotInActiveYear(id: number, DomainName: string): Observable<Student[]> {
+    const headers = new HttpHeaders()
+      .set('Domain-Name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/GetByClassNotInActiveYear/${id}`, { headers });
   }
 
   GetByClassIDAndThoseWhoWishesToUseSchoolTransportation(id: number, DomainName: string): Observable<Student[]> {

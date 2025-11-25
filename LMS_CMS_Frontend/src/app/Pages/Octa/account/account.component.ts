@@ -10,6 +10,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 @Component({
   selector: 'app-account',
   standalone: true,
@@ -17,6 +19,8 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './account.component.html',
   styleUrl: './account.component.css'
 })
+
+@InitLoader()
 export class AccountComponent {
   keysArray: string[] = ['id', 'user_Name','arabic_Name'  ];
   key: string= "id";
@@ -28,7 +32,8 @@ export class AccountComponent {
   editAccount:boolean = false
   validationErrors: { [key in keyof Account]?: string } = {};
 
-  constructor(private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,public octaService: OctaService){}
+  constructor(private languageService: LanguageService,public octaService: OctaService,
+    private loadingService: LoadingService ){}
   
   ngOnInit(){
     this.getAccountData()
@@ -38,11 +43,10 @@ export class AccountComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {   
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAccountData(){

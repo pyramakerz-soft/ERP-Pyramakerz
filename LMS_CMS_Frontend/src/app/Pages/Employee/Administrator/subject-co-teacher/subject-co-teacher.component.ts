@@ -19,6 +19,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-co-teacher',
   standalone: true,
@@ -26,6 +28,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './subject-co-teacher.component.html',
   styleUrl: './subject-co-teacher.component.css'
 })
+
+@InitLoader()
 export class SubjectCoTeacherComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -55,7 +59,8 @@ export class SubjectCoTeacherComponent {
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -76,12 +81,11 @@ export class SubjectCoTeacherComponent {
     this.isRtl = document.documentElement.dir === 'rtl';   
   }
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Employee/${this.SupjectCoTeacher.coTeacherID}`)

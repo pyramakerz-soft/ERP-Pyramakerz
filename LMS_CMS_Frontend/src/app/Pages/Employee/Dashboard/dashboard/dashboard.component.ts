@@ -21,6 +21,8 @@ import {
 import { CategoryRankingsComponent } from '../../../../Component/Employee/Home/category-ranking/category-ranking.component';
 import { RequestProgressComponent } from '../../../../Component/Employee/Home/request-progresss/request-progresss.component';
 import { DashboardService } from '../../../../Services/Dashboard/dashboard.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,6 +41,8 @@ import { DashboardService } from '../../../../Services/Dashboard/dashboard.servi
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
+
+@InitLoader()
 export class DashboardComponent implements OnInit, OnDestroy {
   User_Data_After_Login: TokenData = new TokenData(
     '',
@@ -68,17 +72,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public account: AccountService,
     public employeeService: EmployeeService,
     public ApiServ: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private dashboardService: DashboardService
+    private languageService: LanguageService, 
+    private dashboardService: DashboardService,
+    private loadingService: LoadingService
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {  
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.DomainName = this.ApiServ.GetHeader();
 
-    if (!this.DomainName) {
-      console.error('DomainName is not set!');
+    if (!this.DomainName) { 
       this.errorMessage = 'Domain configuration error';
       this.isLoading = false;
       return;
@@ -94,8 +97,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

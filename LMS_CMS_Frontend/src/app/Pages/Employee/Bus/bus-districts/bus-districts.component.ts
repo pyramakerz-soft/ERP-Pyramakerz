@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bus-Districts',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bus-districts.component.html',
   styleUrl: './bus-districts.component.css'
 })
+
+@InitLoader()
 export class BusDistrictsComponent {
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -65,7 +69,8 @@ export class BusDistrictsComponent {
     public DomainServ: DomainService, 
     public EditDeleteServ: DeleteEditPermissionService, 
     public ApiServ: ApiService ,
-    private languageService: LanguageService , private realTimeService: RealTimeNotificationServiceService) { }
+    private languageService: LanguageService,
+    private loadingService: LoadingService) { }
 
   ngOnInit() {
 
@@ -101,14 +106,12 @@ export class BusDistrictsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
-
-          ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+ 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
 
   Create() {
@@ -176,29 +179,31 @@ export class BusDistrictsComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.busDistrict) {
-      if (this.busDistrict.hasOwnProperty(key)) {
-        const field = key as keyof BusType;
-        if (!this.busDistrict[field]) {
-          if(field == "name"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.busDistrict) {
+    if (this.busDistrict.hasOwnProperty(key)) {
+      const field = key as keyof BusType;
+      if (!this.busDistrict[field]) {
+        if(field == "name"){
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
+      } else {
+        this.validationErrors[field] = '';
       }
     }
-
-    if (this.busDistrict.name.length > 100) {
-      isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
-    }
-
-    return isValid;
   }
+
+  if (this.busDistrict.name.length > 100) {
+    isValid = false;
+    this.validationErrors['name'] = this.translate.instant('Name cannot be longer than 100 characters.');
+  }
+
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof BusType, value: any }) {
     const { field, value } = event;
@@ -291,4 +296,15 @@ export class BusDistrictsComponent {
       });
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

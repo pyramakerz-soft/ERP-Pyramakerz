@@ -37,6 +37,8 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -44,6 +46,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
+
+@InitLoader()
 export class QuestionBankComponent {
   @ViewChild('dropdownContainer') dropdownRef!: ElementRef;
 
@@ -145,8 +149,8 @@ export class QuestionBankComponent {
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
-    private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private translate: TranslateService, 
+    private loadingService: LoadingService,
   ) { }
 
   ngOnInit() {
@@ -177,8 +181,7 @@ export class QuestionBankComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -602,9 +605,8 @@ export class QuestionBankComponent {
             field == 'lessonID' ||
             field == 'questionTypeID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = this.getFieldDisplayName(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         } else {
@@ -616,14 +618,24 @@ export class QuestionBankComponent {
       const options = this.questionBank.questionBankOptionsDTO || [];
 
       if (options.length === 0) {
-        this.validationErrors['questionBankOptionsDTO'] = 'Options are required';
+        if(this.questionBank.questionTypeID == 3){
+          this.validationErrors['questionBankOptionsDTO'] = 'Answers are required';
+        }
+        else{
+          this.validationErrors['questionBankOptionsDTO'] = 'Options are required';
+        }
         isValid = false;
         return isValid;
       } else {
         // Check for empty option values
         const anyEmpty = options.some(o => !o.option || o.option.trim() === '');
         if (anyEmpty) {
-          this.validationErrors['questionBankOptionsDTO'] = 'All options must have non-empty values.';
+          if(this.questionBank.questionTypeID == 3){
+            this.validationErrors['questionBankOptionsDTO'] = 'All Answers must have non-empty values';
+          }
+          else{
+            this.validationErrors['questionBankOptionsDTO'] = 'All options must have non-empty values.';
+          }
           isValid = false;
         }
 
@@ -634,7 +646,9 @@ export class QuestionBankComponent {
 
         const hasDuplicates = normalizedOptions.length !== new Set(normalizedOptions).size;
         if (hasDuplicates) {
-          this.validationErrors['questionBankOptionsDTO'] = 'All options must be unique.';
+          if(this.questionBank.questionTypeID != 3){
+            this.validationErrors['questionBankOptionsDTO'] = 'All options must be unique';
+          }
           isValid = false;
         }
       }
@@ -717,6 +731,28 @@ export class QuestionBankComponent {
       }
     }
     return isValid;
+  }
+
+  private getFieldDisplayName(field: keyof QuestionBank): string {
+    const map: { [key in keyof QuestionBank]?: string } = {
+      gradeID: 'Grade',
+      schoolID: 'School',
+      subjectID: 'Subject',
+      lessonID: 'Lesson',
+      questionTypeID: 'Question Type'
+    };
+    return map[field] ?? this.capitalizeField(field);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   onInputValueChange(event: { field: keyof QuestionBank; value: any }) {
@@ -898,13 +934,12 @@ export class QuestionBankComponent {
   }
 
   AddOption() {
-    if (!Array.isArray(this.questionBank.questionBankOptionsDTO)) {
-      console.warn("questionBankOptionsDTO was invalid, initializing to []");
+    if (!Array.isArray(this.questionBank.questionBankOptionsDTO)) { 
       this.questionBank.questionBankOptionsDTO = [];
     } else {
       if (this.NewOption != "") {
         const exist = this.questionBank.questionBankOptionsDTO.find(s => s.option == this.NewOption)
-        if (exist) {
+        if (exist && this.questionBank.questionTypeID != 3) {
           this.validationErrors['questionBankOptionsDTO'] = 'This Option already exist';
         } else {
           var opt = new QuestionBankOption()

@@ -23,6 +23,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-registraion-test',
@@ -31,6 +33,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registraion-test.component.html',
   styleUrl: './registraion-test.component.css',
 })
+
+@InitLoader()
 export class RegistraionTestComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -76,7 +80,7 @@ export class RegistraionTestComponent {
     public testService: TestService,
     public registerationFormParentService: RegisterationFormParentService,
     public questionServ: QuestionService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -112,11 +116,10 @@ export class RegistraionTestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -205,7 +208,7 @@ export class RegistraionTestComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Added Succeessfully',
+          text: 'Added Successfully',
           confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Parent/Admission Test`);

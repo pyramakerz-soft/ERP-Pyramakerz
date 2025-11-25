@@ -9,6 +9,8 @@ import { CategoryRankings } from '../../../../Models/Dashboard/dashboard.models'
   imports: [CommonModule, TranslateModule],
   template: `
     <div class="p-4 bg-white rounded shadow">
+      <h2 class="font-semibold mb-4">{{ 'E-Commerce' | translate }}</h2>
+      <hr class="mb-4">
       <!-- Total Orders -->
       <div class="text-center mb-4">
         <h2 class="text-3xl font-bold text-gray-900">{{ categoryRankings?.totalOrders || 0 }}</h2>

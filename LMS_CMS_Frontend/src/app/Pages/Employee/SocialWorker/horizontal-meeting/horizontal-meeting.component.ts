@@ -17,6 +17,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-horizontal-meeting',
   standalone: true,
@@ -24,6 +26,8 @@ import {  Subscription } from 'rxjs';
   templateUrl: './horizontal-meeting.component.html',
   styleUrl: './horizontal-meeting.component.css'
 })
+
+@InitLoader()
 export class HorizontalMeetingComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -50,6 +54,11 @@ export class HorizontalMeetingComponent {
 
   validationErrors: { [key in keyof HorizontalMeeting]?: string } = {};
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -59,11 +68,10 @@ export class HorizontalMeetingComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public HorizontalMeetingServ: HorizontalMeetingService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public HorizontalMeetingServ: HorizontalMeetingService, 
     private languageService: LanguageService,
-    private translate: TranslateService,
-
+    private translate: TranslateService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,23 +91,68 @@ export class HorizontalMeetingComponent {
       }
     });
 
-    this.GetAllData();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 
 
-  GetAllData() {
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
-    this.HorizontalMeetingServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d;
+    this.HorizontalMeetingServ.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }  
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
     });
   }
 
@@ -122,7 +175,7 @@ export class HorizontalMeetingComponent {
         }).then((result) => {
       if (result.isConfirmed) {
         this.HorizontalMeetingServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -160,7 +213,7 @@ export class HorizontalMeetingComponent {
       if (this.mode == 'Create') {
         this.HorizontalMeetingServ.Add(this.horizontalMeeting, this.DomainName).subscribe(
           (d) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
             Swal.fire({
@@ -191,7 +244,7 @@ export class HorizontalMeetingComponent {
               text: 'Updated Successfully',
               confirmButtonColor: '#089B41',
             });
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
           },
@@ -253,14 +306,17 @@ export class HorizontalMeetingComponent {
     }
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
+   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: HorizontalMeeting[] = await firstValueFrom(
-        this.HorizontalMeetingServ.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.HorizontalMeetingServ.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -273,7 +329,7 @@ export class HorizontalMeetingComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -282,4 +338,60 @@ export class HorizontalMeetingComponent {
       this.TableData = [];
     }
   }
+
+    changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

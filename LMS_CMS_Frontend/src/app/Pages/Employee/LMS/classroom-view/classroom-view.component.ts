@@ -9,6 +9,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-classroom-view',
   standalone: true,
@@ -16,6 +18,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './classroom-view.component.html',
   styleUrl: './classroom-view.component.css'
 })
+
+@InitLoader()
 export class ClassroomViewComponent { 
   classroom: Classroom = new Classroom();  
 
@@ -32,8 +36,8 @@ export class ClassroomViewComponent {
     public classroomService: ClassroomService, 
     public activeRoute: ActivatedRoute,
     public router: Router,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,  
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -52,9 +56,8 @@ export class ClassroomViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
+  ngOnDestroy(): void { 
+      if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }

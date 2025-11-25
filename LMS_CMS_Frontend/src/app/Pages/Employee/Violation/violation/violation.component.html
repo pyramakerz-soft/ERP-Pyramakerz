@@ -142,24 +142,40 @@
                     class="text-red-500 ml-3 font-normal">{{validationErrors['details'] }}</span>
             </div>
             <div class="w-full mb-4">
-                <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+                <div class="relative bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
-                        <label for="imageForm"
-                            class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                            <img *ngIf="!violation.attach && !violation.attachFile" src="Images/Icon frame.png"
-                                class="w-1/4">
-                            <img *ngIf="violation.attachFile" src="Images/FileAttached.png" class="w-1/4">
-                            <img *ngIf="violation.attach && !violation.attachFile" src="Images/FileAttached.png" class="w-1/4">
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span
-                                    class="secondaryTxt"> {{ 'Click to' | translate }} {{ 'Upload' | translate }} </span></p>
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
-                        </label>
-                        <input id="imageForm" type="file" class="hidden" (change)="onImageFileSelected($event)"
+                    <label for="imageForm" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                        <img *ngIf="!violation.attach && !violation.attachFile" src="Images/Icon frame.png" class="w-1/4">
+                        <img *ngIf="violation.attachFile" src="Images/FileAttached.png" class="w-1/4">
+                        <img *ngIf="violation.attach && !violation.attachFile" src="Images/FileAttached.png" class="w-1/4">
+
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
+                        <span class="secondaryTxt">{{ 'Click to' | translate }} {{ 'Upload' | translate }}</span>
+                        </p>
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]">
+                        {{ '(Max. File size: 25 MB)' | translate }}
+                        </p>
+                    </label>
+
+                    <input id="imageForm" type="file" class="hidden" 
+                            (change)="onImageFileSelected($event)"
                             accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" />
                     </div>
+
+                    <!-- Delete Button
+                    <button (click)="removeAttachment()" 
+                            type="button" 
+                            class="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition">
+                    <i class="fa-solid fa-trash text-lg"></i>
+                    </button> -->
                 </div>
-                <span *ngIf="validationErrors['attachFile']" class="text-red-500  font-normal text-xs md:text-sm">{{validationErrors['attachFile'] }}</span>
+
+                <span *ngIf="validationErrors['attachFile']" 
+                        class="text-red-500 font-normal text-xs md:text-sm">
+                    {{ validationErrors['attachFile'] }}
+                </span>
             </div>
+
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
@@ -168,5 +184,39 @@
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>
+    </div>
+</div>
+
+<div class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4  rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+        [disabled]="CurrentPage === 1 || TableData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p> {{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+        [disabled]="CurrentPage === TotalPages || TableData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
+            <p> {{'Next'| translate }}</p> 
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input  (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p> {{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}}  {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}}  {{'Item'| translate }})</p>
     </div>
 </div>

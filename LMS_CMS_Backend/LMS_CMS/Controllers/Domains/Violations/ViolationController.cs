@@ -43,7 +43,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "violation" }
         )]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -57,10 +57,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Violation> violations = await Unit_Of_Work.violations_Repository.Select_All_With_IncludesById<Violation>(sem => sem.IsDeleted != true,
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.violations_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Violation> violations = await Unit_Of_Work.violations_Repository.Select_All_With_IncludesById_Pagination<Violation>(sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.ViolationType),
                     query => query.Include(emp => emp.Employee.EmployeeType),
-                    query => query.Include(emp => emp.Employee));
+                    query => query.Include(emp => emp.Employee))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
 
             if (violations == null || violations.Count == 0)
             {
@@ -74,7 +83,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 v.Attach = _fileService.GetFileUrl(v.Attach, Request, HttpContext);
             }
 
-            return Ok(violationDTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = violationDTOs, Pagination = paginationMetadata });
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////--77
@@ -306,7 +323,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 violation.Attach = violation.Attach;
             }
 
+
             mapper.Map(Newviolation, violation);
+            if ((Newviolation.DeletedFile != null || Newviolation.DeletedFile != "") && Newviolation.AttachFile == null)
+            {
+                await _fileService.DeleteFileAsync(
+                    Newviolation.DeletedFile,
+                    "Violation/Violation",
+                    Newviolation.ID,
+                    HttpContext
+                );
+                violation.Attach = null;
+            }
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             violation.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")

@@ -18,6 +18,8 @@ import { DaysService } from '../../../../Services/Octa/days.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-school',
   standalone: true,
@@ -25,6 +27,8 @@ import {  Subscription } from 'rxjs';
   templateUrl: './school.component.html',
   styleUrl: './school.component.css',
 })
+
+@InitLoader()
 export class SchoolComponent {
   keysArray: string[] = ['id', 'name', 'address', 'schoolTypeName'];
   key: string = 'id';
@@ -57,7 +61,7 @@ export class SchoolComponent {
     public DaysServ: DaysService,
     public router: Router,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -87,12 +91,11 @@ export class SchoolComponent {
   }
 
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   getSchoolData() {
     this.schoolData = []

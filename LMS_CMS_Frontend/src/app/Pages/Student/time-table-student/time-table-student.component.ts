@@ -22,6 +22,8 @@ import { LanguageService } from '../../../Services/shared/language.service';
 import { MenuService } from '../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../Services/shared/reports.service';
+import { LoadingService } from '../../../Services/loading.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-time-table-student',
@@ -30,6 +32,8 @@ import { ReportsService } from '../../../Services/shared/reports.service';
   templateUrl: './time-table-student.component.html',
   styleUrl: './time-table-student.component.css'
 })
+
+@InitLoader()
 export class TimeTableStudentComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -86,7 +90,7 @@ export class TimeTableStudentComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     public timetableServ: TimeTableService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,11 +107,10 @@ export class TimeTableStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+   ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
 
@@ -119,6 +122,7 @@ export class TimeTableStudentComponent {
     this.date = ""
     this.timetableServ.GetByIdForStudentIdAsync(this.UserID, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
+        this.TimeTablePrint = d.data;
         this.OriginTimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
@@ -199,214 +203,228 @@ export class TimeTableStudentComponent {
   }
 
   async DownloadAsExcel() {
-    const tables: any[] = [];
-    
+    const data: any[] = [];
+
     this.TimeTable.forEach(day => {
-      const data: any[] = [];
+      const row: any[] = [];
+      row.push(day.dayName); // First column: Day
 
-      day.grades.forEach(grade => {
-        grade.classrooms.forEach(classroom => {
-          const row: any[] = [];
+      // Columns for each session
+      for (let i = 0; i < this.MaxPeriods; i++) {
+        let sessionText = '';
 
-          row.push(grade.gradeName);         // Column 1: Grade
-          row.push(classroom.classroomName); // Column 2: Class
-
-          for (let i = 0; i < this.MaxPeriods; i++) {
+        day.grades.forEach(grade => {
+          grade.classrooms.forEach(classroom => {
             const session = classroom.sessions[i];
 
-            let sessionText = '';
+            if (session) {
+              // Add subjects
+              if (session.subjects?.length) {
+                session.subjects.forEach(sub => {
+                  sessionText += `${grade.gradeName} - ${classroom.classroomName} | ${sub.subjectName} (${sub.teacherName})\n`;
+                });
+              }
 
-            if (session?.subjects?.length) {
-              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join('\n');
+              // Add duty teacher
+              if (session.dutyTeacherName) {
+                sessionText += `${grade.gradeName} - ${classroom.classroomName} | Duty: ${session.dutyTeacherName}\n`;
+              }
+
+              // If empty session
+              if (!session.subjects?.length && !session.dutyTeacherName) {
+                sessionText += `${grade.gradeName} - ${classroom.classroomName} | --\n`;
+              }
+            } else {
+              sessionText += `${grade.gradeName} - ${classroom.classroomName} | --\n`;
             }
-
-            if (session?.dutyTeacherName) {
-              sessionText += `\nDuty: ${session.dutyTeacherName}`;
-            }
-
-            row.push(sessionText || '--');
-          }
-
-          data.push(row);
+          });
         });
-      });
-      
-      tables.push({
-        title: day.dayName,
-        headers: ["Grade", "Class", ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)],
-        data: data
-      });
+
+        row.push(sessionText.trim()); // Add session column
+      }
+
+      data.push(row);
     });
+
+    const table = {
+      title: 'Time Table',
+      headers: ['Day', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)],
+      data: data,
+      styles: {
+        header: { bold: true, fillColor: '#F3F4F6' },
+        row: { wrapText: true } // so stacked subjects appear nicely
+      }
+    };
 
     await this.reportsService.generateExcelReport({
       infoRows: [
         { key: 'Name', value: this.TimeTableName },
       ],
       filename: "TimeTable.xlsx",
-      tables: tables
+      tables: [table]
     });
   }
 
   async DownloadAsPDF() {
-  this.isLoading = true;
+    this.isLoading = true;
 
-  try {
-  const tables: any[] = [];
+    try {
+    const tables: any[] = [];
 
-  this.TimeTable.forEach(day => {
-  const data: any[] = [];
+    this.TimeTable.forEach(day => {
+    const data: any[] = [];
 
-  day.grades.forEach(grade => {
-    grade.classrooms.forEach(classroom => {
-      const row: any = {};
+    day.grades.forEach(grade => {
+      grade.classrooms.forEach(classroom => {
+        const row: any = {};
 
-      row['Grade'] = grade.gradeName;
-      row['Class'] = classroom.classroomName;
+        row['Grade'] = grade.gradeName;
+        row['Class'] = classroom.classroomName;
 
-      for (let i = 0; i < this.MaxPeriods; i++) {
-        const session = classroom.sessions[i];
+        for (let i = 0; i < this.MaxPeriods; i++) {
+          const session = classroom.sessions[i];
 
-        let sessionText = '';
+          let sessionText = '';
 
-        if (session?.subjects?.length) {
-          sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join(', ');
+          if (session?.subjects?.length) {
+            sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join(', ');
+          }
+
+          if (session?.dutyTeacherName) {
+            sessionText += ` | Duty: ${session.dutyTeacherName}`;
+          }
+
+          row[`Session ${i + 1}`] = sessionText || '--';
         }
 
-        if (session?.dutyTeacherName) {
-          sessionText += ` | Duty: ${session.dutyTeacherName}`;
-        }
-
-        row[`Session ${i + 1}`] = sessionText || '--';
-      }
-
-      data.push(row);
+        data.push(row);
+      });
     });
-  });
 
-  const headers = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
+    const headers = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
 
-  tables.push({
-    title: day.dayName,
-    headers: headers,
-    data: data
-  });
-  });
+    tables.push({
+      title: day.dayName,
+      headers: headers,
+      data: data
+    });
+    });
 
-  await this.generatePDFWithSplitTables(tables);
-  } catch (error) {
-  console.error('PDF generation error:', error);
-  alert('Error generating PDF. Please try again.');
-  } finally {
-  this.isLoading = false;
-  }
+    await this.generatePDFWithSplitTables(tables);
+    } catch (error) {
+    console.error('PDF generation error:', error);
+    alert('Error generating PDF. Please try again.');
+    } finally {
+    this.isLoading = false;
+    }
   }
 
   private generatePDFWithSplitTables(tables: any[]) {
-  const maxSessionsPerPage = 6; // Show max 6 sessions per page to avoid overflow
+    const maxSessionsPerPage = 6; // Show max 6 sessions per page to avoid overflow
 
-  const opt = {
-  margin: [10, 10, 10, 10],
-  filename: `TimeTable_${this.TimeTableName}.pdf`,
-  image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { 
-  scale: 2, 
-  useCORS: true, 
-  letterRendering: true, 
-  allowTaint: false,
-  logging: false
-  },
-  jsPDF: { 
-  unit: 'mm', 
-  format: 'a4', 
-  orientation: 'landscape',
-  compress: true 
-  },
-  pagebreak: { mode: 'css', before: '.page-break' }
-  };
+    const opt = {
+    margin: [10, 10, 10, 10],
+    filename: `TimeTable_${this.TimeTableName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+    scale: 2, 
+    useCORS: true, 
+    letterRendering: true, 
+    allowTaint: false,
+    logging: false
+    },
+    jsPDF: { 
+    unit: 'mm', 
+    format: 'a4', 
+    orientation: 'landscape',
+    compress: true 
+    },
+    pagebreak: { mode: 'css', before: '.page-break' }
+    };
 
-  // Create container with split tables
-  const container = document.createElement('div');
-  container.style.cssText = `
-  width: 100%;
-  background: white;
-  padding: 10mm;
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  `;
+    // Create container with split tables
+    const container = document.createElement('div');
+    container.style.cssText = `
+    width: 100%;
+    background: white;
+    padding: 10mm;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    `;
 
-  let html = `
-  <div style="text-align: center; margin-bottom: 20px;">
-  <h2 style="margin: 0 0 5px 0; font-size: 18px;">${this.TimeTableName}</h2>
-  <p style="margin: 0; font-size: 12px; color: #666;">Time Table Report</p>
-  </div>
-  `;
-
-  let currentPageHeight = 60; // Start with header height
-  const pageHeight = 210; // A4 height in mm
-  const tableHeight = 40; // Estimated height per table section
-  const margin = 10;
-
-  tables.forEach((table, tableIndex) => {
-  // Split sessions into chunks
-  const sessionHeaders = table.headers.slice(2); // Skip Grade and Class
-  const totalSessions = sessionHeaders.length;
-  const chunks = Math.ceil(totalSessions / maxSessionsPerPage);
-
-  for (let chunkIndex = 0; chunkIndex < chunks; chunkIndex++) {
-  const startSession = chunkIndex * maxSessionsPerPage;
-  const endSession = Math.min(startSession + maxSessionsPerPage, totalSessions);
-
-  const chunkHeaders = ['Grade', 'Class', ...sessionHeaders.slice(startSession, endSession)];
-
-  // Check if we need a page break
-  if (currentPageHeight + tableHeight > pageHeight - margin) {
-    html += '<div class="page-break" style="page-break-before: always;"></div>';
-    currentPageHeight = margin;
-  }
-
-  html += `
-    <div style="margin-bottom: 10px; page-break-inside: avoid;">
-      <h3 style="margin: 5px 0 3px 0; font-size: 12px; background: #ddd; padding: 3px; font-weight: bold;">${table.title}</h3>
-      ${chunkIndex > 0 ? `<p style="margin: 2px 0 3px 0; font-size: 9px; color: #666;">(Sessions ${startSession + 1} - ${endSession})</p>` : ''}
-      
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 9px;">
-        <thead>
-          <tr style="background-color: #f0f0f0;">
-            ${chunkHeaders.map(h => `<th style="border: 1px solid #999; padding: 3px; text-align: left; font-weight: bold; font-size: 8px; word-break: break-word;">${h}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${table.data.map((row: any, rowIndex: number) => `
-            <tr style="background-color: ${rowIndex % 2 === 0 ? '#fff' : '#f9f9f9'};">
-              ${chunkHeaders.map(header => `
-                <td style="border: 1px solid #ccc; padding: 3px; font-size: 8px; word-break: break-word; white-space: normal;">
-                  ${row[header] || '--'}
-                </td>
-              `).join('')}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    let html = `
+    <div style="text-align: center; margin-bottom: 20px;">
+    <h2 style="margin: 0 0 5px 0; font-size: 18px;">${this.TimeTableName}</h2>
+    <p style="margin: 0; font-size: 12px; color: #666;">Time Table Report</p>
     </div>
-  `;
+    `;
 
-  currentPageHeight += tableHeight;
-  }
-  });
+    let currentPageHeight = 60; // Start with header height
+    const pageHeight = 210; // A4 height in mm
+    const tableHeight = 40; // Estimated height per table section
+    const margin = 10;
 
-  container.innerHTML = html;
-  document.body.appendChild(container);
+    tables.forEach((table, tableIndex) => {
+    // Split sessions into chunks
+    const sessionHeaders = table.headers.slice(2); // Skip Grade and Class
+    const totalSessions = sessionHeaders.length;
+    const chunks = Math.ceil(totalSessions / maxSessionsPerPage);
 
-  // Generate PDF
-  const html2pdf = (window as any).html2pdf;
-  html2pdf()
-  .set(opt)
-  .from(container)
-  .save()
-  .finally(() => {
-  document.body.removeChild(container);
-  this.isLoading = false;
-  });
+    for (let chunkIndex = 0; chunkIndex < chunks; chunkIndex++) {
+    const startSession = chunkIndex * maxSessionsPerPage;
+    const endSession = Math.min(startSession + maxSessionsPerPage, totalSessions);
+
+    const chunkHeaders = ['Grade', 'Class', ...sessionHeaders.slice(startSession, endSession)];
+
+    // Check if we need a page break
+    if (currentPageHeight + tableHeight > pageHeight - margin) {
+      html += '<div class="page-break" style="page-break-before: always;"></div>';
+      currentPageHeight = margin;
+    }
+
+    html += `
+      <div style="margin-bottom: 10px; page-break-inside: avoid;">
+        <h3 style="margin: 5px 0 3px 0; font-size: 12px; background: #ddd; padding: 3px; font-weight: bold;">${table.title}</h3>
+        ${chunkIndex > 0 ? `<p style="margin: 2px 0 3px 0; font-size: 9px; color: #666;">(Sessions ${startSession + 1} - ${endSession})</p>` : ''}
+        
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 9px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              ${chunkHeaders.map(h => `<th style="border: 1px solid #999; padding: 3px; text-align: left; font-weight: bold; font-size: 8px; word-break: break-word;">${h}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${table.data.map((row: any, rowIndex: number) => `
+              <tr style="background-color: ${rowIndex % 2 === 0 ? '#fff' : '#f9f9f9'};">
+                ${chunkHeaders.map(header => `
+                  <td style="border: 1px solid #ccc; padding: 3px; font-size: 8px; word-break: break-word; white-space: normal;">
+                    ${row[header] || '--'}
+                  </td>
+                `).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    currentPageHeight += tableHeight;
+    }
+    });
+
+    container.innerHTML = html;
+    document.body.appendChild(container);
+
+    // Generate PDF
+    const html2pdf = (window as any).html2pdf;
+    html2pdf()
+    .set(opt)
+    .from(container)
+    .save()
+    .finally(() => {
+    document.body.removeChild(container);
+    this.isLoading = false;
+    });
   }
 
 
@@ -470,13 +488,7 @@ export class TimeTableStudentComponent {
   async triggerPrint() {
   setTimeout(() => {
   let printContents: string | undefined;
-  if (this.PrintType == "Teacher") {
-    printContents = document.getElementById("DataTeacher")?.innerHTML;
-  } else if (this.PrintType == "Class") {
-    printContents = document.getElementById("Data")?.innerHTML;
-  } else {
-    printContents = document.getElementById("All")?.innerHTML;
-  }
+  printContents = document.getElementById("Data")?.innerHTML;
   if (!printContents) {
     console.error("Element not found!");
     return;

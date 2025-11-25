@@ -37,7 +37,7 @@ export class OctaLoginComponent {
 
   isLoading: boolean = false
 
-  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService,private realTimeService: RealTimeNotificationServiceService,) { }
+  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate); 
@@ -48,11 +48,10 @@ export class OctaLoginComponent {
   }
   
   ngOnDestroy(): void { 
-    window.removeEventListener('popstate', this.checkLocalStorageOnNavigate);
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+    window.removeEventListener('popstate', this.checkLocalStorageOnNavigate); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   checkLocalStorageOnNavigate(): void { 

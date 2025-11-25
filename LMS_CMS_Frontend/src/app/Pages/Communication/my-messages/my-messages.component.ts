@@ -26,6 +26,8 @@ import { StudentService } from '../../../Services/student.service';
 import { SubjectService } from '../../../Services/Employee/LMS/subject.service';
 import { Parent } from '../../../Models/parent';
 import { ParentService } from '../../../Services/parent.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 
 @Component({
   selector: 'app-my-messages',
@@ -34,6 +36,8 @@ import { ParentService } from '../../../Services/parent.service';
   templateUrl: './my-messages.component.html',
   styleUrl: './my-messages.component.css'
 })
+
+@InitLoader()
 export class MyMessagesComponent {
   DomainName: string = ''; 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', ''); 
@@ -78,6 +82,7 @@ export class MyMessagesComponent {
 
   constructor(private route: ActivatedRoute, public chatMessageService:ChatMessageService, public account: AccountService, public ApiServ: ApiService, private router: Router,
     public departmentService:DepartmentService, public schoolService:SchoolService, public employeeService:EmployeeService, public sectionService:SectionService,
+    private loadingService: LoadingService,
     public gradeService:GradeService, public classroomService:ClassroomService, public studentService:StudentService, public subjectService:SubjectService, public parentService:ParentService
   ) {}
 

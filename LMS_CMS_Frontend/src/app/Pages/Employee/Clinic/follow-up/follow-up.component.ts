@@ -23,6 +23,8 @@ import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { DrugClass } from '../../../../Models/Clinic/drug-class';
 import { consumerPollProducersForChange } from '@angular/core/primitives/signals';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-follow-up',
   standalone: true,
@@ -37,6 +39,8 @@ import { consumerPollProducersForChange } from '@angular/core/primitives/signals
   templateUrl: './follow-up.component.html',
   styleUrls: ['./follow-up.component.css'],
 })
+
+@InitLoader()
 export class FollowUpComponent implements OnInit {
   headers: string[] = [
     'ID',
@@ -47,6 +51,7 @@ export class FollowUpComponent implements OnInit {
     'Complaints',
     'Diagnosis',
     'Recommendation',
+    'Date',
     'Actions',
   ];
   followUps: any[] = [];
@@ -59,7 +64,7 @@ export class FollowUpComponent implements OnInit {
     'studentName',
     'complaints',
     'diagnosisName',
-    'recommendation',
+    'recommendation'
   ];
   followUp: FollowUp = new FollowUp();
   schools: any[] = [];
@@ -113,8 +118,8 @@ export class FollowUpComponent implements OnInit {
     private doseService: DoseService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -128,8 +133,7 @@ export class FollowUpComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -275,7 +279,7 @@ console.log(error);
         name: student.en_name,
       }));
     } catch (error) {
-console.log(error);
+      console.log(error);
     }
   }
 
@@ -572,8 +576,7 @@ console.log(error);
 
       this.loadFollowUps();
       this.closeModal();
-    } catch (error) {
-      console.error('Error saving follow-up:', error);
+    } catch (error) { 
       const errorMessage = this.translate.instant('Failed to save the item');
       this.showErrorAlert(errorMessage);
     } finally {
@@ -677,6 +680,7 @@ console.log(error);
         'Student',
         'Diagnosis',
         'Recommendation',
+        'Date',
         'Actions',
       ];
     } else {
@@ -688,6 +692,7 @@ console.log(error);
         'الطالب',
         'التشخيص',
         'التوصية',
+        'التاريخ',
         'الإجراءات',
       ];
     }

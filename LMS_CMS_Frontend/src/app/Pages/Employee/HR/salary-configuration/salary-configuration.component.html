@@ -32,9 +32,9 @@
 </div>
 
 <div class="flex flex-col w-[49%]">
-        <label class="mb-2 primaryTxt" for="overtimeStartAfterMinutes"> {{ 'Overtime is only counted after this many minutes' | translate }}</label>
+        <label class="mb-2 primaryTxt" for="overtimeStartAfterMinutes"> {{ 'Overtime is only counted after this minutes' | translate }}</label>
         <input id="overtimeStartAfterMinutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event,'overtimeStartAfterMinutes')" placeholder="{{ 'Enter Mnutes' | translate }}"
+            (input)="validateNumber($event,'overtimeStartAfterMinutes')" placeholder="{{ 'Enter Minutes ' | translate }}"
             [(ngModel)]="salaryConfiguration.overtimeStartAfterMinutes" 
             (ngModelChange)="onInputValueChange({ field: 'overtimeStartAfterMinutes', value: $event })" />
         <span *ngIf="validationErrors['overtimeStartAfterMinutes']" class="text-red-500 ml-3 font-normal">{{

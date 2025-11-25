@@ -5,10 +5,10 @@
 <div *ngIf="!loading">
     <div class="flex justify-between mb-2">
         <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-<i class="fa-solid fa-chevron-left cursor-pointer" 
-   [class.rotate-180]="isRtl"
-   (click)="moveToRoles()"></i>
-<h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Role' | translate }}</h1>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"
+            (click)="moveToRoles()"></i>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Role' | translate }}</h1>
         </div>
         <div class="flex justify-between items-center">
             <button
@@ -28,18 +28,24 @@
             <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
     </div>
 
-    <div class="bg-[#EAECF0] w-1/3">
+    <div class=" w-1/3">
         <!-- Loop through main pages -->
         <ng-container *ngFor="let row of data">
-            <div class="mb-4">
-                <div class="flex items-center">
+            <div class="bg-[#EAECF0] mb-4">
+                <div class="flex items-center gap-2">
                     <input type="checkbox" [checked]="checkForRow(row.id)" (change)="onCheckboxChange($event, row.id, row.page_ID)"
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-                    <i class="fa-solid fa-folder-open"></i>
-                    <button (click)="toggleCollapse(row.id)" class="w-full px-2 py-2 ltr:text-left rtl:text-right">
+                    <button (click)="toggleCollapse(row.id)" class="w-full flex items-center gap-2 px-4 py-2  ltr:text-left rtl:text-right">
+                        <i class="fa-solid fa-folder-open"></i>
                         {{ !isRtl ? row.enDisplayName_name : row.arDisplayName_name }}
                     </button>
-                </div>
+                    <button
+                        (click)="toggleCollapse(row.id)"
+                        class="flex items-center justify-center text-sm w-8 h-8 bg-white rounded-l-md mr-2">
+                        <i  class="fa-solid fa-chevron-down transition-transform duration-300"
+                        [ngClass]="{ 'rotate-180': collapseStates[row.id] }"></i>
+                    </button>               
+                 </div>
                 <!-- Recursively render children -->
                 <div *ngIf="collapseStates[row.id]" class="mt-4 space-y-2">
                     <ng-container *ngTemplateOutlet="recursiveChildren; context: { $implicit: row.children, parentId: row.id, level: 15 }"></ng-container>
@@ -55,9 +61,15 @@
         <div class="flex items-center" [style.marginInlineStart.px]="level"> 
             <input type="checkbox" [checked]="checkForPage(page.id, parentId)" (change)="onCheckboxChange($event, page.id, page.page_ID)"
                 class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-            <button (click)="toggleCollapse(page.id)" class="w-full px-2 py-2 ltr:text-left rtl:text-right">
-                > {{ !isRtl ? page.enDisplayName_name : page.arDisplayName_name }}
+            <button (click)="toggleCollapse(page.id)" class="w-full px-4 py-2 ltr:text-left rtl:text-right">
+                {{ !isRtl ? page.enDisplayName_name : page.arDisplayName_name }}
             </button>
+            <button (click)="toggleCollapse(page.id)"
+                class="flex items-center justify-center text-sm w-8 h-8 bg-white rounded-l-md mr-2">
+                <i  class="fa-solid fa-chevron-down transition-transform duration-300"
+                [ngClass]="{ 'rotate-180': collapseStates[page.id] }"></i>
+            </button>     
+                
         </div>
         <div *ngIf="collapseStates[page.id]" class="flex flex-col space-y-2">
             <!-- Render permissions only if the page has no children -->

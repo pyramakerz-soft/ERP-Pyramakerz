@@ -21,6 +21,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { Day } from '../../../../Models/day';
 import { Grade } from '../../../../Models/LMS/grade';
 import { SessionGroupDTO } from '../../../../Models/LMS/session-group-dto';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-time-table-replace',
   standalone: true,
@@ -28,6 +30,8 @@ import { SessionGroupDTO } from '../../../../Models/LMS/session-group-dto';
   templateUrl: './time-table-replace.component.html',
   styleUrl: './time-table-replace.component.css',
 })
+
+@InitLoader()
 export class TimeTableReplaceComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -61,6 +65,7 @@ export class TimeTableReplaceComponent {
   grades: Grade[] = [];
   days: Day[] = [];
 
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -71,8 +76,8 @@ export class TimeTableReplaceComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public timetableServ: TimeTableService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService,
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,8 +97,7 @@ export class TimeTableReplaceComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -111,6 +115,12 @@ export class TimeTableReplaceComponent {
         this.MaxPeriods = d.maxPeriods;
         this.ExtractDaysAndGrades();
       });
+  }
+
+  IsThisSessionReplaced(sessionId: number): boolean {
+    return this.SessionReplaced.some(
+      s => (s.fisrtSessionId === sessionId || s.secondSessionId === sessionId )
+    );
   }
 
   ExtractDaysAndGrades() {

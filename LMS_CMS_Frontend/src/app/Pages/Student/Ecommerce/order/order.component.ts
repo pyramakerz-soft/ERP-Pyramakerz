@@ -15,6 +15,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-order',
   standalone: true,
@@ -22,6 +24,8 @@ import { StudentService } from '../../../../Services/student.service';
   templateUrl: './order.component.html',
   styleUrl: './order.component.css'
 })
+
+@InitLoader()
 export class OrderComponent { 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
@@ -36,8 +40,9 @@ export class OrderComponent {
   searchTerm: string = '';
   students: Student[] = [];
 
-  constructor(public account: AccountService,private languageService: LanguageService,public StudentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
+  constructor(public account: AccountService,private languageService: LanguageService,public StudentService: StudentService, 
+    public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService,
+    private loadingService: LoadingService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -64,11 +69,10 @@ export class OrderComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){
@@ -155,8 +159,7 @@ export class OrderComponent {
       this.filteredOrders = this.orders.filter(order =>
         order.cartID.toString().toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         order.totalPrice.toString().toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.orderStateName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.insertedAt.toLowerCase().includes(this.searchTerm.toLowerCase())
+        order.orderStateName.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
   }

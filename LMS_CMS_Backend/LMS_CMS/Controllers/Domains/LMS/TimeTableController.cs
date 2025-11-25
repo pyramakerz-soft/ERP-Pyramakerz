@@ -68,6 +68,63 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(Dto);
         }
 
+
+        /////////////////
+
+        [HttpGet("BySchoolIdWithPaggination/{SchoolId}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
+       )]
+        public async Task<IActionResult> GetWithPaggination(long SchoolId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == SchoolId & s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a => a.SchoolID == SchoolId & a.IsDeleted != true && a.IsActive == true);
+            if (academicYear == null)
+            {
+                return BadRequest("No active academic year in this school");
+            }
+
+            int totalRecords = await Unit_Of_Work.timeTable_Repository
+                   .CountAsync(t => t.IsDeleted != true && t.AcademicYearID == academicYear.ID);
+
+            List<TimeTable> timeTable = await Unit_Of_Work.timeTable_Repository.Select_All_With_IncludesById_Pagination<TimeTable>
+                (t => t.IsDeleted != true && t.AcademicYearID == academicYear.ID)
+                 .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (timeTable == null)
+            {
+                return NotFound();
+            }
+            List<TimeTableGetDTO> Dto = mapper.Map<List<TimeTableGetDTO>>(timeTable);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+        }
+
         /////////////////
 
         [HttpPost]
@@ -762,6 +819,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 query => query.Include(stu => stu.Classroom.AcademicYear),
                 query => query.Include(stu => stu.Classroom.AcademicYear.School)
             );
+
+            if (studentClassrooms == null)
+            {
+                return NotFound();
+            }
 
             School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == studentClassrooms.Classroom.AcademicYear.SchoolID && s.IsDeleted != true);
             if (school == null)

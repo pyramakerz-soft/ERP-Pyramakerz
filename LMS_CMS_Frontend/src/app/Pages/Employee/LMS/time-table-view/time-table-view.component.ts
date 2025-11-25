@@ -27,6 +27,8 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { Observable, of } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-time-table-view',
@@ -35,6 +37,8 @@ import Swal from 'sweetalert2';
   templateUrl: './time-table-view.component.html',
   styleUrl: './time-table-view.component.css',
 })
+
+@InitLoader()
 export class TimeTableViewComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -63,8 +67,8 @@ export class TimeTableViewComponent {
 
   TimeTable2: TimeTableDayGroupDTO[] = []
   TimeTablePrint: any = []
-  types = ['All', 'Class', 'Teacher'];
-  PrintType = 'All'; // default value
+  types = [ 'Current Screen','All' , 'Class', 'Teacher'];
+  PrintType = 'Current Screen'; // default value
   SelectedClassId: number = 0
   SelectedTeacherId: number = 0
   TeacherName: string = '';
@@ -89,8 +93,8 @@ export class TimeTableViewComponent {
     public ApiServ: ApiService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    public timetableServ: TimeTableService,
-    private realTimeService: RealTimeNotificationServiceService,
+    public timetableServ: TimeTableService, 
+    private loadingService: LoadingService,
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -107,11 +111,10 @@ export class TimeTableViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
 
@@ -621,7 +624,7 @@ export class TimeTableViewComponent {
   openPrintModal() {
     document.getElementById('Print_Modal')?.classList.remove('hidden');
     document.getElementById('Print_Modal')?.classList.add('flex');
-    this.PrintType = 'All'
+    this.PrintType = 'Current Screen'
   }
 
   GetTypes() {
@@ -665,6 +668,9 @@ export class TimeTableViewComponent {
         this.MaxPeriods = d.maxPeriods;
         this.triggerPrint();
       });
+    } else if (this.PrintType === "Current Screen") {
+        this.TimeTable2 = this.TimeTable;
+        this.triggerPrint();
     }
   }
 

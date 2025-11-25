@@ -12,6 +12,8 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-job-report',
@@ -20,6 +22,8 @@ import { CommonModule } from '@angular/common';
   templateUrl: './employee-job-report.component.html',
   styleUrl: './employee-job-report.component.css'
 })
+
+@InitLoader()
 export class EmployeeJobReportComponent  implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
@@ -57,9 +61,9 @@ export class EmployeeJobReportComponent  implements OnInit {
     private jobCategoriesService: JobCategoriesService,
     private jobService: JobService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
+    private languageService: LanguageService, 
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -71,8 +75,7 @@ export class EmployeeJobReportComponent  implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -154,12 +157,12 @@ export class EmployeeJobReportComponent  implements OnInit {
       console.error('Error loading job reports:', error);
       this.jobReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load job reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load job reports',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     } finally {
       this.isLoading = false;
     }

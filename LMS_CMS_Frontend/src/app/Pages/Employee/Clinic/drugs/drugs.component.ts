@@ -13,6 +13,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { DrugClass } from '../../../../Models/Clinic/drug-class';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-drugs',
   standalone: true,
@@ -27,6 +29,8 @@ import { DrugClass } from '../../../../Models/Clinic/drug-class';
   templateUrl: './drugs.component.html',
   styleUrls: ['./drugs.component.css'],
 })
+
+@InitLoader()
 export class DrugsComponent implements OnInit {
   drug: DrugClass = new DrugClass(0, '', new Date());
   editDrug = false;
@@ -42,9 +46,9 @@ export class DrugsComponent implements OnInit {
   constructor(
     private drugService: DrugService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
+    private languageService: LanguageService, 
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -59,8 +63,7 @@ export class DrugsComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

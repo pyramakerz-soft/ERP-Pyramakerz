@@ -26,6 +26,18 @@ export class ShopItemService {
     return this.http.get<ShopItem[]>(`${this.baseUrl}/ShopItem`, { headers });
   }
 
+  GetWithPaggination(DomainName: string,pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: ShopItem[], pagination: any }>(`${this.baseUrl}/ShopItem/WithPaggination?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetBySubCategory(SubCategoryId:number ,DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
@@ -62,6 +74,18 @@ export class ShopItemService {
       .set('Content-Type', 'application/json');
   
     return this.http.get<{ data: ShopItem[], pagination: any }>(`${this.baseUrl}/ShopItem/GetBySubCategoryIDWithGenderAndGradeAndStudentID/${SubCategoryId}/${StudentId}?pageNumber=${pageNumber}&pageSize=${pageSize}&searchQuery=${searchQuery}`, { headers });
+  }
+
+  CheckIfHeCanAddItem(itemId: number, studentId: number, DomainName: string){
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<boolean>(`${this.baseUrl}/ShopItem/CheckIfHeCanAddItem/${itemId}/${studentId}`, { headers })
   }
 
   GetById(id: number, DomainName: string) {

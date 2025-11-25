@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-grade',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './grade.component.html',
   styleUrl: './grade.component.css'
 })
+
+@InitLoader()
 export class GradeComponent {
   keysArray: string[] = ['id', 'name'];
   key: string = "id";
@@ -52,7 +56,8 @@ export class GradeComponent {
 
   constructor(public account: AccountService,
     private languageService: LanguageService, public sectionService: SectionService, public gradeService: GradeService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, private translate: TranslateService,private realTimeService: RealTimeNotificationServiceService,) { }
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router, private translate: TranslateService,
+    private loadingService: LoadingService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,8 +92,7 @@ export class GradeComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -250,14 +254,24 @@ export class GradeComponent {
     return valid
   }
 
+  // validateNumber(event: any, field: keyof Grade): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     if (typeof this.grade[field] === 'string') {
+  //       this.grade[field] = null as never;
+  //     }
+  //   }
+  // }
+
   validateNumber(event: any, field: keyof Grade): void {
     const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.grade[field] === 'string') {
-        this.grade[field] = null as never;
-      }
+
+    if (!/^\d*$/.test(value)) {
+      event.target.value = value.replace(/[^\d]/g, ''); // remove invalid chars
     }
+
+    this.grade[field] = event.target.value === '' ? null as never : +event.target.value as never;
   }
 
   SaveGrade() {

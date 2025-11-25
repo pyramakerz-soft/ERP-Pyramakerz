@@ -16,6 +16,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-salary-calculation',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './salary-calculation.component.html',
   styleUrl: './salary-calculation.component.css'
 })
+
+@InitLoader()
 export class SalaryCalculationComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -57,6 +61,7 @@ export class SalaryCalculationComponent {
     public SalaryCalculationServ: SalaryCalculationService,
     public EmployeeServ: EmployeeService,
     private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();

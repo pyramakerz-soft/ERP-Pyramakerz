@@ -22,6 +22,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-conduct-report',
@@ -30,6 +32,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './conduct-report.component.html',
   styleUrl: './conduct-report.component.css'
 })
+
+@InitLoader()
 export class ConductReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -86,10 +90,10 @@ constructor(
   private studentService: StudentService,
   private apiService: ApiService,
   private languageService: LanguageService,   
-  public account: AccountService,   
-  private realTimeService: RealTimeNotificationServiceService,
+  public account: AccountService,    
   private route: ActivatedRoute,
-  private reportsService: ReportsService 
+  private reportsService: ReportsService,
+    private loadingService: LoadingService 
 ) {}
 
   ngOnInit() {
@@ -99,7 +103,6 @@ constructor(
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
-    console.log(this.reportType)
     if(this.reportType == 'parent'){
       this.getStudentsByParentId()
     }
@@ -110,8 +113,7 @@ constructor(
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -306,6 +308,8 @@ constructor(
     } catch (error) {
       console.error('Error loading conduct reports:', error);
       this.conductReports = [];
+      this.reportsForExport =[]
+      this.reportsForPDF =[]
       this.showTable = true;
       // Swal.fire({
       //   title: 'Error',

@@ -15,6 +15,7 @@ export class DirectMark {
             public schoolID: number = 0,
             public gradeName: string = '',
             public gradeID: number = 0,
+            public academicYearID: number = 0,
             public allClasses: boolean = false,
             public subjectWeightTypeID: number = 0,
             public subjectWeightTypeEnglishName: string = '',

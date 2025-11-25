@@ -8,6 +8,8 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Amazon.Runtime.Internal.Util;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Administration
 {
@@ -18,7 +20,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
-        private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly CheckPageAccessService _checkPageAccessService; 
 
         public ReasonsForLeavingWorkController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
@@ -31,13 +33,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
         [HttpGet]
         [Authorize_Endpoint_(
-       allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
-       )]
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Reasons For Leaving Work", "Employee Accounting" }
+        )] 
         public async Task<IActionResult> GetAsync()
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+        { 
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
             List<ReasonForLeavingWork> reasonForLeavingWorks = await Unit_Of_Work.reasonForLeavingWork_Repository.Select_All_With_IncludesById<ReasonForLeavingWork>(
                     b => b.IsDeleted != true);
 

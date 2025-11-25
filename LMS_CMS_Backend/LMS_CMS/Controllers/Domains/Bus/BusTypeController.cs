@@ -44,9 +44,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
         public IActionResult Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            List<BusType> BusType;
-
+             
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -57,7 +55,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            BusType = Unit_Of_Work.busType_Repository.FindBy(t => t.IsDeleted != true);
+            List<BusType> BusType = Unit_Of_Work.busType_Repository.FindBy(t => t.IsDeleted != true);
 
             if (BusType == null || BusType.Count == 0)
             {

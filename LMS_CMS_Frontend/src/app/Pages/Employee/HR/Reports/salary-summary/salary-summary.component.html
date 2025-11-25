@@ -9,7 +9,7 @@
         <label for="Month" class="block mb-2 text-sm font-medium text-gray-900">
             {{ 'Month' | translate }}
         </label>
-        <input id="Month" type="month" [(ngModel)]="selectedMonth" required
+        <input id="Month" type="month" [(ngModel)]="selectedMonth" required 
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             (change)="onDateChange(); IsShowTabls = false;">
     </div>
@@ -48,7 +48,7 @@
             }}</label>
         <select id="SelectedEmpId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId" (change)="GetEmployeeName(); IsShowTabls = false">
+            [(ngModel)]="SelectedEmpId" [disabled]="!SelectedJobId" (change)="getEmployeeName(); IsShowTabls = false">
             <option value=0 selected> All Employees</option>
             <option *ngFor="let ac of employees" [value]="ac.id">
                 {{ ac.en_name }}
@@ -160,20 +160,14 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Employees Report'" [infoRows]="[
-                    {
-                        keyEn: 'Month: ' + this.month + '/' +this.year,
-                    }, 
-                    {
-                        keyEn: 'Job Category: ' + this.SelectedJobCatName,
-                    },
-                    {
-                        keyEn: 'Job: ' + this.SelectedJobName,
-                    },
-                    {
-                        keyEn: 'Employee: ' + this.SelectedEmpName,
-                    }
-                    ]" [tableHeaders]="['employeeEnName', 'basicSalary', 'totalBonus', 'totalOvertime', 'totalDeductions', 'totalLoans', 'netSalary']" [tableData]="salaryHistory" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Salary Summary Report'" 
+         [infoRows]="[
+                { keyEn: 'Month: ' + this.month + '/' +this.year,  keyAr: this.month+ '/' +this.year + ': شهر' },
+                { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
+                { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
+                { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getArEmployeeName() + ': الموظف' }
+                ]"
+                [tableHeaders]="['Employee EnName', 'Basic Salary', 'Total Bonus', 'Total Overtime', 'Total Deductions', 'Total Loans', 'netSalary']" [tableData]="this.tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

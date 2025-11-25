@@ -7,13 +7,13 @@ export class Loans {
         public deductionStartYear: number = 0,
         public deductionEndMonth: number = 0,
         public deductionEndYear: number = 0,
-        public amount: number = 0,
+        public amount: number | null = null,
         public numberOfDeduction: number =1,
         public employeeID: number = 0,
         public employeeEnName: string = '',
         public employeeArName: string = '',
         public safeID: number = 0,
-        public saveName: string = '',
+        public safeName: string = '',
     ) { }
 }
 

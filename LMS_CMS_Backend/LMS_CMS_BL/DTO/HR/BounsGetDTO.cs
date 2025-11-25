@@ -10,20 +10,20 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.HR
 {
-    public class BounsGetDTO
+    public class BonusGetDTO
     {
         public long ID { get; set; }
         public DateOnly Date { get; set; }
-        public int NumberOfBounsDays { get; set; }
+        public int NumberOfBonusDays { get; set; }
         public int Hours { get; set; }
         public int Minutes { get; set; }
-        public long Amount { get; set; }
+        public decimal Amount { get; set; }
         public string? Notes { get; set; }
         public long EmployeeID { get; set; }
         public string EmployeeEnName { get; set; }
         public string EmployeeArName { get; set; }
-        public long BounsTypeID { get; set; }
-        public string BounsTypeName { get; set; }
+        public long BonusTypeID { get; set; }
+        public string BonusTypeName { get; set; }
 
     }
 }

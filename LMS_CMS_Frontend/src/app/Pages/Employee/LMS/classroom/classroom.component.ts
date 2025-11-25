@@ -31,6 +31,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-classroom',
@@ -39,6 +41,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './classroom.component.html',
   styleUrl: './classroom.component.css'
 })
+
+@InitLoader()
 export class ClassroomComponent {
   keysArray: string[] = ['id', 'name','academicYearName','floorName','gradeName','number'];
   key: string= "id";
@@ -83,11 +87,15 @@ export class ClassroomComponent {
   copyClassroom:CopyClassroom = new CopyClassroom()
 
   activeAcademicYearID = 0
-
-  constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
+  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
       private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,    private translate: TranslateService, public employeeServ : EmployeeService ,
-      public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
+      public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router,
+    private loadingService: LoadingService){}
       
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -121,11 +129,10 @@ export class ClassroomComponent {
   } 
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -177,19 +184,23 @@ export class ClassroomComponent {
     this.copyClassroom = new CopyClassroom()
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
-    this.SelectedSchoolIdForFilteration = 0
-    this.activeAcademicYearID = 0
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
+    this.SelectedSchoolIdForFilteration = 0
     try {
-      const data: Classroom[] = await firstValueFrom(this.classroomService.Get(this.DomainName));  
-      this.classroomData = data || [];
-  
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
-        this.classroomData = this.classroomData.filter(t => {
+      const data: any = await firstValueFrom(this.classroomService.GetByAcademicYearIDWithPaggination(this.activeAcademicYearID ,this.DomainName, this.CurrentPage, this.PageSize));  
+      this.classroomData = data.data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.classroomData = this.classroomData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
@@ -228,18 +239,57 @@ export class ClassroomComponent {
     )
   }
   
-  getClassroomDataByYearID(){
-    this.classroomData=[]
+  // getClassroomDataByYearID(){
+  //   this.classroomData=[]
+  //   this.IsViewTable=true
+  //   this.classroomService.GetByAcYearId(this.activeAcademicYearID, this.DomainName).subscribe(
+  //     (data) => {
+  //       this.classroomData = data;
+  //       if(this.classroomData.length != 0){
+  //         this.activeAcademicYearID = this.classroomData[0].academicYearID
+  //       }
+  //     }
+  //   )
+  // }
+
+  getClassroomDataByYearID(DomainName: string, pageNumber: number, pageSize: number) {
+    this.classroomData = [];
     this.IsViewTable=true
-    this.classroomService.GetByAcYearId(this.activeAcademicYearID, this.DomainName).subscribe(
+    this.classroomService.GetByAcademicYearIDWithPaggination(this.activeAcademicYearID ,DomainName, pageNumber, pageSize).subscribe(
       (data) => {
-        this.classroomData = data;
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.classroomData = data.data;
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
         }
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
       }
-    )
+    );
   }
+
 
   AcademicYearIsChanged(){
     this.classroomData=[]
@@ -393,7 +443,7 @@ export class ClassroomComponent {
             this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
             this.isLoadingSaveClassroom=false
-            this.getClassroomDataByYearID()
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -413,7 +463,7 @@ export class ClassroomComponent {
             this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
             this.isLoadingSaveClassroom=false
-            this.getClassroomDataByYearID()
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -444,7 +494,7 @@ export class ClassroomComponent {
         this.classroomService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.classroomData=[]
-            this.getClassroomDataByYearID()
+            this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           }
         );
       }
@@ -539,13 +589,13 @@ export class ClassroomComponent {
     this.isLoading=true
     if(this.copyClassroom.fromAcademicYearID == this.copyClassroom.toAcademicYearID){
       this.closeCopyModal()
-      this.getClassroomData()
+      this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
       this.isLoading=false
     } else{
       this.classroomService.CopyClassroom(this.copyClassroom, this.DomainName).subscribe(
         (result: any) => {
           this.closeCopyModal()
-          this.getClassroomData()
+          this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           this.isLoading=false
         },
         error => {
@@ -567,4 +617,48 @@ export class ClassroomComponent {
     this.SelectedSchoolIdForFilteration =0
    this.getAllClassroomData()
   }
+
+    changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  } 
 }

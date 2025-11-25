@@ -30,6 +30,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-remedial-classroom',
@@ -38,6 +40,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
+
+@InitLoader()
 export class RemedialClassroomComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -74,6 +78,11 @@ export class RemedialClassroomComponent {
   hiddenColumns: string[] = ['Actions'];
   isRtl: boolean = false;
   subscription!: Subscription;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -90,10 +99,10 @@ export class RemedialClassroomComponent {
     public SubjectServ: SubjectService,
     public EmployeeServ: EmployeeService,
     public ClassroomSubjectServ: ClassroomSubjectService,
-    private cdRef: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService,
+    private cdRef: ChangeDetectorRef, 
     private languageService: LanguageService,
-    private translate: TranslateService,
+    private translate: TranslateService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -118,8 +127,7 @@ export class RemedialClassroomComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -135,14 +143,51 @@ export class RemedialClassroomComponent {
     });
   }
 
-  GetAllData() {
+  // GetAllData() {
+  //   this.TableData = [];
+  //   if(this.SelectedSchoolIdForFilter != 0){
+  //     this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
+  //       this.TableData = d;
+  //     });
+  //   }
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
     if(this.SelectedSchoolIdForFilter != 0){
-      this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolIdForFilter, this.DomainName).subscribe((d) => {
-        this.TableData = d;
-      });
+      this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolIdForFilter ,DomainName, pageNumber, pageSize).subscribe(
+        (data) => {
+          this.CurrentPage = data.pagination.currentPage;
+          this.PageSize = data.pagination.pageSize;
+          this.TotalPages = data.pagination.totalPages;
+          this.TotalRecords = data.pagination.totalRecords;
+          this.TableData = data.data;
+        },
+        (error) => {
+          if (error.status == 404) {
+            if (this.TotalRecords != 0) {
+              let lastPage;
+              if (this.isDeleting) {
+                lastPage = (this.TotalRecords - 1) / this.PageSize;
+              } else {
+                lastPage = this.TotalRecords / this.PageSize;
+              }
+              if (lastPage >= 1) {
+                if (this.isDeleting) {
+                  this.CurrentPage = Math.floor(lastPage);
+                  this.isDeleting = false;
+                } else {
+                  this.CurrentPage = Math.ceil(lastPage);
+                }
+                this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+              }
+            }
+          } 
+        }
+      );
     }
   }
+
 
   GetAllAcademicYearBySchool() {
     this.academicYears = [];
@@ -182,7 +227,7 @@ export class RemedialClassroomComponent {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
@@ -216,7 +261,7 @@ export class RemedialClassroomComponent {
       else if (this.mode == 'Edit') {
         console.log(this.remedialClassroom)
         this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
-          this.GetAllData()
+         this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           this.closeModal()
           this.isLoading = false
           Swal.fire({
@@ -252,13 +297,16 @@ export class RemedialClassroomComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: RemedialClassroom[] = await firstValueFrom(
-        this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      const data: any = await firstValueFrom(
+        this.remedialClassroomServ.GetBySchoolIdWithPaggination(this.SelectedSchoolId, this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -294,7 +342,7 @@ export class RemedialClassroomComponent {
       if (result.isConfirmed) {
         this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
           },
           error: (error) => {
             console.error('Error while deleting the Violation:', error);
@@ -390,29 +438,48 @@ export class RemedialClassroomComponent {
     return IsAllow;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.remedialClassroom) {
-      if (this.remedialClassroom.hasOwnProperty(key)) {
-        const field = key as keyof RemedialClassroom;
-        if (!this.remedialClassroom[field]) {
-          if (
-            field == 'name' ||
-            field == 'numberOfSession' ||
-            field == 'gradeID' ||
-            field == 'subjectID' ||
-            field == 'teacherID' ||
-            field == 'academicYearID' ||
-            field == 'schoolID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  // Validate required fields with translation
+  if (!this.remedialClassroom.name) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+    isValid = false;
   }
+  
+  if (!this.remedialClassroom.numberOfSession) {
+    this.validationErrors['numberOfSession'] = this.getRequiredErrorMessage('Number Of Sessions');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.gradeID) {
+    this.validationErrors['gradeID'] = this.getRequiredErrorMessage('Grade');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.subjectID) {
+    this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.teacherID) {
+    this.validationErrors['teacherID'] = this.getRequiredErrorMessage('Teacher');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.academicYearID) {
+    this.validationErrors['academicYearID'] = this.getRequiredErrorMessage('Academic Year');
+    isValid = false;
+  }
+  
+  if (!this.remedialClassroom.schoolID) {
+    this.validationErrors['schoolID'] = this.getRequiredErrorMessage('School');
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   Edit(id: number) {
     this.mode = "Edit"
@@ -446,8 +513,63 @@ export class RemedialClassroomComponent {
   }
 
   Create() {
-    this.mode = "Create"
-    this.GetAllTeachers()
-    this.openModal()
+      this.mode = "Create"
+      this.GetAllTeachers()
+      this.openModal()
+    }
+
+    private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }  
 }

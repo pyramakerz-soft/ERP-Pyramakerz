@@ -17,6 +17,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-book-correction',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './book-correction.component.html',
   styleUrl: './book-correction.component.css'
 })
+
+@InitLoader()
 export class BookCorrectionComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -61,8 +65,8 @@ export class BookCorrectionComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public BookCorrectionServ: EvaluationBookCorrectionService,
-    private realTimeService: RealTimeNotificationServiceService
+    public BookCorrectionServ: EvaluationBookCorrectionService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -91,11 +95,10 @@ export class BookCorrectionComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -226,10 +229,10 @@ export class BookCorrectionComponent {
             field == 'englishName' ||
             field == 'arabicName'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+            const displayName =
+              field === 'englishName' ? 'English Name' : 'Arabic Name';
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
@@ -276,6 +279,17 @@ export class BookCorrectionComponent {
       }
     } catch (error) {
       this.TableData = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 

@@ -25,6 +25,10 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Employee' | translate }}
+                        </th>                        
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             {{ 'Safe' | translate }}
                         </th>
                         <th
@@ -57,7 +61,10 @@
                             {{ row.date }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.saveName }}
+                            {{ row.employeeEnName}}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.safeName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.amount }}
@@ -145,7 +152,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label for="deductionStartMonth" class="mb-2 primaryTxt"> {{ 'Deduction Start Month' | translate }}
                 </label>
-                <input id="deductionStartMonth" type="month"
+                <input id="deductionStartMonth" type="month" (ngModelChange)="onInputValueChange({ field: 'deductionStartMonth', value: $event })"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     placeholder="{{ 'Enter Deduction Start Month' | translate }}" [(ngModel)]="displayStartMonth" />
                 <span *ngIf="validationErrors['deductionStartMonth']"

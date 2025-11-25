@@ -18,6 +18,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-employee-clocks',
@@ -26,6 +28,8 @@ import Swal from 'sweetalert2';
   templateUrl: './employee-clocks.component.html',
   styleUrl: './employee-clocks.component.css',
 })
+
+@InitLoader()
 export class EmployeeClocksComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -62,10 +66,9 @@ export class EmployeeClocksComponent {
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
     public EmployeeClocksServ: EmployeeClocksService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService,
-    
+    private loadingService: LoadingService  
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,8 +86,7 @@ export class EmployeeClocksComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -142,7 +144,7 @@ private showSuccessAlert(message: string) {
     } else {
       row[field] = null;
     }
-    if(field == 'clockIn'){
+    if(field == 'checkIn'){
       row.date=value.slice(0,10)
     }
   }
@@ -193,22 +195,9 @@ private showSuccessAlert(message: string) {
     }
   }
 
-  AddClockIn() {
+  AddcheckIn() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      // if (
-      //   this.employeeClocks.clockIn &&
-      //   this.employeeClocks.clockIn.length === 5
-      // ) {
-      //   this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
-      // }
-      // if (
-      //   this.employeeClocks.clockOut &&
-      //   this.employeeClocks.clockOut.length === 5
-      // ) {
-      //   this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
-      // }
-      console.log(this.employeeClocks);
       this.EmployeeClocksServ.Add(
         this.employeeClocks,
         this.DomainName
@@ -241,39 +230,31 @@ private showSuccessAlert(message: string) {
 
   isFormValid(): boolean {
     let isValid = true;
+    console.log(this.employeeClocks);
     for (const key in this.employeeClocks) {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
-          if (field == 'date' || field == 'employeeID' || field == 'clockIn' || field == 'clockOut' ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          if (field == 'date' || field == 'employeeID' || field == 'checkIn' || field == 'checkOut' ) {
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
           }
         }
-        if(this.employeeClocks.clockIn){
-          this.employeeClocks.date=this.employeeClocks.clockIn.slice(0,10)
+        if(this.employeeClocks.checkIn){
+          this.employeeClocks.date=this.employeeClocks.checkIn.slice(0,10)
+        }
+        if(this.employeeClocks.checkIn &&this.employeeClocks.checkOut && this.employeeClocks.checkIn > this.employeeClocks.checkOut){
+          this.validationErrors['checkOut'] = `Check Out time must be after the Check In time`;
+          isValid = false;      
         }
       }
     }
-    // if (
-    //   this.employeeClocks.clockOut &&
-    //   this.employeeClocks.clockIn &&
-    //   this.employeeClocks.clockOut < this.employeeClocks.clockIn
-    // ) {
-    //   this.validationErrors['clockOut'] =
-    //     'Clock out time cannot be earlier than clock in time.';
-    //   isValid = false;
-    // }
     return isValid;
   }
 
   isFormValidForCreate(): boolean {
     let isValid = true;
-    // isValid = !this.TableData.some(
-    //   (element) =>
-    //     element.clockIn &&
-    //     element.clockOut
-    // );
+    console.log()
     return isValid;
   }
 

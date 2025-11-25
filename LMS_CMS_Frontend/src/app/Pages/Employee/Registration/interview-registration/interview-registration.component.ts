@@ -18,6 +18,8 @@ import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-interview-registration',
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './interview-registration.component.html',
   styleUrl: './interview-registration.component.css'
 })
+
+@InitLoader()
 export class InterviewRegistrationComponent {
 
   DomainName: string = "";
@@ -39,10 +43,10 @@ export class InterviewRegistrationComponent {
 
   isLoading=false
 
-  constructor(public ApiServ: ApiService,
-    private realTimeService: RealTimeNotificationServiceService,
+  constructor(public ApiServ: ApiService, 
     private languageService: LanguageService, public activeRoute: ActivatedRoute, public router:Router, public interviewStateService: InterviewStateService,
-    public interviewTimeTableService: InterviewTimeTableService, public registrationFormInterviewService: RegistrationFormInterviewService ){}
+    public interviewTimeTableService: InterviewTimeTableService, public registrationFormInterviewService: RegistrationFormInterviewService ,
+    private loadingService: LoadingService){}
   
   ngOnInit(){
     this.DomainName = this.ApiServ.GetHeader();
@@ -57,11 +61,10 @@ export class InterviewRegistrationComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getRegistrationFormInterviewData(){

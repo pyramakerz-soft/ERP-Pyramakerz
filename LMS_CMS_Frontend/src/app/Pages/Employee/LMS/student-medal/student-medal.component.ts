@@ -27,6 +27,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-student-medal',
@@ -35,6 +37,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './student-medal.component.html',
   styleUrl: './student-medal.component.css'
 })
+
+@InitLoader()
 export class StudentMedalComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -94,8 +98,8 @@ export class StudentMedalComponent {
     private ClassroomServ: ClassroomService,
     public studentMedalServ : StudentMedalService ,
     public MedalServ : MedalService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -121,11 +125,10 @@ export class StudentMedalComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
 

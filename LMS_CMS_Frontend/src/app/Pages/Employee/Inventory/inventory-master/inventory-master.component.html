@@ -27,8 +27,8 @@
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 {{ 'Total' | translate }}
             </th>
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{ 'Eta Inserte Date' | translate }}
+            <th *ngIf="FlagId == 13" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                {{ 'Is Converted To Purchase' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 {{ 'Notes' | translate }} 
@@ -63,8 +63,9 @@
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.total }}
             </td>
-            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.etaInsertedDate || 'N/A' }}
+            <td *ngIf="FlagId == 13" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                <i *ngIf="row.isConvertedToPurchase" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                <i *ngIf="!row.isConvertedToPurchase" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.notes }}

@@ -23,6 +23,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { Location } from '../../../../Models/HR/location';
 import { LocationService } from '../../../../Services/Employee/HR/location.service';
 import { Employee } from '../../../../Models/Employee/employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-employee-view',
   standalone: true,
@@ -30,6 +32,8 @@ import { Employee } from '../../../../Models/Employee/employee';
   templateUrl: './employee-view.component.html',
   styleUrl: './employee-view.component.css'
 })
+
+@InitLoader()
 export class EmployeeViewComponent {
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -70,8 +74,8 @@ export class EmployeeViewComponent {
     public GradeServ: GradeService,
     public LocationServ: LocationService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -150,12 +154,11 @@ export class EmployeeViewComponent {
   }
 
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToEmployee() {
     this.router.navigateByUrl("Employee/Employee")
@@ -203,6 +206,7 @@ export class EmployeeViewComponent {
       if(this.password != ""){
         this.editpasss.id=this.User_Data_After_Login.id;
         this.editpasss.password=this.password 
+        console.log(this.editpasss)
         this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
             this.isChange = false
             this.password = '';

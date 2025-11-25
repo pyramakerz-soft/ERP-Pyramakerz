@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <h1 *ngIf="!editSubject" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Subject' | translate }}</h1>
             <h1 *ngIf="editSubject" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Subject' | translate }}</h1>
-            <button (click)="closeDialog()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+            <button (click)="closeDialog(true)" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
@@ -145,7 +145,7 @@
             </div>
              <div class="flex flex-col w-full mb-4">
                 <label class="mb-2 primaryTxt" for="assignmentCutOffDatePercentage"> {{ 'Assignment Cut Off Date Percentage' | translate }}</label>
-                <input id="assignmentCutOffDatePercentage" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Number of session per week' | translate }} " 
+                <input id="assignmentCutOffDatePercentage" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Deduction Percentage after cutoff date' | translate }} " 
                 [(ngModel)]="subject.assignmentCutOffDatePercentage"
                 (ngModelChange)="onInputValueChange({ field: 'assignmentCutOffDatePercentage', value: $event })"
                 (input)="validateNumber($event, 'assignmentCutOffDatePercentage')"/>

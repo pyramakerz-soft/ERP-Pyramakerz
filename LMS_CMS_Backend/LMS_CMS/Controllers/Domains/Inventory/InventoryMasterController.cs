@@ -462,7 +462,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Inventory" }
+              pages: new[] { "Inventory" , "Zatca Electronic-Invoice" , "ETA Electronic-Invoice" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -736,20 +736,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             }
 
-            double expectedItemsPrice = newData.InventoryDetails?.Sum(item => item.TotalPrice) ?? 0;
+            decimal expectedItemsPrice = newData.InventoryDetails.Sum(item => item.TotalPrice);
+
             if (newData.Total != expectedItemsPrice)
             {
                 return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
-
             }
 
             if (newData.FlagId == 8 || newData.FlagId == 9 || newData.FlagId == 10 || newData.FlagId == 11 || newData.FlagId == 12)
             {
-                double expectedRemaining = (newData.Total) - ((newData.CashAmount ?? 0) + (newData.VisaAmount ?? 0));
+                decimal expectedRemaining =
+                    newData.Total - ((newData.CashAmount ?? 0) + (newData.VisaAmount ?? 0));
+
                 if (expectedRemaining != newData.Remaining)
                 {
-                    return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
-                } 
+                    return BadRequest("Remaining must equal Total - (CashAmount + VisaAmount)");
+                }
             }
 
             List<ShopItem> existingShopItems = new List<ShopItem>();
@@ -913,7 +915,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 return NotFound("Store cannot be null");
             }
-
+            School school = new School();
+            if (newSale.SchoolId != 0 && newSale.SchoolId != null)
+            {
+                school = Unit_Of_Work.school_Repository.First_Or_Default(b => b.ID == newSale.SchoolId && b.IsDeleted != true);
+                if (school == null)
+                {
+                    return NotFound("school not found.");
+                }
+            }
+            else
+            {
+                newSale.SchoolId = null;
+            }
             if (newSale.StudentID != 0 && newSale.StudentID != null)
             {
                 Student student = Unit_Of_Work.student_Repository.First_Or_Default(b => b.ID == newSale.StudentID && b.IsDeleted != true);

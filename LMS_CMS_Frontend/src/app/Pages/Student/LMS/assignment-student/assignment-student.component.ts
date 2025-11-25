@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-assignment-student',
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './assignment-student.component.html',
   styleUrl: './assignment-student.component.css'
 })
+
+@InitLoader()
 export class AssignmentStudentComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   TableData: AssignmentStudent[] = [];
@@ -71,7 +75,7 @@ export class AssignmentStudentComponent {
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
     public assignmentServ: AssignmentService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -88,14 +92,14 @@ export class AssignmentStudentComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
     this.assignmentServ.CheckIfHaveAccess(this.UserID, this.AssignmentId, this.DomainName).subscribe((d) => {
-      console.log(d)
+      console.log(3243,d)
     }, error => {
+      console.log(123,error)
       this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
     })
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -108,7 +112,9 @@ export class AssignmentStudentComponent {
       this.assignmentStudent.studentID = this.UserID;
       const today = new Date();
       const cutoff = new Date(this.assignment.cutOfDate);
-      if (today >= cutoff) {
+      today.setHours(0, 0, 0, 0);
+      cutoff.setHours(0, 0, 0, 0);
+      if (today > cutoff) {
         this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
       }
 

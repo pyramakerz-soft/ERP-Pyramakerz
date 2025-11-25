@@ -16,6 +16,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-salary-configuration',
@@ -24,6 +26,8 @@ import Swal from 'sweetalert2';
   templateUrl: './salary-configuration.component.html',
   styleUrl: './salary-configuration.component.css'
 })
+
+@InitLoader()
 export class SalaryConfigurationComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -58,10 +62,9 @@ export class SalaryConfigurationComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public SalaryConfigurationServ: SalaryConfigurationService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
-
+    public SalaryConfigurationServ: SalaryConfigurationService, 
+    private translate: TranslateService ,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,8 +92,7 @@ export class SalaryConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

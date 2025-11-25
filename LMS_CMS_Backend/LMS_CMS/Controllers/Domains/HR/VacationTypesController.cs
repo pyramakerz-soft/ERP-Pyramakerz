@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" }
            ,
-           pages: new[] { "Vacation Types" }
+           pages: new[] { "Vacation Types" , "Vacation Employee" }
           )]
         public IActionResult Get()
         {

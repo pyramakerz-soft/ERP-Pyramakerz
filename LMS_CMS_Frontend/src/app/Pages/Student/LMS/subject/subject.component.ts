@@ -13,6 +13,10 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { AnnouncementService } from '../../../../Services/Employee/Administration/announcement.service';
+import { Announcement } from '../../../../Models/Administrator/announcement';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-subject',
@@ -21,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject.component.html',
   styleUrl: './subject.component.css'
 })
+
+@InitLoader()
 export class SubjectComponent {
   subjectData: Subject[] = []
   path: string = ""
@@ -29,10 +35,13 @@ export class SubjectComponent {
   subscription!: Subscription;
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  announcements: Announcement[] = []  
+  selectedIndex = 0;
+  private intervalId: any;
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService,private announcementService: AnnouncementService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -42,17 +51,18 @@ export class SubjectComponent {
       this.path = url[0].path
     });
     this.getSubjectData()
-        this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.getMyAnnouncement()     
+    this.startAutoSlide();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getSubjectData() {
@@ -78,4 +88,39 @@ export class SubjectComponent {
   moveToSubjectAssignments(subjectId: number) {
     this.router.navigateByUrl(`Student/SubjectAssignment/${subjectId}`)
   }
+
+  getMyAnnouncement(){
+    this.announcements = []
+    this.announcementService.GetMyAnnouncement(this.DomainName).subscribe(
+      data => {
+        this.announcements = data
+      }
+    )
+  }
+
+  setSelectedIndex(index: number): void {
+    this.selectedIndex = index;
+  }
+
+  nextSlide(): void {
+    if (this.selectedIndex < this.announcements.length - 1) {
+      this.selectedIndex++;
+    } else {
+      this.selectedIndex = 0;  
+    }
+  }
+
+  prevSlide(): void {
+    if (this.selectedIndex > 0) {
+      this.selectedIndex--;
+    } else {
+      this.selectedIndex = this.announcements.length - 1;  
+    }
+  }
+
+  startAutoSlide() {
+    this.intervalId = setInterval(() => {
+      this.nextSlide();  
+    }, 5000); 
+  }  
 }

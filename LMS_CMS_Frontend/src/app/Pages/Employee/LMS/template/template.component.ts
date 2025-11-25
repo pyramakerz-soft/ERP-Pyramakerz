@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-template',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './template.component.html',
   styleUrl: './template.component.css'
 })
+
+@InitLoader()
 export class TemplateComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -64,8 +68,8 @@ export class TemplateComponent {
     public ApiServ: ApiService,
     private translate: TranslateService,
     public templateServ: EvaluationTemplateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,11 +96,10 @@ export class TemplateComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   GetAllData() {
@@ -228,9 +231,10 @@ export class TemplateComponent {
             field == 'afterCount' ||
             field == 'weight'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            const displayName = field === 'englishTitle' ? 'English Title'
+              : field === 'arabicTitle' ? 'Arabic Title'
+              : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
             isValid = false;
           }
         }
@@ -306,5 +310,16 @@ export class TemplateComponent {
 
   moveToGroups(Id: number) {
     this.router.navigateByUrl('Employee/EvaluationTemplateGroup' + '/' + Id);
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 }

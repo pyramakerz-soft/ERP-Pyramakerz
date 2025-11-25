@@ -23,6 +23,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-salary-summary-token',
@@ -31,6 +33,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './salary-summary-token.component.html',
   styleUrl: './salary-summary-token.component.css'
 })
+
+@InitLoader()
 export class SalarySummaryTokenComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -57,7 +61,12 @@ export class SalarySummaryTokenComponent {
   month: number = 0
   year: number = 0
   SelectedEmpName: string = '';
+  SelectedArEmpName: string = '';
   selectedMonth: string = '';
+  school = {
+    reportHeaderOneEn: 'Salary Summary Report',
+    reportHeaderOneAr: ' تقرير ملخص الراتب '
+  };
 
   constructor(
     private router: Router,
@@ -75,7 +84,7 @@ export class SalarySummaryTokenComponent {
     private languageService: LanguageService,
     public reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -92,8 +101,7 @@ export class SalarySummaryTokenComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -123,6 +131,7 @@ export class SalarySummaryTokenComponent {
   GetEmployeeName() {
     this.EmployeeServ.Get_Employee_By_ID(this.UserID, this.DomainName).subscribe((d) => {
       this.SelectedEmpName = d.en_name
+      this.SelectedArEmpName = d.ar_name
     })
   }
 
@@ -187,7 +196,7 @@ export class SalarySummaryTokenComponent {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Salary Summary Report",
-        ar: "تقرير الموظفين"
+        ar: "تقرير ملخص الراتب"
       },
       // subHeaders: [
       //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },

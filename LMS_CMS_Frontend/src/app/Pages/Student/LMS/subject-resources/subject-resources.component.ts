@@ -12,6 +12,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject-resources',
   standalone: true,
@@ -19,6 +21,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject-resources.component.html',
   styleUrl: './subject-resources.component.css'
 })
+
+@InitLoader()
 export class SubjectResourcesComponent {
 
   SubjectResourcesData: SubjectResource[] = []
@@ -32,8 +36,9 @@ export class SubjectResourcesComponent {
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService,private realTimeService: RealTimeNotificationServiceService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public SubjectResourceServ: SubjectResourceService) { }
+  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public SubjectResourceServ: SubjectResourceService,
+    private loadingService: LoadingService ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -50,11 +55,10 @@ export class SubjectResourcesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   GetSubjectResourceData() {
     this.SubjectResourceServ.GetBySubjectId(this.SubjectID, this.DomainName).subscribe((d) => {

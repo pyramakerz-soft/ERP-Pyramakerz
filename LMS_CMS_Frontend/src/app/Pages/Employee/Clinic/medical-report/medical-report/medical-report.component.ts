@@ -20,6 +20,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
@@ -27,6 +29,8 @@ import { AccountService } from '../../../../../Services/account.service';
   imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   standalone: true,
 })
+
+@InitLoader()
 export class MedicalReportComponent implements OnInit {
   tabs = ['MH By Parent', 'MH By Doctor', 'Hygiene Form', 'Follow Up'];
   selectedTab = this.tabs[0];
@@ -81,12 +85,12 @@ export class MedicalReportComponent implements OnInit {
     private gradeService: GradeService,
     private classroomService: ClassroomService,
     private studentService: StudentService,
-    private stateService: StateService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private stateService: StateService, 
     public account: AccountService,
     public ApiServ: ApiService,
     private route: ActivatedRoute,
-    private reportsService: ReportsService // Add this
+    private reportsService: ReportsService, // Add this
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -107,11 +111,10 @@ export class MedicalReportComponent implements OnInit {
         this.restoreState();
     }
 
-  ngOnDestroy(): void {
-        this.realTimeService.stopConnection(); 
-        if (this.subscription) {
-          this.subscription.unsubscribe();
-        }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   GetStudentsData() {
@@ -171,9 +174,9 @@ export class MedicalReportComponent implements OnInit {
     viewDetails(id: number) {
     this.saveState();
     if (this.selectedTab === 'MH By Parent') {
-      this.router.navigateByUrl(`Employee/Medical History/parent/${id}`);
+      this.router.navigateByUrl(`Employee/Medical Report/parent/${id}`);
     } else if (this.selectedTab === 'MH By Doctor') {
-      this.router.navigateByUrl(`Employee/Medical History/doctor/${id}`);
+      this.router.navigateByUrl(`Employee/Medical Report/doctor/${id}`);
     }
   }
 

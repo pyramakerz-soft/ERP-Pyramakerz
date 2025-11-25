@@ -49,6 +49,8 @@ import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/sa
 import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
@@ -62,19 +64,10 @@ import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
+
+@InitLoader()
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -198,8 +191,8 @@ export class InventoryDetailsComponent {
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   async ngOnInit() {
@@ -220,10 +213,7 @@ export class InventoryDetailsComponent {
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-
-      this.Data.date = `${year}-${month}-${day}T${hours}:${minutes}`;
+      this.Data.date = `${year}-${month}-${day}`;
     } else {
       this.mode = 'Edit';
       this.GetTableDataByID();
@@ -329,8 +319,7 @@ export class InventoryDetailsComponent {
     this.validationErrors = translatedErrors;
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -827,20 +816,26 @@ export class InventoryDetailsComponent {
   }
 
   ConvertToPurcase() {
-    this.Data.flagId = 9;
-    this.Data.isEditInvoiceNumber = true;
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
-    this.Data.date = date;
+    this.Data.isConvertedToPurchase = true;
     this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-      this.showSuccessAlert(this.translate.instant('Convert Successfully'));
-      this.router.navigateByUrl(`Employee/Purchases`);
-    });
+      this.Data.isEditInvoiceNumber = true;
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      this.Data.date = `${year}-${month}-${day}`;
+      this.Data.inventoryDetails = this.TableData;
+      console.log(this.Data)
+      this.Data.flagId = 9;
+      this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
+        this.showSuccessAlert(this.translate.instant('Convert Successfully'));
+        this.router.navigateByUrl(`Employee/Purchases`);
+      },error=>{
+        console.log(123,error)
+      });
+  },error=>{
+    console.log(123,error)
+  });
   }
 
   onImageFileSelected(event: any) {
@@ -972,13 +967,13 @@ export class InventoryDetailsComponent {
     }
 
     if (this.mode == 'Create' && this.Data.inventoryDetails.length == 0) {
-      this.showWarningAlert(this.translate.instant('Items') + this.translate.instant('Are Required'));
+      this.showWarningAlert(this.translate.instant('Items') + ' ' + this.translate.instant('Are Required'));
       return false;
     }
 
     if (this.mode == 'Edit' && this.TableData.length == 0) {
       this.showWarningAlert(
-        this.translate.instant('Items') + this.translate.instant('Are Required')
+        this.translate.instant('Items') + ' ' + this.translate.instant('Are Required')
       );
       return false;
     }
@@ -1293,6 +1288,7 @@ export class InventoryDetailsComponent {
   }
 
   ////////////////////////////// search
+
   SearchToggle() {
     this.IsSearchOpen = true;
     setTimeout(() => {
@@ -1310,17 +1306,48 @@ export class InventoryDetailsComponent {
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-
-    this.shopitemServ
-      .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
-      .subscribe(
-        (d) => {
-          // ... existing success logic
-        },
-        (error) => {
-          this.showErrorAlert(this.translate.instant('Item not found'));
+    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
+      (d) => {
+        let price = 0;
+        if (this.FlagId === 11 || this.FlagId === 12) {
+          price = d.salesPrice ?? 0;
+        } else {
+          price = d.purchasePrice ?? 0;
         }
-      );
+        const detail: InventoryDetails = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          insertedAt: '',
+          insertedByUserId: 0,
+          shopItemID: d.id,
+          shopItemName: d.enName,
+          barCode: d.barCode,
+          quantity: 1,
+          salesId: 0,
+          price: price,
+          totalPrice: price,
+          name: '',
+          inventoryMasterId: this.MasterId,
+          salesName: '',
+          notes: '',
+        };
+        if (this.mode == 'Create') {
+          this.Data.inventoryDetails.push(detail);
+        } else if (this.mode == 'Edit') {
+          this.TableData.push(detail);
+          this.NewDetailsWhenEdit.push(detail);
+        }
+        this.TotalandRemainingCalculate();
+        this.BarCode = ''; 
+      },
+      (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Item not found',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
+    );
   }
 
   getStoreNameById(id: number | string): string {
@@ -1388,33 +1415,29 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(
-    event: any,
-    field: keyof InventoryDetails,
-    row: InventoryDetails
-  ): void {
+  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
     const value = event.target.value;
     const numValue = Number(value);
-    if (field === 'quantity' || field === 'price') {
-      const integerRegex = /^\d+$/;
-
-      if (!integerRegex.test(value) || numValue <= 0) {
-        // Invalid input (decimal, letters, negative, etc.)
-        row[field] = 0;
-        event.target.value = 0;
-      } else {
-        // Valid integer value
-        row[field] = numValue;
-      }
-      this.CalculateTotalPrice(row);
-      return;
-    }
-    if (isNaN(numValue) || value === '') {
+   
+    if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof row[field] === 'string') {
         row[field] = '' as never;
       }
-      row.totalPrice = 0;
+    }
+
+    if (field === 'quantity') {
+      let value = event.target.value;
+      value = value.replace(/[^0-9]/g, '')
+      event.target.value = value;
+      if (isNaN(value) || value === '') {
+        event.target.value = '';
+        if (typeof row[field] === 'string') {
+          row[field] = '' as never;
+        }
+      }
+      this.CalculateTotalPrice(row);
+      return;
     }
   }
 

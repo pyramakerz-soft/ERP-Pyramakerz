@@ -26,6 +26,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-subject',
   standalone: true,
@@ -33,6 +35,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './subject.component.html',
   styleUrl: './subject.component.css'
 })
+
+@InitLoader()
 export class SubjectComponent {
   keysArray: string[] = ['id', 'en_name', 'ar_name', 'gradeName', 'orderInCertificate', 'creditHours', 'subjectCode', 'passByDegree', 'totalMark', 'subjectCategoryName', 'numberOfSessionPerWeek'];
   key: string = "id";
@@ -67,11 +71,11 @@ export class SubjectComponent {
   grades: Grade[] = []
   IsView: boolean = false;
 
-  constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,private translate: TranslateService,
+  constructor(public account: AccountService, private translate: TranslateService,
     private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
-    public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog) { }
+    public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog,
+    private loadingService: LoadingService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,11 +107,10 @@ export class SubjectComponent {
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
   // getSubjectData() {
@@ -162,8 +165,10 @@ export class SubjectComponent {
         },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.GetDate()
+    dialogRef.afterClosed().subscribe((shouldRefresh) => {
+      if (!shouldRefresh) { //  Only call if user saved or closed normally
+        this.GetDate();
+      }
     });
   }
 

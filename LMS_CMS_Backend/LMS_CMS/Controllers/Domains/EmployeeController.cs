@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace LMS_CMS_PL.Controllers.Domains
@@ -51,11 +52,149 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee", "Employee Accounting", "Installment Deduction" }
+        )]
+        public async Task<IActionResult> GetAsyncWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.employee_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Employee> Employees = await Unit_Of_Work.employee_Repository
+                                .Select_All_With_IncludesById<Employee>(
+                                    sem => sem.IsDeleted != true,
+                                    query => query.Include(emp => emp.BusCompany),
+                                    query => query.Include(emp => emp.EmployeeType),
+                                    query => query.Include(emp => emp.Role)); // ✅ sort before pagination
+
+            Employees = Employees.OrderBy(t => t.en_name).ToList();
+
+            Employees = Employees
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
+            if (Employees == null || Employees.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Employee_GetDTO> EmployeesDTO = mapper.Map<List<Employee_GetDTO>>(Employees);
+            foreach (var employeeDTO in EmployeesDTO)
+            {
+                List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
+                List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
+                if (filesDTO != null)
+                {
+                    employeeDTO.Files = filesDTO;
+                    foreach (var file in filesDTO)
+                    {
+                        if (!string.IsNullOrEmpty(file.Link))
+                        {
+                            file.Link = _fileService.GetFileUrl(file.Link, Request, HttpContext);
+                        }
+                    }
+                }
+                else
+                    employeeDTO.Files = new List<EmployeeAttachmentDTO>();
+
+
+                List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted != true);
+
+                if (floors != null && floors.Any())
+                    employeeDTO.FloorsSelected = floors.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.FloorsSelected = new List<long>();
+
+
+                List<SubjectSupervisor> subjectSupervisors = Unit_Of_Work.subjectSupervisor_Repository
+                   .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+                var subjectIds = subjectSupervisors.Select(ss => ss.SubjectID).ToList();
+
+                List<Subject> subjects = Unit_Of_Work.subject_Repository
+                    .FindBy(s => subjectIds.Contains(s.ID) && s.IsDeleted != true);
+
+
+                if (subjects != null && subjects.Any())
+                    employeeDTO.SubjectSelected = subjects.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.SubjectSelected = new List<long>();
+
+
+                List<GradeSupervisor> gradeSupervisors = Unit_Of_Work.gradeSupervisor_Repository
+                  .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+                var gradeIds = gradeSupervisors.Select(ss => ss.GradeID).ToList();
+
+                List<Grade> grades = Unit_Of_Work.grade_Repository
+                    .FindBy(s => gradeIds.Contains(s.ID) && s.IsDeleted != true);
+
+                if (grades != null && grades.Any())
+                    employeeDTO.GradeSelected = grades.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.GradeSelected = new List<long>();
+
+                // Get current month and year
+                var currentDate = DateTime.UtcNow;
+                var currentMonth = currentDate.Month;
+                var currentYear = currentDate.Year;
+
+                // Filter leave requests for the current month only
+                List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                    .FindBy(l => l.EmployeeID == employeeDTO.ID
+                              && l.IsDeleted != true
+                              && l.Date.Month == currentMonth
+                              && l.Date.Year == currentYear);
+
+                // Sum up hours and minutes
+                var allHours = leaveRequests.Sum(l => l.Hours);
+                var allMinutes = leaveRequests.Sum(l => l.Minutes);
+
+                // Convert total minutes into hours and remaining minutes
+                allHours += allMinutes / 60;
+                allMinutes = allMinutes % 60;
+
+                // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
+                employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = EmployeesDTO, Pagination = paginationMetadata });
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" }
+            pages: new[] { "Employee" , "Employee Accounting" , "Installment Deduction" , "Edit Attendance" ,"Loans" , "Bonus" , "Deduction" 
+                , "Leave Request" , "Vacation Employee" , "Salary Calculation", "Loans Status"  ,"Maintenance Employees"}
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -70,6 +209,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
             List<Employee> Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(
                     sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.BusCompany),
@@ -159,8 +299,9 @@ namespace LMS_CMS_PL.Controllers.Domains
 
                 // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
                 employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
-
             }
+
+            EmployeesDTO = EmployeesDTO.OrderBy(t => t.en_name).ToList();
 
             return Ok(EmployeesDTO);
         }
@@ -211,6 +352,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
             }
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -221,7 +363,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByJobId/{JobId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" }
+            pages: new[] { "Employee", "Loans Report" , "Bonus Report" , "Deduction Report" , "Vacation Report" , "Leave Request Report" , "Hr Employees Report" , "Employee Salary Detailed Report" , "Salary Summary Report" , "HR Attendance Report" }
         )]
         public IActionResult GetByJobId(long JobId)
         {
@@ -240,7 +382,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
-             
+
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
             return Ok(employeeDTOs);
         }
         
@@ -249,7 +392,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Employee" , "Teacher Evaluation Report" }
+            pages: new[] { "Employee" , "Teacher Evaluation Report", "Notification" }
         )]
         public IActionResult GetByDepartmentId(long DepartmentId)
         {
@@ -267,8 +410,9 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
 
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
             return Ok(employeeDTOs);
         }
 
@@ -294,7 +438,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept requests");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -321,7 +466,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept requests");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -348,7 +494,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("There is no employees in this department that can accept messages");
             }
 
-            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -441,6 +588,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && teacherIDs.Contains(d.ID));
 
             List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+            employeeDTOs = employeeDTOs.OrderBy(t => t.en_name).ToList();
 
             return Ok(employeeDTOs);
         }
@@ -800,6 +948,18 @@ namespace LMS_CMS_PL.Controllers.Domains
                 }
                 Unit_Of_Work.SaveChanges();
             }
+
+            //// Create EmployeeVacationType
+            List<VacationTypes> vacationTypes = Unit_Of_Work.vacationTypes_Repository.FindBy(a => a.IsDeleted != true);
+            foreach (var type in vacationTypes)
+            {
+                var annualVacation = new AnnualVacationEmployee();
+                annualVacation.EmployeeID = employee.ID;
+                annualVacation.VacationTypesID = type.ID;
+                Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
+                Unit_Of_Work.SaveChanges();
+            }
+
 
             if (files != null && files.Any())
             {
@@ -1385,7 +1545,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
-            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true
+            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true &&a.VacationTypes.IsDeleted != true
             , query => query.Include(emp => emp.Employee),
                 query => query.Include(emp => emp.VacationTypes));
 
@@ -1527,7 +1687,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee Accounting", roleId, userId, employee);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, employee);
                 if (accessCheck != null)
                 {
                     return accessCheck;

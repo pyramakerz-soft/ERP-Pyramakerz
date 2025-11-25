@@ -47,6 +47,13 @@
 </div>
 
 <div *ngIf="busId!=-1">
+    <div class="flex justify-end mt-3 space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" 
+             [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" 
+             [title]="'Print' | translate">
+    </div>
+
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -65,7 +72,7 @@
                         {{ 'Classes' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Student name' | translate }}
+                        {{ 'Student Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Categories' | translate }}
@@ -115,17 +122,61 @@
             </tbody>
         </table>
     </div>
-    <!-- <div class="flex justify-end mt-3">
-        <button 
-            [ngClass]="{ 
-                'text-gray-500': !IsChoosenDomain, 
-                'border border-gray-500': !IsChoosenDomain,
-                'cursor-not-allowed': !IsChoosenDomain,
-                'secondaryBg': IsChoosenDomain,
-                'text-white': IsChoosenDomain
-            }" 
-            class="rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Print
-        </button>
-    </div> -->
+</div>
+
+
+<!-- Name Tag Template (Hidden until PDF/Print) -->
+<div *ngIf="showPDF" #nameTagContainer 
+     style="padding: 15px; font-family: Arial, sans-serif; background: white; width: 200mm; max-width: 200mm; margin: 0 auto; position: absolute; top: -9999px; left: -9999px; box-sizing: border-box;">
+
+  <!-- Grid of Name Tags (2 columns) -->
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 5px; width: 100%; box-sizing: border-box;">
+    
+    <div *ngFor="let student of busStudentData" 
+         style="border: 2px dashed #333; border-radius: 6px; padding: 10px; background: white; page-break-inside: avoid; min-height: 160px; display: flex; flex-direction: column; box-sizing: border-box; position: relative;">
+      
+      <!-- School Image in Top Left Corner - LARGER SIZE -->
+      <div *ngIf="student.schoolImage" 
+           style="position: absolute; top: 5px; left: 5px;">
+        <img [src]="student.schoolImage" 
+             alt="School Logo"
+             style="width: 40px; height: 40px; object-fit: contain;"> <!-- Increased from 25px to 40px -->
+      </div>
+
+      <!-- School Name Header (Centered) -->
+      <div style="text-align: center; margin-bottom: 8px; padding-left: 45px; padding-right: 45px;"> <!-- Increased padding to accommodate larger image -->
+        <div style="font-size: 14px; font-weight: bold; color: #000; line-height: 1.2;">
+          {{ student.schoolName }}
+        </div>
+      </div>
+
+      <!-- Student Info -->
+      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; margin-top: 5px;">
+        <div style="margin-bottom: 6px;">
+          <span style="font-size: 13px; font-weight: bold; color: #000;">Name: </span>
+          <span style="font-size: 13px; font-weight: normal; color: #000;">{{ student.studentName }}</span>
+        </div>
+        <div style="margin-bottom: 6px;">
+          <span style="font-size: 13px; font-weight: bold; color: #000;">Class: </span>
+          <span style="font-size: 13px; font-weight: normal; color: #000;">{{ student.className }}</span>
+        </div>
+        <div style="margin-bottom: 6px;">
+          <div style="font-size: 12px; font-weight: bold; color: #000;">{{ student.busCategoryName }}</div>
+        </div>
+      </div>
+
+      <!-- Bus Info with Driver Number -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+        <div>
+          <div style="font-size: 11px; font-weight: bold; color: #000;">Bus: {{ selectedBusName }}</div>
+          <div *ngIf="student.driverNumber" style="font-size: 11px; font-weight: bold; color: #000;">
+            Driver Number: {{ student.driverNumber }}
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #666; text-align: right;">
+          <div>{{ student.gradeName }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

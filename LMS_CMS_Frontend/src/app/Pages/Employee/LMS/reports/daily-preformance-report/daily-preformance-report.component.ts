@@ -20,6 +20,8 @@ import { firstValueFrom } from 'rxjs';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { PerformanceTypeService } from '../../../../../Services/Employee/LMS/performance-type.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 class PerformanceType {
   id: number = 0;
@@ -57,6 +59,8 @@ class ClassroomReportRow {
   templateUrl: './daily-preformance-report.component.html',
   styleUrl: './daily-preformance-report.component.css',
 })
+
+@InitLoader()
 export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -101,11 +105,11 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     public schoolService: SchoolService,
     public gradeService: GradeService,
     public performanceTypeService: PerformanceTypeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private route: ActivatedRoute,
     public account: AccountService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -137,8 +141,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void {  
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

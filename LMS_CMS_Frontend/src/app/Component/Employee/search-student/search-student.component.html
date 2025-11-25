@@ -51,12 +51,12 @@
                 </div>
                 <div class="flex flex-col mb-4" *ngIf="!isInputHidden('classroom')">
                     <label class="mb-2" for="classroom"
-                        [ngClass]="{ 'text-gray-400': !selectedYear && !selectedGrade, 'primaryTxt': selectedYear || selectedGrade }"> {{ 'Classroom' | translate }}</label>
+                        [ngClass]="{ 'text-gray-400': !selectedYear || !selectedGrade, 'primaryTxt': selectedYear && selectedGrade }"> {{ 'Classroom' | translate }}</label>
                     <select
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto min-w-[220px]"
                         id="classroom" [(ngModel)]="selectedClassroom"
-                        [disabled]="(!selectedYear && !selectedGrade) || isClassroomDisabled()"
-                        [ngClass]="{ 'bg-[#EBEBEB]': !selectedYear && !selectedGrade }" (change)="HideTable()">
+                        [disabled]="(!selectedYear || !selectedGrade) || isClassroomDisabled()"
+                        [ngClass]="{ 'bg-[#EBEBEB]': !selectedYear || !selectedGrade }" (change)="HideTable()">
                         <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Classroom' | translate }}</option>
                         <option *ngFor="let classroom of Classrooms" [value]="classroom.id">{{ classroom.name }}
                         </option>
@@ -157,6 +157,9 @@
                                     </button>
                                     <button  (click)="View(row.registrationFormParentID)">
                                         <i class="fa-solid fa-eye"></i> 
+                                    </button>
+                                    <button (click)="suspend(row)" title="Suspend">
+                                        <i class="fa-solid fa-hand"></i>
                                     </button>
                                 </div>
                             </td>

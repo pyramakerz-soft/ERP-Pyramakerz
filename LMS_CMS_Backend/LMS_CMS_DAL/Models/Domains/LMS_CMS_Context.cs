@@ -243,8 +243,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Maintenance> Maintenances { get; set; }
 
 
-        public DbSet<Bouns> Bouns { get; set; }
-        public DbSet<BounsType> BounsType { get; set; }
+        public DbSet<Bonus> Bonus { get; set; }
+        public DbSet<BonusType> BonusType { get; set; }
         public DbSet<Deduction> Deduction { get; set; }
         public DbSet<DeductionType> DeductionType { get; set; }
         public DbSet<LeaveRequest> LeaveRequest { get; set; }
@@ -440,7 +440,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
-            modelBuilder.Entity<BounsType>()
+            modelBuilder.Entity<BonusType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -1712,6 +1712,12 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.SubjectWeightTypeID)
               .OnDelete(DeleteBehavior.Restrict); 
             
+            modelBuilder.Entity<Assignment>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.Assignments)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict); 
+            
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.StudentClassroom)
               .WithMany(p => p.AssignmentStudents)
@@ -2170,16 +2176,16 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.AppointmentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Bouns>()
+            modelBuilder.Entity<Bonus>()
                 .HasOne(p => p.Employee)
-                .WithMany(p => p.Bouns)
+                .WithMany(p => p.Bonus)
                 .HasForeignKey(p => p.EmployeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Bouns>()
-                .HasOne(p => p.BounsType)
-                .WithMany(p => p.Bouns)
-                .HasForeignKey(p => p.BounsTypeID)
+            modelBuilder.Entity<Bonus>()
+                .HasOne(p => p.BonusType)
+                .WithMany(p => p.Bonus)
+                .HasForeignKey(p => p.BonusTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Deduction>()
@@ -2235,6 +2241,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(p => p.DirectMarks)
                 .HasForeignKey(p => p.SubjectWeightTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.DirectMarks)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DirectMarkClasses>()
                 .HasOne(p => p.DirectMark)
@@ -2549,7 +2561,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(v => v.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict); 
 
-            modelBuilder.Entity<Bouns>()
+            modelBuilder.Entity<Bonus>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)
@@ -2795,7 +2807,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<ReceivableDetails>()
                 .HasIndex(e => e.LinkFileTypeID)
-                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID");
+                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID"); 
         }
     }
 }

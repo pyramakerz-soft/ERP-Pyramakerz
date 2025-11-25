@@ -36,6 +36,8 @@ import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Field } from '../../../../Models/Registration/field';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -43,6 +45,8 @@ import { Field } from '../../../../Models/Registration/field';
   templateUrl: './registration-form.component.html',
   styleUrl: './registration-form.component.css',
 })
+
+@InitLoader()
 export class RegistrationFormComponent {
   DomainName: string = '';
   UserID: number = 0;
@@ -119,7 +123,7 @@ export class RegistrationFormComponent {
     public sectionServce: SectionService,
     private languageService: LanguageService,
     public GenderServ: GenderService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -134,8 +138,7 @@ export class RegistrationFormComponent {
       );
       this.StudentId = Number(
         this.activeRoute.snapshot.paramMap.get('StudentId')
-      );
-      console.log(1234,this.path)
+      ); 
       if (this.path.startsWith('Student/Edit')) {
         this.getRegisterationFormSubmittion();
         this.mode = 'Edit'
@@ -161,8 +164,7 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
       if (this.subscription) {
       this.subscription.unsubscribe();
     }

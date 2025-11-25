@@ -29,6 +29,10 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-direct-mark',
@@ -37,6 +41,8 @@ import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
   templateUrl: './direct-mark.component.html',
   styleUrl: './direct-mark.component.css'
 })
+
+@InitLoader()
 export class DirectMarkComponent {
 
   validationErrors: { [key in keyof DirectMark]?: string } = {};
@@ -74,6 +80,7 @@ export class DirectMarkComponent {
   SelectedSubjectId: number = 0;
   schoolsForCreate: School[] = []
   GradesForCreate: Grade[] = []
+  years: AcademicYear[] = []
   subjectsForCreate: Subject[] = [];
   subjectWeightsForCreate: SubjectWeight[] = [];
   classrooms: Classroom[] = [];
@@ -92,6 +99,7 @@ export class DirectMarkComponent {
     public activeRoute: ActivatedRoute,
     private SchoolServ: SchoolService,
     private GradeServ: GradeService,
+    private acadimicYearService: AcadimicYearService,
     private ClassroomServ: ClassroomService,
     public subjectService: SubjectService,
     public subjectWeightService: SubjectWeightService,
@@ -100,7 +108,7 @@ export class DirectMarkComponent {
     public router: Router,
     private translate: TranslateService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -133,8 +141,7 @@ export class DirectMarkComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -171,12 +178,12 @@ export class DirectMarkComponent {
 
   GetClassroomsData() {
     this.classrooms = []
-    if (!this.directMark.isSummerCourse && this.directMark.subjectID) {
-      this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+    if (!this.directMark.isSummerCourse && this.directMark.subjectID && this.directMark.academicYearID) {
+      this.ClassroomServ.GetBySubjectAndAcademicYearId(this.directMark.subjectID, this.directMark.academicYearID, this.DomainName).subscribe((d) => {
         this.classrooms = d
       })
-    }else if (this.directMark.isSummerCourse && this.directMark.date && this.directMark.subjectID) {
-      this.ClassroomServ.GetFailedClassesBySubject(this.directMark.subjectID, this.directMark.date!, this.DomainName).subscribe((d) => {
+    }else if (this.directMark.isSummerCourse && this.directMark.date && this.directMark.subjectID && this.directMark.academicYearID) {
+      this.ClassroomServ.GetFailedClassesBySubjectAndYear(this.directMark.subjectID, this.directMark.academicYearID, this.directMark.date!, this.DomainName).subscribe((d) => {
         this.classrooms = d
       })
     }
@@ -345,12 +352,13 @@ export class DirectMarkComponent {
       data => {
         this.directMark = data
         this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+          this.acadimicYearService.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => { this.years = d })
           this.GradesForCreate = d
           this.subjectsForCreate = []
           this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
             this.subjectsForCreate = d
             this.getSubjectWeightData()
-            this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+            this.ClassroomServ.GetBySubjectAndAcademicYearId(this.directMark.subjectID, this.directMark.academicYearID, this.DomainName).subscribe((d) => {
               this.classrooms = d
               this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
               this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID)
@@ -447,32 +455,49 @@ export class DirectMarkComponent {
     }
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.directMark) {
-      if (this.directMark.hasOwnProperty(key)) {
-        const field = key as keyof DirectMark;
-        if (!this.directMark[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'subjectID') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
-          }
-        }
-      }
-    }
-
-    if(this.directMark.classids.length === 0){
-      this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
-      isValid = false;
-    }
-
-    if(this.directMark.isSummerCourse == false && this.directMark.subjectWeightTypeID == 0){
-      this.validationErrors['subjectWeightTypeID'] = `*Weight Type is required`;
-      isValid = false;
-    } 
-    
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  if (!this.directMark.englishName) {
+    this.validationErrors['englishName'] = this.getRequiredErrorMessage('English Name');
+    isValid = false;
   }
+  
+  if (!this.directMark.arabicName) {
+    this.validationErrors['arabicName'] = this.getRequiredErrorMessage('Arabic Name');
+    isValid = false;
+  }
+  
+  if (!this.directMark.mark) {
+    this.validationErrors['mark'] = this.getRequiredErrorMessage('Mark');
+    isValid = false;
+  }
+  
+  if (!this.directMark.subjectID) {
+    this.validationErrors['subjectID'] = this.getRequiredErrorMessage('Subject');
+    isValid = false;
+  }
+  
+  if (!this.directMark.academicYearID) {
+    this.validationErrors['academicYearID'] = this.getRequiredErrorMessage('Academic Year');
+    isValid = false;
+  }
+
+  // Validate class selection
+  if(this.directMark.classids.length === 0){
+    this.validationErrors['classids'] = `*${this.translate.instant('At least one class must be selected')}`;
+    isValid = false;
+  }
+
+  // Validate weight type for non-summer courses
+  if(this.directMark.isSummerCourse == false && this.directMark.subjectWeightTypeID == 0){
+    this.validationErrors['subjectWeightTypeID'] = this.getRequiredErrorMessage('Weight Type');
+    isValid = false;
+  } 
+  
+  return isValid;
+}
 
   capitalizeField(field: keyof DirectMark): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -564,15 +589,29 @@ export class DirectMarkComponent {
     this.viewStudents = false
     this.viewClassStudents = false
     this.GradesForCreate = []
+    this.years = []
     this.subjectsForCreate = []
     this.directMark.gradeID = 0
     this.directMark.subjectID = 0
+    this.directMark.academicYearID = 0
     this.directMark.directMarkClasses = [];
     this.directMark.classids = [];
     this.directMark.allClasses = false;
     this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
     }) 
+    this.acadimicYearService.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+      this.years = d
+    }) 
+  }
+
+  onYearModalChange() { 
+    this.viewStudents = false
+    this.viewClassStudents = false 
+    this.directMark.directMarkClasses = [];
+    this.directMark.classids = [];
+    this.directMark.allClasses = false; 
+    this.GetClassroomsData()
   }
 
   onGradeModalChange() {
@@ -625,4 +664,15 @@ export class DirectMarkComponent {
       }
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

@@ -20,6 +20,8 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-loans',
@@ -28,6 +30,8 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.css',
 })
+
+@InitLoader()
 export class LoansComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -47,7 +51,7 @@ export class LoansComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'safeName' ,'amount'];
 
   loan: Loans = new Loans();
 
@@ -75,7 +79,7 @@ export class LoansComponent {
     public LoansServ: LoansService,
     public SafeEmployeeServ: SafeEmployeeService,
     public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -104,8 +108,7 @@ export class LoansComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -342,7 +345,7 @@ isFormValid(): boolean {
           field == 'numberOfDeduction' ||
           field == 'amount'
         ) {
-          this.validationErrors[field] = `${this.translate.instant('Field is required')} ${this.translate.instant(field)}`;
+          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
           isValid = false;
         }
       }

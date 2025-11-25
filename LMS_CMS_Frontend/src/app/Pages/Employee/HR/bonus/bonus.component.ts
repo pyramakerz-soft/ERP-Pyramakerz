@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Bonus } from '../../../../Models/HR/bonus';
-import { BounsType } from '../../../../Models/HR/bouns-type';
+import { BonusType } from '../../../../Models/HR/bouns-type';
 import { BounsTypeService } from '../../../../Services/Employee/HR/bouns-type.service';
 import { BonusService } from '../../../../Services/Employee/HR/bonus.service';
 import { CommonModule } from '@angular/common';
@@ -20,6 +20,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-bonus',
@@ -28,19 +30,10 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bonus.component.html',
   styleUrl: './bonus.component.css',
 })
+
+@InitLoader()
 export class BonusComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -58,16 +51,16 @@ export class BonusComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName' ,'bonusTypeName'];
 
-  bouns: Bonus = new Bonus();
+  bonus: Bonus = new Bonus();
 
   validationErrors: { [key in keyof Bonus]?: string } = {};
   isLoading = false;
 
   SelectedEmployee: Employee = new Employee();
   employees: Employee[] = [];
-  bounsType: BounsType[] = [];
+  bonusType: BonusType[] = [];
   CurrentPage: number = 1;
   PageSize: number = 10;
   TotalPages: number = 1;
@@ -87,7 +80,7 @@ export class BonusComponent {
     public BonusServ: BonusService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -116,8 +109,7 @@ export class BonusComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -181,7 +173,7 @@ export class BonusComponent {
         } else {
           const errorMessage =
             error.error?.message ||
-            this.translate.instant('Failed to load bonuses');
+            this.translate.instant('Failed to load Data');
           this.showErrorAlert(errorMessage);
         }
       }
@@ -190,7 +182,7 @@ export class BonusComponent {
 
   Create() {
     this.mode = 'Create';
-    this.bouns = new Bonus();
+    this.bonus = new Bonus();
     this.validationErrors = {};
     this.openModal();
   }
@@ -224,7 +216,7 @@ export class BonusComponent {
   Edit(id: number) {
     this.mode = 'Edit';
     this.BonusServ.GetByID(id, this.DomainName).subscribe((d) => {
-      this.bouns = d;
+      this.bonus = d;
     });
     this.openModal();
   }
@@ -250,9 +242,9 @@ export class BonusComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.bouns);
+      console.log(this.bonus);
       if (this.mode == 'Create') {
-        this.BonusServ.Add(this.bouns, this.DomainName).subscribe(
+        this.BonusServ.Add(this.bonus, this.DomainName).subscribe(
           (d) => {
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
@@ -265,14 +257,14 @@ export class BonusComponent {
             console.log(error);
             this.isLoading = false;
             const errorMessage =
-              error.error?.message ||
+              error.error ||
               this.translate.instant('Failed to create bonus');
             this.showErrorAlert(errorMessage);
           }
         );
       }
       if (this.mode == 'Edit') {
-        this.BonusServ.Edit(this.bouns, this.DomainName).subscribe(
+        this.BonusServ.Edit(this.bonus, this.DomainName).subscribe(
           (d) => {
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
@@ -284,7 +276,7 @@ export class BonusComponent {
           (error) => {
             this.isLoading = false;
             const errorMessage =
-              error.error?.message ||
+              error.error ||
               this.translate.instant('Failed to update bonus');
             this.showErrorAlert(errorMessage);
           }
@@ -313,7 +305,7 @@ export class BonusComponent {
 
   getAllTypes() {
     this.BounsTypeServ.Get(this.DomainName).subscribe((d) => {
-      this.bounsType = d;
+      this.bonusType = d;
     });
   }
 
@@ -321,79 +313,78 @@ export class BonusComponent {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.bouns[field] === 'string') {
-        this.bouns[field] = 0 as never;
+      if (typeof this.bonus[field] === 'string') {
+        this.bonus[field] = 0 as never;
       }
     }
     if (field == 'minutes') {
-      if (this.bouns.minutes > 60) {
-        this.bouns.minutes = 0;
+      if (this.bonus.minutes &&this.bonus.minutes > 60) {
+        this.bonus.minutes = 0;
       }
     }
   }
 
-  isFormValid(): boolean {
-    this.SelectedEmployee =
-      this.employees.find((e) => e.id == this.bouns.employeeID) ||
-      new Employee();
-    console.log(123, this.SelectedEmployee);
-    let isValid = true;
-    for (const key in this.bouns) {
-      if (this.bouns.hasOwnProperty(key)) {
-        const field = key as keyof Bonus;
-        if (!this.bouns[field]) {
-          if (
-            field == 'date' ||
-            field == 'bounsTypeID' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `${this.translate.instant(
-              'Field is required'
-            )} ${this.translate.instant(field)}`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  this.SelectedEmployee =
+    this.employees.find((e) => e.id == this.bonus.employeeID) ||
+    new Employee();
+  
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.bonus) {
+    if (this.bonus.hasOwnProperty(key)) {
+      const field = key as keyof Bonus;
+      if (!this.bonus[field]) {
+        if (
+          field == 'date' ||
+          field == 'bonusTypeID' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
-    if (
-      this.SelectedEmployee.hasAttendance != true &&
-      (this.bouns.bounsTypeID == 1 || this.bouns.bounsTypeID == 2)
-    ) {
-      isValid = false;
-      this.validationErrors['bounsTypeID'] = this.translate.instant(
-        'This Employee Has No Attendance so should take bouns by amount only'
-      );
-    }
-    if (
-      this.bouns.bounsTypeID == 3 &&
-      (this.bouns.amount == 0 || this.bouns.amount == null)
-    ) {
-      isValid = false;
-      this.validationErrors['amount'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('amount')}`;
-    }
-    if (
-      this.bouns.bounsTypeID == 2 &&
-      (this.bouns.numberOfBounsDays == 0 ||
-        this.bouns.numberOfBounsDays == null)
-    ) {
-      isValid = false;
-      this.validationErrors['numberOfBounsDays'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('numberOfBounsDays')}`;
-    }
-    if (
-      this.bouns.bounsTypeID == 1 &&
-      (this.bouns.hours == 0 || this.bouns.hours == null)
-    ) {
-      isValid = false;
-      this.validationErrors['hours'] = `${this.translate.instant(
-        'Field is required'
-      )} ${this.translate.instant('hours')}`;
-    }
-    return isValid;
   }
+
+  // Business logic validations
+  if (
+    this.SelectedEmployee.hasAttendance != true &&
+    (this.bonus.bonusTypeID == 1 || this.bonus.bonusTypeID == 2)
+  ) {
+    isValid = false;
+    this.validationErrors['bonusTypeID'] = this.translate.instant(
+      'This Employee Has No Attendance so should take bonus by amount only'
+    );
+  }
+
+  if (
+    this.bonus.bonusTypeID == 3 &&
+    (this.bonus.amount == 0 || this.bonus.amount == null)
+  ) {
+    isValid = false;
+    this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
+  }
+
+  if (
+    this.bonus.bonusTypeID == 2 &&
+    (this.bonus.numberOfBonusDays == 0 || this.bonus.numberOfBonusDays == null)
+  ) {
+    isValid = false;
+    this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('Number Of Bonus Days');
+  }
+
+  // if (this.bonus.bonusTypeID == 1 &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
+  if (this.bonus.bonusTypeID == 1 && (this.bonus.minutes == 0 || this.bonus.minutes == null) &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
+    isValid = false;
+    this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
+  }
+
+  return isValid;
+}
 
   capitalizeField(field: keyof Bonus): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -401,7 +392,7 @@ export class BonusComponent {
 
   onInputValueChange(event: { field: keyof Bonus; value: any }) {
     const { field, value } = event;
-    (this.bouns as any)[field] = value;
+    (this.bonus as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
     }
@@ -483,4 +474,16 @@ export class BonusComponent {
       this.PageSize = 0;
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

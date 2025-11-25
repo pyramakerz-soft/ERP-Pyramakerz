@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-assignment-detail',
@@ -29,6 +31,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './assignment-detail.component.html',
   styleUrl: './assignment-detail.component.css'
 })
+
+@InitLoader()
 export class AssignmentDetailComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -67,8 +71,8 @@ export class AssignmentDetailComponent {
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
     public assignmentServ: AssignmentService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -85,8 +89,7 @@ export class AssignmentDetailComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

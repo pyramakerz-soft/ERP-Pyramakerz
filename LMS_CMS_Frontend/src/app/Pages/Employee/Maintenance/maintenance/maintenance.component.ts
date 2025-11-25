@@ -25,6 +25,8 @@ import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item
 import { Maintenance } from '../../../../Models/Maintenance/maintenance';
 import { MaintenanceCompanies } from '../../../../Models/Maintenance/maintenance-companies';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-maintenance',
@@ -33,6 +35,8 @@ import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance
   templateUrl: './maintenance.component.html',
   styleUrls: ['./maintenance.component.css']
 })
+
+@InitLoader()
 export class MaintenanceComponent implements OnInit, OnDestroy {
   // Table configuration
   headers: string[] = ['ID', 'Date', 'Item', 'Company', 'Employee', 'Cost', 'Note', 'Actions'];
@@ -42,6 +46,7 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
 
   // Data
   maintenanceList: any[] = []; // Changed to any[] to include actions property
+  TableData: any[] = []; // Changed to any[] to include actions property
   maintenanceItems: MaintenanceItem[] = [];
   maintenanceCompanies: MaintenanceCompanies[] = [];
   maintenanceEmployees: MaintenanceEmployees[] = [];
@@ -72,7 +77,13 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   
   maintenanceForm: Maintenance = new Maintenance();
-
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
+  DomainName: string = '';
+  
   constructor(
     private maintenanceService: MaintenanceService,
     private languageService: LanguageService,
@@ -83,14 +94,16 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     private menuService: MenuService,
     private editDeleteService: DeleteEditPermissionService,
     private accountService: AccountService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit(): void {
     this.User_Data_After_Login = this.accountService.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-    
-    this.loadMaintenance();
+    this.DomainName = this.apiService.GetHeader();
+
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.loadDropdownData();
     this.setupPermissions();
     this.setupLanguage();
@@ -144,12 +157,51 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
   }
 
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.maintenanceList = [];
+    this.TableData = [];
+    this.maintenanceService.getAllWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+        this.loadMaintenance()
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }
+
   async loadMaintenance(): Promise<void> {
     try {
       const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
-      
-      this.maintenanceList = data.map(item => {
+      this.maintenanceList = this.TableData.map(item => {
         // Keep dates as strings for proper binding to HTML date input
         const maintenanceItem: any = {
           ...item,
@@ -196,7 +248,7 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   async onSearchEvent(event: { key: string, value: any }): Promise<void> {
     this.searchKey = event.key;
     this.searchValue = event.value;
-    await this.loadMaintenance();
+    await this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
   openModal(item?: any): void {
@@ -348,39 +400,80 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async saveMaintenance(): Promise<void> {
-    if (!this.isFormValid()) return;
+async saveMaintenance(): Promise<void> {
+  if (!this.isFormValid()) return;
 
-    try {
-      this.isSaving = true;
-      const domainName = this.apiService.GetHeader();
+  try {
+    this.isSaving = true;
+    const domainName = this.apiService.GetHeader();
 
-      // Ensure date is properly formatted as YYYY-MM-DD
-      // Since date is always a string in the form, we can use it directly
-      const submitData: Maintenance = {
-        ...this.maintenanceForm,
-        companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
-        maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
-      };
+    // Ensure date is properly formatted as YYYY-MM-DD
+    const submitData: Maintenance = {
+      ...this.maintenanceForm,
+      companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
+      maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
+    };
 
-      if (this.editMode && this.maintenanceForm.id) {
-        await firstValueFrom(this.maintenanceService.update(submitData, domainName));
-        this.showSuccessAlert(this.translate.instant('Maintenance record updated successfully'));
-      } else {
-        await firstValueFrom(this.maintenanceService.create(submitData, domainName));
-        this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
-      }
-
-      this.loadMaintenance();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving maintenance record:', error);
-      const errorMessage = String(error) || this.translate.instant('Failed to save maintenance record');
-      this.showErrorAlert(errorMessage);
-    } finally {
-      this.isSaving = false;
+    if (this.editMode && this.maintenanceForm.id) {
+      await firstValueFrom(this.maintenanceService.update(submitData, domainName));
+      this.showSuccessAlert(this.translate.instant('Maintenance record updated successfully'));
+    } else {
+      await firstValueFrom(this.maintenanceService.create(submitData, domainName));
+      this.showSuccessAlert(this.translate.instant('Maintenance record created successfully'));
     }
+
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    this.closeModal();
+  } catch (error: any) {
+    console.error('Error saving maintenance record:', error);
+    
+    // Extract backend error message
+    let errorMessage = this.translate.instant('Failed to save maintenance record');
+    
+    if (error.error) {
+      // Try to get the error message from different possible properties
+      errorMessage = error.error.message || 
+                    error.error.error || 
+                    error.error.title ||
+                    error.error.Message ||
+                    error.error.Error ||
+                    this.getErrorMessageFromResponse(error);
+    } else if (error.message) {
+      errorMessage = error.message;
+    } else if (error.status === 404) {
+      errorMessage = this.translate.instant('Resource not found');
+    } else if (error.status === 400) {
+      errorMessage = this.translate.instant('Bad request - please check your input');
+    } else if (error.status === 500) {
+      errorMessage = this.translate.instant('Server error - please try again later');
+    }
+    
+    this.showErrorAlert(errorMessage);
+  } finally {
+    this.isSaving = false;
   }
+}
+
+// Helper method to extract error message from different response formats
+private getErrorMessageFromResponse(error: any): string {
+  try {
+    // If the error is a string, try to parse it as JSON
+    if (typeof error.error === 'string') {
+      const parsedError = JSON.parse(error.error);
+      return parsedError.message || parsedError.error || parsedError.title || String(error.error);
+    }
+    
+    // If error has a statusText, use it
+    if (error.statusText) {
+      return error.statusText;
+    }
+    
+    return String(error);
+  } catch (parseError) {
+    // If parsing fails, return the original error as string
+    return String(error.error || error);
+  }
+}
 
   validateDecimal(event: any, field: string): void {
     const input = event.target as HTMLInputElement;
@@ -453,7 +546,7 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
         const domainName = this.apiService.GetHeader();
         this.maintenanceService.delete(row.id, domainName).subscribe({
           next: () => {
-            this.loadMaintenance();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.showSuccessAlert(this.translate.instant('Maintenance record deleted successfully'));
           },
           error: (error) => {
@@ -481,4 +574,59 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
       this.AllowEditForOthers
     );
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

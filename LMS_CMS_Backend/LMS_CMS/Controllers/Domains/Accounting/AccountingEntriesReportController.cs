@@ -29,84 +29,114 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         )]
         public async Task<IActionResult> GetAccountingEntriesAsync(DateTime? fromDate, DateTime? toDate, int pageNumber = 1, int pageSize = 10)
         {
-            if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
-                return BadRequest("Start date must be equal or greater than End date");
+            try
+            {
+                if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
+                    return BadRequest("Start date must be equal or greater than End date");
 
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            var context = Unit_Of_Work.DbContext;
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+                var context = Unit_Of_Work.DbContext;
 
-            var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @PageNumber, @PageSize",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@PageNumber", pageNumber),
-                new SqlParameter("@PageSize", pageSize)
-            )
+                // FIX 1: Increase Timeout for Reports
+                // Reports on large tables often take > 30s. Set to 3 minutes (180s) or more.
+                context.Database.SetCommandTimeout(180);
+
+                // 1. Get Data
+                var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @PageNumber, @PageSize",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@PageNumber", pageNumber),
+                    new SqlParameter("@PageSize", pageSize)
+                )
                 .AsNoTracking()
                 .ToListAsync();
 
-            if (results == null || !results.Any())
-            {
-                return NotFound("No accounting entries found for the specified date range.");
-            }
-
-            var groupedResults = results
-            .GroupBy(x => x.Date.Value.Date)
-            .Select((g, index) =>
-            {
-                var entries = g.ToList();
-
-                var totalDebit = entries.Sum(x => x.Debit ?? 0);
-                var totalCredit = entries.Sum(x => x.Credit ?? 0);
-
-                var difference = totalCredit > totalDebit
-                    ? totalCredit - totalDebit
-                    : totalDebit - totalCredit;
-
-                return new
+                // Handle empty result early to save processing time on Totals/Counts if main data is empty
+                // (Unless your totals need to show even if the specific page is empty, 
+                // but usually if the filter yields nothing, totals are 0).
+                if (results == null || !results.Any())
                 {
-                    Date = g.Key,
-                    Entries = entries,
-                    Totals = new
+                    // Check if it's just a pagination issue (page 5 empty, but total records > 0)
+                    // We run count to verify.
+                    var checkCount = await context.Database
+                       .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
+                           new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                           new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
+                       .FirstAsync();
+
+                    if (checkCount == 0)
                     {
-                        Debit = totalDebit,
-                        Credit = totalCredit,
-                        Difference = difference
+                        return Ok(new { Data = new List<object>(), FullTotals = new List<object>(), Pagination = new { TotalRecords = 0, PageSize = pageSize, CurrentPage = pageNumber, TotalPages = 0 } });
                     }
-                };
-            })
+                    // If count > 0 but results empty, it means pageNumber is out of range, 
+                    // usually frontend handles this via the pagination metadata returned below.
+                }
+
+                // 2. Get Full Totals (Likely the most expensive query)
+                var fullTotals = await context.Set<TotalResult>().FromSqlRaw(
+                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
+                )
+                .ToListAsync();
+
+                var totalRecords = await context.Database
+                    .SqlQueryRaw<long>("SELECT dbo.GetDistinctDateCount(@DateFrom, @DateTo) AS Value",
+                        new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                        new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
+                    .FirstAsync();
+
+
+                // 4. Process Results in Memory (This is fast)
+                var groupedResults = results
+                .GroupBy(x => x.Date.Value.Date)
+                .Select((g, index) =>
+                {
+                    var entries = g.ToList();
+                    var totalDebit = entries.Sum(x => x.Debit ?? 0);
+                    var totalCredit = entries.Sum(x => x.Credit ?? 0);
+                    var difference = totalCredit > totalDebit
+                        ? totalCredit - totalDebit
+                        : totalDebit - totalCredit;
+
+                    return new
+                    {
+                        Date = g.Key,
+                        Entries = entries,
+                        Totals = new
+                        {
+                            Debit = totalDebit,
+                            Credit = totalCredit,
+                            Difference = difference
+                        }
+                    };
+                })
                 .OrderBy(g => g.Date)
                 .ToList();
 
-            var fullTotals = await context.Set<TotalResult>().FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
-            )
-                .ToListAsync();
+                var paginationMetadata = new
+                {
+                    TotalRecords = totalRecords,
+                    PageSize = pageSize,
+                    CurrentPage = pageNumber,
+                    TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+                };
 
-            var totalRecords = await context.Database
-                .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
-                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
-                .FirstAsync();
-
-
-            var paginationMetadata = new
+                return Ok(new
+                {
+                    Data = groupedResults,
+                    FullTotals = fullTotals.FirstOrDefault(), // Usually Totals return 1 row, cleaner to unwrap
+                    Pagination = paginationMetadata
+                });
+            }
+            catch (Exception ex)
             {
-                TotalRecords = totalRecords,
-                PageSize = pageSize,
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            };
-
-            return Ok(new
-            {
-                Data = groupedResults,
-                FullTotals = fullTotals,
-                Pagination = paginationMetadata
-            });
-            
+                // Log the error to your console/file/logger to see the REAL issue
+                Console.WriteLine($"Report Error: {ex.Message}");
+                // Return 500 but with the message in Dev environment, or generic in Prod
+                return StatusCode(500, new { error = "Internal Server Error", details = ex.Message });
+            }
         }
         #endregion
     }

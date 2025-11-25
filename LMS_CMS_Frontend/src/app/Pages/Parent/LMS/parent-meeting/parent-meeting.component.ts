@@ -12,6 +12,8 @@ import { ApiService } from '../../../../Services/api.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-parent-meeting',
@@ -20,6 +22,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './parent-meeting.component.html',
   styleUrl: './parent-meeting.component.css'
 })
+
+@InitLoader()
 export class ParentMeetingComponent {
   MeetingsData: ParentMeeting[] = []
   path: string = ""
@@ -34,7 +38,7 @@ export class ParentMeetingComponent {
 
   constructor(public account: AccountService, private languageService: LanguageService,public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public ParentMeetingServ: ParentMeetingService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private loadingService: LoadingService  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -51,11 +55,10 @@ export class ParentMeetingComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetSubjectLessonLiveData() {

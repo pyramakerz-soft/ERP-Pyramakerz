@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-violation-report',
@@ -25,6 +27,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './violation-report.component.html',
   styleUrl: './violation-report.component.css',
 })
+
+@InitLoader()
 export class ViolationReportComponent {
   DomainName: string = '';
   SelectedEmployeeTypeId: number = 0;
@@ -60,9 +64,9 @@ export class ViolationReportComponent {
     public violationTypeService: ViolationTypeService,
     public apiService: ApiService,
     public accountService: AccountService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService // Add this line
+    private languageService: LanguageService, 
+    private reportsService: ReportsService, // Add this line
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -77,8 +81,7 @@ export class ViolationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 
 
@@ -27,6 +29,8 @@ import html2canvas from 'html2canvas';
   templateUrl: './assignment-report.component.html',
   styleUrl: './assignment-report.component.css'
 })
+
+@InitLoader()
 export class AssignmentReportComponent implements OnInit {
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
 
@@ -78,9 +82,9 @@ export class AssignmentReportComponent implements OnInit {
     private gradeService: GradeService,
     private subjectService: SubjectService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
+    private languageService: LanguageService, 
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -92,8 +96,7 @@ export class AssignmentReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

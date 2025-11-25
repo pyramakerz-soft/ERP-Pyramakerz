@@ -1,3 +1,5 @@
+import { InstallmentDeductionDetail } from "./installment-deduction-detail";
+
 export class InstallmentDeductionMaster {
     constructor(
         public id: number = 0,
@@ -10,6 +12,8 @@ export class InstallmentDeductionMaster {
         public studentName: string = '',
         public insertedByUserId :number =0,
         public insertedAt :string ="",
+        public installmentDeductionDetails : InstallmentDeductionDetail[]=[],
+        public newDetails : InstallmentDeductionDetail[]=[],
     ) {}
 }
 

@@ -117,7 +117,7 @@
             </thead>
             <tbody>
                 <!-- No Data Row -->
-                <tr *ngIf="TableData.length === 0 && IsOpenToAdd==false">
+                <tr *ngIf="(Data.installmentDeductionDetails?.length || 0) === 0 && (Data.newDetails?.length || 0) === 0">
                     <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         {{ 'No Data Found' | translate }}
@@ -125,7 +125,7 @@
                 </tr>
 
                 <!-- Data Rows -->
-                <tr *ngFor="let row of TableData; let i = index"
+                <tr *ngFor="let row of Data.installmentDeductionDetails; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -135,79 +135,67 @@
                         {{ Data.studentName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textModeFeesType">
-                            <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails({ field: 'feeTypeID', value: $event })"
-                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                                <option value=0 disabled selected hidden>Select Fees Type</option>
-                                <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
-                            </select>
-                            <span *ngIf="validationErrorsInstallmentDeductionDetails['feeTypeID']" class="text-red-500 ml-3 font-normal">{{validationErrorsInstallmentDeductionDetails["feeTypeID"]}}</span>
-                        </ng-container>
-                        <ng-template #textModeFeesType>{{ row.feeTypeName }}</ng-template>
+                        <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <option value=0 disabled selected hidden>Select Fees Type</option>
+                            <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
+                        </select>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['feeTypeID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['feeTypeID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textMode">
-                            <input [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                        </ng-container>
-                        <ng-template #textMode>{{ row.amount }}</ng-template>
+                        <input (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.id; else textModeDate">
-                            <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails({ field: 'date', value: $event })"
-                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                            <span *ngIf="validationErrorsInstallmentDeductionDetails['date']"class="text-red-500 ml-3 font-normal">{{validationErrorsInstallmentDeductionDetails["date"]}}</span>
-                        </ng-container>
-                        <ng-template #textModeDate>{{ row.date }}</ng-template>
+                        <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['date']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['date'] }}
+                        </span>                   
                     </td>
                     <td *ngIf="mode=='Edit'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button *ngIf="editingRowId === row.id" (click)="SaveEdit(row)">
-                                <i class="far fa-check-circle secondaryTxt"></i>
-                            </button>
-                            <button *ngIf="editingRowId !== row.id" (click)="Edit(row.id)">
-                                <i class="fa-solid fa-pencil"></i>
-                            </button>
                         </div>
                     </td>
                 </tr>
-                <!-- Data Rows -->
-                <tr *ngIf="IsOpenToAdd==true" class="border-t border-gray-300 text-xs md:text-sm bg-[#F7F7F7]">
+
+                <tr *ngFor="let row of Data.newDetails; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        ___
+                        __
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ Data.studentName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select [(ngModel)]="Detail.feeTypeID"
-                            class="w-full border border-gray-300 px-2 py-1 rounded-md"
-                            (ngModelChange)="onInputValueChangeDetails({ field: 'feeTypeID', value: $event })">
-                            <option value=0 disabled selected hidden>Select a FeesType</option>
-                            <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
+                        <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <option value=0 disabled selected hidden>Select Fees Type</option>
+                            <option *ngFor="let type of FeesType" [value]="type.id">{{ type.name }}</option>
                         </select>
-                        <span *ngIf="validationErrorsInstallmentDeductionDetails['feeTypeID']"
-                            class="text-red-500 ml-3 font-normal">{{validationErrorsInstallmentDeductionDetails["feeTypeID"]}}</span>
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['feeTypeID']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['feeTypeID'] }}
+                        </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input [(ngModel)]="Detail.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <input (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input type="date" [(ngModel)]="Detail.date"
-                            class="w-full border border-gray-300 px-2 py-1 rounded-md"
-                            (ngModelChange)="onInputValueChangeDetails({ field: 'date', value: $event })">
-                        <span *ngIf="validationErrorsInstallmentDeductionDetails['date']"
-                            class="text-red-500 ml-3 font-normal">{{validationErrorsInstallmentDeductionDetails["date"]}}</span>
+                        <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
+                            class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['date']" class="text-red-500 ml-3 font-normal">
+                            {{ validationErrorsForDetails[row.id]['date'] }}
+                        </span> 
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td *ngIf="mode=='Edit'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button (click)="CancelAdd()">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="DeleteNew(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                            <button (click)="SaveRow()">
-                                <i class="far fa-check-circle secondaryTxt"></i>
                             </button>
                         </div>
                     </td>

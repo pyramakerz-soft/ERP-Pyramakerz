@@ -13,6 +13,8 @@ import { DeductionService } from '../../../../../Services/Employee/HR/deduction.
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-deduction-report',
@@ -21,13 +23,15 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
   templateUrl: './deduction-report.component.html',
   styleUrl: './deduction-report.component.css'
 })
+
+@InitLoader()
 export class DeductionReportComponent  implements OnInit {
-  // Filter properties
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+// Filter properties
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   // Data sources
   jobCategories: any[] = [];
@@ -41,6 +45,8 @@ export class DeductionReportComponent  implements OnInit {
   showViewReportBtn: boolean = false;
   isExporting: boolean = false;
   reportsForExcel: any[] = [];
+  tableSectionsForPDF: any[] = [];
+
 
   // Language and RTL
   isRtl: boolean = false;
@@ -63,22 +69,21 @@ export class DeductionReportComponent  implements OnInit {
     private jobService: JobService,
     private employeeService: EmployeeService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
+    private languageService: LanguageService, 
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
     this.loadJobCategories();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+      this.isRtl = direction == 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir == 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -95,204 +100,283 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async loadJobs() {
-    if (this.selectedJobCategoryId) {
+    this.selectedJobId = null;
+    this.employees = [];
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
         );
         this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading jobs:', error);
+        this.jobs = [];
       }
     } else {
       this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   async loadEmployees() {
-    if (this.selectedJobId) {
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobId && this.selectedJobId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading employees:', error);
         this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       }
     } else {
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
     this.showTable = false;
-    // Enable View Report when both dates are selected.
-    // Keep previous full-selection behavior as well (optional).
     const datesSelected = !!this.dateFrom && !!this.dateTo;
     const fullSelection = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
     this.showViewReportBtn = datesSelected || fullSelection;
     this.deductionReports = [];
   }
 
-  async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+ResetFilter() {
+  this.selectedJobCategoryId = null;
+  this.selectedJobId = null;
+  this.dateTo = '';
+  this.dateFrom = '';
+  this.selectedEmployeeId = null;
+  this.showTable = false;
+  this.showViewReportBtn = false;
+}
 
-    if (!this.dateFrom || !this.dateTo) {
-      Swal.fire({
-        title: 'Incomplete Selection',
-        text: 'Please select both Date From and Date To to generate the report.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      const response = await firstValueFrom(
-        // pass undefined for filters that are not selected so service omits them
-        this.deductionService.GetDeductionReport(
-          this.selectedJobCategoryId || undefined,
-          this.selectedJobId || undefined,
-          this.selectedEmployeeId || undefined,
-          this.dateFrom || undefined,
-          this.dateTo || undefined,
-          domainName
-        )
-      );
-
-      console.log('API Response:', response);
-      
-      if (Array.isArray(response)) {
-        this.deductionReports = response;
-        console.log('Deduction reports loaded:', this.deductionReports.length);
-      } else {
-        console.log('Response is not an array:', response);
-        this.deductionReports = [];
-      }
-
-      this.prepareExportData();
-      this.showTable = true;
-    } catch (error) {
-      console.error('Error loading deduction reports:', error);
-      this.deductionReports = [];
-      this.showTable = true;
-    } finally {
-      this.isLoading = false;
-    }
+async viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
 
-  private prepareExportData(): void {
-    // For PDF (object format) - Flatten the data for the table
+  if (!this.dateFrom || !this.dateTo) {
+    Swal.fire({
+      title: 'Incomplete Selection',
+      text: 'Please select both Date From and Date To to generate the report.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    
+    const params: any = {
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo
+    };
+
+    // Add optional filters - FIXED: Check for null/undefined properly
+    if (this.selectedEmployeeId) {
+      params.employeeId = this.selectedEmployeeId;
+    }
+    if (this.selectedJobId) {
+      params.jobId = this.selectedJobId;
+    }
+    if (this.selectedJobCategoryId) {
+      params.categoryId = this.selectedJobCategoryId;
+    }
+
+    console.log('Sending parameters:', params);
     this.reportsForExport = [];
-    this.deductionReports.forEach(employeeDeduction => {
-      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
-        employeeDeduction.deductions.forEach((deduction: any) => {
-          this.reportsForExport.push({
-            'Employee ID': employeeDeduction.employeeId,
-            'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-            'Total Amount': employeeDeduction.totalAmount,
-            'Deduction ID': deduction.id,
-            'Deduction Date': new Date(deduction.date).toLocaleDateString(),
-            'Deduction Type': deduction.deductionTypeName,
-            'Hours': deduction.hours || '-',
-            'Minutes': deduction.minutes || '-',
-            'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
-            'Amount': deduction.amount || '-',
-            'Notes': deduction.notes || '-'
-          });
+
+    // FIX: Use the params object properly in the API call
+    const response = await firstValueFrom(
+      this.deductionService.GetDeductionReport(
+        params.categoryId || null,  // Use null if undefined
+        params.jobId || null,       // Use null if undefined  
+        params.employeeId || null,  // Use null if undefined
+        params.dateFrom,
+        params.dateTo,
+        domainName
+      )
+    );
+
+    console.log('API Response:', response);
+    
+    if (Array.isArray(response)) {
+      this.deductionReports = [];
+      this.deductionReports = response;
+      console.log('Deduction reports loaded:', this.deductionReports.length);
+    } else {
+      console.log('Response is not an array:', response);
+      this.deductionReports = [];
+      this.reportsForExport = [];
+    }
+
+    this.prepareExportData();
+    this.showTable = true;
+  } catch (error) {
+    console.error('Error loading deduction reports:', error);
+    this.deductionReports = [];
+    this.showTable = true;
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+private prepareExportData(): void {
+  // For PDF (object format) - Flatten the data for the table
+  this.reportsForExport = [];
+  
+  // For tableDataWithHeaderArray structure
+  const tableSections: any[] = [];
+  
+  this.deductionReports.forEach(employeeDeduction => {
+    // Create a section for each employee
+    const section = {
+      header: `Employee: ${employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown'}`,
+      data: [
+        { key: 'Employee ID', value: employeeDeduction.employeeId },
+        { key: 'Employee Name', value: employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown' },
+      ],
+      tableHeaders: [
+        // 'Deduction ID', 
+        'Deduction Date', 
+        'Deduction Type',
+        'Hours',
+        'Minutes', 
+        'Number of Deduction Days', 
+        'Amount', 
+        'Notes'
+      ],
+      tableData: [] as any[]
+    };
+
+    // Add deduction details if available
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
+        section.tableData.push({
+          // 'Deduction ID': deduction.id,
+          'Deduction Date': new Date(deduction.date).toLocaleDateString(),
+          'Deduction Type': deduction.deductionTypeName,
+          'Hours': deduction.hours || '-',
+          'Minutes': deduction.minutes || '-',
+          'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
+          'Amount': deduction.amount || '-',
+          'Notes': deduction.notes || '-'
         });
-      } else {
-        // If no deductions, still show employee summary
+      });
+    } else {
+      // If no deductions, add a placeholder row
+      section.tableData.push({
+        'Deduction ID': '-',
+        'Deduction Date': '-',
+        'Deduction Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Deduction Days': '-',
+        'Amount': '-',
+        'Notes': 'No deductions found'
+      });
+    }
+
+    tableSections.push(section);
+
+    // Also maintain the flattened version for regular table display
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
         this.reportsForExport.push({
           'Employee ID': employeeDeduction.employeeId,
           'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-          'Total Amount': employeeDeduction.totalAmount,
-          'Deduction ID': '-',
-          'Deduction Date': '-',
-          'Deduction Type': '-',
-          'Hours': '-',
-          'Minutes': '-',
-          'Number of Deduction Days': '-',
-          'Amount': '-',
-          'Notes': '-'
+          // 'Deduction ID': deduction.id,
+          'Deduction Date': new Date(deduction.date).toLocaleDateString(),
+          'Deduction Type': deduction.deductionTypeName,
+          'Hours': deduction.hours || '-',
+          'Minutes': deduction.minutes || '-',
+          'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
+          'Amount': deduction.amount || '-',
+          'Notes': deduction.notes || '-'
         });
-      }
-    });
+      });
+    } else {
+      this.reportsForExport.push({
+        'Employee ID': employeeDeduction.employeeId,
+        'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+        // 'Deduction ID': '-',
+        'Deduction Date': '-',
+        'Deduction Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Deduction Days': '-',
+        'Amount': '-',
+        'Notes': '-'
+      });
+    }
+  });
 
-    // For Excel (array format)
-    this.reportsForExcel = [];
-    this.deductionReports.forEach(employeeDeduction => {
-      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
-        employeeDeduction.deductions.forEach((deduction: any) => {
-          this.reportsForExcel.push([
-            employeeDeduction.employeeId,
-            employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-            employeeDeduction.totalAmount,
-            deduction.id,
-            new Date(deduction.date).toLocaleDateString(),
-            deduction.deductionTypeName,
-            deduction.hours || '-',
-            deduction.minutes || '-',
-            deduction.numberOfDeductionDays || '-',
-            deduction.amount || '-',
-            deduction.notes || '-'
-          ]);
-        });
-      } else {
+  // For Excel (array format) - keep existing logic
+  this.reportsForExcel = [];
+  this.deductionReports.forEach(employeeDeduction => {
+    if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+      employeeDeduction.deductions.forEach((deduction: any) => {
         this.reportsForExcel.push([
           employeeDeduction.employeeId,
           employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
-          employeeDeduction.totalAmount,
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-'
+          new Date(deduction.date).toLocaleDateString(),
+          deduction.deductionTypeName,
+          deduction.hours || '-',
+          deduction.minutes || '-',
+          deduction.numberOfDeductionDays || '-',
+          deduction.amount || '-',
+          deduction.notes || '-'
         ]);
-      }
-    });
-  }
+      });
+    } else {
+      this.reportsForExcel.push([
+        employeeDeduction.employeeId,
+        employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-'
+      ]);
+    }
+  });
+
+  // Store the table sections for PDF export
+  (this as any).tableSectionsForPDF = tableSections;
+}
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
            this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
            'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
            this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
            'All Jobs';
   }
@@ -304,17 +388,16 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   getInfoRows(): any[] {
-    return [
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ];
+    return [{ keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+    { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+    { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+    { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+    { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
+    ]
   }
 
   DownloadAsPDF() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -327,7 +410,7 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   Print() {
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForExport.length == 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -340,27 +423,27 @@ export class DeductionReportComponent  implements OnInit {
         return;
       }
       
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) { display: none !important; }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-      
+           const printStyle = `
+            <style>
+              @page { size: auto; margin: 0mm; }
+              body { margin: 0; }
+              @media print {
+                body > *:not(#print-container) { display: none !important; }
+                #print-container {
+                  display: block !important;
+                  position: static !important;
+                  top: auto !important;
+                  left: auto !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  background: white !important;
+                  box-shadow: none !important;
+                  margin: 0 !important;
+                }
+              }
+            </style>
+          `;
+          
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
@@ -376,7 +459,7 @@ export class DeductionReportComponent  implements OnInit {
   }
 
   async exportExcel() {
-    if (this.reportsForExcel.length === 0) {
+    if (this.reportsForExcel.length == 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -408,8 +491,7 @@ export class DeductionReportComponent  implements OnInit {
             headers: [
               'Employee ID', 
               'Employee Name', 
-              'Total Amount', 
-              'Deduction ID', 
+              // 'Deduction ID', 
               'Deduction Date', 
               'Deduction Type',
               'Hours',

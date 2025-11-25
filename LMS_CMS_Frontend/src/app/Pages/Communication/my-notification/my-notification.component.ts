@@ -10,6 +10,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../Services/loading.service';
 @Component({
   selector: 'app-my-notification',
   standalone: true,
@@ -17,6 +19,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
   templateUrl: './my-notification.component.html',
   styleUrl: './my-notification.component.css'
 })
+
+@InitLoader()
 export class MyNotificationComponent {
   TableData:Notification[] = []
   notification: Notification = new Notification() 
@@ -30,7 +34,7 @@ export class MyNotificationComponent {
     public activeRoute: ActivatedRoute, 
     public notificationService: NotificationService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -48,8 +52,7 @@ export class MyNotificationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+    ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

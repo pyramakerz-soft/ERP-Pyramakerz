@@ -16,6 +16,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-registered-employee',
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './registered-employee.component.html',
   styleUrl: './registered-employee.component.css'
 })
+
+@InitLoader()
 export class RegisteredEmployeeComponent {  
   DomainName: string = '';
   TableData:RegisteredEmployee[] = []
@@ -39,8 +43,8 @@ export class RegisteredEmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService, 
     public registeredEmployeeService: RegisteredEmployeeService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() { 
@@ -55,13 +59,12 @@ export class RegisteredEmployeeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
 
+  ngOnDestroy(): void { 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData(){
     this.TableData = [];
@@ -72,7 +75,7 @@ export class RegisteredEmployeeComponent {
 
   Delete(id: number){
     Swal.fire({
-      title: 'Are you sure you want to Reject This Employee?',
+      title: 'Are you sure you want to Reject and Delete This Employee?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',

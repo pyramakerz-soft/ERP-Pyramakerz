@@ -12,7 +12,7 @@ namespace LMS_CMS_BL.DTO.HR
         public string EmployeeEnName { get; set; }
         public string EmployeeArName { get; set; }
 
-        public long TotalAmount { get; set; }
-        public List<BounsGetDTO> Bonuses { get; set; } = new List<BounsGetDTO>();
+        public decimal TotalAmount { get; set; }
+        public List<BonusGetDTO> Bonuses { get; set; } = new List<BonusGetDTO>();
     }
 }

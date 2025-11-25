@@ -21,6 +21,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { ViolationTypeService } from '../../../../Services/Employee/Violation/violation-type.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
@@ -28,6 +30,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
+
+@InitLoader()
 export class ViolationTypesComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -73,8 +77,8 @@ export class ViolationTypesComponent {
     private router: Router,
     public empTypeServ: EmployeeTypeService,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -85,6 +89,7 @@ export class ViolationTypesComponent {
       this.path = url[0].path;
     });
     this.GetEmployeeType();
+    this.GetViolation();
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -100,8 +105,7 @@ export class ViolationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -109,11 +113,9 @@ export class ViolationTypesComponent {
 
   GetViolation() {
     this.Data = []
-    if (this.SelectedEmployeeType != 0) {
-      this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
-        this.Data = data;
-      });
-    }
+    this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
+      this.Data = data;
+    });
   }
 
   GetEmployeeType() {
@@ -164,8 +166,7 @@ export class ViolationTypesComponent {
           next: (data) => {
             this.GetViolation();
           },
-          error: (error) => {
-            console.error('Error while deleting the Violation:', error);
+          error: (error) => { 
             Swal.fire({
               title: 'Error',
               text: 'An error occurred while deleting the Violation. Please try again later.',
@@ -291,13 +292,14 @@ export class ViolationTypesComponent {
             field == 'employeeTypeIds' ||
             field == 'name'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-            isValid = false;
+            const fieldName = field === 'employeeTypeIds' ? 'Employee Type' : this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(fieldName);
+             isValid = false;
           }
         }
         if (this.violationType.employeeTypeIds.length == 0) {
-          this.validationErrors["employeeTypeIds"] = `employee Type is required`;
-          isValid = false;
+          this.validationErrors["employeeTypeIds"] = this.getRequiredErrorMessage('Employee Type');
+           isValid = false;
         }
       }
     }
@@ -339,6 +341,17 @@ export class ViolationTypesComponent {
       }
     } catch (error) {
       this.Data = [];
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
 

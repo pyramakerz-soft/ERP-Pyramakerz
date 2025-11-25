@@ -15,6 +15,9 @@ import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item
 import { MaintenanceItemService } from '../../../../Services/Employee/Maintenance/maintenance-item.service';
 import { ApiService } from '../../../../Services/api.service';
 import { ActivatedRoute } from '@angular/router';
+import { MenuService } from '../../../../Services/shared/menu.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-maintenance-items',
@@ -23,6 +26,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './maintenance-items.component.html',
   styleUrl: './maintenance-items.component.css'
 })
+
+@InitLoader()
 export class MaintenanceItemsComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   UserID: number = 0;
@@ -47,6 +52,11 @@ export class MaintenanceItemsComponent {
   mode: string = "";
   isEditMode = false;
   path: string = "";
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(    
     private languageService: LanguageService,
@@ -54,10 +64,11 @@ export class MaintenanceItemsComponent {
     private apiService: ApiService,
     public account: AccountService, 
     private mainServ: MaintenanceItemService,
-    private deleteEditPermissionServ: DeleteEditPermissionService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private deleteEditPermissionServ: DeleteEditPermissionService, 
     private activeRoute: ActivatedRoute,
-    private translate: TranslateService
+    private menuService: MenuService,
+    private translate: TranslateService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -70,16 +81,18 @@ export class MaintenanceItemsComponent {
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path;
       });
-      this.mainServ.Get(this.DomainName).subscribe({
-        next: (data:any) => {
-          this.TableData = data;
-          console.log(this.TableData)
-        },
-        error: (err:any) => {
-          console.error('Error fetching maintenance items:', err);
-        }
-      });
+      this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     }
+
+    this.menuService.menuItemsForEmployee$.subscribe((items) => {
+      const settingsPage = this.menuService.findByPageName(this.path, items);
+      if (settingsPage) {
+        this.AllowEdit = settingsPage.allow_Edit;
+        this.AllowDelete = settingsPage.allow_Delete;
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
+      }
+    });
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -87,11 +100,49 @@ export class MaintenanceItemsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.TableData = [];
+    this.mainServ.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
   }
 
   private showErrorAlert(errorMessage: string) {
@@ -136,15 +187,15 @@ export class MaintenanceItemsComponent {
     );
   }
 
-  async GetTableData() {
-    this.TableData = [];
-    try {
-      const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
-      this.TableData = data;
-    } catch (error) {
-      this.TableData = [];
-    }
-  }
+  // async GetTableData() {
+  //   this.TableData = [];
+  //   try {
+  //     const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+  //     this.TableData = data;
+  //   } catch (error) {
+  //     this.TableData = [];
+  //   }
+  // }
 
   Delete(id: number) {
     const deleteTitle = this.translate.instant('Are you sure you want to delete this item?');
@@ -164,7 +215,7 @@ export class MaintenanceItemsComponent {
         this.isLoading = true;
         this.mainServ.Delete(id, this.DomainName).subscribe({
           next: () => {
-            this.GetTableData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.showSuccessAlert(this.translate.instant('Item deleted successfully'));
           },
@@ -212,23 +263,32 @@ export class MaintenanceItemsComponent {
     }
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
+
+
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: MaintenanceItem[] = await firstValueFrom(this.mainServ.Get(this.DomainName));  
-      this.TableData = data || [];
-  
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
-        this.TableData = this.TableData.filter(t => {
+      const data: any = await firstValueFrom(
+        this.mainServ.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.TableData = data.data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.TableData = this.TableData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -237,6 +297,62 @@ export class MaintenanceItemsComponent {
       this.TableData = [];
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
 
   openModal(forNew: boolean = true) {
     if (forNew) {
@@ -274,7 +390,7 @@ export class MaintenanceItemsComponent {
         this.mainServ.Add(this.selectedItem!, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
-            this.GetTableData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.showSuccessAlert(this.translate.instant('Item added successfully'));
           },
@@ -288,7 +404,7 @@ export class MaintenanceItemsComponent {
         this.mainServ.Edit(this.selectedItem!, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
-            this.GetTableData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.showSuccessAlert(this.translate.instant('Item updated successfully'));
           },

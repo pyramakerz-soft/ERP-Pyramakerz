@@ -7,6 +7,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 
@@ -33,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }, 
-            pages: new[] { "Maintenance Items" }
+            pages: new[] { "Maintenance Items", "Maintenance" , "Maintenance Report" }
         )]
         public IActionResult GetAll()
         {
@@ -56,6 +57,51 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
            List<MaintenanceItemGetDTO> dtoList = mapper.Map<List<MaintenanceItemGetDTO>>(items);
 
             return Ok(dtoList);
+        }
+
+        [HttpGet("WithPaggination")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Maintenance Items", "Maintenance", "Maintenance Report" }
+        )]
+        public async Task<IActionResult> GetBySchoolWithPaggination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await uow.maintenanceItem_Repository
+            .CountAsync(sem => sem.IsDeleted != true);
+
+
+            List<MaintenanceItem> items = await uow.maintenanceItem_Repository.Select_All_With_IncludesById_Pagination<MaintenanceItem>
+                (t => t.IsDeleted != true)
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (items == null || !items.Any())
+                return NotFound("No Maintenance Items found.");
+
+
+            List<MaintenanceItemGetDTO> dtoList = mapper.Map<List<MaintenanceItemGetDTO>>(items);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = dtoList, Pagination = paginationMetadata });
         }
 
         [HttpGet("{id}")]

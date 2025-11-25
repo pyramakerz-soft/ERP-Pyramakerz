@@ -1138,7 +1138,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Inventory" }
+          pages: new[] { "Inventory", "Zatca Electronic-Invoice", "ETA Electronic-Invoice" }
         )]
         public async Task<IActionResult> GetBySaleIDAsync(long id)
         {

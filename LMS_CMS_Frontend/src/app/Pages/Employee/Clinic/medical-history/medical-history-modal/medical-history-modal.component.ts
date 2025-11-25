@@ -73,8 +73,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     private studentService: StudentService,
     private medicalHistoryService: MedicalHistoryService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService // Add this
   ) {}
 
@@ -88,8 +87,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -380,9 +378,8 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
 
         this.onSave.emit();
         this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        const errorMessage = this.translate.instant('Failed to save the item');
+      } catch (error:any) { 
+        const errorMessage = error.error?.message || error.error || this.translate.instant('Failed to save the item');
         this.showErrorAlert(errorMessage);
       } finally {
         this.isSaving = false;

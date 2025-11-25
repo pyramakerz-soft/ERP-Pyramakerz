@@ -20,6 +20,7 @@ export class Assignment {
         public subjectID: number = 0,
         public schoolName: string = '',
         public schoolID: number = 0,
+        public academicYearID: number = 0,
         public gradeName: string = '',
         public gradeID: number = 0,
         public assignmentTypeID: number = 0,

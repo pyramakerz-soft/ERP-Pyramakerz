@@ -18,6 +18,8 @@ import { LanguageService } from '../../../../../../Services/shared/language.serv
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
+import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../../../Services/loading.service';
 
 @Component({
   selector: 'app-store-balance-report',
@@ -26,6 +28,8 @@ import { ReportsService } from '../../../../../../Services/shared/reports.servic
   templateUrl: './store-balance-report.component.html',
   styleUrls: ['./store-balance-report.component.css'],
 })
+
+@InitLoader()
 export class StoreBalanceReportComponent implements OnInit {
   reportType:
     | 'QuantityOnly'
@@ -74,9 +78,9 @@ totalRecords: number = 0;
     private storesService: StoresService,
     private categoryService: InventoryCategoryService,
     private route: ActivatedRoute,    
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
+    private languageService: LanguageService, 
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
   ) {}
 
   ngOnInit() {
@@ -93,8 +97,7 @@ totalRecords: number = 0;
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

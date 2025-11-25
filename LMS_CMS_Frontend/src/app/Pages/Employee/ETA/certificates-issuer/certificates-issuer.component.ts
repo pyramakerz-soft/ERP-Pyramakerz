@@ -16,6 +16,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-certificates-issuer',
   standalone: true,
@@ -23,6 +25,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './certificates-issuer.component.html',
   styleUrl: './certificates-issuer.component.css'
 })
+
+@InitLoader()
 export class CertificatesIssuerComponent {
   validationErrors: { [key in keyof CertificatesIssuer]?: string } = {};
   keysArray: string[] = ['id', 'name'];
@@ -63,7 +67,7 @@ export class CertificatesIssuerComponent {
     public router: Router,
     private languageService: LanguageService,
     private translate: TranslateService,
-    private realTimeService: RealTimeNotificationServiceService
+    private loadingService: LoadingService 
   ) { }
 
   ngOnInit() {
@@ -94,8 +98,7 @@ export class CertificatesIssuerComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

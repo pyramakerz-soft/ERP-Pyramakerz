@@ -19,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-evaluation-template-group',
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './evaluation-template-group.component.html',
   styleUrl: './evaluation-template-group.component.css'
 })
+
+@InitLoader()
 export class EvaluationTemplateGroupComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -65,10 +69,10 @@ export class EvaluationTemplateGroupComponent {
     public ApiServ: ApiService,
     public templateServ: EvaluationTemplateService,
     public GroupServ: EvaluationTemplateGroupService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
     private translate: TranslateService,
-
+    private loadingService: LoadingService 
+    
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,8 +101,7 @@ export class EvaluationTemplateGroupComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

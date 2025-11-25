@@ -79,6 +79,59 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         ////////////////////////////////
 
+        [HttpGet("BySchoolIdWithPaggination/{SchoolId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Appoinment" }
+        )]
+        public async Task<IActionResult> GetBySchoolWithPaggination(long SchoolId , [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.appointment_Repository
+            .CountAsync(sem => sem.IsDeleted != true && sem.SchoolID == SchoolId);
+
+            List<Appointment> appointments = await Unit_Of_Work.appointment_Repository.Select_All_With_IncludesById_Pagination<Appointment>(
+                    sem => sem.IsDeleted != true && sem.SchoolID == SchoolId,
+                    query => query.Include(emp => emp.School),
+                    query => query.Include(emp => emp.AppointmentGrades.Where(a => a.IsDeleted != true && a.Grade.IsDeleted != true)).ThenInclude(a => a.Grade),
+                    query => query.Include(emp => emp.AppointmentParents).ThenInclude(a => a.Parent))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+            if (appointments == null || appointments.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AppointmentGetDTO> Dto = mapper.Map<List<AppointmentGetDTO>>(appointments);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+        }
+
+        ////////////////////////////////
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

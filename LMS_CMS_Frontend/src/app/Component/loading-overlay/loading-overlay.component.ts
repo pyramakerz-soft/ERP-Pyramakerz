@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { LoadingService } from '../../Services/loading.service';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-loading-overlay',

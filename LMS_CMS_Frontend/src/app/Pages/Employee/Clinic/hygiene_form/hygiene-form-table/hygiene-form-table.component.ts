@@ -29,8 +29,7 @@ export class HygieneFormTableComponent {
   private previousAttendanceStates: { [key: number]: boolean | null } = {};
 
   constructor(
-      private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+      private languageService: LanguageService, 
   ) {}
 
   ngOnInit(): void {
@@ -41,11 +40,10 @@ export class HygieneFormTableComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   } 
 
   ngOnChanges() {

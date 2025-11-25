@@ -16,7 +16,7 @@ export class ViolationService {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  Get(DomainName?: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -25,7 +25,7 @@ export class ViolationService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Violation[]>(`${this.baseUrl}/Violation`, { headers });
+    return this.http.get<{ data: Violation[], pagination: any }>(`${this.baseUrl}/Violation?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName?: string) {
@@ -98,6 +98,7 @@ export class ViolationService {
     formData.append('employeeID', Violation.employeeID.toString() ?? '');
     formData.append('date', Violation.date ?? '');
     formData.append('details', Violation.details ?? '');
+    formData.append('deletedAttach', Violation.deletedAttach ?? '');
 
     if (Violation.attachFile) {
       formData.append(

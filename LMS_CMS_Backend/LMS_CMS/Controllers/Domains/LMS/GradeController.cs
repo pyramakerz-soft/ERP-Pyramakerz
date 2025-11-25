@@ -234,6 +234,50 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(gradeDTO);
         }
+        
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetDayPeriodSessions/{DayID}/{GradeID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Grade", "Lesson Live" }
+        )]
+        public IActionResult GetDayPeriodSessions(long DayID, long GradeID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+             
+            Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.ID == GradeID);
+
+            if (grade == null)
+            {
+                return NotFound("there is no Grade With This Id");
+            }
+
+            int period = DayID switch
+            {
+                1 => grade.MON ?? 0,
+                2 => grade.TUS ?? 0,
+                3 => grade.WED ?? 0,
+                4 => grade.THRU ?? 0,
+                5 => grade.FRI ?? 0,
+                6 => grade.SAT ?? 0,
+                7 => grade.SUN ?? 0,
+                _ => 0
+            };
+
+            return Ok(period);
+        }
 
         //////////////////////////////////////////////////////////////////////////////////
 

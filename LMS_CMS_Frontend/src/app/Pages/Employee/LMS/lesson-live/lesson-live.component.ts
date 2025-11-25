@@ -27,13 +27,18 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-lesson-live',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-live.component.html',
   styleUrl: './lesson-live.component.css'
-})
+}) 
+
+@InitLoader()
 export class LessonLiveComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -47,14 +52,16 @@ export class LessonLiveComponent {
   days: Day[] = [];
   classrooms: Classroom[] = [];
   isRtl: boolean = false;
-  subscription!: Subscription;
-  SelectedGradeId: number = 0;
+  subscription!: Subscription; 
   SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
   SelectedDayId: number = 0;
 
   DomainName: string = '';
   UserID: number = 0;
+  
+  gradeID: number = 0;
+  gradeDayPeriod: number = 0;
 
   isModalVisible: boolean = false;
   mode: string = '';
@@ -92,8 +99,9 @@ export class LessonLiveComponent {
     public schoolService: SchoolService,
     public SubjectServ: SubjectService,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
+    private gradeService: GradeService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -121,11 +129,10 @@ export class LessonLiveComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
 
@@ -159,16 +166,22 @@ export class LessonLiveComponent {
 
   onYearChangeForModal() {
     this.live.classroomID = 0
-    this.live.subjectID = 0
-    this.SelectedGradeId = 0
+    this.live.subjectID = 0 
+    this.gradeID = 0 
+    this.gradeDayPeriod = 0 
     this.classrooms = []
+    this.live.period = null
 
     if (this.selectedYearForModal) {
       this.getAllClass()
     }
   }
 
+  
+
   onClassChange() {
+    this.gradeID = 0 
+    this.gradeDayPeriod = 0 
     this.GetLessonsByClassID()
   }
 
@@ -247,55 +260,69 @@ export class LessonLiveComponent {
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.mode == 'Create') {
-        this.LessonLiveServ.Add(
-          this.live,
-          this.DomainName
-        ).subscribe(
-          (d) => {
-            this.GetLessonsByClassID();
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
-      }
-      if (this.mode == 'Edit') {
-        this.LessonLiveServ.Edit(
-          this.live,
-          this.DomainName
-        ).subscribe(
-          (d) => {
-            this.GetLessonsByClassID();
-            this.isLoading = false;
-            this.closeModal();
-          },
-          (error) => {
-            this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
-          }
-        );
+      if(this.live.period != null && this.gradeDayPeriod >= this.live.period){
+        this.isLoading = true;
+        if (this.mode == 'Create') {
+          this.LessonLiveServ.Add(
+            this.live,
+            this.DomainName
+          ).subscribe(
+            (d) => {
+              this.GetLessonsByClassID();
+              this.isLoading = false;
+              this.closeModal();
+            },
+            (error) => {
+              this.isLoading = false; // Hide spinner
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' }
+              });
+            }
+          );
+        }
+        if (this.mode == 'Edit') {
+          this.LessonLiveServ.Edit(
+            this.live,
+            this.DomainName
+          ).subscribe(
+            (d) => {
+              this.GetLessonsByClassID();
+              this.isLoading = false;
+              this.closeModal();
+            },
+            (error) => {
+              this.isLoading = false; // Hide spinner
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' }
+              });
+            }
+          );
+        }
+      }else{
+        Swal.fire({
+          icon: 'error',
+          title: 'Periods Exceeded',
+          text: "The entered period exceeds the total periods assigned for the grade linked to the selected subject on this day.",
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' }
+        });
       }
     }
   }
 
   getAllSubject() {
+    this.gradeID = 0 
+    this.gradeDayPeriod = 0
+    this.live.period = null
+     
     this.subject = []
     this.live.subjectID = 0
     this.SubjectServ.GetByClassroom(this.live.classroomID, this.DomainName).subscribe((d) => {
@@ -309,6 +336,38 @@ export class LessonLiveComponent {
     this.weekdaysServ.Get(this.DomainName).subscribe((d) => {
       this.days = d
     })
+  }
+
+  GetGradeBySubjectID(){
+    this.gradeID = 0
+    this.gradeDayPeriod = 0
+    this.live.period = null
+
+    const selectedSubject = this.subject.find(s => s.id == this.live.subjectID)
+    this.gradeID = selectedSubject ? selectedSubject.gradeID : 0
+
+    if(this.gradeID && this.live.weekDayID){
+      this.GetDayPeriodSessions()
+    } 
+  }
+
+  GetDayPeriodSessions() { 
+    this.gradeDayPeriod = 0
+    this.live.period = null
+    if(this.gradeID && this.live.weekDayID){ 
+      this.gradeService.GetDayPeriodSessions(this.live.weekDayID, this.gradeID, this.DomainName).subscribe((d) => {
+        this.gradeDayPeriod = d
+        if(this.gradeDayPeriod == 0){
+          Swal.fire({
+            icon: 'error',
+            title: 'No Periods Found',
+            text: "Please add the period count for this grade for this day first.",
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        }
+      })
+    }
   }
 
   getAllClass() {
@@ -328,8 +387,7 @@ export class LessonLiveComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.selectedYearForModal = 0;
-    this.SelectedGradeId = 0;
+    this.selectedYearForModal = 0; 
     this.validationErrors = {};
     this.live = new LessonLive();
   }
@@ -354,15 +412,30 @@ export class LessonLiveComponent {
             field == 'classroomID' ||
             field == 'subjectID'
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
+            const displayName =
+              field === 'weekDayID' ? 'Week Day' :
+              field === 'classroomID' ? 'Classroom' :
+              field === 'subjectID' ? 'Subject' :
+              field === 'liveLink' ? 'Live Link' :
+              this.capitalizeField(field);
+            this.validationErrors[field] = this.getRequiredErrorMessage(displayName);
+             isValid = false;
           }
         }
       }
     }
     return isValid;
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
 
   capitalizeField(field: keyof LessonLive): string {

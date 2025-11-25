@@ -13,6 +13,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-accountig-configuration',
   standalone: true,
@@ -20,6 +22,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
   templateUrl: './accountig-configuration.component.html',
   styleUrl: './accountig-configuration.component.css'
 })
+
+@InitLoader()
 export class AccountigConfigurationComponent {
   accountConfigData:AccountingConfiguration = new AccountingConfiguration() 
   accountConfigDataToEdit:AccountingConfiguration = new AccountingConfiguration() 
@@ -37,8 +41,8 @@ export class AccountigConfigurationComponent {
     public ApiServ: ApiService,     
     public accountingTreeChartService: AccountingTreeChartService,
     public accountingConfigurationService: AccountingConfigurationService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit() {
@@ -56,9 +60,8 @@ export class AccountigConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 

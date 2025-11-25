@@ -20,6 +20,8 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-attendance-report',
@@ -28,6 +30,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './attendance-report.component.html',
   styleUrl: './attendance-report.component.css'
 })
+
+@InitLoader()
 export class AttendanceReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -83,9 +87,9 @@ constructor(
   private studentService: StudentService,
   private apiService: ApiService,
   private route: ActivatedRoute,
-  private languageService: LanguageService,
-  private realTimeService: RealTimeNotificationServiceService,
-  private reportsService: ReportsService 
+  private languageService: LanguageService, 
+  private reportsService: ReportsService,
+  private loadingService: LoadingService 
 ) {}
 
   ngOnInit() {
@@ -93,8 +97,7 @@ constructor(
     this.DomainName = this.apiService.GetHeader();
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
-    console.log(this.reportType)
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee'; 
     if(this.reportType == 'parent'){
       this.getStudentsByParentId()
     }
@@ -105,8 +108,7 @@ constructor(
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

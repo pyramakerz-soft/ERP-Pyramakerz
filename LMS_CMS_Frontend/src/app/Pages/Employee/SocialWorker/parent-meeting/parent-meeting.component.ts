@@ -13,10 +13,12 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subscription } from 'rxjs';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-parent-meeting',
   standalone: true,
@@ -24,6 +26,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './parent-meeting.component.html',
   styleUrl: './parent-meeting.component.css'
 })
+
+@InitLoader()
 export class ParentMeetingComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -50,6 +54,11 @@ export class ParentMeetingComponent {
 
   validationErrors: { [key in keyof ParentMeeting]?: string } = {};
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
@@ -61,7 +70,8 @@ export class ParentMeetingComponent {
     public ApiServ: ApiService,
     public ParentMeetingServ: ParentMeetingService,    
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private translate: TranslateService, 
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -81,23 +91,68 @@ export class ParentMeetingComponent {
       }
     });
 
-    this.GetAllData();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+  ngOnDestroy(): void { 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 
 
-  GetAllData() {
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
-    this.ParentMeetingServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d;
+    this.ParentMeetingServ.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }  
+  
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
     });
   }
 
@@ -120,7 +175,7 @@ export class ParentMeetingComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.ParentMeetingServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData();
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -158,7 +213,7 @@ export class ParentMeetingComponent {
       if (this.mode == 'Create') {
         this.ParentMeetingServ.Add(this.parentMeeting, this.DomainName).subscribe(
           (d) => {
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
             Swal.fire({
@@ -189,7 +244,7 @@ export class ParentMeetingComponent {
               text: 'Updated Successfully',
               confirmButtonColor: '#089B41',
             });
-            this.GetAllData();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
           },
@@ -252,13 +307,16 @@ export class ParentMeetingComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: ParentMeeting[] = await firstValueFrom(
-        this.ParentMeetingServ.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.ParentMeetingServ.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.TableData = data || [];
+      this.TableData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -271,7 +329,7 @@ export class ParentMeetingComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -280,4 +338,59 @@ export class ParentMeetingComponent {
       this.TableData = [];
     }
   }
+  
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

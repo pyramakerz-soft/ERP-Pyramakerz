@@ -230,7 +230,7 @@
 
 <!-- Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-1/2">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center">
             <h1 *ngIf="!editBus" class="font-semibold text-2xl leading-9"> {{ 'Create Bus' | translate }}</h1>
             <h1 *ngIf="editBus" class="font-semibold text-2xl leading-9"> {{ 'Edit Bus' | translate }}</h1>
@@ -249,7 +249,7 @@
                 <label class="mb-2 primaryTxt" for="type"> {{ 'Type' | translate }}</label>
                 <select [(ngModel)]="bus.busTypeID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="type">
-                    <option *ngIf="!bus.busTypeID" [value]="null" disabled selected hidden>{{ bus.busTypeName || 'Select Type' }}</option>
+                    <option *ngIf="!bus.busTypeID" [value]="null" disabled selected hidden>{{ bus.busTypeName || ('Select' | translate) + ' ' + ('Type' | translate) }}</option>
                     <option *ngFor="let type of BusType" [value]="type.id">{{ type.name }}</option>
                     <option *ngIf="BusType.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -258,7 +258,7 @@
                 <label class="mb-2 primaryTxt" for="District"> {{ 'District' | translate }}</label>
                 <select [(ngModel)]="bus.busDistrictID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="District" >
-                    <option *ngIf="!bus.busDistrictID" [value]="null" disabled selected hidden>{{ bus.busDistrictName || 'Select District' }}</option>
+                    <option *ngIf="!bus.busDistrictID" [value]="null" disabled selected hidden>{{ bus.busDistrictName || ('Select' | translate) + ' ' + ('District' | translate) }}</option>
                     <option *ngFor="let District of BusDistrict" [value]="District.id">{{ District.name }}</option>
                     <option *ngIf="BusDistrict.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -267,7 +267,7 @@
                 <label class="mb-2 primaryTxt" for="status"> {{ 'Status' | translate }}</label>
                 <select [(ngModel)]="bus.busStatusID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="status" >
-                <option *ngIf="!bus.busStatusID" [value]="null" disabled selected hidden>{{ bus.busStatusName || 'Select Status' }}</option>
+                <option *ngIf="!bus.busStatusID" [value]="null" disabled selected hidden>{{ bus.busStatusName || ('Select' | translate) + ' ' + ('Status' | translate)  }}</option>
                     <option *ngFor="let status of BusStatus" [value]="status.id">{{ status.name }}</option>
                     <option *ngIf="BusStatus.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -284,7 +284,7 @@
                 <label class="mb-2 primaryTxt" for="driver"> {{ 'Driver' | translate }}</label>
                 <select [(ngModel)]="bus.driverID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="driver" >
-                   <option *ngIf="!bus.driverID" [value]="null" disabled selected hidden>{{ bus.driverName || 'Select Driver' }}</option>
+                   <option *ngIf="!bus.driverID" [value]="null" disabled selected hidden>{{ bus.driverName || ('Select' | translate) + ' ' + ('Driver' | translate)  }}</option>
                     <option *ngFor="let driver of BusDriver" [value]="driver.id">{{ driver.en_name }}</option>
                     <option *ngIf="BusDriver.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -293,7 +293,12 @@
                 <label class="mb-2 primaryTxt" for="assistant"> {{ 'Driver Assistant' | translate }}</label>
                 <select [(ngModel)]="bus.driverAssistantID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="assistant" >
-                    <option [value]="null" disabled selected hidden>{{ bus.driverAssistantName || 'Select driver Assistant Name' }}</option>
+                    <option [value]="null" disabled selected hidden>{{ bus.driverAssistantName ||  isRtl 
+                        ? ('Enter' | translate) + ' ' + ('Name' | translate) + ' ' + ('Driver Assistant' | translate)
+                        : ('Enter' | translate) + ' ' + ('Driver Assistant' | translate) + ' ' + ('Name' | translate) }}</option>
+                    <!--    {{isRtl 
+                        ? ('Name' | translate)  + ' ' + ('Academic Year' | translate)
+                        : ('Academic Year' | translate) + ' ' + ('Name' | translate) }} -->
                     <option *ngFor="let assistant of BusDriverAssistant" [value]="assistant.id">{{assistant.en_name}}</option>
                     <option *ngIf="BusDriverAssistant.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -302,7 +307,7 @@
                 <label class="mb-2 primaryTxt" for="company"> {{ 'Company' | translate }}</label>
                 <select [(ngModel)]="bus.busCompanyID"
                   class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="company" >
-                  <option [value]="null" disabled selected hidden>{{ bus.busCompanyName || 'Select Company' }}</option>
+                  <option [value]="null" disabled selected hidden>{{ bus.busCompanyName || ('Select' | translate) + ' ' + ('Company' | translate)  }}</option>
                   <option *ngFor="let company of BusCompany" [value]="company.id">{{company.name}}</option>
                   <option *ngIf="BusCompany.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
@@ -345,5 +350,41 @@
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
               </button>
         </div>
+    </div>
+</div>
+
+
+
+<div class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4  rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+        [disabled]="CurrentPage === 1 || busData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || busData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p> {{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+        [disabled]="CurrentPage === TotalPages || busData.length == 0"
+        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || busData.length == 0}">
+            <p> {{'Next'| translate }}</p> 
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input  (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p> {{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}}  {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}}  {{'Item'| translate }})</p>
     </div>
 </div>

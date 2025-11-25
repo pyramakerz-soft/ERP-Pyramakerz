@@ -12,6 +12,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../Services/loading.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-domains',
   standalone: true,
@@ -19,6 +21,8 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './domains.component.html',
   styleUrl: './domains.component.css'
 })
+
+@InitLoader()
 export class DomainsComponent {
   keysArray: string[] = ['id', 'name' ];
   key: string= "id";
@@ -34,7 +38,8 @@ export class DomainsComponent {
   isDropdownOpen = false;
   isSaved = false
 
-  constructor(public domainService:DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public roleDetailsService:RoleDetailsService){}
+  constructor(public domainService:DomainService,private languageService: LanguageService, public roleDetailsService:RoleDetailsService,
+    private loadingService: LoadingService ){}
 
   ngOnInit(){ 
     this.getDomainData()
@@ -44,11 +49,10 @@ export class DomainsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getDomainData(){

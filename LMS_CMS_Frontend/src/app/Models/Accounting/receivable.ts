@@ -1,3 +1,5 @@
+import { ReceivableDetails } from "./receivable-details";
+
 export class Receivable {
     constructor(
         public id: number = 0,
@@ -10,6 +12,9 @@ export class Receivable {
         public linkFileName: string = '',
         public bankOrSaveID: number = 0,
         public bankOrSaveName: string = '',
-        public insertedByUserId: number = 0
+        public insertedByUserId: number = 0,
+        public receivableDetails : ReceivableDetails []=[] ,
+        public newDetails : ReceivableDetails []=[] ,
+        public updatedDetails : ReceivableDetails []=[] ,
     ) {}
 }

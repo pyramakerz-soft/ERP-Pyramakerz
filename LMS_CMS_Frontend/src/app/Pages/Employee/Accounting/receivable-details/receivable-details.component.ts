@@ -29,6 +29,9 @@ import { BankEmployeeService } from '../../../../Services/Employee/Accounting/ba
 import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
 import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { LinkFileTypeData } from '../../../../Models/Accounting/link-file-type-data';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-receivable-details',
@@ -37,8 +40,21 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   templateUrl: './receivable-details.component.html',
   styleUrl: './receivable-details.component.css',
 })
+
+@InitLoader()
 export class ReceivableDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -58,25 +74,16 @@ export class ReceivableDetailsComponent {
 
   receivable: Receivable = new Receivable();
   validationErrors: { [key in keyof Receivable]?: string } = {};
-  validationErrorsForDetails: { [key in keyof ReceivableDetails]?: string } =
-    {};
-
+  validationErrorsForDetails: Record<number, Partial<Record<keyof ReceivableDetails, string>>> = {};
+  AllLinkFileData : LinkFileTypeData= new LinkFileTypeData()
   dataTypesData: ReceivableDocType[] = [];
   // bankOrSaveData: any[] = [];
   banksData: BankEmployee[] = [];
   safesData: SafeEmployee[] = [];
   bankOrSafe: string = '';
-  receivableDetailsData: ReceivableDetails[] = [];
-  newDetails: ReceivableDetails = new ReceivableDetails();
   linkFilesData: LinkFile[] = [];
   linkFileTypesData: any[] = [];
   totalAmount: number = 0;
-
-  isNewDetails: boolean = false;
-  isDetailsValid: boolean = false;
-
-  editingRowId: number | null = null;
-  editedRowData: ReceivableDetails = new ReceivableDetails();
   isLoading = false;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -99,8 +106,8 @@ export class ReceivableDetailsComponent {
     public reportsService: ReportsService,
     private languageService: LanguageService,
     private SafeEmployeeServ: SafeEmployeeService,
-    private BankEmployeeServ: BankEmployeeService,
-    private realTimeService: RealTimeNotificationServiceService
+    private BankEmployeeServ: BankEmployeeService,    
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -113,12 +120,11 @@ export class ReceivableDetailsComponent {
 
     if (!this.ReceivableID) {
       this.isCreate = true;
-      this.receivable.linkFileID=5
+      this.receivable.linkFileID = 5;
       this.getSaveData();
     } else {
       this.GetReceivableByID();
-      this.GetReceivableDetails();
-    }
+      this.GetLinkFiles();    }
 
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
@@ -151,7 +157,6 @@ export class ReceivableDetailsComponent {
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -173,6 +178,7 @@ export class ReceivableDetailsComponent {
       .GetByID(this.ReceivableID, this.DomainName)
       .subscribe((data) => {
         this.receivable = data;
+        this.GetAllLinkFilesTypeData()
         if (this.receivable.linkFileID == 5) {
           this.getSaveData();
         } else if (this.receivable.linkFileID == 6) {
@@ -184,7 +190,10 @@ export class ReceivableDetailsComponent {
   getBankData() {
     this.banksData = [];
     this.bankOrSafe = 'bank';
-    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((data) => {
+    this.BankEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((data) => {
       this.banksData = data;
     });
   }
@@ -192,7 +201,10 @@ export class ReceivableDetailsComponent {
   getSaveData() {
     this.safesData = [];
     this.bankOrSafe = 'safe';
-    this.SafeEmployeeServ.GetByEmployeeId( this.UserID,this.DomainName).subscribe((data) => {
+    this.SafeEmployeeServ.GetByEmployeeId(
+      this.UserID,
+      this.DomainName
+    ).subscribe((data) => {
       this.safesData = data;
     });
   }
@@ -229,15 +241,14 @@ export class ReceivableDetailsComponent {
             field == 'receivableDocTypesID' ||
             field == 'bankOrSaveID' ||
             field == 'linkFileID' ||
-            field == 'date' ||
-            field == 'docNumber'
+            field == 'date' 
           ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            if (this.validationErrors[field] = `*bankOrSaveID is required`) {
-              this.validationErrors[field] = `*bankOrSafeID is required`;
-            }
+            // Handle the specific case for bankOrSaveID field name correction
+            const displayFieldName =
+              field === 'bankOrSaveID' ? 'bankOrSafeID' : field;
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(displayFieldName as keyof Receivable)
+            );
             isValid = false;
           }
         } else {
@@ -248,39 +259,93 @@ export class ReceivableDetailsComponent {
     return isValid;
   }
 
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
   DetailsCapitalizeField(field: keyof ReceivableDetails): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isDetailsFormValid(detail: ReceivableDetails): boolean {
+  isDetailsFormValid(): boolean {
     let isValid = true;
-    for (const key in detail) {
-      if (this.hasOwnProperty(key)) {
-        const field = key as keyof ReceivableDetails;
-        if (!detail[field]) {
-          if (field == 'amount' || field == 'linkFileName') {
-            this.validationErrorsForDetails[
-              field
-            ] = `*${this.DetailsCapitalizeField(field)} is required`;
-            isValid = false;
-          }
-        } else {
-          this.validationErrorsForDetails[field] = '';
-        }
+
+    // Reset validation errors
+    this.validationErrorsForDetails = {};
+
+    this.receivable.receivableDetails.forEach((detail) => {
+      // Ensure detail has an ID
+      const id = detail.id;
+      if (!id) return; // skip if no ID
+
+      // Prepare error object for this row
+      if (!this.validationErrorsForDetails[id]) {
+        this.validationErrorsForDetails[id] = {};
       }
-    }
-    if (detail.linkFileID == 0) {
-      this.validationErrorsForDetails['linkFileID'] = 'link File is required';
-      isValid = false;
-    }
-    if (detail.linkFileTypeID == 0) {
-      this.validationErrorsForDetails['linkFileTypeID'] =
-        'Link File Data is required';
-      isValid = false;
-    }
-    if (detail.amount == null || detail.amount == '') {
-      this.validationErrorsForDetails['amount'] = 'amount is required';
-      isValid = false;
+
+      const errors = this.validationErrorsForDetails[id];
+
+      // Validate only these fields
+      const requiredFields: (keyof ReceivableDetails)[] = [
+        'amount',
+        'linkFileID',
+        'linkFileTypeID',
+      ];
+
+      requiredFields.forEach((field) => {
+        const value = detail[field];
+        if (!value || value == 0 || value == '') {
+          errors[field] = this.getRequiredErrorMessage(
+            this.DetailsCapitalizeField(field)
+          );
+          console.log(errors)
+          isValid = false;
+        } else {
+          errors[field] = ''; 
+        }
+      });
+    });
+
+    if(this.receivable.newDetails && this.receivable.newDetails.length > 0){
+      this.receivable.newDetails.forEach((detail) => {
+        // Ensure detail has an ID
+        const id = detail.id;
+        if (!id) return; // skip if no ID
+
+        // Prepare error object for this row
+        if (!this.validationErrorsForDetails[id]) {
+          this.validationErrorsForDetails[id] = {};
+        }
+
+        const errors = this.validationErrorsForDetails[id];
+
+        // Validate only these fields
+        const requiredFields: (keyof ReceivableDetails)[] = [
+          'amount',
+          'linkFileID',
+          'linkFileTypeID',
+        ];
+
+        requiredFields.forEach((field) => {
+          const value = detail[field];
+          if (!value || value == 0 || value == '') {
+            errors[field] = this.getRequiredErrorMessage(
+              this.DetailsCapitalizeField(field)
+            );
+            console.log(errors)
+            isValid = false;
+          } else {
+            errors[field] = ''; 
+          }
+        });
+      });
     }
     return isValid;
   }
@@ -297,30 +362,62 @@ export class ReceivableDetailsComponent {
     }
   }
 
-  onInputValueChangeForDetails(event: {
-    field: keyof ReceivableDetails;
-    value: any;
-  }) {
+  onInputValueChangeForEditDetails(row: any ,event: {field: keyof ReceivableDetails;value: any;}) {
     const { field, value } = event;
-    (this.newDetails as any)[field] = value;
-    if (value) {
-      this.validationErrorsForDetails[field] = '';
+    if (this.validationErrorsForDetails[row.id]) {
+      this.validationErrorsForDetails[row.id][field] = '';
     }
     if (field == 'linkFileID') {
-      this.newDetails.linkFileTypeID = 0;
+      row.linkFileTypeID = 0; // reset old selection
+      row.linkFileTypesData = row.linkFileTypesData || [];
+
+      const numericValue = Number(value); // <-- convert string to number
+      console.log(numericValue, row.linkFileTypesData, this.AllLinkFileData?.supplierGetDTO);
+
+      switch (numericValue) {
+        case 2: // Supplier
+          row.linkFileTypesData = this.AllLinkFileData?.supplierGetDTO || [];
+          break;
+        case 3: // Debit
+          row.linkFileTypesData = this.AllLinkFileData?.debitGetDTO || [];
+          break;
+        case 4: // Credit
+          row.linkFileTypesData = this.AllLinkFileData?.creditGetDTO || [];
+          break;
+        case 5: // Save
+          row.linkFileTypesData = this.AllLinkFileData?.saveGetDTO || [];
+          break;
+        case 6: // Bank
+          row.linkFileTypesData = this.AllLinkFileData?.bankGetDTOs || [];
+          break;
+        case 7: // Income
+          row.linkFileTypesData = this.AllLinkFileData?.incomeGetDTO || [];
+          break;
+        case 8: // Outcome
+          row.linkFileTypesData = this.AllLinkFileData?.outcomeGetDTO || [];
+          break;
+        case 9: // Asset
+          row.linkFileTypesData = this.AllLinkFileData?.assetGetDTO || [];
+          break;
+        case 10: // Employee
+          row.linkFileTypesData = this.AllLinkFileData?.employee_GetDTO || [];
+          break;
+        case 11: // Fee
+          row.linkFileTypesData = this.AllLinkFileData?.tuitionFeesTypeGetDTO || [];
+          break;
+        case 12: // Discount
+          row.linkFileTypesData = this.AllLinkFileData?.tuitionDiscountTypeGetDTO || [];
+          break;
+        case 13: // Student
+          row.linkFileTypesData = this.AllLinkFileData?.studentGetDTO || [];
+          break;
+        default:
+          row.linkFileTypesData = [];
+          break;
+      }
+      console.log(numericValue, row.linkFileTypesData);
     }
 
-    if (
-      (this.newDetails.amount || this.editedRowData.amount) &&
-      !isNaN(this.newDetails.amount ? this.newDetails.amount : 0) &&
-      !isNaN(this.editedRowData.amount ? this.editedRowData.amount : 0) &&
-      (this.newDetails.linkFileID || this.editedRowData.linkFileID) &&
-      (this.newDetails.linkFileTypeID || this.editedRowData.linkFileTypeID)
-    ) {
-      this.isDetailsValid = true;
-    } else {
-      this.isDetailsValid = false;
-    }
   }
 
   validateNumberReceivable(event: any, field: keyof Receivable): void {
@@ -333,93 +430,80 @@ export class ReceivableDetailsComponent {
     }
   }
 
-  validateNumberDetails(event: any, field: keyof ReceivableDetails): void {
+  validateNumberEditDetails(row:ReceivableDetails ,event: any, field: keyof ReceivableDetails): void { // 
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.newDetails[field] === 'string') {
-        this.newDetails[field] = '' as never;
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
       }
     }
   }
 
-  validateNumberEditDetails(event: any, field: keyof ReceivableDetails): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.editedRowData[field] === 'string') {
-        this.editedRowData[field] = '' as never;
-      }
+  AddInUpdated(row : ReceivableDetails){
+    this.receivable.updatedDetails =this.receivable.updatedDetails || []
+    var ExistRow = this.receivable.updatedDetails.find(p=>p.id == row.id)
+    if(!ExistRow){
+      this.receivable.updatedDetails.push(row)
     }
   }
 
   Save() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.isCreate) {
-        this.receivableService.Add(this.receivable, this.DomainName).subscribe(
-          (data) => {
-            let id = JSON.parse(data).id;
-            this.router.navigateByUrl(`Employee/Receivable/${id}`);
-            Swal.fire({
-              title: 'Saved Successfully',
-              icon: 'success',
-              confirmButtonColor: '#089B41',
-            });
-            this.isLoading = false;
-          },
-          (error) => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+    if (this.isCreate) {
+      if (this.isFormValid()) {
+          this.isLoading = true;
+          this.receivableService.Add(this.receivable, this.DomainName).subscribe(
+            (data) => {
+              let id = JSON.parse(data).id;
+              this.router.navigateByUrl(`Employee/Receivable/${id}`);
+              Swal.fire({
+                title: 'Saved Successfully',
+                icon: 'success',
+                confirmButtonColor: '#089B41',
+              });
+              this.isLoading = false;
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
           }
-        );
       } else if (this.isEdit) {
-        this.isLoading = false;
-        this.receivableService.Edit(this.receivable, this.DomainName).subscribe(
-          (data) => {
-            this.GetReceivableByID();
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'success',
-              title: 'Done!',
-              text: 'The Receivable has been edited successfully.',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {
-            this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
-          }
-        );
+        if(this.isDetailsFormValid()){
+          this.isLoading = true;
+          this.receivableService.Edit(this.receivable, this.DomainName).subscribe(
+            (data) => {
+              this.GetReceivableByID();
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'success',
+                title: 'Done!',
+                text: 'The Receivable has been edited successfully.',
+                confirmButtonColor: '#089B41',
+              });
+            },
+            (error) => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          );
+        }
       }
-    }
   }
 
-  GetReceivableDetails() {
-    this.receivableDetailsData = [];
-    this.receivableDetailsService
-      .Get(this.DomainName, this.ReceivableID)
-      .subscribe((data) => {
-        this.receivableDetailsData = data;
-        let total = 0;
-        this.receivableDetailsData.forEach((element) => {
-          total = total + (element.amount ? element.amount : 0);
-        });
-        this.totalAmount = total;
-      });
-  }
 
   GetLinkFiles() {
     this.linkFileService.Get(this.DomainName).subscribe((data) => {
@@ -427,81 +511,72 @@ export class ReceivableDetailsComponent {
     });
   }
 
-  GetLinkFilesTypeData() {
-    this.linkFileTypesData = [];
-    this.newDetails.linkFileTypeID = 0;
-    this.editedRowData.linkFileTypeID = 0;
-    this.dataAccordingToLinkFileService
-      .GetTableDataAccordingToLinkFile(
-        this.DomainName,
-        +this.newDetails.linkFileID
-      )
-      .subscribe((data) => {
-        this.linkFileTypesData = data;
+  GetAllLinkFilesTypeData() {
+    this.AllLinkFileData = new LinkFileTypeData();
+    this.dataAccordingToLinkFileService.GetAllTableDataAccordingToLinkFile(this.DomainName).subscribe((data) => {
+        this.AllLinkFileData = data;
+        this.getLinkFileTypeOptions()
       });
   }
 
+  getLinkFileTypeOptions() {
+    if (!this.receivable?.receivableDetails || !this.AllLinkFileData) return;
+
+    this.receivable.receivableDetails.forEach((element) => {
+      const numericValue = Number(element.linkFileID);
+      element.linkFileTypesData =element.linkFileTypesData || []
+      switch (numericValue) {
+        case 2: // Supplier
+          element.linkFileTypesData = this.AllLinkFileData?.supplierGetDTO || [];
+          break;
+        case 3: // Debit
+          element.linkFileTypesData = this.AllLinkFileData?.debitGetDTO || [];
+          break;
+        case 4: // Credit
+          element.linkFileTypesData = this.AllLinkFileData?.creditGetDTO || [];
+          break;
+        case 5: // Save
+          element.linkFileTypesData = this.AllLinkFileData?.saveGetDTO || [];
+          break;
+        case 6: // Bank
+          element.linkFileTypesData = this.AllLinkFileData?.bankGetDTOs || [];
+          break;
+        case 7: // Income
+          element.linkFileTypesData = this.AllLinkFileData?.incomeGetDTO || [];
+          break;
+        case 8: // Outcome
+          element.linkFileTypesData = this.AllLinkFileData?.outcomeGetDTO || [];
+          break;
+        case 9: // Asset
+          element.linkFileTypesData = this.AllLinkFileData?.assetGetDTO || [];
+          break;
+        case 10: // Employee
+          element.linkFileTypesData = this.AllLinkFileData?.employee_GetDTO || [];
+          break;
+        case 11: // Fee
+          element.linkFileTypesData = this.AllLinkFileData?.tuitionFeesTypeGetDTO || [];
+          break;
+        case 12: // Discount
+          element.linkFileTypesData = this.AllLinkFileData?.tuitionDiscountTypeGetDTO || [];
+          break;
+        case 13: // Student
+          element.linkFileTypesData = this.AllLinkFileData?.studentGetDTO || [];
+          break;
+        default:
+          element.linkFileTypesData = [];
+          break;
+      }
+    });
+     console.log(this.receivable.receivableDetails)
+  }
+
   AddReceivableDetails() {
-    this.isDetailsValid = false;
-    this.editingRowId = null;
-    this.editedRowData = new ReceivableDetails();
-    this.isNewDetails = true;
-    this.GetLinkFiles();
-  }
+    var newDetail = new ReceivableDetails();
+    newDetail.id =  Date.now() + Math.floor(Math.random() * 10000);
+    newDetail.receivableMasterID =  this.ReceivableID
+    this.receivable.newDetails = this.receivable.newDetails || [];
+    this.receivable.newDetails.push(newDetail)
 
-  SaveNewDetails() {
-    this.newDetails.receivableMasterID = this.ReceivableID;
-    if (this.isDetailsFormValid(this.newDetails)) {
-      this.isLoading = true;
-      this.receivableDetailsService
-        .Add(this.newDetails, this.DomainName)
-        .subscribe((data) => {
-          this.isLoading = false;
-          this.isNewDetails = false;
-          this.newDetails = new ReceivableDetails();
-          this.GetReceivableDetails();
-          this.editingRowId = null;
-          this.editedRowData = new ReceivableDetails();
-          this.isDetailsValid = false;
-        });
-    }
-    this.isLoading = false;
-  }
-
-  EditDetail(row: ReceivableDetails) {
-    this.isNewDetails = false;
-    this.isDetailsValid = true;
-    this.newDetails = new ReceivableDetails();
-    this.GetLinkFiles();
-    this.editingRowId = row.id;
-    this.editedRowData = { ...row };
-    if (this.editedRowData.linkFileID) {
-      this.dataAccordingToLinkFileService
-        .GetTableDataAccordingToLinkFile(
-          this.DomainName,
-          +this.editedRowData.linkFileID
-        )
-        .subscribe((data) => {
-          this.linkFileTypesData = data;
-        });
-    }
-  }
-
-  SaveEditedDetail() {
-    this.newDetails.receivableMasterID = this.ReceivableID;
-    if (this.isDetailsFormValid(this.editedRowData)) {
-      this.receivableDetailsService
-        .Edit(this.editedRowData, this.DomainName)
-        .subscribe((data) => {
-          this.editingRowId = null;
-          this.editedRowData = new ReceivableDetails();
-          this.isDetailsValid = false;
-          this.isNewDetails = false;
-          this.newDetails = new ReceivableDetails();
-          this.GetReceivableDetails();
-        });
-    }
-    this.isLoading = false;
   }
 
   DeleteDetail(id: number) {
@@ -524,38 +599,44 @@ export class ReceivableDetailsComponent {
         this.receivableDetailsService
           .Delete(id, this.DomainName)
           .subscribe((data) => {
-            this.GetReceivableDetails();
+          this.receivable.receivableDetails = (this.receivable.receivableDetails || []).filter(p => p.id !== id);
+          this.receivable.updatedDetails = (this.receivable.updatedDetails || []).filter(p => p.id !== id);
+          if(this.receivable.updatedDetails.length == 0){
+            this.receivable.updatedDetails=[]
+          }
+          if(this.receivable.receivableDetails.length == 0){
+            this.receivable.receivableDetails=[]
+          }
           });
       }
     });
   }
 
-  // DownloadData() {
-  //   let orderElement = document.getElementById('DataToDownload');
+  DeleteNewDetail(id: number) {
+    Swal.fire({
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('receivable Detail') +
+        this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+       this.receivable.newDetails=this.receivable.newDetails.filter(p=>p.id!=id)
+      }
+    });
+  }
 
-  //   if (!orderElement) {
-  //     console.error("Page body not found!");
-  //     return;
-  //   }
-
-  //   document.querySelectorAll('.no-print').forEach(el => {
-  //     (el as HTMLElement).style.display = 'none';
-  //   });
-
-  //   setTimeout(() => {
-  //     html2pdf().from(orderElement).set({
-  //       margin: 10,
-  //       filename: `Receivable_${this.ReceivableID}.pdf`,
-  //       image: { type: 'jpeg', quality: 0.98 },
-  //       html2canvas: { scale: 3, useCORS: true, allowTaint: true, logging: true },
-  //       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-  //     }).save().then(() => {
-  //       document.querySelectorAll('.no-print').forEach(el => {
-  //         (el as HTMLElement).style.display = '';
-  //       });
-  //     });
-  //   }, 500);
-  // }
+  //////////////// print
 
   DownloadAsPDF() {
     this.showPDF = true;
@@ -642,7 +723,7 @@ export class ReceivableDetailsComponent {
             'linkFileTypeName',
             'notes',
           ],
-          data: this.receivableDetailsData.map((row) => [
+          data: this.receivable.receivableDetails.map((row) => [
             row.id || 0,
             row.amount || 0,
             row.linkFileName || '',

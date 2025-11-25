@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LMS_CMS_DAL.Models.Domains.BusModule;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -55,12 +56,12 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (pageSize < 1) pageSize = 10;
 
             int totalRecords = await Unit_Of_Work.bouns_Repository
-               .CountAsync(f => f.IsDeleted != true);
+            .CountAsync(f => f.IsDeleted != true);
 
-            List<Bouns> bouns =await Unit_Of_Work.bouns_Repository.Select_All_With_IncludesById_Pagination<Bouns>(
+            List<Bonus> bouns =await Unit_Of_Work.bouns_Repository.Select_All_With_IncludesById_Pagination<Bonus>(
                     sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.Employee),
-                    query => query.Include(emp => emp.BounsType))
+                    query => query.Include(emp => emp.BonusType))
                    .Skip((pageNumber - 1) * pageSize)
                    .Take(pageSize)
                    .ToListAsync();
@@ -70,7 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return NotFound();
             }
 
-            List<BounsGetDTO> Dto = mapper.Map<List<BounsGetDTO>>(bouns);
+            List<BonusGetDTO> Dto = mapper.Map<List<BonusGetDTO>>(bouns);
             var paginationMetadata = new
             {
                 TotalRecords = totalRecords,
@@ -103,16 +104,16 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Bouns bouns = await Unit_Of_Work.bouns_Repository.FindByIncludesAsync(sem => sem.IsDeleted != true && sem.ID == id,
+            Bonus bouns = await Unit_Of_Work.bouns_Repository.FindByIncludesAsync(sem => sem.IsDeleted != true && sem.ID == id,
                  query => query.Include(emp => emp.Employee),
-                 query => query.Include(emp => emp.BounsType));
+                 query => query.Include(emp => emp.BonusType));
 
             if (bouns == null)
             {
                 return NotFound();
             }
 
-            BounsGetDTO Dto = mapper.Map<BounsGetDTO>(bouns);
+            BonusGetDTO Dto = mapper.Map<BonusGetDTO>(bouns);
 
             return Ok(Dto);
         }
@@ -124,7 +125,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Bonus" }
          )]
-        public async Task<IActionResult> Add(BounsAddDTO newBouns)
+        public async Task<IActionResult> Add(BonusAddDTO newBouns)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -148,13 +149,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("there is no employee with this id");
             }
 
-            BounsType bounsType = Unit_Of_Work.bounsType_Repository.First_Or_Default(e => e.ID == newBouns.BounsTypeID);
+            BonusType bounsType = Unit_Of_Work.bounsType_Repository.First_Or_Default(e => e.ID == newBouns.BonusTypeID);
             if (bounsType == null)
             {
-                return BadRequest("there is no bounsType with this id");
+                return BadRequest("there is no bonusType with this id");
             }
 
-            Bouns bouns = mapper.Map<Bouns>(newBouns);
+            Bonus bouns = mapper.Map<Bonus>(newBouns);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             bouns.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -179,7 +180,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
            allowEdit: 1,
            pages: new[] { "Bonus" }
        )]
-        public async Task<IActionResult> EditAsync(BounsAddDTO newBouns)
+        public async Task<IActionResult> EditAsync(BonusAddDTO newBouns)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -210,13 +211,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("there is no employee with this id");
             }
 
-            BounsType bounsType = Unit_Of_Work.bounsType_Repository.First_Or_Default(e => e.ID == newBouns.BounsTypeID);
+            BonusType bounsType = Unit_Of_Work.bounsType_Repository.First_Or_Default(e => e.ID == newBouns.BonusTypeID);
             if (bounsType == null)
             {
                 return BadRequest("there is no bounsType with this id");
             }
 
-            Bouns bouns = Unit_Of_Work.bouns_Repository.First_Or_Default(s => s.ID == newBouns.ID && s.IsDeleted != true);
+            Bonus bouns = Unit_Of_Work.bouns_Repository.First_Or_Default(s => s.ID == newBouns.ID && s.IsDeleted != true);
             if (bouns == null)
             {
                 return BadRequest("bouns not exist");
@@ -229,6 +230,24 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 {
                     return accessCheck;
                 }
+            }
+
+            switch (newBouns.BonusTypeID)
+            {
+                case 1:
+                    newBouns.NumberOfBonusDays = 0;
+                    newBouns.Amount = 0;
+                    break;
+                case 2:
+                    newBouns.Hours = 0;
+                    newBouns.Minutes = 0;
+                    newBouns.Amount = 0;
+                    break;
+                case 3:
+                    newBouns.NumberOfBonusDays = 0;
+                    newBouns.Hours = 0;
+                    newBouns.Minutes = 0;
+                    break;
             }
 
             mapper.Map(newBouns, bouns);
@@ -283,7 +302,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 return BadRequest("id cannot be null");
             }
-            Bouns bouns = Unit_Of_Work.bouns_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            Bonus bouns = Unit_Of_Work.bouns_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
             if (bouns == null)
             {
                 return BadRequest("bouns not exist");
@@ -415,18 +434,79 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             var employeeIds = employees.Select(e => e.ID).ToList();
 
            
-            var bonuses = await uow.bouns_Repository.Select_All_With_IncludesById<Bouns>(
+            var bonuses = await uow.bouns_Repository.Select_All_With_IncludesById<Bonus>(
                 b => employeeIds.Contains(b.EmployeeID)
                      && b.Date >= request.DateFrom
                      && b.Date <= request.DateTo,
                 q => q.Include(b => b.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory),
-                q => q.Include(b => b.BounsType)
+                q => q.Include(b => b.BonusType)
             );
 
             if (!bonuses.Any())
                 return NotFound("No bonuses found");
 
-            var bonusDtos = mapper.Map<List<BounsGetDTO>>(bonuses);
+
+            var bonusDtos = mapper.Map<List<BonusGetDTO>>(bonuses);
+
+            foreach (var bonusDto in bonusDtos)
+            {
+                var bonus = bonuses.First(b => b.ID == bonusDto.ID);
+                var employee = bonus.Employee;
+                double salary = (double)(employee.MonthSalary ?? 0);
+                if (salary == 0)
+                {
+                    bonus.Amount = 0;
+                    continue;
+                }
+
+               
+                TimeSpan attendanceTime = TimeSpan.Zero;
+                TimeSpan departureTime = TimeSpan.Zero;
+                double totalDayHours = 8; // default 
+
+                if (!string.IsNullOrEmpty(employee.AttendanceTime) && !string.IsNullOrEmpty(employee.DepartureTime))
+                {
+                    attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
+                    departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
+
+                    if (departureTime < attendanceTime)
+                    {
+                        totalDayHours = (TimeSpan.FromHours(24) - attendanceTime + departureTime).TotalHours;
+                    }
+                    else
+                    {
+                        totalDayHours = (departureTime - attendanceTime).TotalHours;
+                    }
+                }
+
+                double dailyRate = salary / 30;
+                double hourlyRate = dailyRate / totalDayHours;
+                double minuteRate = hourlyRate / 60;
+
+
+
+                //string typeName = bonus.BounsType?.Name?.ToLower() ?? string.Empty;
+
+                if (bonus.BonusTypeID == 1) // Hours
+                {
+                    bonusDto.Amount = Math.Round((decimal)((hourlyRate * bonus.Hours) + (minuteRate * bonus.Minutes)), 2);
+                }
+                else if (bonus.BonusTypeID == 2) // Days
+                {
+                    bonusDto.Amount = Math.Round((decimal)(dailyRate * bonus.NumberOfBonusDays), 2);
+                }
+                else if (bonus.BonusTypeID == 3) // Amount
+                {
+                    bonusDto.Amount = Math.Round((decimal)bonus.Amount, 2);
+                }
+                else
+                {
+                    bonusDto.Amount = Math.Round((decimal)bonus.Amount, 2); 
+                }
+
+
+
+            }
 
             var report = bonusDtos
                 .GroupBy(b => new { b.EmployeeID, b.EmployeeEnName, b.EmployeeArName })
@@ -436,7 +516,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     EmployeeEnName = g.Key.EmployeeEnName,
                     EmployeeArName = g.Key.EmployeeArName,
                     TotalAmount = g.Sum(x => x.Amount),
-                    Bonuses = g.ToList()
+                    Bonuses = g.OrderBy(x => x.Date).ToList()
                 })
                 .ToList();
 

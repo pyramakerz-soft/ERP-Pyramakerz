@@ -17,6 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-student-lesson-live',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './student-lesson-live.component.html',
   styleUrl: './student-lesson-live.component.css'
 })
+
+@InitLoader()
 export class StudentLessonLiveComponent {
 User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -62,7 +66,7 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     public LessonLiveServ: LessonLiveService ,
     public ClassroomServ :ClassroomService , 
     public SubjectServ : SubjectService ,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService 
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,11 +93,10 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
   
   GetAllData() {

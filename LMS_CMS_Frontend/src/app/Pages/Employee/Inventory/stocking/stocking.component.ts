@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-stocking',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './stocking.component.html',
   styleUrl: './stocking.component.css'
 })
+
+@InitLoader()
 export class StockingComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -65,8 +69,8 @@ export class StockingComponent {
     public ApiServ: ApiService,
     public StockingServ: StockingService,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,8 +97,7 @@ export class StockingComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -103,7 +106,7 @@ export class StockingComponent {
 
   Create() {
     this.mode = 'Create';
-    this.router.navigateByUrl(`Employee/Stocking Item`)
+    this.router.navigateByUrl(`Employee/Stocking/Create`)
   }
 
   Delete(id: number) {
@@ -125,7 +128,7 @@ export class StockingComponent {
   }
 
   Edit(row: Stocking) {
-    this.router.navigateByUrl(`Employee/Stocking Item/Edit/${row.id}`)
+    this.router.navigateByUrl(`Employee/Stocking/Edit/${row.id}`)
   }
 
   IsAllowDelete(InsertedByID: number) {

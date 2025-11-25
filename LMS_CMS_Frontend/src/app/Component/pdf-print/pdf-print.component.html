@@ -43,13 +43,13 @@
     </div>
 
     <div *ngIf="tableDataWithHeaderArray">
-        <div *ngFor="let section of tableDataWithHeaderArray; let last = last" 
-             class="mb-8 pdf-table-container"
-             [ngClass]="{
-               'small-table-section': isSmallTable(section.tableData),
-               'large-table-section': isLargeTable(section.tableData),
-               'table-section': !isSmallTable(section.tableData) && !isLargeTable(section.tableData)
-             }">
+<div *ngFor="let section of tableDataWithHeaderArray; let last = last" 
+     class="mb-8 pdf-table-container page-break-avoid"
+     [ngClass]="{
+       'small-table-section': isSmallTable(section.tableData),
+       'large-table-section': isLargeTable(section.tableData),
+       'table-section': !isSmallTable(section.tableData) && !isLargeTable(section.tableData)
+     }">
             <!-- Combined box for both summary and table -->
             <div class="border rounded-2xl shadow-sm overflow-hidden">
                 <!-- Summary section -->
@@ -83,7 +83,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngIf="section.tableData?.length === 0" class="pdf-table-row">
+                            <tr *ngIf="section.tableData.length === 0" class="pdf-table-row">
                                 <td [attr.colspan]="section.tableHeaders.length" class="text-center p-4">No Data Found</td>
                             </tr>
                             <tr *ngFor="let row of section.tableData; let i = index"
@@ -104,13 +104,13 @@
         </div>
     </div>
     
-    <div *ngFor="let chunk of tableChunks" 
-         class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container"
-         [ngClass]="{
-           'small-table-section': isSmallTable(chunk.data),
-           'large-table-section': isLargeTable(chunk.data),
-           'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
-         }">
+<div *ngFor="let chunk of tableChunks" 
+     class="mt-10 overflow-x-auto rounded-xl border border-[#BDBDBD] pdf-table-container page-break-avoid"
+     [ngClass]="{
+       'small-table-section': isSmallTable(chunk.data),
+       'large-table-section': isLargeTable(chunk.data),
+       'table-section': !isSmallTable(chunk.data) && !isLargeTable(chunk.data)
+     }">
         <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F] table-fixed">
             <colgroup>
                 <col *ngFor="let header of chunk.headers" 

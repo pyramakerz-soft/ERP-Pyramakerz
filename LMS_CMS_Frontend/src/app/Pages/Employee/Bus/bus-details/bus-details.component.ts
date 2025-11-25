@@ -21,10 +21,12 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bus-details',
   standalone: true,
@@ -32,6 +34,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './bus-details.component.html',
   styleUrl: './bus-details.component.css'
 })
+
+@InitLoader()
 export class BusDetailsComponent {
   User_Data_After_Login :TokenData =new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   DomainData: Domain[] = []
@@ -64,12 +68,17 @@ export class BusDetailsComponent {
 
   path:string = ""
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(public busService:BusService,
-      private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
+    private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
-    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService
-  , private realTimeService: RealTimeNotificationServiceService){}
+    private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService,
+    private loadingService: LoadingService , private translate: TranslateService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -77,12 +86,8 @@ export class BusDetailsComponent {
     if (this.User_Data_After_Login.type === "employee") {
       this.IsChoosenDomain = true;
       this.DomainName=this.ApiServ.GetHeader();
-      this.busService.Get(this.DomainName).subscribe(
-        (data: any) => {
-          this.busData = data;
-        }
-      );
-
+      
+      this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path
       });
@@ -110,9 +115,8 @@ export class BusDetailsComponent {
   }
 
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-      if (this.subscription) {
+  ngOnDestroy(): void { 
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 
@@ -138,6 +142,58 @@ export class BusDetailsComponent {
         this.busData=[];
       });
   }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.busData = [];
+    this.busService.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.busData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
+  }
+
+  private showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }  
 
   deleteBus(busId: number) {
     Swal.fire({
@@ -251,30 +307,32 @@ export class BusDetailsComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.bus) {
-      if (this.bus.hasOwnProperty(key)) {
-        const field = key as keyof Bus;
-        if (!this.bus[field]) {
-          if(field == "name" || field == 'capacity'|| field == 'backPrice'|| field == 'twoWaysPrice'|| field == 'morningPrice'){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.bus) {
+    if (this.bus.hasOwnProperty(key)) {
+      const field = key as keyof Bus;
+      if (!this.bus[field]) {
+        if(field == "name" || field == 'capacity'|| field == 'backPrice'|| field == 'twoWaysPrice'|| field == 'morningPrice'){
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
+        }
+      } else {
+        if(field == "name"){
+          if(this.bus.name.length > 100){
+            this.validationErrors[field] = this.translate.instant('Name cannot be longer than 100 characters.');
             isValid = false;
           }
-        } else {
-          if(field == "name"){
-            if(this.bus.name.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
+        } else{
+          this.validationErrors[field] = '';
         }
       }
     }
-    return isValid;
   }
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof Bus, value: any }) {
     const { field, value } = event;
@@ -367,24 +425,31 @@ export class BusDetailsComponent {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
-
-  async onSearchEvent(event: { key: string, value: any }) {
+  
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Bus[] = await firstValueFrom(this.busService.Get(this.DomainName));  
-      this.busData = data || [];
-  
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
-        this.busData = this.busData.filter(t => {
+      const data: any = await firstValueFrom(
+        this.busService.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.busData = data.data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.busData = this.busData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -393,5 +458,60 @@ export class BusDetailsComponent {
       this.busData = [];
     }
   }
-  
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }
+
 }

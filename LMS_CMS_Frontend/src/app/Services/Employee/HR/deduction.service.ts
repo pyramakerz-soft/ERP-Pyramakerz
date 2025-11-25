@@ -90,13 +90,13 @@ export class DeductionService {
     const requestBody: any = {};
 
     // only include params that are actually selected/passed
-    if (typeof jobCategoryId === 'number' && jobCategoryId > 0) {
-      requestBody.jobCategoryId = jobCategoryId;
+    if (jobCategoryId && jobCategoryId > 0) {
+      requestBody.categoryId = jobCategoryId;
     }
-    if (typeof jobId === 'number' && jobId > 0) {
+    if (jobId && jobId > 0) {
       requestBody.jobId = jobId;
     }
-    if (typeof employeeId === 'number' && employeeId > 0) {
+    if (employeeId && employeeId > 0) {
       requestBody.employeeId = employeeId;
     }
     if (dateFrom) {
@@ -105,7 +105,7 @@ export class DeductionService {
     if (dateTo) {
       requestBody.dateTo = dateTo;
     }
-
+      
     return this.http.post<any[]>(`${this.baseUrl}/Deduction/report`, requestBody, { headers });
   }
 

@@ -13,6 +13,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
 @Component({
   selector: 'app-bonus-report',
@@ -21,13 +23,15 @@ import Swal from 'sweetalert2';
   templateUrl: './bonus-report.component.html',
   styleUrl: './bonus-report.component.css'
 })
+
+@InitLoader()
 export class BonusReportComponent implements OnInit {
-  // Filter properties
-  selectedJobCategoryId: number = 0;
-  selectedJobId: number = 0;
-  selectedEmployeeId: number = 0;
-  dateFrom: string = '';
-  dateTo: string = '';
+
+selectedJobCategoryId: number | null = null;
+selectedJobId: number | null = null;
+selectedEmployeeId: number | null = null;
+dateFrom: string = '';
+dateTo: string = '';
 
   // Data sources
   jobCategories: any[] = [];
@@ -50,6 +54,7 @@ export class BonusReportComponent implements OnInit {
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
   reportsForExport: any[] = [];
+  tableSectionsForPDF: any[] = [];
   school = {
     reportHeaderOneEn: 'Bonus Report',
     reportHeaderTwoEn: 'Employee Bonus Records',
@@ -64,13 +69,13 @@ export class BonusReportComponent implements OnInit {
     private employeeService: EmployeeService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private reportsService: ReportsService
-  ) {}
+    private reportsService: ReportsService,
+    private loadingService: LoadingService 
+  ) { }
 
   ngOnInit() {
     this.loadJobCategories();
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -78,7 +83,6 @@ export class BonusReportComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -95,50 +99,47 @@ export class BonusReportComponent implements OnInit {
   }
 
   async loadJobs() {
-    if (this.selectedJobCategoryId) {
+    this.selectedJobId = null;
+    this.employees = [];
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.jobService.GetByCtegoty(this.selectedJobCategoryId, domainName)
         );
         this.jobs = data;
-        this.selectedJobId = 0;
-        this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading jobs:', error);
+        this.jobs = [];
       }
     } else {
       this.jobs = [];
-      this.selectedJobId = 0;
-      this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   async loadEmployees() {
-    if (this.selectedJobId) {
+    this.selectedEmployeeId = null;
+    
+    if (this.selectedJobId && this.selectedJobId !== null) {
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
         this.employees = data;
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       } catch (error) {
         console.error('Error loading employees:', error);
         this.employees = [];
-        this.selectedEmployeeId = 0;
-        this.onFilterChange();
       }
     } else {
       this.employees = [];
-      this.selectedEmployeeId = 0;
-      this.onFilterChange();
     }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
@@ -147,167 +148,238 @@ export class BonusReportComponent implements OnInit {
     this.bonusReports = [];
   }
 
-async viewReport() {
-  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
+    ResetFilter() {
+    this.selectedJobCategoryId = null;
+    this.selectedJobId = null;
+    this.dateTo = '';
+    this.dateFrom = '';
+    this.selectedEmployeeId = null;
+    this.showTable = false;
+    this.showViewReportBtn = false;
   }
 
-  if (!this.dateFrom || !this.dateTo) {
-    Swal.fire({
-      title: 'Incomplete Selection',
-      text: 'Please select both Date From and Date To to generate the report.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
+  async viewReport() {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (!this.dateFrom || !this.dateTo) {
+      Swal.fire({
+        title: 'Incomplete Selection',
+        text: 'Please select both Date From and Date To to generate the report.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.showTable = false;
+
+    try {
+      const domainName = this.apiService.GetHeader();
+
+      // Create parameters object with only non-zero values
+      const params: any = {
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo
+      };
+
+      // Only add optional parameters if they have meaningful values
+      if (this.selectedEmployeeId && this.selectedEmployeeId !== null) {
+        params.employeeId = this.selectedEmployeeId;
+      }
+      if (this.selectedJobId && this.selectedJobId !== null && this.selectedJobId !== null) {
+        params.jobId = this.selectedJobId;
+      }
+      if (this.selectedJobCategoryId && this.selectedJobCategoryId !== null && this.selectedJobCategoryId !== null) {
+        params.categoryId = this.selectedJobCategoryId;
+      }
+
+      console.log('Sending parameters:', params);
+
+      const response = await firstValueFrom(
+        this.bonusService.GetBonusReport(
+          params.categoryId,    // Will be undefined if not provided
+          params.jobId,         // Will be undefined if not provided  
+          params.employeeId,    // Will be undefined if not provided
+          params.dateFrom,      // Always provided (mandatory)
+          params.dateTo,        // Always provided (mandatory)
+          domainName
+        )
+      );
+
+      console.log('API Response:', response);
+
+      if (Array.isArray(response)) {
+        this.bonusReports = [];
+        this.bonusReports = response;
+        console.log('Bonus reports loaded:', this.bonusReports.length);
+      } else {
+        console.log('Response is not an array:', response);
+        this.bonusReports = [];
+      }
+
+      this.prepareExportData();
+      this.showTable = true;
+    } catch (error) {
+      console.error('Error loading bonus reports:', error);
+      this.bonusReports = [];
+      this.showTable = true;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  this.isLoading = true;
-  this.showTable = false;
+private prepareExportData(): void {
+  // For PDF sections (similar to deduction report)
+  this.tableSectionsForPDF = [];
+  
+  // For regular table display
+  this.reportsForExport = [];
+  
+  this.bonusReports.forEach(employeeBonus => {
+    const employeeName =
+      employeeBonus.employeeEnName ||
+      employeeBonus.employeeName ||
+      employeeBonus.employeeArName ||
+      employeeBonus.en_name ||
+      employeeBonus.ar_name ||
+      'Unknown';
 
-  try {
-    const domainName = this.apiService.GetHeader();
-    
-    // Create parameters object with only non-zero values
-    const params: any = {
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo
+    // Create section for PDF (similar to deduction report)
+    const section = {
+      header: `Employee: ${employeeName}`,
+      data: [
+        { key: 'Employee ID', value: employeeBonus.employeeId },
+        { key: 'Employee Name', value: employeeName },
+        { key: 'Total Amount', value: employeeBonus.totalAmount }
+      ],
+      tableHeaders: [
+        'Bonus Date', 
+        'Bonus Type',
+        'Hours',
+        'Minutes',
+        'Number of Bonus Days', 
+        'Amount', 
+        'Notes'
+      ],
+      tableData: [] as any[]
     };
 
-    // Only add optional parameters if they have meaningful values
-    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-      params.employeeId = this.selectedEmployeeId;
-    }
-    if (this.selectedJobId && this.selectedJobId !== 0) {
-      params.jobId = this.selectedJobId;
-    }
-    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
-      params.categoryId = this.selectedJobCategoryId;
-    }
-
-    console.log('Sending parameters:', params);
-
-    const response = await firstValueFrom(
-      this.bonusService.GetBonusReport(
-        params.categoryId,    // Will be undefined if not provided
-        params.jobId,         // Will be undefined if not provided  
-        params.employeeId,    // Will be undefined if not provided
-        params.dateFrom,      // Always provided (mandatory)
-        params.dateTo,        // Always provided (mandatory)
-        domainName
-      )
-    );
-
-    console.log('API Response:', response);
-    
-    if (Array.isArray(response)) {
-      this.bonusReports = response;
-      console.log('Bonus reports loaded:', this.bonusReports.length);
-    } else {
-      console.log('Response is not an array:', response);
-      this.bonusReports = [];
-    }
-
-    this.prepareExportData();
-    this.showTable = true;
-  } catch (error) {
-    console.error('Error loading bonus reports:', error);
-    this.bonusReports = [];
-    this.showTable = true;
-  } finally {
-    this.isLoading = false;
-  }
-}
-
-  private prepareExportData(): void {
-    // For PDF (object format) - Flatten the data for the table
-    this.reportsForExport = [];
-    this.bonusReports.forEach(employeeBonus => {
-      if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
-        employeeBonus.bonuses.forEach((bonus: any) => {
-          this.reportsForExport.push({
-            'Employee ID': employeeBonus.employeeId,
-            'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-            'Total Amount': employeeBonus.totalAmount,
-            'Bonus ID': bonus.id,
-            'Bonus Date': new Date(bonus.date).toLocaleDateString(),
-            'Bonus Type': bonus.bounsTypeName,
-            'Hours': bonus.hours || '-',
-            'Minutes': bonus.minutes || '-',
-            'Number of Bonus Days': bonus.numberOfBounsDays || '-',
-            'Amount': bonus.amount || '-',
-            'Notes': bonus.notes || '-'
-          });
+    if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
+      employeeBonus.bonuses.forEach((bonus: any) => {
+        // For PDF sections
+        section.tableData.push({
+          'Bonus Date': new Date(bonus.date).toLocaleDateString(),
+          'Bonus Type': bonus.bonusTypeName,
+          'Hours': bonus.hours || '-',
+          'Minutes': bonus.minutes || '-',
+          'Number of Bonus Days': bonus.numberOfBonusDays || '-',
+          'Amount': bonus.amount || '-',
+          'Notes': bonus.notes || '-'
         });
-      } else {
-        // If no bonuses, still show employee summary
+
+        // For regular export
         this.reportsForExport.push({
           'Employee ID': employeeBonus.employeeId,
-          'Employee Name': employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-          'Total Amount': employeeBonus.totalAmount,
-          'Bonus ID': '-',
-          'Bonus Date': '-',
-          'Bonus Type': '-',
-          'Hours': '-',
-          'Minutes': '-',
-          'Number of Bonus Days': '-',
-          'Amount': '-',
-          'Notes': '-'
+          'Employee Name': employeeName,
+          'Bonus ID': bonus.id,
+          'Bonus Date': new Date(bonus.date).toLocaleDateString(),
+          'Bonus Type': bonus.bonusTypeName,
+          'Hours': bonus.hours || '-',
+          'Minutes': bonus.minutes || '-',
+          'Number of Bonus Days': bonus.numberOfBonusDays || '-',
+          'Amount': bonus.amount || '-',
+          'Notes': bonus.notes || '-'
         });
-      }
-    });
+      });
+    } else {
+      // If no bonuses, add placeholder
+      section.tableData.push({
+        'Bonus Date': '-',
+        'Bonus Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Bonus Days': '-',
+        'Amount': '-',
+        'Notes': 'No bonuses found'
+      });
 
-    // For Excel (array format)
-    this.reportsForExcel = [];
-    this.bonusReports.forEach(employeeBonus => {
-      if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
-        employeeBonus.bonuses.forEach((bonus: any) => {
-          this.reportsForExcel.push([
-            employeeBonus.employeeId,
-            employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-            employeeBonus.totalAmount,
-            bonus.id,
-            new Date(bonus.date).toLocaleDateString(),
-            bonus.bounsTypeName,
-            bonus.hours || '-',
-            bonus.minutes || '-',
-            bonus.numberOfBounsDays || '-',
-            bonus.amount || '-',
-            bonus.notes || '-'
-          ]);
-        });
-      } else {
+      this.reportsForExport.push({
+        'Employee ID': employeeBonus.employeeId,
+        'Employee Name': employeeName,
+        'Bonus ID': '-',
+        'Bonus Date': '-',
+        'Bonus Type': '-',
+        'Hours': '-',
+        'Minutes': '-',
+        'Number of Bonus Days': '-',
+        'Amount': '-',
+        'Notes': '-'
+      });
+    }
+
+    this.tableSectionsForPDF.push(section);
+  });
+
+  // For Excel (array format) - keep existing logic
+  this.reportsForExcel = [];
+  this.bonusReports.forEach(employeeBonus => {
+    const employeeName =
+      employeeBonus.employeeEnName ||
+      employeeBonus.employeeName ||
+      employeeBonus.employeeArName ||
+      employeeBonus.en_name ||
+      employeeBonus.ar_name ||
+      'Unknown';
+
+    if (employeeBonus.bonuses && employeeBonus.bonuses.length > 0) {
+      employeeBonus.bonuses.forEach((bonus: any) => {
         this.reportsForExcel.push([
           employeeBonus.employeeId,
-          employeeBonus.employeeEnName || employeeBonus.employeeArName || 'Unknown',
-          employeeBonus.totalAmount,
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-'
+          employeeName,
+          bonus.id,
+          new Date(bonus.date).toLocaleDateString(),
+          bonus.bonusTypeName,
+          bonus.hours || '-',
+          bonus.minutes || '-',
+          bonus.numberOfBonusDays || '-',
+          bonus.amount || '-',
+          bonus.notes || '-'
         ]);
-      }
-    });
-  }
+      });
+    } else {
+      this.reportsForExcel.push([
+        employeeBonus.employeeId,
+        employeeName,
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-'
+      ]);
+    }
+  });
+}
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
            this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
            'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
            this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
            'All Jobs';
   }
@@ -320,11 +392,11 @@ async viewReport() {
 
   getInfoRows(): any[] {
     return [
-      { keyEn: 'Date From: ' + this.dateFrom },
-      { keyEn: 'Date To: ' + this.dateTo },
-      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
-      { keyEn: 'Job: ' + this.getJobName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
+      { keyEn: 'Date From: ' + this.dateFrom, keyAr: this.dateFrom + ': من تاريخ' },
+      { keyEn: 'Date To: ' + this.dateTo, keyAr: this.dateTo + ': إلى تاريخ' },
+      { keyEn: 'Job Category: ' + this.getJobCategoryName(), keyAr: this.getJobCategoryName() + ': فئة الوظيفة' },
+      { keyEn: 'Job: ' + this.getJobName(), keyAr: this.getJobName() + ': الوظيفة' },
+      { keyEn: 'Employee: ' + this.getEmployeeName(), keyAr: this.getEmployeeName() + ': الموظف' }
     ];
   }
 
@@ -346,7 +418,7 @@ async viewReport() {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -354,7 +426,7 @@ async viewReport() {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -375,14 +447,14 @@ async viewReport() {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -397,19 +469,13 @@ async viewReport() {
     }
 
     this.isExporting = true;
-    
+
     try {
       await this.reportsService.generateExcelReport({
         mainHeader: {
           en: 'Bonus Report',
           ar: 'تقرير المكافآت'
         },
-        // subHeaders: [
-        //   {
-        //     en: 'Employee Bonus Records',
-        //     ar: 'سجلات مكافآت الموظفين'
-        //   }
-        // ],
         infoRows: [
           { key: 'Date From', value: this.dateFrom },
           { key: 'Date To', value: this.dateTo },
@@ -419,18 +485,16 @@ async viewReport() {
         ],
         tables: [
           {
-            // title: 'Bonus Report Data',
             headers: [
-              'Employee ID', 
-              'Employee Name', 
-              'Total Amount', 
-              'Bonus ID', 
-              'Bonus Date', 
+              'Employee ID',
+              'Employee Name',
+              'Bonus ID',
+              'Bonus Date',
               'Bonus Type',
               'Hours',
-              'Minutes', 
-              'Number of Bonus Days', 
-              'Amount', 
+              'Minutes',
+              'Number of Bonus Days',
+              'Amount',
               'Notes'
             ],
             data: this.reportsForExcel

@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-semester-view',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './semester-view.component.html',
   styleUrl: './semester-view.component.css'
 })
+
+@InitLoader()
 export class SemesterViewComponent {
   DomainName: string = "";
   semesterId: number = 0
@@ -48,10 +52,15 @@ export class SemesterViewComponent {
   editWorkingWeek: boolean = false;
   validationErrors: { [key in keyof SemesterWorkingWeek]?: string } = {};
   isLoading = false; 
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
-  constructor(private languageService: LanguageService,public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, private translate: TranslateService,
-    public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
+  constructor(private languageService: LanguageService,public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, private translate: TranslateService,
+    public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService,
+    private loadingService: LoadingService){}
 
   ngOnInit(){
     this.DomainName = this.ApiServ.GetHeader();
@@ -59,7 +68,7 @@ export class SemesterViewComponent {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
 
     this.GetSemesterById(this.semesterId)
-    this.GetWorkingWeeksBySemesterById(this.semesterId)
+    this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
 
     this.activeRoute.url.subscribe(url => {
       this.path = url[0].path
@@ -81,11 +90,10 @@ export class SemesterViewComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }  
 
   IsAllowDelete(InsertedByID: number) { 
@@ -116,7 +124,7 @@ export class SemesterViewComponent {
         if (result.isConfirmed) { 
           this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
             data => {
-              this.GetWorkingWeeksBySemesterById(this.semesterId);
+              this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
             }, error => {
               Swal.fire({ 
                 title: error.error,
@@ -140,7 +148,7 @@ export class SemesterViewComponent {
         if (result.isConfirmed) { 
           this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
             data => {
-              this.GetWorkingWeeksBySemesterById(this.semesterId);
+              this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
             }, error => {
               Swal.fire({ 
                 title: error.error,
@@ -166,11 +174,45 @@ export class SemesterViewComponent {
     });
   } 
 
-  GetWorkingWeeksBySemesterById(Id: number) {
-    this.WorkingWeeks = []
-    this.semesterWorkingWeekService.GetBySemesterID(Id, this.DomainName).subscribe((data) => {
-      this.WorkingWeeks = data;
-    });
+  // GetWorkingWeeksBySemesterById(Id: number) {
+  //   this.WorkingWeeks = []
+  //   this.semesterWorkingWeekService.GetBySemesterID(Id, this.DomainName).subscribe((data) => {
+  //     this.WorkingWeeks = data;
+  //   });
+  // }
+
+  GetWorkingWeeksBySemesterById(Id: number ,DomainName: string, pageNumber: number, pageSize: number) {
+    this.WorkingWeeks = [];
+    this.semesterWorkingWeekService.GetBySemesterIDWithPaggination(Id ,DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.WorkingWeeks = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetWorkingWeeksBySemesterById(Id ,this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+      }
+    );
   }
 
   openModal(Id?: number) {
@@ -239,7 +281,7 @@ export class SemesterViewComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.semesterWorkingWeekService.Delete(id,this.DomainName).subscribe((D)=>{ 
-          this.GetWorkingWeeksBySemesterById(this.semesterId)
+          this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
         })
       }
     });
@@ -299,7 +341,7 @@ export class SemesterViewComponent {
         if(this.editWorkingWeek == false){
           this.semesterWorkingWeekService.Add(this.semesterWorkingWeek, this.DomainName).subscribe(
             data =>{
-                this.GetWorkingWeeksBySemesterById(this.semesterId)
+                this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
                 this.closeModal()
                 this.isLoading = false;
             },
@@ -317,7 +359,7 @@ export class SemesterViewComponent {
         } else{
           this.semesterWorkingWeekService.Edit(this.semesterWorkingWeek, this.DomainName).subscribe(
             data =>{
-                this.GetWorkingWeeksBySemesterById(this.semesterId)
+                this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
                 this.closeModal()
                 this.isLoading = false;
             },
@@ -338,13 +380,16 @@ export class SemesterViewComponent {
   } 
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: SemesterWorkingWeek[] = await firstValueFrom(
-        this.semesterWorkingWeekService.GetBySemesterID(this.semesterId, this.DomainName)
+      const data: any = await firstValueFrom(
+        this.semesterWorkingWeekService.GetBySemesterIDWithPaggination(this.semesterId, this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.WorkingWeeks = data || [];
+      this.WorkingWeeks = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -366,4 +411,48 @@ export class SemesterViewComponent {
       this.WorkingWeeks = [];
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }   
 }

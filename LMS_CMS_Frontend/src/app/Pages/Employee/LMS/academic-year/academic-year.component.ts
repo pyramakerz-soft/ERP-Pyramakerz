@@ -18,6 +18,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-academic-year',
   standalone: true,
@@ -25,6 +27,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './academic-year.component.html',
   styleUrl: './academic-year.component.css',
 })
+
+@InitLoader()
 export class AcademicYearComponent {
   keysArray: string[] = [
     'id',
@@ -52,6 +56,11 @@ export class AcademicYearComponent {
 
   Schools: School[] = [];
   isLoading = false;
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     public account: AccountService,
@@ -63,8 +72,8 @@ export class AcademicYearComponent {
     public router: Router,
     private translate: TranslateService,
     public acadimicYearServicea: AcadimicYearService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -77,7 +86,7 @@ export class AcademicYearComponent {
       this.path = url[0].path;
     });
 
-    this.getAcademicYearData();
+    this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -95,11 +104,10 @@ export class AcademicYearComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -129,13 +137,16 @@ export class AcademicYearComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: AcademicYear[] = await firstValueFrom(
-        this.acadimicYearServicea.Get(this.DomainName)
+      const data: any = await firstValueFrom(
+        this.acadimicYearServicea.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
       );
-      this.academicYearData = data || [];
+      this.academicYearData = data.data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -176,11 +187,38 @@ export class AcademicYearComponent {
     return IsAllow;
   }
 
-  getAcademicYearData() {
+  getAcademicYearData(DomainName: string, pageNumber: number, pageSize: number) {
     this.academicYearData = [];
-    this.acadimicYearServicea.Get(this.DomainName).subscribe((data) => {
-      this.academicYearData = data;
-    });
+    this.acadimicYearServicea.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.academicYearData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } 
+      }
+    );
   }
 
   getAcademicYearById(id: number) {
@@ -320,7 +358,7 @@ export class AcademicYearComponent {
                 (result: any) => {
                   this.closeModal();
                   this.isLoading = false;
-                  this.getAcademicYearData();
+                  this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
                 },
                 (error) => {
                   this.isLoading = false;
@@ -340,7 +378,7 @@ export class AcademicYearComponent {
                 (result: any) => {
                   this.closeModal();
                   this.isLoading = false;
-                  this.getAcademicYearData();
+                  this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
                 },
                 (error) => {
                   this.isLoading = false;
@@ -374,7 +412,7 @@ export class AcademicYearComponent {
           .Delete(id, this.DomainName)
           .subscribe((data: any) => {
             this.academicYearData = [];
-            this.getAcademicYearData();
+            this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
           });
       }
     });
@@ -385,4 +423,48 @@ export class AcademicYearComponent {
       'Employee/Semester/' + this.DomainName + '/' + Id
     );
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }    
 }

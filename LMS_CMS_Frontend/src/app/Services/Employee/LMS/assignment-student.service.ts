@@ -75,6 +75,30 @@ export class AssignmentStudentService {
     return this.http.put(`${this.baseUrl}/AssignmentStudent`, payload, { headers });
   }
 
+  EditAll(data: AssignmentStudent[], DomainName: string) {
+    if (DomainName) {
+      this.header = DomainName;
+    }
+
+    const payload = data.map(d => ({
+      id: d.id,
+      degree: d.degree,
+      evaluationConsideringTheDelay: d.evaluationConsideringTheDelay,
+      assignmentStudentQuestions: d.assignmentStudentQuestions?.map(q => ({
+        id: q.id,
+        mark: q.mark
+      })) || []
+    }));
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.put(`${this.baseUrl}/AssignmentStudent/EditAll`, payload, { headers });
+  }
+
   Add(data: AssignmentStudent, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

@@ -5,6 +5,7 @@
     </h1>
 </div>
 
+
 <div class="my-5 flex flex-wrap justify-between items-center">
     <!-- Date From -->
     <div class="w-[24%] mb-4">
@@ -23,48 +24,55 @@
     <!-- Job Category Selector -->
     <div class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="jobCategory">{{ 'Job Category' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="jobCategory"
-            [(ngModel)]="selectedJobCategoryId" (change)="loadJobs()">
-            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
-            <option *ngIf="jobCategories.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
-            <option *ngIf="jobCategories.length === 0" disabled>{{ 'No Data' | translate }}</option>
-            <option *ngFor="let category of jobCategories" [value]="category.id">
-                {{ category.name || category.ar_name }}
-            </option>
-        </select>
+<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" 
+    id="jobCategory"
+    [(ngModel)]="selectedJobCategoryId" 
+    (change)="loadJobs()">
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+    <!-- <option *ngIf="jobCategories.length > 0" [ngValue] = null>{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
+    <option *ngIf="jobCategories.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
+    <option *ngFor="let category of jobCategories" [value]="category.id">
+        {{ category.name || category.ar_name }}
+    </option>
+</select>
     </div>
 
     <!-- Job Selector -->
     <div class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="job">{{ 'Job' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="job"
-            [(ngModel)]="selectedJobId" (change)="loadEmployees()" [disabled]="!selectedJobCategoryId">
-            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job' | translate }}</option>
-            <option *ngIf="jobs.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
-            <option *ngIf="jobs.length === 0" disabled>{{ 'No Data' | translate }}</option>
-            <option *ngFor="let job of jobs" [value]="job.id">
-                {{ job.name || job.ar_name }}
-            </option>
-        </select>
+<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" 
+    id="job"
+    [(ngModel)]="selectedJobId" 
+    (change)="loadEmployees()" 
+    [disabled]="selectedJobCategoryId == 0 || selectedJobCategoryId == null">
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+    <!-- <option *ngIf="jobs.length > 0" [value]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
+    <option *ngIf="jobs.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
+    <option *ngFor="let job of jobs" [value]="job.id">
+        {{ job.name || job.ar_name }}
+    </option>
+</select>
     </div>
 
     <!-- Employee Selector -->
     <div class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="employee">{{ 'Employee' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
-            [(ngModel)]="selectedEmployeeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedJobId">
-            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
-            <option *ngIf="employees.length > 0" [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }}</option>
-            <option *ngIf="employees.length === 0" disabled>{{ 'No Data' | translate }}</option>
-            <option *ngFor="let employee of employees" [value]="employee.id">
-                {{ employee.en_name || employee.ar_name || 'Unknown' }}
-            </option>
-        </select>
+<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" 
+    id="employee"
+    [(ngModel)]="selectedEmployeeId" 
+    (ngModelChange)="onFilterChange()" 
+    [disabled]="selectedJobId == 0 || selectedJobId == null">
+    <option [ngValue]=null  selected>{{ 'Select' | translate }} {{ 'All' | translate }}</option>
+    <!-- <option *ngIf="employees.length > 0" [value]="0">{{ 'Select' | translate }} {{ 'All' | translate }}</option> -->
+    <option *ngIf="employees.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
+    <option *ngFor="let employee of employees" [value]="employee.id">
+        {{ employee.en_name || employee.ar_name || 'Unknown' }}
+    </option>
+</select>
     </div>
 
-    <!-- View Report Button -->
-    <div class="w-[24%] flex justify-end">
-        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+    <div class="w-full md:w-1/6 flex justify-end mt-4 items-center md:mt-0 space-x-4 rtl:space-x-reverse">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()" 
             [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
             'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
             'secondaryBg text-white': showViewReportBtn && !isLoading
@@ -72,6 +80,9 @@
             <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
+        <div class="rounded-full p-2 border-4" (click)="ResetFilter()">
+            <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+        </div>
     </div>
 </div>
 
@@ -96,9 +107,9 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Bonus ID' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Bonus Date' | translate }}
                 </th>
@@ -143,7 +154,7 @@
                         {{ employeeBonus.totalAmount }}
                     </td>
                     <td colspan="8" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
-                        {{ 'No bonuses found' | translate }}
+                        {{ 'No Bonus found' | translate }}
                     </td>
                 </tr>
                 
@@ -159,14 +170,14 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getBonusCount(employeeBonus)">
                             {{ employeeBonus.totalAmount }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.id }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.date | date:'mediumDate' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ bonus.bounsTypeName }}
+                            {{ bonus.bonusTypeName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.hours || '-' }}
@@ -175,7 +186,7 @@
                             {{ bonus.minutes || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ bonus.numberOfBounsDays || '-' }}
+                            {{ bonus.numberOfBonusDays || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ bonus.amount || '-' }}
@@ -194,12 +205,16 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Bonus Report'"
-            [infoRows]="getInfoRows()"
-            [tableHeaders]="[
+        [infoRows]="[
+          { keyEn: 'Date From: ' + this.dateFrom,        keyAr: this.dateFrom + ': من تاريخ' },
+          { keyEn: 'Date To: ' + this.dateTo,            keyAr: this.dateTo + ': إلى تاريخ' },
+          { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
+          { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
+          { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getEmployeeName() + ': الموظف' }
+        ]"
+        [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 
-                'Total Amount', 
-                'Bonus ID', 
                 'Bonus Date', 
                 'Bonus Type',
                 'Hours',
@@ -208,7 +223,8 @@
                 'Amount', 
                 'Notes'
             ]"
-            [tableData]="reportsForExport" #pdfComponentRef>
+            [tableDataWithHeaderArray]="tableSectionsForPDF"
+            #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

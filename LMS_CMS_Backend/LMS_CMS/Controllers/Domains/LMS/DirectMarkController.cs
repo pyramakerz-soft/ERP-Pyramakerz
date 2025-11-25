@@ -104,7 +104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Direct Mark" }
-       )]
+        )]
         public async Task<IActionResult> GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -193,6 +193,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             else
             {
                 NewDirectMark.SubjectWeightTypeID = null;
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewDirectMark.AcademicYearID);
+            if (academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            }
+
+            if(NewDirectMark.IsSummerCourse == false)
+            {
+                if (NewDirectMark.Date < academicYear.DateFrom || NewDirectMark.Date > academicYear.DateTo)
+                {
+                    return BadRequest("This Date Is Not in this Academic Year");
+                }
+            }
+            else
+            {
+                if (NewDirectMark.Date < academicYear.SummerCourseDateFrom || NewDirectMark.Date > academicYear.SummerCourseDateTo)
+                {
+                    return BadRequest("This Date Is Not in this Academic Year");
+                }
             }
 
             DirectMark directMark = mapper.Map<DirectMark>(NewDirectMark);
@@ -355,6 +376,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (accessCheck != null)
                 {
                     return accessCheck;
+                }
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewDirectMark.AcademicYearID);
+            if (academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            }
+
+            if (NewDirectMark.IsSummerCourse == false)
+            {
+                if (NewDirectMark.Date < academicYear.DateFrom || NewDirectMark.Date > academicYear.DateTo)
+                {
+                    return BadRequest("This Date Is Not in this Academic Year");
+                }
+            }
+            else
+            {
+                if (NewDirectMark.Date < academicYear.SummerCourseDateFrom || NewDirectMark.Date > academicYear.SummerCourseDateTo)
+                {
+                    return BadRequest("This Date Is Not in this Academic Year");
                 }
             }
 

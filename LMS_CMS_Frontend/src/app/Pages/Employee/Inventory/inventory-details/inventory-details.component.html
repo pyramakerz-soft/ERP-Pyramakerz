@@ -15,7 +15,7 @@
       <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
 
-    <button *ngIf="FlagId == 13 && mode == 'Edit'" class="secondaryBg text-white font-medium px-6 py-3 rounded-lg"
+    <button *ngIf="FlagId == 13 && mode == 'Edit' && !Data.isConvertedToPurchase" class="secondaryBg text-white font-medium px-6 py-3 rounded-lg"
       (click)="ConvertToPurcase()">
       {{'Convert To Purchase'| translate }}
     </button>
@@ -27,7 +27,7 @@
     <label class="mb-2" for="store"> {{'Store'| translate }}</label>
     <select *ngIf="!IsPrint" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Store"
       (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
-      [disabled]="mode === 'Edit'" [(ngModel)]="Data.storeID">
+      [disabled]="mode === 'Edit'" [(ngModel)]="Data.storeID" [ngClass]="{ 'bg-[#EBEBEB]': mode === 'Edit' }">
       <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Store'| translate }}</option>
       <option *ngFor="let s of Stores" [value]="s.id">{{ s.name }}</option>
       <option *ngIf="Stores.length === 0" disabled selected>
@@ -51,7 +51,7 @@
   </div>
 
   <div class="flex flex-col mb-4 w-[24%]">
-    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }} {{'&' | translate}} {{'Time'| translate }}</label>
+    <label class="mb-2 primaryTxt" for="name"> {{'Date'| translate }}</label>
     <input *ngIf="!IsPrint" id="name" type="date"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
@@ -133,7 +133,7 @@
       <label for="exception" class="text-sm"> {{'Cash'| translate }}</label>
     </div>
     <div *ngIf="Data.isCash" class="flex flex-col mb-4 w-[15%]">
-      <input id="cashAmount" type="number" [(ngModel)]="Data.cashAmount"
+      <input id="cashAmount" type="text" [(ngModel)]="Data.cashAmount"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
         (input)="validateCashVisaNumber($event, 'cashAmount')"
         placeholder="{{'Enter'| translate }} {{'Amount'| translate }}" />
@@ -160,7 +160,7 @@
       <label for="exception" class="text-sm"> {{'Visa'| translate }}</label>
     </div>
     <div *ngIf="Data.isVisa" class="flex flex-col mb-4 w-[15%]">
-      <input id="visaAmount" type="number" [(ngModel)]="Data.visaAmount"
+      <input id="visaAmount" type="text" [(ngModel)]="Data.visaAmount"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
         (input)="validateCashVisaNumber($event, 'visaAmount')"
         placeholder="{{'Enter'| translate }} {{'Amount'| translate }}" />

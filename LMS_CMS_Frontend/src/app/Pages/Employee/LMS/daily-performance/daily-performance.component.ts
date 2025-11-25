@@ -33,6 +33,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-daily-performance',
   standalone: true,
@@ -40,6 +42,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './daily-performance.component.html',
   styleUrl: './daily-performance.component.css',
 })
+
+@InitLoader()
 export class DailyPerformanceComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
@@ -108,8 +112,8 @@ export class DailyPerformanceComponent {
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
     public StudentPerformanceServ: DailyPerformanceService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService, 
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit() {
@@ -137,8 +141,7 @@ export class DailyPerformanceComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -360,7 +363,7 @@ export class DailyPerformanceComponent {
         Swal.fire({
           icon: 'success',
           title: 'Done',
-          text: 'Saved Succeessfully',
+          text: 'Saved Successfully',
           confirmButtonColor: '#089B41',
         }).then(() => {
           window.location.reload();

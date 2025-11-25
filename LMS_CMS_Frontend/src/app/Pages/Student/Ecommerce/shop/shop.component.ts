@@ -22,6 +22,8 @@ import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Student } from '../../../../Models/student';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-shop',
@@ -30,6 +32,8 @@ import { Student } from '../../../../Models/student';
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
+
+@InitLoader()
 export class ShopComponent { 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
@@ -56,8 +60,8 @@ export class ShopComponent {
   searchQuery: string = '';
    
   constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
-    public account: AccountService,public StudentService: StudentService,
-    private realTimeService: RealTimeNotificationServiceService,public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
+    public account: AccountService,public StudentService: StudentService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService,
+    private loadingService: LoadingService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -84,11 +88,10 @@ export class ShopComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getStudents(){
@@ -180,9 +183,7 @@ export class ShopComponent {
         Swal.fire({
           title: "Added Successfully!",
           icon: "success"
-        }).then((result) => {
-          this.goToCart();
-        }); 
+        })
       }
     )
   }
@@ -227,13 +228,13 @@ export class ShopComponent {
   
   goToShopItem(id: number) {  
     if(this.User_Data_After_Login.type == "employee"){
-      this.router.navigateByUrl("Employee/ShopItem/" + id)
+      this.router.navigateByUrl("Employee/The Shop/" + id)
     } 
     else if(this.User_Data_After_Login.type == "student"){
-      this.router.navigateByUrl("Student/ShopItem/" + id)
+      this.router.navigateByUrl("Student/The Shop/" + id)
     }
     else{
-      this.router.navigateByUrl("Parent/ShopItem/" + id)
+      this.router.navigateByUrl("Parent/The Shop/" + id)
     }
   }
 

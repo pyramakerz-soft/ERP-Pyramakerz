@@ -14,6 +14,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../Services/loading.service';
+import { InitLoader } from '../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-school',
   standalone: true,
@@ -21,6 +23,8 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './school.component.html',
   styleUrl: './school.component.css'
 })
+
+@InitLoader()
 export class SchoolComponent {
   key: string= "id";
   value: any = "";
@@ -36,7 +40,9 @@ export class SchoolComponent {
   subscription!: Subscription;
   validationErrors: { [key in keyof School]?: string } = {};
 
-  constructor(public DomainServ: DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService , private translate: TranslateService){}
+  constructor(public DomainServ: DomainService,private languageService: LanguageService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService
+     , private translate: TranslateService,
+    private loadingService: LoadingService ){}
 
   ngOnInit(){
     this.getAllDomains();
@@ -47,11 +53,10 @@ export class SchoolComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {  
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getAllDomains() {

@@ -19,6 +19,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
+import { LoadingService } from '../../../../Services/loading.service';
 
 @Component({
   selector: 'app-leave-request',
@@ -27,6 +29,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './leave-request.component.html',
   styleUrl: './leave-request.component.css'
 })
+
+@InitLoader()
 export class LeaveRequestComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -47,7 +51,7 @@ export class LeaveRequestComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'employeeEnName'];
 
   leaveRequest: LeaveRequest = new LeaveRequest();
   OldleaveRequest: LeaveRequest = new LeaveRequest();
@@ -78,7 +82,7 @@ export class LeaveRequestComponent {
     public LeaveRequestServ: LeaveRequestService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {
@@ -106,8 +110,8 @@ export class LeaveRequestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -190,6 +194,7 @@ export class LeaveRequestComponent {
         this.leaveRequest.monthlyLeaveRequestBalance = emp.monthlyLeaveRequestBalance
         this.leaveRequest.used = emp.monthlyLeaveRequestUsed
         this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
+        this.MonthlyLeaveRequestBalanceError = false
         this.CalculateRemains();
       }, error => {
         console.log(error.error)
@@ -248,10 +253,14 @@ export class LeaveRequestComponent {
     }
   }
 
-  formatHours(value: number): string {
-    const hours = Math.floor(value);
-    const minutes = Math.round((value - hours) * 60);
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  formatHours(value: number | null): string {
+    if(value){
+      const hours = Math.floor(value);
+      const minutes = Math.round((value - hours) * 60);
+      return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }else{
+      return ``;
+    }
   }
 
   validateNumber(event: any, field: keyof LeaveRequest): void {
@@ -387,31 +396,33 @@ export class LeaveRequestComponent {
     })
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.leaveRequest) {
-      if (this.leaveRequest.hasOwnProperty(key)) {
-        const field = key as keyof LeaveRequest;
-        if (!this.leaveRequest[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
+isFormValid(): boolean {
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.leaveRequest) {
+    if (this.leaveRequest.hasOwnProperty(key)) {
+      const field = key as keyof LeaveRequest;
+      if (!this.leaveRequest[field]) {
+        if (
+          field == 'date' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
+  }
     if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
     }
     // validate tha not give him more than this.leaveRequest.remains
-    if (this.leaveRequest.used > this.leaveRequest.monthlyLeaveRequestBalance) {
-      this.validationErrors['hours'] = "You Can not exceed MonthlyLeaveRequestBalance"
+    if (this.leaveRequest.used && this.leaveRequest.used > this.leaveRequest.monthlyLeaveRequestBalance) {
+      this.validationErrors['hours'] = "You Can not exceed Monthly Leave Request Balance"
       isValid = false;
     }
     if (this.MonthlyLeaveRequestBalanceError) {
@@ -516,5 +527,14 @@ export class LeaveRequestComponent {
       this.PageSize = 0
     }
   }
-
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
 }

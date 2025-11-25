@@ -17,6 +17,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../Services/loading.service';
+import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-weight-type',
   standalone: true,
@@ -24,6 +26,8 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   templateUrl: './weight-type.component.html',
   styleUrl: './weight-type.component.css'
 })
+
+@InitLoader()
 export class WeightTypeComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
@@ -60,8 +64,8 @@ export class WeightTypeComponent {
     public weightTypeService: WeightTypeService,
     public ApiServ: ApiService ,
     private translate: TranslateService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -89,11 +93,10 @@ export class WeightTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void { 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -137,30 +140,28 @@ export class WeightTypeComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.weightType) {
-      if (this.weightType.hasOwnProperty(key)) {
-        const field = key as keyof WeightType;
-        if (!this.weightType[field]) {
-          if(field == "englishName" || field == "arabicName"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          if(field == "englishName" || field == 'arabicName'){
-            if(this.weightType.englishName.length > 100 || this.weightType.arabicName.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
-        }
-      }
-    }
-    return isValid;
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {}; // Clear previous errors
+  
+  if (!this.weightType.englishName) {
+    this.validationErrors['englishName'] = this.getRequiredErrorMessage('English Name');
+    isValid = false;
+  } else if (this.weightType.englishName.length > 100) {
+    this.validationErrors['englishName'] = `*English Name cannot be longer than 100 characters`;
+    isValid = false;
   }
+  
+  if (!this.weightType.arabicName) {
+    this.validationErrors['arabicName'] = this.getRequiredErrorMessage('Arabic Name');
+    isValid = false;
+  } else if (this.weightType.arabicName.length > 100) {
+    this.validationErrors['arabicName'] = `*Arabic Name cannot be longer than 100 characters`;
+    isValid = false;
+  }
+  
+  return isValid;
+}
 
   onInputValueChange(event: { field: keyof WeightType, value: any }) {
     const { field, value } = event;
@@ -272,4 +273,16 @@ export class WeightTypeComponent {
       this.TableData = [];
     }
   }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
+  }
+}
+
 }

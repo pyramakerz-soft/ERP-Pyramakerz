@@ -13,6 +13,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { LoadingService } from '../../../../../Services/loading.service';
+import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-hygiene-form',
   standalone: true,
@@ -26,6 +28,8 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
   templateUrl: './hygiene-form.component.html',
   styleUrls: ['./hygiene-form.component.css'],
 })
+
+@InitLoader()
 export class HygieneFormComponent implements OnInit {
   @Input() students: any[] = [];
   @Input() hygieneTypes: any[] = [];
@@ -42,19 +46,24 @@ export class HygieneFormComponent implements OnInit {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'school', 'grade', 'classRoom'];
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService,
-    private translate: TranslateService
+    private languageService: LanguageService, 
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
-    this.loadHygieneForms();
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
         this.isRtl = direction === 'rtl';
@@ -63,8 +72,7 @@ export class HygieneFormComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.realTimeService.stopConnection();
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -96,13 +104,40 @@ export class HygieneFormComponent implements OnInit {
     });
   }
 
-  async loadHygieneForms() {
-    try {
-      const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(
-        this.hygieneFormService.Get(domainName)
-      );
-      this.originalHygieneForms = data.map((item) => ({
+  // async GetAllData() {
+  //   try {
+  //     const domainName = this.apiService.GetHeader();
+  //     const data = await firstValueFrom(
+  //       this.hygieneFormService.Get(domainName)
+  //     );
+  //     this.originalHygieneForms = data.map((item) => ({
+  //       ...item,
+  //       school: item.school,
+  //       grade: item.grade,
+  //       classRoom: item.classRoom,
+  //       date: new Date(item.date).toLocaleDateString(),
+  //       actions: { delete: true, edit: true, view: true },
+  //     }));
+  //     // console.log(this.originalHygieneForms);
+
+  //     this.hygieneForms = [...this.originalHygieneForms];
+  //     console.log('Hygiene Forms Loaded:');
+  //     console.log(this.hygieneForms);
+  //   } catch (error) {
+  //     console.error('Error fetching hygiene forms:', error);
+  //   }
+  // }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.originalHygieneForms = [];
+    this.hygieneForms = [];
+    this.hygieneFormService.GetWithPaggination(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.originalHygieneForms = data.data.map((item) => ({
         ...item,
         school: item.school,
         grade: item.grade,
@@ -113,26 +148,66 @@ export class HygieneFormComponent implements OnInit {
       // console.log(this.originalHygieneForms);
 
       this.hygieneForms = [...this.originalHygieneForms];
-      console.log('Hygiene Forms Loaded:');
-      console.log(this.hygieneForms);
-    } catch (error) {
-      console.error('Error fetching hygiene forms:', error);
-    }
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
+            } else {
+              lastPage = this.TotalRecords / this.PageSize;
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
+          }
+        } else {
+          const errorMessage =
+            error.error?.message ||
+            this.translate.instant('Failed to load Data');
+          this.showErrorAlert(errorMessage);
+        }
+      }
+    );
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
+    try {
+      const data: any = await firstValueFrom(
+        this.hygieneFormService.GetWithPaggination(this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.hygieneForms = data.data || [];
 
-    // Always start with original data
-    this.hygieneForms = [...this.originalHygieneForms];
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
 
-    if (this.value) {
-      this.hygieneForms = this.hygieneForms.filter((form) => {
-        const fieldValue =
-          form[this.key as keyof typeof form]?.toString().toLowerCase() || '';
-        return fieldValue.includes(this.value.toString().toLowerCase());
-      });
+        this.hygieneForms = this.hygieneForms.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString());
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.hygieneForms = [];
     }
   }
 
@@ -152,7 +227,7 @@ export class HygieneFormComponent implements OnInit {
   // }
 
   navigateToCreateHygieneForm() {
-    this.router.navigate(['/Employee/Hygiene Form']);
+    this.router.navigate(['/Employee/Hygiene Form Medical Report/Create']);
   }
 
   openModal(id?: number) {
@@ -220,7 +295,7 @@ export class HygieneFormComponent implements OnInit {
             if (this.hygieneForms.length === 1) {
               this.hygieneForms = [];
             }
-            this.loadHygieneForms();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.showSuccessAlert(successMessage);
           },
           error: (error) => {
@@ -265,7 +340,7 @@ export class HygieneFormComponent implements OnInit {
   }
 
   onView(row: any) {
-    this.router.navigate(['/Employee/Hygiene Form', row.id]);
+    this.router.navigate(['/Employee/Hygiene Form Medical Report', row.id]);
   }
 
   GetTableHeaders() {
@@ -282,4 +357,59 @@ export class HygieneFormComponent implements OnInit {
       ];
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validateNumberPage(event: any): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      this.PageSize = 0;
+    }
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+    
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
+  }  
 }
