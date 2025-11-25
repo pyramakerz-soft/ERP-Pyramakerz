@@ -6,6 +6,8 @@ export class Order {
         public orderStateName: string = "",
         public cartID: number = 0,
         public studentID: number = 0, 
+        public studentEnglishName: string = "",
+        public studentArabicName: string = "",
         public insertedAt: string = "", 
         public mainImage: string = "", 
     ){}

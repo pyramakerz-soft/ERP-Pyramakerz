@@ -48,7 +48,7 @@ using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
-//using System.IO.Compression; 
+using System.IO.Compression; 
 
 namespace LMS_CMS
 {
@@ -72,22 +72,22 @@ namespace LMS_CMS
                 With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
              Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
             */
-            //builder.Services.AddResponseCompression(options =>
-            //{
-            //    options.EnableForHttps = true;
-            //    options.Providers.Add<BrotliCompressionProvider>();
-            //    options.Providers.Add<GzipCompressionProvider>();
-            //});
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            });
 
-            //builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
-            //{
-            //    opts.Level = CompressionLevel.Fastest; // Fast and good
-            //});
+            builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest; // Fast and good
+            });
 
-            //builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
-            //{
-            //    opts.Level = CompressionLevel.Fastest;
-            //});
+            builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+            {
+                opts.Level = CompressionLevel.Fastest;
+            });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -298,7 +298,7 @@ namespace LMS_CMS
 
             
             // To Allow Compression (Brotli - Gzip)
-            //app.UseResponseCompression();
+            app.UseResponseCompression();
 
 
             /// For Endpoint, to check if the user has access for this endpoint or not

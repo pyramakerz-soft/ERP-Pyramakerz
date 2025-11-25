@@ -200,21 +200,33 @@ export class EmployeeSalaryDetailedComponent {
     }, 500);
   }
 
-  async getPDFData() {
-    // Build rows for each subject
-    this.tableDataForPDF = this.monthlyAttendenc.map(d => {
-      const row: Record<string, string> = {};
-      row['Day'] = d.day;
-      row['Day Status'] = d.dayStatusName;
-      row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
-      row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
-      row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
-      row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
-      return row;
-    });
+async getPDFData() {
+  // Build rows for each subject
+  this.tableDataForPDF = this.monthlyAttendenc.map(d => {
+    const row: Record<string, string> = {};
+    row['Day'] = d.day.toString();
+    row['Day Status'] = d.dayStatusName;
+    row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
+    row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
+    row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
+    row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
+    return row;
+  });
 
-    console.log('Prepared PDF data:', this.tableDataForPDF);
-  }
+  // Add total row (empty for first three columns, totals for last three)
+  const totalRow: Record<string, string> = {
+    'Day': 'Total',
+    'Day Status': '',
+    'Total Working Hours': '',
+    'Leave Request in Hours': this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
+    'Overtime in Hours': this.getTotal('overtimeHours', 'overtimeMinutes'),
+    'Deduction in Hours': this.getTotal('deductionHours', 'deductionMinutes')
+  };
+  
+  this.tableDataForPDF.push(totalRow);
+
+  console.log('Prepared PDF data:', this.tableDataForPDF);
+}
 
   async Print() {
     await this.getPDFData();
@@ -263,44 +275,52 @@ export class EmployeeSalaryDetailedComponent {
     }, 500);
   }
 
-  async DownloadAsExcel() {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: "Employee Salary Detailed Report",
-        ar: "تقرير الراتب التفصيلي"
-      },
-      // subHeaders: [
-      //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
-      // ],
-      infoRows: [
-        { key: 'Month', value: this.month + "/" + this.year || '' },
-        { key: 'job Category', value: this.SelectedJobCatName || 'All Job Categories' },
-        { key: 'job', value: this.SelectedJobName || 'All Jobs' },
-        { key: 'Employee', value: this.SelectedEmpName || 'All Employees' },
-        { key: 'Salary', value: this.salaryHistory.basicSalary || '' },
-        { key: 'Total Bonus', value: this.salaryHistory.totalBonus || '' },
-        { key: 'Total Overtime', value: this.salaryHistory.totalOvertime || '' },
-        { key: 'Total Loans', value: this.salaryHistory.totalLoans || '' },
-        { key: 'Total Deduction', value: this.salaryHistory.totalDeductions || '' },
-        { key: 'Final Salary', value: this.salaryHistory.netSalary || '' }
-      ],
-      reportImage: '', // Add image URL if available
-      filename: "Employee_Salary_Detailed_Report.xlsx",
-      tables: [
-        {
-          // title: "Payable Details",
-          headers: ['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours'],
-          data: this.monthlyAttendenc.map((row) => [
+async DownloadAsExcel() {
+  await this.reportsService.generateExcelReport({
+    mainHeader: {
+      en: "Employee Salary Detailed Report",
+      ar: "تقرير الراتب التفصيلي"
+    },
+    infoRows: [
+      { key: 'Month', value: this.month + "/" + this.year || '' },
+      { key: 'job Category', value: this.SelectedJobCatName || 'All Job Categories' },
+      { key: 'job', value: this.SelectedJobName || 'All Jobs' },
+      { key: 'Employee', value: this.SelectedEmpName || 'All Employees' },
+      { key: 'Salary', value: this.salaryHistory.basicSalary || '' },
+      { key: 'Total Bonus', value: this.salaryHistory.totalBonus || '' },
+      { key: 'Total Overtime', value: this.salaryHistory.totalOvertime || '' },
+      { key: 'Total Loans', value: this.salaryHistory.totalLoans || '' },
+      { key: 'Total Deduction', value: this.salaryHistory.totalDeductions || '' },
+      { key: 'Final Salary', value: this.salaryHistory.netSalary || '' }
+    ],
+    reportImage: '', // Add image URL if available
+    filename: "Employee_Salary_Detailed_Report.xlsx",
+    tables: [
+      {
+        headers: ['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours'],
+        data: [
+          // Data rows
+          ...this.monthlyAttendenc.map((row) => [
             row.day || 0,
             row.dayStatusName || '',
             row.workingHours + ':' + row.workingMinutes || '',
             row.leaveRequestHours + ':' + row.leaveRequestMinutes || '',
             row.overtimeHours + ':' + row.overtimeMinutes || '',
             row.deductionHours + ':' + row.deductionMinutes || '',
-          ])
-        }
-      ]
-    });
-  }
+          ]),
+          // Total row
+          [
+            'Total',
+            '',
+            '',
+            this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
+            this.getTotal('overtimeHours', 'overtimeMinutes'),
+            this.getTotal('deductionHours', 'deductionMinutes')
+          ]
+        ]
+      }
+    ]
+  });
+}
 
 }

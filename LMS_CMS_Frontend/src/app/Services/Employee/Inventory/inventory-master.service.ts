@@ -27,7 +27,8 @@ export class InventoryMasterService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<{ data: InventoryMaster[], pagination: any, inventoryFlag: InventoryFlag }>(`${this.baseUrl}/InventoryMaster/ByFlagId/${FlagId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    return this.http.get<{ data: InventoryMaster[], pagination: any,
+       inventoryFlag: InventoryFlag }>(`${this.baseUrl}/InventoryMaster/ByFlagId/${FlagId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetById(id: number, DomainName: string) {

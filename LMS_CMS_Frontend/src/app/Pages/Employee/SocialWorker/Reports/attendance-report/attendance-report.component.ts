@@ -306,6 +306,8 @@ constructor(
     } catch (error) {
       console.error('Error loading attendance reports:', error);
       this.attendanceReports = [];
+      this.reportsForExport =[]
+      this.reportsForExcel = []
       this.showTable = true;
     } finally {
       this.isLoading = false;
