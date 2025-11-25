@@ -221,12 +221,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 )
             )
             .OrderBy(x => x.Date)
-            .ToList(); // ← تبقى كما هي
+            .ToList(); 
 
             if (!filteredData.Any())
                 return NotFound("No records found matching the search criteria.");
 
-            // ⬅⬅⬅ إضافة pagination هنا فقط
+            // ⬅⬅⬅ pagination 
 
             int totalRecords = filteredData.Count;
 

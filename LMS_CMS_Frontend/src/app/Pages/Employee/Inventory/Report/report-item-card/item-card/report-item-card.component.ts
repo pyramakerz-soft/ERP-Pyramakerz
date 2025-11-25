@@ -113,56 +113,113 @@ export class ReportItemCardComponent implements OnInit {
     this.transactionsForExport = [];
   }
 
-  async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+  // async viewReport() {
+  //   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+  //     Swal.fire({
+  //       title: 'Invalid Date Range',
+  //       text: 'Start date cannot be later than end date.',
+  //       icon: 'warning',
+  //       confirmButtonText: 'OK',
+  //     });
+  //     return;
+  //   }
 
-    // if (!this.selectedStoreId || !this.selectedItemId) {
-    //   Swal.fire({
-    //     icon: 'warning',
-    //     title: 'Missing Information',
-    //     text: 'Please select both Store and Item',
-    //     confirmButtonColor: '#3085d6',
-    //     confirmButtonText: 'OK',
-    //   });
-    //   return;
-    // }
+  //   // if (!this.selectedStoreId || !this.selectedItemId) {
+  //   //   Swal.fire({
+  //   //     icon: 'warning',
+  //   //     title: 'Missing Information',
+  //   //     text: 'Please select both Store and Item',
+  //   //     confirmButtonColor: '#3085d6',
+  //   //     confirmButtonText: 'OK',
+  //   //   });
+  //   //   return;
+  //   // }
 
-    this.isLoading = true;
-    this.showTable = false;
-    this.combinedData = [];
+  //   this.isLoading = true;
+  //   this.showTable = false;
+  //   this.combinedData = [];
 
-    try {
-      const response = await this.inventoryDetailsService
-        .getInventoryNetCombined(
-          this.selectedStoreId!,
-          this.selectedItemId!,
-          this.dateFrom,
-          this.dateTo,
-          this.inventoryDetailsService.ApiServ.GetHeader()
-        )
-        .toPromise();
+  //   try {
+  //     const response = await this.inventoryDetailsService
+  //       .getInventoryNetCombined(
+  //         this.selectedStoreId!,
+  //         this.selectedItemId!,
+  //         this.dateFrom,
+  //         this.dateTo,
+  //         this.inventoryDetailsService.ApiServ.GetHeader()
+  //       )
+  //       .toPromise();
 
-      if (!response) {
-        throw new Error('No data received');
-      }
+  //     if (!response) {
+  //       throw new Error('No data received');
+  //     }
 
-      this.processReportData(response.summary, response.transactions || []);
-      this.showTable = true;
-    } catch (error) {
-      this.combinedData = [];
-      this.showTable = true;
-    } finally {
-      this.isLoading = false;
-    }
+  //     this.processReportData(response.summary, response.transactions || []);
+  //     this.showTable = true;
+  //   } catch (error) {
+  //     this.combinedData = [];
+  //     this.showTable = true;
+  //   } finally {
+  //     this.isLoading = false;
+  //   }
+  // }
+
+// updated viewReport method
+
+async viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  this.isLoading = true;
+  this.showTable = false;
+  this.combinedData = [];
+
+  try {
+    const response = await this.inventoryDetailsService
+      .getInventoryNetCombined(
+        this.selectedStoreId!,
+        this.selectedItemId!,
+        this.dateFrom,
+        this.dateTo,
+        this.inventoryDetailsService.ApiServ.GetHeader(),
+        this.currentPage,  
+        this.pageSize      
+      )
+      .toPromise();
+
+    if (!response) {
+      throw new Error('No data received');
+    }
+
+    if (response.pagination) {
+      this.currentPage = response.pagination.currentPage || this.currentPage;
+      this.pageSize = response.pagination.pageSize || this.pageSize;
+      this.totalPages = response.pagination.totalPages || 1;
+      this.totalRecords = response.pagination.totalRecords || 0;
+    } else {
+
+      this.totalRecords = response.transactions?.length || 0;
+      this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    }
+
+    this.processReportData(response.summary, response.transactions || []);
+    this.showTable = true;
+  } catch (error) {
+    this.combinedData = [];
+    this.showTable = true;
+    this.totalPages = 1;
+    this.totalRecords = 0;
+  } finally {
+    this.isLoading = false;
+  }
+}
 
   private processReportData(
     summary: InventoryNetCombinedResponse['summary'],
@@ -769,5 +826,73 @@ getInfoRows(): any[] {
     ...(this.hasAverageInfo() ? [{ keyEn: 'Includes Cost Information' }] : [])
   ];
 }
+
+// ==================== Pagination Functions  Gaber --77 ====================
+
+currentPage: number = 1;
+pageSize: number = 10;
+totalPages: number = 1;
+totalRecords: number = 0;
+
+get visiblePages(): number[] {
+  const total = this.totalPages;
+  const current = this.currentPage;
+  const maxVisible = 5;
+
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const half = Math.floor(maxVisible / 2);
+  let start = current - half;
+  let end = current + half;
+
+  if (start < 1) {
+    start = 1;
+    end = maxVisible;
+  } else if (end > total) {
+    end = total;
+    start = total - maxVisible + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+
+
+changeCurrentPage(page: number): void {
+  if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+  }
   
+  this.currentPage = page;
+  this.viewReport();
+}
+
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; 
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1; 
+  this.viewReport();
+  
+}
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; 
+    return;
+  }
+}
+
+
 }

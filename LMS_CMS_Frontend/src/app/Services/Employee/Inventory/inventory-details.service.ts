@@ -172,7 +172,6 @@ export class InventoryDetailsService {
     const encodedToDate = encodeURIComponent(toDate);
     return this.http.get<any[]>(
       `${this.baseUrl}/InventoryDetails/AverageCost?fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
-      //              /InventoryDetails/AverageCost?fromDate=2020-07-14&toDate=2026-07-14
       { headers }
     );
   }
@@ -276,7 +275,6 @@ getAllStoresBalance(
   if (domainName != null) {
     this.header = domainName;
   }
-
   const token = localStorage.getItem('current_token');
   const headers = new HttpHeaders()
     .set('domain-name', this.header)
@@ -299,27 +297,50 @@ getAllStoresBalance(
 }
 
 
+  // getInventoryNetCombined(
+  //   storeId: number,
+  //   itemId: number,
+  //   fromDate: string,
+  //   toDate: string,
+  //   DomainName: string
+  // ): Observable<InventoryNetCombinedResponse> {
+  //   if (DomainName != null) {
+  //     this.header = DomainName;
+  //   }
+  //   const token = localStorage.getItem('current_token');
+  //   const headers = new HttpHeaders()
+  //     .set('domain-name', this.header)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .set('Content-Type', 'application/json');
 
+  //   return this.http.get<InventoryNetCombinedResponse>(
+  //     `${this.baseUrl}/InventoryDetails/inventory-net-combined?storeId=${storeId}&shopItemId=${itemId}&fromDate=${fromDate}&toDate=${toDate}`,
+  //     { headers }
+  //   );
+  // }
 
-  getInventoryNetCombined(
-    storeId: number,
-    itemId: number,
-    fromDate: string,
-    toDate: string,
-    DomainName: string
-  ): Observable<InventoryNetCombinedResponse> {
-    if (DomainName != null) {
-      this.header = DomainName;
-    }
-    const token = localStorage.getItem('current_token');
-    const headers = new HttpHeaders()
-      .set('domain-name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
-
-    return this.http.get<InventoryNetCombinedResponse>(
-      `${this.baseUrl}/InventoryDetails/inventory-net-combined?storeId=${storeId}&shopItemId=${itemId}&fromDate=${fromDate}&toDate=${toDate}`,
-      { headers }
-    );
+getInventoryNetCombined(
+  storeId: number,
+  itemId: number,
+  fromDate: string,
+  toDate: string,
+  DomainName: string,
+  pageNumber: number = 1,  
+  pageSize: number = 10  
+): Observable<InventoryNetCombinedResponse> {
+  if (DomainName != null) {
+    this.header = DomainName;
   }
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  const url = `${this.baseUrl}/InventoryDetails/inventory-net-combined` +
+    `?storeId=${storeId}` +`&shopItemId=${itemId}` +`&fromDate=${fromDate}` +`&toDate=${toDate}` +`&pageNumber=${pageNumber}` +`&pageSize=${pageSize}`;
+  return this.http.get<InventoryNetCombinedResponse>(url, { headers });
+}
+
+
 }
