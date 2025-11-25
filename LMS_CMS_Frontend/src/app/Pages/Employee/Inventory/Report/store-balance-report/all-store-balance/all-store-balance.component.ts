@@ -145,8 +145,7 @@ private setPageTitle() {
     this.showTable = false;
     this.reportData = null;
   }
-
-viewReport() {
+viewReport(pageNumber: number = 1, pageSize: number = 10) {
   if (!this.dateTo) {
     Swal.fire({
       title: 'Missing Information',
@@ -169,12 +168,14 @@ viewReport() {
       this.hasBalance,
       this.overdrawnBalance,
       this.zeroBalances,
-      this.inventoryDetailsService.ApiServ.GetHeader()
+      this.inventoryDetailsService.ApiServ.GetHeader(),
+      pageNumber,  
+      pageSize     
     )
     .subscribe({
       next: (response) => {
         this.reportData = response;
-        this.cachedTableDataForPDF = this.preparePdfTableSections(); // Cache the data
+        this.cachedTableDataForPDF = this.preparePdfTableSections();
         this.showTable = true;
         this.isLoading = false;
       },
@@ -625,4 +626,76 @@ getBalanceFiltersInfo(): string {
   if (this.overdrawnBalance) filters.push('Overdrawn');
   if (this.zeroBalances) filters.push('Zero Balances');
   return filters.length > 0 ? filters.join(', ') : 'No Filters';
-}}
+}
+
+
+// ==================== Pagination Functions  Gaber --77 ====================
+
+currentPage: number = 1;
+pageSize: number = 10;
+totalPages: number = 1;
+totalRecords: number = 0;
+
+
+get visiblePages(): number[] {
+  const total = this.totalPages;
+  const current = this.currentPage;
+  const maxVisible = 5;
+
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const half = Math.floor(maxVisible / 2);
+  let start = current - half;
+  let end = current + half;
+
+  if (start < 1) {
+    start = 1;
+    end = maxVisible;
+  } else if (end > total) {
+    end = total;
+    start = total - maxVisible + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+changeCurrentPage(page: number): void {
+  if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+  }
+  
+  this.currentPage = page;
+  this.viewReport();
+}
+
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; 
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1;
+  this.viewReport();
+}
+
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; 
+    return;
+  }
+}
+
+
+
+
+}

@@ -9,7 +9,7 @@ import {
 } from '../../../Models/Inventory/report-card';
 import { Store } from '../../../Models/Inventory/store';
 import { ApiService } from '../../api.service';
-import { StoreBalanceReport } from '../../../Models/Inventory/store-balance';
+import { PaginatedStoreBalanceResponse, StoreBalanceReport } from '../../../Models/Inventory/store-balance';
 
 @Injectable({
   providedIn: 'root',
@@ -177,6 +177,32 @@ export class InventoryDetailsService {
     );
   }
 
+  // getStoreBalance(
+  //   storeId: number,
+  //   toDate: string,
+  //   reportFlagType: number,
+  //   categoryId: number,
+  //   typeId: number,
+  //   hasBalance: boolean,
+  //   overdrawnBalance: boolean,
+  //   zeroBalances: boolean,
+  //   DomainName: string,
+
+  // ): Observable<StoreBalanceReport> {
+  //   if (DomainName != null) {
+  //     this.header = DomainName;
+  //   }
+  //   const token = localStorage.getItem('current_token');
+  //   const headers = new HttpHeaders()
+  //     .set('domain-name', this.header)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .set('Content-Type', 'application/json');
+
+  //   return this.http.get<StoreBalanceReport>(
+  //     `${this.baseUrl}/InventoryDetails/StoreBalance?storeId=${storeId}&toDate=${toDate}&ReportFlagType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+  //     { headers }
+  //   );
+  // }
   getStoreBalance(
     storeId: number,
     toDate: string,
@@ -186,47 +212,94 @@ export class InventoryDetailsService {
     hasBalance: boolean,
     overdrawnBalance: boolean,
     zeroBalances: boolean,
-    DomainName: string
-  ): Observable<StoreBalanceReport> {
-    if (DomainName != null) {
-      this.header = DomainName;
+    domainName: string,
+    pageNumber: number,
+    pageSize: number
+  ): Observable<any> {
+
+    if (domainName != null) {
+      this.header = domainName;
     }
+
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
+    const url =
+      `${this.baseUrl}/InventoryDetails/StoreBalance` + `?storeId=${storeId}` + `&toDate=${toDate}` + `&ReportFlagType=${reportFlagType}` + `&categoryId=${categoryId}` + `&typeId=${typeId}` +
+      `&hasBalance=${hasBalance}` + `&overdrawnBalance=${overdrawnBalance}` + `&zeroBalances=${zeroBalances}` +
+      `&pageNumber=${pageNumber}` + `&pageSize=${pageSize}`;
 
-    return this.http.get<StoreBalanceReport>(
-      `${this.baseUrl}/InventoryDetails/StoreBalance?storeId=${storeId}&toDate=${toDate}&ReportFlagType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
-      { headers }
-    );
+    return this.http.get<PaginatedStoreBalanceResponse>(url, { headers });
   }
 
-  getAllStoresBalance(
-    toDate: string,
-    reportFlagType: number,
-    categoryId: number,
-    typeId: number,
-    hasBalance: boolean,
-    overdrawnBalance: boolean,
-    zeroBalances: boolean,
-    DomainName: string
-  ): Observable<StoreBalanceReport> {
-    if (DomainName != null) {
-      this.header = DomainName;
-    }
-    const token = localStorage.getItem('current_token');
-    const headers = new HttpHeaders()
-      .set('domain-name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
 
-    return this.http.get<StoreBalanceReport>(
-      `${this.baseUrl}/InventoryDetails/AllStoresBalanceHorizontal?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
-      { headers }
-    );
+  // getAllStoresBalance(
+  //   toDate: string,
+  //   reportFlagType: number,
+  //   categoryId: number,
+  //   typeId: number,
+  //   hasBalance: boolean,
+  //   overdrawnBalance: boolean,
+  //   zeroBalances: boolean,
+  //   DomainName: string
+  // ): Observable<StoreBalanceReport> {
+  //   if (DomainName != null) {
+  //     this.header = DomainName;
+  //   }
+  //   const token = localStorage.getItem('current_token');
+  //   const headers = new HttpHeaders()
+  //     .set('domain-name', this.header)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .set('Content-Type', 'application/json');
+
+  //   return this.http.get<StoreBalanceReport>(
+  //     `${this.baseUrl}/InventoryDetails/AllStoresBalanceHorizontal?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+  //     { headers }
+  //   );
+  // }
+
+getAllStoresBalance(
+  toDate: string,
+  reportFlagType: number,
+  categoryId: number,
+  typeId: number,
+  hasBalance: boolean,
+  overdrawnBalance: boolean,
+  zeroBalances: boolean,
+  domainName: string,
+  pageNumber: number,
+  pageSize: number
+): Observable<any> {
+
+  if (domainName != null) {
+    this.header = domainName;
   }
+
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  const url =
+    `${this.baseUrl}/InventoryDetails/AllStoresBalanceHorizontal` +
+    `?toDate=${toDate}` +
+    `&reportType=${reportFlagType}` +
+    `&categoryId=${categoryId}` +
+    `&typeId=${typeId}` +
+    `&hasBalance=${hasBalance}` +
+    `&overdrawnBalance=${overdrawnBalance}` +
+    `&zeroBalances=${zeroBalances}` +
+    `&pageNumber=${pageNumber}` +
+    `&pageSize=${pageSize}`;
+
+  return this.http.get<any>(url, { headers });
+}
+
+
+
 
   getInventoryNetCombined(
     storeId: number,

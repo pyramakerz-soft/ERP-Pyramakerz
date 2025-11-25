@@ -1,3 +1,4 @@
+
 export class StoreBalanceReport {
   constructor(
     public reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit' = 'QuantityOnly',
@@ -33,4 +34,16 @@ export class StoreBalanceDetail {
     public value: number | null = null,
     public AverageCost?: number
   ) {}
+}
+
+export interface PaginatedStoreBalanceResponse {
+  reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit';
+  data: StoreBalanceItem[];
+  grandTotals: { TotalQuantity: number; TotalValue?: number };
+  pagination: {
+    totalRecords: number;
+    pageSize: number;
+    currentPage: number;
+    totalPages: number;
+  };
 }

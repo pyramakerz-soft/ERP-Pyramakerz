@@ -224,12 +224,12 @@ export class InventoryMasterComponent {
     )
   }
 
-  changeCurrentPage(currentPage: number) {
+  changeCurrentPage(currentPage: number) {   // For clicking on page numbers
     this.CurrentPage = currentPage
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) {
+  validatePageSize(event: any) {   // To prevent non-numeric input
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
