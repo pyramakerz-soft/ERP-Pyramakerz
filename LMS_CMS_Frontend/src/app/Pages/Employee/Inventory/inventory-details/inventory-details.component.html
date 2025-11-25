@@ -15,7 +15,7 @@
       <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
 
-    <button *ngIf="FlagId == 13 && mode == 'Edit'" class="secondaryBg text-white font-medium px-6 py-3 rounded-lg"
+    <button *ngIf="FlagId == 13 && mode == 'Edit' && !Data.isConvertedToPurchase" class="secondaryBg text-white font-medium px-6 py-3 rounded-lg"
       (click)="ConvertToPurcase()">
       {{'Convert To Purchase'| translate }}
     </button>

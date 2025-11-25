@@ -44,7 +44,45 @@ export class CombinedReportData {
     public quantitybalance: number = 0
   ) {}
 }
+// // Inventory Net Combined Response Model
+// export class InventoryNetCombinedResponse {
+//   summary: {
+//     fromDate: string;
+//     shopItemId: number;
+//     storeId: number;
+//     toDate: string;
+//     inQuantity: number;
+//     outQuantity: number;
+//     quantitybalance: number;
+//     costBalance: number;
+//   };
+//   transactions: InventoryNetCombinedTransaction[];
 
+//   constructor(init?: Partial<InventoryNetCombinedResponse>) {
+//     this.summary = init?.summary || {
+//       fromDate: '',
+//       shopItemId: 0,
+//       storeId: 0,
+//       toDate: '',
+//       inQuantity: 0,
+//       outQuantity: 0,
+//       quantitybalance: 0,
+//       costBalance: 0
+//     };
+//     this.transactions = init?.transactions || [];
+//   }
+// }
+
+// Pagination interface
+ 
+export interface Pagination {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalRecords: number;
+}
+
+// Inventory Net Combined Response Model
 export class InventoryNetCombinedResponse {
   summary: {
     fromDate: string;
@@ -57,6 +95,7 @@ export class InventoryNetCombinedResponse {
     costBalance: number;
   };
   transactions: InventoryNetCombinedTransaction[];
+  pagination: Pagination; 
 
   constructor(init?: Partial<InventoryNetCombinedResponse>) {
     this.summary = init?.summary || {
@@ -70,6 +109,12 @@ export class InventoryNetCombinedResponse {
       costBalance: 0
     };
     this.transactions = init?.transactions || [];
+    this.pagination = init?.pagination || {
+      currentPage: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalRecords: this.transactions.length
+    };
   }
 }
 

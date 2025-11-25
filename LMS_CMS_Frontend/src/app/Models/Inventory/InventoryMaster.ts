@@ -6,6 +6,7 @@ export class InventoryMaster {
             public etaInsertedDate: number | null = null,
             public name: string = '',
             public invoiceNumber :number =0,
+            public isConvertedToPurchase :boolean = false,
             public date: string = '',
             public isCash: boolean = false,
             public isVisa: boolean = false,

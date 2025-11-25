@@ -52,6 +52,13 @@ export class StoreBalanceReportComponent implements OnInit {
   reportData: StoreBalanceReport | null = null;
   showTable: boolean = false;
   isLoading: boolean = false;
+  pageNumber: number = 1;
+  pageSize: number = 10;
+
+currentPage: number = 1;
+totalPages: number = 1;
+totalRecords: number = 0;
+
 
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
   showPDF = false;
@@ -193,30 +200,44 @@ export class StoreBalanceReportComponent implements OnInit {
     this.showTable = false;
 
     this.inventoryDetailsService
-      .getStoreBalance(
-        this.selectedStoreId!,
-        this.dateTo,
-        this.getReportFlagType(),
-        this.selectedCategoryId || 0,
-        this.selectedTypeId || 0,
-        this.hasBalance,
-        this.overdrawnBalance,
-        this.zeroBalances,
-        this.inventoryDetailsService.ApiServ.GetHeader()
-      )
-      .subscribe({
-        next: (response) => {
-          this.reportData = response;
-          this.prepareExportData();
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.reportData = null;
-          this.showTable = true;
-          this.isLoading = false;
-        },
-      });
+    .getStoreBalance(
+      this.selectedStoreId!,
+      this.dateTo,
+      this.getReportFlagType(),
+      this.selectedCategoryId || 0,
+      this.selectedTypeId || 0,
+      this.hasBalance,
+      this.overdrawnBalance,
+      this.zeroBalances,
+      this.inventoryDetailsService.ApiServ.GetHeader(),
+      this.currentPage,    // استخدم currentPage بدلاً من pageNumber
+      this.pageSize        // استخدم pageSize
+    )
+    .subscribe({
+      next: (response) => {
+        this.reportData = response;
+        
+        // تحديث بيانات Pagination من الـ response
+        if (response) {
+          this.currentPage = response.pageNumber || this.currentPage;
+          this.pageSize = response.pageSize || this.pageSize;
+          this.totalPages = response.totalPages || 1;
+          this.totalRecords = response.totalCount || 0;
+        }
+        
+        this.prepareExportData();
+        this.showTable = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+        // إعادة تعيين Pagination في حالة الخطأ
+        this.totalPages = 1;
+        this.totalRecords = 0;
+      },
+    });
   }
 
   // Helper method to format numbers - remove decimals for whole numbers, keep for decimals
@@ -448,4 +469,63 @@ export class StoreBalanceReportComponent implements OnInit {
         return ['Item Code', 'Item Name', 'Quantity'];
     }
   }
+
+  // ==================== Pagination Functions ====================
+  get visiblePages(): number[] {
+  const total = this.totalPages;
+  const current = this.currentPage;
+  const maxVisible = 5;
+
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const half = Math.floor(maxVisible / 2);
+  let start = current - half;
+  let end = current + half;
+
+  if (start < 1) {
+    start = 1;
+    end = maxVisible;
+  } else if (end > total) {
+    end = total;
+    start = total - maxVisible + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+changeCurrentPage(page: number): void {
+  if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+  }
+  
+  this.currentPage = page;
+  this.viewReport();
+}
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; // قيمة افتراضية
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1; // العودة للصفحة الأولى
+  this.viewReport();
+}
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; 
+    return;
+  }
+}
+
+
 }

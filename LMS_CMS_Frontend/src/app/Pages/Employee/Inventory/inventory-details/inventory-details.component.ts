@@ -816,17 +816,23 @@ export class InventoryDetailsComponent {
   }
 
   ConvertToPurcase() {
-    this.Data.flagId = 9;
-    this.Data.isEditInvoiceNumber = true;
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    this.Data.date = `${year}-${month}-${day}`;
-    console.log(this.Data)
-    this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
-      this.showSuccessAlert(this.translate.instant('Convert Successfully'));
-      this.router.navigateByUrl(`Employee/Purchases`);
+    this.Data.isConvertedToPurchase = true;
+    this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
+      this.Data.isEditInvoiceNumber = true;
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      this.Data.date = `${year}-${month}-${day}`;
+      this.Data.inventoryDetails = this.TableData;
+      console.log(this.Data)
+      this.Data.flagId = 9;
+      this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
+        this.showSuccessAlert(this.translate.instant('Convert Successfully'));
+        this.router.navigateByUrl(`Employee/Purchases`);
+      },error=>{
+        console.log(123,error)
+      });
   },error=>{
     console.log(123,error)
   });

@@ -433,7 +433,9 @@ export class StudentIssuesComponent {
 
   changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage;
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    if(this.CurrentPage > 0 && this.PageSize >0){
+      this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    }
   }
 
   validatePageSize(event: any) {
@@ -470,8 +472,8 @@ export class StudentIssuesComponent {
   validateNumberPage(event: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = '';
-      this.PageSize = 0;
+      event.target.value = 10;
+      this.PageSize = 10;
     }
   }
 

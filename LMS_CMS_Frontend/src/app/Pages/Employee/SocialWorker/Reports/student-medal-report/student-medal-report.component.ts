@@ -245,6 +245,8 @@ export class StudentMedalReportComponent implements OnInit {
       this.showTable = true;
     } catch (error: any) { 
       this.medalReports = [];
+      this.reportsForExcel=[]
+      this.reportsForExport =[]
       this.showTable = true;
       if(error.status !== 404){
         Swal.fire({

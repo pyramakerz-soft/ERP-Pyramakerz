@@ -146,8 +146,10 @@ export class RegisteredEmployeeViewComponent {
         cancelButtonText: 'Cancel',
       }).then((result) => {
         if (result.isConfirmed) {
+          this.isLoading = true
           this.registeredEmployeeService.Accept(this.employee, this.DomainName).subscribe(
             (d) => {
+              this.isLoading = false
               Swal.fire({
                 title: 'Employee Accepted!',
                 text: 'The employee has been successfully accepted.',
@@ -161,6 +163,7 @@ export class RegisteredEmployeeViewComponent {
               });
             },
             (error) => {
+              this.isLoading = false
               Swal.fire({
                 icon: 'error',
                 title: 'Error',

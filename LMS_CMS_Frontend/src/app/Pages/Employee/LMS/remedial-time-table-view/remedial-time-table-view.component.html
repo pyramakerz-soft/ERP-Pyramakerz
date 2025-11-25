@@ -35,7 +35,7 @@
         {{ class.name }} / {{ class.numberOfSession }}
       </div>
 
-      <div *ngIf="remedialClasses.length === 0" class="text-gray-500"> {{ 'No Class' | translate }}</div>
+      <div *ngIf="remedialClasses.length === 0 && SelectedGradeId" class="text-gray-500"> {{ 'No Class' | translate }}</div>
     </div>
   </div>
 

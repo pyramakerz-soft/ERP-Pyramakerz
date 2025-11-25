@@ -747,4 +747,53 @@ exportExcel() {
   XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
 }
 
+// ==================== Pagination Functions ====================
+
+changeCurrentPage(page: number): void {
+  if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+  }
+  
+  this.currentPage = page;
+  this.viewReport();
+}
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; // قيمة افتراضية
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1; // العودة للصفحة الأولى
+  this.viewReport();
+}
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; // إعادة القيمة السابقة
+    return;
+  }
+}
+
+validatePageSize(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize;
+    return;
+  }
+}
+
+
+
+
+
+
 }

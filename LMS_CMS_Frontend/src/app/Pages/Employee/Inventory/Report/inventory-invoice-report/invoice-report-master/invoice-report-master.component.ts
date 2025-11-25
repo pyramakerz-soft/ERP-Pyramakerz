@@ -19,6 +19,7 @@ import { ReportsService } from '../../../../../../Services/shared/reports.servic
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../../Services/loading.service';
+
 interface FlagOption {
   id: number;
   name: string;
@@ -62,6 +63,13 @@ school = {
 
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+  salesServ: any;
+  CurrentPage: any;
+  PageSize: any;
+  TotalPages: any;
+  TotalRecords: any;
+  TableData: InventoryMaster[] = [];
+  isDeleting: any;
 
   getStoreName(): string {
     return (
@@ -472,7 +480,7 @@ private prepareExportData(): void {
     this.viewReport();
   }
 
-  get visiblePages(): number[] {
+  get visiblePages(): number[] {  //
     const total = this.totalPages;
     const current = this.currentPage;
     const maxVisible = 5;
@@ -618,4 +626,66 @@ async exportExcel() {
     }]
   });
 }
+
+
+
+
+// adding pagination functions  by Gaber ..777
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; 
+    return;
+  }
+  
+  this.pageSize = numValue;
+}
+
+
+validatePageSize(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize;
+    return;
+  }
+
+  if (this.pageSize !== numValue) {
+    this.pageSize = numValue;
+    this.currentPage = 1; 
+    this.viewReport();
+  }
+}
+   
+
+   changeCurrentPage(page: number): void {
+   if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+   }
+  
+  this.currentPage = page;
+  this.viewReport(); 
+}
+
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; 
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1;
+  this.viewReport();
+}
+
+
+
+
 }

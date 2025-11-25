@@ -27,7 +27,8 @@ export class InventoryMasterService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<{ data: InventoryMaster[], pagination: any, inventoryFlag: InventoryFlag }>(`${this.baseUrl}/InventoryMaster/ByFlagId/${FlagId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    return this.http.get<{ data: InventoryMaster[], pagination: any,
+       inventoryFlag: InventoryFlag }>(`${this.baseUrl}/InventoryMaster/ByFlagId/${FlagId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetById(id: number, DomainName: string) {
@@ -68,6 +69,7 @@ export class InventoryMasterService {
 
     formData.append('invoiceNumber', (master.invoiceNumber ?? '').toString());
     formData.append('date', master.date ?? '');
+    formData.append('isConvertedToPurchase', (master.isConvertedToPurchase ?? false).toString());
     formData.append('isCash', (master.isCash ?? false).toString());
     formData.append('isVisa', (master.isVisa ?? false).toString());
     formData.append('cashAmount', (master.cashAmount ?? 0).toString());
@@ -120,6 +122,7 @@ export class InventoryMasterService {
     formData.append('date', master.date || '');
     formData.append('isCash', master.isCash?.toString() || 'false');
     formData.append('isVisa', master.isVisa?.toString() || 'false');
+    formData.append('isConvertedToPurchase', (master.isConvertedToPurchase ?? false).toString());
     formData.append('isEditInvoiceNumber', master.isEditInvoiceNumber?.toString() || 'false');
     formData.append('cashAmount', master.cashAmount?.toString() || '0');
     formData.append('visaAmount', master.visaAmount?.toString() || '0');

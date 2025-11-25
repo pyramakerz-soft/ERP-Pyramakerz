@@ -123,21 +123,22 @@
      [ngClass]="{'hidden': !isModalVisible}"
      class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
 
-    <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md max-h-[90vh] overflow-y-auto">
-        <!-- Close Icon -->
-        <button (click)="closeModal()"
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
+    <div class="relative bg-white w-[669px] rounded-2xl p-12 shadow-md max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
+                {{ 'Create' | translate }} {{ 'Appoinment' | translate }}
+            </h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
+                {{ 'Edit' | translate }} {{ 'Appoinment' | translate }}
+            </h1>
+            
+            <button (click)="closeModal()"
+                class="text-gray-400 hover:text-gray-900 transition duration-200">
+                <i class="fa-solid fa-xmark text-2xl"></i> 
+            </button>
+        </div> 
 
-        <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-            {{ 'Create' | translate }} {{ 'Appoinment' | translate }}
-        </h1>
-        <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-            {{ 'Edit' | translate }} {{ 'Appoinment' | translate }}
-        </h1>
-
-        <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
+        <div class="mt-4 bg-[#F7F7F7] w-full h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
             <div class="flex justify-start mt-2 gap-2 items-start">
                 <div class="flex flex-col">
 
