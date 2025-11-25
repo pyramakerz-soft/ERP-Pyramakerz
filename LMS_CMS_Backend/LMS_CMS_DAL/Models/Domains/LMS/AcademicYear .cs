@@ -1,6 +1,7 @@
 ﻿using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,6 +22,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public DateOnly DateFrom { get; set; }
         public DateOnly DateTo { get; set; }
         public bool IsActive { get; set; }
+
         [ForeignKey("School")]
         public long SchoolID { get; set; }
         public School School { get; set; }
