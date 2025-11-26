@@ -143,7 +143,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 TimeSpan attendanceTime = DateTime.Parse(employee.AttendanceTime).TimeOfDay;
                 TimeSpan departureTime = DateTime.Parse(employee.DepartureTime).TimeOfDay;
-                TimeSpan allowedStart = attendanceTime.Add(TimeSpan.FromMinutes((double)employee.DelayAllowance));
+                //TimeSpan allowedStart = attendanceTime.Add(TimeSpan.FromMinutes((double)employee.DelayAllowance));
+                double delay = employee.DelayAllowance ?? 0;
+                TimeSpan allowedStart = attendanceTime.Add(TimeSpan.FromMinutes(delay));
 
                 TimeSpan fullDayHours;
                 TimeSpan halfDayHours;

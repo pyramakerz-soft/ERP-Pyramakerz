@@ -2,7 +2,8 @@
     <div>
         <div class="no-print flex justify-between items-center">
             <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-                <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToReceivable()"></i>
+                    <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToReceivable()"></i>
                 <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create Receivable' | translate }}</h1>
                 <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Edit Receivable' | translate }}</h1>
                 <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Receivable' | translate }}</h1>

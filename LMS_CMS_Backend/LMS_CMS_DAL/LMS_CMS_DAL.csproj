@@ -20,11 +20,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DbScripts\EntriesFunV04.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFunV03.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFunV02.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFun.sql" />
     <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountBalanceV02.sql" />
+    <EmbeddedResource Include="DbScripts\GetAccountingEntriesV05.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntriesV04.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntriesV03.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntriesV02.sql" />

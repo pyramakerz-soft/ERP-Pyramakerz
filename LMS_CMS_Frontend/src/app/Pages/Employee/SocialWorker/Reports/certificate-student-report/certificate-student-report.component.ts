@@ -277,18 +277,15 @@ export class CertificateStudentReportComponent implements OnInit {
   }
 
 private prepareExportData(): void {
-  // For PDF (object format)
+  // For PDF (object format) - keep only the fields shown in the table
   this.reportsForExport = this.certificateReports.map((report) => ({
-    'Medal Name': report.certificateTypeName,
+    'Certificate Name': report.certificateTypeName, // Changed from 'Medal Name' to match table
     'Added By': report.insertedByUserName
   }));
 
-  // For Excel (array format)
   this.reportsForExcel = this.certificateReports.map((report) => [
-    report.certificateTypeID,
-    report.certificateTypeName,
-    new Date(report.insertedAt).toLocaleDateString(),
-    report.insertedByUserName
+    report.certificateTypeName, // Only certificate name
+    report.insertedByUserName    // Only added by
   ]);
 }
 
@@ -409,43 +406,42 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  async exportExcel() {
-    if (this.reportsForExcel.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-
-    this.isExporting = true;
-    
-    try {
-      await this.reportsService.generateExcelReport({
-        mainHeader: {
-          en: 'Certificate Student Report',
-          ar: 'تقرير شهادات الطالب'
-        },
-        subHeaders: [
-          {
-            en: 'Student Certificate Records',
-            ar: 'سجلات شهادات الطالب'
-          }
-        ],
-        infoRows: this.getInfoRowsExcel(),
-        tables: [
-          {
-            // title: 'Certificate Report Data',
-            headers: [ 'Medal Name', 'Added By'],
-            data: this.reportsForExcel
-          }
-        ],
-        filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-      });
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      Swal.fire('Error', 'Failed to export to Excel', 'error');
-    } finally {
-      this.isExporting = false;
-    }
+async exportExcel() {
+  if (this.reportsForExcel.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  this.isExporting = true;
+  
+  try {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Certificate Student Report',
+        ar: 'تقرير شهادات الطالب'
+      },
+      subHeaders: [
+        {
+          en: 'Student Certificate Records',
+          ar: 'سجلات شهادات الطالب'
+        }
+      ],
+      infoRows: this.getInfoRowsExcel(),
+      tables: [
+        {
+          headers: ['Certificate Name', 'Added By'], // Updated headers to match table
+          data: this.reportsForExcel
+        }
+      ],
+      filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  } finally {
+    this.isExporting = false;
+  }
+}
 
   // downloadCertificate(row: CertificateStudent) {
   //   const canvas = document.createElement('canvas');

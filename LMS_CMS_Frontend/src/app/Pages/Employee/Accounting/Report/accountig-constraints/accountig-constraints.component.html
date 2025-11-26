@@ -31,7 +31,11 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="showTable" class="mt-5">
+<div *ngIf="isLoading" class="w-full justify-center items-center flex py-8">
+    <i class="fas fa-spinner fa-spin text-2xl primaryTxt"></i>
+</div>
+
+<div *ngIf="showTable && !isLoading" class="mt-5">
     <div *ngIf="!responseData?.data?.length" class="w-full justify-center items-center flex">
         <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
             {{'No Data Found'| translate }}
@@ -71,7 +75,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngIf="!dateGroup.entries?.length">
+                        <tr *ngIf="!dateGroup.entries.length">
                             <td colspan="12" class="bg-white px-4 py-2 h-[72px] text-center">
                                 {{'No Data Found'| translate }}
                             </td>
@@ -135,7 +139,7 @@
 </div>
 
 <!-- Pagination -->
-<div *ngIf="showTable" class="mt-8 flex justify-between items-center">
+<div *ngIf="showTable && !isLoading" class="mt-8 flex justify-between items-center">
 
     <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"

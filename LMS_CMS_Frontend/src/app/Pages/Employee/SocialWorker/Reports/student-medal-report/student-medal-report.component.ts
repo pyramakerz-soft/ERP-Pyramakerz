@@ -270,7 +270,7 @@ private prepareExportData(): void {
 
   // For Excel (array format)
   this.reportsForExcel = this.medalReports.map((report) => [
-    report.socialWorkerMedalID,
+    // report.socialWorkerMedalID,
     report.socialWorkerMedalName,
     report.insertedByUserName
   ]);
