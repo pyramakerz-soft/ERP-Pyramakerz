@@ -55,45 +55,46 @@
     </div>
 </div>
 
-<div class="overflow-x-auto mt-4">
+<div class=" mt-4">
     <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
         <div class="bg-gray-300 text-center font-bold py-2">{{ day.dayName }}</div>
 
         <div *ngFor="let grade of day.grades" class="p-2">
             <div class="text-md font-semibold mb-1">{{ 'Grade' | translate }}: {{ grade.gradeName }}</div>
+            <div class="overflow-x-auto overflow-y-auto max-h-[400px] border rounded">
+                <table class="table-auto w-full text-sm text-left rtl:text-right border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border p-2">{{ 'Class Name' | translate }}</th>
+                            <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                {{ 'Session' | translate }} {{ period + 1 }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let classroom of grade.classrooms">
+                            <td class="border p-2 font-medium">{{ classroom.classroomName }}</td>
+                            <td class="border p-2" *ngFor="let session of classroom.sessions; let periodIndex = index"
+                                draggable="true" (dragstart)="onDragStart($event, session)" (dragover)="onDragOver($event); autoScroll($event)"
+                                (drop)="onDrop($event, session, day, periodIndex)"
+                                class="border p-2 bg-gray-50 cursor-move"
+                                [ngClass]="{
+                                    'bg-sky-200': IsThisSessionReplaced(session.sessionId) && session.subjects.length >0, 
+                                    'bg-gray-50': !IsThisSessionReplaced(session.sessionId)
+                                }">
 
-            <table class="table-auto w-full text-sm text-left rtl:text-right border-collapse border border-gray-300">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border p-2">{{ 'Class Name' | translate }}</th>
-                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
-                             {{ 'Session' | translate }} {{ period + 1 }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let classroom of grade.classrooms">
-                        <td class="border p-2 font-medium">{{ classroom.classroomName }}</td>
-                        <td class="border p-2" *ngFor="let session of classroom.sessions; let periodIndex = index"
-                            draggable="true" (dragstart)="onDragStart($event, session)" (dragover)="onDragOver($event); autoScroll($event)"
-                            (drop)="onDrop($event, session, day, periodIndex)"
-                            class="border p-2 bg-gray-50 cursor-move"
-                            [ngClass]="{
-                                'bg-sky-200': IsThisSessionReplaced(session.sessionId) && session.subjects.length >0, 
-                                'bg-gray-50': !IsThisSessionReplaced(session.sessionId)
-                            }">
+                                <div *ngFor="let subject of session.subjects"
+                                    class="p-1 border border-gray-300 rounded mb-1 bg-white">
+                                    <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                    <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                                </div>
 
-                            <div *ngFor="let subject of session.subjects"
-                                class="p-1 border border-gray-300 rounded mb-1 bg-white">
-                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
-                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
-                            </div>
-
-                            <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
