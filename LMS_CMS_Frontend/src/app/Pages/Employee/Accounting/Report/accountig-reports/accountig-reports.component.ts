@@ -49,6 +49,7 @@ export class AccountigReportsComponent {
   subscription!: Subscription;
   tableData: any[] = [];
   direction: string = '';
+  isLoading: boolean = false;
 
   school = {
     reportHeaderOneEn: 'Accounting Report',
@@ -131,84 +132,88 @@ export class AccountigReportsComponent {
     }
   }
 
-  GetData(pageNumber: number, pageSize: number) {
-    this.tableData = [];
-    this.CurrentPage = 1;
-    this.TotalPages = 1;
-    this.TotalRecords = 0;
+GetData(pageNumber: number, pageSize: number) {
+  this.isLoading = true; // Start loading
+  this.tableData = [];
+  this.CurrentPage = 1;
+  this.TotalPages = 1;
+  this.TotalRecords = 0;
 
-    let dataObservable;
+  let dataObservable;
 
-    switch (this.type) {
-      case 'Payable':
-        dataObservable = this.reportsService.GetPayablesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+  switch (this.type) {
+    case 'Payable':
+      dataObservable = this.reportsService.GetPayablesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Receivable':
-        dataObservable = this.reportsService.GetReceivablesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Receivable':
+      dataObservable = this.reportsService.GetReceivablesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Installment Deduction':
-        dataObservable = this.reportsService.GetInstallmentDeductionsByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Installment Deduction':
+      dataObservable = this.reportsService.GetInstallmentDeductionsByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Accounting Entries':
-        dataObservable = this.reportsService.GetAccountingEntriesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Accounting Entries':
+      dataObservable = this.reportsService.GetAccountingEntriesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      default:
-        console.error('Unknown report type:', this.type);
-        return;
-    }
+    default:
+      console.error('Unknown report type:', this.type);
+      this.isLoading = false; // End loading on error
+      return;
+  }
 
-    dataObservable.subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage;
-        this.PageSize = data.pagination.pageSize;
-        this.TotalPages = data.pagination.totalPages;
-        this.TotalRecords = data.pagination.totalRecords;
-        this.tableData = data.data;
-        let count = 0;
-        this.tableData.forEach((element) => {
-          this.collapsedItems.add(count);
-          count++;
-        });
-      },
-      (error) => {
-        if (error.status == 404 && this.TotalRecords != 0) {
-          let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
-          if (lastPage >= 1) {
-            this.CurrentPage = lastPage;
-            this.GetData(this.CurrentPage, this.PageSize);
-          }
+  dataObservable.subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage;
+      this.PageSize = data.pagination.pageSize;
+      this.TotalPages = data.pagination.totalPages;
+      this.TotalRecords = data.pagination.totalRecords;
+      this.tableData = data.data;
+      let count = 0;
+      this.tableData.forEach((element) => {
+        this.collapsedItems.add(count);
+        count++;
+      });
+      this.isLoading = false; // End loading
+    },
+    (error) => {
+      this.isLoading = false; // End loading even on error
+      if (error.status == 404 && this.TotalRecords != 0) {
+        let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
+        if (lastPage >= 1) {
+          this.CurrentPage = lastPage;
+          this.GetData(this.CurrentPage, this.PageSize);
         }
       }
-    );
-  }
+    }
+  );
+}
 
   toggleCollapse(index: number) {
     if (this.collapsedItems.has(index)) {

@@ -206,16 +206,16 @@
                             </td>
                         </tr>
                         <!-- Grand Total Summary Row -->
-<tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
-    <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
-        <ng-container *ngIf="reportType === 'QuantityOnly'">
-            {{ reportData?.grandTotals?.TotalQuantity ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalQuantity ?? 0) ? '1.2-2' : '1.0-0') }}
-        </ng-container>
-        <ng-container *ngIf="reportType !== 'QuantityOnly'">
-            {{ reportData?.grandTotals?.TotalValue ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalValue ?? 0) ? '1.2-2' : '1.0-0') }}
-        </ng-container>
-    </td>
-</tr>
+                        <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold border-t border-gray-400">
+                            <td class="py-3 px-4 border border-[#EAECF0] border-l-0 font-bold">
+                                <ng-container *ngIf="reportType === 'QuantityOnly'">
+                                    {{ reportData?.grandTotals?.TotalQuantity ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalQuantity ?? 0) ? '1.2-2' : '1.0-0') }}
+                                </ng-container>
+                                <ng-container *ngIf="reportType !== 'QuantityOnly'">
+                                    {{ reportData?.grandTotals?.TotalValue ?? 0 | number:(hasDecimal(reportData?.grandTotals?.TotalValue ?? 0) ? '1.2-2' : '1.0-0') }}
+                                </ng-container>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -227,10 +227,10 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="pageTitle" 
         [infoRows]="[   
-               { keyEn: 'Report Type: ' + this.pageTitle },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Category: ' + this.getCategoryName() },
-      { keyEn: 'Filters: ' + this.getBalanceFiltersInfo() },]"
+      { keyEn: 'Report Type: ' + this.pageTitle , keyAr: this.pageTitle + ' : نوع التقرير' },
+      { keyEn: 'To Date: ' + this.dateTo , keyAr: this.dateTo + ' : إلى تاريخ' },
+      { keyEn: 'Category: ' + this.getCategoryName() , keyAr: this.getCategoryName() + ' : الفئة' },
+      { keyEn: 'Filters: ' + this.getBalanceFiltersInfo() , keyAr: this.getBalanceFiltersInfo() + 'رصيد: '},]"
             [tableDataWithHeaderArray]="cachedTableDataForPDF" #pdfPrintComponent>
         </app-pdf-print>
     </div>

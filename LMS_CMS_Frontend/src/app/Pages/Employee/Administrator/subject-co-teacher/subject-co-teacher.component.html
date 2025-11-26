@@ -1,6 +1,7 @@
 <div class="flex justify-between items-between mb-5">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{employee.user_Name}} /   {{ 'Supject Co-Teacher' | translate }}</h1>
     </div>
     <button (click)="Add()" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg">

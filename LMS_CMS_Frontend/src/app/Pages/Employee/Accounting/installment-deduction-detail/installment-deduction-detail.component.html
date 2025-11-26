@@ -1,6 +1,7 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToMaster()"></i>
         <h1 *ngIf="mode=='Create'" class="primaryTxt font-semibold text-2xl leading-9">
             {{ 'Create' | translate }} {{'Installment Deduction' | translate }}
         </h1>

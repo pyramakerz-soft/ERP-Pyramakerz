@@ -31,7 +31,6 @@ export class StateService {
     students: any[];
   } | null = null;
 
-  // Invoice state methods
   setInvoiceState(state: any) {
     this.invoiceState = state;
   }

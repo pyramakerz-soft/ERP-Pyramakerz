@@ -1,6 +1,7 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAssignment()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToAssignment()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{assignmentStudent.assignmentEnglishName}}</h1>
     </div>
     <div *ngIf="assignmentStudent.degree!=null" class="justify-center text-sm font-semibold px-2 py-1 rounded-md border flex items-center gap-1 bg-[#BDBDBD] text-[#6F6F6F] border-[#6F6F6F]">
