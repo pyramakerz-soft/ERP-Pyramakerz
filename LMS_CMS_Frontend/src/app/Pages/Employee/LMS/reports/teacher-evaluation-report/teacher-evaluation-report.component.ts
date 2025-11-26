@@ -9,7 +9,7 @@ import { DepartmentService } from '../../../../../Services/Employee/Administrati
 import { EvaluationEmployeeService } from '../../../../../Services/Employee/LMS/evaluation-employee.service';
 import { ApiService } from '../../../../../Services/api.service';
 import Swal from 'sweetalert2';
-import { Chart, ChartConfiguration } from 'chart.js';
+import { Chart, ChartConfiguration } from 'chart.js/auto';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { LoadingService } from '../../../../../Services/loading.service';
