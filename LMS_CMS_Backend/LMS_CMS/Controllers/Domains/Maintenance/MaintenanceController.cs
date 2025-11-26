@@ -372,6 +372,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             if (request.MaintenanceEmployeeId.HasValue && request.CompanyId.HasValue)
                 return BadRequest("You cannot filter by both Employee and Company at the same time.");
 
+
+            if (request.FilterBy.HasValue)
+            {
+                if (request.FilterBy.Value == 1 && request.MaintenanceEmployeeId.HasValue)
+                    return BadRequest("You cannot pass MaintenanceEmployeeId when filtering by Company.");
+                else if (request.FilterBy.Value == 2 && request.CompanyId.HasValue)
+                    return BadRequest("You cannot pass CompanyId when filtering by Employee.");
+            }
+
             //IQueryable<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> query =
             //               uow.maintenance_Repository.Query()
             //                  .Include(m => m.Item)
@@ -392,11 +401,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             if (request.ItemId.HasValue && request.ItemId.Value > 0)
                 query = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
 
-            if (request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
-                query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
+            if (request.FilterBy.HasValue)
+            {
+                if (request.FilterBy.Value == 1 && request.CompanyId.HasValue && request.CompanyId.Value > 0)
+                {
+                    //only by company
+                    query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
+                }
+                else if (request.FilterBy.Value == 2 && request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
+                {
+                    //  only by employee
+                    query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
+                }
+            }
+            else
+            {
+                //flag is null, apply both filters 
+                if (request.CompanyId.HasValue && request.CompanyId.Value > 0)
+                    query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
 
-            if (request.CompanyId.HasValue && request.CompanyId.Value > 0)
-                query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
+                if (request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
+                    query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
+            }
+
 
 
             List<MaintenanceGetDto> dtoList = mapper.Map<List<MaintenanceGetDto>>(query);
