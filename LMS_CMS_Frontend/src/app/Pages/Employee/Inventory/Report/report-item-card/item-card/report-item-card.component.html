@@ -162,10 +162,10 @@
             ? ['Date', 'Type', '#', 'Authority', 'Income', 'Outcome', 'Balance', 'Price', 'Total Price', 'Avg']
             : ['Date', 'Type', '#', 'Authority', 'Income', 'Outcome', 'Balance']"
         [infoRows]="[
-            { keyEn: 'From Date: ' + dateFrom },
-            { keyEn: 'To Date: ' + dateTo },
-            { keyEn: 'Store: ' + getStoreName() },
-            { keyEn: 'Item: ' + getItemName() },
+            { keyEn: 'From Date: ' + dateFrom , keyAr: dateFrom + ' : من تاريخ' },
+            { keyEn: 'To Date: ' + dateTo , keyAr: dateTo + ' : إلى تاريخ' },
+            { keyEn: 'Store: ' + getStoreName() , keyAr: getStoreName() + ' : المخزن' },
+            { keyEn: 'Item: ' + getItemName() , keyAr: getItemName() + ' : الصنف' },
         ]"
         [tableData]="transactionsForExport" #pdfPrintComponent>
     </app-pdf-print>

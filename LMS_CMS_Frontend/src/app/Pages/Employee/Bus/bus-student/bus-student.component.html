@@ -1,6 +1,7 @@
 <div>
     <div class="flex items-center space-x-5 rtl:space-x-reverse mb-5">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBus()"></i> 
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToBus()"></i> 
         <h1 class="primaryTxt font-semibold text-2xl">{{ bus.name }}</h1>
     </div>
     <div class="flex flex-wrap justify-between">

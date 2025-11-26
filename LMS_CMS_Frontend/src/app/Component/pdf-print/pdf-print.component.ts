@@ -311,48 +311,59 @@ printPDF() {
     });
 }
 
-  getColumnWidth(header: string, totalColumns: number): any {
-    const headerLower = header.toLowerCase();
-    
-    if (headerLower.includes('details')) {
-      return { 
-        width: '35%', 
-        'min-width': '200px',
-        'max-width': '400px',
-        'word-wrap': 'break-word',
-        'white-space': 'normal'
-      };
-    }
-    
-    const wideColumns = ['details', 'description', 'notes', 'comments', 'permanent drug'];
-    const mediumColumns = ['name', 'title', 'address', 'employee name'];
-    
-    const isWideColumn = wideColumns.some(col => headerLower.includes(col));
-    const isMediumColumn = mediumColumns.some(col => headerLower.includes(col));
-    
-    if (isWideColumn) {
-      return { 
-        width: '30%', 
-        'min-width': '150px',
-        'word-wrap': 'break-word',
-        'white-space': 'normal'
-      };
-    } else if (isMediumColumn) {
-      return { 
-        width: '15%', 
-        'min-width': '100px',
-        'word-wrap': 'break-word',
-        'white-space': 'normal'
-      };
-    } else {
-      return { 
-        width: 'auto', 
-        'min-width': '80px',
-        'word-wrap': 'break-word',
-        'white-space': 'normal'
-      };
-    }
+getColumnWidth(header: string, totalColumns: number): any {
+  const headerLower = header.toLowerCase();
+  
+  // Specific handling for item card report columns
+  if (headerLower.includes('average') || headerLower.includes('avg') || headerLower.includes('cost')) {
+    return { 
+      width: '12%', 
+      'min-width': '80px',
+      'max-width': '100px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
   }
+  
+  if (headerLower.includes('price') || headerLower.includes('total')) {
+    return { 
+      width: '10%', 
+      'min-width': '70px',
+      'max-width': '90px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
+  }
+  
+  if (headerLower.includes('details') || headerLower.includes('authority')) {
+    return { 
+      width: '15%', 
+      'min-width': '100px',
+      'max-width': '150px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
+  }
+  
+  if (headerLower.includes('transaction') || headerLower.includes('type')) {
+    return { 
+      width: '12%', 
+      'min-width': '90px',
+      'max-width': '120px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
+  }
+  
+  // Default for other columns
+  return { 
+    width: '8%', 
+    'min-width': '60px',
+    'max-width': '80px',
+    'word-wrap': 'break-word',
+    'white-space': 'normal'
+  };
+}
 
   isSmallTable(data: any[]): boolean {
     return data && data.length <= 5;

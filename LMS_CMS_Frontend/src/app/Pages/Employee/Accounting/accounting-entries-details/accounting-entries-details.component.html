@@ -1,7 +1,8 @@
 <div id="DataToDownload">
     <div class="no-print flex justify-between items-center">
         <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-            <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAccountingEntries()"></i>
+                <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToAccountingEntries()"></i>
             <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create Accounting Entries' | translate }}</h1>
             <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Edit Accounting Entries' | translate }}</h1>
             <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Accounting Entries' | translate }}</h1>
@@ -125,7 +126,7 @@
             </thead>
             <tbody>
                 <!-- No Data Row -->
-                <tr *ngIf="(accountingEntries.accountingEntriesDetails?.length || 0) === 0 && (accountingEntries.newDetails?.length || 0) === 0">
+                <tr *ngIf="(accountingEntries.accountingEntriesDetails.length || 0) === 0 && (accountingEntries.newDetails.length || 0) === 0">
                     <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                        {{ 'No Data Found' | translate }}
