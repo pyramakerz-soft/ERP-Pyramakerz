@@ -171,11 +171,11 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="pageTitle" 
         [infoRows]="[   
-               { keyEn: 'Report Type: ' + this.pageTitle },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Store: ' + getStoreName() },
-      { keyEn: 'Category: ' + getCategoryName() },
-      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() },]"
+      { keyEn: 'Report Type: ' + this.pageTitle , keyAr: this.pageTitle + ' : نوع التقرير' },
+      { keyEn: 'To Date: ' + this.dateTo , keyAr: this.dateTo + ' : إلى تاريخ' },
+      { keyEn: 'Store: ' + getStoreName() , keyAr: getStoreName() + ' : المخزن' },
+      { keyEn: 'Category: ' + getCategoryName() , keyAr: getCategoryName() + ' : الفئة' },
+      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() , keyAr: getBalanceFiltersInfo() + 'رصيد: ' },]"
             [tableHeaders]="baseHeaders"
             
              [tableData]="reportForExport" #pdfPrintComponent>

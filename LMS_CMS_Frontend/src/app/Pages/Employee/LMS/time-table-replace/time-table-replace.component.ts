@@ -194,7 +194,7 @@ export class TimeTableReplaceComponent {
   }
 
   moveToTimeTable() {
-    this.router.navigateByUrl(`Employee/Time Table`);
+    this.router.navigateByUrl(`Employee/Time Table/${this.TimeTableId}`)
   }
 
   onDragStart(event: DragEvent, session: SessionGroupDTO) {

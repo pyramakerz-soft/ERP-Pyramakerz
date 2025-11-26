@@ -111,11 +111,13 @@ export class MedicalReportComponent implements OnInit {
         this.restoreState();
     }
 
-  ngOnDestroy(): void {  
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  } 
+ngOnDestroy(): void {  
+  if (this.subscription) {
+    this.subscription.unsubscribe();
+  }
+  
+  this.stateService.clearMedicalReportState();
+}
 
   GetStudentsData() {
     this.students = []
@@ -171,14 +173,13 @@ export class MedicalReportComponent implements OnInit {
     }
   }
 
-    viewDetails(id: number) {
-    this.saveState();
-    if (this.selectedTab === 'MH By Parent') {
-      this.router.navigateByUrl(`Employee/Medical Report/parent/${id}`);
-    } else if (this.selectedTab === 'MH By Doctor') {
-      this.router.navigateByUrl(`Employee/Medical Report/doctor/${id}`);
-    }
-  }
+viewDetails(id: number) {
+  this.saveState();
+  if (this.selectedTab === 'MH By Parent') {
+    this.router.navigateByUrl(`Employee/Medical Report/parent/${id}`);
+  } else if (this.selectedTab === 'MH By Doctor') {
+    this.router.navigateByUrl(`Employee/Medical Report/doctor/${id}`);
+  }}
 
   OrCheck():boolean{
     if(this.reportType === 'employee'){

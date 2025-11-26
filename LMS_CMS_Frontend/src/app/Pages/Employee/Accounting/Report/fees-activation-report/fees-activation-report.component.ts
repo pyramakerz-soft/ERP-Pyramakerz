@@ -45,6 +45,8 @@ export class FeesActivationReportComponent {
   tableData: FeesActivation[]=[]; 
   direction: string = "";
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+    isLoading: boolean = false;
+
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -196,20 +198,24 @@ export class FeesActivationReportComponent {
     });
   }
     
-  GetData(pageNumber:number, pageSize:number){
-    this.tableData = []  
-    this.CurrentPage = 1 
-    this.TotalPages = 1
-    this.TotalRecords = 0
-    this.reportsService.GetFeesActivationByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, pageNumber, pageSize).subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage
-        this.PageSize = data.pagination.pageSize
-        this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords 
-        this.tableData = data.data 
-      }, 
-      (error) => { 
+GetData(pageNumber:number, pageSize:number){
+  this.isLoading = true; // Start loading
+  this.tableData = []  
+  this.CurrentPage = 1 
+  this.TotalPages = 1
+  this.TotalRecords = 0
+  
+  this.reportsService.GetFeesActivationByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, pageNumber, pageSize).subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage
+      this.PageSize = data.pagination.pageSize
+      this.TotalPages = data.pagination.totalPages
+      this.TotalRecords = data.pagination.totalRecords 
+      this.tableData = data.data 
+      this.isLoading = false;
+    }, 
+    (error) => { 
+      this.isLoading = false; 
         if(error.status == 404){
           if(this.TotalRecords != 0){
             let lastPage = this.TotalRecords / this.PageSize 

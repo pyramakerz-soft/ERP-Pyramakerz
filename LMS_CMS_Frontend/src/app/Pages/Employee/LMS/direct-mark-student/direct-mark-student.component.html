@@ -1,6 +1,7 @@
 <div class="flex justify-between items-center mb-5">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToDirectMark()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToDirectMark()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9"> Direct Mark Students</h1>
     </div>
 
