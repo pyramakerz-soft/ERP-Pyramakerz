@@ -134,8 +134,8 @@
     </div>
     <div *ngIf="Data.isCash" class="flex flex-col mb-4 w-[15%]">
       <input id="cashAmount" type="text" [(ngModel)]="Data.cashAmount"
-        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
-        (input)="validateCashVisaNumber($event, 'cashAmount')"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+        (input)="validateCashVisaNumber($event, 'cashAmount')" (ngModelChange)="TotalandRemainingCalculate()"
         placeholder="{{'Enter'| translate }} {{'Amount'| translate }}" />
 
     </div>
@@ -161,8 +161,8 @@
     </div>
     <div *ngIf="Data.isVisa" class="flex flex-col mb-4 w-[15%]">
       <input id="visaAmount" type="text" [(ngModel)]="Data.visaAmount"
-        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
-        (input)="validateCashVisaNumber($event, 'visaAmount')"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+        (input)="validateCashVisaNumber($event, 'visaAmount')" (ngModelChange)="TotalandRemainingCalculate()"
         placeholder="{{'Enter'| translate }} {{'Amount'| translate }}" />
 
     </div>
@@ -395,8 +395,8 @@
       <tbody>
         <!-- No Data Row -->
         <ng-container *ngIf="!IsOpenToAdd && (
-            (mode === 'Create' && Data.inventoryDetails?.length === 0 && SelectedSopItem == null) ||
-            (mode === 'Edit' && TableData?.length === 0)
+            (mode === 'Create' && Data.inventoryDetails?.length == 0 && SelectedSopItem == null) ||
+            (mode === 'Edit' && TableData?.length == 0 && this.NewDetailsWhenEdit?.length == 0)
           )">
           <tr>
             <td colspan="11"
@@ -456,6 +456,7 @@
     </table>
   </div>
 </div>
+
 
 <div class="print-area" *ngIf="FlagId == 12"> <!-- in sales return only  -->
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
@@ -577,18 +578,11 @@
   </div>
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
-  <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows"
-      [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
-      [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
-  </div>
-</div>
 
 <!-- Modal --> <!-- in sales return only   -->
 <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
   class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-  <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md">
+  <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md max-h-[90vh] overflow-y-auto">
     <!-- Close Icon -->
     <button (click)="closeModal()"
       class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
@@ -655,5 +649,15 @@
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+
+
+<div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
+  <div id="Data" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows"
+      [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
+      [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
   </div>
 </div>

@@ -79,7 +79,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             List<SafeEmployee> safeEmployees = await Unit_Of_Work.safeEmployee_Repository.Select_All_With_IncludesById<SafeEmployee>(
-                    f => f.IsDeleted != true && f.EmployeeID == EmpId,
+                    f => f.IsDeleted != true && f.EmployeeID == EmpId && f.Save.IsDeleted != true,
                     query => query.Include(d => d.Save),
                     query => query.Include(d => d.Employee));
 

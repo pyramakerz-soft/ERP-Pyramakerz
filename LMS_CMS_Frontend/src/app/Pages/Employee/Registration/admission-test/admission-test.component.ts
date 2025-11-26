@@ -293,9 +293,12 @@ export class AdmissionTestComponent {
   }
 
   CreateOREdit() {
+        console.log(12)
     if (this.isFormValid()) {
+        console.log(13)
       this.isLoading = true
       if (this.mode == "Create") {
+        console.log(4)
         this.testServ.Add(this.test, this.DomainName).subscribe(() => {
           this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           this.closeModal();
@@ -374,6 +377,7 @@ export class AdmissionTestComponent {
             isValid = false;
           }
         }
+        console.log(this.validationErrors)
       }
     }
     return isValid;

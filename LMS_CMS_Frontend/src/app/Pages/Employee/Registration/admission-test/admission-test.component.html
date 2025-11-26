@@ -118,7 +118,7 @@
             <div class="flex flex-col mb-4">
                 <select (ngModelChange)="onSchoolChange($event)"
                     class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-[500px] h-[45px] mb-3"
-                    id="schoolSelect" [(ngModel)]="SchoolId">
+                    id="schoolSelect" [(ngModel)]="test.schoolID">
                     <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                     <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
                     <option *ngIf="Schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>

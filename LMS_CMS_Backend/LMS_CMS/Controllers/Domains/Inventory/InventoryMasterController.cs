@@ -740,7 +740,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newData.Total != expectedItemsPrice)
             {
-                return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
+                return BadRequest("Total should reflect the sum of all Total Price values in the Inventory Details.");
             }
 
             if (newData.FlagId == 8 || newData.FlagId == 9 || newData.FlagId == 10 || newData.FlagId == 11 || newData.FlagId == 12)
@@ -950,10 +950,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newSale.BankID != 0 && newSale.BankID != null)
             {
-                Bank bank = Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == newSale.BankID && b.IsDeleted != true);
+                BankEmployee bank = Unit_Of_Work.bankEmployee_Repository.First_Or_Default(b => b.BankID == newSale.BankID && b.EmployeeID == userId && b.IsDeleted != true && b.Bank.IsDeleted != true);
                 if (bank == null)
                 {
-                    return NotFound("There Is No Bank With This Id");
+                    return NotFound("Bank not found");
                 }
             }
             else
@@ -976,10 +976,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newSale.SaveID != 0 && newSale.SaveID != null)
             {
-                Save save = Unit_Of_Work.save_Repository.First_Or_Default(b => b.ID == newSale.SaveID && b.IsDeleted != true);
+                SafeEmployee save = Unit_Of_Work.safeEmployee_Repository.First_Or_Default(b => b.SaveID == newSale.SaveID && b.EmployeeID == userId && b.IsDeleted != true && b.Save.IsDeleted != true);
                 if (save == null)
                 {
-                    return NotFound("There Is No Save With This Id");
+                    return NotFound("Safe not found");
                 }
             }
             else
@@ -988,7 +988,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
             if (newSale.SchoolPCId != 0 && newSale.SchoolPCId != null)
             {
-                SchoolPCs SchoolPCId = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(b => b.ID == newSale.SchoolPCId && b.IsDeleted != true);
+                SchoolPCs SchoolPCId = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(b => b.ID == newSale.SchoolPCId &&b.SchoolId==newSale.SchoolId && b.IsDeleted != true);
                 if (SchoolPCId == null)
                 {
                     return NotFound("SchoolPCId not found.");
@@ -1043,10 +1043,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newSale.FlagId == 8 || newSale.FlagId == 9 || newSale.FlagId == 10 || newSale.FlagId == 11 || newSale.FlagId == 12)
             {
+                newSale.CashAmount = Math.Round((newSale.CashAmount ?? 0) + (decimal)double.Epsilon, 2, MidpointRounding.AwayFromZero);
+                newSale.VisaAmount = Math.Round((newSale.VisaAmount ?? 0) + (decimal)double.Epsilon, 2, MidpointRounding.AwayFromZero);
+
                 decimal expectedRemaining = (newSale.Total) - ((newSale.CashAmount ?? 0) + (newSale.VisaAmount ?? 0));
                 if (expectedRemaining != newSale.Remaining)
                 {
-                    return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
+                    return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails"+ expectedRemaining +" : "+ newSale.Remaining);
                 }
 
 
