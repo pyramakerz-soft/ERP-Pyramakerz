@@ -280,31 +280,20 @@ selectTab(tab: string) {
   this.saveState(); // Add this
 }
 
-  resetTable() {
-    this.showTable = false;
-    this.tableData = [];
-  }
+resetTable() {
+  this.showTable = false;
+  this.tableData = [];
+  this.pdfTableData = [];
+  this.pdfTableHeaders = [];
+}
+async viewReport() {
+  this.isLoading = true;
+  this.showTable = false;
 
-  async viewReport() {
-    // if (
-    //  !this.selectedStudent
-    // ) {
-    //   Swal.fire({
-    //     icon: 'warning',
-    //     title: 'Missing Information',
-    //     text: 'Please select School, Grade, Class and Student',
-    //     confirmButtonColor: '#3085d6',
-    //     confirmButtonText: 'OK',
-    //   });
-    //   return;
-    // }
+  try {
+    const domainName = this.apiService.GetHeader();
+    let data: any[] = [];
 
-    this.isLoading = true;
-    this.showTable = false;
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      let data: any[] = [];
 
       switch (this.selectedTab) {
         case 'MH By Parent':
@@ -451,7 +440,7 @@ break;
             );
           }
           this.tableData = data.map((item: any) => ({
-            date: new Date(item.insertedAt).toLocaleDateString(),
+            date: item.date,
             diagnosis: item.diagnosis || 'No diagnosis',
             drug: item.followUpDrugs?.map((d: any) => d.drug).join(', ') || 'No drug',
             dose: item.followUpDrugs?.map((d: any) => d.dose).join(', ') || 'No dose',
@@ -463,19 +452,28 @@ break;
   
       }
 
-      this.prepareExportData();
-      console.log('Report data loaded:', this.tableData);
-      this.showTable = true;
-    } catch (error) {
-      console.error('Error loading report data:', error);
-      this.tableData = [];
-      this.showTable = true;
-    } finally {
-      this.isLoading = false;
-    }
+    this.prepareExportData();
+    console.log('Report data loaded:', this.tableData);
+    this.showTable = true;
+  } catch (error) {
+    console.error('Error loading report data:', error);
+    this.tableData = [];
+    this.showTable = true;
+  } finally {
+    this.isLoading = false;
   }
+}
   
 prepareExportData() {
+  // Clear previous data first
+  this.pdfTableData = [];
+  this.pdfTableHeaders = [];
+  this.pdfInfoRows = [];
+
+  if (this.tableData.length === 0) {
+    return;
+  }
+
   this.pdfTableData = this.tableData.map((item) => {
     switch (this.selectedTab) {
       case 'MH By Parent':
@@ -485,21 +483,29 @@ prepareExportData() {
           Details: item.details,
           'Permanent Drug': item.permanentDrug,
         };
-      case 'Hygiene Form':
-        const hygieneRow: any = {
-          Date: item.date,
-          Attendance: item.attendance,
-          Comment: item.comment,
-          'Action Taken': item.actionTaken
-        };
         
-        // Add dynamic hygiene types - ensure all types have values
-        Object.keys(item).forEach(key => {
-          if (key !== 'date' && key !== 'attendance' && 
-              key !== 'comment' && key !== 'actionTaken') {
-            hygieneRow[key] = item[key] || 'No'; // This ensures 'No' instead of undefined
-          }
-        });
+case 'Hygiene Form':
+  const hygieneRow: any = {
+    Date: item.date,
+    Attendance: item.attendance,
+    Comment: item.comment,
+    'Action Taken': item.actionTaken
+  };
+  
+  // Add dynamic hygiene types with emoji formatting for both PDF and Excel
+  Object.keys(item).forEach(key => {
+    if (key !== 'date' && key !== 'attendance' && 
+        key !== 'comment' && key !== 'actionTaken') {
+      // Use emojis for hygiene types
+      if (item[key] === 'Yes' || item[key] === 'true') {
+        hygieneRow[key] = '✓'; // Checkmark
+      } else {
+        hygieneRow[key] = '✗'; // X mark
+      }
+    }
+  });
+  
+  return hygieneRow;
         
         return hygieneRow;
       case 'Follow Up':
@@ -517,7 +523,9 @@ prepareExportData() {
     }
   });
 
-  // Set PDF headers based on selected tab
+  // Set PDF headers based on selected tab - CLEAR FIRST
+  this.pdfTableHeaders = [];
+  
   switch (this.selectedTab) {
     case 'MH By Parent':
     case 'MH By Doctor':
@@ -526,11 +534,10 @@ prepareExportData() {
     case 'Hygiene Form':
       this.pdfTableHeaders = ['Date', 'Attendance'];
       
-      // Add dynamic hygiene type headers and ensure all data has these columns
+      // Add dynamic hygiene type headers
       if (this.tableData.length > 0) {
         const allTypes = new Set<string>();
         
-        // Collect all possible hygiene types from all rows
         this.tableData.forEach(row => {
           Object.keys(row).forEach(key => {
             if (key !== 'date' && key !== 'attendance' && 
@@ -540,14 +547,13 @@ prepareExportData() {
           });
         });
 
-        // Add all hygiene types to headers
         allTypes.forEach(type => this.pdfTableHeaders.push(type));
         
-        // Ensure all rows have all hygiene type columns with 'No' as default
+        // Ensure all rows have all hygiene type columns with emojis
         this.pdfTableData = this.pdfTableData.map(row => {
           allTypes.forEach(type => {
             if (!row.hasOwnProperty(type)) {
-              row[type] = 'No';
+              row[type] = '✗'; // Default to X mark for PDF
             }
           });
           return row;
@@ -556,18 +562,20 @@ prepareExportData() {
       
       this.pdfTableHeaders.push('Comment', 'Action Taken');
       break;
-      case 'Follow Up':
+    case 'Follow Up':
       this.pdfTableHeaders = [
         'Date',
         'Diagnosis',
         'Drug',
         'Dose',
         'Recommendations',
+        'Complains',
+        'Doctor'
       ];
       break;
   }
 
-  // Set info rows (your existing code)
+  // Set info rows
   const selectedSchool = this.schools.find(
     (s) => s.id === this.selectedSchool
   );
@@ -744,28 +752,31 @@ async exportToExcel() {
   }
 }
 
-  exportToPDF() {
-    if (this.pdfTableData.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No Data',
-        text: 'No data to export!',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.pdfTitle = `${this.selectedTab} Report`;
-    this.pdfFileName = `${this.selectedTab.replace(/ /g, '_')}_Report.pdf`;
-    this.showPDF = true;
-
-    setTimeout(() => {
-      if (this.pdfComponentRef) {
-        this.pdfComponentRef.downloadPDF();
-      }
-      this.showPDF = false;
-    }, 100);
+exportToPDF() {
+  if (this.tableData.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'No Data',
+      text: 'No data to export!',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  // Ensure we have the latest data prepared
+  this.prepareExportData();
+
+  this.pdfTitle = `${this.selectedTab} Report`;
+  this.pdfFileName = `${this.selectedTab.replace(/ /g, '_')}_Report.pdf`;
+  this.showPDF = true;
+
+  setTimeout(() => {
+    if (this.pdfComponentRef) {
+      this.pdfComponentRef.downloadPDF();
+    }
+    this.showPDF = false;
+  }, 100);
+}
 
 printTable() {
   if (this.tableData.length === 0) {
@@ -778,7 +789,8 @@ printTable() {
     return;
   }
 
-  this.prepareExportData(); // Ensure data is prepared
+  // Ensure we have the latest data prepared
+  this.prepareExportData();
   
   this.pdfTitle = `${this.selectedTab} Report`;
   this.showPDF = true;
@@ -818,7 +830,7 @@ printTable() {
       document.body.removeChild(printContainer);
       this.showPDF = false;
     }, 100);
-  }, 300); // Increased timeout to ensure data is ready
+  }, 300);
 }
 
 

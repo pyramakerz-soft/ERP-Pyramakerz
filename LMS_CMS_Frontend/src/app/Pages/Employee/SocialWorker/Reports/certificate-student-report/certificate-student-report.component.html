@@ -4,7 +4,7 @@
     </h1>
 </div>
 
-<div *ngIf="this.reportType != 'student'" class="my-5 flex flex-wrap items-center md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+<div *ngIf="this.reportType != 'student'" class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
     <!-- School Selector -->
     <div *ngIf="this.reportType == 'employee'"  class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
@@ -129,7 +129,7 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Certificate Student Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="[ 'Medal Name', 'Added By']"
+            [tableHeaders]="[ 'Certificate Name', 'Added By']"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
