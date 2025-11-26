@@ -1253,7 +1253,8 @@ namespace LMS_CMS_BL.Config
             .ForMember(dest => dest.ConductType, opt => opt.MapFrom(src => new ConductTypeReportDTO
             {
                 ID = src.ConductType.ID,
-                Name = src.ConductType.en_name ?? src.ConductType.ar_name
+                en_name = src.ConductType.en_name ,
+                ar_name = src.ConductType.ar_name
             }))
             .ForMember(dest => dest.ProcedureType, opt => opt.MapFrom(src => new ProcedureTypeReportDTO
             {

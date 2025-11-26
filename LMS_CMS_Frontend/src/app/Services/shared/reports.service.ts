@@ -177,7 +177,7 @@ async generateExcelReport(options: {
 
   worksheet.addRow([]);
 
-  // Info rows (dynamic)
+  // Info rows (dynamic)--77
   options.infoRows?.forEach(({ key, value }) => {
     const row = worksheet.addRow([`${key}: ${value}`]);
     row.font = { bold: true, size: 12 };
