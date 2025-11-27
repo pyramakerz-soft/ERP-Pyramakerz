@@ -10,8 +10,7 @@ import { InventoryCategoryService } from '../../../../../../Services/Employee/In
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
-import { firstValueFrom, Subscription } from 'rxjs';
-import * as XLSX from 'xlsx';
+import { firstValueFrom, Subscription } from 'rxjs'; 
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../../Services/loading.service';

@@ -15,9 +15,8 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import 'leaflet-control-geocoder';
-import * as L from 'leaflet';
+// import * as L from 'leaflet';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -164,7 +163,9 @@ private showSuccessAlert(message: string) {
     });
   }
 
-  Edit(id: number) {
+  async Edit(id: number) {
+    const L = await import('leaflet');
+    
     this.mode = 'Edit';
     this.LocationServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.location = d;
@@ -330,8 +331,9 @@ CreateOREdit() {
     this.initMap();
   }
 
-  private initMap(): void {
-
+  private async initMap(): Promise<void> {
+    const L = await import('leaflet');
+    
     // Create map
     this.map = L.map('map').setView([30.0444, 31.2357], 13);
 
@@ -384,7 +386,9 @@ CreateOREdit() {
   }
 
   /** Called when latitude or longitude inputs change */
-  onLatLngChange(): void {
+  async onLatLngChange(): Promise<void> {
+    const L = await import('leaflet');
+   
     if (this.location.latitude && this.location.longitude) {
       const latlng = L.latLng(this.location.latitude, this.location.longitude);
       this.marker.setLatLng(latlng);
@@ -399,7 +403,9 @@ CreateOREdit() {
   }
 
   /** Draw / update circle */
-  updateCircle(): void {
+  async updateCircle(): Promise<void> {
+    const L = await import('leaflet');
+    
     if (this.circle) {
       this.map.removeLayer(this.circle);
     }

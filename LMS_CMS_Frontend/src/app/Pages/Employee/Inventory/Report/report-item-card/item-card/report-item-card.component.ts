@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as XLSX from 'xlsx-js-style';
+// import * as XLSX from 'xlsx-js-style';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { Store } from '../../../../../../Models/Inventory/store';
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
@@ -535,7 +535,7 @@ async viewReport() {
   //   XLSX.writeFile(workbook, `Item_Card_Report_${dateStr}.xlsx`);
   // }
 
-  exportExcel() {
+  async exportExcel() {
   if (this.combinedData.length == 0) {
     Swal.fire({
       icon: 'warning',
@@ -745,6 +745,7 @@ async viewReport() {
     excelData.push(rowData);
   });
 
+  const XLSX = await import('xlsx-js-style');
   // Create worksheet
   const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 

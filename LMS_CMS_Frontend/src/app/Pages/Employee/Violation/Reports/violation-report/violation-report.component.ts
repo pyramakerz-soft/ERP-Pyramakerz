@@ -13,8 +13,7 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
-import * as XLSX from 'xlsx-js-style';
+import { TranslateModule } from '@ngx-translate/core'; 
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { LoadingService } from '../../../../../Services/loading.service';

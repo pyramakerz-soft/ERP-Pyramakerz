@@ -10,14 +10,14 @@ import { ParentService } from '../../../Services/parent.service';
 import { ApiService } from '../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
-import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
+import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-sign-up',
-  standalone: true,
+  standalone: true, 
   imports: [CommonModule, FormsModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
@@ -42,12 +42,12 @@ export class SignUpComponent {
   ConfirmPassword: string = ""
 
   validationErrors: { [key in keyof ParentAdd]?: string } = {};
-
+ 
   parentInfo: ParentAdd = new ParentAdd()
   isLoading = false;
 
   IsConfimPassEmpty = false
-  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
+  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent; 
 
   constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
   ngOnInit() {
@@ -80,14 +80,14 @@ export class SignUpComponent {
     this.IsConfimPassEmpty = false
   }
 
-  // onCaptchaResolved(token: string | null): void {
-  //   if (token) {
-  //     this.parentInfo.recaptchaToken = token;
-  //     this.validationErrors['recaptchaToken'] = ''
-  //   } else {
-  //     this.parentInfo.recaptchaToken = '';
-  //   }
-  // }
+  onCaptchaResolved(token: any): void {
+    if (token) {
+      this.parentInfo.recaptchaToken = token;
+      this.validationErrors['recaptchaToken'] = ''
+    } else {
+      this.parentInfo.recaptchaToken = '';
+    }
+  }
 
   SignUp() {
     if (this.isFormValid()) {
@@ -166,10 +166,10 @@ export class SignUpComponent {
           }
         );
       }, (error) => {
-        // this.parentInfo.recaptchaToken = '';
-        // this.isLoading = false;
+        this.parentInfo.recaptchaToken = '';
+        this.isLoading = false;
         // if (this.captchaRef) {
-        //   this.captchaRef.reset();
+        //   this.captchaRef.reset(); 
         // }
         Swal.fire({
           icon: 'error',
@@ -223,12 +223,12 @@ export class SignUpComponent {
         }
       }
 
-      // if (this.parentInfo.recaptchaToken == "") {
-      //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-      //   isValid = false;
-      // } else {
-      //   this.validationErrors['recaptchaToken'] = '';
-      // }
+      if (this.parentInfo.recaptchaToken == "") {
+        this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+        isValid = false;
+      } else {
+        this.validationErrors['recaptchaToken'] = '';
+      }
     }
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.parentInfo.email && !emailPattern.test(this.parentInfo.email)) {

@@ -7,7 +7,7 @@ import { InventoryMaster } from '../../../../../../Models/Inventory/InventoryMas
 import { InventoryMasterService } from '../../../../../../Services/Employee/Inventory/inventory-master.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 // import * as XLSX from 'xlsx';
-import * as XLSX from 'xlsx-js-style';
+// import * as XLSX from 'xlsx-js-style';
 
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
@@ -613,7 +613,7 @@ getInfoRows(): any[] {
     }, 500);
   }
 
-exportExcel() {
+  async exportExcel() {
   if (this.transactions.length == 0) {
     alert('No data to export!');
     return;
@@ -714,6 +714,8 @@ exportExcel() {
     excelData.push([]); // empty row
     excelData.push([]); // empty row for spacing between invoices
   });
+
+  const XLSX = await import('xlsx-js-style');
 
   // Create worksheet
   const worksheet = XLSX.utils.aoa_to_sheet(excelData);

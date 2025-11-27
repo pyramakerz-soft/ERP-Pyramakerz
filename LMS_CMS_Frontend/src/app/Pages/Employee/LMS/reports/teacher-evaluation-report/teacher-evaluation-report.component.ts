@@ -10,7 +10,7 @@ import { EvaluationEmployeeService } from '../../../../../Services/Employee/LMS/
 import { ApiService } from '../../../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
@@ -302,6 +302,8 @@ async downloadAsPDF() {
   let reportElement: HTMLElement | null = null;
 
   try {
+    const html2canvas = (await import('html2canvas')).default;
+
     // Wait for the chart to be fully rendered
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -710,12 +712,13 @@ printReport() {
 }
 
 private getChartAsImage(): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!this.chartCanvas?.nativeElement) {
       reject('Chart canvas not available');
       return;
     }
-    
+    const html2canvas = (await import('html2canvas')).default;
+
     html2canvas(this.chartCanvas.nativeElement, {
       scale: 2,
       backgroundColor: '#ffffff',
