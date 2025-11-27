@@ -194,8 +194,8 @@ export class ArchivingComponent {
     input.value = '';
   } 
 
-  saveCreateFolder(){
-    if(this.newArchiving.name){
+  saveCreateFolder(){ 
+    if(this.newArchiving.name && this.newArchiving.name.trim() !== ''){
       if(this.isAddFileOpen && this.newArchiving.fileFile == null){
         Swal.fire({
           icon: 'error',
@@ -233,6 +233,7 @@ export class ArchivingComponent {
         ); 
       }
     } else{
+      console.log(this.isAddFileOpen)
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -252,7 +253,9 @@ export class ArchivingComponent {
     return filename.slice(lastDotIndex).toLowerCase();
   }
 
-  downloadFile(fileUrl: string, fileName: string) {
+  downloadFile(event: Event, fileUrl: string) {
+    event.preventDefault()
+    const fileName = decodeURIComponent(fileUrl.split('/').pop() || 'download');
     fetch(fileUrl)
       .then(response => response.blob())
       .then(blob => {
