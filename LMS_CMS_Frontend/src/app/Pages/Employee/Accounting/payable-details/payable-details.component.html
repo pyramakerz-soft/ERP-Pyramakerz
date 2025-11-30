@@ -191,7 +191,7 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
                             row.id}}</td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            <input [disabled]="isView" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 [attr.placeholder]="!row.amount ? 'Enter Amount' : ''"
                                 (input)="validateNumberEditDetails(row , $event, 'amount'); "
                                 [(ngModel)]="row.amount"
@@ -201,7 +201,7 @@
                             </span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <select  (ngModelChange)="onInputValueChangeForEditDetails(row ,{ field: 'linkFileID', value: $event }) ; AddInUpdated(row)"
+                            <select  [disabled]="isView" (ngModelChange)="onInputValueChangeForEditDetails(row ,{ field: 'linkFileID', value: $event }) ; AddInUpdated(row)"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                                 id="linkFileID" [(ngModel)]="row.linkFileID">
                                 <option [value]="0" disabled selected hidden>{{ 'Choose Link File' | translate }}
@@ -216,7 +216,7 @@
                             </span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <select [disabled]="row.linkFileID == 0" [(ngModel)]="row.linkFileTypeID"
+                            <select [disabled]="row.linkFileID == 0 || isView" [(ngModel)]="row.linkFileTypeID"
                                 (ngModelChange)="onInputValueChangeForEditDetails(row ,{ field: 'linkFileTypeID', value: $event }); AddInUpdated(row)"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
                                 <option [value]="0" disabled selected hidden>
@@ -234,11 +234,11 @@
                             </span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                            <textarea [disabled]="isView"  class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3" 
                              (ngModelChange)="AddInUpdated(row)"
                                 [(ngModel)]="row.notes"></textarea>
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <td *ngIf="!isView" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="DeleteDetail(row.id)">
