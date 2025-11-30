@@ -252,10 +252,10 @@ export class AssignmentReportComponent implements OnInit {
           domainName,
           this.dateFrom,
           this.dateTo,
-          this.selectedSchoolId,
-          this.selectedAcademicYearId,
-          this.selectedGradeId,
-          this.selectedSubjectId
+          this.selectedSchoolId!,
+          this.selectedAcademicYearId!,
+          this.selectedGradeId!,
+          this.selectedSubjectId!
         )
       );
 
