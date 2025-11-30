@@ -1,13 +1,14 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ Data.user_Name }}</h1>
     </div>
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <button class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectTeacher()">
+        <button *ngIf="Data.employeeTypeID == 4" class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectTeacher()">
                {{ 'Subject Teacher' | translate }}
         </button>
-        <button class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectCoTeacher()">
+        <button *ngIf="Data.employeeTypeID == 4" class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectCoTeacher()">
                {{ 'Subject Co-Teacher' | translate }}
         </button>
         <button (click)="edit()"
@@ -19,39 +20,39 @@
 
 <div class="flex flex-wrap justify-between mt-5">
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'English Name' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'English Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.en_name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Arabic Name' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Arabic Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.ar_name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Email' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Email' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.email }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Mobile' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Mobile' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.mobile }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Phone' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Phone' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.phone }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'licenseNumber' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'licenseNumber' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.licenseNumber }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'expireDate' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'expireDate' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.expireDate }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Address' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Address' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.address }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Role Name' | translate }}</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Role Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ Data.role_Name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
@@ -66,23 +67,23 @@
 
 <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
   <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [checked]="Data.canReceiveRequest" disabled>
-  <label class="mb-2" for="canReceiveRequest">   {{ 'Can Receive Request' | translate }}</label>
+  <label class="mb-2" for="canReceiveRequest">{{ 'Can Receive Request' | translate }}</label>
 </div>
  
 <div class="flex align-middle space-x-2 mb-4 w-full">
   <input type="checkbox" id="canReceiveRequestFromParentOrStudent" class="w-5 h-5" [checked]="Data.canReceiveRequestFromParent" disabled>
-  <label class="mb-2" for="canReceiveRequestFromParentOrStudent">   {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
+  <label class="mb-2" for="canReceiveRequestFromParentOrStudent">{{ 'Can Receive Request From Parent Or Student' | translate }}</label>
 </div>
 
 <div class="flex align-middle space-x-2 mb-4 w-full">
   <input type="checkbox" id="canReceiveMessageFromParentOrStudent" class="w-5 h-5" [checked]="Data.canReceiveMessageFromParent" disabled>
-  <label class="mb-2" for="canReceiveMessageFromParentOrStudent">   {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
+  <label class="mb-2" for="canReceiveMessageFromParentOrStudent">{{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
 </div>
 
 <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
     <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="Data.isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" disabled>
-        <label class="mb-2" for="Data.isRestrictedForLoctaion">   {{ 'is Restricted For Location' | translate }}</label>
+        <label class="mb-2" for="Data.isRestrictedForLoctaion">{{ 'is Restricted For Location' | translate }}</label>
     </div>
     <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="ac"> {{ 'Locations' | translate }}</label>
@@ -98,7 +99,7 @@
                     </div>
                 </ng-container>
                 <ng-template #placeholder>
-                    <span class="text-gray-400">   {{ 'No Location Selected' | translate }}</span>
+                    <span class="text-gray-400">{{ 'No Location Selected' | translate }}</span>
                 </ng-template>
             </div>
         </div>

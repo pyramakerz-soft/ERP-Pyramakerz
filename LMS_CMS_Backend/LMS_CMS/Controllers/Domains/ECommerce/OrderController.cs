@@ -132,7 +132,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
 
             List<Order> orders = await Unit_Of_Work.order_Repository.Select_All_With_IncludesById<Order>(
                     b => b.IsDeleted != true && b.OrderStateID == id,
-                    query => query.Include(order => order.OrderState));
+                    query => query.Include(order => order.OrderState),
+                    query => query.Include(order => order.Student));
 
             if (orders == null || orders.Count == 0)
             {
@@ -160,14 +161,16 @@ namespace LMS_CMS_PL.Controllers.Domains.ECommerce
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Order History" }
-         )]
+        )]
         public async Task<IActionResult> GetAll()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Order> orders = await Unit_Of_Work.order_Repository.Select_All_With_IncludesById<Order>(
                     b => b.IsDeleted != true,
-                    query => query.Include(order => order.OrderState));
+                    query => query.Include(order => order.OrderState),
+                    query => query.Include(order => order.Student)
+                    );
 
             if (orders == null || orders.Count == 0)
             {

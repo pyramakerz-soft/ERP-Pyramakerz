@@ -12,7 +12,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -232,7 +232,7 @@ export class GradeComponent {
     return IsAllow;
   }
 
-  checkFromToDate() {
+  async checkFromToDate() {
     let valid = true
 
     const fromDate: Date = new Date(this.grade.dateFrom);
@@ -241,6 +241,8 @@ export class GradeComponent {
 
     if (diff < 0) {
       valid = false
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'From Birthdate Must Be a Date Before To Birthdate',
         icon: 'warning',
@@ -274,12 +276,14 @@ export class GradeComponent {
     this.grade[field] = event.target.value === '' ? null as never : +event.target.value as never;
   }
 
-  SaveGrade() {
+  async SaveGrade() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.grade.sectionID = this.sectionId
       this.checkFromToDate()
-      if (this.checkFromToDate()) {
+      if (await this.checkFromToDate()) {
         if (this.editGrade == false) {
           this.gradeService.Add(this.grade, this.DomainName).subscribe(
             (result: any) => {
@@ -320,7 +324,9 @@ export class GradeComponent {
     }
   }
 
-  deleteGrade(id: number) {
+  async deleteGrade(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Grade') + this.translate.instant('?'),
       icon: 'warning',

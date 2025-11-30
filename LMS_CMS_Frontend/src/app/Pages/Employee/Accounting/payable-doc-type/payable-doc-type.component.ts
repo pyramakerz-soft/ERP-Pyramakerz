@@ -6,7 +6,7 @@ import { PayableDocType } from '../../../../Models/Accounting/payable-doc-type';
 import { PayableDocTypeService } from '../../../../Services/Employee/Accounting/payable-doc-type.service';
 import { firstValueFrom } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -128,7 +128,9 @@ export class PayableDocTypeComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -189,8 +191,10 @@ export class PayableDocTypeComponent {
             this.GetAllData();
             this.closeModal();
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -207,7 +211,9 @@ export class PayableDocTypeComponent {
             this.GetAllData();
             this.closeModal();
           },
-          (error) => {
+          async (error) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false;
             Swal.fire({
               icon: 'error',

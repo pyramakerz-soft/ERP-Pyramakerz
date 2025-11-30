@@ -13,9 +13,7 @@ import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom
 import { StudentService } from '../../../../../Services/student.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
+// import Swal from 'sweetalert2'; 
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
@@ -77,28 +75,28 @@ export class AttendanceReportComponent implements OnInit {
     reportHeaderOneAr: 'تقرير الحضور',
     reportHeaderTwoAr: 'سجلات حضور الطلاب'
   };
-constructor(
-  private attendanceService: AttendanceService,
-  private schoolService: SchoolService,
-  public account: AccountService,   
-  private academicYearService: AcadimicYearService,
-  private gradeService: GradeService,
-  private classroomService: ClassroomService,
-  private studentService: StudentService,
-  private apiService: ApiService,
-  private route: ActivatedRoute,
-  private languageService: LanguageService, 
-  private reportsService: ReportsService,
-  private loadingService: LoadingService 
-) {}
+  constructor(
+    private attendanceService: AttendanceService,
+    private schoolService: SchoolService,
+    public account: AccountService,
+    private academicYearService: AcadimicYearService,
+    private gradeService: GradeService,
+    private classroomService: ClassroomService,
+    private studentService: StudentService,
+    private apiService: ApiService,
+    private route: ActivatedRoute,
+    private languageService: LanguageService,
+    private reportsService: ReportsService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.loadSchools();
     this.DomainName = this.apiService.GetHeader();
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-    this.reportType = this.route.snapshot.data['reportType'] || 'employee'; 
-    if(this.reportType == 'parent'){
+    this.reportType = this.route.snapshot.data['reportType'] || 'employee';
+    if (this.reportType == 'parent') {
       this.getStudentsByParentId()
     }
 
@@ -108,13 +106,13 @@ constructor(
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  getStudentsByParentId(){ 
+  getStudentsByParentId() {
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
       console.log(this.students)
@@ -252,16 +250,18 @@ constructor(
 
   onFilterChange() {
     this.showTable = false;
-    if(this.reportType == 'parent'){
+    if (this.reportType == 'parent') {
       this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
     }
-    else{
-      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    else {
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
     }
     this.attendanceReports = [];
   }
 
   async viewReport() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
         title: 'Invalid Date Range',
@@ -291,7 +291,7 @@ constructor(
       );
 
       console.log('API Response:', response);
-      
+
       // Handle the response directly as an array
       if (Array.isArray(response)) {
         this.attendanceReports = response;
@@ -306,31 +306,33 @@ constructor(
     } catch (error) {
       console.error('Error loading attendance reports:', error);
       this.attendanceReports = [];
+      this.reportsForExport = []
+      this.reportsForExcel = []
       this.showTable = true;
     } finally {
       this.isLoading = false;
     }
   }
 
-private prepareExportData(): void {
-  // For PDF (object format)
-  this.reportsForExport = this.attendanceReports.map((report) => ({
-    'Date': new Date(report.date).toLocaleDateString(),
-    'Student Name': report.studentName,
-    'Status': report.isLate ? 'Late' : 'Present',
-    'Late Time (minutes)': report.isLate ? report.lateTimeInMinutes : '-',
-    'Notes': report.notes || '-'
-  }));
+  private prepareExportData(): void {
+    // For PDF (object format)
+    this.reportsForExport = this.attendanceReports.map((report) => ({
+      'Date': new Date(report.date).toLocaleDateString(),
+      'Student Name': report.studentName,
+      'Status': report.isLate ? 'Late' : 'Present',
+      'Late Time (minutes)': report.isLate ? report.lateTimeInMinutes : '-',
+      'Notes': report.notes || '-'
+    }));
 
-  // For Excel (array format)
-  this.reportsForExcel = this.attendanceReports.map((report) => [
-    new Date(report.date).toLocaleDateString(),
-    report.studentName,
-    report.isLate ? 'Late' : 'Present',
-    report.isLate ? report.lateTimeInMinutes : '-',
-    report.notes || '-'
-  ]);
-}
+    // For Excel (array format)
+    this.reportsForExcel = this.attendanceReports.map((report) => [
+      new Date(report.date).toLocaleDateString(),
+      report.studentName,
+      report.isLate ? 'Late' : 'Present',
+      report.isLate ? report.lateTimeInMinutes : '-',
+      report.notes || '-'
+    ]);
+  }
 
   getSchoolName(): string {
     return this.schools.find(s => s.id === this.selectedSchoolId)?.name || 'All Schools';
@@ -349,16 +351,16 @@ private prepareExportData(): void {
   }
 
   getStudentName(): string {
-   if(this.reportType === 'employee'){
-     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
-   }
-   else{
-    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
-   }
+    if (this.reportType === 'employee') {
+      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+    }
+    else {
+      return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+    }
   }
 
   getInfoRows(): any[] {
-    if(this.reportType === 'employee'){
+    if (this.reportType === 'employee') {
       return [
         { keyEn: 'From Date: ' + this.dateFrom },
         { keyEn: 'To Date: ' + this.dateTo },
@@ -368,8 +370,8 @@ private prepareExportData(): void {
         { keyEn: 'Class: ' + this.getClassName() },
         { keyEn: 'Student: ' + this.getStudentName() }
       ];
-   }
-    else{
+    }
+    else {
       return [
         { keyEn: 'From Date: ' + this.dateFrom },
         { keyEn: 'To Date: ' + this.dateTo },
@@ -379,7 +381,7 @@ private prepareExportData(): void {
   }
 
   getInfoRowsExcel(): any[] {
-    if(this.reportType === 'employee'){
+    if (this.reportType === 'employee') {
       return [
         { key: 'From Date', value: this.dateFrom },
         { key: 'To Date', value: this.dateTo },
@@ -388,9 +390,9 @@ private prepareExportData(): void {
         { key: 'Grade', value: this.getGradeName() },
         { key: 'Class', value: this.getClassName() },
         { key: 'Student', value: this.getStudentName() }
-      ]; 
+      ];
     }
-    else{
+    else {
       return [
         { key: 'From Date', value: this.dateFrom },
         { key: 'To Date', value: this.dateTo },
@@ -399,7 +401,9 @@ private prepareExportData(): void {
     }
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
@@ -412,12 +416,14 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -425,7 +431,7 @@ private prepareExportData(): void {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -446,14 +452,14 @@ private prepareExportData(): void {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -461,41 +467,43 @@ private prepareExportData(): void {
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExcel.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
+  async exportExcel() {
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-  this.isExporting = true;
-  
-  try {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Attendance Report',
-        ar: 'تقرير الحضور'
-      },
-      subHeaders: [
-        {
-          en: 'Student Attendance Records',
-          ar: 'سجلات حضور الطلاب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          // title: 'Attendance Report Data',
-          headers: ['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes'],
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Attendance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  } finally {
-    this.isExporting = false;
+    if (this.reportsForExcel.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+
+    try {
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Attendance Report',
+          ar: 'تقرير الحضور'
+        },
+        subHeaders: [
+          {
+            en: 'Student Attendance Records',
+            ar: 'سجلات حضور الطلاب'
+          }
+        ],
+        infoRows: this.getInfoRowsExcel(),
+        tables: [
+          {
+            // title: 'Attendance Report Data',
+            headers: ['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes'],
+            data: this.reportsForExcel
+          }
+        ],
+        filename: `Attendance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
-}
 }

@@ -3,16 +3,10 @@ import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { QuillModule, QuillEditorComponent } from 'ngx-quill';
+import { QuillModule } from 'ngx-quill';
 import { Subscription } from 'rxjs';
-import Swal from 'sweetalert2';
-import { SearchComponent } from '../../../../Component/search/search.component';
-import { AcademicYear } from '../../../../Models/LMS/academic-year';
-import { Grade } from '../../../../Models/LMS/grade';
-import { Lesson } from '../../../../Models/LMS/lesson';
-import { Semester } from '../../../../Models/LMS/semester';
-import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
-import { School } from '../../../../Models/school';
+// import Swal from 'sweetalert2'; 
+import { Lesson } from '../../../../Models/LMS/lesson'; 
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -174,8 +168,10 @@ export class ParentLessonComponent {
     this.GetAllData()
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
       if (this.reportsForExport.length === 0) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire('Warning', 'No data to export!', 'warning');
         return;
       }
@@ -187,8 +183,10 @@ export class ParentLessonComponent {
       }, 500);
     }
   
-    Print() {
+    async Print() {
       if (this.reportsForExport.length === 0) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire('Warning', 'No data to print!', 'warning');
         return;
       }
@@ -285,6 +283,8 @@ export class ParentLessonComponent {
   
   async exportExcel() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -306,7 +306,8 @@ export class ParentLessonComponent {
         filename: `Lesson_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', 'Failed to export to Excel', 'error');
     }
   }

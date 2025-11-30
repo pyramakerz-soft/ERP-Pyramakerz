@@ -3,7 +3,7 @@ import { DiscussionRoom } from '../../../../Models/LMS/discussion-room';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TokenData } from '../../../../Models/token-data';
 import { DiscussionRoomService } from '../../../../Services/Employee/LMS/discussion-room.service';
 import { firstValueFrom } from 'rxjs';
@@ -491,7 +491,7 @@ isFormValid(): boolean {
     input.value = '';
   }
 
-  Save() {
+  async Save() {
     this.discussionRoom.studentClassrooms = []
     this.discussionRoom.studentClassrooms.push(...this.choosedStudentsClass)
 
@@ -499,6 +499,8 @@ isFormValid(): boolean {
       if(this.discussionRoom.saturday == false && this.discussionRoom.sunday == false && this.discussionRoom.monday == false
         && this.discussionRoom.tuesday == false && this.discussionRoom.wednesday == false && this.discussionRoom.thursday == false && this.discussionRoom.friday == false
       ){
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: 'You have to choose atleast one day',
           icon: 'warning', 
@@ -531,7 +533,9 @@ isFormValid(): boolean {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
           title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +this.translate.instant('Discussion Room') + " " + this.translate.instant('?'),
           icon: 'warning',

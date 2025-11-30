@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { Domain } from '../../../Models/domain';
 import { DomainService } from '../../../Services/Octa/domain.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { PagesWithRoleId } from '../../../Models/pages-with-role-id';
 import { RoleDetailsService } from '../../../Services/Employee/role-details.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -242,11 +242,13 @@ export class DomainsComponent {
     }
   }
 
-  SaveDomain(){
+  async SaveDomain(){
     const hostname = window.location.hostname;  
     var Header = hostname.split('.')[0] 
  
     if(this.isFormValid()){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isSaved = true
       if(this.editDomain == false){
         this.domainService.CreateDomainDB(this.domain.name).subscribe(
@@ -374,7 +376,9 @@ export class DomainsComponent {
     }
   } 
 
-  deleteDomain(id:number){
+  async deleteDomain(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this domain?',
       icon: 'warning',

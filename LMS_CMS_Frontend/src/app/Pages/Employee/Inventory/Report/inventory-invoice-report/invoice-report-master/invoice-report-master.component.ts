@@ -5,20 +5,19 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '../../../../../../Models/Inventory/store';
 import { InventoryMaster } from '../../../../../../Models/Inventory/InventoryMaster';
 import { InventoryMasterService } from '../../../../../../Services/Employee/Inventory/inventory-master.service';
-import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
-import * as XLSX from 'xlsx';
+import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service'; 
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-import { ReportsService } from '../../../../../../Services/shared/reports.service';
-import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { ReportsService } from '../../../../../../Services/shared/reports.service'; 
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../../Services/loading.service';
+
 interface FlagOption {
   id: number;
   name: string;
@@ -62,6 +61,13 @@ school = {
 
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+  salesServ: any;
+  CurrentPage: any;
+  PageSize: any;
+  TotalPages: any;
+  TotalRecords: any;
+  TableData: InventoryMaster[] = [];
+  isDeleting: any;
 
   getStoreName(): string {
     return (
@@ -323,8 +329,10 @@ onFlagSelected() {
     });
   }
 
-viewReport() {
+  async viewReport() {
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Invalid Date Range',
       text: 'Start date cannot be later than end date.',
@@ -472,7 +480,7 @@ private prepareExportData(): void {
     this.viewReport();
   }
 
-  get visiblePages(): number[] {
+  get visiblePages(): number[] {  //
     const total = this.totalPages;
     const current = this.currentPage;
     const maxVisible = 5;
@@ -509,8 +517,10 @@ DownloadAsPDF() {
   }, 500);
 }
 
-  Print() {
+  async Print() {
     if (this.transactionsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -618,4 +628,66 @@ async exportExcel() {
     }]
   });
 }
+
+
+
+
+// adding pagination functions  by Gaber ..777
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; 
+    return;
+  }
+  
+  this.pageSize = numValue;
+}
+
+
+validatePageSize(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize;
+    return;
+  }
+
+  if (this.pageSize !== numValue) {
+    this.pageSize = numValue;
+    this.currentPage = 1; 
+    this.viewReport();
+  }
+}
+   
+
+   changeCurrentPage(page: number): void {
+   if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+   }
+  
+  this.currentPage = page;
+  this.viewReport(); 
+}
+
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; 
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1;
+  this.viewReport();
+}
+
+
+
+
 }

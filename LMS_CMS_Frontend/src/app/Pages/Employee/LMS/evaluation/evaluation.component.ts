@@ -22,7 +22,7 @@ import { EvaluationBookCorrection } from '../../../../Models/LMS/evaluation-book
 import { EvaluationBookCorrectionService } from '../../../../Services/Employee/LMS/evaluation-book-correction.service';
 import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 // import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -333,7 +333,9 @@ export class EvaluationComponent {
 
   ////////////////////////////////////////// Submit ///////////////////////////////////////////////
 
-  Submit(){ 
+  async Submit(){ 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(this.EvaluationEmployee.evaluationBookCorrectionID == 0){
       Swal.fire({
         icon: 'error',

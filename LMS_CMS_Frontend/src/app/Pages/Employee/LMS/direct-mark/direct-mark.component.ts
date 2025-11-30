@@ -26,7 +26,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subject } from '../../../../Models/LMS/subject';
 import { firstValueFrom, Subscription } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
@@ -503,8 +503,10 @@ isFormValid(): boolean {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.directMark.id == 0) {
         this.DirectMarkServ.Add(this.directMark, this.DomainName).subscribe(
           (result: any) => {
@@ -559,7 +561,9 @@ isFormValid(): boolean {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Direct Mark') + this.translate.instant('?'),
       icon: 'warning',

@@ -9,7 +9,7 @@
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="store">{{ 'Store' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="store"
-            [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
+            [(ngModel)]="selectedStoreId" (ngModelChange)="onStoreSelected()" required>
             <option [ngValue]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Store' | translate }}</option>
             <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
         </select>
@@ -22,13 +22,17 @@
             id="dateTo" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 
-    <!-- Category Selector -->
+    <!-- Category Selector - Updated to depend on store selection -->
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="category">{{ 'Category' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="category"
-            [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()">
+            [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()"
+            [disabled]="!selectedStoreId">
             <option [ngValue]="null">{{ 'All' | translate }} {{ 'Categories' | translate }}</option>
             <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+            <option *ngIf="selectedStoreId && categories.length === 0" [ngValue]="null" disabled>
+                {{ 'No Categories Available' | translate }}
+            </option>
         </select>
     </div>
 
@@ -167,14 +171,57 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="pageTitle" 
         [infoRows]="[   
-               { keyEn: 'Report Type: ' + this.pageTitle },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Store: ' + getStoreName() },
-      { keyEn: 'Category: ' + getCategoryName() },
-      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() },]"
+      { keyEn: 'Report Type: ' + this.pageTitle , keyAr: this.pageTitle + ' : نوع التقرير' },
+      { keyEn: 'To Date: ' + this.dateTo , keyAr: this.dateTo + ' : إلى تاريخ' },
+      { keyEn: 'Store: ' + getStoreName() , keyAr: getStoreName() + ' : المخزن' },
+      { keyEn: 'Category: ' + getCategoryName() , keyAr: getCategoryName() + ' : الفئة' },
+      { keyEn: 'Balance Filters: ' + getBalanceFiltersInfo() , keyAr: getBalanceFiltersInfo() + 'رصيد: ' },]"
             [tableHeaders]="baseHeaders"
             
              [tableData]="reportForExport" #pdfPrintComponent>
         </app-pdf-print>
     </div>
 </div>
+
+<!-- Pagination Controls Gaber --77 -->
+<div *ngIf="showTable && totalPages > 0" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(currentPage-1)" 
+            [disabled]="currentPage == 1 || !reportData?.data?.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': currentPage == 1 || !reportData?.data?.length}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>{{'Previous'| translate }}</p>
+        </button>
+
+        <div class="flex">
+            <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{'border': page === currentPage, 'hover:bg-gray-100': page == currentPage, 'hover:bg-gray-100 cursor-pointer': page !== currentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="text-center">{{ page }}</p>
+            </div>
+        </div>
+        
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(currentPage+1)" 
+            [disabled]="currentPage == totalPages || !reportData?.data?.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': currentPage == totalPages || !reportData?.data?.length}">
+            <p>{{'Next'| translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input 
+            class="rounded-lg border py-3 px-4 w-[73px]" 
+            [(ngModel)]="pageSize" 
+            min="1"
+            (ngModelChange)="onPageSizeChange($event)">
+        <p>{{'items Per Page'| translate }}</p>
+    </div>  
+
+    <div>
+        <p>{{currentPage}} {{'of'| translate }} {{totalPages}} {{'pages'| translate }} ({{totalRecords}} {{'Item'| translate }})</p>
+    </div>
+</div>
+<!-- end Pagination --77 -->

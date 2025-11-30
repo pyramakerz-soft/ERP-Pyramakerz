@@ -15,7 +15,7 @@ import { StudentService } from '../../../../../Services/student.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { TokenData } from '../../../../../Models/token-data';
 import { AccountService } from '../../../../../Services/account.service';
@@ -241,6 +241,8 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
   async viewReport() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
         title: 'Invalid Date Range',
@@ -285,6 +287,8 @@ export class StudentIssueReportComponent  implements OnInit {
     } catch (error) {
       console.error('Error loading student issue reports:', error);
       this.studentIssueReports = [];
+      this.reportsForExport = []
+      this.reportsForExcel = []
       this.showTable = true;
     } finally {
       this.isLoading = false;
@@ -378,7 +382,9 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
@@ -391,7 +397,9 @@ export class StudentIssueReportComponent  implements OnInit {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+   
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
@@ -441,6 +449,8 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
   async exportExcel() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExcel.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;

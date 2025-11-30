@@ -13,7 +13,7 @@ import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assi
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { finalize } from 'rxjs';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
@@ -148,13 +148,15 @@ export class AssignmentDetailComponent {
     }
   }
 
-  save() {
+  async save() {
     this.isLoading = true;
     const TheSubmittedDate = new Date(this.assignmentStudent.insertedAt); // current date
     const dueDate = new Date(this.assignmentStudent.dueDate);
     TheSubmittedDate.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0);// ensure dueDate is a Date object
-    console.log(343, TheSubmittedDate, dueDate)
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (TheSubmittedDate > dueDate) {
       Swal.fire({
         title: 'Apply Late Submission Penalty?',

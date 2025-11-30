@@ -19,7 +19,7 @@ import { Gender } from '../../../../Models/gender';
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
 import { GenderService } from '../../../../Services/Employee/Inventory/gender.service';
 import { ShopItemService } from '../../../../Services/Employee/Inventory/shop-item.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -204,7 +204,7 @@ export class ShopItemsAddEditComponent {
     }
   }
 
-  Save() {
+  async Save() {
     this.ShopItem.shopItemColors = []
     this.ShopItem.shopItemSizes = []
     if(this.colors.length != 0){ 
@@ -219,6 +219,8 @@ export class ShopItemsAddEditComponent {
     }
     
     if (this.isFormValid()) { 
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading=true
       if (this.mode == 'Create') {
         this.shopItemService.Add(this.ShopItem, this.DomainName).subscribe(
@@ -278,6 +280,10 @@ export class ShopItemsAddEditComponent {
             this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
             isValid = false;
           }
+        }
+        if(this.mode == 'Edit' && (this.ShopItem.barCode == null || this.ShopItem.barCode == "")){
+          this.validationErrors['barCode'] = `barCode is required`
+          isValid = false;
         }
       }
     }

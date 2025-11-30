@@ -29,7 +29,7 @@ export class OrderHistoryComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0; 
   DomainName: string = ""; 
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription; 
   orders: Order[] = []
   orderStates: OrderState[] = []

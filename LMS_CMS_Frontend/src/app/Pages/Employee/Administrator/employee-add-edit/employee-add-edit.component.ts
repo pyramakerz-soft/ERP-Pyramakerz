@@ -14,7 +14,7 @@ import { RoleService } from '../../../../Services/Employee/role.service';
 import { Role } from '../../../../Models/Administrator/role';
 import { EmployeeTypeService } from '../../../../Services/Employee/employee-type.service';
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
 import { Floor } from '../../../../Models/LMS/floor';
 import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
@@ -243,9 +243,11 @@ export class EmployeeAddEditComponent {
     });
   }
 
-  onFilesSelected(event: Event): void {
+  async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    
+      
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
@@ -401,6 +403,9 @@ export class EmployeeAddEditComponent {
     this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       const initialLength = this.Data.files.length; 
       for (let i = 0; i < this.SelectedFiles.length; i++) {
         this.Data.files.push(this.SelectedFiles[i]);

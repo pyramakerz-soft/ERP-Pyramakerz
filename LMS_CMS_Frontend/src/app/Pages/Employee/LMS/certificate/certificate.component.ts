@@ -34,7 +34,7 @@ import { CertificateSubjectTotalMark } from '../../../../Models/LMS/certificate-
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ChangeDetectorRef } from '@angular/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -307,7 +307,7 @@ isInfoRowsLoading: boolean = false;
     this.clearAndReloadInfoRows(); // Add this line
   }
 
-  SelectAcadimicYear() {
+  async SelectAcadimicYear() {
     this.IsShowTabls = false
     this.TableData = []
     this.DateFrom = ''
@@ -324,6 +324,8 @@ isInfoRowsLoading: boolean = false;
     }
 
     if(this.DateFrom == null || this.DateTo == null){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -388,7 +390,9 @@ isInfoRowsLoading: boolean = false;
       this.academicYears = d
       this.getAllClassByGradeIdAndAcYearId()
 
-    }, error => {
+    }, async error => {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -656,63 +660,155 @@ async DownloadAsPDF() {
   }, 800);
 }
 
-async DownloadAsExcel() { 
-  // If info rows aren't loaded yet, wait for them
+async DownloadAsExcel() {
+  try {
+    // Prepare the data for Excel
+    await this.prepareExcelData();
+    
+    // Generate Excel report using ReportsService
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Certificate Report',
+        ar: 'تقرير الشهادة'
+      },
+      subHeaders: [
+        {
+          en: 'Student Academic Performance Report',
+          ar: 'تقرير الأداء الأكاديمي للطالب'
+        }
+      ],
+      infoRows: this.infoRows.map(row => ({
+        key: row.keyEn.split(':')[0].trim(),
+        value: row.keyEn.split(':')[1]?.trim() || ''
+      })),
+      tables: [
+        {
+          // title: 'Academic Performance',
+          headers: [
+            'Subjects',
+            ...this.weightTypes.map(wt => wt.englishName),
+            'Total',
+            'Percentage'
+          ],
+          data: [
+            // Subject rows
+            ...this.subjects.map(subject => {
+              const row: (string | number)[] = [subject.en_name];
+              
+              // Add weight type data
+              this.weightTypes.forEach(wt => {
+                const cell = this.TableData.find(
+                  (c: Certificate) => c.subjectID === subject.id && c.weightTypeId === wt.id
+                );
+                row.push(cell ? `${cell.degree}/${cell.mark}` : '-');
+              });
+              
+              // Add total and percentage
+              const totalCell = this.LastColumn.find((c: CertificateSubjectTotalMark) => c.subjectID === subject.id);
+              row.push(totalCell ? `${totalCell.degree}/${totalCell.mark}` : '-');
+              row.push(totalCell ? `${Number(totalCell.percentage).toFixed(2)}%` : '-');
+              
+              return row;
+            }),
+            
+            // Total row
+            [
+              'Total',
+              ...this.weightTypes.map(() => '-'),
+              this.getSum(),
+              this.getSumPercentage()
+            ]
+          ]
+        }
+      ],
+      filename: `Certificate_Report_${this.SelectedStudentName || 'Student'}_${new Date().toISOString().split('T')[0]}.xlsx`
+    });
+    
+  } catch (error) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to generate Excel report. Please try again.',
+      confirmButtonText: 'Okay',
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+}
+
+private async prepareExcelData() {
+  // Ensure info rows are loaded
+  if (this.infoRows.length === 0) {
+    await this.loadInfoRows();
+  }
+  
+  // If info rows are still loading, wait a bit more
   if (this.isInfoRowsLoading) {
     await new Promise(resolve => setTimeout(resolve, 100));
   }
-  
-  // Use pre-loaded this.infoRows instead of calling getInfoData()
-  const headerKeyMap = [
-    { key: 'subject', header: 'Subjects' },
-    ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
-    { key: 'total', header: 'Total' },
-    { key: 'percentage', header: 'Percentage' }
-  ];
-
-  const dataMatrix = this.subjects.map(subject => {
-    const row: any[] = [];
-    row.push(subject.en_name);
-    this.weightTypes.forEach(wt => {
-      row.push(this.getDegree(subject.id, wt.id) || '-');
-    });
-    row.push(this.getTotal(subject.id));
-    row.push(this.getPercentage(subject.id));
-    return row;
-  });
-
-  const totalRow: any[] = [];
-  totalRow.push('Total');
-  this.weightTypes.forEach(() => totalRow.push('-'));
-  totalRow.push(this.getSum());
-  totalRow.push(this.getSumPercentage());
-  dataMatrix.push(totalRow);
-
-  const now = new Date();
-  const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
-    .toString()
-    .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
-    + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
-      .toString()
-      .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-  
-  // Add printed at to info rows if not already there
-  if (!this.infoRows.some(row => row.keyEn.includes('Printed At'))) {
-    this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
-  }
-
-  await this.reportsService.generateExcelReport({
-    infoRows: this.infoRows, // Use pre-loaded infoRows
-    filename: 'Certificate.xlsx',
-    reportImage: this.SelectedSchool.reportImage,
-    tables: [
-      {
-        headers: headerKeyMap.map(h => h.header),
-        data: dataMatrix
-      }
-    ]
-  });
 }
+}
+
+
+
+// async DownloadAsExcel() { 
+//   // If info rows aren't loaded yet, wait for them
+//   if (this.isInfoRowsLoading) {
+//     await new Promise(resolve => setTimeout(resolve, 100));
+//   }
+  
+//   // Use pre-loaded this.infoRows instead of calling getInfoData()
+//   const headerKeyMap = [
+//     { key: 'subject', header: 'Subjects' },
+//     ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
+//     { key: 'total', header: 'Total' },
+//     { key: 'percentage', header: 'Percentage' }
+//   ];
+
+//   const dataMatrix = this.subjects.map(subject => {
+//     const row: any[] = [];
+//     row.push(subject.en_name);
+//     this.weightTypes.forEach(wt => {
+//       row.push(this.getDegree(subject.id, wt.id) || '-');
+//     });
+//     row.push(this.getTotal(subject.id));
+//     row.push(this.getPercentage(subject.id));
+//     return row;
+//   });
+
+//   const totalRow: any[] = [];
+//   totalRow.push('Total');
+//   this.weightTypes.forEach(() => totalRow.push('-'));
+//   totalRow.push(this.getSum());
+//   totalRow.push(this.getSumPercentage());
+//   dataMatrix.push(totalRow);
+
+//   const now = new Date();
+//   const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+//     .toString()
+//     .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
+//     + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+//       .toString()
+//       .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  
+//   // Add printed at to info rows if not already there
+//   if (!this.infoRows.some(row => row.keyEn.includes('Printed At'))) {
+//     this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+//   }
+
+//   await this.reportsService.generateExcelReport({
+//     infoRows: this.infoRows, // Use pre-loaded infoRows
+//     filename: 'Certificate.xlsx',
+//     reportImage: this.SelectedSchool.reportImage,
+//     tables: [
+//       {
+//         headers: headerKeyMap.map(h => h.header),
+//         data: dataMatrix
+//       }
+//     ]
+//   });
+// }
 
   // getInfoData() {
   //   this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)?.name || '';
@@ -764,5 +860,3 @@ async DownloadAsExcel() {
 
   //   return this.infoRows;
   // }
-
-}

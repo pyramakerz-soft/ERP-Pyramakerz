@@ -167,7 +167,7 @@
                 { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
                 { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getArEmployeeName() + ': الموظف' }
                 ]"
-                [tableHeaders]="['employeeEnName', 'basicSalary', 'totalBonus', 'totalOvertime', 'totalDeductions', 'totalLoans', 'netSalary']" [tableData]="salaryHistory" #pdfComponentRef>
+                [tableHeaders]="['Employee EnName', 'Basic Salary', 'Total Bonus', 'Total Overtime', 'Total Deductions', 'Total Loans', 'netSalary']" [tableData]="this.tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

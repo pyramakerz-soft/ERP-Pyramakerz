@@ -7,7 +7,7 @@ import { InventoryMaster } from '../../../../../../Models/Inventory/InventoryMas
 import { InventoryMasterService } from '../../../../../../Services/Employee/Inventory/inventory-master.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 // import * as XLSX from 'xlsx';
-import * as XLSX from 'xlsx-js-style';
+// import * as XLSX from 'xlsx-js-style';
 
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
@@ -613,7 +613,7 @@ getInfoRows(): any[] {
     }, 500);
   }
 
-exportExcel() {
+  async exportExcel() {
   if (this.transactions.length == 0) {
     alert('No data to export!');
     return;
@@ -715,6 +715,8 @@ exportExcel() {
     excelData.push([]); // empty row for spacing between invoices
   });
 
+  const XLSX = await import('xlsx-js-style');
+
   // Create worksheet
   const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
@@ -746,5 +748,54 @@ exportExcel() {
   const dateStr = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
 }
+
+// ==================== Pagination Functions ====================
+
+changeCurrentPage(page: number): void {
+  if (page < 1 || page > this.totalPages || page === this.currentPage) {
+    return;
+  }
+  
+  this.currentPage = page;
+  this.viewReport();
+}
+
+onPageSizeChange(newSize: any): void {
+  const numValue = parseInt(newSize);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    this.pageSize = 10; // قيمة افتراضية
+  } else {
+    this.pageSize = numValue;
+  }
+  
+  this.currentPage = 1; // العودة للصفحة الأولى
+  this.viewReport();
+}
+
+validateNumber(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize; // إعادة القيمة السابقة
+    return;
+  }
+}
+
+validatePageSize(event: any): void {
+  const value = event.target.value;
+  const numValue = parseInt(value);
+  
+  if (isNaN(numValue) || numValue < 1) {
+    event.target.value = this.pageSize;
+    return;
+  }
+}
+
+
+
+
+
 
 }

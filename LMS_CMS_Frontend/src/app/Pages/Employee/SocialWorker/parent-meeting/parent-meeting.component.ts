@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -143,9 +143,11 @@ export class ParentMeetingComponent {
     );
   }  
   
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -163,7 +165,9 @@ export class ParentMeetingComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this Meeting?',
       icon: 'warning',
@@ -207,8 +211,10 @@ export class ParentMeetingComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.ParentMeetingServ.Add(this.parentMeeting, this.DomainName).subscribe(

@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -115,7 +115,9 @@ export class MedalComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',
@@ -159,8 +161,10 @@ export class MedalComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.medalServ.Add(

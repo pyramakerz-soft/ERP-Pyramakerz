@@ -13,13 +13,13 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TimeTable } from '../../../../Models/LMS/time-table';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
@@ -44,7 +44,7 @@ export class RemedialTimeTableComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   SelectedSchoolId: number = 0;
   TableData: RemedialTimeTable[] = [];
@@ -63,9 +63,9 @@ export class RemedialTimeTableComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public RemedialTimeTableServ: RemedialTimeTableService,
-    private cdRef: ChangeDetectorRef,    
+    private cdRef: ChangeDetectorRef,
     private languageService: LanguageService,
-    private translate: TranslateService, 
+    private translate: TranslateService,
     private loadingService: LoadingService
   ) { }
   ngOnInit() {
@@ -86,16 +86,16 @@ export class RemedialTimeTableComponent {
       }
     });
     this.GetAllSchools();
-           this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   GetAllSchools() {
     this.TableData = [];
@@ -159,15 +159,15 @@ export class RemedialTimeTableComponent {
     }
   }
 
-openModal() {
-  if (this.SelectedSchoolId == 0) {
-    this.validationErrors["schoolID"] = this.getRequiredErrorMessage('School');
-  } else {
-    document.getElementById('Add_Modal')?.classList.remove('hidden');
-    document.getElementById('Add_Modal')?.classList.add('flex');
-    this.remedialTimeTable = new RemedialTimeTable();
+  openModal() {
+    if (this.SelectedSchoolId == 0) {
+      this.validationErrors["schoolID"] = this.getRequiredErrorMessage('School');
+    } else {
+      document.getElementById('Add_Modal')?.classList.remove('hidden');
+      document.getElementById('Add_Modal')?.classList.add('flex');
+      this.remedialTimeTable = new RemedialTimeTable();
+    }
   }
-}
 
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
@@ -180,24 +180,24 @@ openModal() {
     })
   }
 
-isFormValid(): boolean {
-  let isValid = true;
-  this.validationErrors = {}; // Clear previous errors
-  
-  // Validate required fields with translation
-  if (!this.remedialTimeTable.name) {
-    this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
-    isValid = false;
-  }
+  isFormValid(): boolean {
+    let isValid = true;
+    this.validationErrors = {}; // Clear previous errors
 
-  // Validate field length
-  if (this.remedialTimeTable.name && this.remedialTimeTable.name.length > 100) {
-    this.validationErrors['name'] = `*Name cannot be longer than 100 characters`;
-    isValid = false;
-  }
+    // Validate required fields with translation
+    if (!this.remedialTimeTable.name) {
+      this.validationErrors['name'] = this.getRequiredErrorMessage('Name');
+      isValid = false;
+    }
 
-  return isValid;
-}
+    // Validate field length
+    if (this.remedialTimeTable.name && this.remedialTimeTable.name.length > 100) {
+      this.validationErrors['name'] = `*Name cannot be longer than 100 characters`;
+      isValid = false;
+    }
+
+    return isValid;
+  }
 
   capitalizeField(field: keyof TimeTable): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -213,33 +213,35 @@ isFormValid(): boolean {
     }
   }
 
-Generate() {
-  this.remedialTimeTable.schoolID = this.SelectedSchoolId;
-  if (this.isFormValid()) {
-    this.isLoading = true
-    this.RemedialTimeTableServ.Add(this.remedialTimeTable, this.DomainName).subscribe((d) => {
-      this.showSuccessAlert(this.translate.instant('Generated successfully'));
-      this.closeModal();
-      this.GetAllData();
-      this.isLoading = false
-    }, error => {
-      const errorMessage = error.error || this.translate.instant('An unexpected error occurred');
-      this.showErrorAlert(errorMessage);
-      this.isLoading = false
-    });
+  Generate() {
+    this.remedialTimeTable.schoolID = this.SelectedSchoolId;
+    if (this.isFormValid()) {
+      this.isLoading = true
+      this.RemedialTimeTableServ.Add(this.remedialTimeTable, this.DomainName).subscribe((d) => {
+        this.showSuccessAlert(this.translate.instant('Generated successfully'));
+        this.closeModal();
+        this.GetAllData();
+        this.isLoading = false
+      }, error => {
+        const errorMessage = error.error || this.translate.instant('An unexpected error occurred');
+        this.showErrorAlert(errorMessage);
+        this.isLoading = false
+      });
+    }
   }
-}
 
-  delete(id: number) {
+  async delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
-        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +  this.translate.instant('Remedial Time Table') + this.translate.instant('?'),
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: this.translate.instant('Delete'),
-        cancelButtonText: this.translate.instant('Cancel'),
-      }).then((result) => {
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Remedial Time Table') + this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
       if (result.isConfirmed) {
         this.RemedialTimeTableServ.Delete(id, this.DomainName).subscribe((d) => {
           this.GetAllData();
@@ -253,39 +255,43 @@ Generate() {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 
-private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 }

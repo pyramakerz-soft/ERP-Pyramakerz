@@ -5,7 +5,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { ZatcaDevice } from '../../../../Models/zatca/zatca-device';
 import { School } from '../../../../Models/school';
@@ -122,10 +122,12 @@ export class ZatcaDevicesComponent implements OnInit {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
     
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'error',
       title: translatedTitle,
@@ -135,10 +137,12 @@ export class ZatcaDevicesComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'success',
       title: translatedTitle,
@@ -314,11 +318,13 @@ export class ZatcaDevicesComponent implements OnInit {
     });
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
     const deleteTitle = this.translate.instant('Are you sure you want to delete this device?');
     const deleteButton = this.translate.instant('Delete');
     const cancelButton = this.translate.instant('Cancel');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: deleteTitle,
       icon: 'warning',
@@ -347,12 +353,14 @@ export class ZatcaDevicesComponent implements OnInit {
     });
   }
 
-  generateCertificate() {
+  async generateCertificate() {
     const generateTitle = this.translate.instant('Generate Certificate');
     const generateText = this.translate.instant('Are you sure you want to generate a certificate for this device?');
     const generateButton = this.translate.instant('Generate');
     const cancelButton = this.translate.instant('Cancel');
     
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: generateTitle,
       text: generateText,

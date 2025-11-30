@@ -7,7 +7,7 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ReportsService } from '../../../../../Services/Employee/Accounting/reports.service';
 import { ReportsService as SharedReportsService } from '../../../../../Services/shared/reports.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { catchError, map, Observable, of } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
@@ -36,6 +36,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
   PageSize: number = 10;
   TotalPages: number = 1;
   TotalRecords: number = 0;
+  isLoading: boolean = false;
 
   showPDF: boolean = false;
   showTable: boolean = false;
@@ -78,6 +79,8 @@ export class AccountigConstraintsComponent implements OnDestroy {
   
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -104,50 +107,52 @@ export class AccountigConstraintsComponent implements OnDestroy {
     }
   }
 
-  // In the GetData method, replace the collapsedDates handling:
-  GetData(pageNumber: number, pageSize: number) {
-    this.responseData = null;
-    this.CurrentPage = 1;
-    this.TotalPages = 1;
-    this.TotalRecords = 0;
+GetData(pageNumber: number, pageSize: number) {
+  this.isLoading = true; // Start loading
+  this.responseData = null;
+  this.CurrentPage = 1;
+  this.TotalPages = 1;
+  this.TotalRecords = 0;
 
-    this.reportsService
-      .GetAccountingEntriesReportByDate(
-        this.SelectedStartDate,
-        this.SelectedEndDate,
-        this.DomainName,
-        pageNumber,
-        pageSize
-      )
-      .subscribe({
-        next: (data) => {
-          this.responseData = data;
-          this.CurrentPage = data.pagination.currentPage;
-          this.PageSize = data.pagination.pageSize;
-          this.TotalPages = data.pagination.totalPages;
-          this.TotalRecords = data.pagination.totalRecords;
+  this.reportsService
+    .GetAccountingEntriesReportByDate(
+      this.SelectedStartDate,
+      this.SelectedEndDate,
+      this.DomainName,
+      pageNumber,
+      pageSize
+    )
+    .subscribe({
+      next: (data) => {
+        this.responseData = data;
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
 
-          // Clear collapsed dates and expand all by default
-          this.collapsedDates.clear();
-        },
-        error: (error) => {
-          if (error.status == 404 && this.TotalRecords != 0) {
-            let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
-            if (lastPage >= 1) {
-              this.CurrentPage = lastPage;
-              this.GetData(this.CurrentPage, this.PageSize);
-            }
-          } else {
-            // Swal.fire({
-            //   title: 'Error',
-            //   text: 'Failed to load data. Please try again.',
-            //   icon: 'error',
-            //   confirmButtonText: 'OK',
-            // });
+        // Clear collapsed dates and expand all by default
+        this.collapsedDates.clear();
+        this.isLoading = false; // End loading
+      },
+      error: (error) => {
+        this.isLoading = false; // End loading even on error
+        if (error.status == 404 && this.TotalRecords != 0) {
+          let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
+          if (lastPage >= 1) {
+            this.CurrentPage = lastPage;
+            this.GetData(this.CurrentPage, this.PageSize);
           }
-        },
-      });
-  }
+        } else {
+          // Swal.fire({
+          //   title: 'Error',
+          //   text: 'Failed to load data. Please try again.',
+          //   icon: 'error',
+          //   confirmButtonText: 'OK',
+          // });
+        }
+      },
+    });
+}
 
   Print() {
     this.DataToPrint = [];

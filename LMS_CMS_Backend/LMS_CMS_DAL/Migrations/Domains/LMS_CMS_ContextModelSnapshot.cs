@@ -6297,7 +6297,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("IsCash")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsConvertedToPurchase")
+                    b.Property<bool?>("IsConvertedToPurchase")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -7098,7 +7098,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("SchoolID");
+                    b.HasIndex("SchoolID")
+                        .HasDatabaseName("IX_AcademicYear_SchoolID_New");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -7692,13 +7693,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AcademicYearID");
+                    b.HasIndex("AcademicYearID")
+                        .HasDatabaseName("IX_Classroom_AcademicYearID_New");
 
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("FloorID");
 
-                    b.HasIndex("GradeID");
+                    b.HasIndex("GradeID")
+                        .HasDatabaseName("IX_Classroom_GradeID_New");
 
                     b.HasIndex("HomeroomTeacherID");
 
@@ -8995,7 +8998,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.HasIndex("buildingID");
+                    b.HasIndex("buildingID")
+                        .HasDatabaseName("IX_Floor_buildingID_New");
 
                     b.ToTable("Floor");
                 });
@@ -9084,7 +9088,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("SectionID");
+                    b.HasIndex("SectionID")
+                        .HasDatabaseName("IX_Grade_SectionID_New");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -10228,7 +10233,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AcademicYearID");
+                    b.HasIndex("AcademicYearID")
+                        .HasDatabaseName("IX_RemedialTimeTable_AcademicYearID_New");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -11416,7 +11422,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("DeletedByUserId");
 
-                    b.HasIndex("GradeID");
+                    b.HasIndex("GradeID")
+                        .HasDatabaseName("IX_Subject_GradeID_New");
 
                     b.HasIndex("InsertedByUserId");
 
@@ -11774,7 +11781,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AcademicYearID");
+                    b.HasIndex("AcademicYearID")
+                        .HasDatabaseName("IX_TimeTable_AcademicYearID_New");
 
                     b.HasIndex("DeletedByUserId");
 

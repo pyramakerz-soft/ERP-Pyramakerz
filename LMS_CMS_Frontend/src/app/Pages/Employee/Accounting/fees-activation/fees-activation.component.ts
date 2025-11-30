@@ -8,7 +8,7 @@ import { AccountingTreeChartService } from '../../../../Services/Employee/Accoun
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FeesActivationService } from '../../../../Services/Employee/Accounting/fees-activation.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { School } from '../../../../Models/school';
@@ -214,10 +214,12 @@ export class FeesActivationComponent {
     );
   }    
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
       const translatedTitle = this.translate.instant('Error');
       const translatedButton = this.translate.instant('Okay');
-  
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: translatedTitle,
@@ -227,7 +229,9 @@ export class FeesActivationComponent {
       });
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
      Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "+ this.translate.instant('Fees Activation') + this.translate.instant('?'),
       icon: 'warning',
@@ -458,6 +462,8 @@ export class FeesActivationComponent {
         await this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
         await this.Search();
 
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         await Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',
@@ -505,7 +511,7 @@ export class FeesActivationComponent {
     this.editingRowId = id
   }
 
-  Save(row: FeesActivation) {
+  async Save(row: FeesActivation) {
     this.editingRowId = null;
     var fee: FeesActivationAddPut = new FeesActivationAddPut()
     fee.academicYearId = row.academicYearId;
@@ -517,6 +523,9 @@ export class FeesActivationComponent {
     fee.net = row.net;
     fee.studentID = row.studentID;
     fee.feeActivationID = row.feeActivationID;
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.feesActivationServ.Edit(fee, this.DomainName).subscribe((d) => {
       this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
       Swal.fire({

@@ -1,7 +1,8 @@
 <div id="DataToDownload">
     <div class="no-print flex justify-between items-center">
         <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-            <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAccountingEntries()"></i>
+                <i class="fa-solid fa-chevron-left cursor-pointer" 
+            [class.rotate-180]="isRtl"(click)="moveToAccountingEntries()"></i>
             <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create Accounting Entries' | translate }}</h1>
             <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Edit Accounting Entries' | translate }}</h1>
             <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Accounting Entries' | translate }}</h1>
@@ -118,14 +119,14 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                          {{ 'Notes' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th *ngIf="!isView" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                          {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <!-- No Data Row -->
-                <tr *ngIf="(accountingEntries.accountingEntriesDetails?.length || 0) === 0 && (accountingEntries.newDetails?.length || 0) === 0">
+                <tr *ngIf="!(accountingEntries?.accountingEntriesDetails?.length) && !(accountingEntries?.newDetails?.length)">              
                     <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                        {{ 'No Data Found' | translate }}
@@ -140,21 +141,21 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input id="debitAmount" type="text"
+                        <input [disabled]="isView" id="debitAmount" type="text"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                             (input)="validateNumberEditedRowData(row ,$event, 'debitAmount')"
                             [(ngModel)]="row.debitAmount"
                             (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'debitAmount', value: $event })" />
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input id="creditAmount" type="text"
+                        <input [disabled]="isView" id="creditAmount" type="text"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                             (input)="validateNumberEditedRowData(row ,$event, 'creditAmount')"
                             [(ngModel)]="row.creditAmount"
                             (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'creditAmount', value: $event })" />
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select (change)="GetSubAccountData(row ,$event)"
+                        <select [disabled]="isView" (change)="GetSubAccountData(row ,$event)"
                             (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'accountingTreeChartID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                             id="accountingTreeChartID" [(ngModel)]="row.accountingTreeChartID">
@@ -169,7 +170,7 @@
                         </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select [disabled]="row.accountingTreeChartID == 0"
+                        <select [disabled]="row.accountingTreeChartID == 0 || isView"
                             (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'subAccountingID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                             id="subAccountingID" [(ngModel)]="row.subAccountingID">
@@ -186,7 +187,7 @@
                         <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
                             [(ngModel)]="row.note"></textarea>
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <td *ngIf="!isView" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                 (click)="DeleteDetail(row.id)">

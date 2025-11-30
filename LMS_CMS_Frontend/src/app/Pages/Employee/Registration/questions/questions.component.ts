@@ -14,7 +14,7 @@ import { TestService } from '../../../../Services/Employee/Registration/test.ser
 import { QuestionService } from '../../../../Services/Employee/Registration/question.service';
 import { QuestionTypeService } from '../../../../Services/Employee/Registration/question-type.service';
 import { QuestionAddEdit } from '../../../../Models/Registration/question-add-edit';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -167,7 +167,9 @@ export class QuestionsComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Question') + this.translate.instant('?'),
       icon: 'warning',
@@ -210,13 +212,15 @@ export class QuestionsComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     this.question.options = this.options;
     this.question.testID = this.testId;
     if (this.question.questionTypeID == 3) {
       this.question.correctAnswerName = ''
     }
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.QuestionServ.Add(this.question, this.DomainName).subscribe(() => {
@@ -398,7 +402,7 @@ export class QuestionsComponent {
     }
   }
 
-  onFileUpload(event: any): void {
+  async onFileUpload(event: any) {
     this.validationErrors['imageFile'] = '';
 
     const file: File = event.target.files[0];
@@ -418,6 +422,8 @@ export class QuestionsComponent {
 
       const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!this.allowedExtensions.includes(fileExtension)) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: 'Invalid file type',
           html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,

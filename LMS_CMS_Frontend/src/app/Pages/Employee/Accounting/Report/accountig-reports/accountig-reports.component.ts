@@ -9,15 +9,13 @@ import { DeleteEditPermissionService } from '../../../../../Services/shared/dele
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { catchError, map, Observable, of } from 'rxjs';
 import { BankService } from '../../../../../Services/Employee/Accounting/bank.service';
-import { SaveService } from '../../../../../Services/Employee/Accounting/save.service';
-import * as XLSX from 'xlsx-js-style';
+import { SaveService } from '../../../../../Services/Employee/Accounting/save.service'; 
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs'; 
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../Services/loading.service';
 
@@ -49,6 +47,7 @@ export class AccountigReportsComponent {
   subscription!: Subscription;
   tableData: any[] = [];
   direction: string = '';
+  isLoading: boolean = false;
 
   school = {
     reportHeaderOneEn: 'Accounting Report',
@@ -109,6 +108,8 @@ export class AccountigReportsComponent {
 
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -131,84 +132,88 @@ export class AccountigReportsComponent {
     }
   }
 
-  GetData(pageNumber: number, pageSize: number) {
-    this.tableData = [];
-    this.CurrentPage = 1;
-    this.TotalPages = 1;
-    this.TotalRecords = 0;
+GetData(pageNumber: number, pageSize: number) {
+  this.isLoading = true; // Start loading
+  this.tableData = [];
+  this.CurrentPage = 1;
+  this.TotalPages = 1;
+  this.TotalRecords = 0;
 
-    let dataObservable;
+  let dataObservable;
 
-    switch (this.type) {
-      case 'Payable':
-        dataObservable = this.reportsService.GetPayablesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+  switch (this.type) {
+    case 'Payable':
+      dataObservable = this.reportsService.GetPayablesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Receivable':
-        dataObservable = this.reportsService.GetReceivablesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Receivable':
+      dataObservable = this.reportsService.GetReceivablesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Installment Deduction':
-        dataObservable = this.reportsService.GetInstallmentDeductionsByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Installment Deduction':
+      dataObservable = this.reportsService.GetInstallmentDeductionsByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      case 'Accounting Entries':
-        dataObservable = this.reportsService.GetAccountingEntriesByDate(
-          this.SelectedStartDate,
-          this.SelectedEndDate,
-          this.DomainName,
-          pageNumber,
-          pageSize
-        );
-        break;
+    case 'Accounting Entries':
+      dataObservable = this.reportsService.GetAccountingEntriesByDate(
+        this.SelectedStartDate,
+        this.SelectedEndDate,
+        this.DomainName,
+        pageNumber,
+        pageSize
+      );
+      break;
 
-      default:
-        console.error('Unknown report type:', this.type);
-        return;
-    }
+    default:
+      console.error('Unknown report type:', this.type);
+      this.isLoading = false; // End loading on error
+      return;
+  }
 
-    dataObservable.subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage;
-        this.PageSize = data.pagination.pageSize;
-        this.TotalPages = data.pagination.totalPages;
-        this.TotalRecords = data.pagination.totalRecords;
-        this.tableData = data.data;
-        let count = 0;
-        this.tableData.forEach((element) => {
-          this.collapsedItems.add(count);
-          count++;
-        });
-      },
-      (error) => {
-        if (error.status == 404 && this.TotalRecords != 0) {
-          let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
-          if (lastPage >= 1) {
-            this.CurrentPage = lastPage;
-            this.GetData(this.CurrentPage, this.PageSize);
-          }
+  dataObservable.subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage;
+      this.PageSize = data.pagination.pageSize;
+      this.TotalPages = data.pagination.totalPages;
+      this.TotalRecords = data.pagination.totalRecords;
+      this.tableData = data.data;
+      let count = 0;
+      this.tableData.forEach((element) => {
+        this.collapsedItems.add(count);
+        count++;
+      });
+      this.isLoading = false; // End loading
+    },
+    (error) => {
+      this.isLoading = false; // End loading even on error
+      if (error.status == 404 && this.TotalRecords != 0) {
+        let lastPage = Math.ceil(this.TotalRecords / this.PageSize);
+        if (lastPage >= 1) {
+          this.CurrentPage = lastPage;
+          this.GetData(this.CurrentPage, this.PageSize);
         }
       }
-    );
-  }
+    }
+  );
+}
 
   toggleCollapse(index: number) {
     if (this.collapsedItems.has(index)) {
@@ -554,6 +559,8 @@ async DownloadAsExcel() {
     const exportData = await this.GetDataForPrint().toPromise();
     
     if (!exportData || exportData.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -616,6 +623,8 @@ async DownloadAsExcel() {
       tables: tables
     });
 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     // Show success message
     Swal.fire({
       title: 'Export Successful',
@@ -627,7 +636,8 @@ async DownloadAsExcel() {
     });
 
   } catch (error) {
-    console.error('Error exporting to Excel:', error);
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Export Failed',
       text: 'There was an error exporting the report to Excel. Please try again.',

@@ -21,7 +21,7 @@ import { LinkFile } from '../../../../Models/Accounting/link-file';
 import { MotionType } from '../../../../Models/Accounting/motion-type';
 import { SubType } from '../../../../Models/Accounting/sub-type';
 import { EndType } from '../../../../Models/Accounting/end-type';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -355,8 +355,10 @@ isFormValid(): boolean {
     return IsAllow;
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.isEdit) {
         if (this.AllowEdit && this.IsAllowEdit(this.accountingTreeChart.insertedByUserId)) {
           this.accountingTreeChartService.Edit(this.accountingTreeChart, this.DomainName).subscribe(

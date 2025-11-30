@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { School } from '../../../../Models/school';
 import { TokenData } from '../../../../Models/token-data';
@@ -165,9 +165,11 @@ export class AppointmentComponent {
     );
   }  
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -212,7 +214,9 @@ export class AppointmentComponent {
     this.validationErrors = {}
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('the') +this.translate.instant('Appoinment') + this.translate.instant('?'),
       icon: 'warning',
@@ -298,8 +302,10 @@ export class AppointmentComponent {
   }
 
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.AppointmentServ.Add(this.appointment, this.DomainName).subscribe((d) => {

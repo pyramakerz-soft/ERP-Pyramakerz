@@ -456,6 +456,40 @@ namespace LMS_CMS_DAL.Models.Domains
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
+            ///////////////////////// index /////////////////////////////
+
+            modelBuilder.Entity<AcademicYear>()
+                .HasIndex(c => c.SchoolID)
+                .HasDatabaseName("IX_AcademicYear_SchoolID_New");
+
+            modelBuilder.Entity<Grade>()
+                .HasIndex(c => c.SectionID)
+                .HasDatabaseName("IX_Grade_SectionID_New");
+
+            modelBuilder.Entity<Floor>()
+                .HasIndex(c => c.buildingID)
+                .HasDatabaseName("IX_Floor_buildingID_New");
+
+            modelBuilder.Entity<Classroom>()
+                .HasIndex(c => c.AcademicYearID)
+                .HasDatabaseName("IX_Classroom_AcademicYearID_New");
+
+            modelBuilder.Entity<Classroom>()
+                .HasIndex(c => c.GradeID)
+                .HasDatabaseName("IX_Classroom_GradeID_New");
+
+            modelBuilder.Entity<TimeTable>()
+                .HasIndex(c => c.AcademicYearID)
+                .HasDatabaseName("IX_TimeTable_AcademicYearID_New");
+
+            modelBuilder.Entity<RemedialTimeTable>()
+                .HasIndex(c => c.AcademicYearID)
+                .HasDatabaseName("IX_RemedialTimeTable_AcademicYearID_New");
+
+            modelBuilder.Entity<Subject>()
+                .HasIndex(c => c.GradeID)
+                .HasDatabaseName("IX_Subject_GradeID_New");
+
             ///////////////////////// OnDelete: /////////////////////////
             modelBuilder.Entity<Page>()
                  .HasOne(p => p.Parent)

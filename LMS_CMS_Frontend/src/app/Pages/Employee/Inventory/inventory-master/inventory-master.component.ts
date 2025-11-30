@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { InventoryMaster } from '../../../../Models/Inventory/InventoryMaster';
 import { TokenData } from '../../../../Models/token-data';
@@ -39,7 +39,7 @@ export class InventoryMasterComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: InventoryMaster[] = [];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -112,7 +112,9 @@ export class InventoryMasterComponent {
     this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName}/${this.FlagId}`)
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Invoice') + this.translate.instant('?'),
       icon: 'warning',
@@ -227,12 +229,12 @@ export class InventoryMasterComponent {
     )
   }
 
-  changeCurrentPage(currentPage: number) {
+  changeCurrentPage(currentPage: number) {   // For clicking on page numbers
     this.CurrentPage = currentPage
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) {
+  validatePageSize(event: any) {   // To prevent non-numeric input
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';

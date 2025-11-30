@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TaxIssuer } from '../../../../Models/Administrator/tax-issuer.model';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TaxIssuerService } from '../../../../Services/Employee/ETA/tax-issuer.service';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -110,8 +110,11 @@ export class TaxIssuerComponent {
         this.GetById()
         this.isLoading = false;
       },
-      (error) => {
+      async (error) => {
         this.isLoading = false;
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

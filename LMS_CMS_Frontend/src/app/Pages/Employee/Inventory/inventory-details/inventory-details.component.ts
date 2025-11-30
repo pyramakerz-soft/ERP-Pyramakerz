@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Bank } from '../../../../Models/Accounting/bank';
 import { Saves } from '../../../../Models/Accounting/saves';
@@ -64,10 +64,20 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
-
 @InitLoader()
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -191,7 +201,7 @@ export class InventoryDetailsComponent {
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private loadingService: LoadingService
   ) {}
 
@@ -319,7 +329,7 @@ export class InventoryDetailsComponent {
     this.validationErrors = translatedErrors;
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -328,11 +338,13 @@ export class InventoryDetailsComponent {
   moveToMaster() {
     this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
   }
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     // Use immediate translation
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(errorMessage);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -343,10 +355,12 @@ export class InventoryDetailsComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(message);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -357,10 +371,12 @@ export class InventoryDetailsComponent {
     });
   }
 
-  private showWarningAlert(message: string) {
+  private async showWarningAlert(message: string) {
     const translatedTitle = this.translate.instant('Warning');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(message);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'warning',
@@ -486,7 +502,6 @@ export class InventoryDetailsComponent {
       if (this.Data.isCash == false) {
         this.Data.saveID = 0;
       }
-      console.log(this.Data);
       this.schoolpcsServ
         .GetBySchoolId(this.Data.schoolId, this.DomainName)
         .subscribe((d) => {
@@ -646,9 +661,7 @@ export class InventoryDetailsComponent {
           .Edit(this.Data.inventoryDetails, this.DomainName)
           .subscribe(
             (d) => {},
-            (error) => {
-              console.log(error);
-            }
+            (error) => {}
           );
         this.salesItemServ
           .Add(this.NewDetailsWhenEdit, this.DomainName)
@@ -656,7 +669,6 @@ export class InventoryDetailsComponent {
             (d) => {},
             (error) => {}
           );
-        console.log(1234, this.Data);
         this.salesServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
             this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
@@ -712,7 +724,7 @@ export class InventoryDetailsComponent {
     this.TotalandRemainingCalculate();
   }
 
-  Delete(row: InventoryDetails) {
+  async Delete(row: InventoryDetails) {
     // Translate immediately when method is called
     const translatedTitle =
       this.translate.instant('Are you sure you want to') +
@@ -725,6 +737,8 @@ export class InventoryDetailsComponent {
       '?';
     const translatedConfirm = this.translate.instant('Delete');
     const translatedCancel = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,
@@ -741,15 +755,17 @@ export class InventoryDetailsComponent {
             this.salesItemServ
               .Delete(row.id, this.DomainName)
               .subscribe(async (D) => {
-                await this.GetTableDataByID();
+                // await this.GetTableDataByID();
+                this.TableData = this.TableData.filter((s) => s.id != row.id);
+                this.TotalandRemainingCalculate();
               });
           } else {
             this.NewDetailsWhenEdit = this.NewDetailsWhenEdit.filter(
               (s) => s.id != row.id
             );
             this.TableData = this.TableData.filter((s) => s.id != row.id);
+            this.TotalandRemainingCalculate();
           }
-          this.TotalandRemainingCalculate();
         } else if (this.mode == 'Create') {
           this.Data.inventoryDetails = this.Data.inventoryDetails.filter(
             (item) => item.id !== row.id
@@ -777,18 +793,11 @@ export class InventoryDetailsComponent {
       this.Data.DeletedAttachments = [];
     }
     this.Data.DeletedAttachments.push(img);
-    console.log(123, this.Data.DeletedAttachments);
     this.Data.attachments = this.Data.attachments.filter((i) => i != img);
   }
 
   async SaveRow() {
-    // this.Item.shopItemID = this.ShopItem.id;
     if (this.mode === 'Create') {
-      // if (this.FlagId === 9 || this.FlagId === 13) {
-      //   // await firstValueFrom(
-      //   //   this.shopitemServ.Edit(this.ShopItem, this.DomainName)
-      //   // );
-      // }
       if (!this.Data.inventoryDetails) {
         this.Data.inventoryDetails = [];
       }
@@ -801,8 +810,6 @@ export class InventoryDetailsComponent {
       }
       this.NewDetailsWhenEdit.push(this.Item);
       this.TableData.push(this.Item);
-      // await this.GetMasterInfo();
-      // await firstValueFrom(this.salesServ.Edit(this.Data, this.DomainName));
     }
     this.TotalandRemainingCalculate();
     this.Item = new InventoryDetails();
@@ -816,20 +823,29 @@ export class InventoryDetailsComponent {
   }
 
   ConvertToPurcase() {
-    this.Data.flagId = 9;
-    this.Data.isEditInvoiceNumber = true;
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    this.Data.date = `${year}-${month}-${day}`;
-    console.log(this.Data)
-    this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
-      this.showSuccessAlert(this.translate.instant('Convert Successfully'));
-      this.router.navigateByUrl(`Employee/Purchases`);
-  },error=>{
-    console.log(123,error)
-  });
+    this.Data.isConvertedToPurchase = true;
+    this.salesServ.Edit(this.Data, this.DomainName).subscribe(
+      (d) => {
+        this.Data.isEditInvoiceNumber = true;
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        this.Data.date = `${year}-${month}-${day}`;
+        this.Data.inventoryDetails = this.TableData;
+        this.Data.flagId = 9;
+        this.salesServ.Add(this.Data, this.DomainName).subscribe(
+          (d) => {
+            this.showSuccessAlert(
+              this.translate.instant('Convert Successfully')
+            );
+            this.router.navigateByUrl(`Employee/Purchases`);
+          },
+          (error) => {}
+        );
+      },
+      (error) => {}
+    );
   }
 
   onImageFileSelected(event: any) {
@@ -913,29 +929,49 @@ export class InventoryDetailsComponent {
   }
 
   async TotalandRemainingCalculate(): Promise<void> {
+    this.Data.cashAmount = Number(this.Data.cashAmount) || 0;
+    this.Data.visaAmount = Number(this.Data.visaAmount) || 0;
     return new Promise((resolve) => {
       if (this.mode == 'Create') {
-        this.Data.cashAmount = this.Data.cashAmount || 0;
-        this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.Data.inventoryDetails.reduce(
-          (sum, item) => sum + (item.totalPrice || 0),
-          0
+        // this.Data.total = this.Data.inventoryDetails.reduce(
+        //   (sum, item) => sum + (item.totalPrice || 0),
+        //   0
+        // );
+        // this.Data.remaining =
+        //   +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
+
+        this.Data.total = this.round2(
+          this.Data.inventoryDetails.reduce(
+            (sum, item) => sum + (item.totalPrice || 0),
+            0
+          )
         );
-        this.Data.remaining =
-          +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
+        this.Data.remaining = this.round2(
+          this.Data.total - (this.Data.cashAmount + this.Data.visaAmount)
+        );
       } else if (this.mode == 'Edit') {
-        this.Data.cashAmount = this.Data.cashAmount || 0;
-        this.Data.visaAmount = this.Data.visaAmount || 0;
-        this.Data.total = this.TableData.reduce(
-          (sum, item) => sum + (item.totalPrice || 0),
-          0
-        );
-        this.Data.remaining =
-          +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
-        // this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { });
+        // this.Data.total = this.TableData.reduce(
+        //   (sum, item) => sum + (item.totalPrice || 0),
+        //   0
+        // );
+        // this.Data.remaining =
+        //   +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
+
+        this.Data.total = this.round2(this.TableData.reduce((sum, item) => sum + Number(item.totalPrice || 0), 0));
+        this.Data.remaining = this.round2(this.Data.total - (this.Data.cashAmount + this.Data.visaAmount));
+  
+        console.log('Cash:', this.Data.cashAmount);
+        console.log('Visa:', this.Data.visaAmount);
+        console.log('Total:', this.Data.total);
+        console.log('Remaining:', this.Data.remaining);
       }
+
       resolve();
     });
+  }
+
+  round2(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
   }
 
   ///////////////////////////////////// validation fOR Master
@@ -961,13 +997,19 @@ export class InventoryDetailsComponent {
     }
 
     if (this.mode == 'Create' && this.Data.inventoryDetails.length == 0) {
-      this.showWarningAlert(this.translate.instant('Items') + ' ' + this.translate.instant('Are Required'));
+      this.showWarningAlert(
+        this.translate.instant('Items') +
+          ' ' +
+          this.translate.instant('Are Required')
+      );
       return false;
     }
 
     if (this.mode == 'Edit' && this.TableData.length == 0) {
       this.showWarningAlert(
-        this.translate.instant('Items') + ' ' + this.translate.instant('Are Required')
+        this.translate.instant('Items') +
+          ' ' +
+          this.translate.instant('Are Required')
       );
       return false;
     }
@@ -1272,11 +1314,22 @@ export class InventoryDetailsComponent {
   }
 
   validateCashVisaNumber(event: any, field: keyof InventoryMaster): void {
-    const value = event.target.value;
+    let value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.Data[field] === 'string') {
         this.Data[field] = '' as never;
+      }
+    }
+
+      // 🔥 NEW: allow only 2 decimal digits
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 2) {
+        console.log(453)
+        value = `${parts[0]}.${parts[1].substring(0, 2)}`;
+        event.target.value = value;
+        this.Data[field] = value as never;
       }
     }
   }
@@ -1300,48 +1353,52 @@ export class InventoryDetailsComponent {
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
-      (d) => {
-        let price = 0;
-        if (this.FlagId === 11 || this.FlagId === 12) {
-          price = d.salesPrice ?? 0;
-        } else {
-          price = d.purchasePrice ?? 0;
+    this.shopitemServ
+      .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
+      .subscribe(
+        (d) => {
+          let price = 0;
+          if (this.FlagId === 11 || this.FlagId === 12) {
+            price = d.salesPrice ?? 0;
+          } else {
+            price = d.purchasePrice ?? 0;
+          }
+          const detail: InventoryDetails = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            insertedAt: '',
+            insertedByUserId: 0,
+            shopItemID: d.id,
+            shopItemName: d.enName,
+            barCode: d.barCode,
+            quantity: 1,
+            salesId: 0,
+            price: price,
+            totalPrice: price,
+            name: '',
+            inventoryMasterId: this.MasterId,
+            salesName: '',
+            notes: '',
+          };
+          if (this.mode == 'Create') {
+            this.Data.inventoryDetails.push(detail);
+          } else if (this.mode == 'Edit') {
+            this.TableData.push(detail);
+            this.NewDetailsWhenEdit.push(detail);
+          }
+          this.TotalandRemainingCalculate();
+          this.BarCode = '';
+        },
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Item not found',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
         }
-        const detail: InventoryDetails = {
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          insertedAt: '',
-          insertedByUserId: 0,
-          shopItemID: d.id,
-          shopItemName: d.enName,
-          barCode: d.barCode,
-          quantity: 1,
-          salesId: 0,
-          price: price,
-          totalPrice: price,
-          name: '',
-          inventoryMasterId: this.MasterId,
-          salesName: '',
-          notes: '',
-        };
-        if (this.mode == 'Create') {
-          this.Data.inventoryDetails.push(detail);
-        } else if (this.mode == 'Edit') {
-          this.TableData.push(detail);
-          this.NewDetailsWhenEdit.push(detail);
-        }
-        this.TotalandRemainingCalculate();
-        this.BarCode = ''; 
-      },
-      (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Item not found',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-      }
-    );
+      );
   }
 
   getStoreNameById(id: number | string): string {
@@ -1409,10 +1466,14 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
+  validateNumberRow(
+    event: any,
+    field: keyof InventoryDetails,
+    row: InventoryDetails
+  ): void {
     const value = event.target.value;
     const numValue = Number(value);
-   
+
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof row[field] === 'string') {
@@ -1422,7 +1483,7 @@ export class InventoryDetailsComponent {
 
     if (field === 'quantity') {
       let value = event.target.value;
-      value = value.replace(/[^0-9]/g, '')
+      value = value.replace(/[^0-9]/g, '');
       event.target.value = value;
       if (isNaN(value) || value === '') {
         event.target.value = '';
@@ -1454,4 +1515,3 @@ export class InventoryDetailsComponent {
     }
   }
 }
-

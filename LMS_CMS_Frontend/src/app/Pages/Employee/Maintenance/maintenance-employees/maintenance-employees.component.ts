@@ -6,7 +6,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../Services/api.service';
@@ -23,7 +23,7 @@ import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-maintenance-employees',
   standalone: true,
-  imports: [TranslateModule,SearchComponent,CommonModule, FormsModule],
+  imports: [TranslateModule, SearchComponent, CommonModule, FormsModule],
   templateUrl: './maintenance-employees.component.html',
   styleUrl: './maintenance-employees.component.css'
 })
@@ -37,17 +37,17 @@ export class MaintenanceEmployeesComponent {
   validationErrors: { [key in keyof MaintenanceEmployees]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: MaintenanceEmployees[] = [];       
-  employees: Employee[] = []; 
-  selectedEmployeeId: number=0;
+  TableData: MaintenanceEmployees[] = [];
+  employees: Employee[] = [];
+  selectedEmployeeId: number = 0;
   keysArray: string[] = ['id', 'en_Name'];
-  key: string= "id";
+  key: string = "id";
   DomainName: string = '';
   EditDeleteServ: any;
   value: any;
   selectedEmployee: MaintenanceEmployees | null = null;
   isLoading = false;
-  isModalOpen= false;
+  isModalOpen = false;
   path: string = "";
   IsChoosenDomain: boolean = false;
   CurrentPage: number = 1;
@@ -56,19 +56,19 @@ export class MaintenanceEmployeesComponent {
   TotalRecords: number = 0;
   isDeleting: boolean = false;
 
-  constructor(    
+  constructor(
     private languageService: LanguageService,
     private router: Router,
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public mainServ: MaintenanceEmployeesService,
     private deleteEditPermissionServ: DeleteEditPermissionService,
     public account: AccountService,
     public EmpServ: EmployeeService,
-    private activeRoute: ActivatedRoute, 
-    private menuService: MenuService,  
+    private activeRoute: ActivatedRoute,
+    private menuService: MenuService,
     private translate: TranslateService,
-    private loadingService: LoadingService 
-){}
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,18 +76,18 @@ export class MaintenanceEmployeesComponent {
     if (this.User_Data_After_Login.type === "employee") {
       this.IsChoosenDomain = true;
       this.DomainName = this.apiService.GetHeader();
-      
+
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path;
       });
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+      this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
     }
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
-      if (settingsPage) { 
+      if (settingsPage) {
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others; 
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
       }
     });
 
@@ -97,7 +97,7 @@ export class MaintenanceEmployeesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) this.subscription.unsubscribe();
   }
 
@@ -109,45 +109,49 @@ export class MaintenanceEmployeesComponent {
     );
   }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
- 
-// async GetTableData() {
-//   this.TableData = [];
-//   try {
-//     const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
-//     this.TableData = data;
-    
-//     // Refresh the employees list to exclude those already in maintenance
-//     this.refreshFilteredEmployees();
-//   } catch (error) {
-//     this.TableData = [];
-//   }
-// }
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+
+  // async GetTableData() {
+  //   this.TableData = [];
+  //   try {
+  //     const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+  //     this.TableData = data;
+
+  //     // Refresh the employees list to exclude those already in maintenance
+  //     this.refreshFilteredEmployees();
+  //   } catch (error) {
+  //     this.TableData = [];
+  //   }
+  // }
 
   GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
@@ -189,70 +193,72 @@ private showSuccessAlert(message: string) {
     );
   }
 
-refreshFilteredEmployees() {
-  if (this.employees.length > 0) {
-    this.employees = this.employees.filter(emp => 
-      !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
-    );
-  }
-}
-
-async GetSelectData() {
-  this.employees = [];
-  try {
-    const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
-    // Filter out employees that are already in maintenance
-    this.employees = data.filter(emp => 
-      !this.TableData.some(maintenanceEmp => maintenanceEmp.employeeID === emp.id)
-    );
-  } catch (error) {
-    this.employees = [];
-  }
-}
-
-Delete(id: number) {
-  const deleteTitle = this.translate.instant('Are you sure you want to delete this employee from maintenance?');
-  const deleteButton = this.translate.instant('Delete');
-  const cancelButton = this.translate.instant('Cancel');
-  
-  Swal.fire({
-    title: deleteTitle,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: deleteButton,
-    cancelButtonText: cancelButton
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.isLoading = true;
-      this.mainServ.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-          this.isLoading = false;
-          this.showSuccessAlert(this.translate.instant('Employee removed from maintenance successfully'));
-        },
-        error: (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to remove employee from maintenance');
-          this.showErrorAlert(errorMessage);
-        }
-      });
+  refreshFilteredEmployees() {
+    if (this.employees.length > 0) {
+      this.employees = this.employees.filter(emp =>
+        !this.TableData.some(maintenanceEmp => maintenanceEmp.id === emp.id)
+      );
     }
-  });
-}
-
-
-isFormValid(): boolean {
-  let isValid = true;
-  this.validationErrors = {};
-  if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
-    this.validationErrors['id'] = this.translate.instant('Employee is required');
-    isValid = false;
   }
 
-  return isValid;
-}
+  async GetSelectData() {
+    this.employees = [];
+    try {
+      const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName));
+      // Filter out employees that are already in maintenance
+      this.employees = data.filter(emp =>
+        !this.TableData.some(maintenanceEmp => maintenanceEmp.employeeID === emp.id)
+      );
+    } catch (error) {
+      this.employees = [];
+    }
+  }
+
+  async Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this employee from maintenance?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.mainServ.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Employee removed from maintenance successfully'));
+          },
+          error: (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to remove employee from maintenance');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  }
+
+
+  isFormValid(): boolean {
+    let isValid = true;
+    this.validationErrors = {};
+    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+      this.validationErrors['id'] = this.translate.instant('Employee is required');
+      isValid = false;
+    }
+
+    return isValid;
+  }
 
 
 
@@ -334,23 +340,23 @@ isFormValid(): boolean {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 
   onInputValueChange(event: { field: keyof MaintenanceEmployees; value: any }) {
     const { field, value } = event;
-    
+
     if (field === 'id') {
       this.selectedEmployeeId = value;
     }
-    
+
     if (value && value !== 0) {
       this.validationErrors[field] = '';
     }
@@ -358,9 +364,9 @@ isFormValid(): boolean {
   capitalizeField(field: keyof MaintenanceEmployees): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-  
+
   openModal() {
-    this.selectedEmployeeId = 0; 
+    this.selectedEmployeeId = 0;
     this.validationErrors = {};
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
@@ -375,28 +381,28 @@ isFormValid(): boolean {
     this.validationErrors = {};
   }
 
-Save() {  
-  if (this.isFormValid()) {
-    if (this.selectedEmployeeId) {   
-      this.isLoading = true;    
+  Save() {
+    if (this.isFormValid()) {
+      if (this.selectedEmployeeId) {
+        this.isLoading = true;
 
-      const payload = { employeeId: this.selectedEmployeeId }; 
-      this.mainServ.Add(payload, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-          this.isLoading = false;
-          this.showSuccessAlert(this.translate.instant('Employee added to maintenance successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to add employee to maintenance');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    } 
+        const payload = { employeeId: this.selectedEmployeeId };
+        this.mainServ.Add(payload, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.showSuccessAlert(this.translate.instant('Employee added to maintenance successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to add employee to maintenance');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
+    }
   }
-}
 
 }
 

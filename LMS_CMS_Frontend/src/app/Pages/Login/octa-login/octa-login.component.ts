@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
 import { jwtDecode } from 'jwt-decode';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -182,7 +182,7 @@ export class OctaLoginComponent {
           this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
           this.router.navigateByUrl("Octa/Home")
           
-        }, (error) => {
+        }, async (error) => {
           this.isLoading = false
           if (error.error === "UserName or Password is Invalid") {
             this.somthingError = "UserName or Password is Invalid"
@@ -191,6 +191,8 @@ export class OctaLoginComponent {
             this.somthingError = "Username, Password or Type maybe wrong"
           }
           else {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',

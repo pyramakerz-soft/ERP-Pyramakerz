@@ -17,7 +17,7 @@ import { ReceivableDetails } from '../../../../Models/Accounting/receivable-deta
 import { LinkFile } from '../../../../Models/Accounting/link-file';
 import { LinkFileService } from '../../../../Services/Employee/Accounting/link-file.service';
 import { DataAccordingToLinkFileService } from '../../../../Services/Employee/Accounting/data-according-to-link-file.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
@@ -448,9 +448,11 @@ export class ReceivableDetailsComponent {
     }
   }
 
-  Save() {
+  async Save() {
     if (this.isCreate) {
       if (this.isFormValid()) {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           this.isLoading = true;
           this.receivableService.Add(this.receivable, this.DomainName).subscribe(
             (data) => {
@@ -477,6 +479,8 @@ export class ReceivableDetailsComponent {
           }
       } else if (this.isEdit) {
         if(this.isDetailsFormValid()){
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           this.isLoading = true;
           this.receivableService.Edit(this.receivable, this.DomainName).subscribe(
             (data) => {
@@ -579,7 +583,9 @@ export class ReceivableDetailsComponent {
 
   }
 
-  DeleteDetail(id: number) {
+  async DeleteDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -612,7 +618,9 @@ export class ReceivableDetailsComponent {
     });
   }
 
-  DeleteNewDetail(id: number) {
+  async DeleteNewDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +

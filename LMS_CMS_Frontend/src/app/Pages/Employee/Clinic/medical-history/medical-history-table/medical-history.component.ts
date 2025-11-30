@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../../../../Component/reuse-table/reuse-table.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
@@ -86,9 +86,11 @@ export class MedicalHistoryComponent implements OnInit {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+      
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -99,9 +101,11 @@ export class MedicalHistoryComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -149,6 +153,8 @@ export class MedicalHistoryComponent implements OnInit {
         });
       }
     } catch (error: any) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Failed',
@@ -181,12 +187,14 @@ export class MedicalHistoryComponent implements OnInit {
     this.isModalVisible = false;
   }
 
-  deleteMedicalHistory(row: any) {
+  async deleteMedicalHistory(row: any) {
     const translatedTitle = this.translate.instant('Are you sure?');
     const translatedText = this.translate.instant('You will not be able to recover this medical history!');
     const translatedConfirm = this.translate.instant('Yes, delete it!');
     const translatedCancel = this.translate.instant('No, keep it');
     const successMessage = this.translate.instant('Deleted successfully');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,

@@ -11,7 +11,7 @@ import { AccountingTreeChartService } from '../../../../../Services/Employee/Acc
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
 import { LinkFile } from '../../../../../Models/Accounting/link-file';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
@@ -62,7 +62,7 @@ export class AccountingSubledgerComponent implements OnInit {
   TotalPages: number = 1;
   TotalRecords: number = 0;
 
-  
+
   school = {
     reportHeaderOneEn: 'Accounts Subledger Report',
     reportHeaderTwoEn: 'Detailed Subledger Summary',
@@ -81,7 +81,7 @@ export class AccountingSubledgerComponent implements OnInit {
     public ApiServ: ApiService,
     private linkFileService: LinkFileService,
     private reportsService: ReportsService,
-    private loadingService: LoadingService 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -89,7 +89,7 @@ export class AccountingSubledgerComponent implements OnInit {
     this.DomainName = this.ApiServ.GetHeader();
     this.loadLinkFiles();
     this.loadAccounts();
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -135,7 +135,7 @@ export class AccountingSubledgerComponent implements OnInit {
     this.accountOptions = []; // Clear previous account options
     this.showTable = false;
     this.reportData = null;
-    
+
     if (this.linkFileID > 0) {
       this.loadAccountsByLinkFile();
     }
@@ -161,74 +161,79 @@ export class AccountingSubledgerComponent implements OnInit {
     this.pageNumber = 1;
   }
 
-viewReport() {
-  if (!this.fromDate || !this.toDate || !this.linkFileID) {
-    Swal.fire({
-      title: 'Missing Information',
-      text: 'Please select Date Range and Account Type',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
+  async viewReport() {
+    if (!this.fromDate || !this.toDate || !this.linkFileID) {
+        const Swal = await import('sweetalert2').then(m => m.default);
 
-  if (new Date(this.fromDate) > new Date(this.toDate)) {
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  this.isLoading = true;
-  this.showTable = false;
-
-  this.accountingSubledgerService.GetAccountsLedger(
-    new Date(this.fromDate),
-    new Date(this.toDate),
-    this.linkFileID,
-    this.accountID,
-    this.CurrentPage, // Changed from pageNumber
-    this.PageSize,    // Changed from pageSize
-    this.DomainName
-  ).subscribe({
-    next: (response) => {
-      this.reportData = response;
-      this.showTable = true;
-      this.isLoading = false;
-      
-      // Update pagination properties from response
-      if (response.pagination) {
-        this.CurrentPage = response.pagination.currentPage;
-        this.TotalPages = response.pagination.totalPages;
-        this.TotalRecords = response.pagination.totalRecords;
-      }
-    },
-    error: (error) => {
-      console.error('Error loading report:', error);
-      this.reportData = null;
-      this.showTable = true;
-      this.isLoading = false;
-      if (error.status === 404) {
-        Swal.fire({
-          title: 'No Data Found',
-          text: 'No data available for the selected filters',
-          icon: 'info',
-          confirmButtonText: 'OK',
-        });
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to load report data',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
+      Swal.fire({
+        title: 'Missing Information',
+        text: 'Please select Date Range and Account Type',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
-  });
-}
+
+    if (new Date(this.fromDate) > new Date(this.toDate)) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.showTable = false;
+
+    this.accountingSubledgerService.GetAccountsLedger(
+      new Date(this.fromDate),
+      new Date(this.toDate),
+      this.linkFileID,
+      this.accountID,
+      this.CurrentPage, // Changed from pageNumber
+      this.PageSize,    // Changed from pageSize
+      this.DomainName
+    ).subscribe({
+      next: (response) => {
+        this.reportData = response;
+        this.showTable = true;
+        this.isLoading = false;
+
+        // Update pagination properties from response
+        if (response.pagination) {
+          this.CurrentPage = response.pagination.currentPage;
+          this.TotalPages = response.pagination.totalPages;
+          this.TotalRecords = response.pagination.totalRecords;
+        }
+      },
+      error: async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+        if (error.status === 404) {
+          Swal.fire({
+            title: 'No Data Found',
+            text: 'No data available for the selected filters',
+            icon: 'info',
+            confirmButtonText: 'OK',
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to load report data',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        }
+      }
+    });
+  }
 
   changePage(newPage: number) {
     if (newPage > 0 && newPage <= (this.reportData?.pagination.totalPages || 1)) {
@@ -244,13 +249,13 @@ viewReport() {
 
   getAccountName(id: number): string {
     if (id === 0) return 'All Accounts';
-    
+
     // First check in accountOptions (link file specific accounts)
     const accountFromLinkFile = this.accountOptions.find(acc => acc.id === id);
     if (accountFromLinkFile) {
       return accountFromLinkFile.name;
     }
-    
+
     // Fallback to general accounts
     const account = this.accounts.find(acc => acc.id === id);
     return account ? account.name : 'Unknown Account';
@@ -263,7 +268,7 @@ viewReport() {
 
   prepareExportData(): void {
     this.cachedTableDataForPDF = [];
-    
+
     if (this.reportData) {
       // Opening Balance Section
       if (this.reportData.firstPeriodTotals.balance.length > 0) {
@@ -352,9 +357,11 @@ viewReport() {
     ];
   }
 
-  Print() {
+  async Print() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -399,9 +406,11 @@ viewReport() {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -415,6 +424,8 @@ viewReport() {
 
   async DownloadAsExcel() {
     if (!this.reportData) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -436,7 +447,7 @@ viewReport() {
           item.debit,
           item.credit
         ]);
-        
+
         const openingTotals = [
           ['Total Debit', this.reportData.firstPeriodTotals.total.totalDebit],
           ['Total Credit', this.reportData.firstPeriodTotals.total.totalCredit],
@@ -464,7 +475,7 @@ viewReport() {
           item.debit,
           item.credit
         ]);
-        
+
         const transactionsTotals = [
           ['Total Debit', this.reportData.transactionsPeriodTotals.total.totalDebit],
           ['Total Credit', this.reportData.transactionsPeriodTotals.total.totalCredit],
@@ -492,7 +503,7 @@ viewReport() {
           item.debit,
           item.credit
         ]);
-        
+
         const closingTotals = [
           ['Total Debit', this.reportData.lastPeriodTotals.total.totalDebit],
           ['Total Credit', this.reportData.lastPeriodTotals.total.totalCredit],
@@ -513,6 +524,8 @@ viewReport() {
       }
 
       if (tables.length === 0) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: 'No Data',
           text: 'No data available for export.',
@@ -542,7 +555,8 @@ viewReport() {
         filename: `Accounts_Subledger_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report.',
@@ -551,67 +565,67 @@ viewReport() {
       });
     }
   }
-changeCurrentPage(currentPage: number) {
-  this.CurrentPage = currentPage;
-  this.viewReport();
-}
-
-validatePageSize(event: any) { 
-  const value = event.target.value;
-  if (isNaN(value) || value === '' || parseInt(value) <= 0) {
-    // Set to minimum valid value instead of empty
-    this.PageSize = 1;
-    event.target.value = 1;
-  } else {
-    // Ensure it's a valid integer
-    this.PageSize = parseInt(value);
-    event.target.value = parseInt(value);
-  }
-}
-
-validateNumberForPagination(event: any): void {
-  const value = event.target.value;
-  // Validate and ensure it's a positive number
-  if (value === '' || isNaN(value) || parseInt(value) <= 0) {
-    event.target.value = this.PageSize; // Reset to previous valid value
-  }
-}
-
-get visiblePages(): number[] {
-  const total = this.TotalPages;
-  const current = this.CurrentPage;
-  const maxVisible = 5;
-
-  if (total <= maxVisible) {
-    return Array.from({ length: total }, (_, i) => i + 1);
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage;
+    this.viewReport();
   }
 
-  const half = Math.floor(maxVisible / 2);
-  let start = current - half;
-  let end = current + half;
-
-  if (start < 1) {
-    start = 1;
-    end = maxVisible;
-  } else if (end > total) {
-    end = total;
-    start = total - maxVisible + 1;
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '' || parseInt(value) <= 0) {
+      // Set to minimum valid value instead of empty
+      this.PageSize = 1;
+      event.target.value = 1;
+    } else {
+      // Ensure it's a valid integer
+      this.PageSize = parseInt(value);
+      event.target.value = parseInt(value);
+    }
   }
 
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
+  validateNumberForPagination(event: any): void {
+    const value = event.target.value;
+    // Validate and ensure it's a positive number
+    if (value === '' || isNaN(value) || parseInt(value) <= 0) {
+      event.target.value = this.PageSize; // Reset to previous valid value
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
 
   // New method to get all account IDs for the fixed column
   getAllAccountIds(): number[] {
     if (!this.reportData) return [];
-    
+
     const allIds = new Set<number>();
-    
+
     // Collect IDs from all periods
     this.reportData.firstPeriodTotals.balance.forEach(item => allIds.add(item.id));
     this.reportData.transactionsPeriodTotals.balance.forEach(item => allIds.add(item.id));
     this.reportData.lastPeriodTotals.balance.forEach(item => allIds.add(item.id));
-    
+
     return Array.from(allIds).sort((a, b) => a - b);
   }
 
@@ -623,7 +637,7 @@ get visiblePages(): number[] {
       ...this.reportData?.transactionsPeriodTotals.balance || [],
       ...this.reportData?.lastPeriodTotals.balance || []
     ];
-    
+
     const account = allAccounts.find(acc => acc.id === accountId);
     return account ? account.name : `Account ${accountId}`;
   }
@@ -631,10 +645,10 @@ get visiblePages(): number[] {
   // Method to get account data for a specific period and account ID
   getAccountDataForPeriod(period: string, accountId: number): any {
     if (!this.reportData) return { debit: 0, credit: 0 };
-    
+
     let periodData: any[] = [];
-    
-    switch(period) {
+
+    switch (period) {
       case 'opening':
         periodData = this.reportData.firstPeriodTotals.balance;
         break;
@@ -647,7 +661,7 @@ get visiblePages(): number[] {
       default:
         return { debit: 0, credit: 0 };
     }
-    
+
     const account = periodData.find(acc => acc.id === accountId);
     return account ? { debit: account.debit, credit: account.credit } : { debit: 0, credit: 0 };
   }

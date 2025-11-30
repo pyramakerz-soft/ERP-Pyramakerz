@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { RegisterationFormTest } from '../../../../Models/Registration/registeration-form-test';
 import { RegisterationFormTestService } from '../../../../Services/Employee/Registration/registeration-form-test.service';
 import { TranslateModule } from '@ngx-translate/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
 import { Test } from '../../../../Models/Registration/test';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -150,7 +150,9 @@ export class RegistrationFormTestAnswerComponent {
     this.openModal(); 
   }
 
-  Save() { 
+  async Save() { 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.RegesterForm.registerationFormParentID=this.RegisterFormParentID;
     this.RegesterForm.testID=this.TestId;
     this.RegesterForm.id=this.RegisterFormID;

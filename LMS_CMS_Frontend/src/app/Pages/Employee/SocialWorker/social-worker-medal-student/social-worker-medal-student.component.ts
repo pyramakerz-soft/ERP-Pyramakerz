@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Grade } from '../../../../Models/LMS/grade';
 import { School } from '../../../../Models/school';
@@ -208,8 +208,11 @@ export class SocialWorkerMedalStudentComponent {
           this.isLoading = false;
           this.closeModal();
         },
-        (error) => {
+        async (error) => {
           this.isLoading = false; // Hide spinner
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -325,7 +328,9 @@ export class SocialWorkerMedalStudentComponent {
     return IsAllow;
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',

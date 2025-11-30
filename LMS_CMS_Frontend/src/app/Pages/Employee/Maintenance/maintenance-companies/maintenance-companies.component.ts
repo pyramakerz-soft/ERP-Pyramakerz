@@ -5,7 +5,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { AccountService } from '../../../../Services/account.service';
 import { TokenData } from '../../../../Models/token-data';
@@ -147,9 +147,11 @@ export class MaintenanceCompaniesComponent {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -160,9 +162,11 @@ export class MaintenanceCompaniesComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -205,10 +209,12 @@ export class MaintenanceCompaniesComponent {
 
 
 
-  Delete(id: number) {
+  async Delete(id: number) {
     const deleteTitle = this.translate.instant('Are you sure you want to delete this company?');
     const deleteButton = this.translate.instant('Delete');
     const cancelButton = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: deleteTitle,

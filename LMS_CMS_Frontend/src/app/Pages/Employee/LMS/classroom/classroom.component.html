@@ -25,6 +25,7 @@
             <option *ngFor="let school of SchoolsForFilteration" [value]="school.id">
                 {{ school.name }}
             </option>
+            <option *ngIf="SchoolsForFilteration.length == 0" disabled> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="w-[49%]">
@@ -37,7 +38,7 @@
             <option *ngFor="let ac of AcademicYearsForFilteration" [value]="ac.id">
                 {{ ac.name }}
             </option>
-            <option *ngIf="AcademicYearsForFilteration.length == 0"> {{ 'No Data Found' | translate }}</option>
+            <option *ngIf="AcademicYearsForFilteration.length == 0" disabled> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
     <div class="mt-7 ml-2">
@@ -187,7 +188,7 @@
                     (change)="onSchoolChange($event)">
                     <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                     <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
-                    <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Schools.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
@@ -201,23 +202,21 @@
                     <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
                     <option *ngFor="let academicYear of AcademicYears" [value]="academicYear.id">{{ academicYear.name }}
                     </option>
-                    <option *ngIf="AcademicYears.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="AcademicYears.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['academicYearID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['academicYearID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" for="section"
-
+                <label class="mb-2" for="section" 
                     [ngClass]="{ 'text-gray-400': !selectedSchool || classroom.id != 0, 'primaryTxt': selectedSchool }">
                      {{ 'Choose' | translate }} {{ 'Section' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="section"
                     [(ngModel)]="selectedSection" (change)="onSectionChange($event)" [disabled]="!selectedSchool || classroom.id != 0"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool || classroom.id != 0 }">
-                    <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Section' | translate }}</option>
-
+                    <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Section' | translate }}</option> 
                     <option *ngFor="let section of Sections" [value]="section.id">{{ section.name }}</option>
-                    <option *ngIf="Sections.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Sections.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
@@ -231,7 +230,7 @@
                     (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
                     <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                     <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}</option>
-                    <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Grades.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['gradeID'] }}</span>
@@ -245,7 +244,7 @@
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }">
                     <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'Building' | translate }}</option>
                     <option *ngFor="let building of Buildings" [value]="building.id">{{ building.name }}</option>
-                    <option *ngIf="Buildings.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Buildings.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
@@ -258,7 +257,7 @@
                     (ngModelChange)="onInputValueChange({ field: 'floorID', value: $event })">
                     <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'Floor' | translate }}</option>
                     <option *ngFor="let floor of Floors" [value]="floor.id">{{ floor.name }}</option>
-                    <option *ngIf="Floors.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Floors.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['floorID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['floorID'] }}</span>
@@ -270,7 +269,7 @@
                     <option *ngIf="!classroom.id" [value]="null" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
                     <option *ngIf="classroom.id" [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Teacher' | translate }}</option>
                     <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.en_name }}</option>
-                    <option *ngIf="Employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Employees.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
         </div>
@@ -303,7 +302,7 @@
                     [ngClass]="{ 'bg-[#EBEBEB]': editClassroom}">
                     <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'School' | translate }}</option>
                     <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
-                    <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="Schools.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col mb-4">
@@ -316,7 +315,7 @@
                     <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
                     <option *ngFor="let academicYear of AcademicYears" [value]="academicYear.id">{{ academicYear.name }}
                     </option>
-                    <option *ngIf="AcademicYears.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="AcademicYears.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col mb-4">
@@ -329,7 +328,7 @@
                     <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }}{{ 'Academic Year' | translate }}</option>
                     <option *ngFor="let academicYear of AcademicYears" [value]="academicYear.id">{{ academicYear.name }}
                     </option>
-                    <option *ngIf="AcademicYears.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+                    <option *ngIf="AcademicYears.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
         </div>

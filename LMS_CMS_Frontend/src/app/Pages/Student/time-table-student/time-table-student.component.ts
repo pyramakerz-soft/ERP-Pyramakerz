@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription, Observable, of } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../Component/pdf-print/pdf-print.component';
 import { Day } from '../../../Models/day';
 import { Employee } from '../../../Models/Employee/employee';

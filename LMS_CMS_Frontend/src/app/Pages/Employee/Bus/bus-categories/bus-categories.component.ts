@@ -13,7 +13,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -150,7 +150,9 @@ export class BusCategoriesComponent {
     this.validationErrors = {};
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') +this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
@@ -227,8 +229,11 @@ isFormValid(): boolean {
       this.closeModal();
       this.isLoading = false; // Hide spinner
       this.busCategory = new BusType()
-    }, (error) => {
+    }, async (error) => {
       this.isLoading = false; // Hide spinner
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -246,8 +251,11 @@ isFormValid(): boolean {
       this.closeModal();
       this.isLoading = false; // Hide spinner
       this.busCategory = new BusType()
-    }, (error) => {
+    }, async (error) => {
       this.isLoading = false; // Hide spinner
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

@@ -8,7 +8,7 @@ import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -119,6 +119,8 @@ export class EmployeeJobReportComponent  implements OnInit {
 
   async viewReport() {
     if (!this.selectedJobCategoryId || !this.selectedJobId) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Incomplete Selection',
         text: 'Please select Job Category and Job to generate the report.',
@@ -202,8 +204,10 @@ export class EmployeeJobReportComponent  implements OnInit {
     ];
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -215,8 +219,10 @@ export class EmployeeJobReportComponent  implements OnInit {
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -266,6 +272,8 @@ export class EmployeeJobReportComponent  implements OnInit {
 
   async exportExcel() {
     if (this.reportsForExcel.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -298,7 +306,8 @@ export class EmployeeJobReportComponent  implements OnInit {
         filename: `Job_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', 'Failed to export to Excel', 'error');
     } finally {
       this.isExporting = false;

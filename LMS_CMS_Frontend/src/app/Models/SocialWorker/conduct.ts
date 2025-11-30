@@ -30,11 +30,13 @@ export class Conduct {
 }
 
 export class ConductReportItem {
+  
     constructor(
   public id: number,
   public date: string,
   public studentID: number,
   public studentEnName: string,
+  public studentArName: string,
   public conductType: ConductType,
   public procedureType: ProcedureType,
   public details: string,

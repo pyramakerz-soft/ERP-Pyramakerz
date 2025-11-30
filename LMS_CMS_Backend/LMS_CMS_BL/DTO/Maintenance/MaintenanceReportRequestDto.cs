@@ -18,5 +18,10 @@ namespace LMS_CMS_BL.DTO.Maintenance
         public long? ItemId { get; set; }
         public long? MaintenanceEmployeeId { get; set; }
         public long? CompanyId { get; set; }
+
+        // 1 = Company,
+        // 2 = Employee,
+        // null = Both
+        public int? FilterBy { get; set; }
     }
 }

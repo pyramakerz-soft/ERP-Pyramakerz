@@ -19,7 +19,7 @@ import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { LoanStatus } from '../../../../../Models/HR/loan-status';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
@@ -61,6 +61,9 @@ export class LoansStatusComponent {
   totalLoansAll: number = 0;
   totalDeductedAll: number = 0;
   remainingAll: number = 0;
+
+  isLoading: boolean = false;
+
 
   // School info for PDF
   school = {
@@ -109,25 +112,29 @@ export class LoansStatusComponent {
     }
   }
 
-  GetAllData() {
+ GetAllData() {
+    this.isLoading = true; // Start loading
     this.LoanStatus = []
-    this.LoansServ.GetLoansStatus(this.SelectedEmpId, this.DomainName).subscribe((d) => {
-      this.LoanStatus = d
-      this.totalLoansAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalLoans || 0), 0);
-      this.totalDeductedAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalDeducted || 0), 0);
-      this.remainingAll = this.LoanStatus.reduce((sum, x) => sum + (x.remaining || 0), 0);
-      
-      // Find selected employee
-      this.selectedEmployee = this.employees.find(emp => emp.id == this.SelectedEmpId);
-      
-      // Prepare data for export
-      this.prepareExportData();
-    })
-  }
-
-  Apply() {
-    this.IsShowTabls = true
-    this.GetAllData()
+    this.LoansServ.GetLoansStatus(this.SelectedEmpId, this.DomainName).subscribe({
+      next: (d) => {
+        this.LoanStatus = d
+        this.totalLoansAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalLoans || 0), 0);
+        this.totalDeductedAll = this.LoanStatus.reduce((sum, x) => sum + (x.totalDeducted || 0), 0);
+        this.remainingAll = this.LoanStatus.reduce((sum, x) => sum + (x.remaining || 0), 0);
+        
+        // Find selected employee
+        this.selectedEmployee = this.employees.find(emp => emp.id == this.SelectedEmpId);
+        
+        // Prepare data for export
+        this.prepareExportData();
+        this.isLoading = false; // End loading
+      },
+      error: (error) => {
+        console.error('Error loading loan status:', error);
+        this.isLoading = false; // End loading even on error
+        // You might want to show an error message here
+      }
+    });
   }
 
   getEmployee() {
@@ -136,6 +143,18 @@ export class LoansStatusComponent {
       this.employees = d
     })
   }
+
+  Apply() {
+    this.IsShowTabls = true
+    this.GetAllData()
+  }
+
+  // getEmployee() {
+  //   this.employees = []
+  //   this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
+  //     this.employees = d
+  //   })
+  // }
 
   // PDF and Print Methods
   private prepareExportData(): void {
@@ -255,8 +274,10 @@ export class LoansStatusComponent {
     ];
   }
 
-  Print() {
+  async Print() {
     if (this.cachedTableDataForPDF.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -301,8 +322,10 @@ export class LoansStatusComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.cachedTableDataForPDF.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -316,6 +339,8 @@ export class LoansStatusComponent {
 
   async exportExcel() {
     if (this.LoanStatus.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Warning',
         text: 'No data to export!',
@@ -411,7 +436,8 @@ export class LoansStatusComponent {
       });
 
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report',

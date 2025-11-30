@@ -14,7 +14,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TokenData } from '../../../../Models/token-data';
 import { InterviewTimeTableService } from '../../../../Services/Employee/Registration/interview-time-table.service';
 import { InterviewTimeTable } from '../../../../Models/Registration/interview-time-table';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -415,8 +415,10 @@ export class InterviewTimeTableComponent {
     return from > to;
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       const timeCheck = this.isFromTimeAfterToTime(this.interviewTimeTable.fromTime, this.interviewTimeTable.toTime);
       if (timeCheck) {
         Swal.fire({
@@ -538,7 +540,9 @@ export class InterviewTimeTableComponent {
     this.interviewTimeTableData = filteredData;           
   }
 
-  deleteInterview(id: number) {
+  async deleteInterview(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Time') + this.translate.instant('?'),
       icon: 'warning',

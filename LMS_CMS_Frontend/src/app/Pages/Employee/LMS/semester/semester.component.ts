@@ -12,7 +12,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { firstValueFrom } from 'rxjs';
@@ -236,13 +236,15 @@ export class SemesterComponent {
     return IsAllow;
   }
 
-  checkFromToDate() {
+  async checkFromToDate() {
     let valid = true;
 
     const semesterFrom: Date = new Date(this.semester.dateFrom);
     const semesterTo: Date = new Date(this.semester.dateTo);
     const academicFrom: Date = new Date(this.academicYear.dateFrom);
     const academicTo: Date = new Date(this.academicYear.dateTo);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     // Check that semesterFrom is before semesterTo
     if (semesterTo.getTime() < semesterFrom.getTime()) {
@@ -277,11 +279,13 @@ export class SemesterComponent {
   }
 
 
-  SaveSemester() {
+  async SaveSemester() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.semester.academicYearID = this.academicYearId
-      if (this.checkFromToDate()) {
+      if (await this.checkFromToDate()) {
         if (this.editSemester == false) {
           this.semesterService.Add(this.semester, this.DomainName).subscribe(
             (result: any) => {
@@ -323,7 +327,9 @@ export class SemesterComponent {
     }
   }
 
-  deleteSemester(id: number) {
+  async deleteSemester(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Semester') + this.translate.instant('?'),
       icon: 'warning',

@@ -17,7 +17,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -201,18 +201,20 @@ export class AdmissionTestComponent {
     );
   }
 
-  private showErrorAlert(errorMessage: string) {
-      const translatedTitle = this.translate.instant('Error');
-      const translatedButton = this.translate.instant('Okay');
-  
-      Swal.fire({
-        icon: 'error',
-        title: translatedTitle,
-        text: errorMessage,
-        confirmButtonText: translatedButton,
-        customClass: { confirmButton: 'secondaryBg' },
-      });
-    }
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
   
 
   GetGradesBySchoolId() {
@@ -250,8 +252,10 @@ export class AdmissionTestComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
-        Swal.fire({
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Admission Test') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
@@ -292,10 +296,13 @@ export class AdmissionTestComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
+  async CreateOREdit() { 
+    if (this.isFormValid()) { 
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == "Create") {
+        console.log(4)
         this.testServ.Add(this.test, this.DomainName).subscribe(() => {
           this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
           this.closeModal();
@@ -374,6 +381,7 @@ export class AdmissionTestComponent {
             isValid = false;
           }
         }
+        console.log(this.validationErrors)
       }
     }
     return isValid;

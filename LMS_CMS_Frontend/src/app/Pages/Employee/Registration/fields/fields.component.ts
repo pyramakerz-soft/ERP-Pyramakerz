@@ -13,7 +13,7 @@ import { FieldOption } from '../../../../Models/Registration/field-option';
 import { FieldType } from '../../../../Models/Registration/field-type';
 import { RegistrationCategoryService } from '../../../../Services/Employee/Registration/registration-category.service';
 import { FieldsService } from '../../../../Services/Employee/Registration/fields.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FieldTypeService } from '../../../../Services/Employee/Registration/field-type.service';
 import { FieldAddEdit } from '../../../../Models/Registration/field-add-edit';
 import { firstValueFrom } from 'rxjs';
@@ -155,7 +155,9 @@ export class FieldsComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "  +this.translate.instant('Field') + this.translate.instant('?'),
       icon: 'warning',
@@ -200,10 +202,12 @@ export class FieldsComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     this.field.registrationCategoryID = this.CategoryId;
     if (this) this.field.options = this.options;
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.fieldServ.Add(this.field, this.DomainName).subscribe(() => {

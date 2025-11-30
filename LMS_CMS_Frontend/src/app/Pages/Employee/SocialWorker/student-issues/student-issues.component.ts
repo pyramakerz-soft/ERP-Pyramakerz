@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { School } from '../../../../Models/school';
 import { TokenData } from '../../../../Models/token-data';
@@ -164,9 +164,11 @@ export class StudentIssuesComponent {
     );
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -237,7 +239,9 @@ export class StudentIssuesComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Issue') + this.translate.instant('?'),
       icon: 'warning',
@@ -293,8 +297,10 @@ export class StudentIssuesComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.StudentIssueServ.Add(this.studentIssue, this.DomainName).subscribe(
@@ -433,7 +439,9 @@ export class StudentIssuesComponent {
 
   changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage;
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    if(this.CurrentPage > 0 && this.PageSize >0){
+      this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+    }
   }
 
   validatePageSize(event: any) {
@@ -470,8 +478,8 @@ export class StudentIssuesComponent {
   validateNumberPage(event: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = '';
-      this.PageSize = 0;
+      event.target.value = 10;
+      this.PageSize = 10;
     }
   }
 

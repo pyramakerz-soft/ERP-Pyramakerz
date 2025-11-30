@@ -1316,124 +1316,120 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //////////////////////////////////////////////////////////////////////////////////////////-77
 
-        //[HttpGet("AssignmentReport")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //pages: new[] { "Assignment Report" }
-        //)]
-        //public async Task<IActionResult> AssignmentReport(AssignmentReportFilterDTO filter)
+        [HttpPost("AssignmentReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Assignment Report" }
+                )]
+        public async Task<IActionResult> AssignmentReport([FromBody] AssignmentReportFilterDTO filter)
+        {
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-        //{
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //        var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
 
-        //        if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
-        //        {
-        //            return Unauthorized("User ID or Type claim not found.");
-        //        }
+            if (filter.FromDate == default || filter.ToDate == default)
+                return BadRequest("FromDate and ToDate are required.");
 
-        //    if (filter.FromDate == default || filter.ToDate == default)
-        //        return BadRequest("FromDate and ToDate are required.");
-
-        //    if (filter.FromDate > filter.ToDate)
-        //        return BadRequest("FromDate cannot be later than ToDate.");
-
-
-        //    if (filter.SchoolId <= 0 || filter.AcademicYearId <= 0 || filter.GradeId <= 0 || filter.SubjectId <= 0)
-        //    {
-        //        return BadRequest("SchoolId, AcademicYearId, GradeId, and SubjectId are required values.");
-        //    }
+            if (filter.FromDate > filter.ToDate)
+                return BadRequest("FromDate cannot be later than ToDate.");
 
 
-        //    UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var academicYearEntity = await uow.academicYear_Repository
-        //            .Select_By_IdAsync(filter.AcademicYearId);
-
-
-        //    if (academicYearEntity == null || academicYearEntity.SchoolID != filter.SchoolId)
-        //    {
-        //        return BadRequest("Invalid Academic Year or it does not belong to the selected school.");
-
-        //    }
-
-        //    var assignments = await uow.assignment_Repository.Query()
-        //             .Include(a => a.Subject)
-        //                 .ThenInclude(s => s.Grade)
-        //             .Include(a => a.AssignmentStudents)
-        //             .Include(a => a.AssignmentStudentIsSpecifics)
-        //             .Where(a => a.Subject.Grade.Section.SchoolID == filter.SchoolId)
-        //             .Where(a => a.Subject.GradeID == filter.GradeId)
-        //             .Where(a => a.SubjectID == filter.SubjectId)
-        //             .Where(a => a.OpenDate >= filter.FromDate && a.OpenDate <= filter.ToDate)
-        //             .ToListAsync();
-
-        //    if (!assignments.Any())
-        //        return NotFound("No assignments found for the given filters.");
+            if (filter.SchoolId <= 0 || filter.AcademicYearId <= 0 || filter.GradeId <= 0 || filter.SubjectId <= 0)
+            {
+                return BadRequest("SchoolId, AcademicYearId, GradeId, and SubjectId are required values.");
+            }
 
 
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            AcademicYear academicYearEntity = await uow.academicYear_Repository
+                    .Select_By_IdAsync(filter.AcademicYearId);
+
+
+            if (academicYearEntity == null || academicYearEntity.SchoolID != filter.SchoolId)
+            {
+                return BadRequest("Invalid Academic Year or it does not belong to the selected school.");
+
+            }
+
+            List<Assignment> assignmentsQuery = await uow.assignment_Repository.Select_All_With_IncludesById<Assignment>(
+                    a => a.IsDeleted != true && a.Subject.Grade.Section.SchoolID == filter.SchoolId &&
+                        a.Subject.GradeID == filter.GradeId && a.SubjectID == filter.SubjectId && 
+                        a.OpenDate >= filter.FromDate && a.OpenDate <= filter.ToDate,
+                    a => a.Include(d => d.Subject).ThenInclude(d => d.Grade).ThenInclude(d => d.Section),
+                    a => a.Include(d => d.AssignmentStudentIsSpecifics),
+                    a => a.Include(d => d.AssignmentStudents).ThenInclude(d => d.StudentClassroom)
+                    );
+
+            if (!assignmentsQuery.Any())
+                return NotFound("No assignments found for the given filters.");
+
+            List<AssignmentReportDTO> report = new List<AssignmentReportDTO>();
+
+            foreach (Assignment  assignment in assignmentsQuery)
+            {
+                List<Student> eligibleStudents;
+
+                if (!assignment.IsSpecificStudents)
+                {
+                    eligibleStudents = await uow.studentClassroom_Repository.Query()
+                        .Where(sc =>
+                         sc.Classroom.GradeID == filter.GradeId &&
+                            sc.Classroom.AcademicYearID == filter.AcademicYearId &&
+                            sc.Student.IsDeleted != true &&
+                            sc.StudentClassroomSubjects.Any(ss => ss.SubjectID == filter.SubjectId))
+                        .Select(sc => sc.Student)
+                        .Distinct()
+                        .ToListAsync();
+                }
+
+                else
+                {
+                    eligibleStudents = await uow.assignmentStudentIsSpecific_Repository.Query()
+                        .Where(x => x.AssignmentID == assignment.ID && x.StudentClassroom.Student.IsDeleted != true)
+                        .Select(x => x.StudentClassroom.Student)
+                        .Distinct()
+                        .ToListAsync();
+                }
+
+                // students who got the assignment
+                int assignedStudentsCount = eligibleStudents.Count;
+
+                // Students who submitted (attendance) 
+                 List<AssignmentStudent> submittedStudents = assignment.AssignmentStudents
+                    .Where(a => eligibleStudents.Select(es => es.ID).Contains(a.StudentClassroom.StudentID))
+                    .ToList();
+
+                int attendanceStudentsCount = submittedStudents.Count;
+
+                // successful, failed, pending based on Degree
+                int successful = submittedStudents.Count(s => s.Degree.HasValue && s.Degree.Value >= assignment.PassMark);
+                int failed = submittedStudents.Count(s => s.Degree.HasValue && s.Degree.Value < assignment.PassMark);
+                int pending = submittedStudents.Count(s => !s.Degree.HasValue);
+
+                double successRate = attendanceStudentsCount == 0
+                    ? 0
+                    : (double)successful / attendanceStudentsCount * 100.0;
+
+
+                AssignmentReportDTO dto = mapper.Map<AssignmentReportDTO>(assignment);
+                dto.AssignedStudents = assignedStudentsCount;
+                dto.submittedStudents = attendanceStudentsCount;
+                dto.SuccessfulStudents = successful;
+                dto.FailedStudents = failed;
+                dto.PendingStudents = pending;
+                dto.SuccessRate = Math.Round(successRate, 2);
+                report.Add(dto);
+            };
             
+            return Ok(report);
+        }
 
-        //        var report = new List<AssignmentReportDTO>();
-
-        //        foreach (var assignment in assignments)
-        //        {
-        //        List<Student> eligibleStudents;
-
-        //        if (!assignment.IsSpecificStudents)
-        //        {
-        //            eligibleStudents = await uow.studentClassroom_Repository.Query()
-        //                .Where(sc =>
-        //                    sc.GradeID == filter.GradeId &&
-        //                    sc.AcademicYearId == filter.AcademicYearId &&
-        //                    !sc.Student.IsDeleted &&
-        //                    sc.StudentClassroomSubjects.Any(ss => ss.SubjectID == filter.SubjectId))
-        //                .Select(sc => sc.Student)
-        //                .Distinct()
-        //                .ToListAsync();
-        //        }
-              
-        //        else
-        //        {
-        //            eligibleStudents = await uow.assignmentStudentIsSpecific_Repository.Query()
-        //                .Where(x => x.AssignmentID == assignment.ID && !x.StudentClassroom.Student.IsDeleted)
-        //                .Select(x => x.StudentClassroom.Student)
-        //                .Distinct()
-        //                .ToListAsync();
-        //        }
-
-        //        int totalAssigned = eligibleStudents.Count;
-
-
-        //        // الطلاب اللى سلّموا من المكلفين فقط
-        //        var submittedStudents = assignment.AssignmentStudents
-        //                .Where(a => assignedStudentIds.Contains(a.StudentClassroomID))
-        //                .ToList();
-
-        //            int attendanceNumber = submittedStudents.Count;
-
-        //            int numberSuccessful = submittedStudents
-        //                .Count(ag => ag.Degree.GetValueOrDefault(0) >= assignment.PassMark);
-
-        //            int numberFailed = submittedStudents
-        //                .Count(ag => ag.Degree.GetValueOrDefault(0) < assignment.PassMark);
-
-        //            int absent = assigned - attendanceNumber;
-
-        //            var dto = mapper.Map<AssignmentReportDTO>(assignment);
-        //            dto.AssignmentName = assignment.EnglishName; 
-        //            dto.SubjectName = assignment.Subject?.en_name;
-        //            dto.Assigned = assigned;
-        //            dto.Absent = absent;
-        //            dto.AttendanceNumber = attendanceNumber;
-        //            dto.NumberSuccessful = numberSuccessful;
-        //            dto.NumberFailed = numberFailed;
-
-        //            report.Add(dto);
-        //        }
-
-        //        return Ok(report);
-        //    }
-        } 
+         
+        }
+    } 
     
-}

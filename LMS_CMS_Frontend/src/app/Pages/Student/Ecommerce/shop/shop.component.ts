@@ -12,7 +12,7 @@ import { ShopItem } from '../../../../Models/Inventory/shop-item';
 import { Router } from '@angular/router';
 import { CartShopItemService } from '../../../../Services/Student/cart-shop-item.service';
 import { CartShopItem } from '../../../../Models/Student/ECommerce/cart-shop-item';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { FormsModule } from '@angular/forms';
@@ -179,7 +179,9 @@ export class ShopComponent {
     this.cartShopItem.shopItemID = id
 
     this.cartShopItemService.Add(this.cartShopItem, this.DomainName).subscribe(
-      data => {
+      async data => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: "Added Successfully!",
           icon: "success"

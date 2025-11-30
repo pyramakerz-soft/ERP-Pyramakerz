@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -212,7 +212,9 @@ export class LessonLiveComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +  this.translate.instant('Live') + this.translate.instant('?'),
       icon: 'warning',
@@ -258,8 +260,10 @@ export class LessonLiveComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if(this.live.period != null && this.gradeDayPeriod >= this.live.period){
         this.isLoading = true;
         if (this.mode == 'Create') {
@@ -351,10 +355,12 @@ export class LessonLiveComponent {
     } 
   }
 
-  GetDayPeriodSessions() { 
+  async GetDayPeriodSessions() { 
     this.gradeDayPeriod = 0
     this.live.period = null
     if(this.gradeID && this.live.weekDayID){ 
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.gradeService.GetDayPeriodSessions(this.live.weekDayID, this.gradeID, this.DomainName).subscribe((d) => {
         this.gradeDayPeriod = d
         if(this.gradeDayPeriod == 0){

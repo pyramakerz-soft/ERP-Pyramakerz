@@ -771,7 +771,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<MedicalHistoryPutByParentDTO, MedicalHistory>();
 
             CreateMap<Order, OrderGetDTO>()
-                .ForMember(dest => dest.OrderStateName, opt => opt.MapFrom(src => src.OrderState.Name));
+                .ForMember(dest => dest.OrderStateName, opt => opt.MapFrom(src => src.OrderState.Name))
+                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.Student.en_name));
 
             CreateMap<OrderState, OrderStateGetDTO>();
 
@@ -1098,11 +1100,15 @@ namespace LMS_CMS_BL.Config
             //In AutoMapConfig.cs, add mappings if needed for basic properties (custom logic will handle counts in the controller)-77
 
             CreateMap<Assignment, AssignmentReportDTO>()
-                .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.EnglishName))
-                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name));
-               //.ForMember(dest => dest.AttendanceNumber, opt => opt.Ignore())
-               //.ForMember(dest => dest.NumberSuccessful, opt => opt.Ignore())
-               //.ForMember(dest => dest.NumberFailed, opt => opt.Ignore());
+                    .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.EnglishName))
+                    .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+                    .ForMember(dest => dest.AssignedStudents, opt => opt.Ignore())
+                    .ForMember(dest => dest.submittedStudents, opt => opt.Ignore())
+                    .ForMember(dest => dest.SuccessfulStudents, opt => opt.Ignore())
+                    .ForMember(dest => dest.FailedStudents, opt => opt.Ignore())
+                    .ForMember(dest => dest.PendingStudents, opt => opt.Ignore())
+                    .ForMember(dest => dest.SuccessRate, opt => opt.Ignore());
+
             //-77
             CreateMap<POSAddDTO, ETAPOS>();
             CreateMap<POSEditDTO, ETAPOS>();
@@ -1247,7 +1253,8 @@ namespace LMS_CMS_BL.Config
             .ForMember(dest => dest.ConductType, opt => opt.MapFrom(src => new ConductTypeReportDTO
             {
                 ID = src.ConductType.ID,
-                Name = src.ConductType.en_name ?? src.ConductType.ar_name
+                en_name = src.ConductType.en_name ,
+                ar_name = src.ConductType.ar_name
             }))
             .ForMember(dest => dest.ProcedureType, opt => opt.MapFrom(src => new ProcedureTypeReportDTO
             {

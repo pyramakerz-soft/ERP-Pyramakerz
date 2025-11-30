@@ -12,7 +12,7 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,6 +37,10 @@ export class MaintenanceReportComponent implements OnInit {
   selectedItemId: number | null = null;
   selectedCompanyId: number | null = null;
   selectedEmployeeId: number | null = null;
+
+  // Checkbox filters
+  filterByCompany: boolean = true;
+  filterByEmployee: boolean = true;
 
   // Data sources
   maintenanceItems: MaintenanceItem[] = [];
@@ -65,7 +69,6 @@ export class MaintenanceReportComponent implements OnInit {
   };
 
   constructor(
-    // private maintenanceReportService: MaintenanceReport,
     private maintenanceReportService: MaintenanceService,
     private maintenanceItemService: MaintenanceItemService,
     private maintenanceCompaniesService: MaintenanceCompaniesService,
@@ -110,103 +113,99 @@ export class MaintenanceReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
     this.maintenanceReports = [];
   }
 
-async viewReport() {
-  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
+  onCompanyCheckboxChange() {
+    if (!this.filterByCompany) {
+      this.selectedCompanyId = null;
+    }
+    this.onFilterChange();
   }
 
-  // Check if both Company and Employee are selected
-  if (this.selectedCompanyId && this.selectedEmployeeId) {
-    Swal.fire({
-      title: 'Invalid Selection',
-      text: 'You cannot filter by both Employee and Company at the same time.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
+  onEmployeeCheckboxChange() {
+    if (!this.filterByEmployee) {
+      this.selectedEmployeeId = null;
+    }
+    this.onFilterChange();
   }
 
-  this.isLoading = true;
-  this.showTable = false;
-
-  try {
-    const domainName = this.apiService.GetHeader();
-    
-    // Create proper request object with actual filter values
-    const request: any = {
-      fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
-      toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
-      itemId: this.selectedItemId || 0,
-      companyId: this.selectedCompanyId || 0,
-      maintenanceEmployeeId: this.selectedEmployeeId || 0
-    };
-
-    // Remove properties with 0 values (optional, depending on backend requirements)
-    Object.keys(request).forEach(key => {
-      if (request[key] === 0 || request[key] === null || request[key] === undefined) {
-        delete request[key];
-      }
-    }); 
-
-    const response = await firstValueFrom(
-      this.maintenanceReportService.getMaintenanceReport(domainName, request)
-    ); 
-    
-    if (Array.isArray(response)) {
-      this.maintenanceReports = response; 
-    } else { 
-      this.maintenanceReports = [];
+  async viewReport() {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
 
-    this.prepareExportData();
-    this.showTable = true;
-  } catch (error) {
-    console.error('Error loading maintenance reports:', error);
-    this.maintenanceReports = [];
-    this.showTable = true;
-    Swal.fire('Error', 'Failed to load maintenance reports', 'error');
-  } finally {
-    this.isLoading = false;
-  }
-}
+    this.isLoading = true;
+    this.showTable = false;
 
-onCompanyChange() {
-  if (this.selectedCompanyId && this.selectedEmployeeId) {
-    // If both are selected, clear the employee selection
-    this.selectedEmployeeId = null;
-    Swal.fire({
-      title: 'Selection Changed',
-      text: 'Company selected. Employee selection cleared.',
-      icon: 'info',
-      confirmButtonText: 'OK',
-    });
-  }
-  this.onFilterChange();
-}
+    try {
+      const domainName = this.apiService.GetHeader();
+      
+      // Build request object based on filter checkboxes
+      const request: any = {
+        fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
+        toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
+      };
 
-onEmployeeChange() {
-  if (this.selectedEmployeeId && this.selectedCompanyId) {
-    // If both are selected, clear the company selection
-    this.selectedCompanyId = null;
-    Swal.fire({
-      title: 'Selection Changed',
-      text: 'Employee selected. Company selection cleared.',
-      icon: 'info',
-      confirmButtonText: 'OK',
-    });
+      // Add itemId if selected
+      if (this.selectedItemId && this.selectedItemId !== 0) {
+        request.itemId = this.selectedItemId;
+      }
+
+      // Determine filterBy value based on checkboxes
+      if (this.filterByCompany && !this.filterByEmployee) {
+        // Only companies
+        request.filterBy = 1;
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
+        }
+      } else if (!this.filterByCompany && this.filterByEmployee) {
+        // Only employees
+        request.filterBy = 2;
+        if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+        }
+      } else if (this.filterByCompany && this.filterByEmployee) {
+        // Both filters (filterBy is null/undefined in this case)
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
+        }
+        if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+        }
+      }
+      // If both are false, only dates are sent
+
+      const response = await firstValueFrom(
+        this.maintenanceReportService.getMaintenanceReport(domainName, request)
+      ); 
+      
+      if (Array.isArray(response)) {
+        this.maintenanceReports = response; 
+      } else { 
+        this.maintenanceReports = [];
+      }
+
+      this.prepareExportData();
+      this.showTable = true;
+    } catch (error) { 
+      this.maintenanceReports = [];
+      this.showTable = true;
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to load maintenance reports', 'error');
+    } finally {
+      this.isLoading = false;
+    }
   }
-  this.onFilterChange();
-}
 
   private prepareExportData(): void {
     // For PDF (object format)
@@ -231,45 +230,55 @@ onEmployeeChange() {
   }
 
   getItemName(): string {
+    if (!this.selectedItemId || this.selectedItemId === 0) {
+      return 'All Items';
+    }
     return this.maintenanceItems.find(i => i.id === this.selectedItemId)?.en_Name || 'All Items';
   }
 
   getCompanyName(): string {
+    if (!this.filterByCompany) {
+      return 'Not Filtered';
+    }
+    if (!this.selectedCompanyId || this.selectedCompanyId === 0) {
+      return 'All Companies';
+    }
     return this.maintenanceCompanies.find(c => c.id === this.selectedCompanyId)?.en_Name || 'All Companies';
   }
 
   getEmployeeName(): string {
+    if (!this.filterByEmployee) {
+      return 'Not Filtered';
+    }
+    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+      return 'All Employees';
+    }
     return this.maintenanceEmployees.find(e => e.id === this.selectedEmployeeId)?.en_Name || 'All Employees';
   }
 
-// In maintenance-report.component.ts - update the getInfoRows method and related helper methods
+  getInfoRows(): any[] {
+    const infoRows = [
+      { keyEn: 'From Date: ' + this.dateFrom },
+      { keyEn: 'To Date: ' + this.dateTo },
+      { keyEn: 'Item: ' + this.getItemName() }
+    ];
 
-getInfoRows(): any[] {
-  const infoRows = [
-    { keyEn: 'From Date: ' + this.dateFrom },
-    { keyEn: 'To Date: ' + this.dateTo },
-    { keyEn: 'Item: ' + this.getItemName() }
-  ];
+    // Add Company info if filtered
+    if (this.filterByCompany) {
+      infoRows.push({ keyEn: 'Company: ' + this.getCompanyName() });
+    }
 
-  // Handle Company/Employee display logic
-  if (this.selectedCompanyId) {
-    infoRows.push({ keyEn: 'Company: ' + this.getCompanyName() });
-    // infoRows.push({ keyEn: 'Employee: All Employees' });
-  } else if (this.selectedEmployeeId) {
-    // infoRows.push({ keyEn: 'Company: All Companies' });
-    infoRows.push({ keyEn: 'Employee: ' + this.getEmployeeName() });
-  } else {
-    // Neither is selected
-    infoRows.push({ keyEn: 'Company: All Companies' });
-    infoRows.push({ keyEn: 'Employee: All Employees' });
+    // Add Employee info if filtered
+    if (this.filterByEmployee) {
+      infoRows.push({ keyEn: 'Employee: ' + this.getEmployeeName() });
+    }
+
+    return infoRows;
   }
 
-  return infoRows;
-}
-
-
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -281,8 +290,9 @@ getInfoRows(): any[] {
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -330,61 +340,51 @@ getInfoRows(): any[] {
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExcel.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
-
-  this.isExporting = true;
-  
-  try {
-    // Prepare info rows with the same logic as getInfoRows
-    const infoRows = [
-      { key: 'From Date', value: this.dateFrom },
-      { key: 'To Date', value: this.dateTo },
-      { key: 'Item', value: this.getItemName() }
-    ];
-
-    // Handle Company/Employee display logic
-    if (this.selectedCompanyId) {
-      infoRows.push({ key: 'Company', value: this.getCompanyName() });
-      // infoRows.push({ key: 'Employee', value: 'All Employees' });
-    } else if (this.selectedEmployeeId) {
-      // infoRows.push({ key: 'Company', value: 'All Companies' });
-      infoRows.push({ key: 'Employee', value: this.getEmployeeName() });
-    } else {
-      // Neither is selected
-      infoRows.push({ key: 'Company', value: 'All Companies' });
-      infoRows.push({ key: 'Employee', value: 'All Employees' });
+  async exportExcel() {
+    if (this.reportsForExcel.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
     }
 
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Maintenance Report',
-        ar: 'تقرير الصيانة'
-      },
-      // subHeaders: [
-      //   {
-      //     en: 'Maintenance Records',
-      //     ar: 'سجلات الصيانة'
-      //   }
-      // ],
-      infoRows: infoRows,
-      tables: [
-        {
-          // title: 'Maintenance Report Data',
-          headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Maintenance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  } finally {
-    this.isExporting = false;
+    this.isExporting = true;
+    
+    try {
+      const infoRows = [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'Item', value: this.getItemName() }
+      ];
+
+      // Add Company info if filtered
+      if (this.filterByCompany) {
+        infoRows.push({ key: 'Company', value: this.getCompanyName() });
+      }
+
+      // Add Employee info if filtered
+      if (this.filterByEmployee) {
+        infoRows.push({ key: 'Employee', value: this.getEmployeeName() });
+      }
+
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Maintenance Report',
+          ar: 'تقرير الصيانة'
+        },
+        infoRows: infoRows,
+        tables: [
+          {
+            headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
+            data: this.reportsForExcel
+          }
+        ],
+        filename: `Maintenance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
+    } catch (error) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
-}
 }

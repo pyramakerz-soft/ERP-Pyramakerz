@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { ApiService } from '../../../../../Services/api.service';
 import { JobCategoriesService } from '../../../../../Services/Employee/Administration/job-categories.service';
@@ -153,6 +153,8 @@ async loadEmployees() {
 }
 
   async viewReport() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
         title: 'Invalid Date Range',
@@ -346,8 +348,10 @@ private prepareExportData(): void {
   }
 
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -358,8 +362,10 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -404,6 +410,8 @@ private prepareExportData(): void {
 
   async exportExcel() {
     if (this.reportsForExcel.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -443,7 +451,8 @@ private prepareExportData(): void {
         filename: `Vacation_Employee_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', 'Failed to export to Excel', 'error');
     } finally {
       this.isExporting = false;

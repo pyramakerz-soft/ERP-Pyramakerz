@@ -16,7 +16,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { Assignment } from '../../../../Models/LMS/assignment';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Grade } from '../../../../Models/LMS/grade';
 import { School } from '../../../../Models/school';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
@@ -255,7 +255,9 @@ export class AssignmentStudentComponent {
           this.isLoading = false;
           this.GetAllData(this.CurrentPage, this.PageSize);
         },
-        (error) => {
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',

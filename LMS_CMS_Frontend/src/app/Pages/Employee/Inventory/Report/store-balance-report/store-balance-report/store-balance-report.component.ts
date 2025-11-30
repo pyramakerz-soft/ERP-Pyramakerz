@@ -1,10 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-
-import * as XLSX from 'xlsx';
-import Swal from 'sweetalert2';
+import { ActivatedRoute } from '@angular/router'; 
+// import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import {
   StoreBalanceItem,
@@ -14,8 +12,7 @@ import { InventoryDetailsService } from '../../../../../../Services/Employee/Inv
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { LanguageService } from '../../../../../../Services/shared/language.service';
-import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { LanguageService } from '../../../../../../Services/shared/language.service'; 
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
@@ -52,6 +49,13 @@ export class StoreBalanceReportComponent implements OnInit {
   reportData: StoreBalanceReport | null = null;
   showTable: boolean = false;
   isLoading: boolean = false;
+  pageNumber: number = 1;
+  pageSize: number = 10;
+
+currentPage: number = 1;
+totalPages: number = 1;
+totalRecords: number = 0;
+
 
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
   showPDF = false;
@@ -168,9 +172,17 @@ export class StoreBalanceReportComponent implements OnInit {
   }
 
   loadCategories() {
+    if (!this.selectedStoreId) {
+      this.categories = [];
+      return;
+    }
+
     this.isLoading = true;
     this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
+      .GetByStoreId(
+        this.categoryService.ApiServ.GetHeader(),
+        this.selectedStoreId,
+      )
       .subscribe({
         next: (categories) => {
           this.categories = categories;
@@ -178,9 +190,23 @@ export class StoreBalanceReportComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading categories:', error);
+          this.categories = [];
           this.isLoading = false;
         },
       });
+  }
+
+  onStoreSelected() {
+    this.selectedCategoryId = null;
+    this.categories = [];
+    
+    if (this.selectedStoreId) {
+      this.loadCategories();
+    } else {
+      this.categories = [];
+    }
+    
+    this.onFilterChange();
   }
 
   onFilterChange() {
@@ -188,54 +214,61 @@ export class StoreBalanceReportComponent implements OnInit {
     this.reportData = null;
   }
 
-  viewReport() {
+ viewReport() {
     this.isLoading = true;
     this.showTable = false;
 
     this.inventoryDetailsService
-      .getStoreBalance(
-        this.selectedStoreId!,
-        this.dateTo,
-        this.getReportFlagType(),
-        this.selectedCategoryId || 0,
-        this.selectedTypeId || 0,
-        this.hasBalance,
-        this.overdrawnBalance,
-        this.zeroBalances,
-        this.inventoryDetailsService.ApiServ.GetHeader()
-      )
-      .subscribe({
-        next: (response) => {
-          this.reportData = response;
-          this.prepareExportData();
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.reportData = null;
-          this.showTable = true;
-          this.isLoading = false;
-        },
-      });
+    .getStoreBalance(
+      this.selectedStoreId!,
+      this.dateTo,
+      this.getReportFlagType(),
+      this.selectedCategoryId || 0,
+      this.selectedTypeId || 0,
+      this.hasBalance,
+      this.overdrawnBalance,
+      this.zeroBalances,
+      this.inventoryDetailsService.ApiServ.GetHeader(),
+      this.currentPage,
+      this.pageSize
+    )
+    .subscribe({
+      next: (response) => {
+        this.reportData = response;
+        
+        if (response) {
+          this.currentPage = response.pageNumber || this.currentPage;
+          this.pageSize = response.pageSize || this.pageSize;
+          this.totalPages = response.totalPages || 1;
+          this.totalRecords = response.totalCount || 0;
+        }
+        
+        this.prepareExportData();
+        this.showTable = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+        this.totalPages = 1;
+        this.totalRecords = 0;
+      },
+    });
   }
-
-  // Helper method to format numbers - remove decimals for whole numbers, keep for decimals
-  formatNumber(value: any): string | number {
+ formatNumber(value: any): string | number {
     if (value === null || value === undefined) return '';
     
     const numValue = Number(value);
     if (isNaN(numValue)) return value;
     
-    // Check if the number is a whole number (no decimal part or .00)
     if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
-      return Math.round(numValue); // Return as integer
+      return Math.round(numValue);
     } else {
-      // Return with 2 decimal places for actual decimals
       return Math.round(numValue * 100) / 100;
     }
   }
 
-  // Format number for display in HTML template (with proper decimal places)
   formatNumberForDisplay(value: any): string {
     if (value === null || value === undefined) return '';
     
@@ -244,17 +277,14 @@ export class StoreBalanceReportComponent implements OnInit {
     
     // Check if the number is a whole number
     if (Number.isInteger(numValue) || Math.abs(numValue - Math.round(numValue)) < 0.0001) {
-      return Math.round(numValue).toString(); // Return as integer string
+      return Math.round(numValue).toString();
     } else {
-      // Return with minimum 1 and maximum 2 decimal places
       return numValue.toFixed(2).replace(/\.?0+$/, '');
     }
   }
 
-  // Format number for display in HTML template (with proper decimal places) - LTR support
   formatNumberForDisplayWithLTR(value: number): string {
     if (value == null) return '';
-    // Add LTR mark before negative numbers
     return value < 0 ? '\u200E' + this.formatNumberForDisplay(value) : this.formatNumberForDisplay(value);
   }
 
@@ -350,8 +380,10 @@ export class StoreBalanceReportComponent implements OnInit {
     return this.reportType !== 'QuantityOnly';
   }
 
-  DownloadAsPDF() { 
+  async DownloadAsPDF() { 
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -362,8 +394,10 @@ export class StoreBalanceReportComponent implements OnInit {
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -405,6 +439,8 @@ export class StoreBalanceReportComponent implements OnInit {
 
   async exportExcel() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -414,9 +450,6 @@ export class StoreBalanceReportComponent implements OnInit {
         en: this.school.reportHeaderOneEn,
         ar: this.school.reportHeaderOneAr
       },
-      // subHeaders: [
-      //   { en: 'Store Balance Summary', ar: 'ملخص أرصدة المستودع' },
-      // ],
       infoRows: [
         { key: 'Report Type', value: this.pageTitle },
         { key: 'To Date', value: this.dateTo },
@@ -446,6 +479,63 @@ export class StoreBalanceReportComponent implements OnInit {
         return ['Item Code', 'Item Name', 'Quantity', 'Limit'];
       default: // QuantityOnly
         return ['Item Code', 'Item Name', 'Quantity'];
+    }
+  }
+
+  // ==================== Pagination Functions ====================
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  changeCurrentPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) {
+      return;
+    }
+    
+    this.currentPage = page;
+    this.viewReport();
+  }
+
+  onPageSizeChange(newSize: any): void {
+    const numValue = parseInt(newSize);
+    
+    if (isNaN(numValue) || numValue < 1) {
+      this.pageSize = 10; // default value
+    } else {
+      this.pageSize = numValue;
+    }
+    
+    this.currentPage = 1; // Return to first page
+    this.viewReport();
+  }
+
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    const numValue = parseInt(value);
+    
+    if (isNaN(numValue) || numValue < 1) {
+      event.target.value = this.pageSize; 
+      return;
     }
   }
 }

@@ -142,21 +142,33 @@ export class AttendanceReportByTokenComponent {
     }, 500);
   }
 
-  async getPDFData() {
-    // Build rows for each subject
-    this.tableDataForPDF = this.monthlyAttendenc.map(d => {
-      const row: Record<string, string> = {};
-      row['Day'] = d.day;
-      row['Day Status'] = d.dayStatusName;
-      row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
-      row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
-      row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
-      row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
-      return row;
-    });
+async getPDFData() {
+  // Build rows for each subject
+  this.tableDataForPDF = this.monthlyAttendenc.map(d => {
+    const row: Record<string, string> = {};
+    row['Day'] = d.day.toString();
+    row['Day Status'] = d.dayStatusName;
+    row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
+    row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
+    row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
+    row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
+    return row;
+  });
 
-    console.log('Prepared PDF data:', this.tableDataForPDF);
-  }
+  // Add total row (empty for first three columns, totals for last three)
+  const totalRow: Record<string, string> = {
+    'Day': 'Total',
+    'Day Status': '',
+    'Total Working Hours': '',
+    'Leave Request in Hours': this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
+    'Overtime in Hours': this.getTotal('overtimeHours', 'overtimeMinutes'),
+    'Deduction in Hours': this.getTotal('deductionHours', 'deductionMinutes')
+  };
+  
+  this.tableDataForPDF.push(totalRow);
+
+  console.log('Prepared PDF data:', this.tableDataForPDF);
+}
 
   async Print() {
     await this.GetEmployeeName();
@@ -207,38 +219,46 @@ export class AttendanceReportByTokenComponent {
   }
 
 
-  async DownloadAsExcel() {
-    await this.GetEmployeeName();
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: "Attendance Report",
-        ar: "تقرير الحضور"
-      },
-      // subHeaders: [
-      //   { en: "Detailed payable information", ar: "معلومات تفصيلية عن الدفع" },
-      // ],
-      infoRows: [
-        { key: 'Month', value: this.month + "/" + this.year || '' },
-        { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
-      ],
-      reportImage: '', // Add image URL if available
-      filename: "Attendance_Report_Report.xlsx",
-      tables: [
-        {
-          // title: "Payable Details",
-          headers: ['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours'],
-          data: this.monthlyAttendenc.map((row) => [
+async DownloadAsExcel() {
+  await this.GetEmployeeName();
+  await this.reportsService.generateExcelReport({
+    mainHeader: {
+      en: "Attendance Report",
+      ar: "تقرير الحضور"
+    },
+    infoRows: [
+      { key: 'Month', value: this.month + "/" + this.year || '' },
+      { key: 'Employee', value: this.SelectedEmpName || 'All Employees' }
+    ],
+    reportImage: '', // Add image URL if available
+    filename: "Attendance_Report_Report.xlsx",
+    tables: [
+      {
+        headers: ['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours'],
+        data: [
+          // Data rows
+          ...this.monthlyAttendenc.map((row) => [
             row.day || 0,
             row.dayStatusName || '',
             row.workingHours + ':' + row.workingMinutes || '',
             row.leaveRequestHours + ':' + row.leaveRequestMinutes || '',
             row.overtimeHours + ':' + row.overtimeMinutes || '',
             row.deductionHours + ':' + row.deductionMinutes || '',
-          ])
-        }
-      ]
-    });
-  }
+          ]),
+          // Total row
+          [
+            'Total',
+            '',
+            '',
+            this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
+            this.getTotal('overtimeHours', 'overtimeMinutes'),
+            this.getTotal('deductionHours', 'deductionMinutes')
+          ]
+        ]
+      }
+    ]
+  });
+}
 
   getTotal(fieldHours: keyof MonthlyAttendance, fieldMinutes: keyof MonthlyAttendance): string {
     let totalMinutes = this.monthlyAttendenc.reduce((acc, row) => {

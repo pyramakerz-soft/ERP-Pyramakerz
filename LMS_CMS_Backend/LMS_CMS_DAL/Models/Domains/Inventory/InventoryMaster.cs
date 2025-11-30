@@ -23,7 +23,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public DateOnly Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
-        public bool IsConvertedToPurchase { get; set; }
+        public bool? IsConvertedToPurchase { get; set; }
         public decimal? CashAmount { get; set; }
         public decimal? VisaAmount { get; set; }
         public decimal Remaining { get; set; }

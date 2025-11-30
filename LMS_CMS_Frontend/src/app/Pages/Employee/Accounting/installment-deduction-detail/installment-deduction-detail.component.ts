@@ -19,7 +19,7 @@ import { InstallmentDeductionDetailService } from '../../../../Services/Employee
 import { InstallmentDeductionMasterService } from '../../../../Services/Employee/Accounting/installment-deduction-master.service';
 import { TuitionFeesType } from '../../../../Models/Accounting/tuition-fees-type';
 import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting/tuition-fees-type.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -324,10 +324,12 @@ export class InstallmentDeductionDetailComponent {
     }
   }
 
-  Save() {
+  async Save() {
+    const Swal = await import('sweetalert2').then(m => m.default);
     if (this.mode == "Create") {
         if (this.isFormValid()) {
-          this.isLoading = true
+
+        this.isLoading = true
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
           this.isLoading = false
@@ -421,7 +423,9 @@ export class InstallmentDeductionDetailComponent {
   //   this.editingRowId = id
   // }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
      Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Detail')+ this.translate.instant('?'),
       icon: 'warning',
@@ -446,7 +450,9 @@ export class InstallmentDeductionDetailComponent {
     });
   }
 
-  DeleteNew(id: number) {
+  async DeleteNew(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
      Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('Installment Deduction Details')+ this.translate.instant('?'),
       icon: 'warning',

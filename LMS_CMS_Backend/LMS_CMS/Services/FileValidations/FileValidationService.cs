@@ -64,52 +64,52 @@ namespace LMS_CMS_PL.Services
         private async Task<string?> ValidateFileInternalAsync(IFormFile file, CancellationToken cancellationToken)
         {
             // 1. Basic checks (from base class)
-            //var basicCheck = await ValidateBasicChecksAsync(file, _allowedExtensions, _allowedMimeTypes);
-            //if (basicCheck != null) return basicCheck;
+            var basicCheck = await ValidateBasicChecksAsync(file, _allowedExtensions, _allowedMimeTypes);
+            if (basicCheck != null) return basicCheck;
 
-            //var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant();
-            //var contentType = file.ContentType?.ToLowerInvariant();
+            var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+            var contentType = file.ContentType?.ToLowerInvariant();
 
-            //// 2. File signature validation (magic number check)
-            //try
-            //{
-            //    using var stream = file.OpenReadStream();
+            // 2. File signature validation (magic number check)
+            try
+            {
+                using var stream = file.OpenReadStream();
 
-            //    // Read enough bytes for the longest signature (usually 8 bytes)
-            //    var header = new byte[8];
-            //    var bytesRead = await stream.ReadAsync(header, 0, 8, cancellationToken);
+                // Read enough bytes for the longest signature (usually 8 bytes)
+                var header = new byte[8];
+                var bytesRead = await stream.ReadAsync(header, 0, 8, cancellationToken);
 
-            //    if (bytesRead < 4)
-            //        return "File is too small for signature validation.";
+                if (bytesRead < 4)
+                    return "File is too small for signature validation.";
 
-            //    // Check for executable content first
-            //    if (IsExecutableContent(header))
-            //        return "File contains executable content";
+                // Check for executable content first
+                if (IsExecutableContent(header))
+                    return "File contains executable content";
 
-            //    // Validate file signature
-            //    if (_fileSignatures.TryGetValue(extension, out var signatures) && signatures.Any())
-            //    {
-            //        if (!(signatures.Count == 1 && signatures[0].Length == 0)) // Not a text file
-            //        {
-            //            bool signatureValid = signatures.Any(signature =>
-            //                header.Take(signature.Length).SequenceEqual(signature));
+                // Validate file signature
+                if (_fileSignatures.TryGetValue(extension, out var signatures) && signatures.Any())
+                {
+                    if (!(signatures.Count == 1 && signatures[0].Length == 0)) // Not a text file
+                    {
+                        bool signatureValid = signatures.Any(signature =>
+                            header.Take(signature.Length).SequenceEqual(signature));
 
-            //            if (!signatureValid)
-            //                return $"File content doesn't match its extension. Expected {extension} file.";
-            //        }
-            //    }
+                        if (!signatureValid)
+                            return $"File content doesn't match its extension. Expected {extension} file.";
+                    }
+                }
 
-            //    // Reset stream for content scanning
-            //    stream.Position = 0;
+                // Reset stream for content scanning
+                stream.Position = 0;
 
-            //    // Scan for dangerous patterns
-            //    //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-            //    //    return "File contains potentially dangerous content";
-            //}
-            //catch (Exception ex)
-            //{
-            //    return $"Unable to verify file content: {ex.Message}";
-            //}
+                // Scan for dangerous patterns
+                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+                //    return "File contains potentially dangerous content";
+            }
+            catch (Exception ex)
+            {
+                return $"Unable to verify file content: {ex.Message}";
+            }
 
             return null; // Validation passed
         }
