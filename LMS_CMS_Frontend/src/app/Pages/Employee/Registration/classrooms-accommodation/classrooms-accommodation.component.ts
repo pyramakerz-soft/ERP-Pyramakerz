@@ -20,7 +20,7 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RegistrationFormStateService } from '../../../../Services/Employee/Registration/registration-form-state.service';
 import { RegistrationFormState } from '../../../../Models/Registration/registration-form-state';
@@ -144,7 +144,9 @@ export class ClassroomsAccommodationComponent {
     });
   }
 
-  Save() {
+  async Save() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(this.ClassroomId != 0){
       this.isLoading = true
       this.classroomServ

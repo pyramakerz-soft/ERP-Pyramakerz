@@ -2,7 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, formatCurrency } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -151,7 +151,9 @@ export class ViolationTypesComponent {
     this.dropdownOpen = false;
   }
 
-  Delete(id: number): void {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
@@ -184,8 +186,10 @@ export class ViolationTypesComponent {
     this.validationErrors = {}
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.violationTypeServ.Add(this.violationType, this.DomainName).subscribe((d) => {

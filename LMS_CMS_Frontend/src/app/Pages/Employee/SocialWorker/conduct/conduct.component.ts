@@ -16,7 +16,7 @@ import { ConductLevelService } from '../../../../Services/Employee/SocialWorker/
 import { ConductTypeService } from '../../../../Services/Employee/SocialWorker/conduct-type.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -151,10 +151,12 @@ export class ConductComponent {
     );
   }  
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
       const translatedTitle = this.translate.instant('Error');
       const translatedButton = this.translate.instant('Okay');
-  
+      
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: translatedTitle,
@@ -175,7 +177,9 @@ export class ConductComponent {
     this.router.navigateByUrl('Employee/Conducts/Create');
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Conduct') + this.translate.instant('?'),
       icon: 'warning',

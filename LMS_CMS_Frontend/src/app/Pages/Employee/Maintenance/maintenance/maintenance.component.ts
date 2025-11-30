@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 
 // Services
 import { MaintenanceService } from '../../../../Services/Employee/Maintenance/maintenance.services';
@@ -374,7 +374,9 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     return isValid;
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+  
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
     
@@ -387,10 +389,12 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
     
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'success',
       title: translatedTitle,
@@ -520,7 +524,7 @@ private getErrorMessageFromResponse(error: any): string {
     this.clearValidationError(field);
   }
 
-  deleteMaintenance(row: any): void {
+  async deleteMaintenance(row: any) {
     if (!this.IsAllowDelete(row.insertedByUserId || 0)) {
       const errorMessage = this.translate.instant('You do not have permission to delete this record');
       this.showErrorAlert(errorMessage);
@@ -531,6 +535,8 @@ private getErrorMessageFromResponse(error: any): string {
     const deleteText = this.translate.instant('You will not be able to recover this maintenance record');
     const confirmButton = this.translate.instant('Delete');
     const cancelButton = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: deleteTitle,

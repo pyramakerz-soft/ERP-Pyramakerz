@@ -24,7 +24,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AttendanceService } from '../../../../Services/Employee/SocialWorker/attendance.service';
 import { AttendanceStudent } from '../../../../Models/SocialWorker/attendance-student';
 import { StudentService } from '../../../../Services/student.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
@@ -258,8 +258,10 @@ export class AttendanceStudentComponent {
     this.router.navigateByUrl('Employee/Attendance');
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.AttendanceServ.Add(this.attendance, this.DomainName).subscribe((d) => {

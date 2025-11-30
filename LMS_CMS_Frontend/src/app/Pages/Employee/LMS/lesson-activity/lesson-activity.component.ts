@@ -9,7 +9,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { LessonActivityService } from '../../../../Services/Employee/LMS/lesson-activity.service';
 import { LessonService } from '../../../../Services/Employee/LMS/lesson.service';
 import { Lesson } from '../../../../Models/LMS/lesson';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
@@ -284,9 +284,11 @@ export class LessonActivityComponent {
     this.lessonActivity.attachmentFile = null;
   }
 
-  Save() {
+  async Save() {
     this.lessonActivity.lessonID = this.lessonId
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
 
       if (this.editLessonActivity == false) {
@@ -359,7 +361,9 @@ export class LessonActivityComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Activity') + this.translate.instant('?'),
       icon: 'warning',

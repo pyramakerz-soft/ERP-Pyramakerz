@@ -17,7 +17,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -31,7 +31,7 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @InitLoader()
 export class EmployeeClocksComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -66,10 +66,10 @@ export class EmployeeClocksComponent {
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
     public EmployeeClocksServ: EmployeeClocksService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private translate: TranslateService,
-    private loadingService: LoadingService  
-  ) {}
+    private loadingService: LoadingService
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -86,38 +86,42 @@ export class EmployeeClocksComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
 
-  private showErrorAlert(errorMessage: string) { 
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   getAllEmployee() {
     this.employees = [];
@@ -144,20 +148,20 @@ private showSuccessAlert(message: string) {
     } else {
       row[field] = null;
     }
-    if(field == 'checkIn'){
-      row.date=value.slice(0,10)
+    if (field == 'checkIn') {
+      row.date = value.slice(0, 10)
     }
   }
 
   GetAllData() {
     this.TableData = [];
     if (this.SelectedEmployeeId && this.year && this.month) {
-      this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
+      this.EmployeeClocksServ.Get(this.SelectedEmployeeId, this.year, this.month, this.DomainName).subscribe(
         (data) => {
-          this.TableData = data; 
+          this.TableData = data;
         },
         (error) => {
-          if(error.status!=404){
+          if (error.status != 404) {
             const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
             this.showErrorAlert(errorMessage);
           }
@@ -186,7 +190,7 @@ private showSuccessAlert(message: string) {
           this.GetAllData();
           this.showSuccessAlert(this.translate.instant('Saved Successfully'));
         },
-        (error) => { 
+        (error) => {
           this.isLoadingWhenEdit = false;
           const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
           this.showErrorAlert(errorMessage);
@@ -208,7 +212,7 @@ private showSuccessAlert(message: string) {
           this.closeModal();
           this.showSuccessAlert(this.translate.instant('Saved Successfully'));
         },
-        (error) => { 
+        (error) => {
           this.isLoading = false;
           this.closeModal();
           const errorMessage = error.error?.message || this.translate.instant('Try Again Later');
@@ -235,17 +239,17 @@ private showSuccessAlert(message: string) {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
-          if (field == 'date' || field == 'employeeID' || field == 'checkIn' || field == 'checkOut' ) {
-          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
-          isValid = false;
+          if (field == 'date' || field == 'employeeID' || field == 'checkIn' || field == 'checkOut') {
+            this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
+            isValid = false;
           }
         }
-        if(this.employeeClocks.checkIn){
-          this.employeeClocks.date=this.employeeClocks.checkIn.slice(0,10)
+        if (this.employeeClocks.checkIn) {
+          this.employeeClocks.date = this.employeeClocks.checkIn.slice(0, 10)
         }
-        if(this.employeeClocks.checkIn &&this.employeeClocks.checkOut && this.employeeClocks.checkIn > this.employeeClocks.checkOut){
+        if (this.employeeClocks.checkIn && this.employeeClocks.checkOut && this.employeeClocks.checkIn > this.employeeClocks.checkOut) {
           this.validationErrors['checkOut'] = `Check Out time must be after the Check In time`;
-          isValid = false;      
+          isValid = false;
         }
       }
     }

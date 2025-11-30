@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TokenData } from '../../../../Models/token-data';
@@ -82,7 +82,7 @@ export class LeaveRequestComponent {
     public LeaveRequestServ: LeaveRequestService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private loadingService: LoadingService  
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -110,8 +110,8 @@ export class LeaveRequestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  
-  ngOnDestroy(): void { 
+
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -158,7 +158,9 @@ export class LeaveRequestComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Request') + this.translate.instant('?'),
       icon: 'warning',
@@ -181,7 +183,7 @@ export class LeaveRequestComponent {
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.leaveRequest = { ...d };
       this.OldleaveRequest = { ...d };
-      console.log(123,this.leaveRequest)
+      console.log(123, this.leaveRequest)
       // this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
     });
     this.openModal();
@@ -196,10 +198,12 @@ export class LeaveRequestComponent {
         this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
         this.MonthlyLeaveRequestBalanceError = false
         this.CalculateRemains();
-      }, error => {
-        console.log(error.error)
+      }, async error => {
         if (typeof error.error === 'string' && error.error.includes("Monthly leave request for this employee is required")) {
           this.MonthlyLeaveRequestBalanceError = true
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -254,11 +258,11 @@ export class LeaveRequestComponent {
   }
 
   formatHours(value: number | null): string {
-    if(value){
+    if (value) {
       const hours = Math.floor(value);
       const minutes = Math.round((value - hours) * 60);
       return `${hours}:${minutes.toString().padStart(2, '0')}`;
-    }else{
+    } else {
       return ``;
     }
   }
@@ -318,9 +322,12 @@ export class LeaveRequestComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
+  async CreateOREdit() {
+    if (await this.isFormValid()) {
       this.isLoading = true;
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.mode == 'Create') {
         this.LeaveRequestServ.Add(this.leaveRequest, this.DomainName).subscribe(
           (d) => {
@@ -396,26 +403,26 @@ export class LeaveRequestComponent {
     })
   }
 
-isFormValid(): boolean {
-  let isValid = true;
-  
-  // Basic field validation
-  for (const key in this.leaveRequest) {
-    if (this.leaveRequest.hasOwnProperty(key)) {
-      const field = key as keyof LeaveRequest;
-      if (!this.leaveRequest[field]) {
-        if (
-          field == 'date' ||
-          field == 'employeeID'
-        ) {
-          this.validationErrors[field] = this.getRequiredErrorMessage(
-            this.capitalizeField(field)
-          );
-          isValid = false;
+  async isFormValid() {
+    let isValid = true;
+
+    // Basic field validation
+    for (const key in this.leaveRequest) {
+      if (this.leaveRequest.hasOwnProperty(key)) {
+        const field = key as keyof LeaveRequest;
+        if (!this.leaveRequest[field]) {
+          if (
+            field == 'date' ||
+            field == 'employeeID'
+          ) {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
+            isValid = false;
+          }
         }
       }
     }
-  }
     if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
@@ -426,6 +433,8 @@ isFormValid(): boolean {
       isValid = false;
     }
     if (this.MonthlyLeaveRequestBalanceError) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -527,14 +536,14 @@ isFormValid(): boolean {
       this.PageSize = 0
     }
   }
-private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 }

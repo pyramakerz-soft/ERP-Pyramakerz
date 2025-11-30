@@ -23,7 +23,7 @@ import { Classroom } from '../../../../Models/LMS/classroom';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { Observable, of } from 'rxjs'; 
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -216,14 +216,15 @@ export class TimeTableViewComponent {
     this.OriginTimeTable = [];
     this.SelectedDay = 0
     this.SelectedGrade = 0
-    this.timetableServ.GetDutyByDate(this.TimeTableId, this.date, this.DomainName).subscribe((d) => {
-      console.log(d)
+    this.timetableServ.GetDutyByDate(this.TimeTableId, this.date, this.DomainName).subscribe((d) => { 
       this.TimeTable = d.data;
       this.OriginTimeTable = d.data;
       this.TimeTableName = d.timeTableName;
       this.MaxPeriods = d.maxPeriods;
       this.ExtractDaysAndGrades();
-    },error=>{
+    },async error=>{
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

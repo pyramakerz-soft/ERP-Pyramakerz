@@ -4,7 +4,7 @@ import { QuestionBankService } from '../../../../Services/Employee/LMS/question-
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -228,11 +228,13 @@ export class QuestionBankComponent {
     this.quillInstance = quill;
   }
 
-  customImageHandler() {
+  async customImageHandler() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
     input.click();
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     input.onchange = async () => {
       const file = input?.files?.[0];
@@ -285,7 +287,9 @@ export class QuestionBankComponent {
     };
   }
 
-  customVideoHandler() {
+  async customVideoHandler() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Enter video URL',
       input: 'url',
@@ -341,7 +345,9 @@ export class QuestionBankComponent {
     });
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Question Bank') + this.translate.instant('?'),
       icon: 'warning',
@@ -531,9 +537,11 @@ export class QuestionBankComponent {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.QuestionBankServ.Add(

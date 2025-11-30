@@ -10,7 +10,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
 import { SubjectCategoryService } from '../../../../Services/Employee/LMS/subject-category.service';
 import { School } from '../../../../Models/school';
@@ -214,7 +214,9 @@ export class SubjectComponent {
     })
   }
 
-  deleteSubject(id: number) {
+  async deleteSubject(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Subject') + this.translate.instant('?'),
       icon: 'warning',

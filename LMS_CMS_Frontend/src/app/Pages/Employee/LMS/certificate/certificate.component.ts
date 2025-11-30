@@ -34,7 +34,7 @@ import { CertificateSubjectTotalMark } from '../../../../Models/LMS/certificate-
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ChangeDetectorRef } from '@angular/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -307,7 +307,7 @@ isInfoRowsLoading: boolean = false;
     this.clearAndReloadInfoRows(); // Add this line
   }
 
-  SelectAcadimicYear() {
+  async SelectAcadimicYear() {
     this.IsShowTabls = false
     this.TableData = []
     this.DateFrom = ''
@@ -324,6 +324,8 @@ isInfoRowsLoading: boolean = false;
     }
 
     if(this.DateFrom == null || this.DateTo == null){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -388,7 +390,9 @@ isInfoRowsLoading: boolean = false;
       this.academicYears = d
       this.getAllClassByGradeIdAndAcYearId()
 
-    }, error => {
+    }, async error => {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -721,7 +725,8 @@ async DownloadAsExcel() {
     });
     
   } catch (error) {
-    console.error('Error generating Excel report:', error);
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'error',
       title: 'Error',

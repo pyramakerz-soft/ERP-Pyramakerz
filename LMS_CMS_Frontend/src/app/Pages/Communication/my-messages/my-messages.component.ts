@@ -13,7 +13,7 @@ import { Grade } from '../../../Models/LMS/grade';
 import { School } from '../../../Models/school';
 import { Student } from '../../../Models/student';
 import { Subject } from '../../../Models/LMS/subject';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { DepartmentService } from '../../../Services/Employee/Administration/department.service';
 import { SchoolService } from '../../../Services/Employee/school.service';
 import { FormsModule } from '@angular/forms';
@@ -466,7 +466,9 @@ export class MyMessagesComponent {
           this.ForwardTheMessage()
         }
       },
-      error => {
+      async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: "This student doesn't have a parent to send the message to",
           icon: 'warning', 
@@ -564,7 +566,7 @@ export class MyMessagesComponent {
     }
   }
 
-  onFileSelected(event: any) { 
+  async onFileSelected(event: any) { 
     const input = event.target as HTMLInputElement;
     const files: FileList | null = input.files;
 
@@ -609,6 +611,8 @@ export class MyMessagesComponent {
         message += `<p>The following files are not allowed types:</p><strong>${invalidTypeFiles.join('<br>')}</strong>`;
       }
 
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'File Upload Issues',
         html: message,
@@ -627,8 +631,10 @@ export class MyMessagesComponent {
     }
   }
 
-  Send(){
+  async Send(){
     if(this.messageToBeSend.message == '' && (this.messageToBeSend.chatMessageAttachmentFiles == null || this.messageToBeSend.chatMessageAttachmentFiles.length == 0)){
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
       Swal.fire({
         title: 'You have to send at least one item (File - Message)',
         icon: 'warning', 
@@ -689,8 +695,10 @@ export class MyMessagesComponent {
           queryParamsHandling: 'merge' 
         }); 
       },
-      error => {
+      async error => {
         this.isLoading = false;
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'error', 
@@ -701,11 +709,13 @@ export class MyMessagesComponent {
     ); 
   }
 
-  SendOneMessage(){ 
+  async SendOneMessage(){ 
     this.messageToBeSend.receiverID = this.otherUserID
     this.messageToBeSend.receiverUserTypeID = this.otherUserTypeID
     
     if(this.messageToBeSend.message == '' && (this.messageToBeSend.chatMessageAttachmentFiles == null || this.messageToBeSend.chatMessageAttachmentFiles.length == 0)){
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
       Swal.fire({
         title: 'You have to send at least one item (File - Message)',
         icon: 'warning', 
@@ -726,8 +736,11 @@ export class MyMessagesComponent {
           // call the subscribe again for the other pages
           // this.chatMessageService.notifyMessageOpened();
         },
-        error => {
+        async error => {
           this.isLoading = false;
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             title: error.error,
             icon: 'error', 
@@ -797,8 +810,10 @@ export class MyMessagesComponent {
         // call the subscribe again for the other pages
         this.chatMessageService.notifyMessageOpened();
       },
-      error => {
+      async error => {
         this.isLoading = false;
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'error', 

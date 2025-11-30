@@ -12,7 +12,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { School } from '../../../../Models/school';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -298,7 +298,7 @@ export class AcademicYearComponent {
     this.academicYear.isActive = isChecked;
   }
 
-  checkFromToDate() {
+  async checkFromToDate() {
     let valid = true;
 
     const fromDate: Date = new Date(this.academicYear.dateFrom);
@@ -307,6 +307,9 @@ export class AcademicYearComponent {
 
     if (diff < 0) {
       valid = false;
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'From Date Must Be a Date Before To Date',
         icon: 'warning',
@@ -319,7 +322,7 @@ export class AcademicYearComponent {
     return valid;
   }
 
-  checkSummerCourseFromToDate() {
+  async checkSummerCourseFromToDate() {
     let valid = true;
 
     const fromDate: Date = new Date(this.academicYear.summerCourseDateFrom? this.academicYear.summerCourseDateFrom : "");
@@ -328,6 +331,9 @@ export class AcademicYearComponent {
 
     if (diff < 0) {
       valid = false;
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'From Date Must Be a Date Before To Date',
         icon: 'warning',
@@ -340,11 +346,11 @@ export class AcademicYearComponent {
     return valid;
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      if (this.checkFromToDate()) {
-        if(this.checkSummerCourseFromToDate()){
+      if (await this.checkFromToDate()) {
+        if(await this.checkSummerCourseFromToDate()){
           if(this.academicYear.summerCourseDateFrom == ""){
             this.academicYear.summerCourseDateFrom = null; 
           }
@@ -360,8 +366,10 @@ export class AcademicYearComponent {
                   this.isLoading = false;
                   this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
                 },
-                (error) => {
+                async (error) => {
                   this.isLoading = false;
+                  const Swal = await import('sweetalert2').then(m => m.default);
+
                   Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
@@ -380,8 +388,11 @@ export class AcademicYearComponent {
                   this.isLoading = false;
                   this.getAcademicYearData(this.DomainName, this.CurrentPage, this.PageSize);
                 },
-                (error) => {
+                async (error) => {
                   this.isLoading = false;
+
+                  const Swal = await import('sweetalert2').then(m => m.default);
+
                   Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
@@ -397,7 +408,9 @@ export class AcademicYearComponent {
     }
   }
 
-  deleteAcademicYear(id: number) {
+  async deleteAcademicYear(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Academic Year') + this.translate.instant('?'),
       icon: 'warning',

@@ -11,7 +11,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -73,7 +73,9 @@ export class RegisteredEmployeeComponent {
     });
   } 
 
-  Delete(id: number){
+  async Delete(id: number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Reject and Delete This Employee?',
       icon: 'warning',

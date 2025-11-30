@@ -10,7 +10,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { LoadingService } from '../../../../Services/loading.service';
@@ -291,8 +291,11 @@ closeModal() {
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -309,8 +312,11 @@ closeModal() {
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -324,7 +330,9 @@ closeModal() {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this Permission Group?',
       icon: 'warning',

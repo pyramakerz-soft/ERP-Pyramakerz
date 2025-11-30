@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
 import { TokenData } from '../../../../Models/token-data';
@@ -149,7 +149,9 @@ export class SubjectCoTeacherComponent {
           this.isLoading = false;
           this.closeModal();
         },
-        error: (err) => {
+        error: async (err) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Error',

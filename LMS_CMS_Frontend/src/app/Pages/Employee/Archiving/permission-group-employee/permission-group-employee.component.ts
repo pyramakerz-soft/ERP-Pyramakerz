@@ -13,7 +13,7 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service'; 
 import { LoadingService } from '../../../../Services/loading.service';
@@ -130,7 +130,7 @@ export class PermissionGroupEmployeeComponent {
     this.permissionGroupEmployee = new PermissionGroupEmployee();  
   }
 
-  Save() {   
+  async Save() {   
     if(this.permissionGroupEmployee.employeeID){
       this.isLoading = true;    
       this.permissionGroupEmployee.permissionGroupID = this.permissionGroupID
@@ -140,8 +140,11 @@ export class PermissionGroupEmployeeComponent {
           this.GetAllData()
           this.isLoading = false;
         },
-        (error) => {
+        async (error) => {
           this.isLoading = false;
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -152,6 +155,8 @@ export class PermissionGroupEmployeeComponent {
         }
       ); 
     } else{
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -162,7 +167,9 @@ export class PermissionGroupEmployeeComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    
     Swal.fire({
       title: 'Are you sure you want to delete this Employee?',
       icon: 'warning',

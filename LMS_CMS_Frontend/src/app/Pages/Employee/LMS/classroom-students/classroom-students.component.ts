@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { Student } from '../../../../Models/student';
@@ -180,7 +180,7 @@ export class ClassroomStudentsComponent {
     }); 
      
     this.classroomStudentService.Add(classroomStudentNew, this.DomainName).subscribe(
-      data => { 
+      async data => { 
         let studentsAlreadyInClass: any[] = []; 
         if (typeof data === 'string') {
           try {
@@ -197,6 +197,8 @@ export class ClassroomStudentsComponent {
           const namesList = studentsAlreadyInClass.map(s => s.user_Name || s.name || 'Unnamed Student');
           const formattedNames = namesList.join('<br/>');
 
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'warning',
             title: 'Some students are already in a class',
@@ -207,8 +209,9 @@ export class ClassroomStudentsComponent {
 
         this.getStudentsByClassID()
       },
-      error => {
-        console.error('Error:', error);
+      async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'An error occurred',
@@ -267,7 +270,9 @@ export class ClassroomStudentsComponent {
     });
   }
 
-  deleteStudent(id:number){
+  async deleteStudent(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
         title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
         icon: 'warning',

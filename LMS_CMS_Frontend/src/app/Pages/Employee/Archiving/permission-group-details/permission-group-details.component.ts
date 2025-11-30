@@ -10,7 +10,7 @@ import { PermissionGroupDetailsService } from '../../../../Services/Employee/Arc
 import { PermissionGroupDetails } from '../../../../Models/Archiving/permission-group-details';
 import { ArchivingService } from '../../../../Services/Employee/Archiving/archiving.service';
 import { PermissionGroupArchivingItemComponent } from '../../../../Component/Employee/Archiving/permission-group-archiving-item/permission-group-archiving-item.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 
@@ -137,13 +137,15 @@ export class PermissionGroupDetailsComponent {
     } 
   }
  
-  Save() { 
+  async Save() { 
     if(this.SelectedPermissionGroupDetails.length > 0){
       let PermissionGroupDetail = new PermissionGroupDetails()
       PermissionGroupDetail.permissionGroupID = this.permissionGroupID
       PermissionGroupDetail.archivingTreeDetails = this.SelectedPermissionGroupDetails
 
       this.isLoading = true
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.permissionGroupDetailsService.Add(PermissionGroupDetail, this.DomainName).subscribe(
         data => {
           Swal.fire({

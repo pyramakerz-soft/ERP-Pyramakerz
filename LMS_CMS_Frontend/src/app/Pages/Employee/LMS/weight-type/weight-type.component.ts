@@ -12,7 +12,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -181,7 +181,9 @@ isFormValid(): boolean {
     return IsAllow;
   }
 
-  Delete(id: number){
+  async Delete(id: number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
@@ -201,8 +203,10 @@ isFormValid(): boolean {
     });
   }
 
-  Save(){
+  async Save(){
     if(this.isFormValid()){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true; 
       if(this.editWeight == false){
         this.weightTypeService.Add(this.weightType, this.DomainName).subscribe(

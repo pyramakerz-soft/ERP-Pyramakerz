@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ConductLevel } from '../../../../Models/SocialWorker/conduct-level';
 import { ConductLevelService } from '../../../../Services/Employee/SocialWorker/conduct-level.service';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -114,7 +114,9 @@ export class ConductLevelComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Conduct Level') + this.translate.instant('?'),
       icon: 'warning',
@@ -158,8 +160,10 @@ export class ConductLevelComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.ConductLevelServ.Add(this.conductLevel, this.DomainName).subscribe(

@@ -9,7 +9,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegistrationCategoryService } from '../../../../Services/Employee/Registration/registration-category.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -115,7 +115,9 @@ export class RegistrationFormFieldComponent {
     this.openModal(); 
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
@@ -153,9 +155,11 @@ export class RegistrationFormFieldComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     this.Category.registrationFormId = 1;
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == "Create") {
         this.CategoryServ.Add(this.Category, this.DomainName).subscribe(() => {

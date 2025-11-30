@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FollowUpService } from '../../../../Services/Employee/Clinic/follow-up.service';
 import { DiagnosisService } from '../../../../Services/Employee/Clinic/diagnosis.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -139,10 +139,12 @@ export class FollowUpComponent implements OnInit {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
 
+    const Swal = await import('sweetalert2').then(m => m.default);
+    
     Swal.fire({
       icon: 'error',
       title: translatedTitle,
@@ -152,10 +154,12 @@ export class FollowUpComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
 
+    const Swal = await import('sweetalert2').then(m => m.default);
+    
     Swal.fire({
       icon: 'success',
       title: translatedTitle,
@@ -583,7 +587,7 @@ console.log(error);
       this.isSaving = false;
     }
   }
-  addDrugAndDose() {
+  async addDrugAndDose() {
     if (this.isAddingDrugDose) return;
     if (this.selectedDrugId && this.selectedDoseId) {
       this.isAddingDrugDose = true;
@@ -620,6 +624,8 @@ console.log(error);
         this.isAddingDrugDose = false;
       }, 500); // simulate async, can be removed if not needed
     } else {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', 'Please select both a drug and a dose.', 'error');
     }
   }
@@ -629,7 +635,7 @@ console.log(error);
     this.followUp.followUpDrugs.splice(index, 1);
   }
 
-  deleteFollowUp(row: any) {
+  async deleteFollowUp(row: any) {
     const translatedTitle = this.translate.instant('Are you sure?');
     const translatedText = this.translate.instant(
       'You will not be able to recover this item!'
@@ -637,6 +643,8 @@ console.log(error);
     const translatedConfirm = this.translate.instant('Yes, delete it!');
     const translatedCancel = this.translate.instant('No, keep it');
     const successMessage = this.translate.instant('Deleted successfully');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,

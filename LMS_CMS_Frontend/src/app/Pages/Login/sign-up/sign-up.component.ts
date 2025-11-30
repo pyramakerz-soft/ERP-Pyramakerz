@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ParentAdd } from '../../../Models/parent-add';
 import { ParentService } from '../../../Services/parent.service';
 import { ApiService } from '../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
 import { TranslateModule } from '@ngx-translate/core';
@@ -165,12 +165,15 @@ export class SignUpComponent {
             this.router.navigateByUrl("/Parent")
           }
         );
-      }, (error) => {
+      }, async (error) => {
         this.parentInfo.recaptchaToken = '';
         this.isLoading = false;
         // if (this.captchaRef) {
         //   this.captchaRef.reset(); 
         // }
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

@@ -9,11 +9,11 @@ import { InventoryMasterService } from '../../../../Services/Employee/Inventory/
 import { ApiService } from '../../../../Services/api.service';
 import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
@@ -85,9 +85,9 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     public ApiServ: ApiService,
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
-    private etaService: EtaService, 
-    private loadingService: LoadingService 
-  ) {}
+    private etaService: EtaService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.invoiceId = +this.route.snapshot.params['id'];
@@ -97,13 +97,13 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.currentSystem = this.route.snapshot.data['system'] || 'zatca';
 
     this.loadInvoice();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -174,26 +174,26 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
   // Update the sendInvoice method in electronic-invoice-detail.component.ts
   async sendInvoice() {
     this.isSubmitting = true;
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     try {
       const serviceCall =
         this.currentSystem === 'zatca'
           ? this.zatcaService.reportInvoice(this.invoiceId, this.DomainName)
           : this.etaService.submitInvoice(
-              this.invoiceId,
-              0,
-              0,
-              this.DomainName
-            );
+            this.invoiceId,
+            0,
+            0,
+            this.DomainName
+          );
 
       await firstValueFrom(serviceCall);
 
       Swal.fire(
         'Success',
-        `Invoice ${
-          this.currentSystem === 'zatca'
-            ? 'reported to ZATCA'
-            : 'submitted to ETA'
+        `Invoice ${this.currentSystem === 'zatca'
+          ? 'reported to ZATCA'
+          : 'submitted to ETA'
         } successfully`,
         'success'
       );
@@ -201,8 +201,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     } catch (error) {
       Swal.fire(
         'Error',
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        `Failed to ${this.currentSystem === 'zatca' ? 'report' : 'submit'
         } invoice`,
         'error'
       );
@@ -214,9 +213,11 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
 
   printInvoice() {
     this.showPDF = true;
-    setTimeout(() => {
+    setTimeout(async () => {
       const printContents = document.getElementById('invoiceData')?.innerHTML;
       if (!printContents) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire('Error', 'Failed to prepare print content', 'error');
         this.showPDF = false;
         return;

@@ -7,7 +7,7 @@ import { TokenData } from '../../../../Models/token-data';
 import { CartService } from '../../../../Services/Student/cart.service';
 import { Cart } from '../../../../Models/Student/ECommerce/cart';
 import { OrderService } from '../../../../Services/Student/order.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Order } from '../../../../Models/Student/ECommerce/order';  
 import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
@@ -136,7 +136,9 @@ export class OrderItemsComponent {
     )
   }
 
-  CancelOrder(){
+  async CancelOrder(){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to cancel this Order?',
       icon: 'warning',

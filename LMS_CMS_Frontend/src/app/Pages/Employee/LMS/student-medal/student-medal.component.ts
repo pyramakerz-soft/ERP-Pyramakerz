@@ -19,7 +19,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import { StudentMedal } from '../../../../Models/LMS/student-medal';
 import { StudentMedalService } from '../../../../Services/Employee/LMS/student-medal.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { MedalService } from '../../../../Services/Employee/LMS/medal.service';
 import { Medal } from '../../../../Models/LMS/medal';
@@ -209,8 +209,11 @@ export class StudentMedalComponent {
               this.isLoading = false;
               this.closeModal();
             },
-            (error) => {
+            async (error) => {
               this.isLoading = false; // Hide spinner
+
+              const Swal = await import('sweetalert2').then(m => m.default);
+
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',

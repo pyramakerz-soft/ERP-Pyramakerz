@@ -7,7 +7,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RegisterationFormTestService } from '../../../../Services/Employee/Registration/registeration-form-test.service';
 import { RegisterationFormTest } from '../../../../Models/Registration/registeration-form-test';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TestWithRegistrationForm } from '../../../../Models/Registration/test-with-registration-form';
@@ -125,7 +125,9 @@ export class RegistrationConfirmationTestDetailsComponent {
     })
   }
  
-  Save() { 
+  async Save() { 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(!this.RegesterForm.mark){
       this.MarkIsEmpty=true
     }else if(Number(this.RegesterForm.mark) > Number(this.RegesterForm.totalMark)){

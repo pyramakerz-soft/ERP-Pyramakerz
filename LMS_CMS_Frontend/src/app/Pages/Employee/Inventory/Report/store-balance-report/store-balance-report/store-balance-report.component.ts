@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router'; 
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import {
   StoreBalanceItem,
@@ -380,8 +380,10 @@ totalRecords: number = 0;
     return this.reportType !== 'QuantityOnly';
   }
 
-  DownloadAsPDF() { 
+  async DownloadAsPDF() { 
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -392,8 +394,10 @@ totalRecords: number = 0;
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -435,6 +439,8 @@ totalRecords: number = 0;
 
   async exportExcel() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }

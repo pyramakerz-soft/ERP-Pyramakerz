@@ -22,7 +22,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { Student } from '../../../../Models/student';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -155,12 +155,15 @@ export class AccountingStudentEditComponent {
     this.EmailValidation = ''
   }
 
-  Save() {
+  async Save() {
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.Data.email && !emailPattern.test(this.Data.email)) {
       this.EmailValidation = 'Email is not valid';
       return;
     }
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.isLoading = true
     this.StudentServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
       this.GetAllData();

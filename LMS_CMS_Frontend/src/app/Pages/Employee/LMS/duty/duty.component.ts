@@ -14,7 +14,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service'; 
 import { DutyService } from '../../../../Services/Employee/LMS/duty.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -175,8 +175,10 @@ export class DutyComponent {
     }
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == "Create") {
         this.DutyServ.Add(this.duty, this.DomainName).subscribe((d) => {
@@ -269,7 +271,9 @@ export class DutyComponent {
     if (this.duty.date != '' && this.duty.classID != 0) {
       this.DutyServ.GetNumberOfPeriods(this.duty.date, this.duty.classID, this.DomainName).subscribe((d) => {
         this.periods = Array.from({ length: d }, (_, i) => i + 1);
-      },error=>{
+      },async error=>{
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -282,7 +286,9 @@ export class DutyComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('duty') + this.translate.instant('?'),
       icon: 'warning',

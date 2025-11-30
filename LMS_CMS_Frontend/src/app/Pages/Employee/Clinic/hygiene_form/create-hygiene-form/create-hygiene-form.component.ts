@@ -5,7 +5,7 @@ import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-ta
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { HygieneTypesService } from '../../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
@@ -19,7 +19,7 @@ import { StudentService } from '../../../../../Services/student.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
@@ -28,7 +28,7 @@ import { LoadingService } from '../../../../../Services/loading.service';
 @Component({
   selector: 'app-create-hygiene-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HygieneFormTableComponent, 
+  imports: [CommonModule, FormsModule, HygieneFormTableComponent,
     TranslateModule],
   templateUrl: './create-hygiene-form.component.html',
   styleUrls: ['./create-hygiene-form.component.css'],
@@ -36,7 +36,7 @@ import { LoadingService } from '../../../../../Services/loading.service';
 
 @InitLoader()
 export class CreateHygieneFormComponent implements OnInit {
-    schools: School[] = [];
+  schools: School[] = [];
   grades: Grade[] = [];
   classes: Classroom[] = [];
   students: Student[] = [];
@@ -59,11 +59,11 @@ export class CreateHygieneFormComponent implements OnInit {
     private gradeService: GradeService,
     private classroomService: ClassroomService,
     private studentService: StudentService,
-    private languageService: LanguageService,  
+    private languageService: LanguageService,
     private translate: TranslateService,
     private hygieneFormService: HygieneFormService,
     private loadingService: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadHygieneTypes();
@@ -74,7 +74,7 @@ export class CreateHygieneFormComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
- 
+
   private retranslateValidationErrors(): void {
     if (!this.validationErrors || Object.keys(this.validationErrors).length === 0) {
       return;
@@ -93,52 +93,56 @@ export class CreateHygieneFormComponent implements OnInit {
     }
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
-   
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
   moveToHygieneForm() {
-  this.router.navigateByUrl('Employee/Hygiene Form Medical Report');
+    this.router.navigateByUrl('Employee/Hygiene Form Medical Report');
   }
 
   async loadHygieneTypes() {
@@ -252,116 +256,116 @@ private showSuccessAlert(message: string) {
   }
 
   checkFormValidity(): boolean {
-    return !!this.selectedSchool && 
-           !!this.selectedGrade && 
-           !!this.selectedClass && 
-           !!this.selectedDate;
+    return !!this.selectedSchool &&
+      !!this.selectedGrade &&
+      !!this.selectedClass &&
+      !!this.selectedDate;
   }
 
-validateForm(): boolean {
-  this.validationErrors = {};
-  let isValid = true;
+  validateForm(): boolean {
+    this.validationErrors = {};
+    let isValid = true;
 
-  if (!this.selectedSchool) {
-    this.validationErrors['school'] = this.getRequiredErrorMessage('School');
-    isValid = false;
+    if (!this.selectedSchool) {
+      this.validationErrors['school'] = this.getRequiredErrorMessage('School');
+      isValid = false;
+    }
+    if (!this.selectedGrade) {
+      this.validationErrors['grade'] = this.getRequiredErrorMessage('Grade');
+      isValid = false;
+    }
+    if (!this.selectedClass) {
+      this.validationErrors['class'] = this.getRequiredErrorMessage('Class');
+      isValid = false;
+    }
+    if (!this.selectedDate) {
+      this.validationErrors['date'] = this.getRequiredErrorMessage('Date');
+      isValid = false;
+    }
+
+    // Prevent saving when there are no students loaded for the selected class
+    if (!this.students || this.students.length === 0) {
+      // show a clear message and mark validation so UI can react
+      const msg = this.translate.instant('No students found for the selected class.');
+      this.errorMessage = msg;
+      this.validationErrors['students'] = msg;
+      isValid = false;
+    }
+
+    if (isValid) {
+      this.errorMessage = null;
+    }
+
+    return isValid;
   }
-  if (!this.selectedGrade) {
-    this.validationErrors['grade'] = this.getRequiredErrorMessage('Grade');
-    isValid = false;
-  }
-  if (!this.selectedClass) {
-    this.validationErrors['class'] = this.getRequiredErrorMessage('Class');
-    isValid = false;
-  }
-  if (!this.selectedDate) {
-    this.validationErrors['date'] = this.getRequiredErrorMessage('Date');
-    isValid = false;
-  }
 
-  // Prevent saving when there are no students loaded for the selected class
-  if (!this.students || this.students.length === 0) {
-    // show a clear message and mark validation so UI can react
-    const msg = this.translate.instant('No students found for the selected class.');
-    this.errorMessage = msg;
-    this.validationErrors['students'] = msg;
-    isValid = false;
-  }
+  saveHygieneForm() {
+    if (this.validateForm()) {
+      let hasHygieneTypeErrors = false;
+      const hygieneTypeErrors: string[] = [];
 
-  if (isValid) {
-    this.errorMessage = null;
-  }
+      this.students.forEach((student, index) => {
+        if (student['attendance'] === true) {
+          const missingHygieneTypes = this.hygieneTypes
+            .filter(ht => student[`hygieneType_${ht.id}`] === null || student[`hygieneType_${ht.id}`] === undefined)
+            .map(ht => ht.type);
 
-  return isValid;
-}
+          if (missingHygieneTypes.length > 0) {
+            hasHygieneTypeErrors = true;
 
-saveHygieneForm() {
-  if (this.validateForm()) {
-    let hasHygieneTypeErrors = false;
-    const hygieneTypeErrors: string[] = [];
+            const studentText = this.translate.instant('The Student');
+            const needsSelectionsText = this.translate.instant('needs selections for');
 
-this.students.forEach((student, index) => {
-  if (student['attendance'] === true) {
-    const missingHygieneTypes = this.hygieneTypes
-      .filter(ht => student[`hygieneType_${ht.id}`] === null || student[`hygieneType_${ht.id}`] === undefined)
-      .map(ht => ht.type);
+            hygieneTypeErrors.push(
+              `${studentText} ${this.isRtl ? student.ar_name : student.en_name} ${needsSelectionsText}: ${missingHygieneTypes.join(', ')}`
+            );
+          }
+        }
+      });
 
-    if (missingHygieneTypes.length > 0) {
-      hasHygieneTypeErrors = true;
-      
-      const studentText = this.translate.instant('The Student');
-      const needsSelectionsText = this.translate.instant('needs selections for');
-      
-      hygieneTypeErrors.push(
-        `${studentText} ${this.isRtl? student.ar_name :student.en_name} ${needsSelectionsText}: ${missingHygieneTypes.join(', ')}`
-      );
+      if (hasHygieneTypeErrors) {
+        this.errorMessage = hygieneTypeErrors.join('; ');
+        return;
+      }
+
+      const domainName = this.apiService.GetHeader();
+
+      const studentHygieneTypes = this.students.map((student) => {
+        const hygieneTypesIds = this.hygieneTypes
+          .filter((ht) => student[`hygieneType_${ht.id}`] === true)
+          .map((ht) => ht.id);
+        const attendance = student['attendance'] === true ? true : false;
+
+        return {
+          studentId: student.id,
+          hygieneTypesIds: hygieneTypesIds,
+          attendance: attendance,
+          comment: student['comment'],
+          actionTaken: student['actionTaken'],
+        };
+      });
+
+      const requestBody = {
+        schoolId: this.selectedSchool,
+        gradeId: this.selectedGrade,
+        classRoomID: this.selectedClass,
+        date: new Date(this.selectedDate).toISOString(),
+        studentHygieneTypes: studentHygieneTypes,
+      };
+
+      this.hygieneFormService.Add(requestBody, domainName).subscribe({
+        next: (response) => {
+          this.showSuccessAlert(this.translate.instant('Created successfully'));
+          this.router.navigate(['/Employee/Hygiene Form Medical Report']);
+        },
+        error: (error) => {
+          console.error('Error saving hygiene form:', error);
+          const errorMessage = error.error?.message || this.translate.instant('Failed to save the item');
+          this.showErrorAlert(errorMessage);
+        },
+      });
     }
   }
-});
-
-if (hasHygieneTypeErrors) {
-  this.errorMessage = hygieneTypeErrors.join('; ');
-  return;
-}
-
-    const domainName = this.apiService.GetHeader();
-
-    const studentHygieneTypes = this.students.map((student) => {
-      const hygieneTypesIds = this.hygieneTypes
-        .filter((ht) => student[`hygieneType_${ht.id}`] === true)
-        .map((ht) => ht.id);
-      const attendance = student['attendance'] === true ? true : false;
-
-      return {
-        studentId: student.id,
-        hygieneTypesIds: hygieneTypesIds,
-        attendance: attendance, 
-        comment: student['comment'],
-        actionTaken: student['actionTaken'],
-      };
-    });
-
-    const requestBody = {
-      schoolId: this.selectedSchool,
-      gradeId: this.selectedGrade,
-      classRoomID: this.selectedClass,
-      date: new Date(this.selectedDate).toISOString(),
-      studentHygieneTypes: studentHygieneTypes,
-    };
-
-    this.hygieneFormService.Add(requestBody, domainName).subscribe({
-      next: (response) => {
-        this.showSuccessAlert(this.translate.instant('Created successfully'));
-        this.router.navigate(['/Employee/Hygiene Form Medical Report']);
-      },
-      error: (error) => {
-        console.error('Error saving hygiene form:', error);
-        const errorMessage = error.error?.message || this.translate.instant('Failed to save the item');
-        this.showErrorAlert(errorMessage);
-      },
-    });
-  }
-}
 
   onView(row: any) {
     this.router.navigate(['/Hygiene Form Medical Report/', row.id]);

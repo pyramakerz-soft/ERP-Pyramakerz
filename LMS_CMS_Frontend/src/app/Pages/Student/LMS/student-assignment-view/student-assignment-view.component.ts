@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
 import { TokenData } from '../../../../Models/token-data';

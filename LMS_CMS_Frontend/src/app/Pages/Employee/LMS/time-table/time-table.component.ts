@@ -14,7 +14,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
@@ -238,9 +238,11 @@ export class TimeTableComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  Generate() {
+  async Generate() {
     this.timetable.schoolID = this.SelectedSchoolId;
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       this.TimeTableServ.Add(this.timetable, this.DomainName).subscribe((d) => {
         Swal.fire({
@@ -275,7 +277,9 @@ export class TimeTableComponent {
     })
   }
 
-  delete(id: number) {
+  async delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Time Table') + this.translate.instant('?'),
       icon: 'warning',

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Account } from '../../../Models/Octa/account';
 import { OctaService } from '../../../Services/Octa/octa.service';
 import { firstValueFrom } from 'rxjs';
@@ -175,7 +175,9 @@ export class AccountComponent {
     }
   } 
 
-  deleteAccount(id:number){
+  async deleteAccount(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this account?',
       icon: 'warning',

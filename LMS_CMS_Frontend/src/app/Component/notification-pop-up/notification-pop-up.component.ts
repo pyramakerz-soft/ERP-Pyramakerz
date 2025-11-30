@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { ApiService } from '../../Services/api.service';
 import { NotificationService } from '../../Services/Employee/Communication/notification.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-notification-pop-up',
@@ -45,7 +45,7 @@ export class NotificationPopUpComponent {
     this.changeDetector.detectChanges();
   } 
   
-  DismissAll(){
+  async DismissAll(){
     this.notificationService.DismissAll(this.DomainName).subscribe(
       data =>{}
     )
@@ -55,6 +55,8 @@ export class NotificationPopUpComponent {
     if(this.notifications.length == 0){
       this.dialogRef.close();
     }else{
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Could not dismiss all notifications',
         text: 'Some require you to view the link first',

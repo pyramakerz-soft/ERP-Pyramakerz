@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { InterviewTimeTable } from '../../../Models/Registration/interview-time-table';
 import { InterviewTimeTableService } from '../../../Services/Employee/Registration/interview-time-table.service';
 import { RegistrationFormInterviewService } from '../../../Services/Employee/Registration/registration-form-interview.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { DayWithInterviews } from '../../../Models/Registration/day-with-interviews';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
@@ -153,7 +153,9 @@ export class InterviewRegistrationComponent {
     document.getElementById("Calender_Modal")?.classList.add("hidden");
   }
 
-  deleteInterview(id: number) {
+  async deleteInterview(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
           title: 'Are you sure you want to Cancel this Interview Registration?',
           icon: 'warning',
@@ -189,7 +191,9 @@ export class InterviewRegistrationComponent {
           this.closeModal()
           this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
         },
-        (error) => {
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           this.isLoading = false
           Swal.fire({
             title: 'Error',
@@ -206,7 +210,9 @@ export class InterviewRegistrationComponent {
           this.closeModal()
           this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
         },
-        (error) => {
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           this.isLoading = false
           Swal.fire({
             title: 'Error',

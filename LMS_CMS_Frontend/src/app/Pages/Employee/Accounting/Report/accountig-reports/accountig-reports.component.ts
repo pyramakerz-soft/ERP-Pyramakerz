@@ -9,7 +9,7 @@ import { DeleteEditPermissionService } from '../../../../../Services/shared/dele
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { catchError, map, Observable, of } from 'rxjs';
 import { BankService } from '../../../../../Services/Employee/Accounting/bank.service';
 import { SaveService } from '../../../../../Services/Employee/Accounting/save.service'; 
@@ -108,6 +108,8 @@ export class AccountigReportsComponent {
 
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -557,6 +559,8 @@ async DownloadAsExcel() {
     const exportData = await this.GetDataForPrint().toPromise();
     
     if (!exportData || exportData.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -619,6 +623,8 @@ async DownloadAsExcel() {
       tables: tables
     });
 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     // Show success message
     Swal.fire({
       title: 'Export Successful',
@@ -630,7 +636,8 @@ async DownloadAsExcel() {
     });
 
   } catch (error) {
-    console.error('Error exporting to Excel:', error);
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Export Failed',
       text: 'There was an error exporting the report to Excel. Please try again.',

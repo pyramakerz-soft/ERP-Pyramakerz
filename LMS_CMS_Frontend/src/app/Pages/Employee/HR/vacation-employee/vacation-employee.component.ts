@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { LeaveRequest } from '../../../../Models/HR/leave-request';
 import { TokenData } from '../../../../Models/token-data';
@@ -161,7 +161,9 @@ export class VacationEmployeeComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Vacation') + this.translate.instant('?'),
       icon: 'warning',
@@ -197,7 +199,6 @@ export class VacationEmployeeComponent {
     this.OldVacationEmployee.used = 0
     if (this.vacationEmployee.employeeID && this.vacationEmployee.vacationTypesID && this.vacationEmployee.dateFrom) {
       this.VacationEmployeeServ.GetBalanceAndUsedVacationEmployee(this.vacationEmployee.employeeID, this.vacationEmployee.vacationTypesID, this.vacationEmployee.dateFrom, this.DomainName).subscribe((emp) => {
-        console.log(emp)
         this.HireDateError = false
         this.vacationEmployee.balance = emp.balance
         this.vacationEmployee.used = emp.used
@@ -205,10 +206,12 @@ export class VacationEmployeeComponent {
         this.OldVacationEmployee.balance = emp.balance
         this.OldVacationEmployee.used = emp.used
         this.CalculateRemains()
-      }, error => {
-        console.log(error.error);
+      }, async error => { 
         if (typeof error.error === 'string' && error.error.includes("This employee does not have a hire date set")) {
           this.HireDateError = true
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -318,8 +321,10 @@ export class VacationEmployeeComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
+  async CreateOREdit() {
+    if (await this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       console.log(this.vacationEmployee)
       if (this.mode == 'Create') {
@@ -335,8 +340,7 @@ export class VacationEmployeeComponent {
               confirmButtonColor: '#089B41',
             });
           },
-          (error) => {
-            console.log(error)
+          (error) => { 
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -361,8 +365,7 @@ export class VacationEmployeeComponent {
             this.isLoading = false;
             this.closeModal();
           },
-          (error) => {
-            console.log(error)
+          (error) => { 
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -408,7 +411,7 @@ export class VacationEmployeeComponent {
     })
   }
 
-isFormValid(): boolean {
+async isFormValid() {
   let isValid = true;
   
   // Basic field validation
@@ -435,6 +438,8 @@ isFormValid(): boolean {
     }
 
     if (this.HireDateError == true) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

@@ -4,7 +4,7 @@ import { TokenData } from '../../../../Models/token-data';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AccountingConfiguration } from '../../../../Models/Accounting/accounting-configuration';
 import { AccountingConfigurationService } from '../../../../Services/Employee/Accounting/accounting-configuration.service';
 import { FormsModule } from '@angular/forms';
@@ -99,8 +99,10 @@ export class AccountigConfigurationComponent {
         this.GetById()
         this.isLoading = false;
       },
-      (error) => {
+      async (error) => {
         this.isLoading = false;
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

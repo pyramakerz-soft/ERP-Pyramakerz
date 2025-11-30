@@ -16,7 +16,7 @@ import { LinkFileService } from '../../../../Services/Employee/Accounting/link-f
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
@@ -390,7 +390,9 @@ export class AccountingEntriesDetailsComponent {
   }
 
 
-  Save() {
+  async Save() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.isCreate) {
       if (this.isFormValid()) {
         this.isSaveLoading = true;
@@ -442,7 +444,9 @@ export class AccountingEntriesDetailsComponent {
     this.accountingEntries.newDetails.push(newDetail)
   }
 
-  DeleteDetail(id: number) {
+  async DeleteDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
       icon: 'warning',
@@ -463,7 +467,9 @@ export class AccountingEntriesDetailsComponent {
     });
   }
 
-  DeleteNewDetail(id: number) {
+  async DeleteNewDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
       icon: 'warning',

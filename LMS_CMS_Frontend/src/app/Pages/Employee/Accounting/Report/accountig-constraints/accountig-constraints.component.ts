@@ -7,7 +7,7 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ReportsService } from '../../../../../Services/Employee/Accounting/reports.service';
 import { ReportsService as SharedReportsService } from '../../../../../Services/shared/reports.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { catchError, map, Observable, of } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
@@ -79,6 +79,8 @@ export class AccountigConstraintsComponent implements OnDestroy {
   
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',

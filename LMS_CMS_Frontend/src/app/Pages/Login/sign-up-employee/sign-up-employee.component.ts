@@ -6,7 +6,7 @@ import { RegisteredEmployee } from '../../../Models/Administrator/registered-emp
 import { RegisteredEmployeeService } from '../../../Services/Employee/Administration/registered-employee.service';
 import { ApiService } from '../../../Services/api.service';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -130,8 +130,10 @@ export class SignUpEmployeeComponent {
     this.IsConfimPassEmpty = false
   }
 
-  SignUp() {
+  async SignUp() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.registeredEmployeeService.Add(this.employee, this.DomainName).subscribe(
         data => {
