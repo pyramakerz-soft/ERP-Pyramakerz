@@ -1316,13 +1316,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //////////////////////////////////////////////////////////////////////////////////////////-77
 
-        [HttpGet("AssignmentReport")]
+        [HttpPost("AssignmentReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Assignment Report" }
-        )]
-        public async Task<IActionResult> AssignmentReport(AssignmentReportFilterDTO filter)
-
+            pages: new[] { "Assignment Report" }
+                )]
+        public async Task<IActionResult> AssignmentReport([FromBody] AssignmentReportFilterDTO filter)
         {
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
@@ -1359,8 +1358,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Assignment> assignmentsQuery = uow.assignment_Repository.Select_All_With_Includes(
                     a => a.Subject,
+                    a => a.Subject.Grade,
+                    a => a.Subject.Grade.Section,
                     a => a.AssignmentStudents,
-                    a => a.AssignmentStudentIsSpecifics);
+                    a => a.AssignmentStudentIsSpecifics
+                );
 
             List<Assignment> assignments = assignmentsQuery
                 .Where(a => a.Subject.Grade.Section.SchoolID == filter.SchoolId &&
