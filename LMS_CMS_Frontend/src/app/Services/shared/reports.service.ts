@@ -1,10 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'; 
+// import FileSaver from 'file-saver';
 // import saveAs from 'file-saver';
-import FileSaver from 'file-saver';
-import saveAs from 'file-saver';
-import html2pdf from 'html2pdf.js'; 
-import html2canvas from 'html2canvas';
-import * as ExcelJS from 'exceljs'
+import html2pdf from 'html2pdf.js';  
+// import * as ExcelJS from 'exceljs'
 
 @Injectable({
   providedIn: 'root'
@@ -107,6 +105,8 @@ async generateExcelReport(options: {
   }[];
   filename?: string;
 }) {
+  const ExcelJS = await import('exceljs');
+
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Report");
 
@@ -177,7 +177,7 @@ async generateExcelReport(options: {
 
   worksheet.addRow([]);
 
-  // Info rows (dynamic)
+  // Info rows (dynamic)--77
   options.infoRows?.forEach(({ key, value }) => {
     const row = worksheet.addRow([`${key}: ${value}`]);
     row.font = { bold: true, size: 12 };
@@ -252,6 +252,7 @@ async generateExcelReport(options: {
     }
   ];
 
+  const FileSaver = await import('file-saver');
   const buffer = await workbook.xlsx.writeBuffer();
   FileSaver.saveAs(new Blob([buffer]), options.filename || 'Report.xlsx');
 }

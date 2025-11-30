@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
@@ -447,6 +447,8 @@ export class AssignmentReportComponent implements OnInit {
 
       // Chart image
       if (this.chartContainer && this.chartContainer.nativeElement) {
+        const html2canvas = (await import('html2canvas')).default;
+
         const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
           scale: 2,
           backgroundColor: '#fff',
@@ -554,6 +556,8 @@ export class AssignmentReportComponent implements OnInit {
 
       // Wait for rendering
       await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const html2canvas = (await import('html2canvas')).default;
 
       // Convert to image
       const reportImage = await html2canvas(reportElement, {
@@ -612,6 +616,8 @@ export class AssignmentReportComponent implements OnInit {
       // Convert chart to image
       let chartImage = '';
       if (this.chartContainer) {
+        const html2canvas = (await import('html2canvas')).default;
+
         const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
           scale: 2,
           backgroundColor: '#ffffff',

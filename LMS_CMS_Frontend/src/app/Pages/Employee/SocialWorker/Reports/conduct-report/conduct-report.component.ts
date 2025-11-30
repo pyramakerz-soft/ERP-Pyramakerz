@@ -24,6 +24,8 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-conduct-report',
@@ -38,6 +40,8 @@ export class ConductReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   reportType: string = 'employee';
+
+   currentLang: string = 'en';
   
   // Filter properties
   dateFrom: string = '';
@@ -109,8 +113,10 @@ constructor(
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
+       this.currentLang = direction === 'rtl' ? 'ar' : 'en'; // أضف هذا السطر7777
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+     this.currentLang = this.isRtl ? 'ar' : 'en'; // أضف هذا السطر7777
   }
 
   ngOnDestroy(): void { 
@@ -322,25 +328,23 @@ constructor(
     }
   }
 
-  private prepareExportData(): void {
-    // For Excel (array format)
-    this.reportsForExport = this.conductReports.map((report) => [
-      new Date(report.date).toLocaleDateString(),
-      report.studentEnName,
-      report.conductType?.name || '-',
-      report.procedureType?.name || '-',
-      report.details || '-'
-    ]);
+private prepareExportData(): void {
+  this.reportsForExport = this.conductReports.map((report) => [
+    new Date(report.date).toLocaleDateString(),
+    report.studentEnName,
+    report.conductType?.en_name || '-',
+    report.procedureType?.name || '-',
+    report.details || '-'
+  ]);
 
-    // For PDF (object format with proper keys)
-    this.reportsForPDF = this.conductReports.map((report) => ({
-      'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentEnName,
-      'Conduct Type': report.conductType?.name || '-',
-      'Procedure Type': report.procedureType?.name || '-',
-      'Details': report.details || '-'
-    }));
-  }
+  this.reportsForPDF = this.conductReports.map((report) => ({
+    'Date': new Date(report.date).toLocaleDateString(),
+    'Student Name': this.currentLang === 'en' ? report.studentEnName : (report.studentArName || report.studentEnName), 
+    'Conduct Type': report.conductType?.en_name || '-',
+    'Procedure Type': report.procedureType?.name || '-',
+    'Details': report.details || '-'
+  }));
+}
 
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
@@ -371,28 +375,133 @@ constructor(
     return this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || 'All Types';
   }
 
-  getInfoRows(): any[] {
-    if(this.reportType === 'employee'){
-       return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'School: ' + this.getSchoolName() },
-        { keyEn: 'Grade: ' + this.getGradeName() },
-        { keyEn: 'Class: ' + this.getClassName() },
-        { keyEn: 'Student: ' + this.getStudentName() },
-        { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-        { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
-      ];
-   }
-    else{
-      return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'Student: ' + this.getStudentName() },
-      ];
-    }
-  }
+// 
+  // getInfoRows(): any[] {
+  //   if(this.reportType === 'employee'){
+  //      return [
+  //       { keyEn: 'From Date: ' + this.dateFrom },
+  //       { keyEn: 'To Date: ' + this.dateTo },
+  //       { keyEn: 'School: ' + this.getSchoolName() },
+  //       { keyEn: 'Grade: ' + this.getGradeName() },
+  //       { keyEn: 'Class: ' + this.getClassName() },
+  //       { keyEn: 'Student: ' + this.getStudentName() },
+  //       { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
+  //       { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
+  //     ];
+  //  }
+  //   else{
+  //     return [
+  //       { keyEn: 'From Date: ' + this.dateFrom },
+  //       { keyEn: 'To Date: ' + this.dateTo },
+  //       { keyEn: 'Student: ' + this.getStudentName() },
+  //     ];
+  //   }
+  // }
 
+ // Revised getInfoRows method
+getInfoRows(): any[] {
+  if(this.reportType === 'employee'){
+    return [
+      { 
+        keyEn: 'From Date: ' + this.dateFrom, 
+        keyAr: 'من تاريخ: ' + this.dateFrom 
+      },
+      { 
+        keyEn: 'To Date: ' + this.dateTo, 
+        keyAr: 'إلى تاريخ: ' + this.dateTo 
+      },
+      { 
+        keyEn: 'School: ' + this.getSchoolName(), 
+        keyAr: 'المدرسة: ' + this.getSchoolName() 
+      },
+      { 
+        keyEn: 'Grade: ' + this.getGradeName(), 
+        keyAr: 'الصف: ' + this.getGradeName() 
+      },
+      { 
+        keyEn: 'Class: ' + this.getClassName(), 
+        keyAr: 'الفصل: ' + this.getClassName() 
+      },
+      { 
+        keyEn: 'Student: ' + this.getStudentName(), 
+        keyAr: 'الطالب: ' + this.getStudentName() 
+      },
+      { 
+        keyEn: 'Conduct Type: ' + this.getConductTypeName(), 
+        keyAr: 'نوع السلوك: ' + this.getConductTypeName() 
+      },
+      { 
+        keyEn: 'Procedure Type: ' + this.getProcedureTypeName(), 
+        keyAr: 'نوع الإجراء: ' + this.getProcedureTypeName() 
+      },
+      { 
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(), 
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString() 
+      }
+    ];
+  }
+  else{
+    return [
+      { 
+        keyEn: 'From Date: ' + this.dateFrom, 
+        keyAr: 'من تاريخ: ' + this.dateFrom 
+      },
+      { 
+        keyEn: 'To Date: ' + this.dateTo, 
+        keyAr: 'إلى تاريخ: ' + this.dateTo 
+      },
+      { 
+        keyEn: 'Student: ' + this.getStudentName(), 
+        keyAr: 'الطالب: ' + this.getStudentName() 
+      },
+      { 
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(), 
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString() 
+      }
+    ];
+  }
+}
+
+// Gaber -- 77
+GetDataForPrint(): Observable<any[]> {
+  return of(this.conductReports).pipe(
+    map((reports) => {
+      if (reports.length === 0) {
+        return [];
+      }
+
+      return [{
+        header: {
+          en: this.reportType === 'employee' ? 'Conduct Report' : 'Parent Conduct Report',
+          ar: this.reportType === 'employee' ? 'تقرير السلوك' : 'تقرير سلوك ولي الأمر'
+        },
+        summary: this.getInfoRowsExcel(),
+        table: {
+          headers: {
+            en: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
+            ar: ['التاريخ', 'اسم الطالب', 'نوع السلوك', 'نوع الإجراء', 'التفاصيل']
+          },
+          data: reports.map((item: any) => ({
+            'Date': new Date(item.date).toLocaleDateString(),
+            'التاريخ': new Date(item.date).toLocaleDateString(),
+            'Student Name': item.studentEnName,
+            'اسم الطالب': item.studentEnName || item.studentArName || '-',
+            'Conduct Type': item.conductType?.en_name || item.conductType?.en_name || '-',
+            'نوع السلوك': item.conductType?.ar_name || item.conductType?.ar_name || '-',
+            'Procedure Type': item.procedureType?.en_name || item.procedureType?.name || '-',
+            'نوع الإجراء': item.procedureType?.ar_name || item.procedureType?.name || '-',
+            'Details': item.details || '-',
+            'التفاصيل': item.details || '-'
+          }))
+        }
+      }];
+    })
+  );
+}
+
+// --77 
+
+// New method for Excel info rows
   getInfoRowsExcel(): any[] {
     if(this.reportType === 'employee'){
       return [
@@ -416,6 +525,89 @@ constructor(
       ];
     }
   }
+
+// Revised getInfoRowsExcel method--77
+async exportExcel() {
+  if (this.conductReports.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
+  }
+
+  try {
+    const excelOptions = {
+      mainHeader: {
+        en: 'Conduct Report',
+        ar: 'تقرير السلوك'
+      },
+      subHeaders: [
+        {
+          en: 'Student Behavior Records',
+          ar: 'سجلات سلوك الطلاب'
+        }
+      ],
+      infoRows: this.getInfoRowsExcel(),
+      tables: [
+        {
+          headers: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details', 'التاريخ', 'اسم الطالب', 'نوع السلوك', 'نوع الإجراء', 'التفاصيل'],
+          data: this.conductReports.map((report) => [
+            new Date(report.date).toLocaleDateString(),
+            report.studentEnName,
+            report.conductType?.en_name || report.conductType?.en_name || '-',
+            report.procedureType?.name || report.procedureType?.name || '-',
+            report.details || '-',
+            new Date(report.date).toLocaleDateString(),
+            report.studentEnName || report.studentEnName,
+            report.conductType?.ar_name || report.conductType?.ar_name || '-',
+            report.procedureType?.name || report.procedureType?.name || '-',
+            report.details || '-'
+          ])
+        }
+      ],
+      filename: `Conduct_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    };
+
+    await this.reportsService.generateExcelReport(excelOptions);
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  }
+}
+
+// ``77
+getSchoolNameAr(): string {
+  return this.schools.find(s => s.id == this.selectedSchoolId)?.ar_name || this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'كل المدارس';
+}
+
+getGradeNameAr(): string {
+  return this.grades.find(g => g.id == this.selectedGradeId)?.ar_name || this.grades.find(g => g.id == this.selectedGradeId)?.name || 'كل الصفوف';
+}
+
+getClassNameAr(): string {
+  return this.classes.find(c => c.id == this.selectedClassId)?.ar_name || this.classes.find(c => c.id == this.selectedClassId)?.name || 'كل الفصول';
+}
+
+getStudentNameAr(): string {
+  if(this.reportType === 'employee'){
+    return this.students.find(s => s.id == this.selectedStudentId)?.ar_name || this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+  }
+  else{
+    return this.students.find(s => s.id == this.selectedStudentId)?.ar_name || this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+  }
+}
+
+getConductTypeNameAr(): string {
+  return this.conductTypes.find(ct => ct.id == this.selectedConductTypeId)?.ar_name || this.conductTypes.find(ct => ct.id == this.selectedConductTypeId)?.ar_name || 'كل الأنواع';
+}
+
+getProcedureTypeNameAr(): string {
+  return this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || 'كل الأنواع';
+}
+
+
+// Revised getInfoRowsExcel method --77
+
+
+
 
   DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
@@ -479,37 +671,43 @@ constructor(
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExport.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
+// async exportExcel() {
+//   if (this.reportsForExport.length === 0) {
+//     Swal.fire('Warning', 'No data to export!', 'warning');
+//     return;
+//   }
 
-  try {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Conduct Report',
-        ar: 'تقرير السلوك'
-      },
-      subHeaders: [
-        {
-          en: 'Student Behavior Records',
-          ar: 'سجلات سلوك الطلاب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          // title: 'Conduct Report Data',
-          headers: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
-          data: this.reportsForExport
-        }
-      ],
-      filename: `Conduct_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  }
-}
+//   try {
+//     await this.reportsService.generateExcelReport({
+//       mainHeader: {
+//         en: 'Conduct Report',
+//         ar: 'تقرير السلوك'
+//       },
+//       subHeaders: [
+//         {
+//           en: 'Student Behavior Records',
+//           ar: 'سجلات سلوك الطلاب'
+//         }
+//       ],
+//       infoRows: this.getInfoRowsExcel(),
+//       tables: [
+//         {
+//           // title: 'Conduct Report Data',
+//           headers: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
+//           data: this.reportsForExport
+//         }
+//       ],
+//       filename: `Conduct_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+//     });
+//   } catch (error) {
+//     console.error('Error exporting to Excel:', error);
+//     Swal.fire('Error', 'Failed to export to Excel', 'error');
+//   }
+// }
+
+
+
+
+
+
 }

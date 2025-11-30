@@ -12,8 +12,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
-import { MenuService } from '../../../../Services/shared/menu.service';
-import { SearchComponent } from '../../../../Component/search/search.component';
+import { MenuService } from '../../../../Services/shared/menu.service'; 
 import { DutyService } from '../../../../Services/Employee/LMS/duty.service';
 import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -26,7 +25,7 @@ import { LoadingService } from '../../../../Services/loading.service';
 @Component({
   selector: 'app-duty',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './duty.component.html',
   styleUrl: './duty.component.css',
 })

@@ -9,6 +9,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
     public class ConductTypeReportDTO
     {
         public long ID { get; set; }
-        public string Name { get; set; } // Will use en_name or ar_name
+        public string en_name { get; set; } 
+        public string ar_name { get; set; }
+
     }
 }

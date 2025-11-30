@@ -9,8 +9,7 @@ import { GradeService } from '../../../../../Services/Employee/LMS/grade.service
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { MedicalReportService } from '../../../../../Services/Employee/Clinic/medical-report.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import * as XLSX from 'xlsx';
+import { ActivatedRoute, Router } from '@angular/router'; 
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';

@@ -12,7 +12,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string SubjectName { get; set; }// Using en_name as default; can adjust to ar_name if needed
 
         public int AssignedStudents { get; set; }
-        public int AttendanceStudents { get; set; }
+        public int submittedStudents { get; set; }
         public int SuccessfulStudents { get; set; }
         public int FailedStudents { get; set; }
         public int PendingStudents { get; set; }

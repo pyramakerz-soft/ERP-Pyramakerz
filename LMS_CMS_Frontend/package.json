@@ -44,7 +44,7 @@
     "quill": "^2.0.3",
     "quill-image-resize-module": "github:kensnyder/quill-image-resize-module",
     "rxjs": "~7.8.0",
-    "sweetalert2": "^11.22.2",
+    "sweetalert2": "^11.26.3",
     "tslib": "^2.3.0",
     "xlsx": "^0.18.5",
     "xlsx-js-style": "^1.2.0",

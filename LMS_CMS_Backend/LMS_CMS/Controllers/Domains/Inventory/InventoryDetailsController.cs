@@ -51,33 +51,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return Ok(DTO);
         }
-
-        /// //////////////////////////////////////////////////////////////////////--77
-        //[HttpGet("inventory-net-combined")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Item Card Report", "Item Card Report With Average" })]
-        //public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
-        //{
-        //    try
-        //    {
-        //        var summaryResult = await GetInventoryNetSummaryInternalAsync(storeId, shopItemId, fromDate);
-        //        var transactionsResult = await GetInventoryNetTransactionsInternalAsync(storeId, shopItemId, fromDate, toDate);
-
-        //        var result = new
-        //        {
-        //            Summary = summaryResult,
-        //            Transactions = transactionsResult
-        //        };
-
-        //        return Ok(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"An error occurred: {ex.Message}");
-        //    }
-        //}
-
+ 
         ////// /////////////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("inventory-net-combined")]
         [Authorize_Endpoint_(
@@ -88,7 +62,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         {
             try
             {
-                var summaryResult = await GetInventoryNetSummaryInternalAsync(storeId, shopItemId, fromDate);
+                var summaryResult = await GetInventoryNetSummaryInternalAsync(storeId, shopItemId, fromDate.AddDays(-1));
                 var transactionsResult = await GetInventoryNetTransactionsInternalAsync(storeId, shopItemId, fromDate, toDate);
 
                 // ========== Pagination Applied to Transactions ==========
@@ -163,7 +137,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-                ToDate = toDate.AddDays(-1),
+                ToDate = toDate,
                 InQuantity = quantityBalance > 0 ? quantityBalance : 0,
                 outQuantity = quantityBalance < 0 ? -quantityBalance : 0,
                 Quantitybalance = quantityBalance,
@@ -171,8 +145,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                
             };
         }
-
-
         private async Task<List<InventoryNetTransactionDTO>> GetInventoryNetTransactionsInternalAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
         {
             var parsedFromDate = fromDate;
@@ -209,12 +181,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             var transactionData = allData
             .Where(d =>
-                d.InventoryMaster.Date > parsedFromDate &&
+                d.InventoryMaster.Date >= parsedFromDate &&
                 d.InventoryMaster.Date <= parsedToDate)
             .OrderBy(d => d.InventoryMaster.Date)
             .ToList();
-
-
 
 
             var runningBalance = previousBalance;
@@ -228,7 +198,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
                 transactions.Add(new InventoryNetTransactionDTO
                 {
-                    Date = d.InventoryMaster.Date.AddDays(-1),
+                    Date = d.InventoryMaster.Date,
                     FlagId = d.InventoryMaster.FlagId,
                     FlagName = d.InventoryMaster.InventoryFlags.enName,
                     InvoiceNumber = d.InventoryMaster.InvoiceNumber,

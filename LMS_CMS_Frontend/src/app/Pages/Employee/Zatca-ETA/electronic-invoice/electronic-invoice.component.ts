@@ -12,7 +12,7 @@ import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { StateService } from '../../../../Services/Employee/Inventory/state.service';
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -365,12 +365,12 @@ export class ElectronicInvoiceComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
+  async exportExcel() {
     if (this.transactions.length === 0) {
       Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
-    }
-
+    } 
+    const XLSX = await import('xlsx');
     const worksheet = XLSX.utils.json_to_sheet(
       this.transactions.map((t) => ({
         'Invoice ID': t.id,
