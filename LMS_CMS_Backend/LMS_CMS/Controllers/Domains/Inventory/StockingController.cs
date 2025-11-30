@@ -219,6 +219,98 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Unit_Of_Work.stocking_Repository.Update(data);
             Unit_Of_Work.SaveChanges();
 
+            // edit Details
+            if(newData.UpdatedStockingDetails != null && newData.UpdatedStockingDetails.Count > 0) {
+              foreach (var newItem in newData.UpdatedStockingDetails)
+              {
+                StockingDetails stockingDetails = Unit_Of_Work.stockingDetails_Repository.First_Or_Default(s => s.ID == newItem.ID && s.IsDeleted != true);
+                if (stockingDetails != null)
+                {
+                    ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(s => s.ID == newItem.ShopItemID && s.IsDeleted != true);
+                    if (shopItem == null)
+                    {
+                        return NotFound();
+                    }
+
+                    Stocking stocking = Unit_Of_Work.stocking_Repository.First_Or_Default(s => s.ID == newItem.StockingId && s.IsDeleted != true);
+                    if (stocking == null)
+                    {
+                        return NotFound();
+                    }
+
+                    if (userTypeClaim == "employee")
+                    {
+                        IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Inventory", roleId, userId, stockingDetails);
+                        if (accessCheck != null)
+                        {
+                            return accessCheck;
+                        }
+                    }
+
+                    mapper.Map(newItem, stockingDetails);
+                    stockingDetails.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        stockingDetails.UpdatedByOctaId = userId;
+                        if (stockingDetails.UpdatedByUserId != null)
+                        {
+                            stockingDetails.UpdatedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        stockingDetails.UpdatedByUserId = userId;
+                        if (stockingDetails.UpdatedByOctaId != null)
+                        {
+                            stockingDetails.UpdatedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.stockingDetails_Repository.Update(stockingDetails);
+                }
+
+              }
+              await Unit_Of_Work.SaveChangesAsync();
+            }
+            // new Details 
+            if (newData.NewDetailsWhenEdit != null && newData.NewDetailsWhenEdit.Count > 0)
+            {
+                foreach (var newItem in newData.NewDetailsWhenEdit)
+                {
+                    if (newItem == null)
+                    {
+                        return BadRequest("Stocking Details cannot be null");
+                    }
+                    newItem.ID = null; 
+                    ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(s => s.ID == newItem.ShopItemID && s.IsDeleted != true);
+                    if (shopItem == null)
+                    {
+                        return NotFound();
+                    }
+
+                    Stocking stocking = Unit_Of_Work.stocking_Repository.First_Or_Default(s => s.ID == newItem.StockingId && s.IsDeleted != true);
+                    if (stocking == null)
+                    {
+                        return NotFound();
+                    }
+
+                    StockingDetails stockingDetails = mapper.Map<StockingDetails>(newItem);
+
+                    stockingDetails.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        stockingDetails.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        stockingDetails.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.stockingDetails_Repository.Add(stockingDetails);
+                }
+                await Unit_Of_Work.SaveChangesAsync();
+            }
+
 
             return Ok(newData);
         }

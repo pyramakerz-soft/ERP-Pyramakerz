@@ -416,7 +416,7 @@ isFormValid(): boolean {
       }
     }
   }
-    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
+    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0 || this.leaveRequest.hours == null && this.leaveRequest.minutes == null ) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
     }

@@ -735,7 +735,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             
             var vacations = await uow.vacationEmployee_Repository.Select_All_With_IncludesById<VacationEmployee>(
-                b => employeeIds.Contains(b.EmployeeID)
+                b => employeeIds.Contains(b.EmployeeID) && b.IsDeleted != true
                      && b.Date >= request.DateFrom
                      && b.Date <= request.DateTo,
                 q => q.Include(b => b.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory),

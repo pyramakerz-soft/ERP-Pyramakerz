@@ -279,6 +279,10 @@ export class ShopItemsAddEditComponent {
             isValid = false;
           }
         }
+        if(this.mode == 'Edit' && (this.ShopItem.barCode == null || this.ShopItem.barCode == "")){
+          this.validationErrors['barCode'] = `barCode is required`
+          isValid = false;
+        }
       }
     }
 
