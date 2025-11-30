@@ -168,7 +168,15 @@ export class SocialWorkerMedalComponent {
           this.socialWorkerMedal,
           this.DomainName
         ).subscribe(
-          (d) => {
+          async (d) => {      
+            const Swal = await import('sweetalert2').then(m => m.default);
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
@@ -192,7 +200,15 @@ export class SocialWorkerMedalComponent {
           this.socialWorkerMedal,
           this.DomainName
         ).subscribe(
-          (d) => {
+          async (d) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updated Successfully',
+              confirmButtonColor: '#089B41',
+            });
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();

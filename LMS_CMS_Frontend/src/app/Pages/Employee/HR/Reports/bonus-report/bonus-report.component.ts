@@ -349,7 +349,6 @@ private prepareExportData(): void {
         this.reportsForExcel.push([
           employeeBonus.employeeId,
           employeeName,
-          bonus.id,
           new Date(bonus.date).toLocaleDateString(),
           bonus.bonusTypeName,
           bonus.hours || '-',
@@ -498,7 +497,6 @@ private prepareExportData(): void {
             headers: [
               'Employee ID',
               'Employee Name',
-              'Bonus ID',
               'Bonus Date',
               'Bonus Type',
               'Hours',

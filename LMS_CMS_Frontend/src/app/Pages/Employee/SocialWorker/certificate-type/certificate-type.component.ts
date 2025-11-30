@@ -181,6 +181,12 @@ export class CertificateTypeComponent {
           this.DomainName
         ).subscribe(
           (d) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();
@@ -203,6 +209,12 @@ export class CertificateTypeComponent {
           this.DomainName
         ).subscribe(
           (d) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updated Successfully',
+              confirmButtonColor: '#089B41',
+            });
             this.GetAllData();
             this.isLoading = false;
             this.closeModal();

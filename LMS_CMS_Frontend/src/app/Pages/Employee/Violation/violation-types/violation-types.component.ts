@@ -77,7 +77,7 @@ export class ViolationTypesComponent {
     private router: Router,
     public empTypeServ: EmployeeTypeService,
     private translate: TranslateService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private loadingService: LoadingService
   ) { }
 
@@ -105,7 +105,7 @@ export class ViolationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -152,29 +152,30 @@ export class ViolationTypesComponent {
   }
 
   async Delete(id: number) {
+    const translatedTitle = this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?');
+    const translatedDelete = this.translate.instant('Delete');
+    const translatedCancel = this.translate.instant('Cancel');
+
     const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+this.translate.instant('Type') + this.translate.instant('?'),
+      title: translatedTitle,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
+      confirmButtonText: translatedDelete,
+      cancelButtonText: translatedCancel,
     }).then((result) => {
       if (result.isConfirmed) {
         this.violationTypeServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
             this.GetViolation();
+            this.showSuccessAlert(this.translate.instant('Deleted successfully'));
           },
-          error: (error) => { 
-            Swal.fire({
-              title: 'Error',
-              text: 'An error occurred while deleting the Violation. Please try again later.',
-              icon: 'error',
-              confirmButtonText: 'OK',
-            });
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('An error occurred while deleting the Violation. Please try again later.');
+            this.showErrorAlert(errorMessage);
           },
         });
       }
@@ -205,13 +206,14 @@ export class ViolationTypesComponent {
         }, error => {
           this.isLoading = false
           {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+            // Swal.fire({
+            //   icon: 'error',
+            //   title: 'Oops...',
+            //   text: error.error,
+            //   confirmButtonText: 'Okay',
+            //   customClass: { confirmButton: 'secondaryBg' }
+            // });
+            this.showSuccessAlert(this.translate.instant('Created successfully'));
           }
 
         })
@@ -221,21 +223,24 @@ export class ViolationTypesComponent {
           this.GetViolation()
           this.closeModal()
           this.isLoading = false
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Updated Successfully',
-            confirmButtonColor: '#089B41',
-          });
+          // Swal.fire({
+          //   icon: 'success',
+          //   title: 'Done',
+          //   text: 'Updated Successfully',
+          //   confirmButtonColor: '#089B41',
+          // });
+          this.showSuccessAlert(this.translate.instant('Updated successfully'));
         }, error => {
           this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+          // Swal.fire({
+          //   icon: 'error',
+          //   title: 'Oops...',
+          //   text: error.error,
+          //   confirmButtonText: 'Okay',
+          //   customClass: { confirmButton: 'secondaryBg' }
+          // });
+          const errorMessage = error.error?.message || this.translate.instant('An error occurred while processing your request.');
+          this.showErrorAlert(errorMessage);
         })
       }
     }
@@ -298,12 +303,12 @@ export class ViolationTypesComponent {
           ) {
             const fieldName = field === 'employeeTypeIds' ? 'Employee Type' : this.capitalizeField(field);
             this.validationErrors[field] = this.getRequiredErrorMessage(fieldName);
-             isValid = false;
+            isValid = false;
           }
         }
         if (this.violationType.employeeTypeIds.length == 0) {
           this.validationErrors["employeeTypeIds"] = this.getRequiredErrorMessage('Employee Type');
-           isValid = false;
+          isValid = false;
         }
       }
     }
@@ -357,6 +362,43 @@ export class ViolationTypesComponent {
     } else {
       return `${fieldTranslated} ${requiredTranslated}`;
     }
+  }
+
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showWarningAlert(title: string, text: string, confirmButtonText: string) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire({
+      icon: 'warning',
+      title: title,
+      text: text,
+      confirmButtonText: confirmButtonText
+    });
   }
 
 }

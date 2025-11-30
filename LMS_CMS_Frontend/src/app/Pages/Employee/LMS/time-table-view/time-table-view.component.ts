@@ -339,97 +339,84 @@ export class TimeTableViewComponent {
     }
   }
 
-  private generatePDFWithSplitTables(tables: any[]) {
+private generatePDFWithSplitTables(tables: any[]) {
   const maxSessionsPerPage = 6; // Show max 6 sessions per page to avoid overflow
 
   const opt = {
-  margin: [10, 10, 10, 10],
-  filename: `TimeTable_${this.TimeTableName}.pdf`,
-  image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { 
-  scale: 2, 
-  useCORS: true, 
-  letterRendering: true, 
-  allowTaint: false,
-  logging: false
-  },
-  jsPDF: { 
-  unit: 'mm', 
-  format: 'a4', 
-  orientation: 'landscape',
-  compress: true 
-  },
-  pagebreak: { mode: 'css', before: '.page-break' }
+    margin: [10, 10, 10, 10],
+    filename: `TimeTable_${this.TimeTableName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2, 
+      useCORS: true, 
+      letterRendering: true, 
+      allowTaint: false,
+      logging: false
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'landscape',
+      compress: true 
+    },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
   // Create container with split tables
   const container = document.createElement('div');
   container.style.cssText = `
-  width: 100%;
-  background: white;
-  padding: 10mm;
-  font-family: Arial, sans-serif;
-  font-size: 11px;
+    width: 100%;
+    background: white;
+    padding: 10mm;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
   `;
 
   let html = `
-  <div style="text-align: center; margin-bottom: 20px;">
-  <h2 style="margin: 0 0 5px 0; font-size: 18px;">${this.TimeTableName}</h2>
-  <p style="margin: 0; font-size: 12px; color: #666;">Time Table Report</p>
-  </div>
-  `;
-
-  let currentPageHeight = 60; // Start with header height
-  const pageHeight = 210; // A4 height in mm
-  const tableHeight = 40; // Estimated height per table section
-  const margin = 10;
-
-  tables.forEach((table, tableIndex) => {
-  // Split sessions into chunks
-  const sessionHeaders = table.headers.slice(2); // Skip Grade and Class
-  const totalSessions = sessionHeaders.length;
-  const chunks = Math.ceil(totalSessions / maxSessionsPerPage);
-
-  for (let chunkIndex = 0; chunkIndex < chunks; chunkIndex++) {
-  const startSession = chunkIndex * maxSessionsPerPage;
-  const endSession = Math.min(startSession + maxSessionsPerPage, totalSessions);
-
-  const chunkHeaders = ['Grade', 'Class', ...sessionHeaders.slice(startSession, endSession)];
-
-  // Check if we need a page break
-  if (currentPageHeight + tableHeight > pageHeight - margin) {
-    html += '<div class="page-break" style="page-break-before: always;"></div>';
-    currentPageHeight = margin;
-  }
-
-  html += `
-    <div style="margin-bottom: 10px; page-break-inside: avoid;">
-      <h3 style="margin: 5px 0 3px 0; font-size: 12px; background: #ddd; padding: 3px; font-weight: bold;">${table.title}</h3>
-      ${chunkIndex > 0 ? `<p style="margin: 2px 0 3px 0; font-size: 9px; color: #666;">(Sessions ${startSession + 1} - ${endSession})</p>` : ''}
-      
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 9px;">
-        <thead>
-          <tr style="background-color: #f0f0f0;">
-            ${chunkHeaders.map(h => `<th style="border: 1px solid #999; padding: 3px; text-align: left; font-weight: bold; font-size: 8px; word-break: break-word;">${h}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${table.data.map((row: any, rowIndex: number) => `
-            <tr style="background-color: ${rowIndex % 2 === 0 ? '#fff' : '#f9f9f9'};">
-              ${chunkHeaders.map(header => `
-                <td style="border: 1px solid #ccc; padding: 3px; font-size: 8px; word-break: break-word; white-space: normal;">
-                  ${row[header] || '--'}
-                </td>
-              `).join('')}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <h2 style="margin: 0 0 5px 0; font-size: 18px;">${this.TimeTableName}</h2>
+      <p style="margin: 0; font-size: 12px; color: #666;">Time Table Report</p>
     </div>
   `;
 
-  currentPageHeight += tableHeight;
-  }
+  tables.forEach((table, tableIndex) => {
+    // Split sessions into chunks
+    const sessionHeaders = table.headers.slice(2); // Skip Grade and Class
+    const totalSessions = sessionHeaders.length;
+    const chunks = Math.ceil(totalSessions / maxSessionsPerPage);
+
+    for (let chunkIndex = 0; chunkIndex < chunks; chunkIndex++) {
+      const startSession = chunkIndex * maxSessionsPerPage;
+      const endSession = Math.min(startSession + maxSessionsPerPage, totalSessions);
+
+      const chunkHeaders = ['Grade', 'Class', ...sessionHeaders.slice(startSession, endSession)];
+
+      html += `
+        <div style="margin-bottom: 8px; page-break-inside: avoid;">
+          <h3 style="margin: 3px 0; font-size: 12px; background: #ddd; padding: 3px; font-weight: bold;">${table.title}</h3>
+          ${chunkIndex > 0 ? `<p style="margin: 2px 0; font-size: 9px; color: #666;">(Sessions ${startSession + 1} - ${endSession})</p>` : ''}
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 0; font-size: 9px;">
+            <thead>
+              <tr style="background-color: #f0f0f0;">
+                ${chunkHeaders.map(h => `<th style="border: 1px solid #999; padding: 3px; text-align: left; font-weight: bold; font-size: 8px; word-break: break-word;">${h}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${table.data.map((row: any, rowIndex: number) => `
+                <tr style="background-color: ${rowIndex % 2 === 0 ? '#fff' : '#f9f9f9'};">
+                  ${chunkHeaders.map(header => `
+                    <td style="border: 1px solid #ccc; padding: 3px; font-size: 8px; word-break: break-word; white-space: normal;">
+                      ${row[header] || '--'}
+                    </td>
+                  `).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
   });
 
   container.innerHTML = html;
@@ -438,14 +425,14 @@ export class TimeTableViewComponent {
   // Generate PDF
   const html2pdf = (window as any).html2pdf;
   html2pdf()
-  .set(opt)
-  .from(container)
-  .save()
-  .finally(() => {
-  document.body.removeChild(container);
-  this.isLoading = false;
-  });
-  }
+    .set(opt)
+    .from(container)
+    .save()
+    .finally(() => {
+      document.body.removeChild(container);
+      this.isLoading = false;
+    });
+}
 
 
   GetDataForPrint(): Observable<any[]> {

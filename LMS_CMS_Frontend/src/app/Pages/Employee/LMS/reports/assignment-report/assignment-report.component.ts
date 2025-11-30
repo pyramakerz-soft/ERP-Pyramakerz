@@ -285,14 +285,16 @@ export class AssignmentReportComponent implements OnInit {
   private prepareChartData(): void {
     this.chartData = this.assignmentReports.map(report => ({
       name: report.assignmentName,
-      successful: report.numberSuccessful,
-      failed: report.numberFailed,
-      total: report.attendanceNumber
+      successful: report.successfulStudents,
+      failed: report.failedStudents,
+      total: report.assignedStudents,
+      submitted: report.submittedStudents,
+      pending: report.pendingStudents
     }));
 
     // Calculate max value for chart scaling
     this.maxChartValue = Math.max(
-      ...this.chartData.map(item => Math.max(item.successful, item.failed)),
+      ...this.chartData.map(item => Math.max(item.successful, item.failed, item.submitted, item.pending)),
       100 // Minimum scale
     );
   }
@@ -306,22 +308,24 @@ export class AssignmentReportComponent implements OnInit {
     this.reportsForExport = this.assignmentReports.map((report) => ({
       'Assignment Name': report.assignmentName,
       'Subject': report.subjectName,
-      'Attendance Number': report.attendanceNumber,
-      'Successful': report.numberSuccessful,
-      'Failed': report.numberFailed,
-      'Success Rate': report.attendanceNumber > 0 ?
-        ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'
+      'Assigned Students': report.assignedStudents,
+      'Submitted Students': report.submittedStudents,
+      'Successful': report.successfulStudents,
+      'Failed': report.failedStudents,
+      'Pending': report.pendingStudents,
+      'Success Rate': report.successRate.toFixed(2) + '%'
     }));
 
     // For Excel (array format)
     this.reportsForExcel = this.assignmentReports.map((report) => [
       report.assignmentName,
       report.subjectName,
-      report.attendanceNumber,
-      report.numberSuccessful,
-      report.numberFailed,
-      report.attendanceNumber > 0 ?
-        ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'
+      report.assignedStudents,
+      report.submittedStudents,
+      report.successfulStudents,
+      report.failedStudents,
+      report.pendingStudents,
+      report.successRate.toFixed(2) + '%'
     ]);
   }
 
@@ -416,7 +420,6 @@ export class AssignmentReportComponent implements OnInit {
   async downloadAsPDFWithChart() {
     if (this.assignmentReports.length === 0) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -525,35 +528,38 @@ export class AssignmentReportComponent implements OnInit {
       if (this.assignmentReports.length > 0) {
         const tableDiv = document.createElement('div');
         tableDiv.innerHTML = `
-          <div style="margin-top: 24px;">
-            <table style="width: 100%; border-collapse: collapse; background: #EBEBEB; color: #6F6F6F; font-size: 14px;">
-              <thead>
-                <tr style="background: #EBEBEB;">
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assignment Name</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Subject Name</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Attendance</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Successful</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Failed</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Success Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.assignmentReports.map((report, i) => `
-                  <tr style="background: ${i % 2 === 1 ? '#F7F7F7' : '#fff'};">
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignmentName}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.subjectName}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.attendanceNumber}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberSuccessful}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberFailed}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">
-                      ${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
+  <div style="margin-top: 24px;">
+    <table style="width: 100%; border-collapse: collapse; background: #EBEBEB; color: #6F6F6F; font-size: 14px;">
+      <thead>
+        <tr style="background: #EBEBEB;">
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assignment Name</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Subject Name</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assigned Students</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Submitted Students</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Successful</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Failed</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Pending</th>
+          <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Success Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${this.assignmentReports.map((report, i) => `
+          <tr style="background: ${i % 2 === 1 ? '#F7F7F7' : '#fff'};">
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignmentName}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.subjectName}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignedStudents}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.submittedStudents}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.successfulStudents}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.failedStudents}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.pendingStudents}</td>
+            <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.successRate.toFixed(2) + '%'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+`;
+
         reportElement.appendChild(tableDiv);
       }
 
@@ -600,7 +606,6 @@ export class AssignmentReportComponent implements OnInit {
 
     } catch (error) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
     } finally {
       this.isExporting = false;
@@ -612,9 +617,8 @@ export class AssignmentReportComponent implements OnInit {
   }
 
   async printReportWithChart() {
-    const Swal = await import('sweetalert2').then(m => m.default);
-
     if (this.assignmentReports.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -638,6 +642,7 @@ export class AssignmentReportComponent implements OnInit {
       // Create print-friendly version
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
+        const Swal = await import('sweetalert2').then(m => m.default);
         Swal.fire('Error', 'Please allow popups for printing', 'error');
         this.isExporting = false;
         return;
@@ -807,7 +812,7 @@ export class AssignmentReportComponent implements OnInit {
       printWindow.document.close();
 
     } catch (error) {
-      console.error('Error printing report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Error', 'Failed to print report', 'error');
     } finally {
       this.isExporting = false;
@@ -817,7 +822,6 @@ export class AssignmentReportComponent implements OnInit {
   async exportChartToExcel() {
     if (this.assignmentReports.length === 0) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -860,7 +864,6 @@ export class AssignmentReportComponent implements OnInit {
 
     } catch (error) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Error', 'Failed to export chart to Excel', 'error');
     } finally {
       this.isExporting = false;

@@ -38,6 +38,10 @@ export class MaintenanceReportComponent implements OnInit {
   selectedCompanyId: number | null = null;
   selectedEmployeeId: number | null = null;
 
+  // Checkbox filters
+  filterByCompany: boolean = true;
+  filterByEmployee: boolean = true;
+
   // Data sources
   maintenanceItems: MaintenanceItem[] = [];
   maintenanceCompanies: MaintenanceCompanies[] = [];
@@ -65,27 +69,26 @@ export class MaintenanceReportComponent implements OnInit {
   };
 
   constructor(
-    // private maintenanceReportService: MaintenanceReport,
     private maintenanceReportService: MaintenanceService,
     private maintenanceItemService: MaintenanceItemService,
     private maintenanceCompaniesService: MaintenanceCompaniesService,
     private maintenanceEmployeesService: MaintenanceEmployeesService,
     private apiService: ApiService,
-    private languageService: LanguageService,
+    private languageService: LanguageService, 
     private reportsService: ReportsService,
-    private loadingService: LoadingService
-  ) { }
+    private loadingService: LoadingService 
+  ) {}
 
   ngOnInit() {
     this.loadDropdownData();
-
+    
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -94,13 +97,13 @@ export class MaintenanceReportComponent implements OnInit {
   async loadDropdownData() {
     try {
       const domainName = this.apiService.GetHeader();
-
+      
       // Load maintenance items
       this.maintenanceItems = await firstValueFrom(this.maintenanceItemService.Get(domainName));
-
+      
       // Load maintenance companies
       this.maintenanceCompanies = await firstValueFrom(this.maintenanceCompaniesService.Get(domainName));
-
+      
       // Load maintenance employees
       this.maintenanceEmployees = await firstValueFrom(this.maintenanceEmployeesService.Get(domainName));
     } catch (error) {
@@ -114,24 +117,27 @@ export class MaintenanceReportComponent implements OnInit {
     this.maintenanceReports = [];
   }
 
+  onCompanyCheckboxChange() {
+    if (!this.filterByCompany) {
+      this.selectedCompanyId = null;
+    }
+    this.onFilterChange();
+  }
+
+  onEmployeeCheckboxChange() {
+    if (!this.filterByEmployee) {
+      this.selectedEmployeeId = null;
+    }
+    this.onFilterChange();
+  }
+
   async viewReport() {
-    const Swal = await import('sweetalert2').then(m => m.default);
-    
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    // Check if both Company and Employee are selected
-    if (this.selectedCompanyId && this.selectedEmployeeId) {
-      Swal.fire({
-        title: 'Invalid Selection',
-        text: 'You cannot filter by both Employee and Company at the same time.',
         icon: 'warning',
         confirmButtonText: 'OK',
       });
@@ -143,76 +149,62 @@ export class MaintenanceReportComponent implements OnInit {
 
     try {
       const domainName = this.apiService.GetHeader();
-
-      // Create proper request object with actual filter values
+      
+      // Build request object based on filter checkboxes
       const request: any = {
         fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
         toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
-        itemId: this.selectedItemId || 0,
-        companyId: this.selectedCompanyId || 0,
-        maintenanceEmployeeId: this.selectedEmployeeId || 0
       };
 
-      // Remove properties with 0 values (optional, depending on backend requirements)
-      Object.keys(request).forEach(key => {
-        if (request[key] === 0 || request[key] === null || request[key] === undefined) {
-          delete request[key];
+      // Add itemId if selected
+      if (this.selectedItemId && this.selectedItemId !== 0) {
+        request.itemId = this.selectedItemId;
+      }
+
+      // Determine filterBy value based on checkboxes
+      if (this.filterByCompany && !this.filterByEmployee) {
+        // Only companies
+        request.filterBy = 1;
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
         }
-      });
+      } else if (!this.filterByCompany && this.filterByEmployee) {
+        // Only employees
+        request.filterBy = 2;
+        if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+        }
+      } else if (this.filterByCompany && this.filterByEmployee) {
+        // Both filters (filterBy is null/undefined in this case)
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
+        }
+        if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+        }
+      }
+      // If both are false, only dates are sent
 
       const response = await firstValueFrom(
         this.maintenanceReportService.getMaintenanceReport(domainName, request)
-      );
-
+      ); 
+      
       if (Array.isArray(response)) {
-        this.maintenanceReports = response;
-      } else {
+        this.maintenanceReports = response; 
+      } else { 
         this.maintenanceReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
-    } catch (error) {
-      console.error('Error loading maintenance reports:', error);
+    } catch (error) { 
       this.maintenanceReports = [];
       this.showTable = true;
-
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Error', 'Failed to load maintenance reports', 'error');
     } finally {
       this.isLoading = false;
     }
-  }
-
-  async onCompanyChange() {
-    if (this.selectedCompanyId && this.selectedEmployeeId) {
-      const Swal = await import('sweetalert2').then(m => m.default);
-
-      // If both are selected, clear the employee selection
-      this.selectedEmployeeId = null;
-      Swal.fire({
-        title: 'Selection Changed',
-        text: 'Company selected. Employee selection cleared.',
-        icon: 'info',
-        confirmButtonText: 'OK',
-      });
-    }
-    this.onFilterChange();
-  }
-
-  async onEmployeeChange() {
-    if (this.selectedEmployeeId && this.selectedCompanyId) {
-      const Swal = await import('sweetalert2').then(m => m.default);
-
-      // If both are selected, clear the company selection
-      this.selectedCompanyId = null;
-      Swal.fire({
-        title: 'Selection Changed',
-        text: 'Employee selected. Company selection cleared.',
-        icon: 'info',
-        confirmButtonText: 'OK',
-      });
-    }
-    this.onFilterChange();
   }
 
   private prepareExportData(): void {
@@ -238,18 +230,31 @@ export class MaintenanceReportComponent implements OnInit {
   }
 
   getItemName(): string {
+    if (!this.selectedItemId || this.selectedItemId === 0) {
+      return 'All Items';
+    }
     return this.maintenanceItems.find(i => i.id === this.selectedItemId)?.en_Name || 'All Items';
   }
 
   getCompanyName(): string {
+    if (!this.filterByCompany) {
+      return 'Not Filtered';
+    }
+    if (!this.selectedCompanyId || this.selectedCompanyId === 0) {
+      return 'All Companies';
+    }
     return this.maintenanceCompanies.find(c => c.id === this.selectedCompanyId)?.en_Name || 'All Companies';
   }
 
   getEmployeeName(): string {
+    if (!this.filterByEmployee) {
+      return 'Not Filtered';
+    }
+    if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+      return 'All Employees';
+    }
     return this.maintenanceEmployees.find(e => e.id === this.selectedEmployeeId)?.en_Name || 'All Employees';
   }
-
-  // In maintenance-report.component.ts - update the getInfoRows method and related helper methods
 
   getInfoRows(): any[] {
     const infoRows = [
@@ -258,27 +263,22 @@ export class MaintenanceReportComponent implements OnInit {
       { keyEn: 'Item: ' + this.getItemName() }
     ];
 
-    // Handle Company/Employee display logic
-    if (this.selectedCompanyId) {
+    // Add Company info if filtered
+    if (this.filterByCompany) {
       infoRows.push({ keyEn: 'Company: ' + this.getCompanyName() });
-      // infoRows.push({ keyEn: 'Employee: All Employees' });
-    } else if (this.selectedEmployeeId) {
-      // infoRows.push({ keyEn: 'Company: All Companies' });
+    }
+
+    // Add Employee info if filtered
+    if (this.filterByEmployee) {
       infoRows.push({ keyEn: 'Employee: ' + this.getEmployeeName() });
-    } else {
-      // Neither is selected
-      infoRows.push({ keyEn: 'Company: All Companies' });
-      infoRows.push({ keyEn: 'Employee: All Employees' });
     }
 
     return infoRows;
   }
 
-
   async DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -293,11 +293,10 @@ export class MaintenanceReportComponent implements OnInit {
   async Print() {
     if (this.reportsForExport.length === 0) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-
+    
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -305,7 +304,7 @@ export class MaintenanceReportComponent implements OnInit {
         console.error('Element not found!');
         return;
       }
-
+      
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -326,14 +325,14 @@ export class MaintenanceReportComponent implements OnInit {
           }
         </style>
       `;
-
+      
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-
+      
       document.body.appendChild(printContainer);
       window.print();
-
+      
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -344,32 +343,27 @@ export class MaintenanceReportComponent implements OnInit {
   async exportExcel() {
     if (this.reportsForExcel.length === 0) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
     this.isExporting = true;
-
+    
     try {
-      // Prepare info rows with the same logic as getInfoRows
       const infoRows = [
         { key: 'From Date', value: this.dateFrom },
         { key: 'To Date', value: this.dateTo },
         { key: 'Item', value: this.getItemName() }
       ];
 
-      // Handle Company/Employee display logic
-      if (this.selectedCompanyId) {
+      // Add Company info if filtered
+      if (this.filterByCompany) {
         infoRows.push({ key: 'Company', value: this.getCompanyName() });
-        // infoRows.push({ key: 'Employee', value: 'All Employees' });
-      } else if (this.selectedEmployeeId) {
-        // infoRows.push({ key: 'Company', value: 'All Companies' });
+      }
+
+      // Add Employee info if filtered
+      if (this.filterByEmployee) {
         infoRows.push({ key: 'Employee', value: this.getEmployeeName() });
-      } else {
-        // Neither is selected
-        infoRows.push({ key: 'Company', value: 'All Companies' });
-        infoRows.push({ key: 'Employee', value: 'All Employees' });
       }
 
       await this.reportsService.generateExcelReport({
@@ -377,16 +371,9 @@ export class MaintenanceReportComponent implements OnInit {
           en: 'Maintenance Report',
           ar: 'تقرير الصيانة'
         },
-        // subHeaders: [
-        //   {
-        //     en: 'Maintenance Records',
-        //     ar: 'سجلات الصيانة'
-        //   }
-        // ],
         infoRows: infoRows,
         tables: [
           {
-            // title: 'Maintenance Report Data',
             headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
             data: this.reportsForExcel
           }
@@ -394,10 +381,7 @@ export class MaintenanceReportComponent implements OnInit {
         filename: `Maintenance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
-
       const Swal = await import('sweetalert2').then(m => m.default);
-
       Swal.fire('Error', 'Failed to export to Excel', 'error');
     } finally {
       this.isExporting = false;

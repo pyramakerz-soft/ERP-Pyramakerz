@@ -398,8 +398,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             //if (!query.Any())
             //    return NotFound("No Maintenance records found for this filter.");
 
-            if (request.ItemId.HasValue && request.ItemId.Value > 0)
-                query = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
+            if (request.ItemId.HasValue && request.ItemId.Value > 0) {
+                var itemMaintenances = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
+
+                if (request.FilterBy==1)
+                {
+                    query = itemMaintenances.Where(m => m.CompanyID.HasValue && m.CompanyID.Value > 0).ToList();
+                }
+                else if (request.FilterBy == 2)
+                {
+                    query = itemMaintenances.Where(m => m.MaintenanceEmployeeID.HasValue && m.MaintenanceEmployeeID.Value > 0).ToList();
+                }
+                else
+                {
+                    query = itemMaintenances;
+                }
+            }
 
             if (request.FilterBy.HasValue)
             {

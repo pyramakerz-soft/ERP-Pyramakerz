@@ -82,7 +82,7 @@ export class LeaveRequestComponent {
     public LeaveRequestServ: LeaveRequestService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService  
   ) { }
 
   ngOnInit() {
@@ -110,8 +110,8 @@ export class LeaveRequestComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
-  ngOnDestroy(): void {
+  
+  ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -183,7 +183,7 @@ export class LeaveRequestComponent {
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.leaveRequest = { ...d };
       this.OldleaveRequest = { ...d };
-      console.log(123, this.leaveRequest)
+      console.log(123,this.leaveRequest)
       // this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
     });
     this.openModal();
@@ -198,7 +198,7 @@ export class LeaveRequestComponent {
         this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
         this.MonthlyLeaveRequestBalanceError = false
         this.CalculateRemains();
-      }, async error => {
+      }, async error => { 
         if (typeof error.error === 'string' && error.error.includes("Monthly leave request for this employee is required")) {
           this.MonthlyLeaveRequestBalanceError = true
 
@@ -258,11 +258,11 @@ export class LeaveRequestComponent {
   }
 
   formatHours(value: number | null): string {
-    if (value) {
+    if(value){
       const hours = Math.floor(value);
       const minutes = Math.round((value - hours) * 60);
       return `${hours}:${minutes.toString().padStart(2, '0')}`;
-    } else {
+    }else{
       return ``;
     }
   }
@@ -324,10 +324,9 @@ export class LeaveRequestComponent {
 
   async CreateOREdit() {
     if (await this.isFormValid()) {
-      this.isLoading = true;
-
       const Swal = await import('sweetalert2').then(m => m.default);
 
+      this.isLoading = true;
       if (this.mode == 'Create') {
         this.LeaveRequestServ.Add(this.leaveRequest, this.DomainName).subscribe(
           (d) => {
@@ -403,27 +402,27 @@ export class LeaveRequestComponent {
     })
   }
 
-  async isFormValid() {
-    let isValid = true;
-
-    // Basic field validation
-    for (const key in this.leaveRequest) {
-      if (this.leaveRequest.hasOwnProperty(key)) {
-        const field = key as keyof LeaveRequest;
-        if (!this.leaveRequest[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID'
-          ) {
-            this.validationErrors[field] = this.getRequiredErrorMessage(
-              this.capitalizeField(field)
-            );
-            isValid = false;
-          }
+  async isFormValid(): Promise<boolean> {
+  let isValid = true;
+  
+  // Basic field validation
+  for (const key in this.leaveRequest) {
+    if (this.leaveRequest.hasOwnProperty(key)) {
+      const field = key as keyof LeaveRequest;
+      if (!this.leaveRequest[field]) {
+        if (
+          field == 'date' ||
+          field == 'employeeID'
+        ) {
+          this.validationErrors[field] = this.getRequiredErrorMessage(
+            this.capitalizeField(field)
+          );
+          isValid = false;
         }
       }
     }
-    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
+  }
+    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0 || this.leaveRequest.hours == null && this.leaveRequest.minutes == null ) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
     }
@@ -536,14 +535,14 @@ export class LeaveRequestComponent {
       this.PageSize = 0
     }
   }
-  private getRequiredErrorMessage(fieldName: string): string {
-    const fieldTranslated = this.translate.instant(fieldName);
-    const requiredTranslated = this.translate.instant('Is Required');
-
-    if (this.isRtl) {
-      return `${requiredTranslated} ${fieldTranslated}`;
-    } else {
-      return `${fieldTranslated} ${requiredTranslated}`;
-    }
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
   }
+}
 }
