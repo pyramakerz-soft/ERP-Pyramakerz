@@ -1356,27 +1356,21 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             }
 
-            List<Assignment> assignmentsQuery = uow.assignment_Repository.Select_All_With_Includes(
-                    a => a.Subject,
-                    a => a.Subject.Grade,
-                    a => a.Subject.Grade.Section,
-                    a => a.AssignmentStudents,
-                    a => a.AssignmentStudentIsSpecifics
-                );
+            List<Assignment> assignmentsQuery = await uow.assignment_Repository.Select_All_With_IncludesById<Assignment>(
+                    a => a.IsDeleted != true && a.Subject.Grade.Section.SchoolID == filter.SchoolId &&
+                        a.Subject.GradeID == filter.GradeId && a.SubjectID == filter.SubjectId && 
+                        a.OpenDate >= filter.FromDate && a.OpenDate <= filter.ToDate,
+                    a => a.Include(d => d.Subject).ThenInclude(d => d.Grade).ThenInclude(d => d.Section),
+                    a => a.Include(d => d.AssignmentStudentIsSpecifics),
+                    a => a.Include(d => d.AssignmentStudents).ThenInclude(d => d.StudentClassroom)
+                    );
 
-            List<Assignment> assignments = assignmentsQuery
-                .Where(a => a.Subject.Grade.Section.SchoolID == filter.SchoolId &&
-                            a.Subject.GradeID == filter.GradeId &&
-                            a.SubjectID == filter.SubjectId &&
-                            a.OpenDate >= filter.FromDate && a.OpenDate <= filter.ToDate)
-                .ToList();
-
-            if (!assignments.Any())
+            if (!assignmentsQuery.Any())
                 return NotFound("No assignments found for the given filters.");
 
             List<AssignmentReportDTO> report = new List<AssignmentReportDTO>();
 
-            foreach (Assignment  assignment in assignments)
+            foreach (Assignment  assignment in assignmentsQuery)
             {
                 List<Student> eligibleStudents;
 

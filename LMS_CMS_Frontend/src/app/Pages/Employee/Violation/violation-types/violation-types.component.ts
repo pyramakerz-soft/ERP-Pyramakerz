@@ -151,33 +151,34 @@ export class ViolationTypesComponent {
     this.dropdownOpen = false;
   }
 
-  Delete(id: number): void {
-    Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+this.translate.instant('Type') + this.translate.instant('?'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.violationTypeServ.Delete(id, this.DomainName).subscribe({
-          next: (data) => {
-            this.GetViolation();
-          },
-          error: (error) => { 
-            Swal.fire({
-              title: 'Error',
-              text: 'An error occurred while deleting the Violation. Please try again later.',
-              icon: 'error',
-              confirmButtonText: 'OK',
-            });
-          },
-        });
-      }
-    });
-  }
+Delete(id: number): void {
+  const translatedTitle = this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?');
+  const translatedDelete = this.translate.instant('Delete');
+  const translatedCancel = this.translate.instant('Cancel');
+
+  Swal.fire({
+    title: translatedTitle,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: translatedDelete,
+    cancelButtonText: translatedCancel,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.violationTypeServ.Delete(id, this.DomainName).subscribe({
+        next: (data) => {
+          this.GetViolation();
+          this.showSuccessAlert(this.translate.instant('Deleted successfully'));
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || this.translate.instant('An error occurred while deleting the Violation. Please try again later.');
+          this.showErrorAlert(errorMessage);
+        },
+      });
+    }
+  });
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -201,13 +202,14 @@ export class ViolationTypesComponent {
         }, error => {
           this.isLoading = false
           {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+            // Swal.fire({
+            //   icon: 'error',
+            //   title: 'Oops...',
+            //   text: error.error,
+            //   confirmButtonText: 'Okay',
+            //   customClass: { confirmButton: 'secondaryBg' }
+            // });
+            this.showSuccessAlert(this.translate.instant('Created successfully'));
           }
 
         })
@@ -217,21 +219,24 @@ export class ViolationTypesComponent {
           this.GetViolation()
           this.closeModal()
           this.isLoading = false
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Updated Successfully',
-            confirmButtonColor: '#089B41',
-          });
+          // Swal.fire({
+          //   icon: 'success',
+          //   title: 'Done',
+          //   text: 'Updated Successfully',
+          //   confirmButtonColor: '#089B41',
+          // });
+          this.showSuccessAlert(this.translate.instant('Updated successfully'));
         }, error => {
           this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
-            });
+            // Swal.fire({
+            //   icon: 'error',
+            //   title: 'Oops...',
+            //   text: error.error,
+            //   confirmButtonText: 'Okay',
+            //   customClass: { confirmButton: 'secondaryBg' }
+            // });
+            const errorMessage = error.error?.message || this.translate.instant('An error occurred while processing your request.');
+this.showErrorAlert(errorMessage);
         })
       }
     }
@@ -354,5 +359,40 @@ export class ViolationTypesComponent {
       return `${fieldTranslated} ${requiredTranslated}`;
     }
   }
+
+  private showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private showWarningAlert(title: string, text: string, confirmButtonText: string) {
+  Swal.fire({
+    icon: 'warning',
+    title: title,
+    text: text,
+    confirmButtonText: confirmButtonText
+  });
+}
 
 }

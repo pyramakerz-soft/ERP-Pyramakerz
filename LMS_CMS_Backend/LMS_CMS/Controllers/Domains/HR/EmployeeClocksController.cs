@@ -157,6 +157,44 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         ////////////////////////////////
 
+        [HttpGet("GetByTokenLast10")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public IActionResult GetByTokenLast10()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized(new { error = "User ID or Type claim not found." });
+            }
+
+            long EmpId = long.Parse(userIdClaim);
+
+            var employeeClocks = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(t => t.IsDeleted != true&& t.EmployeeID == EmpId)
+                .OrderByDescending(t => t.ClockIn)
+                .Take(10)              // <-- Get last 10 clocks
+                .ToList();
+
+            if (employeeClocks == null || employeeClocks.Count == 0)
+            {
+                return NotFound(new { error = "No employee clocks found." });
+            }
+
+            List<EmployeeClocksGetDTO> dto = mapper.Map<List<EmployeeClocksGetDTO>>(employeeClocks);
+
+            return Ok(dto);
+        }
+
+        ////////////////////////////////
+
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

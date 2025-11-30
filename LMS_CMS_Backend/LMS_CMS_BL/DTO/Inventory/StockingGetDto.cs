@@ -20,6 +20,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? SchoolName { get; set; }
         public long? SchoolPCId { get; set; }
         public string? SchoolPCName { get; set; }
-
-    }
+        public List<StockingDetailsGetDto>? UpdatedStockingDetails { get; set; }
+        public List<StockingDetailsGetDto>? NewDetailsWhenEdit { get; set; }
+    } 
 }
