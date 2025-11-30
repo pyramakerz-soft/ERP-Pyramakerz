@@ -435,7 +435,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
            
             var bonuses = await uow.bouns_Repository.Select_All_With_IncludesById<Bonus>(
-                b => employeeIds.Contains(b.EmployeeID)
+                b => employeeIds.Contains(b.EmployeeID) && b.IsDeleted != true
                      && b.Date >= request.DateFrom
                      && b.Date <= request.DateTo,
                 q => q.Include(b => b.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory),
