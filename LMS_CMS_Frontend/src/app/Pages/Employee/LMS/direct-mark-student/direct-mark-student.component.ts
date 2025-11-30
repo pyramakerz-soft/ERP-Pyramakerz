@@ -22,7 +22,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { DirectMarkClassesService } from '../../../../Services/Employee/LMS/direct-mark-classes.service';
 import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -215,8 +215,9 @@ export class DirectMarkStudentComponent {
       this.DirectMarkClassesStudentServ.Edit(this.TableData, this.DomainName).subscribe((d) => {
         this.isLoading = false
         this.GetAllData(this.CurrentPage, this.PageSize)
-      }, error => {
-        console.log(error)
+      }, async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         this.isLoading = false
         Swal.fire({
           icon: 'error',

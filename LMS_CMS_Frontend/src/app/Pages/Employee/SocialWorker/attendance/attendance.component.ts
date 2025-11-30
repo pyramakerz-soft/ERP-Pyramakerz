@@ -22,7 +22,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AttendanceService } from '../../../../Services/Employee/SocialWorker/attendance.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
@@ -120,7 +120,9 @@ export class AttendanceComponent {
     this.router.navigateByUrl(`Employee/Attendance/` + id);
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this Attendance?',
       icon: 'warning',

@@ -3,7 +3,7 @@ import { SubCategory } from '../../../../Models/Inventory/sub-category';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Category } from '../../../../Models/Inventory/category';
 import { TokenData } from '../../../../Models/token-data';
@@ -133,7 +133,9 @@ export class SubCategoryComponent {
     this.router.navigateByUrl(`Employee/Inventory Categories`)
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('SubCategory') + this.translate.instant('?'),
       icon: 'warning',
@@ -187,8 +189,10 @@ export class SubCategoryComponent {
           this.closeModal();
           this.isLoading = false
         },
-          error => {
+          async error => {
             this.isLoading = false
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -205,7 +209,9 @@ export class SubCategoryComponent {
           this.closeModal();
           this.isLoading = false
         },
-          error => {
+          async error => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false
             Swal.fire({
               icon: 'error',

@@ -11,7 +11,7 @@ import { LogOutService } from '../../Services/shared/log-out.service';
 import { Subject as RxSubject, Subscription } from 'rxjs';
 import { LanguageService } from '../../Services/shared/language.service';
 import { EditPass } from '../../Models/Employee/edit-pass';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { EmployeeService } from '../../Services/Employee/employee.service';
 import { ApiService } from '../../Services/api.service';
 import { OctaService } from '../../Services/Octa/octa.service';
@@ -450,7 +450,9 @@ export class NavMenuComponent {
     this.OldPasswordError = "" 
   } 
   
-  Save(){ 
+  async Save(){ 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(this.password != this.confirmPassword){
       Swal.fire({
         icon: 'error',
@@ -668,7 +670,9 @@ export class NavMenuComponent {
     document.getElementById("RequestModal")?.classList.add("hidden"); 
   }
 
-  Accept(request:Request){
+  async Accept(request:Request){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Accept this Request?',
       icon: 'warning',
@@ -689,7 +693,9 @@ export class NavMenuComponent {
     });
   }
 
-  Decline(request:Request){
+  async Decline(request:Request){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Decline this Request?',
       icon: 'warning',
@@ -741,8 +747,10 @@ export class NavMenuComponent {
     }
   }
  
-  SendForward(){
+  async SendForward(){
     if(this.requestToBeForwarded.forwardToID == 0 || this.requestToBeForwarded.forwardToID == null){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'You have to select an employee to forward the request to',
         icon: 'warning', 
@@ -757,7 +765,9 @@ export class NavMenuComponent {
           // call the subscribe again for the other pages
           this.requestService.notifyRequestOpened(); 
         },
-        error => {
+        async error => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             text: error.error,
@@ -898,7 +908,9 @@ export class NavMenuComponent {
         this.requestToBeSend.receiverID = this.parent.id
         this.SendTheRequest()
       },
-      error => {
+      async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: "This student doesn't have a parent to send the request to",
           icon: 'warning', 
@@ -1057,8 +1069,10 @@ export class NavMenuComponent {
     } 
   }
 
-  Send(){
+  async Send(){
     if(this.requestToBeSend.message == ''){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'You have to insert the message',
         icon: 'warning', 
@@ -1066,6 +1080,8 @@ export class NavMenuComponent {
         confirmButtonText: "OK"
       })
     } else if(this.requestToBeSend.receiverID == 0 || this.requestToBeSend.receiverID == null){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'You have to choose the user to request from',
         icon: 'warning', 
@@ -1105,8 +1121,11 @@ export class NavMenuComponent {
         // call the subscribe again for the other pages
         this.requestService.notifyRequestOpened(); 
       },
-      error => {
+      async error => {
         this.isLoading = false;
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'error', 
@@ -1117,13 +1136,15 @@ export class NavMenuComponent {
     ); 
   } 
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 
     if (file) {
       const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!this.allowedExtensions.includes(fileExtension)) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: 'Invalid file type',
           html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
@@ -1136,6 +1157,8 @@ export class NavMenuComponent {
       }
 
       if (file.size > 25 * 1024 * 1024) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',
           icon: 'warning', 

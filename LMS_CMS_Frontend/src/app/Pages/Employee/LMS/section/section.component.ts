@@ -12,7 +12,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SectionService } from '../../../../Services/Employee/LMS/section.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -249,8 +249,10 @@ export class SectionComponent {
     }
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.editSection == false) {
         this.sectionService.Add(this.section, this.DomainName).subscribe(
@@ -292,7 +294,9 @@ export class SectionComponent {
     }
   }
 
-  deleteSection(id: number) {
+  async deleteSection(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Section') + this.translate.instant('?'),
       icon: 'warning',

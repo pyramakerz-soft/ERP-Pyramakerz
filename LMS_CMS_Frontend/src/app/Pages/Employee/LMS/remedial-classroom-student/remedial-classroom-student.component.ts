@@ -12,7 +12,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -126,7 +126,9 @@ export class RemedialClassroomStudentComponent {
     this.remedialClassroomStudent.remedialClassroomID = this.RemedialClassroomID
   }
 
-  handleStudentSelected(students: number[]) {
+  async handleStudentSelected(students: number[]) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (students.length == 0) {
       Swal.fire({
         icon: 'warning',
@@ -253,7 +255,9 @@ export class RemedialClassroomStudentComponent {
     return IsAllow;
   }
 
-  dalete(id: number) {
+  async dalete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Student') + this.translate.instant('?'),
       icon: 'warning',

@@ -9,7 +9,7 @@ import { ApiService } from '../../../../../Services/api.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2'; 
+// import Swal from 'sweetalert2'; 
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { ActivatedRoute } from '@angular/router';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
@@ -252,8 +252,10 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     this.showTable = false;
   }
 
-  ViewReport() {
+  async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -562,8 +564,10 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   }
 
   // Improved Print function
-  Print() {
+  async Print() {
     if (this.tableDataForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -624,8 +628,10 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   }
 
   // Improved PDF Download function
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.tableDataForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -639,6 +645,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
 
   async DownloadAsExcel() {
     if (!this.tableData || this.tableData.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -710,7 +718,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         filename: `${(this.reportType === 'student' || this.reportType === 'parent') ? 'Student' : 'Classroom'}_Daily_Performance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`,
       });
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report.',

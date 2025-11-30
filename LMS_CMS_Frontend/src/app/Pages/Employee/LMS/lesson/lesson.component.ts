@@ -12,7 +12,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
@@ -203,6 +203,8 @@ export class LessonComponent {
     input.onchange = async () => {
       const file = input?.files?.[0];
       if (file) {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         const reader = new FileReader();
         reader.onload = async (e: any) => {
           const { value: formValues } = await Swal.fire({
@@ -250,7 +252,9 @@ export class LessonComponent {
     };
   }
 
-  customVideoHandler() {
+  async customVideoHandler() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Enter video URL',
       input: 'url',
@@ -805,7 +809,7 @@ export class LessonComponent {
     }
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
       this.isLoading = true;
 
@@ -821,6 +825,8 @@ export class LessonComponent {
           this.lesson.tagIDs.push(element)
         });
       }
+
+      const Swal = await import('sweetalert2').then(m => m.default);
 
       if (this.editLesson == false) {
         this.lessonService.Add(this.lesson, this.DomainName).subscribe(
@@ -874,8 +880,11 @@ export class LessonComponent {
         this.GetAllData();
         this.isLoading = false;
       },
-      (error) => {
+      async (error) => {
         this.isLoading = false;
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -887,7 +896,9 @@ export class LessonComponent {
     )
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +  this.translate.instant('Lesson') + this.translate.instant('?'),
       icon: 'warning',

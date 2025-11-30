@@ -153,15 +153,16 @@ GetAssignmentReport(
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
 
-  let params = new URLSearchParams();
-  params.append('FromDate', fromDate);
-  params.append('ToDate', toDate);
-  params.append('SchoolId', schoolId.toString());
-  params.append('AcademicYearId', academicYearId.toString());
-  params.append('GradeId', gradeId.toString());
-  params.append('SubjectId', subjectId.toString());
+  const requestBody = {
+    schoolId: schoolId,
+    academicYearId: academicYearId,
+    gradeId: gradeId,
+    subjectId: subjectId,
+    fromDate: fromDate,
+    toDate: toDate
+  };
 
-  return this.http.get<any[]>(`${this.baseUrl}/Assignment/AssignmentReport?${params.toString()}`, { headers });
+  return this.http.post<any[]>(`${this.baseUrl}/Assignment/AssignmentReport`, requestBody, { headers });
 }
 
 }

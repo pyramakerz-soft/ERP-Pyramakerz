@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -114,7 +114,9 @@ export class SocialWorkerMedalComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',
@@ -166,7 +168,9 @@ export class SocialWorkerMedalComponent {
           this.socialWorkerMedal,
           this.DomainName
         ).subscribe(
-          (d) => {
+          async (d) => {      
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'success',
               title: 'Done',
@@ -177,8 +181,10 @@ export class SocialWorkerMedalComponent {
             this.isLoading = false;
             this.closeModal();
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false; // Hide spinner
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -194,7 +200,9 @@ export class SocialWorkerMedalComponent {
           this.socialWorkerMedal,
           this.DomainName
         ).subscribe(
-          (d) => {
+          async (d) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'success',
               title: 'Done',
@@ -205,8 +213,10 @@ export class SocialWorkerMedalComponent {
             this.isLoading = false;
             this.closeModal();
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false; // Hide spinner
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',

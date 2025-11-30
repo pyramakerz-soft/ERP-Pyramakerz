@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoleAdd } from '../../../../Models/Administrator/role-add';
 import { RoleService } from '../../../../Services/Employee/role.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { RoleDetailsService } from '../../../../Services/Employee/role-details.service';
 import { RolePut } from '../../../../Models/Administrator/role-put';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -115,10 +115,12 @@ export class RoleAddEditComponent {
     }
   }
 
-private showErrorAlert(errorMessage: string) {
+private async showErrorAlert(errorMessage: string) {
   const translatedTitle = this.translate.instant('Error');
   const translatedButton = this.translate.instant('Okay');
   
+  const Swal = await import('sweetalert2').then(m => m.default);
+
   Swal.fire({
     icon: 'error',
     title: translatedTitle,
@@ -129,10 +131,12 @@ private showErrorAlert(errorMessage: string) {
 }
 
 // Helper method to show success messages
-private showSuccessAlert(message: string) {
+private async showSuccessAlert(message: string) {
   const translatedTitle = this.translate.instant('Success');
   const translatedButton = this.translate.instant('Okay');
   
+  const Swal = await import('sweetalert2').then(m => m.default);
+
   Swal.fire({
     icon: 'success',
     title: translatedTitle,

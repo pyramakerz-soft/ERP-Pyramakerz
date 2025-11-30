@@ -13,7 +13,7 @@ import { Section } from '../../../../Models/LMS/section';
 import { School } from '../../../../Models/school';
 import { ApiService } from '../../../../Services/api.service';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -73,9 +73,11 @@ export class AddEditSubjectComponent {
     });
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -86,9 +88,11 @@ export class AddEditSubjectComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',

@@ -29,7 +29,7 @@ import { JobCategories } from '../../../../Models/Administrator/job-categories';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { StudentService } from '../../../../Services/student.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Student } from '../../../../Models/student';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -251,7 +251,7 @@ export class AccountingEmployeeEditComponent {
     this.router.navigateByUrl(`Employee/Employee Accounting`)
   }
 
-  Save() {
+  async Save() {
     Object.keys(this.Data).forEach(key => {
       if ((this.Data as any)[key] === '') {
         (this.Data as any)[key] = null;
@@ -266,6 +266,9 @@ export class AccountingEmployeeEditComponent {
         this.Data.attendanceTime = null
       }
       this.isLoading = true
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
         Swal.fire({
@@ -384,7 +387,7 @@ export class AccountingEmployeeEditComponent {
     })
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.NationalID == '') {
       this.IsNationalIsEmpty = 'National Id Is Required'
       return;
@@ -402,10 +405,11 @@ export class AccountingEmployeeEditComponent {
           this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
             this.TableData = d
           })
-        }, error => {
-          console.log(error)
+        }, error => { 
         })
       } else {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -416,6 +420,8 @@ export class AccountingEmployeeEditComponent {
       }
     }
     else {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
@@ -441,7 +447,9 @@ export class AccountingEmployeeEditComponent {
     this.openModal();
   }
 
-  DeleteChild(id: number) {
+  async DeleteChild(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('Child'),
       icon: 'warning',

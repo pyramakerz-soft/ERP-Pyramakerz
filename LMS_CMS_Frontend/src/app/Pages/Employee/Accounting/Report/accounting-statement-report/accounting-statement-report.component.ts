@@ -14,7 +14,7 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { DataAccordingToLinkFileService } from '../../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
 import { ActivatedRoute } from '@angular/router';
@@ -190,8 +190,10 @@ export class AccountingStatementReportComponent implements OnInit {
   }
 
 
-  viewReport() {
+  async viewReport() {
     if (!this.fromDate || !this.toDate || !this.linkFileID || !this.subAccountID) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Missing Information',
         text: 'Please select Date Range, Account Type, and Account',
@@ -202,6 +204,8 @@ export class AccountingStatementReportComponent implements OnInit {
     }
 
     if (new Date(this.fromDate) > new Date(this.toDate)) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -233,8 +237,9 @@ export class AccountingStatementReportComponent implements OnInit {
           this.TotalRecords = response.pagination.totalRecords;
         }
       },
-      error: (error) => {
-        console.error('Error loading report:', error);
+      error: async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         this.reportData = null;
         this.showTable = true;
         this.isLoading = false;
@@ -383,9 +388,11 @@ export class AccountingStatementReportComponent implements OnInit {
     ];
   }
 
-  Print() {
+  async Print() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -425,9 +432,11 @@ export class AccountingStatementReportComponent implements OnInit {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -440,6 +449,8 @@ export class AccountingStatementReportComponent implements OnInit {
 
   async DownloadAsExcel() {
     if (!this.reportData || this.reportData.data.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -496,7 +507,8 @@ export class AccountingStatementReportComponent implements OnInit {
         filename: `Account_Statement_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report.',

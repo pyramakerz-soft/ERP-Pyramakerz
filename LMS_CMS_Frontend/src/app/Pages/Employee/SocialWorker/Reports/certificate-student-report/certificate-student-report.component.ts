@@ -10,8 +10,8 @@ import { GradeService } from '../../../../../Services/Employee/LMS/grade.service
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { ApiService } from '../../../../../Services/api.service';
-import { LanguageService } from '../../../../../Services/shared/language.service'; 
-import Swal from 'sweetalert2'; 
+import { LanguageService } from '../../../../../Services/shared/language.service';
+// import Swal from 'sweetalert2'; 
 import { CertificateStudentService } from '../../../../../Services/Employee/SocialWorker/certificate-student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { ActivatedRoute } from '@angular/router';
@@ -48,7 +48,7 @@ export class CertificateStudentReportComponent implements OnInit {
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
-  Student: Student= new Student();
+  Student: Student = new Student();
 
   // Report data
   certificateReports: CertificateStudent[] = [];
@@ -81,13 +81,13 @@ export class CertificateStudentReportComponent implements OnInit {
     private classroomService: ClassroomService,
     private studentService: StudentService,
     private apiService: ApiService,
-    public account: AccountService,   
+    public account: AccountService,
     private route: ActivatedRoute,
-    private languageService: LanguageService, 
-    private reportsService: ReportsService ,
-    private loadingService: LoadingService 
+    private languageService: LanguageService,
+    private reportsService: ReportsService,
+    private loadingService: LoadingService
 
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadSchools();
@@ -96,20 +96,20 @@ export class CertificateStudentReportComponent implements OnInit {
     this.UserID = this.User_Data_After_Login.id;
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
     console.log(this.reportType)
-    if(this.reportType == 'parent'){
+    if (this.reportType == 'parent') {
       this.getStudentsByParentId()
     }
-    else if(this.reportType == 'student'){
+    else if (this.reportType == 'student') {
       this.showTable = true;
-      this.certificateReportService.GetByStudentID(this.UserID,this.DomainName).subscribe((s)=>{
-        this.certificateReports=s
+      this.certificateReportService.GetByStudentID(this.UserID, this.DomainName).subscribe((s) => {
+        this.certificateReports = s
         this.prepareExportData();
       })
-    
-      this.studentService.GetByID(this.UserID,this.DomainName).subscribe((d)=>{
+
+      this.studentService.GetByID(this.UserID, this.DomainName).subscribe((d) => {
         console.log(d)
-        this.Student =d
-      },error=>{
+        this.Student = d
+      }, error => {
         console.log(error)
       })
     }
@@ -120,13 +120,13 @@ export class CertificateStudentReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  getStudentsByParentId(){ 
+  getStudentsByParentId() {
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
       console.log(this.students)
@@ -206,18 +206,20 @@ export class CertificateStudentReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    if(this.reportType == 'parent'){
-      this.showViewReportBtn =  !!this.selectedStudentId;
+    if (this.reportType == 'parent') {
+      this.showViewReportBtn = !!this.selectedStudentId;
     }
-    else{
-    this.showViewReportBtn = !!this.selectedSchoolId && !!this.selectedGradeId && 
-      !!this.selectedClassId && !!this.selectedStudentId;   
+    else {
+      this.showViewReportBtn = !!this.selectedSchoolId && !!this.selectedGradeId &&
+        !!this.selectedClassId && !!this.selectedStudentId;
     }
     this.certificateReports = [];
   }
 
   async viewReport() {
-    if(this.reportType == 'employee'){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    if (this.reportType == 'employee') {
       if (!this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId) {
         Swal.fire({
           title: 'Incomplete Selection',
@@ -228,7 +230,7 @@ export class CertificateStudentReportComponent implements OnInit {
         return;
       }
     }
-    else if(this.reportType == 'parent'){
+    else if (this.reportType == 'parent') {
       if (!this.selectedStudentId) {
         Swal.fire({
           title: 'Incomplete Selection',
@@ -249,19 +251,19 @@ export class CertificateStudentReportComponent implements OnInit {
           this.selectedStudentId,
           domainName
         )
-      ); 
+      );
       if (Array.isArray(response)) {
-        this.certificateReports = response; 
-      } else { 
+        this.certificateReports = response;
+      } else {
         this.certificateReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
-    } catch (error: any) { 
+    } catch (error: any) {
       this.certificateReports = [];
       this.showTable = true;
-      if(error.status !== 404){
+      if (error.status !== 404) {
         Swal.fire({
           title: 'Error',
           text: 'Failed to load certificate reports',
@@ -274,18 +276,18 @@ export class CertificateStudentReportComponent implements OnInit {
     }
   }
 
-private prepareExportData(): void {
-  // For PDF (object format) - keep only the fields shown in the table
-  this.reportsForExport = this.certificateReports.map((report) => ({
-    'Certificate Name': report.certificateTypeName, // Changed from 'Medal Name' to match table
-    'Added By': report.insertedByUserName
-  }));
+  private prepareExportData(): void {
+    // For PDF (object format) - keep only the fields shown in the table
+    this.reportsForExport = this.certificateReports.map((report) => ({
+      'Certificate Name': report.certificateTypeName, // Changed from 'Medal Name' to match table
+      'Added By': report.insertedByUserName
+    }));
 
-  this.reportsForExcel = this.certificateReports.map((report) => [
-    report.certificateTypeName, // Only certificate name
-    report.insertedByUserName    // Only added by
-  ]);
-}
+    this.reportsForExcel = this.certificateReports.map((report) => [
+      report.certificateTypeName, // Only certificate name
+      report.insertedByUserName    // Only added by
+    ]);
+  }
 
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
@@ -299,27 +301,27 @@ private prepareExportData(): void {
     return this.classes.find(c => c.id == this.selectedClassId)?.name || 'All Classes';
   }
 
-  getStudentName(): string{
-   if(this.reportType === 'employee'){
-     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
-   }
-   else if(this.reportType === 'parent'){
-    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
-   }else{
-     return this.Student.en_name
-   }
+  getStudentName(): string {
+    if (this.reportType === 'employee') {
+      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+    }
+    else if (this.reportType === 'parent') {
+      return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+    } else {
+      return this.Student.en_name
+    }
   }
 
   getInfoRows(): any[] {
-    if(this.reportType === 'employee'){
+    if (this.reportType === 'employee') {
       return [
         { keyEn: 'School: ' + this.getSchoolName() },
         { keyEn: 'Grade: ' + this.getGradeName() },
         { keyEn: 'Class: ' + this.getClassName() },
         { keyEn: 'Student: ' + this.getStudentName() }
-      ]; 
-   }
-    else{
+      ];
+    }
+    else {
       return [
         { keyEn: 'Student: ' + this.getStudentName() }
       ];
@@ -327,22 +329,24 @@ private prepareExportData(): void {
   }
 
   getInfoRowsExcel(): any[] {
-    if(this.reportType === 'employee'){
+    if (this.reportType === 'employee') {
       return [
-          { key: 'School', value: this.getSchoolName() },
-          { key: 'Grade', value: this.getGradeName() },
-          { key: 'Class', value: this.getClassName() },
-          { key: 'Student', value: this.getStudentName() }, 
-      ]; 
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() },
+      ];
     }
-    else{
+    else {
       return [
-          { key: 'Student', value: this.getStudentName() }, 
+        { key: 'Student', value: this.getStudentName() },
       ];
     }
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
@@ -355,12 +359,14 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -368,7 +374,7 @@ private prepareExportData(): void {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -389,14 +395,14 @@ private prepareExportData(): void {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -404,42 +410,44 @@ private prepareExportData(): void {
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExcel.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
+  async exportExcel() {
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-  this.isExporting = true;
-  
-  try {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Certificate Student Report',
-        ar: 'تقرير شهادات الطالب'
-      },
-      subHeaders: [
-        {
-          en: 'Student Certificate Records',
-          ar: 'سجلات شهادات الطالب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          headers: ['Certificate Name', 'Added By'], // Updated headers to match table
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  } finally {
-    this.isExporting = false;
+    if (this.reportsForExcel.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+
+    try {
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Certificate Student Report',
+          ar: 'تقرير شهادات الطالب'
+        },
+        subHeaders: [
+          {
+            en: 'Student Certificate Records',
+            ar: 'سجلات شهادات الطالب'
+          }
+        ],
+        infoRows: this.getInfoRowsExcel(),
+        tables: [
+          {
+            headers: ['Certificate Name', 'Added By'], // Updated headers to match table
+            data: this.reportsForExcel
+          }
+        ],
+        filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
-}
 
   // downloadCertificate(row: CertificateStudent) {
   //   const canvas = document.createElement('canvas');
@@ -468,7 +476,7 @@ async exportExcel() {
 
   downloadCertificate(row: CertificateStudent) {
     const imageUrl = row.certificateTypeFile;
-    
+
     fetch(imageUrl)
       .then(response => response.blob())
       .then(blob => {
@@ -483,7 +491,7 @@ async exportExcel() {
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
-            
+
             const leftPx = (row.leftSpace / 100) * img.width;
             const topPx = (row.topSpace / 100) * img.height;
             const fontSize = Math.floor(img.height * 0.05);
@@ -499,8 +507,8 @@ async exportExcel() {
         };
         reader.readAsDataURL(blob);
       })
-      .catch(err => console.error('Error loading image:', err));    
-   }
+      .catch(err => console.error('Error loading image:', err));
+  }
 
-  
+
 }

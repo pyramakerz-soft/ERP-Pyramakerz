@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../Component/search/search.component';
 import { SchoolType } from '../../../Models/Octa/school-type';
 import { SchoolTypeService } from '../../../Services/Octa/school-type.service';
@@ -155,9 +155,12 @@ export class SchoolTypeComponent {
     }
   }
 
-  SaveSchoolType(){
+  async SaveSchoolType(){
     if(this.isFormValid()){
       this.isSaved = true
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if(this.editSchoolType == false){
         this.schoolTypeService.Add(this.schoolType).subscribe(
           (result: any) => {
@@ -213,7 +216,9 @@ export class SchoolTypeComponent {
     }
   } 
 
-  deleteShoolType(id:number){
+  async deleteShoolType(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this school type?',
       icon: 'warning',

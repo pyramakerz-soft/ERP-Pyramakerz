@@ -13,7 +13,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TokenData } from '../../../../Models/token-data';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { School } from '../../../../Models/school';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { Section } from '../../../../Models/LMS/section';
 import { Floor } from '../../../../Models/LMS/floor';
@@ -433,8 +433,10 @@ export class ClassroomComponent {
     this.router.navigateByUrl("Employee/Classroom/"+classID)
   }
 
-  SaveClassroom(){
+  async SaveClassroom(){
     if(this.isFormValid()){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoadingSaveClassroom=true
       if(this.editClassroom == false){
         this.classroomService.Add(this.classroom, this.DomainName).subscribe(
@@ -480,7 +482,9 @@ export class ClassroomComponent {
     }
   } 
 
-  deleteClassroom(id:number){
+  async deleteClassroom(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Classroom') + this.translate.instant('?'),
       icon: 'warning',
@@ -598,8 +602,10 @@ export class ClassroomComponent {
           this.getClassroomDataByYearID(this.DomainName, this.CurrentPage, this.PageSize)
           this.isLoading=false
         },
-        error => {
+        async error => {
           this.isLoading=false
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',

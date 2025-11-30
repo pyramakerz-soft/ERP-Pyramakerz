@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../../../../Component/reuse-table/reuse-table.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { ParentMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
@@ -12,7 +12,7 @@ import { MedicalHistoryModalComponent } from "../../../../Employee/Clinic/medica
 import { ParentMedicalHistoryModalComponent } from "../medical-history-modal/medical-history-modal.component";
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
@@ -20,7 +20,7 @@ import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator'
 @Component({
   selector: 'app-parent-medical-history',
   standalone: true,
-  imports: [FormsModule, CommonModule, TableComponent, SearchComponent,  ParentMedicalHistoryModalComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, TableComponent, SearchComponent, ParentMedicalHistoryModalComponent, TranslateModule],
   templateUrl: './medical-history-table.component.html',
   styleUrls: ['./medical-history-table.component.css'],
 })
@@ -40,56 +40,60 @@ export class ParentMedicalHistoryComponent implements OnInit {
   constructor(
     private medicalHistoryService: MedicalHistoryService,
     private languageService: LanguageService,
-    private apiService: ApiService, 
+    private apiService: ApiService,
     private translate: TranslateService, // Add this 
-    private loadingService: LoadingService 
-  ) {}
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit(): void {
     this.loadMedicalHistories();
-        this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {  
-      if (this.subscription) {
+  ngOnDestroy(): void {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   async onSearchEvent(event: { key: string, value: any }) {
     this.searchKey = event.key;
     this.searchValue = event.value;
     await this.loadMedicalHistories();
-    
+
     if (this.searchValue) {
       this.medicalHistories = this.medicalHistories.filter(mh => {
         const fieldValue = mh[this.searchKey as keyof typeof mh]?.toString().toLowerCase() || '';
@@ -131,40 +135,42 @@ private showSuccessAlert(message: string) {
     this.selectedMedicalHistory = row || null;
   }
 
-deleteMedicalHistory(row: any) {
-  const translatedTitle = this.translate.instant('Are you sure?');
-  const translatedText = this.translate.instant('You will not be able to recover this item!');
-  const translatedConfirm = this.translate.instant('Yes, delete it!');
-  const translatedCancel = this.translate.instant('No, keep it');
-  const successMessage = this.translate.instant('Deleted successfully');
+  async deleteMedicalHistory(row: any) {
+    const translatedTitle = this.translate.instant('Are you sure?');
+    const translatedText = this.translate.instant('You will not be able to recover this item!');
+    const translatedConfirm = this.translate.instant('Yes, delete it!');
+    const translatedCancel = this.translate.instant('No, keep it');
+    const successMessage = this.translate.instant('Deleted successfully');
 
-  Swal.fire({
-    title: translatedTitle,
-    text: translatedText,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#2E3646',
-    confirmButtonText: translatedConfirm,
-    cancelButtonText: translatedCancel,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const domainName = this.apiService.GetHeader();
-      this.medicalHistoryService.Delete(row.id, domainName).subscribe({
-        next: () => {
-          if (this.medicalHistories.length === 1) {
-            this.medicalHistories = [];
-          }
-          this.loadMedicalHistories();
-          this.showSuccessAlert(successMessage);
-        },
-        error: (error) => {
-          console.error('Error deleting medical history:', error);
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
-          this.showErrorAlert(errorMessage);
-        },
-      });
-    }
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: translatedTitle,
+      text: translatedText,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#2E3646',
+      confirmButtonText: translatedConfirm,
+      cancelButtonText: translatedCancel,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const domainName = this.apiService.GetHeader();
+        this.medicalHistoryService.Delete(row.id, domainName).subscribe({
+          next: () => {
+            if (this.medicalHistories.length === 1) {
+              this.medicalHistories = [];
+            }
+            this.loadMedicalHistories();
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            console.error('Error deleting medical history:', error);
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete the item');
+            this.showErrorAlert(errorMessage);
+          },
+        });
+      }
+    });
+  }
 }

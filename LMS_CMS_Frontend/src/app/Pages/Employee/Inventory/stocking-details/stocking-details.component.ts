@@ -3,7 +3,7 @@ import { Stocking } from '../../../../Models/Inventory/stocking';
 import { StockingDetails } from '../../../../Models/Inventory/stocking-details';
 import { StockingService } from '../../../../Services/Employee/Inventory/stocking.service';
 import { StockingDetailsService } from '../../../../Services/Employee/Inventory/stocking-details.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -476,7 +476,9 @@ export class StockingDetailsComponent {
         }
         this.BarCode = ''; // Clear input after search
       },
-      (error) => {
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Item not found',
@@ -524,8 +526,10 @@ export class StockingDetailsComponent {
   }
   /////////////////////////////////////////////////////// CRUD
 
-  Save() {
-    if (this.isFormValid()) {
+  async Save() {
+    if (await this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.StockingServ.Add(this.Data, this.DomainName).subscribe(
@@ -593,7 +597,9 @@ export class StockingDetailsComponent {
     this.editingRowId = row.id;
   }
 
-  Delete(row: StockingDetails) {
+  async Delete(row: StockingDetails) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.mode == 'Edit') {
       Swal.fire({
         title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
@@ -661,7 +667,7 @@ export class StockingDetailsComponent {
 
   ///////////////////////////////////// validation fOR Master
 
-  isFormValid(): boolean {
+  async isFormValid() {
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
@@ -676,6 +682,9 @@ export class StockingDetailsComponent {
         }
       }
     }
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.mode == 'Create' && this.Data.stockingDetails.length == 0) {
       Swal.fire({
         icon: 'warning',

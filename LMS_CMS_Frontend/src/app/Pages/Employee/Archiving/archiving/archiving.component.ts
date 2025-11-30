@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArchivingItemComponent } from '../../../../Component/Employee/Archiving/archiving-item/archiving-item.component';
 import { ArchivingTree } from '../../../../Models/Archiving/archiving-tree';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 
@@ -107,7 +107,9 @@ export class ArchivingComponent {
     return IsAllow;
   }
 
-  Delete(child: ArchivingTree) {
+  async Delete(child: ArchivingTree) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this?',
       icon: 'warning',
@@ -152,12 +154,14 @@ export class ArchivingComponent {
     this.isAddFileOpen = false
   }
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
     
     if (file) {
         if (file.size > 25 * 1024 * 1024) { 
+            const Swal = await import('sweetalert2').then(m => m.default);
+  
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -179,6 +183,8 @@ export class ArchivingComponent {
             const reader = new FileReader();
             reader.readAsDataURL(file);
         } else { 
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -194,9 +200,11 @@ export class ArchivingComponent {
     input.value = '';
   } 
 
-  saveCreateFolder(){ 
+  async saveCreateFolder(){ 
     if(this.newArchiving.name && this.newArchiving.name.trim() !== ''){
       if(this.isAddFileOpen && this.newArchiving.fileFile == null){
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -220,8 +228,11 @@ export class ArchivingComponent {
             this.GetAllData()
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -233,7 +244,8 @@ export class ArchivingComponent {
         ); 
       }
     } else{
-      console.log(this.isAddFileOpen)
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

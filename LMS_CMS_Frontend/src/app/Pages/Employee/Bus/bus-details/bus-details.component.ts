@@ -14,7 +14,7 @@ import { BusStatusService } from '../../../../Services/Employee/Bus/bus-status.s
 import { BusCompanyService } from '../../../../Services/Employee/Bus/bus-company.service';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service'; 
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
@@ -182,9 +182,11 @@ export class BusDetailsComponent {
     );
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -195,7 +197,9 @@ export class BusDetailsComponent {
     });
   }  
 
-  deleteBus(busId: number) {
+  async deleteBus(busId: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete bus?',
       icon: 'warning',
@@ -396,8 +400,11 @@ isFormValid(): boolean {
               }
             );
           },
-          error => {
+          async error => {
             this.isLoading = false;  
+
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               text: error.error,

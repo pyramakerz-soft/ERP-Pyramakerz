@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { InterviewState } from '../../../../Models/Registration/interview-state';
 import { InterviewStateService } from '../../../../Services/Employee/Registration/interview-state.service';
 import { TranslateModule } from '@ngx-translate/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -121,7 +121,9 @@ export class InterviewRegistrationComponent {
     this.getRegistrationFormInterviewData()
   }
 
-  Submit(){
+  async Submit(){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.isLoading=true
     this.registrationFormInterviewService.Edit(this.registrationFormInterview.id, this.registrationFormInterview.interviewStateID, this.DomainName).subscribe(
       (result: any) => {

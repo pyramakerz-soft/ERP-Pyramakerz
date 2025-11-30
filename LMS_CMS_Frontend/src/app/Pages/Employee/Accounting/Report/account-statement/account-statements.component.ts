@@ -9,7 +9,7 @@ import { AccountService } from '../../../../../Services/account.service';
 import { DeleteEditPermissionService } from '../../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/Employee/Accounting/reports.service';
 import { SupplierService } from '../../../../../Services/Employee/Accounting/supplier.service';
 import { Supplier } from '../../../../../Models/Accounting/supplier';
@@ -111,8 +111,10 @@ export class AccountStatementsComponent {
     this.showTable = false;
   }
 
-  ViewReport() {
+  async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -123,6 +125,8 @@ export class AccountStatementsComponent {
     }
 
     if (this.selectedSupplier === null) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Missing Information',
         text: 'Please select a Supplier.',
@@ -410,11 +414,13 @@ export class AccountStatementsComponent {
   }
 
   // UNCOMMENTED AND FIXED DownloadAsExcel METHOD
-  DownloadAsExcel() {
+  async DownloadAsExcel() {
     this.DataToPrint = [];
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     this.GetDataForPrint().subscribe((result) => {
       if (!result || result.length === 0) {
+        
         Swal.fire({
           title: 'No Data',
           text: 'No data available for export.',

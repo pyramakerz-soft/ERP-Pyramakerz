@@ -12,7 +12,7 @@ import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
@@ -160,6 +160,8 @@ dateTo: string = '';
 
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -170,6 +172,8 @@ dateTo: string = '';
     }
 
     if (!this.dateFrom || !this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Incomplete Selection',
         text: 'Please select both Date From and Date To to generate the report.',
@@ -399,8 +403,10 @@ private prepareExportData(): void {
     ];
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -412,8 +418,10 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (this.reportsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -463,6 +471,8 @@ private prepareExportData(): void {
 
   async exportExcel() {
     if (this.reportsForExcel.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -501,7 +511,8 @@ private prepareExportData(): void {
         filename: `Bonus_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', 'Failed to export to Excel', 'error');
     } finally {
       this.isExporting = false;

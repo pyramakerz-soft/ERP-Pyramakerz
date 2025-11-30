@@ -7,7 +7,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { TokenData } from '../../../../Models/token-data';
 import { CartService } from '../../../../Services/Student/cart.service';
 import { OrderService } from '../../../../Services/Student/order.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CartShopItemService } from '../../../../Services/Student/cart-shop-item.service';
 import { CartShopItem } from '../../../../Models/Student/ECommerce/cart-shop-item'; 
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
@@ -128,7 +128,9 @@ export class CartComponent {
     )
   }
   
-  ProceedToBuy() { 
+  async ProceedToBuy() { 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Proceed To Buy?',
       icon: 'warning',
@@ -148,7 +150,9 @@ export class CartComponent {
     }); 
   }
   
-  RemoveCartShopItem(id: number) {
+  async RemoveCartShopItem(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Remove this item?',
       icon: 'warning',

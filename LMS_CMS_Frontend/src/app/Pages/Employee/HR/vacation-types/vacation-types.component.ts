@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -22,7 +22,7 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-vacation-types',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './vacation-types.component.html',
   styleUrl: './vacation-types.component.css'
 })
@@ -66,7 +66,7 @@ export class VacationTypesComponent {
     private translate: TranslateService,
     public ApiServ: ApiService,
     public VacationTypesServ: VacationTypesService,
-    private loadingService: LoadingService 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -88,43 +88,47 @@ export class VacationTypesComponent {
 
     this.GetAllData();
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
 
   GetAllData() {
@@ -141,9 +145,11 @@ private showSuccessAlert(message: string) {
     this.openModal();
   }
 
-  Delete(id: number) {
-   Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -185,41 +191,41 @@ private showSuccessAlert(message: string) {
     return IsAllow;
   }
 
-CreateOREdit() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    if (this.mode == 'Create') {
-      this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(this.translate.instant('Vacation type created successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to create vacation type');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-    if (this.mode == 'Edit') {
-      this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
-        (d) => {
-          this.showSuccessAlert(this.translate.instant('Vacation type updated successfully'));
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update vacation type');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.mode == 'Create') {
+        this.VacationTypesServ.Add(this.vacationType, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(this.translate.instant('Vacation type created successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to create vacation type');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.VacationTypesServ.Edit(this.vacationType, this.DomainName).subscribe(
+          (d) => {
+            this.showSuccessAlert(this.translate.instant('Vacation type updated successfully'));
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update vacation type');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
   }
-}
 
   closeModal() {
     this.isModalVisible = false;
@@ -239,8 +245,8 @@ CreateOREdit() {
           if (
             field == 'name'
           ) {
-          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
-          isValid = false;
+            this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
+            isValid = false;
           }
         }
       }

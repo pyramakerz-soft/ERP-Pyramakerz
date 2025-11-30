@@ -7,7 +7,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { BuildingService } from '../../../../Services/Employee/LMS/building.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
@@ -294,9 +294,12 @@ export class BuildingComponent {
     return IsAllow;
   }
 
-  SaveBuilding() {
+  async SaveBuilding() {
     if (this.isFormValid()) {
       this.isLoading = true;
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.editBuilding == false) {
         this.buildingService.Add(this.building, this.DomainName).subscribe(
           (result: any) => {
@@ -337,7 +340,9 @@ export class BuildingComponent {
     }
   }
 
-  deleteBuilding(id: number) {
+  async deleteBuilding(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
    Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Building') + this.translate.instant('?'),
       icon: 'warning',

@@ -12,7 +12,7 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { Supplier } from '../../../../Models/Accounting/supplier';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { SupplierService } from '../../../../Services/Employee/Accounting/supplier.service';
@@ -137,7 +137,9 @@ export class SuppliersComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Supplier') + this.translate.instant('?'),
       icon: 'warning',
@@ -202,7 +204,9 @@ export class SuppliersComponent {
           this.isLoading = false
 
         },
-          error => {
+          async error => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false
             Swal.fire({
               icon: 'error',
@@ -219,7 +223,9 @@ export class SuppliersComponent {
           this.isLoading = false
 
         },
-          error => {
+          async error => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false
             Swal.fire({
               icon: 'error',

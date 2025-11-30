@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SubjectCategoryService } from '../../../../Services/Employee/LMS/subject-category.service';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -96,9 +96,11 @@ export class SubjectCategoryComponent {
     }
   } 
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -109,9 +111,11 @@ export class SubjectCategoryComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async  showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -122,7 +126,9 @@ export class SubjectCategoryComponent {
     });
   }
 
-  private showWarningAlert(title: string, text: string, confirmButtonText: string) {
+  private async  showWarningAlert(title: string, text: string, confirmButtonText: string) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'warning',
       title: title,
@@ -265,12 +271,14 @@ export class SubjectCategoryComponent {
     }
   } 
 
-  deleteSubjectCategory(id:number){
+  async deleteSubjectCategory(id:number){
     const translatedTitle = this.translate.instant('Are you sure?');
     const translatedText = this.translate.instant('You will not be able to recover this item!');
     const translatedConfirm = this.translate.instant('Yes, delete it!');
     const translatedCancel = this.translate.instant('No, keep it');
     const successMessage = this.translate.instant('Deleted successfully');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { TokenData } from '../../../../Models/token-data';
@@ -134,7 +134,9 @@ export class AddChildComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -168,7 +170,7 @@ export class AddChildComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.NationalID == '') {
       this.IsNationalIsEmpty = this.getRequiredErrorMessage('National Id');
       return;
@@ -182,8 +184,11 @@ export class AddChildComponent {
           this.GetAllData();
           this.closeModal();
         },
-        (error) => {
+        async (error) => {
           if (error.error == 'Student Already Assigned To This Employee') {
+
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -195,6 +200,8 @@ export class AddChildComponent {
         }
       );
     } else {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',

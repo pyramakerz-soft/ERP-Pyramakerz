@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { InventoryDetailsService } from '../../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { CommonModule } from '@angular/common';
@@ -53,7 +53,7 @@ export class AverageCostCalcComponent {
     }
   }
 
-  validateDateRange(): boolean {
+  async validateDateRange() {
     if (!this.dateFrom || !this.dateTo) {
       return true;
     }
@@ -62,6 +62,8 @@ export class AverageCostCalcComponent {
     const toDate = new Date(this.dateTo);
 
     if (fromDate > toDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Invalid Date Range',

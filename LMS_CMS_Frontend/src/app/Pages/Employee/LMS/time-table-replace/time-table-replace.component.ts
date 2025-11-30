@@ -13,7 +13,7 @@ import { TimeTableService } from '../../../../Services/Employee/LMS/time-table.s
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TimeTableReplace } from '../../../../Models/LMS/time-table-replace';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -224,7 +224,9 @@ export class TimeTableReplaceComponent {
     this.draggedSession = new SessionGroupDTO();
   }
 
-  private areSubjectsTeachersEqual(subjects1: any[],subjects2: any[]): boolean {
+  private async areSubjectsTeachersEqual(subjects1: any[],subjects2: any[]) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     const teachers1 = [...new Set(subjects1.map((s) => s.teacherId))].sort();
     const teachers2 = [...new Set(subjects2.map((s) => s.teacherId))].sort();
 
@@ -262,6 +264,8 @@ export class TimeTableReplaceComponent {
       allTeachersInTargetDayPeriod = this.collectTeachersAtPeriod(targetLocation.dayId,periodIndex,[this.draggedSession.sessionId, targetSession.sessionId]);
       allTeachersInDraggedDayPeriod = this.collectTeachersAtPeriod(draggedLocation.dayId,periodIndex,[this.draggedSession.sessionId, targetSession.sessionId]);
     }
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     if (this.hasIntersection(targetTeacherIds, allTeachersInDraggedDayPeriod)) {
       Swal.fire({
@@ -446,6 +450,9 @@ export class TimeTableReplaceComponent {
   async Save() {
     this.isLoading = true;
     await this.deduplicateSessionReplacements();
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.timetableServ.Edit(this.SessionReplaced, this.DomainName).subscribe(
       (d) => {
         Swal.fire({

@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TokenData } from '../../../../Models/token-data';
@@ -33,7 +33,7 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @InitLoader()
 export class BonusComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -51,7 +51,7 @@ export class BonusComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'bonusTypeName'];
+  keysArray: string[] = ['id', 'employeeEnName', 'bonusTypeName'];
 
   bonus: Bonus = new Bonus();
 
@@ -80,8 +80,8 @@ export class BonusComponent {
     public BonusServ: BonusService,
     public BounsTypeServ: BounsTypeService,
     public EmployeeServ: EmployeeService,
-    private loadingService: LoadingService 
-  ) {}
+    private loadingService: LoadingService
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -109,15 +109,17 @@ export class BonusComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -128,9 +130,11 @@ export class BonusComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -187,7 +191,9 @@ export class BonusComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -318,73 +324,73 @@ export class BonusComponent {
       }
     }
     if (field == 'minutes') {
-      if (this.bonus.minutes &&this.bonus.minutes > 60) {
+      if (this.bonus.minutes && this.bonus.minutes > 60) {
         this.bonus.minutes = 0;
       }
     }
   }
 
-isFormValid(): boolean {
-  this.SelectedEmployee =
-    this.employees.find((e) => e.id == this.bonus.employeeID) ||
-    new Employee();
-  
-  let isValid = true;
-  
-  // Basic field validation
-  for (const key in this.bonus) {
-    if (this.bonus.hasOwnProperty(key)) {
-      const field = key as keyof Bonus;
-      if (!this.bonus[field]) {
-        if (
-          field == 'date' ||
-          field == 'bonusTypeID' ||
-          field == 'employeeID'
-        ) {
-          this.validationErrors[field] = this.getRequiredErrorMessage(
-            this.capitalizeField(field)
-          );
-          isValid = false;
+  isFormValid(): boolean {
+    this.SelectedEmployee =
+      this.employees.find((e) => e.id == this.bonus.employeeID) ||
+      new Employee();
+
+    let isValid = true;
+
+    // Basic field validation
+    for (const key in this.bonus) {
+      if (this.bonus.hasOwnProperty(key)) {
+        const field = key as keyof Bonus;
+        if (!this.bonus[field]) {
+          if (
+            field == 'date' ||
+            field == 'bonusTypeID' ||
+            field == 'employeeID'
+          ) {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
+            isValid = false;
+          }
         }
       }
     }
-  }
 
-  // Business logic validations
-  if (
-    this.SelectedEmployee.hasAttendance != true &&
-    (this.bonus.bonusTypeID == 1 || this.bonus.bonusTypeID == 2)
-  ) {
-    isValid = false;
-    this.validationErrors['bonusTypeID'] = this.translate.instant(
-      'This Employee Has No Attendance so should take bonus by amount only'
-    );
-  }
+    // Business logic validations
+    if (
+      this.SelectedEmployee.hasAttendance != true &&
+      (this.bonus.bonusTypeID == 1 || this.bonus.bonusTypeID == 2)
+    ) {
+      isValid = false;
+      this.validationErrors['bonusTypeID'] = this.translate.instant(
+        'This Employee Has No Attendance so should take bonus by amount only'
+      );
+    }
 
-  if (
-    this.bonus.bonusTypeID == 3 &&
-    (this.bonus.amount == 0 || this.bonus.amount == null)
-  ) {
-    isValid = false;
-    this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
-  }
+    if (
+      this.bonus.bonusTypeID == 3 &&
+      (this.bonus.amount == 0 || this.bonus.amount == null)
+    ) {
+      isValid = false;
+      this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
+    }
 
-  if (
-    this.bonus.bonusTypeID == 2 &&
-    (this.bonus.numberOfBonusDays == 0 || this.bonus.numberOfBonusDays == null)
-  ) {
-    isValid = false;
-    this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('Number Of Bonus Days');
-  }
+    if (
+      this.bonus.bonusTypeID == 2 &&
+      (this.bonus.numberOfBonusDays == 0 || this.bonus.numberOfBonusDays == null)
+    ) {
+      isValid = false;
+      this.validationErrors['numberOfBonusDays'] = this.getRequiredErrorMessage('Number Of Bonus Days');
+    }
 
-  // if (this.bonus.bonusTypeID == 1 &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
-  if (this.bonus.bonusTypeID == 1 && (this.bonus.minutes == 0 || this.bonus.minutes == null) &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
-    isValid = false;
-    this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
-  }
+    // if (this.bonus.bonusTypeID == 1 &&(this.bonus.hours == 0 || this.bonus.hours == null)) {
+    if (this.bonus.bonusTypeID == 1 && (this.bonus.minutes == 0 || this.bonus.minutes == null) && (this.bonus.hours == 0 || this.bonus.hours == null)) {
+      isValid = false;
+      this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
+    }
 
-  return isValid;
-}
+    return isValid;
+  }
 
   capitalizeField(field: keyof Bonus): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -476,14 +482,14 @@ isFormValid(): boolean {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 
 }

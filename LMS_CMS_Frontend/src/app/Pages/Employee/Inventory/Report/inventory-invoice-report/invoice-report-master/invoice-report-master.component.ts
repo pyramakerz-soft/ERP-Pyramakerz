@@ -10,7 +10,7 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -329,8 +329,10 @@ onFlagSelected() {
     });
   }
 
-viewReport() {
+  async viewReport() {
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Invalid Date Range',
       text: 'Start date cannot be later than end date.',
@@ -515,8 +517,10 @@ DownloadAsPDF() {
   }, 500);
 }
 
-  Print() {
+  async Print() {
     if (this.transactionsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }

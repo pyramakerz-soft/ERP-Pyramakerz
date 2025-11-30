@@ -11,7 +11,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { TokenData } from '../../../../Models/token-data';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -110,8 +110,10 @@ export class SemesterViewComponent {
     this.router.navigateByUrl('Employee/Semester/' + this.DomainName + '/' + this.semester.academicYearID)
   }
 
-  Generate(){
+  async Generate(){
     if(this.WorkingWeeks.length == 0){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to generate the working weeks?',
@@ -136,6 +138,8 @@ export class SemesterViewComponent {
         }
       });
     } else{
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Are you sure?',
         text: 'This Action Will Remove All the Last Generated Weeks, Are You Sure?',
@@ -269,7 +273,9 @@ export class SemesterViewComponent {
     return isValid;
   }
 
-  Delete(id:number){
+  async Delete(id:number){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Week') + this.translate.instant('?'),
       icon: 'warning',
@@ -295,13 +301,15 @@ export class SemesterViewComponent {
     }
   }
   
-  checkFromToDate() {
+  async checkFromToDate() {
     let valid = true;
   
     const semesterFrom: Date = new Date(this.semester.dateFrom);
     const semesterTo: Date = new Date(this.semester.dateTo);
     const workingWeekFrom: Date = new Date(this.semesterWorkingWeek.dateFrom);
     const workingWeekTo: Date = new Date(this.semesterWorkingWeek.dateTo);
+   
+    const Swal = await import('sweetalert2').then(m => m.default);
    
     if (workingWeekTo.getTime() < workingWeekFrom.getTime()) {
       valid = false;
@@ -333,11 +341,13 @@ export class SemesterViewComponent {
     return valid;
   }
    
-  Save(){
+  async Save(){
     if(this.isFormValid()){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.semesterWorkingWeek.semesterID = this.semesterId
-      if(this.checkFromToDate()){
+      if(await this.checkFromToDate()){
         if(this.editWorkingWeek == false){
           this.semesterWorkingWeekService.Add(this.semesterWorkingWeek, this.DomainName).subscribe(
             data =>{

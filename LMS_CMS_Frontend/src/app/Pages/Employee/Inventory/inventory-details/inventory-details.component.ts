@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Bank } from '../../../../Models/Accounting/bank';
 import { Saves } from '../../../../Models/Accounting/saves';
@@ -338,11 +338,13 @@ export class InventoryDetailsComponent {
   moveToMaster() {
     this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
   }
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     // Use immediate translation
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(errorMessage);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -353,10 +355,12 @@ export class InventoryDetailsComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(message);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -367,10 +371,12 @@ export class InventoryDetailsComponent {
     });
   }
 
-  private showWarningAlert(message: string) {
+  private async showWarningAlert(message: string) {
     const translatedTitle = this.translate.instant('Warning');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(message);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'warning',
@@ -718,7 +724,7 @@ export class InventoryDetailsComponent {
     this.TotalandRemainingCalculate();
   }
 
-  Delete(row: InventoryDetails) {
+  async Delete(row: InventoryDetails) {
     // Translate immediately when method is called
     const translatedTitle =
       this.translate.instant('Are you sure you want to') +
@@ -731,6 +737,9 @@ export class InventoryDetailsComponent {
       '?';
     const translatedConfirm = this.translate.instant('Delete');
     const translatedCancel = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: translatedTitle,
       icon: 'warning',
@@ -1379,7 +1388,9 @@ export class InventoryDetailsComponent {
           this.TotalandRemainingCalculate();
           this.BarCode = '';
         },
-        (error) => {
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Item not found',

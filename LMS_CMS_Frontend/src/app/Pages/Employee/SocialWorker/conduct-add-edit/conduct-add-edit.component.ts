@@ -26,7 +26,7 @@ import { ConductTypeService } from '../../../../Services/Employee/SocialWorker/c
 import { ProcedureTypeService } from '../../../../Services/Employee/SocialWorker/procedure-type.service';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -226,8 +226,9 @@ export class ConductAddEditComponent {
     this.router.navigateByUrl('Employee/Conducts');
   }
 
-  Save() {
+  async Save() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.ConductServ.Add(this.Data, this.DomainName).subscribe(

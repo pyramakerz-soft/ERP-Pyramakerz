@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Grade } from '../../../../Models/LMS/grade';
 import { School } from '../../../../Models/school';
@@ -207,7 +207,9 @@ export class StudentCertificateComponent {
           this.isLoading = false;
           this.closeModal();
         },
-        (error) => {
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           this.isLoading = false; // Hide spinner
           Swal.fire({
             icon: 'error',
@@ -444,7 +446,9 @@ export class StudentCertificateComponent {
     return IsAllow;
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this Certificate Type?',
       icon: 'warning',

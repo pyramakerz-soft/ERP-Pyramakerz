@@ -8,7 +8,7 @@ import { EmployeeService } from '../../../../../Services/Employee/employee.servi
 import { DepartmentService } from '../../../../../Services/Employee/Administration/department.service';
 import { EvaluationEmployeeService } from '../../../../../Services/Employee/LMS/evaluation-employee.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 // import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -32,7 +32,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
   filterParams = {
     fromDate: '',
     toDate: '',
-    employeeId:  null as number | null,
+    employeeId: null as number | null,
     departmentId: null as number | null
   };
 
@@ -54,9 +54,9 @@ export class TeacherEvaluationReportComponent implements OnInit {
     private employeeService: EmployeeService,
     private departmentService: DepartmentService,
     private evaluationService: EvaluationEmployeeService,
-    private apiService: ApiService, 
-    private loadingService: LoadingService 
-  ) {}
+    private apiService: ApiService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
@@ -68,8 +68,8 @@ export class TeacherEvaluationReportComponent implements OnInit {
       (data) => {
         this.departments = data;
       },
-      (error) => {
-        console.error('Error loading departments:', error);
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
         Swal.fire('Error', 'Failed to load departments', 'error');
       }
     );
@@ -78,7 +78,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
   onDepartmentChange() {
     this.employees = [];
     this.filterParams.employeeId = null;
-    
+
     if (this.filterParams.departmentId) {
       this.loadEmployeesByDepartment(this.filterParams.departmentId);
     }
@@ -89,20 +89,22 @@ export class TeacherEvaluationReportComponent implements OnInit {
       (data) => {
         this.employees = data;
       },
-      (error) => {
-        console.error('Error loading employees:', error);
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
         Swal.fire('Error', 'Failed to load employees', 'error');
       }
     );
   }
 
- generateReport() {
+  async generateReport() {
     if (!this.filterParams.fromDate || !this.filterParams.toDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Warning', 'Please select both start and end dates', 'warning');
       return;
     }
 
     if (this.filterParams.fromDate > this.filterParams.toDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire('Invalid Date Range', 'Start date cannot be later than end date', 'warning');
       return;
     }
@@ -123,17 +125,17 @@ export class TeacherEvaluationReportComponent implements OnInit {
         // console.log('Fetched Evaluation Data:', data);
         this.evaluationData = data;
         this.hasData = data.length > 0;
-        
+
         if (this.hasData) {
           setTimeout(() => {
             this.createChart();
           }, 100);
         }
-        
+
         this.isLoading = false;
       },
-      (error) => {
-        console.error('Error fetching evaluation report:', error);
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
         Swal.fire('Error', 'Failed to fetch evaluation data', 'error');
         this.isLoading = false;
         this.hasData = false;
@@ -141,7 +143,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
     );
   }
 
-    clearFilters() {
+  clearFilters() {
     this.filterParams = {
       fromDate: '',
       toDate: '',
@@ -150,12 +152,12 @@ export class TeacherEvaluationReportComponent implements OnInit {
     };
     this.employees = [];
     this.reportGenerated = false; // Reset flag when clearing filters
-    
+
     if (this.chart) {
       this.chart.destroy();
       this.chart = null;
     }
-    
+
     this.evaluationData = [];
     this.hasData = false;
   }
@@ -169,7 +171,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
     try {
       // Group data by employee
       const employeeData: { [key: string]: any } = {};
-      
+
       this.evaluationData.forEach(item => {
         const employeeKey = `${item.employeeId}-${item.employeeEnglishName}`;
         if (!employeeData[employeeKey]) {
@@ -180,7 +182,7 @@ export class TeacherEvaluationReportComponent implements OnInit {
             borderColor: this.getOrderedColor(Object.keys(employeeData).length) // Assign color based on index
           };
         }
-        
+
         employeeData[employeeKey].data.push(parseFloat(item.overallAverage));
         employeeData[employeeKey].dates.push(item.date);
       });
@@ -292,36 +294,38 @@ export class TeacherEvaluationReportComponent implements OnInit {
 
   // ========== EXPORT METHODS ==========
 
-async downloadAsPDF() {
-  if (!this.hasData) {
-    Swal.fire('Warning', 'No data available to export', 'warning');
-    return;
-  }
+  async downloadAsPDF() {
+    if (!this.hasData) {
+      const Swal = await import('sweetalert2').then(m => m.default);
 
-  this.isExporting = true;
-  let reportElement: HTMLElement | null = null;
+      Swal.fire('Warning', 'No data available to export', 'warning');
+      return;
+    }
 
-  try {
-    const html2canvas = (await import('html2canvas')).default;
+    this.isExporting = true;
+    let reportElement: HTMLElement | null = null;
 
-    // Wait for the chart to be fully rendered
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const html2canvas = (await import('html2canvas')).default;
 
-    // Create a temporary container for the report (same as assignment report)
-    reportElement = document.createElement('div');
-    reportElement.style.width = '900px';
-    reportElement.style.padding = '32px';
-    reportElement.style.backgroundColor = '#fff';
-    reportElement.style.fontFamily = 'Arial, sans-serif';
-    reportElement.style.position = 'fixed';
-    reportElement.style.left = '-9999px';
-    reportElement.style.top = '0';
-    reportElement.style.color = '#333';
-    reportElement.style.boxSizing = 'border-box';
+      // Wait for the chart to be fully rendered
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Header
-    const headerDiv = document.createElement('div');
-    headerDiv.innerHTML = `
+      // Create a temporary container for the report (same as assignment report)
+      reportElement = document.createElement('div');
+      reportElement.style.width = '900px';
+      reportElement.style.padding = '32px';
+      reportElement.style.backgroundColor = '#fff';
+      reportElement.style.fontFamily = 'Arial, sans-serif';
+      reportElement.style.position = 'fixed';
+      reportElement.style.left = '-9999px';
+      reportElement.style.top = '0';
+      reportElement.style.color = '#333';
+      reportElement.style.boxSizing = 'border-box';
+
+      // Header
+      const headerDiv = document.createElement('div');
+      headerDiv.innerHTML = `
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="font-size: 2rem; font-weight: bold; color: #333; margin: 0;">
           Teacher Evaluation Report
@@ -329,31 +333,31 @@ async downloadAsPDF() {
 
       </div>
     `;
-    reportElement.appendChild(headerDiv);
+      reportElement.appendChild(headerDiv);
 
-    // Chart image
-    if (this.chartCanvas && this.chartCanvas.nativeElement) {
-      const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
-        scale: 2,
-        backgroundColor: '#fff',
-        logging: false,
-        useCORS: true,
-        allowTaint: false,
-        width: this.chartCanvas.nativeElement.scrollWidth,
-        height: this.chartCanvas.nativeElement.scrollHeight
-      });
-      const chartImg = document.createElement('img');
-      chartImg.src = chartCanvas.toDataURL('image/png');
-      chartImg.style.display = 'block';
-      chartImg.style.margin = '0 auto 32px auto';
-      chartImg.style.maxWidth = '100%';
-      chartImg.style.height = 'auto';
-      reportElement.appendChild(chartImg);
-    }
+      // Chart image
+      if (this.chartCanvas && this.chartCanvas.nativeElement) {
+        const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
+          scale: 2,
+          backgroundColor: '#fff',
+          logging: false,
+          useCORS: true,
+          allowTaint: false,
+          width: this.chartCanvas.nativeElement.scrollWidth,
+          height: this.chartCanvas.nativeElement.scrollHeight
+        });
+        const chartImg = document.createElement('img');
+        chartImg.src = chartCanvas.toDataURL('image/png');
+        chartImg.style.display = 'block';
+        chartImg.style.margin = '0 auto 32px auto';
+        chartImg.style.maxWidth = '100%';
+        chartImg.style.height = 'auto';
+        reportElement.appendChild(chartImg);
+      }
 
-    // Details
-    const detailsDiv = document.createElement('div');
-    detailsDiv.innerHTML = `
+      // Details
+      const detailsDiv = document.createElement('div');
+      detailsDiv.innerHTML = `
       <div style="margin: 24px 0;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
           <div><strong>Date Range:</strong> ${this.filterParams.fromDate} to ${this.filterParams.toDate}</div>
@@ -365,66 +369,66 @@ async downloadAsPDF() {
         </div>
       </div>
     `;
-    reportElement.appendChild(detailsDiv);
+      reportElement.appendChild(detailsDiv);
 
-    
 
-    // Append to document body
-    document.body.appendChild(reportElement);
 
-    // Wait for rendering
-    await new Promise(resolve => setTimeout(resolve, 300));
+      // Append to document body
+      document.body.appendChild(reportElement);
 
-    // Convert to image
-    const reportImage = await html2canvas(reportElement, {
-      scale: 2,
-      backgroundColor: '#fff',
-      logging: false,
-      useCORS: true,
-      allowTaint: false,
-      width: reportElement.scrollWidth,
-      height: reportElement.scrollHeight
-    });
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Clean up
-    if (reportElement.parentNode) {
-      document.body.removeChild(reportElement);
-    }
+      // Convert to image
+      const reportImage = await html2canvas(reportElement, {
+        scale: 2,
+        backgroundColor: '#fff',
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        width: reportElement.scrollWidth,
+        height: reportElement.scrollHeight
+      });
 
-    const imgData = reportImage.toDataURL('image/png');
+      // Clean up
+      if (reportElement.parentNode) {
+        document.body.removeChild(reportElement);
+      }
 
-    // Create PDF in portrait mode (like a standard document)
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgData = reportImage.toDataURL('image/png');
 
-    // Calculate image dimensions to fit the page
-    const imgWidth = pdfWidth - 20; // 10mm margins on each side
-    const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
+      // Create PDF in portrait mode (like a standard document)
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    // Add image to PDF with centered margins
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      // Calculate image dimensions to fit the page
+      const imgWidth = pdfWidth - 20; // 10mm margins on each side
+      const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
 
-    // Save PDF
-    pdf.save(`Teacher_Evaluation_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      // Add image to PDF with centered margins
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
 
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
-  } finally {
-    this.isExporting = false;
-    // Safety cleanup
-    if (reportElement && reportElement.parentNode === document.body) {
-      document.body.removeChild(reportElement);
+      // Save PDF
+      pdf.save(`Teacher_Evaluation_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+
+    } catch (error) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      this.isExporting = false;
+      // Safety cleanup
+      if (reportElement && reportElement.parentNode === document.body) {
+        document.body.removeChild(reportElement);
+      }
     }
   }
-}
 
-private getUniqueEmployeeCount(): number {
-  if (!this.hasData) return 0;
-  const uniqueEmployees = new Set(this.evaluationData.map(item => item.employeeId));
-  return uniqueEmployees.size;
-}
+  private getUniqueEmployeeCount(): number {
+    if (!this.hasData) return 0;
+    const uniqueEmployees = new Set(this.evaluationData.map(item => item.employeeId));
+    return uniqueEmployees.size;
+  }
 
   // private setupPrintWindowCloseDetection(printWindow: Window) {
   //   // Check if print window is closed
@@ -454,38 +458,40 @@ private getUniqueEmployeeCount(): number {
   //   }
   // }
 
-printReport() {
-  if (!this.hasData) {
-    Swal.fire('Warning', 'No data available to print', 'warning');
-    return;
-  }
+  async printReport() {
+    if (!this.hasData) {
+      const Swal = await import('sweetalert2').then(m => m.default);
 
-  this.isExporting = true;
-
-  // Store cleanup function reference
-  let cleanupCalled = false;
-
-  let cleanup = () => {
-    if (cleanupCalled) return;
-    cleanupCalled = true;
-
-    const printContainer = document.querySelector('.print-overlay');
-    if (printContainer && printContainer.parentNode) {
-      document.body.removeChild(printContainer);
+      Swal.fire('Warning', 'No data available to print', 'warning');
+      return;
     }
 
-    // Remove print styles
-    const printStyles = document.querySelectorAll('style[data-print-style]');
-    printStyles.forEach(style => style.remove());
+    this.isExporting = true;
 
-    this.isExporting = false;
-  };
+    // Store cleanup function reference
+    let cleanupCalled = false;
 
-  try {
-    // Create a hidden print container
-    const printContainer = document.createElement('div');
-    printContainer.className = 'print-overlay';
-    printContainer.style.cssText = `
+    let cleanup = () => {
+      if (cleanupCalled) return;
+      cleanupCalled = true;
+
+      const printContainer = document.querySelector('.print-overlay');
+      if (printContainer && printContainer.parentNode) {
+        document.body.removeChild(printContainer);
+      }
+
+      // Remove print styles
+      const printStyles = document.querySelectorAll('style[data-print-style]');
+      printStyles.forEach(style => style.remove());
+
+      this.isExporting = false;
+    };
+
+    try {
+      // Create a hidden print container
+      const printContainer = document.createElement('div');
+      printContainer.className = 'print-overlay';
+      printContainer.style.cssText = `
       position: fixed;
       top: 0;
       left: 0;
@@ -498,10 +504,10 @@ printReport() {
       visibility: hidden;
     `;
 
-    // First, get the chart as image
-    this.getChartAsImage().then((chartImage) => {
-      // Create print content with the chart image
-      const printContent = `
+      // First, get the chart as image
+      this.getChartAsImage().then((chartImage) => {
+        // Create print content with the chart image
+        const printContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -602,15 +608,15 @@ printReport() {
         </html>
       `;
 
-      printContainer.innerHTML = printContent;
-      document.body.appendChild(printContainer);
+        printContainer.innerHTML = printContent;
+        document.body.appendChild(printContainer);
 
-      // Wait for content to be rendered
-      setTimeout(() => {
-        // Add print styles with data attribute for easy removal
-        const printStyles = document.createElement('style');
-        printStyles.setAttribute('data-print-style', 'true');
-        printStyles.textContent = `
+        // Wait for content to be rendered
+        setTimeout(() => {
+          // Add print styles with data attribute for easy removal
+          const printStyles = document.createElement('style');
+          printStyles.setAttribute('data-print-style', 'true');
+          printStyles.textContent = `
           @media screen {
             .print-overlay {
               display: none !important;
@@ -636,139 +642,139 @@ printReport() {
             }
           }
         `;
-        document.head.appendChild(printStyles);
+          document.head.appendChild(printStyles);
 
-        // Strategy 1: Use beforeprint and afterprint events
-        const handleAfterPrint = () => {
-          window.removeEventListener('afterprint', handleAfterPrint);
-          cleanup();
-        };
-
-        const handleBeforePrint = () => {
-          window.removeEventListener('beforeprint', handleBeforePrint);
-          window.addEventListener('afterprint', handleAfterPrint);
-        };
-
-        window.addEventListener('beforeprint', handleBeforePrint);
-
-        // Strategy 2: Fallback timeout for browsers that don't fire afterprint
-        const fallbackTimeout = setTimeout(() => {
-          if (!cleanupCalled) {
-            console.warn('Fallback cleanup triggered');
+          // Strategy 1: Use beforeprint and afterprint events
+          const handleAfterPrint = () => {
+            window.removeEventListener('afterprint', handleAfterPrint);
             cleanup();
-          }
-        }, 3000); // 3 second fallback
+          };
 
-        // Strategy 3: Listen for focus event (when print dialog closes)
-        const handleFocus = () => {
-          window.removeEventListener('focus', handleFocus);
-          if (!cleanupCalled) {
-            setTimeout(() => {
-              if (!cleanupCalled) {
-                cleanup();
-              }
-            }, 500);
-          }
-        };
+          const handleBeforePrint = () => {
+            window.removeEventListener('beforeprint', handleBeforePrint);
+            window.addEventListener('afterprint', handleAfterPrint);
+          };
 
-        window.addEventListener('focus', handleFocus);
+          window.addEventListener('beforeprint', handleBeforePrint);
 
-        // Update cleanup to clear the timeout
-        const originalCleanup = cleanup;
-        cleanup = () => {
-          clearTimeout(fallbackTimeout);
-          window.removeEventListener('beforeprint', handleBeforePrint);
-          window.removeEventListener('afterprint', handleAfterPrint);
-          window.removeEventListener('focus', handleFocus);
-          originalCleanup();
-        };
+          // Strategy 2: Fallback timeout for browsers that don't fire afterprint
+          const fallbackTimeout = setTimeout(() => {
+            if (!cleanupCalled) {
+              console.warn('Fallback cleanup triggered');
+              cleanup();
+            }
+          }, 3000); // 3 second fallback
 
-        // Trigger print
-        window.print();
+          // Strategy 3: Listen for focus event (when print dialog closes)
+          const handleFocus = () => {
+            window.removeEventListener('focus', handleFocus);
+            if (!cleanupCalled) {
+              setTimeout(() => {
+                if (!cleanupCalled) {
+                  cleanup();
+                }
+              }, 500);
+            }
+          };
 
-      }, 500);
+          window.addEventListener('focus', handleFocus);
 
-    }).catch(error => {
-      console.error('Error generating chart image:', error);
-      Swal.fire('Error', 'Failed to generate chart for printing', 'error');
+          // Update cleanup to clear the timeout
+          const originalCleanup = cleanup;
+          cleanup = () => {
+            clearTimeout(fallbackTimeout);
+            window.removeEventListener('beforeprint', handleBeforePrint);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            window.removeEventListener('focus', handleFocus);
+            originalCleanup();
+          };
+
+          // Trigger print
+          window.print();
+
+        }, 500);
+
+      }).catch(async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+        Swal.fire('Error', 'Failed to generate chart for printing', 'error');
+        this.isExporting = false;
+      });
+
+    } catch (error) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to print report', 'error');
       this.isExporting = false;
-    });
 
-  } catch (error) {
-    console.error('Error printing report:', error);
-    Swal.fire('Error', 'Failed to print report', 'error');
-    this.isExporting = false;
-    
-    // Cleanup on error
-    const printContainer = document.querySelector('.print-overlay');
-    if (printContainer && printContainer.parentNode) {
-      document.body.removeChild(printContainer);
+      // Cleanup on error
+      const printContainer = document.querySelector('.print-overlay');
+      if (printContainer && printContainer.parentNode) {
+        document.body.removeChild(printContainer);
+      }
     }
   }
-}
 
-private getChartAsImage(): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    if (!this.chartCanvas?.nativeElement) {
-      reject('Chart canvas not available');
-      return;
-    }
-    const html2canvas = (await import('html2canvas')).default;
+  private getChartAsImage(): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.chartCanvas?.nativeElement) {
+        reject('Chart canvas not available');
+        return;
+      }
+      const html2canvas = (await import('html2canvas')).default;
 
-    html2canvas(this.chartCanvas.nativeElement, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      useCORS: true
-    }).then(chartCanvas => {
-      resolve(chartCanvas.toDataURL('image/png'));
-    }).catch(error => {
-      reject(error);
+      html2canvas(this.chartCanvas.nativeElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      }).then(chartCanvas => {
+        resolve(chartCanvas.toDataURL('image/png'));
+      }).catch(error => {
+        reject(error);
+      });
     });
-  });
-}
+  }
 
 
-// private getSummaryTableHTML(): string {
-//   const summaryData = this.getSummaryData();
-//   if (!summaryData.length) return '';
+  // private getSummaryTableHTML(): string {
+  //   const summaryData = this.getSummaryData();
+  //   if (!summaryData.length) return '';
 
-//   let tableHTML = `
-//     <div class="page-break">
-//       <h3 style="font-size: 20px; margin-bottom: 15px; color: #333;">Employee Performance Summary</h3>
-//       <table class="summary-table">
-//         <thead>
-//           <tr>
-//             <th>Employee Name</th>
-//             <th>Evaluations</th>
-//             <th>Average Score</th>
-//             <th>Min Score</th>
-//             <th>Max Score</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//   `;
+  //   let tableHTML = `
+  //     <div class="page-break">
+  //       <h3 style="font-size: 20px; margin-bottom: 15px; color: #333;">Employee Performance Summary</h3>
+  //       <table class="summary-table">
+  //         <thead>
+  //           <tr>
+  //             <th>Employee Name</th>
+  //             <th>Evaluations</th>
+  //             <th>Average Score</th>
+  //             <th>Min Score</th>
+  //             <th>Max Score</th>
+  //           </tr>
+  //         </thead>
+  //         <tbody>
+  //   `;
 
-//   summaryData.forEach(employee => {
-//     tableHTML += `
-//       <tr>
-//         <td>${employee.employeeName}</td>
-//         <td>${employee.evaluations}</td>
-//         <td>${employee.averageScore.toFixed(2)}</td>
-//         <td>${employee.minScore.toFixed(2)}</td>
-//         <td>${employee.maxScore.toFixed(2)}</td>
-//       </tr>
-//     `;
-//   });
+  //   summaryData.forEach(employee => {
+  //     tableHTML += `
+  //       <tr>
+  //         <td>${employee.employeeName}</td>
+  //         <td>${employee.evaluations}</td>
+  //         <td>${employee.averageScore.toFixed(2)}</td>
+  //         <td>${employee.minScore.toFixed(2)}</td>
+  //         <td>${employee.maxScore.toFixed(2)}</td>
+  //       </tr>
+  //     `;
+  //   });
 
-//   tableHTML += `
-//         </tbody>
-//       </table>
-//     </div>
-//   `;
+  //   tableHTML += `
+  //         </tbody>
+  //       </table>
+  //     </div>
+  //   `;
 
-//   return tableHTML;
-// }
+  //   return tableHTML;
+  // }
 
   private getDepartmentName(): string {
     if (!this.filterParams.departmentId) return 'All Departments';

@@ -11,7 +11,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Subject } from '../../../../Models/LMS/subject';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { AssignmentType } from '../../../../Models/LMS/assignment-type';
@@ -607,7 +607,7 @@ export class AssignmentComponent {
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
   }
 
-  toggleClassesToChooseStudents() {
+  async toggleClassesToChooseStudents() {
     this.viewStudents = false
     this.validationErrors['studentClassroomIDs'] = '';
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
@@ -618,6 +618,8 @@ export class AssignmentComponent {
         this.viewClassStudents = false
       }
     } else {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'warning',
         title: 'Oops...',
@@ -727,8 +729,10 @@ export class AssignmentComponent {
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -745,8 +749,11 @@ export class AssignmentComponent {
             this.GetAllData(this.CurrentPage, this.PageSize)
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+            
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -760,7 +767,9 @@ export class AssignmentComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Assignment') + this.translate.instant('?'),
       icon: 'warning',

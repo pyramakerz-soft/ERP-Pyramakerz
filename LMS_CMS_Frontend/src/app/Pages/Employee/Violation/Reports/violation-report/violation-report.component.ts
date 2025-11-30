@@ -10,7 +10,7 @@ import { ViolationTypeService } from '../../../../../Services/Employee/Violation
 import { ApiService } from '../../../../../Services/api.service';
 import { AccountService } from '../../../../../Services/account.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core'; 
@@ -132,8 +132,10 @@ export class ViolationReportComponent {
     }
   }
 
-  ViewReport() {
+  async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -163,8 +165,9 @@ export class ViolationReportComponent {
           this.prepareExportData(); // Prepare data for export
           this.showTable = true;
         },
-        (error) => {
-          console.error('Error fetching violation report:', error);
+        async (error) => {
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             title: 'Error',
             text: 'Failed to fetch violation report data.',
@@ -269,8 +272,10 @@ export class ViolationReportComponent {
     ];
   }
 
-  Print() {
+  async Print() {
     if (this.tableDataForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -315,8 +320,10 @@ export class ViolationReportComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.tableDataForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -328,8 +335,9 @@ export class ViolationReportComponent {
     }, 500);
   }
 
-  async DownloadAsExcel() {
+  async DownloadAsExcel() {    
     if (!this.tableData || this.tableData.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -386,7 +394,8 @@ export class ViolationReportComponent {
           .slice(0, 10)}.xlsx`,
       });
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report.',

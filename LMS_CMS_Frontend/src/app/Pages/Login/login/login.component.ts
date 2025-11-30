@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -65,9 +65,11 @@ export class LoginComponent {
     }
   }
   // Helper method to show translated error messages
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -79,9 +81,11 @@ export class LoginComponent {
   }
 
   // Helper method to show warning messages
-  private showWarningAlert(message: string) {
+  private async showWarningAlert(message: string) {
     const translatedTitle = this.translate.instant('Warning');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'warning',

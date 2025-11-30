@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { ApiService } from '../../../../Services/api.service';
 import { DiagnosisService } from '../../../../Services/Employee/Clinic/diagnosis.service';
@@ -71,9 +71,11 @@ export class DiagnosisComponent implements OnInit {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -84,9 +86,11 @@ export class DiagnosisComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',

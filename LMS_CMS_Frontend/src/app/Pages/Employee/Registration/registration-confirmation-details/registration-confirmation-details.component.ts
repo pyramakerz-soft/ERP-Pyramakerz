@@ -15,7 +15,7 @@ import { RegistrationFormStateService } from '../../../../Services/Employee/Regi
 import { FormsModule } from '@angular/forms';
 import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
 import { RegisterationFormParent } from '../../../../Models/Registration/registeration-form-parent';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -145,7 +145,9 @@ export class RegistrationConfirmationDetailsComponent {
     }
   }
 
-  Submit(){
+  async Submit(){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.registrationFormParentService.Edit(this.registrationParentID, this.selectedState, this.DomainName).subscribe(
       (data) => {
         Swal.fire({

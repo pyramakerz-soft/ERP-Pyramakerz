@@ -12,7 +12,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
 import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -179,8 +179,11 @@ export class ClassroomSubjectsComponent {
         this.getSubjectsByClassID()
         this.isLoading = false
       },
-      error =>{
+      async error =>{
         this.isLoading = false
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'warning', 
@@ -200,8 +203,11 @@ export class ClassroomSubjectsComponent {
         this.closeModal()
         this.isLoading = false
       },
-      error =>{
+      async error =>{
         this.isLoading = false
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'warning', 
@@ -216,7 +222,9 @@ export class ClassroomSubjectsComponent {
     this.classroomSubjectService.IsSubjectHide(classSubject, this.DomainName).subscribe(
       data =>{ 
       },
-      error =>{
+      async error =>{
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           title: error.error,
           icon: 'warning', 
@@ -227,7 +235,9 @@ export class ClassroomSubjectsComponent {
     )
   }
 
-  onToggleNotAllowed() {
+  async onToggleNotAllowed() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'You Are Not Allowed To Edit This',
       icon: 'warning', 

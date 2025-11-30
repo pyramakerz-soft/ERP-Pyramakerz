@@ -13,7 +13,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -303,8 +303,10 @@ export class FloorComponent {
     return IsAllow;
   }
 
-  SaveFloor() { 
+  async SaveFloor() { 
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.floor.buildingID = this.buildingId;
       if (this.editFloor == false) {
@@ -347,7 +349,9 @@ export class FloorComponent {
     }
   }
 
-  deleteFloor(id: number) {
+  async deleteFloor(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Floor') + this.translate.instant('?'),
       icon: 'warning',
