@@ -136,7 +136,7 @@
                         {{ Data.studentName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
+                        <select [disabled]="this.mode=='View'" [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'feeTypeID', value: $event })"
                             class="w-full border border-gray-300 px-2 py-1 rounded-md">
                             <option value=0 disabled selected hidden>Select Fees Type</option>
                             <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
@@ -146,10 +146,10 @@
                         </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                        <input [disabled]="this.mode=='View'" (input)="validateNumberEditDetails(row ,$event, 'amount')" [(ngModel)]="row.amount" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <input [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
+                        <input [disabled]="this.mode=='View'" [(ngModel)]="row.date" type="date" (ngModelChange)="onInputValueChangeDetails(row,{ field: 'date', value: $event })"
                             class="w-full border border-gray-300 px-2 py-1 rounded-md">
                         <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['date']" class="text-red-500 ml-3 font-normal">
                             {{ validationErrorsForDetails[row.id]['date'] }}

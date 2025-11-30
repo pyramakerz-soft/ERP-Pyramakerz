@@ -48,6 +48,12 @@ export class AssignmentReportItem {
     public numberSuccessful: number = 0,
     public numberFailed: number = 0,
     public assigned: number = 0,
-    public absent: number = 0
+    public absent: number = 0,
+    public assignedStudents: number = 0,
+    public submittedStudents: number = 0,
+    public successfulStudents: number = 0,
+    public failedStudents: number = 0,
+    public pendingStudents: number = 0,
+    public successRate: number = 0
   ) {}
 }

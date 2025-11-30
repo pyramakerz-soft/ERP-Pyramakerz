@@ -328,7 +328,7 @@ export class StudentsInformationFormReportComponent {
                   Admission_Date: student.admissionDate || '',
                   Identity_of_Father: student.guardianNationalID || '',
                   Email_Address: student.email || '',
-                  Bus: student.isRegisteredToBus ? 'Yes' : 'No',
+                  Bus: student.isRegisteredToBus || 'No',
                   Religion: student.religion || '',
                   Pre_School: student.previousSchool || '',
                 };

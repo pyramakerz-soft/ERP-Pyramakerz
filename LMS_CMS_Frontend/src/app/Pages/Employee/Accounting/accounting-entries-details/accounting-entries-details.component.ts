@@ -192,6 +192,7 @@ export class AccountingEntriesDetailsComponent {
   GetAccountingEntriesByID() {
     this.accountingEntriesService.GetByID(this.AccountingEntriesID, this.DomainName).subscribe(
       (data) => {
+        console.log(123,data)
         this.accountingEntries = data
         let totalCredit = 0
         let totalDebit = 0
