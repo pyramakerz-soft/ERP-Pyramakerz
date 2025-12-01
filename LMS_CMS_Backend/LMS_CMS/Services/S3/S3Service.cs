@@ -192,10 +192,10 @@ namespace LMS_CMS_PL.Services.S3
         public string GetFileUrl(string key, IConfiguration config)
         {
             key = key.TrimStart('/');
-            var region = config["AWS:Region"] ?? "us-east-1";
+            //var region = config["AWS:Region"] ?? "us-east-1";
 
-            return $"https://{_bucketName}.s3.{region}.amazonaws.com/{key}";
-            //return $"https://d393tpgdl2mqkp.cloudfront.net/{key}";
+            //return $"https://{_bucketName}.s3.{region}.amazonaws.com/{key}";
+            return $"https://d393tpgdl2mqkp.cloudfront.net/{key}";
         }
 
         public async Task<bool> DeleteFileAsync(string subDirectory, string domain, string fileName)
