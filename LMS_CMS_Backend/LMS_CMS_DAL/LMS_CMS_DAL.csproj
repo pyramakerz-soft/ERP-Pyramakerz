@@ -42,6 +42,7 @@
     <EmbeddedResource Include="DbScripts\GetDistinctDateCount.sql" />
     <EmbeddedResource Include="DbScripts\GetEntriesCountV02.sql" />
     <EmbeddedResource Include="DbScripts\GetEntriesCount.sql" />
+    <EmbeddedResource Include="DbScripts\GetSubAccountInfoV03.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountInfoV02.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>
