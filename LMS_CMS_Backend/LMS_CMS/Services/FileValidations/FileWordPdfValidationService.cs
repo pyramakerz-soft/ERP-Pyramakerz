@@ -53,11 +53,11 @@ namespace LMS_CMS_PL.Services.FileValidations
                 if (IsExecutableContent(header))
                     return "File contains executable content";
 
-                if (_fileSignatures.TryGetValue(extension, out var signature))
-                {
-                    if (!header.Take(signature.Length).SequenceEqual(signature))
-                        return $"File content doesn't match its extension. Expected {extension} document.";
-                }
+                //if (_fileSignatures.TryGetValue(extension, out var signature))
+                //{
+                //    if (!header.Take(signature.Length).SequenceEqual(signature))
+                //        return $"File content doesn't match its extension. Expected {extension} document.";
+                //}
 
                 stream.Position = 0;
                 //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
