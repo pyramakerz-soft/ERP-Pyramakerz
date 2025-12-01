@@ -152,6 +152,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         this.performanceTypeService.Get(this.DomainName)
       );
       this.performanceTypes = data || [];
+      console.log(123,this.performanceTypes)
     } catch (error) {
       console.error('Error loading performance types:', error);
       this.performanceTypes = [];
@@ -497,6 +498,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         row['Comment'] = item.comment || '-';
         return row;
       });
+      console.log(this.performanceTypes )
     } else {
       this.tableDataForExport = this.tableData.map((item) => {
         const row: any = {
