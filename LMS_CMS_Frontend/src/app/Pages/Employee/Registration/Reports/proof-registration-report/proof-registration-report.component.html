@@ -98,7 +98,7 @@
                 <div class="text-lg leading-8"><strong>Date :</strong> {{CurrentDate}}</div>
             </div>
             <div class="w-1/2 text-right">
-                <div class="text-lg leading-8">{{ArabicCurrentDate}} <strong>:التاريخ</strong></div>
+                <div class="text-lg leading-8"><strong>التاريخ :</strong>{{ArabicCurrentDate}} </div>
             </div>
         </div>
 
@@ -108,7 +108,7 @@
                 <div class="text-lg leading-8"><strong>Dear Sirs ,</strong></div>
             </div>
             <div class="w-1/2 text-right">
-                <div class="text-lg leading-8"><strong>تحية طيبة وبعد</strong></div>
+                <div class="text-lg leading-8"><strong>, تحية طيبة وبعد</strong></div>
             </div>
         </div>
 
@@ -118,7 +118,7 @@
                 <div class="text-lg leading-8">This is to certify that Student / {{getStudentName()}}</div>
             </div>
             <div class="w-1/2 text-right">
-                <div class="text-lg leading-8">{{getStudentArabicName()}} <strong>/ نفيدكم بأن الطالبة</strong></div>
+                <div class="text-lg leading-8"><strong>نفيدكم بأن الطالب/ة /</strong>{{getStudentArabicName()}} </div>
             </div>
         </div>
 
@@ -128,7 +128,7 @@
                 <div class="text-lg leading-8">{{getNationality()}} Nationality</div>
             </div>
             <div class="w-1/2 text-right">
-                <div class="text-lg leading-8">{{getArabicNationality()}} <strong>/ تحمل الجنسية</strong></div>
+                <div class="text-lg leading-8"> <strong>تحمل الجنسية /</strong> {{getArabicNationality()}}</div>
             </div>
         </div>
 
@@ -155,10 +155,10 @@
         <!-- Registration -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">Is registered in this school this year {{getCurrentGrade()}}</div>
+                <div class="text-lg leading-8">Is registered in this school this year {{DataToPrint?.student?.startAcademicYearName}}</div>
             </div>
             <div class="w-1/2 text-right">
-                <div class="text-lg leading-8">{{getCurrentGrade()}} <strong>مقيدة لدينا من للعام الدراسي الحالى</strong></div>
+                <div class="text-lg leading-8">{{DataToPrint?.student?.startAcademicYearName}} <strong>مقيدة لدينا من للعام الدراسي الحالى</strong></div>
             </div>
         </div>
 
