@@ -141,13 +141,14 @@ export class OrderComponent {
   }
   
   DownloadOrder(id:number) {  
+    console.log(this.User_Data_After_Login.type)
     if(this.User_Data_After_Login.type == 'employee'){ 
       this.router.navigate(['Employee/Order', id], { queryParams: { download: 'true' } }); 
 
     } else if(this.User_Data_After_Login.type == 'student'){ 
       this.router.navigate(['Student/Order', id], { queryParams: { download: 'true' } }); 
     } 
-    else{
+    else if(this.User_Data_After_Login.type == 'parent'){
       this.router.navigate(['Parent/Order', id], { queryParams: { download: 'true' } }); 
     }
   }
