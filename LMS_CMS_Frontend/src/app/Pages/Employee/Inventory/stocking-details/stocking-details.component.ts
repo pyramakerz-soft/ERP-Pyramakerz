@@ -318,6 +318,7 @@ export class StockingDetailsComponent {
         );
         if (this.HasBallance) {
           this.TableData = this.TableData.filter((d) => d.currentStock !== 0);
+          this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter((d) => d.currentStock !== 0);
         }
       }
     });
@@ -372,9 +373,7 @@ export class StockingDetailsComponent {
               this.FilteredDetails
             );
             if (this.HasBallance) {
-              this.TableData = this.OriginDetails.filter(
-                (d) => d.currentStock != 0
-              );
+              this.TableData = this.OriginDetails.filter((d) => d.currentStock != 0);
             }
           }
         }
@@ -778,8 +777,11 @@ export class StockingDetailsComponent {
           5,
           (s) => s.theDifference < 0
         );
+          await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+          this.router.navigateByUrl(`Employee/Stocking`);
       }
       if (this.mode === 'Edit') {
+        console.log(this.Data)
         this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
           console.log(12345,this.Data)
           if (this.Data.additionId != 0 && this.Data.additionId != null) {
@@ -796,6 +798,8 @@ export class StockingDetailsComponent {
             5,
             (s) => s.theDifference < 0
           );
+          this.Data.newDetailsWhenEdit =[]
+          this.Data.updatedStockingDetails =[]
           await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
           this.router.navigateByUrl(`Employee/Stocking`);
         })
