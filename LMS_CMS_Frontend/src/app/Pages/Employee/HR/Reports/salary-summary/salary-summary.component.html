@@ -165,7 +165,7 @@
                 { keyEn: 'Month: ' + this.month + '/' +this.year,  keyAr: this.month+ '/' +this.year + ': شهر' },
                 { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
                 { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
-                { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: getArEmployeeName() + ': الموظف' }
+                { keyEn: 'Employee: ' + getEmployeeName(),     keyAr: ' الموظف :  ' + getArEmployeeName()  }
                 ]"
                 [tableHeaders]="['Employee EnName', 'Basic Salary', 'Total Bonus', 'Total Overtime', 'Total Deductions', 'Total Loans', 'netSalary']" [tableData]="this.tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
