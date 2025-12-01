@@ -431,7 +431,7 @@ export class StudentInformationComponent {
               //   value: d.student?.placeOfBirth || '-',
               // },
               {
-                key: 'Pre-School',
+                key: 'previous School',
                 value: d.student?.previousSchool || '-',
               },
             ],

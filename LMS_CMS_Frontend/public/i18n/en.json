@@ -1410,5 +1410,27 @@
   "MorningPrice" : "Morning Price",
   "TwoWaysPrice" : "Two Ways Price",
   "Deduction Percentage after cutoff date": "Deduction Percentage after cutoff date",
-  "Attendance Report" : "Attendance Report"
+  "Attendance Report" : "Attendance Report",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"Conduct Types" : "Conduct Types",
+"Procedure Types" : "Procedure Types",
+"Login" : "Login"
 }

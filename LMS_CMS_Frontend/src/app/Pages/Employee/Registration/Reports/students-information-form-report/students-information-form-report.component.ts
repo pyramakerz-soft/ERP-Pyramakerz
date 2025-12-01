@@ -158,14 +158,14 @@ export class StudentsInformationFormReportComponent {
     this.getAllClass();
   }
 
-  onClassChange() {
-    this.showTable = false;
-    this.showViewReportBtn =
-      this.SelectedSchoolId !== 0 &&
-      this.SelectedYearId !== 0 &&
-      this.SelectedGradeId !== 0 &&
-      this.SelectedClassId !== 0;
-  }
+onClassChange() {
+  this.showTable = false;
+  this.showViewReportBtn = 
+    this.SelectedSchoolId !== 0 &&
+    this.SelectedYearId !== 0 &&
+    this.SelectedGradeId !== 0 &&
+    this.SelectedClassId !== 0;
+}
 
   async ViewReport() {
     await this.GetData();
@@ -297,62 +297,68 @@ export class StudentsInformationFormReportComponent {
     });
   }
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ
-        .GetByClassIDReport(
-          this.SelectedSchoolId,
-          this.SelectedClassId,
-          this.DomainName
-        )
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = d;
-            this.school = d.school;
-            this.students = d.students;
-            this.tableData = this.students.map(
-              (student: any, index: number) => {
-                return {
-                  No: index + 1, // No
-                  Name: student.en_name || '',
-                  الاسم: student.ar_name || '',
-                  Mobile_1: student.mobile || '',
-                  Mobile_2: student.phone || '',
-                  Passport: student.passportNo || '',
-                  Nationality: student.nationalityEnName || '',
-                  Note: student.note || '',
-                  Date_Of_Birth: student.dateOfBirth || '',
-                  Place_Of_Birth: student.placeOfBirth || '',
-                  Passport_Expired: student.passportExpiredDate || '',
-                  identities_Expired: student.nationalIDExpiredDate || '',
-                  Admission_Date: student.admissionDate || '',
-                  Identity_of_Father: student.guardianNationalID || '',
-                  Email_Address: student.email || '',
-                  Bus: student.isRegisteredToBus || 'No',
-                  Religion: student.religion || '',
-                  Pre_School: student.previousSchool || '',
-                };
-              }
-            );
-            this.CurrentDate = d.date;
-            this.CurrentDate = this.formatDate(
-              this.CurrentDate,
-              this.direction
-            );
-            this.ArabicCurrentDate = new Date(
-              this.CurrentDate
-            ).toLocaleDateString('ar-EG', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            });
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          },
-        });
-    });
-  }
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.studentServ
+      .GetByClassIDReport(
+        this.SelectedSchoolId,
+        this.SelectedClassId,
+        this.DomainName
+      )
+      .subscribe({
+        next: (d) => {
+          this.DataToPrint = d;
+          this.school = d.school;
+          this.students = d.students || []; // Ensure students is always an array
+          this.tableData = this.students.map(
+            (student: any, index: number) => {
+              return {
+                No: index + 1, // No
+                Name: student.en_name || '',
+                الاسم: student.ar_name || '',
+                Mobile_1: student.mobile || '',
+                Mobile_2: student.phone || '',
+                Passport: student.passportNo || '',
+                Nationality: student.nationalityEnName || '',
+                Note: student.note || '',
+                Date_Of_Birth: student.dateOfBirth || '',
+                Place_Of_Birth: student.placeOfBirth || '',
+                Passport_Expired: student.passportExpiredDate || '',
+                identities_Expired: student.nationalIDExpiredDate || '',
+                Admission_Date: student.admissionDate || '',
+                Identity_of_Father: student.guardianNationalID || '',
+                Email_Address: student.email || '',
+                Bus: student.isRegisteredToBus || 'No',
+                Religion: student.religion || '',
+                Pre_School: student.previousSchool || '',
+              };
+            }
+          );
+          this.CurrentDate = d.date;
+          this.CurrentDate = this.formatDate(
+            this.CurrentDate,
+            this.direction
+          );
+          this.ArabicCurrentDate = new Date(
+            this.CurrentDate
+          ).toLocaleDateString('ar-EG', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+          resolve();
+        },
+        error: (err) => {
+          // Handle 404 or other errors gracefully
+          console.error('Error fetching students:', err);
+          // Clear data and show empty state
+          this.students = [];
+          this.tableData = [];
+          this.showTable = true;
+          resolve(); // Resolve anyway to show the empty table
+        },
+      });
+  });
+}
 }

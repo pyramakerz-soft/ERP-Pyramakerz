@@ -215,12 +215,12 @@ async viewReport() {
 
       const Swal = await import('sweetalert2').then(m => m.default);
 
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load report data',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load report data',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     }
   });
 }
