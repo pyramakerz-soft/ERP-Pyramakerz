@@ -124,7 +124,7 @@
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Attendance Report'" 
                  [infoRows]="[
                 { keyEn: 'Month: ' + this.month + '/' +this.year,  keyAr: this.month+ '/' +this.year + ': شهر' },
-                { keyEn: 'Employee: ' + this.SelectedEmpName,     keyAr: this.SelectedEmpName + ': الموظف' }
+                { keyEn: 'Employee: ' + this.SelectedEmpName,     keyAr:  + 'الموظف : ' + this.SelectedEmpName }
                 ]" 
                 [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" 
                 [tableData]="tableDataForPDF" #pdfComponentRef>
