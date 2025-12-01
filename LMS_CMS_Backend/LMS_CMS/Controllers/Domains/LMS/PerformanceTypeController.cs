@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" , "parent" },
             pages: new[] { "Performance Type" , "Enter Daily Performance" }
         )]
         public IActionResult Get()

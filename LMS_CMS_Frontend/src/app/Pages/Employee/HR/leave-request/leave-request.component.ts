@@ -422,7 +422,7 @@ export class LeaveRequestComponent {
       }
     }
   }
-    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0 || this.leaveRequest.hours == null && this.leaveRequest.minutes == null ) {
+    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0 || this.leaveRequest.hours == null && this.leaveRequest.minutes == null || this.leaveRequest.hours == 0 && this.leaveRequest.minutes == null || this.leaveRequest.hours == null && this.leaveRequest.minutes == 0) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
     }

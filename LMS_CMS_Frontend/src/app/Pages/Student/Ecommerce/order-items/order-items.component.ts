@@ -81,9 +81,12 @@ export class OrderItemsComponent {
   goToCart() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Cart")
-    } else{
+    } else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Cart")
     } 
+    else{
+      this.router.navigateByUrl("Parent/Cart")
+    }
   } 
 
   moveToOrders(){
@@ -93,9 +96,12 @@ export class OrderItemsComponent {
       } else {
         this.router.navigateByUrl("Employee/Order");
       }
-    } else{
+    } else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Order")
     } 
+    else{
+      this.router.navigateByUrl("Parent/Order")
+    }
   }
 
   // getCartData(){
