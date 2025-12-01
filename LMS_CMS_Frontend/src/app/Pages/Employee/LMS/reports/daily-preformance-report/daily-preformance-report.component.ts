@@ -284,8 +284,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         )
         .subscribe(
           (data) => {
+            console.log(this.reportType , data)
             this.processData(data);
-            console.log(data);
           },
           (error) => {
             this.handleError(error);
