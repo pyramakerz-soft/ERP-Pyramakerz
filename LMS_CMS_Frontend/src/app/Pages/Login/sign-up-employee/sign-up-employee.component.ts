@@ -103,12 +103,12 @@ export class SignUpEmployeeComponent {
       isValid = false;
     }
 
-    if (this.employee.recaptchaToken == "") {
-      this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-      isValid = false;
-    } else {
-      this.validationErrors['recaptchaToken'] = '';
-    }
+    // if (this.employee.recaptchaToken == "") {
+    //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+    //   isValid = false;
+    // } else {
+    //   this.validationErrors['recaptchaToken'] = '';
+    // }
 
     return isValid;
   }
