@@ -476,6 +476,10 @@ export class PayableDetailsComponent {
     }
   }
 
+  // CalcTotal(){
+    
+  // }
+
   GetLinkFiles() {
     this.linkFileService.Get(this.DomainName).subscribe((data) => {
       this.linkFilesData = data;
