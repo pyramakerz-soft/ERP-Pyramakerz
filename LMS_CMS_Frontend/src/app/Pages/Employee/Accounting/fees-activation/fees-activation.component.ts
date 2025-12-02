@@ -483,7 +483,7 @@ export class FeesActivationComponent {
   }
 
   round2(val: number): number {
-    return Math.round((val + Number.EPSILON) * 100) / 100;
+   return Math.round((val + Number.EPSILON) * 100) / 100; // 2 decimals
   }
 
   CalculateDiscountFromPercentage() {
@@ -494,26 +494,20 @@ export class FeesActivationComponent {
   }
 
   CalculatePercentageFromDiscount() {
-    const amount = parseFloat(this.Fees.amount as any) || 0;
-    const discount = parseFloat(this.Fees.discount as any) || 0;
-
-    if (amount === 0) {
-      this.DiscountPercentage = 0;
-      return;
+    console.log(this.Fees.discount)
+    this.DiscountPercentage = 0
+    if ((this.Fees.amount ? this.Fees.amount : 0) > 0) {
+      this.DiscountPercentage = ((this.Fees.discount ? this.Fees.discount : 0) / (this.Fees.amount ? this.Fees.amount : 0)) * 100;
+      this.CalculateNet();
     }
-
-    this.DiscountPercentage = this.round2((discount / amount) * 100);
-
-    this.CalculateNet();
   }
 
-  CalculateNet() {
-    const amount = parseFloat(this.Fees.amount as any) || 0;
-    const discount = parseFloat(this.Fees.discount as any) || 0;
-    if(this.DiscountPercentage){
-      this.Fees.discount = this.round2((amount * this.DiscountPercentage) / 100);
-    }
-    this.Fees.net = this.round2(amount - (this.Fees?.discount ?? 0));
+  async CalculateNet() {
+    this.Fees.net = this.Fees.amount
+    // if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
+    //   // this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+    // }
+    this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
   }
 
   CalculateNetForEdit(row: FeesActivation) {
