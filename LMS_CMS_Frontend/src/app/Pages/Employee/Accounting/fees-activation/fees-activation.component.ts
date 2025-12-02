@@ -289,7 +289,7 @@ export class FeesActivationComponent {
  
     event.target.value = value;
     this.DiscountPercentage = value ? parseFloat(value) : 0;  
-}
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -417,6 +417,9 @@ export class FeesActivationComponent {
   Search() {
     this.IsSearch = true
     this.isSearchLoading = true
+    this.Fees = new FeesActivationAddPut();
+    this.validationErrors= {};
+    this.DiscountPercentage = null;
     this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
@@ -479,6 +482,10 @@ export class FeesActivationComponent {
     }
   }
 
+  round2(val: number): number {
+   return Math.round((val + Number.EPSILON) * 100) / 100; // 2 decimals
+  }
+
   CalculateDiscountFromPercentage() {
     if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
       this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
@@ -487,6 +494,7 @@ export class FeesActivationComponent {
   }
 
   CalculatePercentageFromDiscount() {
+    console.log(this.Fees.discount)
     this.DiscountPercentage = 0
     if ((this.Fees.amount ? this.Fees.amount : 0) > 0) {
       this.DiscountPercentage = ((this.Fees.discount ? this.Fees.discount : 0) / (this.Fees.amount ? this.Fees.amount : 0)) * 100;
@@ -496,9 +504,9 @@ export class FeesActivationComponent {
 
   async CalculateNet() {
     this.Fees.net = this.Fees.amount
-    if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
-      this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
-    }
+    // if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
+    //   // this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+    // }
     this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
   }
 

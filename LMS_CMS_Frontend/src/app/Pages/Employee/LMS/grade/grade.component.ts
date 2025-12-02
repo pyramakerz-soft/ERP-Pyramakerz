@@ -120,8 +120,10 @@ export class GradeComponent {
   getUpgradeToGradeData() {
     this.UpgradeToGrade = [] 
     this.gradeService.GetBySchoolId(this.section.schoolID, this.DomainName).subscribe(
-      (data) => {  
-        this.UpgradeToGrade = data.filter((g: any) => g.id !== this.grade.id);
+      (data) => {   
+        this.UpgradeToGrade = data.filter(
+            (d) => Number(d.id) !== Number(this.grade.id)
+          );
       }
     )
   }

@@ -1461,7 +1461,7 @@ export class InventoryDetailsComponent {
     this.Item.barCode = row.barCode;
     this.Item.salesId = row.inventoryMasterId;
     this.Item.quantity = row.quantity;
-    this.Item.totalPrice = this.Item.price;
+    this.Item.totalPrice = this.Item.price * this.Item.quantity;
     await this.SaveRow();
     this.SaleId = 0;
   }

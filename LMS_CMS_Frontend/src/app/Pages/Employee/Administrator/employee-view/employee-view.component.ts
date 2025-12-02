@@ -206,7 +206,7 @@ export class EmployeeViewComponent {
       });
     }else{
       if(this.password != ""){
-        this.editpasss.id=this.User_Data_After_Login.id;
+        this.editpasss.id=this.Data.id;
         this.editpasss.password=this.password  
         this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
             this.isChange = false
