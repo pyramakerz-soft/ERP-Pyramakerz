@@ -515,7 +515,6 @@ export class MedicalReportComponent implements OnInit {
 
           return hygieneRow;
 
-          return hygieneRow;
         case 'Follow Up':
           return {
             Date: item.date,

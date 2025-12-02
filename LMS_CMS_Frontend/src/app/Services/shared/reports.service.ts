@@ -90,182 +90,183 @@ export class ReportsService {
     });
   }
 
-  async generateExcelReport(options: {
-    mainHeader?: { en: string; ar: string };
-    subHeaders?: { en: string; ar: string }[];
-    infoRows?: { key: string; value: string | number | boolean }[];
-    reportImage?: string;
-    tables: {
-      title?: string;
-      headers: string[];
-      data: (string | number | boolean)[][];
-    }[];
-    filename?: string;
-  }) {
-    const ExcelJS = await import('exceljs');
+async generateExcelReport(options: {
+  mainHeader?: { en: string; ar: string };
+  subHeaders?: { en: string; ar: string }[];
+  infoRows?: { key: string; value: string | number | boolean }[];
+  reportImage?: string;
+  tables: {
+    title?: string;
+    headers: string[];
+    data: (string | number | boolean)[][];
+  }[];
+  filename?: string;
+}) {
+  // Use proper dynamic import syntax
+  const ExcelJS = await import('exceljs');
+  // Make sure to access the default export correctly
+  const Excel = ExcelJS.default || ExcelJS;
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Report");
+  const workbook = new Excel.Workbook();
+  const worksheet = workbook.addWorksheet("Report");
 
-    function getExcelColumnLetter(colIndex: number): string {
-      let temp = '';
-      while (colIndex > 0) {
-        let remainder = (colIndex - 1) % 26;
-        temp = String.fromCharCode(65 + remainder) + temp;
-        colIndex = Math.floor((colIndex - 1) / 26);
-      }
-      return temp;
+  function getExcelColumnLetter(colIndex: number): string {
+    let temp = '';
+    while (colIndex > 0) {
+      let remainder = (colIndex - 1) % 26;
+      temp = String.fromCharCode(65 + remainder) + temp;
+      colIndex = Math.floor((colIndex - 1) / 26);
     }
-
-    let base64Image = '';
-    if (options.reportImage) {
-      if (options.reportImage.startsWith('http')) {
-        base64Image = await this.getBase64ImageFromUrl(options.reportImage);
-      } else if (options.reportImage.startsWith('data:image')) {
-        base64Image = options.reportImage;
-      }
-    }
-    // if (options.reportImage?.startsWith('http')) {
-    //   base64Image = await this.getBase64ImageFromUrl(options.reportImage);
-    // } else if (options.reportImage) {
-    //   base64Image = options.reportImage;
-    // }
-
-    // FIXED: Use reasonable fixed column spans instead of dynamic calculation
-    const enEnd = 'D'; // Fixed position for English section
-    const arStart = 'E'; // Fixed position for Arabic section start
-    const arEnd = 'H';   // Fixed position for Arabic section end
-
-    // Main header - English
-    worksheet.mergeCells(`A1:${enEnd}1`);
-    worksheet.getCell('A1').value = options.mainHeader?.en;
-    worksheet.getCell('A1').font = { bold: true, size: 16 };
-    worksheet.getCell('A1').alignment = { horizontal: 'left' };
-
-    // Main header - Arabic
-    worksheet.mergeCells(`${arStart}1:${arEnd}1`);
-    worksheet.getCell(`${arStart}1`).value = options.mainHeader?.ar;
-    worksheet.getCell(`${arStart}1`).font = { bold: true, size: 16 };
-    worksheet.getCell(`${arStart}1`).alignment = { horizontal: 'right' };
-
-    // Sub headers
-    options.subHeaders?.forEach((header, i) => {
-      const row = i + 2;
-
-      // English subheader
-      worksheet.mergeCells(`A${row}:${enEnd}${row}`);
-      worksheet.getCell(`A${row}`).value = header.en;
-      worksheet.getCell(`A${row}`).font = { size: 12 };
-      worksheet.getCell(`A${row}`).alignment = { horizontal: 'left' };
-
-      // Arabic subheader
-      worksheet.mergeCells(`${arStart}${row}:${arEnd}${row}`);
-      worksheet.getCell(`${arStart}${row}`).value = header.ar;
-      worksheet.getCell(`${arStart}${row}`).font = { size: 12 };
-      worksheet.getCell(`${arStart}${row}`).alignment = { horizontal: 'right' };
-    });
-
-    const headerOffset = (options.subHeaders?.length || 0) + 2;
-
-    if (base64Image) {
-      // const imageId = workbook.addImage({
-      //   base64: base64Image.split(',')[1],
-      //   extension: 'png',
-      // });
-
-
-      const base64Data = base64Image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
-
-      const imageId = workbook.addImage({
-        base64: base64Data,
-        extension: 'png',
-      });
-
-      worksheet.addImage(imageId, {
-        tl: { col: 4, row: 0 },
-        ext: { width: 100, height: 50 },
-      });
-    }
-
-    worksheet.addRow([]);
-
-    // Info rows (dynamic)--77
-    options.infoRows?.forEach(({ key, value }) => {
-      const row = worksheet.addRow([`${key}: ${value}`]);
-      row.font = { bold: true, size: 12 };
-      // Set LTR alignment for info rows
-      row.eachCell((cell) => {
-        cell.alignment = { horizontal: 'left' };
-      });
-    });
-
-    worksheet.addRow([]);
-
-    // Tables
-    for (const table of options.tables) {
-      if (table.title) {
-        const titleRow = worksheet.addRow([table.title]);
-        titleRow.font = { bold: true, size: 14 };
-        worksheet.mergeCells(`A${titleRow.number}:E${titleRow.number}`); // merge columns A–E for the title
-        titleRow.alignment = { horizontal: 'center' };
-        worksheet.addRow([]); // add an empty row for spacing
-      }
-
-      const headerRow = worksheet.addRow(table.headers);
-      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
-      headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '4F81BD' }
-      };
-
-      // Set LTR alignment for header cells
-      headerRow.eachCell((cell) => {
-        cell.border = { bottom: { style: 'thin' } };
-        cell.alignment = { horizontal: 'left' }; // Force LTR for headers
-      });
-
-      // Add data rows with LTR alignment
-      table.data.forEach((rowData) => {
-        const dataRow = worksheet.addRow(rowData);
-
-        // Set LTR alignment and proper formatting for all data cells
-        dataRow.eachCell((cell, colNumber) => {
-          cell.alignment = { horizontal: 'left' }; // Force LTR for data
-
-          // Format numbers appropriately
-          if (typeof cell.value === 'number') {
-            // Check if the number is a whole number (no decimal part)
-            if (Number.isInteger(cell.value) || cell.value % 1 === 0) {
-              cell.numFmt = '0'; // Integer format (no decimals)
-            } else {
-              cell.numFmt = '0.00'; // Decimal format with 2 decimal places
-            }
-            cell.value = Number(cell.value); // Ensure it's treated as number
-          }
-        });
-      });
-
-      worksheet.addRow([]);
-    }
-
-    // Set column widths and alignment
-    worksheet.columns.forEach((col) => {
-      col.width = 20;
-    });
-
-    // Set worksheet to LTR direction
-    worksheet.views = [
-      {
-        state: 'normal',
-        rightToLeft: false, // Explicitly set to LTR
-        activeCell: 'A1',
-        showGridLines: true
-      }
-    ];
-
-    const FileSaver = await import('file-saver');
-    const buffer = await workbook.xlsx.writeBuffer();
-    FileSaver.saveAs(new Blob([buffer]), options.filename || 'Report.xlsx');
+    return temp;
   }
+
+  let base64Image = '';
+  if (options.reportImage) {
+    if (options.reportImage.startsWith('http')) {
+      base64Image = await this.getBase64ImageFromUrl(options.reportImage);
+    } else if (options.reportImage.startsWith('data:image')) {
+      base64Image = options.reportImage;
+    }
+  }
+
+  // Define column ranges
+  const enStart = 'A';
+  const enEnd = 'D';   // English section takes A-D
+  const imageCol = 'E'; // Image in column E
+  const arStart = 'F';  // Arabic section starts at F
+  const arEnd = 'I';    // Arabic section takes F-I
+
+  // Main header - English (A-D)
+  worksheet.mergeCells(`${enStart}1:${enEnd}1`);
+  worksheet.getCell(`${enStart}1`).value = options.mainHeader?.en;
+  worksheet.getCell(`${enStart}1`).font = { bold: true, size: 16 };
+  worksheet.getCell(`${enStart}1`).alignment = { horizontal: 'left' };
+
+  // Main header - Arabic (F-I)
+  worksheet.mergeCells(`${arStart}1:${arEnd}1`);
+  worksheet.getCell(`${arStart}1`).value = options.mainHeader?.ar;
+  worksheet.getCell(`${arStart}1`).font = { bold: true, size: 16 };
+  worksheet.getCell(`${arStart}1`).alignment = { horizontal: 'right' };
+
+  // Image in column E (if exists)
+  if (base64Image) {
+    const base64Data = base64Image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
+
+    const imageId = workbook.addImage({
+      base64: base64Data,
+      extension: 'png',
+    });
+
+    // Place image in column E (col index 4, since ExcelJS uses 0-based indexing)
+    worksheet.addImage(imageId, {
+      tl: { col: 4, row: 0 }, // Column E is index 4 (A=0, B=1, C=2, D=3, E=4)
+      ext: { width: 100, height: 50 },
+    });
+  }
+
+  // Sub headers
+  options.subHeaders?.forEach((header, i) => {
+    const row = i + 2;
+
+    // English subheader (A-D)
+    worksheet.mergeCells(`${enStart}${row}:${enEnd}${row}`);
+    worksheet.getCell(`${enStart}${row}`).value = header.en;
+    worksheet.getCell(`${enStart}${row}`).font = { size: 12 };
+    worksheet.getCell(`${enStart}${row}`).alignment = { horizontal: 'left' };
+
+    // Arabic subheader (F-I)
+    worksheet.mergeCells(`${arStart}${row}:${arEnd}${row}`);
+    worksheet.getCell(`${arStart}${row}`).value = header.ar;
+    worksheet.getCell(`${arStart}${row}`).font = { size: 12 };
+    worksheet.getCell(`${arStart}${row}`).alignment = { horizontal: 'right' };
+  });
+
+  const headerOffset = (options.subHeaders?.length || 0) + 2;
+
+  // Skip image row for data placement
+  worksheet.addRow([]);
+  
+  // Info rows (dynamic) - these will start from column A
+  options.infoRows?.forEach(({ key, value }) => {
+    const row = worksheet.addRow([`${key}: ${value}`]);
+    row.font = { bold: true, size: 12 };
+    // Set LTR alignment for info rows
+    row.eachCell((cell) => {
+      cell.alignment = { horizontal: 'left' };
+    });
+  });
+
+  worksheet.addRow([]);
+
+  // Tables
+  for (const table of options.tables) {
+    if (table.title) {
+      const titleRow = worksheet.addRow([table.title]);
+      titleRow.font = { bold: true, size: 14 };
+      // Merge across all columns for title
+      worksheet.mergeCells(`A${titleRow.number}:I${titleRow.number}`);
+      titleRow.alignment = { horizontal: 'center' };
+      worksheet.addRow([]); // add an empty row for spacing
+    }
+
+    const headerRow = worksheet.addRow(table.headers);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: '4F81BD' }
+    };
+
+    // Set LTR alignment for header cells
+    headerRow.eachCell((cell) => {
+      cell.border = { bottom: { style: 'thin' } };
+      cell.alignment = { horizontal: 'left' }; // Force LTR for headers
+    });
+
+    // Add data rows with LTR alignment
+    table.data.forEach((rowData) => {
+      const dataRow = worksheet.addRow(rowData);
+
+      // Set LTR alignment and proper formatting for all data cells
+      dataRow.eachCell((cell, colNumber) => {
+        cell.alignment = { horizontal: 'left' }; // Force LTR for data
+
+        // Format numbers appropriately
+        if (typeof cell.value === 'number') {
+          // Check if the number is a whole number (no decimal part)
+          if (Number.isInteger(cell.value) || cell.value % 1 === 0) {
+            cell.numFmt = '0'; // Integer format (no decimals)
+          } else {
+            cell.numFmt = '0.00'; // Decimal format with 2 decimal places
+          }
+          cell.value = Number(cell.value); // Ensure it's treated as number
+        }
+      });
+    });
+
+    worksheet.addRow([]);
+  }
+
+  // Set column widths and alignment
+  worksheet.columns.forEach((col) => {
+    col.width = 20;
+  });
+
+  // Set worksheet to LTR direction
+  worksheet.views = [
+    {
+      state: 'normal',
+      rightToLeft: false, // Explicitly set to LTR
+      activeCell: 'A1',
+      showGridLines: true
+    }
+  ];
+
+  // Also fix the FileSaver import
+  const FileSaver = await import('file-saver');
+  const saveAs = FileSaver.default || FileSaver;
+  
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), options.filename || 'Report.xlsx');
+}
 }
