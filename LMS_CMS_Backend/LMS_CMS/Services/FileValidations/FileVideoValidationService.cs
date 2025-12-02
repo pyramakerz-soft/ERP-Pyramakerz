@@ -133,8 +133,8 @@ namespace LMS_CMS_PL.Services.FileValidations
                     isValidSignature = header.Take(4).SequenceEqual(new byte[] { 0x1A, 0x45, 0xDF, 0xA3 });
                 }
 
-                if (!isValidSignature)
-                    return $"File content doesn't match its extension. Expected {extension} video file.";
+                //if (!isValidSignature)
+                //    return $"File content doesn't match its extension. Expected {extension} video file.";
 
                 // Reset stream position
                 stream.Position = 0;

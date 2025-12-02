@@ -22,6 +22,7 @@ import { LoadingService } from '../../../../../Services/loading.service';
 @InitLoader()
 export class ViewReportComponent implements OnInit {
   @Input() reportType: 'parent' | 'doctor' = 'parent';
+  UserType: string = 'employee';
   @Input() id?: number;
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -80,7 +81,11 @@ export class ViewReportComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/Employee/Medical Report'], { relativeTo: this.route });
+    if(this.UserType == 'parent'){
+      this.router.navigate(['/Employee/Medical Report'], { relativeTo: this.route });
+    }else{
+      this.router.navigate(['/Parent/Medical Report'], { relativeTo: this.route });
+    }
   }
 
   getFileName(filePath: string | null): string {

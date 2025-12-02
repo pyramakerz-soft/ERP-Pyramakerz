@@ -167,7 +167,7 @@
       placeholder="{{ 'Enter Delay Allowance' | translate }}" [(ngModel)]="Data.delayAllowance" />
   </div>
 
-  <div class="flex flex-col w-full mb-4">
+  <div class="flex flex-col w-[48%] mb-4">
     <label class="mb-2" for="Account"> {{ 'Account Number' | translate }}</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Account"
       [(ngModel)]="Data.accountNumberID">
@@ -177,7 +177,7 @@
     </select>
   </div>
 
-  <div class="flex flex-col mb-4 w-[33%]">
+  <!-- <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="annualLeaveBalance"> {{ 'Annual Leave Balance' | translate }}</label>
     <input id="annualLeaveBalance" (input)="validateNumber($event, 'annualLeaveBalance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -188,8 +188,8 @@
     <input id="casualLeavesBalance" (input)="validateNumber($event, 'casualLeavesBalance')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       placeholder="{{ 'Enter Casual Leaves Balance' | translate }}" [(ngModel)]="Data.casualLeavesBalance" />
-  </div>
-  <div class="flex flex-col mb-4 w-[33%]">
+  </div> -->
+  <div class="flex flex-col mb-4 w-[48%]">
     <label class="mb-2 primaryTxt" for="monthlyLeaveRequestBalance"> {{ 'Monthly Leave Request Balance' | translate
       }}</label>
     <input id="monthlyLeaveRequestBalance" (input)="validateNumber($event, 'monthlyLeaveRequestBalance')"

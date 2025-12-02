@@ -650,7 +650,7 @@
   "Edit Income": "تعديل الإيراد",
   "Income Name": "اسم الإيراد",
   "Employees": "الموظفون",
-  "All": "الكل",
+  "All": "كل",
   "Orders": "الطلبات",
   "Number of orders placed": " عدد الطلبات المقدمة",
   "No Orders Yet": "لا توجد طلبات بعد",
@@ -1418,5 +1418,19 @@
   "MorningPrice" : "سعر الصباح",
   "TwoWaysPrice" : "سعر الذهاب والعودة",
   "Deduction Percentage after cutoff date": "نسبة الخصم بعد تاريخ القطع",
-  "Attendance Report" : "تقرير الحضور"
+  "Attendance Report" : "تقرير الحضور",
+
+
+
+
+
+
+
+
+
+
+
+  "Conduct Types": "أنواع السلوك",
+  "Procedure Types" : "أنواع الإجراءات",
+  "Login" : "تسجيل الدخول"
 }
