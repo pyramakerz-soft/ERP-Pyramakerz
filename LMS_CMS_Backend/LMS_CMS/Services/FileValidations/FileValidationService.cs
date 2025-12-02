@@ -87,17 +87,17 @@ namespace LMS_CMS_PL.Services
                     return "File contains executable content";
 
                 // Validate file signature
-                if (_fileSignatures.TryGetValue(extension, out var signatures) && signatures.Any())
-                {
-                    if (!(signatures.Count == 1 && signatures[0].Length == 0)) // Not a text file
-                    {
-                        bool signatureValid = signatures.Any(signature =>
-                            header.Take(signature.Length).SequenceEqual(signature));
+                //if (_fileSignatures.TryGetValue(extension, out var signatures) && signatures.Any())
+                //{
+                //    if (!(signatures.Count == 1 && signatures[0].Length == 0)) // Not a text file
+                //    {
+                //        bool signatureValid = signatures.Any(signature =>
+                //            header.Take(signature.Length).SequenceEqual(signature));
 
-                        if (!signatureValid)
-                            return $"File content doesn't match its extension. Expected {extension} file.";
-                    }
-                }
+                //        if (!signatureValid)
+                //            return $"File content doesn't match its extension. Expected {extension} file.";
+                //    }
+                //}
 
                 // Reset stream for content scanning
                 stream.Position = 0;

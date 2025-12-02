@@ -277,7 +277,12 @@ export class AccountingEntriesDetailsComponent {
         this.validationErrorsForDetails[row.id][field] = '';
       }
     }
-
+    if(field == 'creditAmount'){
+      this.validationErrorsForDetails[row.id]['debitAmount'] = '';
+    }
+    if(field == 'debitAmount'){
+      this.validationErrorsForDetails[row.id]['creditAmount'] = '';
+    }
     this.CalcTotalData();  
   }
 
@@ -317,6 +322,15 @@ export class AccountingEntriesDetailsComponent {
           errors[field] = ''; 
         }
       });
+
+      const credit = Number(detail.creditAmount);
+      const debit = Number(detail.debitAmount);
+      
+      if(detail.creditAmount != null && detail.creditAmount != 0 && detail.debitAmount != null && detail.debitAmount != 0 ){
+        console.log(3232)
+        errors['debitAmount'] ='You cannot enter both Debit and Credit in the same row.'
+          isValid = false;
+      }
     });
 
     if(this.accountingEntries.newDetails && this.accountingEntries.newDetails.length > 0){

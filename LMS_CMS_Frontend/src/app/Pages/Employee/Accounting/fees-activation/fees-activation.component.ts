@@ -289,7 +289,7 @@ export class FeesActivationComponent {
  
     event.target.value = value;
     this.DiscountPercentage = value ? parseFloat(value) : 0;  
-}
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -417,6 +417,9 @@ export class FeesActivationComponent {
   Search() {
     this.IsSearch = true
     this.isSearchLoading = true
+    this.Fees = new FeesActivationAddPut();
+    this.validationErrors= {};
+    this.DiscountPercentage = null;
     this.GetAllFeesData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
@@ -479,6 +482,10 @@ export class FeesActivationComponent {
     }
   }
 
+  round2(val: number): number {
+    return Math.round((val + Number.EPSILON) * 100) / 100;
+  }
+
   CalculateDiscountFromPercentage() {
     if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
       this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
@@ -487,19 +494,26 @@ export class FeesActivationComponent {
   }
 
   CalculatePercentageFromDiscount() {
-    this.DiscountPercentage = 0
-    if ((this.Fees.amount ? this.Fees.amount : 0) > 0) {
-      this.DiscountPercentage = ((this.Fees.discount ? this.Fees.discount : 0) / (this.Fees.amount ? this.Fees.amount : 0)) * 100;
-      this.CalculateNet();
+    const amount = parseFloat(this.Fees.amount as any) || 0;
+    const discount = parseFloat(this.Fees.discount as any) || 0;
+
+    if (amount === 0) {
+      this.DiscountPercentage = 0;
+      return;
     }
+
+    this.DiscountPercentage = this.round2((discount / amount) * 100);
+
+    this.CalculateNet();
   }
 
-  async CalculateNet() {
-    this.Fees.net = this.Fees.amount
-    if ((this.DiscountPercentage ? this.DiscountPercentage : 0) >= 0) {
-      this.Fees.discount = ((this.Fees.amount ? this.Fees.amount : 0) * (this.DiscountPercentage ? this.DiscountPercentage : 0)) / 100;
+  CalculateNet() {
+    const amount = parseFloat(this.Fees.amount as any) || 0;
+    const discount = parseFloat(this.Fees.discount as any) || 0;
+    if(this.DiscountPercentage){
+      this.Fees.discount = this.round2((amount * this.DiscountPercentage) / 100);
     }
-    this.Fees.net = (this.Fees.amount ? this.Fees.amount : 0) - (this.Fees.discount ? this.Fees.discount : 0);
+    this.Fees.net = this.round2(amount - (this.Fees?.discount ?? 0));
   }
 
   CalculateNetForEdit(row: FeesActivation) {

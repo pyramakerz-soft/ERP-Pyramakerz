@@ -120,7 +120,7 @@ export class GradeComponent {
   getUpgradeToGradeData() {
     this.UpgradeToGrade = [] 
     this.gradeService.GetBySchoolId(this.section.schoolID, this.DomainName).subscribe(
-      (data) => { 
+      (data) => {  
         this.UpgradeToGrade = data.filter((g: any) => g.id !== this.grade.id);
       }
     )
@@ -133,12 +133,13 @@ export class GradeComponent {
   }
 
   openModal(Id?: number) {
-    this.getUpgradeToGradeData()
     if (Id) {
       this.editGrade = true;
       this.GetGradeById(Id);
     }
-
+    
+    this.getUpgradeToGradeData()
+    
     document.getElementById("Add_Modal")?.classList.remove("hidden");
     document.getElementById("Add_Modal")?.classList.add("flex");
   }

@@ -66,7 +66,7 @@
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
                         id="bankOrSaveID" [(ngModel)]="receivable.bankOrSaveID">
                         <option [value]="0" disabled selected hidden> {{ 'Choose Data' | translate }}</option>
-                        <option *ngFor="let bankOrSave of banksData" [value]="bankOrSave.id">{{ bankOrSave.bankName }}
+                        <option *ngFor="let bankOrSave of banksData" [value]="bankOrSave.bankID">{{ bankOrSave.bankName }}
                         </option>
                         <option *ngIf="banksData.length === 0" disabled selected> {{ 'No Data Found' | translate }}
                         </option>
@@ -76,7 +76,7 @@
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
                         id="bankOrSaveID" [(ngModel)]="receivable.bankOrSaveID">
                         <option [value]="0" disabled selected hidden> {{ 'Choose Data' | translate }}</option>
-                        <option *ngFor="let bankOrSave of safesData" [value]="bankOrSave.id">{{ bankOrSave.saveName }}
+                        <option *ngFor="let bankOrSave of safesData" [value]="bankOrSave.saveID">{{ bankOrSave.saveName }}
                         </option>
                         <option *ngIf="safesData.length === 0" disabled selected> {{ 'No Data Found' | translate }}
                         </option>
