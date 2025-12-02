@@ -104,6 +104,10 @@ export class TimeTableReplaceComponent {
   }
 
   GetTimeTable() {
+    this.draggedSubject= null;
+    this.draggedSession= new SessionGroupDTO();
+    this.SessionReplaced= [];
+    this.HoldingSessionsSession= [];
     this.TimeTable = [];
     this.OriginTimeTable = [];
     this.SelectedDay = 0;
