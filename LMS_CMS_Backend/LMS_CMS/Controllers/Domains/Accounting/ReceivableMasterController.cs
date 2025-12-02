@@ -257,12 +257,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     return BadRequest("There is no Bank with this ID in the database.");
                 }
+                else
+                {
+                    BankEmployee bankEmployee = Unit_Of_Work.bankEmployee_Repository.First_Or_Default(a => a.EmployeeID == userId && a.BankID == newMaster.BankOrSaveID && a.IsDeleted != true);
+                    if (bankEmployee == null)
+                    {
+                        return BadRequest("You do not have access on this bank.");
+                    }
+                }
             } else if(newMaster.LinkFileID == 5) // Save
             {
                 Save Save = Unit_Of_Work.save_Repository.First_Or_Default(t => t.ID == newMaster.BankOrSaveID);
                 if (Save == null)
                 {
                     return BadRequest("There is no Save with this ID in the database.");
+                }
+                else
+                {
+                    SafeEmployee safeEmployee = Unit_Of_Work.safeEmployee_Repository.First_Or_Default(a => a.EmployeeID == userId && a.SaveID == newMaster.BankOrSaveID && a.IsDeleted != true);
+                    if (safeEmployee == null)
+                    {
+                        return BadRequest("You do not have access on this safe.");
+                    }
                 }
             }
             else
@@ -352,6 +368,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     return BadRequest("There is no Bank with this ID in the database.");
                 }
+                else
+                {
+                    BankEmployee bankEmployee = Unit_Of_Work.bankEmployee_Repository.First_Or_Default(a => a.EmployeeID == userId && a.BankID == newMaster.BankOrSaveID && a.IsDeleted != true);
+                    if (bankEmployee == null)
+                    {
+                        return BadRequest("You do not have access on this bank.");
+                    }
+                }
             }
             else if (newMaster.LinkFileID == 5) // Save
             {
@@ -359,6 +383,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 if (Save == null)
                 {
                     return BadRequest("There is no Save with this ID in the database.");
+                }
+                else
+                {
+                    SafeEmployee safeEmployee = Unit_Of_Work.safeEmployee_Repository.First_Or_Default(a => a.EmployeeID == userId && a.SaveID == newMaster.BankOrSaveID && a.IsDeleted != true);
+                    if (safeEmployee == null)
+                    {
+                        return BadRequest("You do not have access on this safe.");
+                    }
                 }
             }
             else

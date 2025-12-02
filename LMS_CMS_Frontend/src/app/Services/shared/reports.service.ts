@@ -129,42 +129,26 @@ async generateExcelReport(options: {
     }
   }
 
-  // FIXED: Use reasonable fixed column spans instead of dynamic calculation
-  const enEnd = 'D'; // Fixed position for English section
-  const arStart = 'E'; // Fixed position for Arabic section start
-  const arEnd = 'H';   // Fixed position for Arabic section end
+  // Define column ranges
+  const enStart = 'A';
+  const enEnd = 'D';   // English section takes A-D
+  const imageCol = 'E'; // Image in column E
+  const arStart = 'F';  // Arabic section starts at F
+  const arEnd = 'I';    // Arabic section takes F-I
 
-  // Main header - English
-  worksheet.mergeCells(`A1:${enEnd}1`);
-  worksheet.getCell('A1').value = options.mainHeader?.en;
-  worksheet.getCell('A1').font = { bold: true, size: 16 };
-  worksheet.getCell('A1').alignment = { horizontal: 'left' };
+  // Main header - English (A-D)
+  worksheet.mergeCells(`${enStart}1:${enEnd}1`);
+  worksheet.getCell(`${enStart}1`).value = options.mainHeader?.en;
+  worksheet.getCell(`${enStart}1`).font = { bold: true, size: 16 };
+  worksheet.getCell(`${enStart}1`).alignment = { horizontal: 'left' };
 
-  // Main header - Arabic
+  // Main header - Arabic (F-I)
   worksheet.mergeCells(`${arStart}1:${arEnd}1`);
   worksheet.getCell(`${arStart}1`).value = options.mainHeader?.ar;
   worksheet.getCell(`${arStart}1`).font = { bold: true, size: 16 };
   worksheet.getCell(`${arStart}1`).alignment = { horizontal: 'right' };
 
-  // Sub headers
-  options.subHeaders?.forEach((header, i) => {
-    const row = i + 2;
-
-    // English subheader
-    worksheet.mergeCells(`A${row}:${enEnd}${row}`);
-    worksheet.getCell(`A${row}`).value = header.en;
-    worksheet.getCell(`A${row}`).font = { size: 12 };
-    worksheet.getCell(`A${row}`).alignment = { horizontal: 'left' };
-
-    // Arabic subheader
-    worksheet.mergeCells(`${arStart}${row}:${arEnd}${row}`);
-    worksheet.getCell(`${arStart}${row}`).value = header.ar;
-    worksheet.getCell(`${arStart}${row}`).font = { size: 12 };
-    worksheet.getCell(`${arStart}${row}`).alignment = { horizontal: 'right' };
-  });
-
-  const headerOffset = (options.subHeaders?.length || 0) + 2;
-
+  // Image in column E (if exists)
   if (base64Image) {
     const base64Data = base64Image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
 
@@ -173,15 +157,36 @@ async generateExcelReport(options: {
       extension: 'png',
     });
 
+    // Place image in column E (col index 4, since ExcelJS uses 0-based indexing)
     worksheet.addImage(imageId, {
-      tl: { col: 4, row: 0 },
+      tl: { col: 4, row: 0 }, // Column E is index 4 (A=0, B=1, C=2, D=3, E=4)
       ext: { width: 100, height: 50 },
     });
   }
 
-  worksheet.addRow([]);
+  // Sub headers
+  options.subHeaders?.forEach((header, i) => {
+    const row = i + 2;
 
-  // Info rows (dynamic)
+    // English subheader (A-D)
+    worksheet.mergeCells(`${enStart}${row}:${enEnd}${row}`);
+    worksheet.getCell(`${enStart}${row}`).value = header.en;
+    worksheet.getCell(`${enStart}${row}`).font = { size: 12 };
+    worksheet.getCell(`${enStart}${row}`).alignment = { horizontal: 'left' };
+
+    // Arabic subheader (F-I)
+    worksheet.mergeCells(`${arStart}${row}:${arEnd}${row}`);
+    worksheet.getCell(`${arStart}${row}`).value = header.ar;
+    worksheet.getCell(`${arStart}${row}`).font = { size: 12 };
+    worksheet.getCell(`${arStart}${row}`).alignment = { horizontal: 'right' };
+  });
+
+  const headerOffset = (options.subHeaders?.length || 0) + 2;
+
+  // Skip image row for data placement
+  worksheet.addRow([]);
+  
+  // Info rows (dynamic) - these will start from column A
   options.infoRows?.forEach(({ key, value }) => {
     const row = worksheet.addRow([`${key}: ${value}`]);
     row.font = { bold: true, size: 12 };
@@ -198,7 +203,8 @@ async generateExcelReport(options: {
     if (table.title) {
       const titleRow = worksheet.addRow([table.title]);
       titleRow.font = { bold: true, size: 14 };
-      worksheet.mergeCells(`A${titleRow.number}:E${titleRow.number}`); // merge columns A–E for the title
+      // Merge across all columns for title
+      worksheet.mergeCells(`A${titleRow.number}:I${titleRow.number}`);
       titleRow.alignment = { horizontal: 'center' };
       worksheet.addRow([]); // add an empty row for spacing
     }
