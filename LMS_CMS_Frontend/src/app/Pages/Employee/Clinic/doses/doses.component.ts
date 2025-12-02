@@ -112,8 +112,8 @@ export class DosesComponent implements OnInit {
       });
     } catch (error) {
       console.error('Error loading doses:', error);
-      const errorMessage = this.translate.instant('Failed to load items');
-      this.showErrorAlert(errorMessage);
+      // const errorMessage = this.translate.instant('Failed to load items');
+      // this.showErrorAlert(errorMessage);
     }
   }
 

@@ -293,7 +293,7 @@ export class TransferedFromKindergartenReportComponent {
 
   printKindergartenPDF() {
     const opt = {
-      margin: [0.3, 0.3, 0.3, 0.3],
+      // margin: [0, 0, 0, 0],
       filename: `Kindergarten-Transfer-Certificate-${this.SelectedStudent?.en_name || 'student'}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, letterRendering: true, allowTaint: false },
@@ -302,10 +302,8 @@ export class TransferedFromKindergartenReportComponent {
 
     const container = this.kindergartenContainer.nativeElement as HTMLElement;
 
-    // Create a visible clone so html2canvas can render it reliably (not positioned off-screen)
     const clone = container.cloneNode(true) as HTMLElement;
 
-    // Apply styles to clone to match print layout and ensure it's visible in DOM
     clone.style.position = 'static';
     clone.style.top = 'auto';
     clone.style.left = 'auto';
@@ -321,7 +319,6 @@ export class TransferedFromKindergartenReportComponent {
     clone.style.color = '#000';
     clone.style.fontFamily = 'Arial, sans-serif';
 
-    // If images are relative or base64 they will render; ensure useCORS true in options above
     const wrapper = document.createElement('div');
     wrapper.style.width = '100%';
     wrapper.style.display = 'block';
@@ -337,7 +334,6 @@ export class TransferedFromKindergartenReportComponent {
       .set(opt)
       .save()
       .then(() => {
-        // cleanup
         document.body.removeChild(wrapper);
         this.showPDF = false;
       })

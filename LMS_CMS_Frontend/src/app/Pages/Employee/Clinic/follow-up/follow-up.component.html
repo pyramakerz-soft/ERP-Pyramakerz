@@ -34,7 +34,7 @@
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
                         <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                         <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
-                        <option *ngIf="schools?.length === 0" disabled>{{ 'No Schools Available' | translate }}</option>
+                        <option *ngIf="schools.length === 0" disabled>{{ 'No Schools Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['schoolId'] }}
@@ -48,7 +48,7 @@
                         [disabled]="!followUp.schoolId">
                         <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate}}</option>
                         <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
-                        <option *ngIf="grades?.length === 0" disabled>{{ 'No Grade Available' | translate }}</option>
+                        <option *ngIf="grades.length === 0" disabled>{{ 'No Grade Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['gradeId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['gradeId'] }}
@@ -64,7 +64,7 @@
                         [disabled]="!followUp.gradeId">
                         <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                         <option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</option>
-                        <option *ngIf="classes?.length === 0" disabled>{{ 'No Classes Available' | translate }}</option>
+                        <option *ngIf="classes.length === 0" disabled>{{ 'No Classes Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['classroomId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['classroomId'] }}
@@ -78,7 +78,7 @@
                         [disabled]="!followUp.classroomId">
                         <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
                         <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
-                        <option *ngIf="students?.length === 0" disabled>{{ 'No Students Available' | translate }}</option>
+                        <option *ngIf="students.length === 0" disabled>{{ 'No Students Available' | translate }}</option>
                     </select>
                     <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal text-sm">
                         {{ validationErrors['studentId'] }}

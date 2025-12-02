@@ -15,7 +15,7 @@
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Academic Year' | translate }}{{ 'Name' | translate }}</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{isRtl ? ('Name' | translate) + ' ' + ('Academic Year' | translate)  : ('Academic Year' | translate) + ' ' + ('Name' | translate) }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ semester.academicYearName }}</p>
         </div>
     </div>
