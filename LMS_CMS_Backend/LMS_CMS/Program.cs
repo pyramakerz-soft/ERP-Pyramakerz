@@ -48,7 +48,8 @@ using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
 using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
-using System.IO.Compression; 
+using System.IO.Compression;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace LMS_CMS
 {
@@ -66,12 +67,13 @@ namespace LMS_CMS
             // Add services to the container.
             builder.Services.AddControllers();
 
+
             /*
-             When your API sends data to Angular (JSON, HTML, JS, CSS…): 
-                Without compression → the full size is sent (maybe 300 KB, 1 MB, etc.)
-                With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
-             Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
-            */
+            When your API sends data to Angular (JSON, HTML, JS, CSS…): 
+               Without compression → the full size is sent (maybe 300 KB, 1 MB, etc.)
+               With compression → the data is automatically compressed before sending (maybe 10× smaller, like 30 KB instead of 300 KB)
+            Your server will automatically pick the best one (Brotli - Gzip) based on browser support.
+           */
             builder.Services.AddResponseCompression(options =>
             {
                 options.EnableForHttps = true;
@@ -88,6 +90,7 @@ namespace LMS_CMS
             {
                 opts.Level = CompressionLevel.Fastest;
             });
+
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -160,7 +163,7 @@ namespace LMS_CMS
                             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
                             {
                                 context.Token = accessToken;
-                            } 
+                            }
                             //if (!string.IsNullOrEmpty(accessToken) &&
                             //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
                             //{
@@ -168,6 +171,28 @@ namespace LMS_CMS
                             //}
                             return Task.CompletedTask;
                         }
+                    };
+
+                    option.Events.OnTokenValidated = context =>
+                    {
+                        var validator = context.HttpContext.RequestServices.GetRequiredService<CachedJwtValidator>();
+
+                        // Ensure we have a JWT token
+                        if (context.SecurityToken is JwtSecurityToken token)
+                        {
+                            bool isValid = validator.ValidateToken(token.RawData);
+                            if (!isValid)
+                            {
+                                context.Fail("Invalid or expired token (cached check).");
+                            }
+                        }
+                        else
+                        {
+                            // If token is missing (rare for HTTP), let default validation handle it
+                            // Do NOT fail here, otherwise normal requests might break
+                        }
+
+                        return Task.CompletedTask;
                     };
                 });
 
@@ -205,7 +230,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<ChatMessageService>();
             builder.Services.AddScoped<SendNotificationService>();
-            builder.Services.AddScoped<ValidTeachersForStudentService>(); 
+            builder.Services.AddScoped<ValidTeachersForStudentService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<FileUploadsService>();
             builder.Services.AddScoped<Accounting_Service>();
@@ -215,26 +240,38 @@ namespace LMS_CMS
             builder.Services.AddScoped<HR_Service>();
             builder.Services.AddScoped<Inventory_Service>();
             builder.Services.AddScoped<LMS_Service>();
-            builder.Services.AddScoped<Registration_Service>(); 
-
+            builder.Services.AddScoped<Registration_Service>();
+            builder.Services.AddSingleton<CachedJwtValidator>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
                 Region = RegionEndpoint.USEast1
             });
 
-            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+            var allowedOriginsSet = new HashSet<string>(allowedOrigins, StringComparer.OrdinalIgnoreCase);
+
             /// 2)
             builder.Services.AddCors(option =>
             {
-                option.AddPolicy(txt, builder =>
+                option.AddPolicy(txt, corsBuilder =>
                 {
-                    builder.WithOrigins(allowedOrigins)
-                           .AllowAnyMethod()
-                           .AllowAnyHeader()
-                           .WithHeaders("content-type", "Domain-Name")
-                           .WithExposedHeaders("Content-Disposition")
-                           .AllowCredentials();
+                    corsBuilder
+                        // Allow the configured origins and any subdomain of octa-edu.com
+                        .SetIsOriginAllowed(origin =>
+                        {
+                            if (allowedOriginsSet.Contains(origin))
+                            {
+                                return true;
+                            }
+
+                            return Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+                                   uri.Host.EndsWith("octa-edu.com", StringComparison.OrdinalIgnoreCase);
+                        })
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Content-Disposition")
+                        .AllowCredentials();
                 });
             });
 
@@ -261,17 +298,20 @@ namespace LMS_CMS
             builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.Limits.MaxRequestBodySize = 104857600; // 100 MB
-            }); 
+            });
+
 
             // 1) SignalR 
             //builder.Services.AddSignalR();
             builder.Services.AddSignalR(hubOptions =>
             {
-                hubOptions.EnableDetailedErrors = true; 
+                hubOptions.EnableDetailedErrors = true;
                 hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // send ping every 15s
                 hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // allow up to 60s silence
-            }); 
-             
+            });
+
+            builder.Services.AddMemoryCache();
+
             var app = builder.Build();
 
             /// 1) For DB Check
@@ -284,7 +324,7 @@ namespace LMS_CMS
             });
 
             app.UseRouting();
-            app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+            app.UseCors(txt); // you can keep it permissive; same-origin won't need it
 
             app.UseAuthentication();
 
@@ -296,7 +336,7 @@ namespace LMS_CMS
                     appBuilder.UseMiddleware<SuspendMiddleware>();
                 });
 
-            
+
             // To Allow Compression (Brotli - Gzip)
             app.UseResponseCompression();
 
@@ -349,6 +389,6 @@ namespace LMS_CMS
             //); 
 
             app.Run();
-        }
+        } 
     }
 }
