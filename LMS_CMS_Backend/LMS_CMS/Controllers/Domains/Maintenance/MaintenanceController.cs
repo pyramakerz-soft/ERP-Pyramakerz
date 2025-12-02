@@ -398,45 +398,48 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             //if (!query.Any())
             //    return NotFound("No Maintenance records found for this filter.");
 
-            if (request.ItemId.HasValue && request.ItemId.Value > 0) {
-                var itemMaintenances = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
+            if (request.ItemId.HasValue && request.ItemId.Value > 0)
+            {
+                query = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
+            }
 
-                if (request.FilterBy==1)
+
+            // 1 = Company 
+            // 2 = Employee 
+            if (request.FilterBy == 1)
+            {
+                
+                if (request.CompanyId.HasValue && request.CompanyId.Value > 0)
                 {
-                    query = itemMaintenances.Where(m => m.CompanyID.HasValue && m.CompanyID.Value > 0).ToList();
-                }
-                else if (request.FilterBy == 2)
-                {
-                    query = itemMaintenances.Where(m => m.MaintenanceEmployeeID.HasValue && m.MaintenanceEmployeeID.Value > 0).ToList();
+                    query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
                 }
                 else
                 {
-                    query = itemMaintenances;
+                    query = query.Where(m => m.CompanyID.HasValue && m.CompanyID > 0).ToList();
                 }
             }
-
-            if (request.FilterBy.HasValue)
+            else if (request.FilterBy == 2)
             {
-                if (request.FilterBy.Value == 1 && request.CompanyId.HasValue && request.CompanyId.Value > 0)
+                if (request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
                 {
-                    //only by company
-                    query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
-                }
-                else if (request.FilterBy.Value == 2 && request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
-                {
-                    //  only by employee
                     query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
+                }
+                else
+                {
+                    query = query.Where(m => m.MaintenanceEmployeeID.HasValue && m.MaintenanceEmployeeID > 0).ToList();
                 }
             }
             else
             {
-                //flag is null, apply both filters 
+                // FilterBy = null the then allow both filters if provided
                 if (request.CompanyId.HasValue && request.CompanyId.Value > 0)
                     query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
 
                 if (request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
                     query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
             }
+
+
 
 
 
