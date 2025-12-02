@@ -1156,15 +1156,6 @@ namespace LMS_CMS_PL.Controllers.Domains
             School_GetDTO schoolDTO = _schoolHeaderService.GetSchoolHeader(Unit_Of_Work, schoolId, Request, HttpContext);
             studentDTOs = studentDTOs.OrderBy(t => t.en_name).ToList();
 
-            //foreach (var stu in studentDTOs)
-            //{
-            //    var submittionGuardianName = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 22 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //    var submittionPassport = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 23 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //    var submittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 24 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //    var submittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 25 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //    var submittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 26 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //    var submittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.CategoryFieldID == 28 && r.RegisterationFormParentID == stu.RegistrationFormParentID);
-            //}
             return Ok(new
             {
                 Students = studentDTOs,
