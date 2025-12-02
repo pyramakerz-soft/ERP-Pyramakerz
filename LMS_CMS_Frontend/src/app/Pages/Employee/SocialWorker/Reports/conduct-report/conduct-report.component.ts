@@ -113,10 +113,10 @@ export class ConductReportComponent implements OnInit {
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
-      this.currentLang = direction === 'rtl' ? 'ar' : 'en'; // أضف هذا السطر7777
+      this.currentLang = direction === 'rtl' ? 'ar' : 'en'; 
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-    this.currentLang = this.isRtl ? 'ar' : 'en'; // أضف هذا السطر7777
+    this.currentLang = this.isRtl ? 'ar' : 'en'; 
   }
 
   ngOnDestroy(): void {
