@@ -142,9 +142,16 @@
                         <option [value]="null" disabled selected hidden>
                             {{ 'Choose' | translate }} {{ 'Grade' | translate }}
                         </option>
-                        <option *ngFor="let grade of UpgradeToGrade" [value]="grade.id">
+                        <!-- <option *ngFor="let grade of UpgradeToGrade" [value]="grade.id">
                             {{ grade.name }}
-                        </option>
+                        </option> -->
+                         <ng-container *ngFor="let g of UpgradeToGrade">
+                            <option 
+                            *ngIf="g.id !== grade.id" 
+                            [value]="g.id">
+                            {{ g.name }}
+                            </option>
+                        </ng-container>
                         <option *ngIf="UpgradeToGrade.length === 0" disabled selected>
                             {{ 'No Data Found' | translate }}
                         </option>
