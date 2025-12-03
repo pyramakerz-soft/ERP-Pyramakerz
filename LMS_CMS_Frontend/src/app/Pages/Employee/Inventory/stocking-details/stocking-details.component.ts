@@ -645,6 +645,7 @@ export class StockingDetailsComponent {
 
   onStockChangeWhenEditRow(row: StockingDetails): void {
     row.theDifference = row.actualStock - row.currentStock;
+    console.log(row.theDifference , row.actualStock , row.currentStock)
       // Initialize if null
     if (!this.Data.updatedStockingDetails) {
       this.Data.updatedStockingDetails = [];
@@ -753,61 +754,54 @@ export class StockingDetailsComponent {
   ////////////////////////////////////////// Adjustment
 
   async Adjustment() {
-    if (!this.isFormValid()) return;
-    this.isLoading = true;
-    try {
-      if (this.mode === 'Create') {
-        this.TableData = this.Data.stockingDetails;
-        const addedData = await this.StockingServ.Add(
-          this.Data,
-          this.DomainName
-        ).toPromise();
-        this.Data.id = addedData;
-        this.MasterId = addedData;
-        const result = await this.StockingServ.GetById(
-          this.Data.id,
-          this.DomainName
-        ).toPromise();
-        if (result) this.Data = result;
-        this.Data.additionId = await this.prepareAdjustment(
-          3,
-          (s) => s.theDifference > 0
-        );
-        this.Data.disbursementId = await this.prepareAdjustment(
-          5,
-          (s) => s.theDifference < 0
-        );
-          await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
-          this.router.navigateByUrl(`Employee/Stocking`);
+    if (await this.isFormValid()){
+      this.isLoading = true;
+      try {
+        if (this.mode === 'Create') {
+          this.TableData = this.Data.stockingDetails;
+          this.StockingServ.Add(this.Data,this.DomainName).subscribe(async (addedData)=>{
+            this.Data.id = addedData;
+            this.MasterId = addedData;
+            const result = await this.StockingServ.GetById(this.Data.id,this.DomainName).toPromise();
+            if (result) this.Data = result;
+            this.Data.additionId = await this.prepareAdjustment(3,(s) => s.theDifference > 0);
+            this.Data.disbursementId = await this.prepareAdjustment(5,(s) => s.theDifference < 0);
+            await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+            this.router.navigateByUrl(`Employee/Stocking`);
+          },async error=>{
+            const Swal = await import('sweetalert2').then(m => m.default);
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
+        }
+        if (this.mode === 'Edit') {
+          console.log(this.Data)
+          this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
+            console.log(12345,this.Data)
+            if (this.Data.additionId != 0 && this.Data.additionId != null) {
+              await this.InventoryMastrServ.Delete(this.Data.additionId,this.DomainName).toPromise();
+            }
+            if (this.Data.disbursementId != 0 && this.Data.disbursementId != null) {
+              await this.InventoryMastrServ.Delete(this.Data.disbursementId,this.DomainName).toPromise();
+            }
+            this.Data.additionId = await this.prepareAdjustment(3,(s) => s.theDifference > 0);
+            this.Data.disbursementId = await this.prepareAdjustment(5,(s) => s.theDifference < 0);
+            this.Data.newDetailsWhenEdit =[]
+            this.Data.updatedStockingDetails =[]
+            await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+            this.router.navigateByUrl(`Employee/Stocking`);
+          })
+        }
+      } catch (error) {
+        console.error('Unexpected error in Adjustment():', error);
+      } finally {
+        this.isLoading = false;
       }
-      if (this.mode === 'Edit') {
-        console.log(this.Data)
-        this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
-          console.log(12345,this.Data)
-          if (this.Data.additionId != 0 && this.Data.additionId != null) {
-            await this.InventoryMastrServ.Delete(this.Data.additionId,this.DomainName).toPromise();
-          }
-          if (this.Data.disbursementId != 0 && this.Data.disbursementId != null) {
-            await this.InventoryMastrServ.Delete(this.Data.disbursementId,this.DomainName).toPromise();
-          }
-          this.Data.additionId = await this.prepareAdjustment(
-            3,
-            (s) => s.theDifference > 0
-          );
-          this.Data.disbursementId = await this.prepareAdjustment(
-            5,
-            (s) => s.theDifference < 0
-          );
-          this.Data.newDetailsWhenEdit =[]
-          this.Data.updatedStockingDetails =[]
-          await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
-          this.router.navigateByUrl(`Employee/Stocking`);
-        })
-      }
-    } catch (error) {
-      console.error('Unexpected error in Adjustment():', error);
-    } finally {
-      this.isLoading = false;
     }
   }
 
@@ -1144,31 +1138,19 @@ export class StockingDetailsComponent {
 
   validateNumberRow(event: any, field: keyof StockingDetails, row: StockingDetails): void {
     let value = event.target.value;
-    value = value.replace(/[^0-9]/g, '')
+
+    // Keep only digits
+    value = value.replace(/[^0-9]/g, '');
+
+    // Update the input immediately
     event.target.value = value;
-    if (isNaN(value) || value === '') {
-      event.target.value = ''; 
-      if (typeof row[field] === 'string') {
-        row[field] = '' as never;  
-      }
-    }
-    // const numValue = Number(value);
-    // if (field === 'actualStock') {
-    //   const integerRegex = /^\d+$/;
 
-    //   if (!integerRegex.test(value) || numValue <= 0) {
-    //     // Invalid input (decimal, letters, negative, etc.)
-    //     row[field] = '';
-    //     event.target.value = 0;
-    //   } else {
-    //     // Valid integer value
-    //     row[field] = numValue;
-    //   }
-    //   this.onStockChangeWhenEditRow(row);
-    //   return;
-    // }
+    // Update the row model with cleaned value
+    row[field] = value ? Number(value) as never : ("" as never);
+
+    // Run your calculation function
+    this.onStockChangeWhenEditRow(row);
   }
-
   
 }
 

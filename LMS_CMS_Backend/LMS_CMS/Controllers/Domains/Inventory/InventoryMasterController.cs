@@ -1176,7 +1176,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("Enter Store ID");
             }
 
-            InventoryMaster sales = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);
+            InventoryMaster sales = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(t => t.ID == id);
 
             if (sales == null)
             {
