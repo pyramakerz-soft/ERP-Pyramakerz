@@ -226,12 +226,12 @@ export class SignUpComponent {
         }
       }
 
-      if (this.parentInfo.recaptchaToken == "") {
-        this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
-        isValid = false;
-      } else {
-        this.validationErrors['recaptchaToken'] = '';
-      }
+      // if (this.parentInfo.recaptchaToken == "") {
+      //   this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+      //   isValid = false;
+      // } else {
+      //   this.validationErrors['recaptchaToken'] = '';
+      // }
     }
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.parentInfo.email && !emailPattern.test(this.parentInfo.email)) {

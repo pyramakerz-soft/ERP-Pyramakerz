@@ -107,7 +107,6 @@ async generateExcelReport(options: {
 }) {
   // Use proper dynamic import syntax
   const ExcelJS = await import('exceljs');
-  // Make sure to access the default export correctly
   const Excel = ExcelJS.default || ExcelJS;
 
 
@@ -135,10 +134,10 @@ async generateExcelReport(options: {
 
   // Define column ranges
   const enStart = 'A';
-  const enEnd = 'D';   // English section takes A-D
-  const imageCol = 'E'; // Image in column E
-  const arStart = 'F';  // Arabic section starts at F
-  const arEnd = 'I';    // Arabic section takes F-I
+  const enEnd = 'D';
+  const imageCol = 'E';
+  const arStart = 'F';
+  const arEnd = 'I';
 
   // Main header - English (A-D)
   worksheet.mergeCells(`${enStart}1:${enEnd}1`);
@@ -152,7 +151,6 @@ async generateExcelReport(options: {
   worksheet.getCell(`${arStart}1`).font = { bold: true, size: 16 };
   worksheet.getCell(`${arStart}1`).alignment = { horizontal: 'right' };
 
-  // Image in column E (if exists)
   if (base64Image) {
     const base64Data = base64Image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
 
