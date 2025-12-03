@@ -156,6 +156,12 @@ export class ReceivableDetailsComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  CalculateTotal() {
+    const oldTotal =this.receivable.receivableDetails?.map(s => Number(s.amount) || 0).reduce((a, c) => a + c, 0) || 0;
+    const newTotal =this.receivable.newDetails?.map(s => Number(s.amount) || 0).reduce((a, c) => a + c, 0) || 0;
+    this.totalAmount = oldTotal + newTotal;
+  }
+
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
@@ -174,17 +180,16 @@ export class ReceivableDetailsComponent {
   }
 
   GetReceivableByID() {
-    this.receivableService
-      .GetByID(this.ReceivableID, this.DomainName)
-      .subscribe((data) => {
-        this.receivable = data;
-        this.GetAllLinkFilesTypeData()
-        if (this.receivable.linkFileID == 5) {
-          this.getSaveData();
-        } else if (this.receivable.linkFileID == 6) {
-          this.getBankData();
-        }
-      });
+    this.receivableService.GetByID(this.ReceivableID, this.DomainName).subscribe((data) => {
+      this.receivable = data;
+      this.GetAllLinkFilesTypeData()
+      if (this.receivable.linkFileID == 5) {
+        this.getSaveData();
+      } else if (this.receivable.linkFileID == 6) {
+        this.getBankData();
+      }
+      this.CalculateTotal()
+    });
   }
 
   getBankData() {
@@ -602,18 +607,17 @@ export class ReceivableDetailsComponent {
       cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.receivableDetailsService
-          .Delete(id, this.DomainName)
-          .subscribe((data) => {
-          this.receivable.receivableDetails = (this.receivable.receivableDetails || []).filter(p => p.id !== id);
-          this.receivable.updatedDetails = (this.receivable.updatedDetails || []).filter(p => p.id !== id);
-          if(this.receivable.updatedDetails.length == 0){
-            this.receivable.updatedDetails=[]
-          }
-          if(this.receivable.receivableDetails.length == 0){
-            this.receivable.receivableDetails=[]
-          }
-          });
+        this.receivableDetailsService.Delete(id, this.DomainName).subscribe((data) => {
+        this.receivable.receivableDetails = (this.receivable.receivableDetails || []).filter(p => p.id !== id);
+        this.receivable.updatedDetails = (this.receivable.updatedDetails || []).filter(p => p.id !== id);
+        this.CalculateTotal();
+        if(this.receivable.updatedDetails.length == 0){
+          this.receivable.updatedDetails=[]
+        }
+        if(this.receivable.receivableDetails.length == 0){
+          this.receivable.receivableDetails=[]
+        }
+        });
       }
     });
   }
@@ -640,6 +644,7 @@ export class ReceivableDetailsComponent {
     }).then((result) => {
       if (result.isConfirmed) {
        this.receivable.newDetails=this.receivable.newDetails.filter(p=>p.id!=id)
+       this.CalculateTotal();
       }
     });
   }
