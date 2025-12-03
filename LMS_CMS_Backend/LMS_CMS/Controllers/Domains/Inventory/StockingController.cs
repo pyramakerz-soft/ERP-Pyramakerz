@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Http;
@@ -194,7 +195,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     return accessCheck;
                 }
             }
-
+            Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newData.StoreID && b.IsDeleted != true);
+            if (store == null)
+            {
+                return NotFound("Store cannot be null");
+            }
+            School school = new School();
+            if (newData.SchoolId != 0 && newData.SchoolId != null)
+            {
+                school = Unit_Of_Work.school_Repository.First_Or_Default(b => b.ID == newData.SchoolId && b.IsDeleted != true);
+                if (school == null)
+                {
+                    return NotFound("school not found.");
+                }
+            }
+            else
+            {
+                newData.SchoolId = null;
+            }
+            if (newData.SchoolPCId != 0 && newData.SchoolPCId != null)
+            {
+                SchoolPCs SchoolPCId = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(b => b.ID == newData.SchoolPCId && b.SchoolId == newData.SchoolId && b.IsDeleted != true);
+                if (SchoolPCId == null)
+                {
+                    return NotFound("SchoolPCId not found.");
+                }
+            }
+            else
+            {
+                newData.SchoolPCId = null;
+            }
             mapper.Map(newData, data);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

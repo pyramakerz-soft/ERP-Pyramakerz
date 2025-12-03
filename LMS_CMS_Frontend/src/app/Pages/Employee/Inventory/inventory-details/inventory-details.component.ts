@@ -1466,11 +1466,7 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(
-    event: any,
-    field: keyof InventoryDetails,
-    row: InventoryDetails
-  ): void {
+  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
     const value = event.target.value;
     const numValue = Number(value);
 
@@ -1491,7 +1487,6 @@ export class InventoryDetailsComponent {
           row[field] = '' as never;
         }
       }
-      this.CalculateTotalPrice(row);
       return;
     }
   }
