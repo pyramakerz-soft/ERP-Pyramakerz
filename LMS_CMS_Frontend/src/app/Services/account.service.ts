@@ -84,7 +84,7 @@ export class AccountService {
           )
         }
       } else if(User_Data_After_Login.type == 'parent'){
-        this.parentService.GetByID(User_Data_After_Login.id, this.header).subscribe(
+        this.parentService.GetByIDByToken(this.header).subscribe(
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut() 
@@ -93,7 +93,7 @@ export class AccountService {
           }
         )
       } else if(User_Data_After_Login.type == 'student'){
-        this.studentService.GetByID(User_Data_After_Login.id, this.header).subscribe(
+        this.studentService.GetByIDByToken(this.header).subscribe(
           data => { 
             if(User_Data_After_Login.user_Name != data.user_Name){
               this.logOutService.logOut()

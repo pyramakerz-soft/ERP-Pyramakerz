@@ -102,8 +102,7 @@ export class StudentMedalReportComponent implements OnInit {
         this.prepareExportData();
       })
     
-      this.studentService.GetByID(this.UserID,this.DomainName).subscribe((d)=>{
-        console.log(d)
+      this.studentService.GetByIDByToken(this.DomainName).subscribe((d)=>{ 
         this.Student =d
       },error=>{
         console.log(error)
