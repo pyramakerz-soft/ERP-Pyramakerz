@@ -93,19 +93,23 @@ export class ReportsService {
 async generateExcelReport(options: {
   mainHeader?: { en: string; ar: string };
   subHeaders?: { en: string; ar: string }[];
-  infoRows?: { key: string; value: string | number | boolean }[];
+
+  infoRows?: { en: string; ar: string }[] | { key: string; value: string | number | boolean | Date | null | undefined }[];
   reportImage?: string;
+  isRtl?: boolean; // ⬅️ إضافة خاصية RTL
   tables: {
     title?: string;
     headers: string[];
     data: (string | number | boolean)[][];
   }[];
   filename?: string;
+
 }) {
   // Use proper dynamic import syntax
   const ExcelJS = await import('exceljs');
   // Make sure to access the default export correctly
   const Excel = ExcelJS.default || ExcelJS;
+
 
   const workbook = new Excel.Workbook();
   const worksheet = workbook.addWorksheet("Report");
@@ -186,15 +190,33 @@ async generateExcelReport(options: {
   // Skip image row for data placement
   worksheet.addRow([]);
   
-  // Info rows (dynamic) - these will start from column A
-  options.infoRows?.forEach(({ key, value }) => {
-    const row = worksheet.addRow([`${key}: ${value}`]);
-    row.font = { bold: true, size: 12 };
-    // Set LTR alignment for info rows
-    row.eachCell((cell) => {
-      cell.alignment = { horizontal: 'left' };
-    });
-  });
+options.infoRows?.forEach((infoRow: any) => {
+  let englishValue = '';
+  let arabicValue = '';
+
+  if ('en' in infoRow && 'ar' in infoRow) {
+    englishValue = infoRow.en?.toString() || '';
+    arabicValue = infoRow.ar?.toString() || '';
+  } else if ('key' in infoRow && 'value' in infoRow) {
+    englishValue = infoRow.key?.toString() || '';
+    const val = infoRow.value;
+    arabicValue = val instanceof Date ? val.toLocaleDateString() : (val ?? '').toString();
+  }
+
+  // English in A-D
+  const row = worksheet.addRow([englishValue]);
+  worksheet.mergeCells(`A${row.number}:D${row.number}`);
+  row.font = { bold: true, size: 12 };
+  row.eachCell(cell => cell.alignment = { horizontal: 'left' });
+
+  // Arabic in F-I
+  const arabicRow = worksheet.getRow(row.number);
+  arabicRow.getCell('F').value = arabicValue;
+  worksheet.mergeCells(`F${row.number}:I${row.number}`);
+  arabicRow.getCell('F').alignment = { horizontal: 'right' };
+  arabicRow.getCell('F').font = { bold: true, size: 12 };
+});
+
 
   worksheet.addRow([]);
 

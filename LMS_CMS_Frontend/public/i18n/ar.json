@@ -1414,22 +1414,12 @@
   "Leave Request" : "طلب إجازة",
   "DateFrom" : "من تاريخ",
   "VacationTypesID" : "أنواع الإجازات",
-  "BackPrice" : "سعر الاسترجاع",
+  "BackPrice" : "سعر الاسترجاع", 
   "MorningPrice" : "سعر الصباح",
   "TwoWaysPrice" : "سعر الذهاب والعودة",
   "Deduction Percentage after cutoff date": "نسبة الخصم بعد تاريخ القطع",
   "Attendance Report" : "تقرير الحضور",
-
-
-
-
-
-
-
-
-
-
-
+  "Conduct Report" : "تقرير السلوك",
   "Conduct Types": "أنواع السلوك",
   "Procedure Types" : "أنواع الإجراءات",
   "Login" : "تسجيل الدخول"
