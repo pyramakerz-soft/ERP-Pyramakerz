@@ -11,12 +11,12 @@ import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
@@ -82,21 +82,21 @@ export class AssignmentReportComponent implements OnInit {
     private gradeService: GradeService,
     private subjectService: SubjectService,
     private apiService: ApiService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private reportsService: ReportsService,
-    private loadingService: LoadingService 
-  ) {}
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.loadSchools();
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -192,12 +192,12 @@ export class AssignmentReportComponent implements OnInit {
     // Reset subject filter when grade changes
     this.selectedSubjectId = null;
     this.subjects = [];
-    
+
     // Only load subjects if a grade is selected
     if (this.selectedGradeId) {
       this.loadSubjects();
     }
-    
+
     this.onFilterChange();
   }
 
@@ -207,18 +207,20 @@ export class AssignmentReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && 
-                            this.dateTo !== '' && 
-                            this.selectedSchoolId !== null && 
-                            this.selectedAcademicYearId !== null && 
-                            this.selectedGradeId !== null && 
-                            this.selectedSubjectId !== null;
+    this.showViewReportBtn = this.dateFrom !== '' &&
+      this.dateTo !== '' &&
+      this.selectedSchoolId !== null &&
+      this.selectedAcademicYearId !== null &&
+      this.selectedGradeId !== null &&
+      this.selectedSubjectId !== null;
     this.assignmentReports = [];
     this.chartData = [];
   }
 
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -229,6 +231,8 @@ export class AssignmentReportComponent implements OnInit {
     }
 
     if (!this.selectedSchoolId || !this.selectedAcademicYearId || !this.selectedGradeId || !this.selectedSubjectId) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Missing Filters',
         text: 'Please select all required filters: School, Academic Year, Grade, and Subject.',
@@ -248,15 +252,15 @@ export class AssignmentReportComponent implements OnInit {
           domainName,
           this.dateFrom,
           this.dateTo,
-          this.selectedSchoolId,
-          this.selectedAcademicYearId,
-          this.selectedGradeId,
-          this.selectedSubjectId
+          this.selectedSchoolId!,
+          this.selectedAcademicYearId!,
+          this.selectedGradeId!,
+          this.selectedSubjectId!
         )
       );
 
       console.log('API Response:', response);
-      
+
       if (Array.isArray(response)) {
         this.assignmentReports = response;
         console.log('Assignment reports loaded:', this.assignmentReports.length);
@@ -281,14 +285,16 @@ export class AssignmentReportComponent implements OnInit {
   private prepareChartData(): void {
     this.chartData = this.assignmentReports.map(report => ({
       name: report.assignmentName,
-      successful: report.numberSuccessful,
-      failed: report.numberFailed,
-      total: report.attendanceNumber
+      successful: report.successfulStudents,
+      failed: report.failedStudents,
+      total: report.assignedStudents,
+      submitted: report.submittedStudents,
+      pending: report.pendingStudents
     }));
 
     // Calculate max value for chart scaling
     this.maxChartValue = Math.max(
-      ...this.chartData.map(item => Math.max(item.successful, item.failed)),
+      ...this.chartData.map(item => Math.max(item.successful, item.failed, item.submitted, item.pending)),
       100 // Minimum scale
     );
   }
@@ -302,22 +308,24 @@ export class AssignmentReportComponent implements OnInit {
     this.reportsForExport = this.assignmentReports.map((report) => ({
       'Assignment Name': report.assignmentName,
       'Subject': report.subjectName,
-      'Attendance Number': report.attendanceNumber,
-      'Successful': report.numberSuccessful,
-      'Failed': report.numberFailed,
-      'Success Rate': report.attendanceNumber > 0 ? 
-        ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'
+      'Assigned Students': report.assignedStudents,
+      'Submitted Students': report.submittedStudents,
+      'Successful': report.successfulStudents,
+      'Failed': report.failedStudents,
+      'Pending': report.pendingStudents,
+      'Success Rate': report.successRate.toFixed(2) + '%'
     }));
 
     // For Excel (array format)
     this.reportsForExcel = this.assignmentReports.map((report) => [
       report.assignmentName,
       report.subjectName,
-      report.attendanceNumber,
-      report.numberSuccessful,
-      report.numberFailed,
-      report.attendanceNumber > 0 ? 
-        ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'
+      report.assignedStudents,
+      report.submittedStudents,
+      report.successfulStudents,
+      report.failedStudents,
+      report.pendingStudents,
+      report.successRate.toFixed(2) + '%'
     ]);
   }
 
@@ -371,7 +379,7 @@ export class AssignmentReportComponent implements OnInit {
   //   }
 
   //   this.isExporting = true;
-    
+
   //   try {
   //     await this.reportsService.generateExcelReport({
   //       mainHeader: {
@@ -409,226 +417,218 @@ export class AssignmentReportComponent implements OnInit {
   //   }
   // }
 
-  async downloadAsPDFWithChart() {
-    if (this.assignmentReports.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
+async downloadAsPDFWithChart() {
+  if (this.assignmentReports.length === 0) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
+  }
 
-    this.isExporting = true;
-    let reportElement: HTMLElement | null = null;
+  this.isExporting = true;
+  let reportElement: HTMLElement | null = null;
 
-    try {
-      // Wait for the chart to be fully rendered
-      await new Promise(resolve => setTimeout(resolve, 500));
+  try {
+    const html2canvas = (await import('html2canvas')).default;
 
-      // Create a temporary container for the report (same as print)
-      reportElement = document.createElement('div');
-      reportElement.style.width = '900px';
-      reportElement.style.padding = '32px';
-      reportElement.style.backgroundColor = '#fff';
-      reportElement.style.fontFamily = 'Arial, sans-serif';
-      reportElement.style.position = 'fixed';
-      reportElement.style.left = '-9999px';
-      reportElement.style.top = '0';
-      reportElement.style.color = '#333';
-      reportElement.style.boxSizing = 'border-box';
+    // Wait for the chart to be fully rendered
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Header
-      const headerDiv = document.createElement('div');
-      headerDiv.innerHTML = `
-        <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="font-size: 2rem; font-weight: bold; color: #333; margin: 0;">
-            Assignment Report
-          </h1>
-        </div>
-      `;
-      reportElement.appendChild(headerDiv);
+    // Create a temporary container for the report
+    reportElement = document.createElement('div');
+    reportElement.style.width = '900px';
+    reportElement.style.padding = '32px';
+    reportElement.style.backgroundColor = '#fff';
+    reportElement.style.fontFamily = 'Arial, sans-serif';
+    reportElement.style.position = 'fixed';
+    reportElement.style.left = '-9999px';
+    reportElement.style.top = '0';
+    reportElement.style.color = '#333';
+    reportElement.style.boxSizing = 'border-box';
 
-      // Chart image
-      if (this.chartContainer && this.chartContainer.nativeElement) {
-        const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
-          scale: 2,
-          backgroundColor: '#fff',
-          logging: false,
-          useCORS: true,
-          allowTaint: false,
-          width: this.chartContainer.nativeElement.scrollWidth,
-          height: this.chartContainer.nativeElement.scrollHeight
-        });
-        const chartImg = document.createElement('img');
-        chartImg.src = chartCanvas.toDataURL('image/png');
-        chartImg.style.display = 'block';
-        chartImg.style.margin = '0 auto 32px auto';
-        chartImg.style.maxWidth = '100%';
-        chartImg.style.height = 'auto';
-        reportElement.appendChild(chartImg);
-      }
+    // Header
+    const headerDiv = document.createElement('div');
+    headerDiv.innerHTML = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 2rem; font-weight: bold; color: #333; margin: 0;">
+          Assignment Report
+        </h1>
+      </div>
+    `;
+    reportElement.appendChild(headerDiv);
 
-      // Details
-      const detailsDiv = document.createElement('div');
-      detailsDiv.innerHTML = `
-        <div style="margin: 24px 0;">
-          <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 10px; color: #333;">
-            Report Details
-          </h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
-            <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
-            <div><strong>School:</strong> ${this.getSchoolName()}</div>
-            <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
-            <div><strong>Grade:</strong> ${this.getGradeName()}</div>
-            <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
-            <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-      `;
-      reportElement.appendChild(detailsDiv);
-
-      // Summary statistics
-      // const summaryDiv = document.createElement('div');
-      // summaryDiv.innerHTML = `
-      //   <div style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #BDBDBD; margin: 24px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.07);">
-      //     <h3 style="font-size: 1.125rem; font-weight: 600; color: #333; margin-bottom: 16px; text-align: center;">
-      //       Summary Statistics
-      //     </h3>
-      //     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
-      //       <div style="text-align: center;">
-      //         <div style="font-size: 1.5rem; font-weight: bold; color: #10B981;">${this.getTotalSuccessful()}</div>
-      //         <div style="font-size: 14px; color: #6B7280;">Total Successful</div>
-      //       </div>
-      //       <div style="text-align: center;">
-      //         <div style="font-size: 1.5rem; font-weight: bold; color: #F97316;">${this.getTotalFailed()}</div>
-      //         <div style="font-size: 14px; color: #6B7280;">Total Failed</div>
-      //       </div>
-      //       <div style="text-align: center;">
-      //         <div style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.getTotalAttendance()}</div>
-      //         <div style="font-size: 14px; color: #6B7280;">Total Attendance</div>
-      //       </div>
-      //       <div style="text-align: center;">
-      //         <div style="font-size: 1.5rem; font-weight: bold; color: #8B5CF6;">${this.getTotalAssignments()}</div>
-      //         <div style="font-size: 14px; color: #6B7280;">Total Assignments</div>
-      //       </div>
-      //     </div>
-      //   </div>
-      // `;
-      // reportElement.appendChild(summaryDiv);
-
-      // Data table
-      if (this.assignmentReports.length > 0) {
-        const tableDiv = document.createElement('div');
-        tableDiv.innerHTML = `
-          <div style="margin-top: 24px;">
-            <table style="width: 100%; border-collapse: collapse; background: #EBEBEB; color: #6F6F6F; font-size: 14px;">
-              <thead>
-                <tr style="background: #EBEBEB;">
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assignment Name</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Subject Name</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Attendance</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Successful</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Failed</th>
-                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Success Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.assignmentReports.map((report, i) => `
-                  <tr style="background: ${i % 2 === 1 ? '#F7F7F7' : '#fff'};">
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignmentName}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.subjectName}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.attendanceNumber}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberSuccessful}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberFailed}</td>
-                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">
-                      ${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-        reportElement.appendChild(tableDiv);
-      }
-
-      // Append to document body
-      document.body.appendChild(reportElement);
-
-      // Wait for rendering
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Convert to image
-      const reportImage = await html2canvas(reportElement, {
+    // Chart image
+    if (this.chartContainer && this.chartContainer.nativeElement) {
+      const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
         scale: 2,
         backgroundColor: '#fff',
         logging: false,
         useCORS: true,
         allowTaint: false,
-        width: reportElement.scrollWidth,
-        height: reportElement.scrollHeight
+        width: this.chartContainer.nativeElement.scrollWidth,
+        height: this.chartContainer.nativeElement.scrollHeight
       });
+      const chartImg = document.createElement('img');
+      chartImg.src = chartCanvas.toDataURL('image/png');
+      chartImg.style.display = 'block';
+      chartImg.style.margin = '0 auto 32px auto';
+      chartImg.style.maxWidth = '100%';
+      chartImg.style.height = 'auto';
+      reportElement.appendChild(chartImg);
+    }
 
-      // Clean up
-      if (reportElement.parentNode) {
-        document.body.removeChild(reportElement);
-      }
+    // Details
+    const detailsDiv = document.createElement('div');
+    detailsDiv.innerHTML = `
+      <div style="margin: 24px 0;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
+          <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
+          <div><strong>School:</strong> ${this.getSchoolName()}</div>
+          <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
+          <div><strong>Grade:</strong> ${this.getGradeName()}</div>
+          <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
+          <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
+        </div>
+      </div>
+    `;
+    reportElement.appendChild(detailsDiv);
 
-      const imgData = reportImage.toDataURL('image/png');
+    // Data table
+    if (this.assignmentReports.length > 0) {
+      const tableDiv = document.createElement('div');
+      tableDiv.innerHTML = `
+        <div style="margin-top: 24px;">
+          <table style="width: 100%; border-collapse: collapse; background: #EBEBEB; color: #6F6F6F; font-size: 14px;">
+            <thead>
+              <tr style="background: #EBEBEB;">
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assignment Name</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Subject Name</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assigned Students</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Submitted Students</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Successful</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Failed</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Pending</th>
+                <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Success Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.assignmentReports.map((report, i) => `
+                <tr style="background: ${i % 2 === 1 ? '#F7F7F7' : '#fff'};">
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignmentName}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.subjectName}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignedStudents}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.submittedStudents}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.successfulStudents}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.failedStudents}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.pendingStudents}</td>
+                  <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.successRate.toFixed(2) + '%'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      reportElement.appendChild(tableDiv);
+    }
 
-      // Create PDF in portrait mode (like a standard document)
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+    // Append to document body
+    document.body.appendChild(reportElement);
 
-      // Calculate image dimensions to fit the page
-      const imgWidth = pdfWidth - 20; // 10mm margins on each side
-      const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
+    // Wait for rendering
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Add image to PDF with centered margins
-      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    // Convert to image
+    const reportImage = await html2canvas(reportElement, {
+      scale: 2,
+      backgroundColor: '#fff',
+      logging: false,
+      useCORS: true,
+      allowTaint: false,
+      width: reportElement.scrollWidth,
+      height: reportElement.scrollHeight
+    });
 
-      // Save PDF
-      pdf.save(`Assignment_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+    // Clean up
+    if (reportElement.parentNode) {
+      document.body.removeChild(reportElement);
+    }
 
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
-    } finally {
-      this.isExporting = false;
-      // Safety cleanup
-      if (reportElement && reportElement.parentNode === document.body) {
-        document.body.removeChild(reportElement);
-      }
+    const imgData = reportImage.toDataURL('image/png');
+
+    // Create PDF in portrait mode
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // Calculate image dimensions to fit the page
+    const imgWidth = pdfWidth - 20; // 10mm margins on each side
+    const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
+
+    // Add image to PDF with centered margins
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+    // Save PDF
+    pdf.save(`Assignment_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+
+  } catch (error) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
+  } finally {
+    this.isExporting = false;
+    // Safety cleanup
+    if (reportElement && reportElement.parentNode === document.body) {
+      document.body.removeChild(reportElement);
     }
   }
+}
 
-  async printReportWithChart() {
-    if (this.assignmentReports.length === 0) {
-      Swal.fire('Warning', 'No data to print!', 'warning');
-      return;
+async printReportWithChart() {
+  if (this.assignmentReports.length === 0) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire('Warning', 'No data to print!', 'warning');
+    return;
+  }
+
+  this.isExporting = true;
+
+  // Store cleanup function reference
+  let cleanupCalled = false;
+
+  let cleanup = () => {
+    if (cleanupCalled) return;
+    cleanupCalled = true;
+
+    const printContainer = document.querySelector('.print-overlay');
+    if (printContainer && printContainer.parentNode) {
+      document.body.removeChild(printContainer);
     }
 
-    this.isExporting = true;
+    // Remove print styles
+    const printStyles = document.querySelectorAll('style[data-print-style]');
+    printStyles.forEach(style => style.remove());
 
-    try {
-      // Convert chart to image
-      let chartImage = '';
-      if (this.chartContainer) {
-        const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false
-        });
-        chartImage = chartCanvas.toDataURL('image/png');
-      }
+    this.isExporting = false;
+  };
 
-      // Create print-friendly version
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        Swal.fire('Error', 'Please allow popups for printing', 'error');
-        this.isExporting = false;
-        return;
-      }
+  try {
+    // Create a hidden print container
+    const printContainer = document.createElement('div');
+    printContainer.className = 'print-overlay';
+    printContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 9999;
+      padding: 20px;
+      overflow: auto;
+      visibility: hidden;
+    `;
 
-      // Create print content that matches HTML exactly
+    // First, get the chart as image
+    this.getChartAsImage().then((chartImage) => {
+      // Create print content with the chart image
       const printContent = `
         <!DOCTYPE html>
         <html>
@@ -637,91 +637,84 @@ export class AssignmentReportComponent implements OnInit {
           <style>
             body { 
               font-family: Arial, sans-serif; 
-              margin: 20px; 
-              color: #333;
+              margin: 0;
+              padding: 20px;
               background: white;
             }
             .header { 
               text-align: center; 
-              margin-bottom: 20px; 
-            }
-            .header h1 {
-              font-size: 24px;
-              font-weight: bold;
-              color: #333;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #333;
+              padding-bottom: 20px;
             }
             .chart-container { 
-              margin: 20px 0; 
+              text-align: center; 
+              margin: 30px 0;
+              page-break-inside: avoid;
             }
             .details { 
-              margin: 20px 0; 
-            }
-            .details h3 {
-              font-size: 18px;
-              font-weight: 600;
-              margin-bottom: 10px;
+              margin: 30px 0;
+              page-break-inside: avoid;
             }
             .details-grid { 
               display: grid; 
               grid-template-columns: 1fr 1fr; 
-              gap: 10px; 
-              margin-top: 15px;
-              font-size: 14px;
+              gap: 15px; 
+              margin-top: 20px;
             }
-            table {
+            .data-table {
               width: 100%;
               border-collapse: collapse;
               margin: 20px 0;
-              font-size: 12px;
-              border: 1px solid #BDBDBD;
-              border-radius: 16px;
-              overflow: hidden;
+              page-break-inside: avoid;
             }
-            th, td {
-              border: 1px solid #EAECF0;
-              padding: 12px 16px;
+            .data-table th,
+            .data-table td {
+              border: 1px solid #ddd;
+              padding: 12px;
               text-align: left;
+              font-size: 12px;
             }
-            th {
-              background-color: #EBEBEB;
-              font-weight: 600;
-              color: #6F6F6F;
+            .data-table th {
+              background-color: #f5f5f5;
+              font-weight: bold;
             }
-            td {
-              color: #6F6F6F;
+            .data-table tr:nth-child(even) {
+              background-color: #f9f9f9;
             }
-            tr:nth-child(even) {
-              background-color: #F7F7F7;
-            }
-            tr:nth-child(odd) {
-              background-color: white;
-            }
-            .no-print { 
-              display: none; 
+            .footer { 
+              margin-top: 40px; 
+              text-align: center; 
+              color: #666;
+              font-size: 12px;
             }
             @media print {
               body { 
-                margin: 0; 
-                padding: 15px; 
-                background: white;
+                margin: 0;
+                padding: 15px;
               }
-              .no-print { display: none; }
+              .header {
+                margin-bottom: 20px;
+              }
+              .chart-container {
+                margin: 20px 0;
+              }
+              .page-break {
+                page-break-before: always;
+              }
+            }
+            @page {
+              size: auto;
+              margin: 15mm;
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Assignment Report</h1>
+            <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #333;">Assignment Report</h1>
           </div>
-          
-          ${chartImage ? `
-          <div class="chart-container">
-            <img src="${chartImage}" style="max-width: 100%; height: auto;" />
-          </div>
-          ` : ''}
           
           <div class="details">
-            <h3>Report Details</h3>
             <div class="details-grid">
               <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
               <div><strong>School:</strong> ${this.getSchoolName()}</div>
@@ -732,16 +725,22 @@ export class AssignmentReportComponent implements OnInit {
             </div>
           </div>
           
-          <div class="table-container">
-            <h3>Assignment Details</h3>
-            <table>
+          <div class="chart-container">
+            <img src="${chartImage}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" />
+          </div>
+
+          <div class="data-section">
+            <h3 style="font-size: 20px; margin-bottom: 15px; color: #333;">Assignment Details</h3>
+            <table class="data-table">
               <thead>
                 <tr>
                   <th>Assignment Name</th>
                   <th>Subject</th>
-                  <th>Attendance</th>
+                  <th>Assigned</th>
+                  <th>Submitted</th>
                   <th>Successful</th>
                   <th>Failed</th>
+                  <th>Pending</th>
                   <th>Success Rate</th>
                 </tr>
               </thead>
@@ -750,117 +749,211 @@ export class AssignmentReportComponent implements OnInit {
                   <tr>
                     <td>${report.assignmentName}</td>
                     <td>${report.subjectName}</td>
-                    <td>${report.attendanceNumber}</td>
-                    <td>${report.numberSuccessful}</td>
-                    <td>${report.numberFailed}</td>
-                    <td>${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+                    <td>${report.assignedStudents}</td>
+                    <td>${report.submittedStudents}</td>
+                    <td>${report.successfulStudents}</td>
+                    <td>${report.failedStudents}</td>
+                    <td>${report.pendingStudents}</td>
+                    <td>${report.successRate.toFixed(2)}%</td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           </div>
-          
-          <div class="no-print" style="margin-top: 20px; text-align: center;">
-            <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-              Print Report
-            </button>
-            <button onclick="window.close()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-              Close
-            </button>
-          </div>
-          
-          <script>
-            // Auto-print when window loads
-            window.onload = function() {
-              setTimeout(() => {
-                window.print();
-              }, 500);
-              
-              // Listen for afterprint event to close the window
-              window.addEventListener('afterprint', function() {
-                setTimeout(function() {
-                  window.close();
-                }, 500);
-              });
-            };
-          </script>
+
         </body>
         </html>
       `;
 
-      printWindow.document.write(printContent);
-      printWindow.document.close();
+      printContainer.innerHTML = printContent;
+      document.body.appendChild(printContainer);
+
+      // Wait for content to be rendered
+      setTimeout(() => {
+        // Add print styles with data attribute for easy removal
+        const printStyles = document.createElement('style');
+        printStyles.setAttribute('data-print-style', 'true');
+        printStyles.textContent = `
+          @media screen {
+            .print-overlay {
+              display: none !important;
+            }
+          }
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .print-overlay,
+            .print-overlay * {
+              visibility: visible;
+            }
+            .print-overlay {
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              padding: 0 !important;
+              margin: 0 !important;
+            }
+          }
+        `;
+        document.head.appendChild(printStyles);
+
+        // Strategy 1: Use beforeprint and afterprint events
+        const handleAfterPrint = () => {
+          window.removeEventListener('afterprint', handleAfterPrint);
+          cleanup();
+        };
+
+        const handleBeforePrint = () => {
+          window.removeEventListener('beforeprint', handleBeforePrint);
+          window.addEventListener('afterprint', handleAfterPrint);
+        };
+
+        window.addEventListener('beforeprint', handleBeforePrint);
+
+        // Strategy 2: Fallback timeout for browsers that don't fire afterprint
+        const fallbackTimeout = setTimeout(() => {
+          if (!cleanupCalled) {
+            console.warn('Fallback cleanup triggered');
+            cleanup();
+          }
+        }, 3000); // 3 second fallback
+
+        // Strategy 3: Listen for focus event (when print dialog closes)
+        const handleFocus = () => {
+          window.removeEventListener('focus', handleFocus);
+          if (!cleanupCalled) {
+            setTimeout(() => {
+              if (!cleanupCalled) {
+                cleanup();
+              }
+            }, 500);
+          }
+        };
+
+        window.addEventListener('focus', handleFocus);
+
+        // Update cleanup to clear the timeout
+        const originalCleanup = cleanup;
+        cleanup = () => {
+          clearTimeout(fallbackTimeout);
+          window.removeEventListener('beforeprint', handleBeforePrint);
+          window.removeEventListener('afterprint', handleAfterPrint);
+          window.removeEventListener('focus', handleFocus);
+          originalCleanup();
+        };
+
+        // Trigger print
+        window.print();
+
+      }, 500);
+
+    }).catch(async error => {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to generate chart for printing', 'error');
+      this.isExporting = false;
+    });
+
+  } catch (error) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+    Swal.fire('Error', 'Failed to print report', 'error');
+    this.isExporting = false;
+
+    // Cleanup on error
+    const printContainer = document.querySelector('.print-overlay');
+    if (printContainer && printContainer.parentNode) {
+      document.body.removeChild(printContainer);
+    }
+  }
+}
+
+private getChartAsImage(): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    if (!this.chartContainer?.nativeElement) {
+      reject('Chart container not available');
+      return;
+    }
+    const html2canvas = (await import('html2canvas')).default;
+
+    html2canvas(this.chartContainer.nativeElement, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true
+    }).then(chartCanvas => {
+      resolve(chartCanvas.toDataURL('image/png'));
+    }).catch(error => {
+      reject(error);
+    });
+  });
+}
+
+  async exportChartToExcel() {
+    if (this.assignmentReports.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+
+    try {
+      const ExcelJS = await import('exceljs');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Assignment Chart');
+
+      // Prepare data
+      const chartData = this.assignmentReports.map(report => ({
+        name: report.assignmentName,
+        successful: report.numberSuccessful,
+        failed: report.numberFailed
+      }));
+
+      // Add data to worksheet
+      worksheet.addRow(['Assignment Name', 'Successful', 'Failed']);
+      chartData.forEach(item => worksheet.addRow([item.name, item.successful, item.failed]));
+
+      // Create chart using the most compatible method
+      // This creates the data structure that ExcelJS expects
+      const chart = {
+        type: 'column' as const,
+        title: 'Assignment Performance Chart',
+        data: chartData.map(item => ({
+          name: item.name,
+          values: [item.successful, item.failed]
+        }))
+      };
+
+      // ExcelJS does not support adding charts directly; only data will be exported.
+      // If chart export is needed, consider using a library that supports chart embedding or export chart as image separately.
+
+      // Generate file
+      const buffer = await workbook.xlsx.writeBuffer();
+      this.downloadExcelFile(buffer, `Assignment_Chart_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
     } catch (error) {
-      console.error('Error printing report:', error);
-      Swal.fire('Error', 'Failed to print report', 'error');
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to export chart to Excel', 'error');
     } finally {
       this.isExporting = false;
     }
   }
 
-async exportChartToExcel() {
-  if (this.assignmentReports.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
+  private downloadExcelFile(buffer: ArrayBuffer, filename: string) {
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
-
-  this.isExporting = true;
-
-  try {
-    const ExcelJS = await import('exceljs');
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Assignment Chart');
-
-    // Prepare data
-    const chartData = this.assignmentReports.map(report => ({
-      name: report.assignmentName,
-      successful: report.numberSuccessful,
-      failed: report.numberFailed
-    }));
-
-    // Add data to worksheet
-    worksheet.addRow(['Assignment Name', 'Successful', 'Failed']);
-    chartData.forEach(item => worksheet.addRow([item.name, item.successful, item.failed]));
-
-    // Create chart using the most compatible method
-    // This creates the data structure that ExcelJS expects
-    const chart = {
-      type: 'column' as const,
-      title: 'Assignment Performance Chart',
-      data: chartData.map(item => ({
-        name: item.name,
-        values: [item.successful, item.failed]
-      }))
-    };
-
-    // ExcelJS does not support adding charts directly; only data will be exported.
-    // If chart export is needed, consider using a library that supports chart embedding or export chart as image separately.
-
-    // Generate file
-    const buffer = await workbook.xlsx.writeBuffer();
-    this.downloadExcelFile(buffer, `Assignment_Chart_${new Date().toISOString().slice(0, 10)}.xlsx`);
-
-  } catch (error) {
-    console.error('Error exporting chart to Excel:', error);
-    Swal.fire('Error', 'Failed to export chart to Excel', 'error');
-  } finally {
-    this.isExporting = false;
-  }
-}
-
-private downloadExcelFile(buffer: ArrayBuffer, filename: string) {
-  const blob = new Blob([buffer], { 
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-  });
-  
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-}
 }

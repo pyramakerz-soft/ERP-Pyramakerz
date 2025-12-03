@@ -25,7 +25,7 @@ import { FormsModule } from '@angular/forms';
 import { PerformanceType } from '../../../../Models/LMS/performance-type';
 import { PerformanceTypeService } from '../../../../Services/Employee/LMS/performance-type.service';
 import { DailyPerformanceService } from '../../../../Services/Employee/LMS/daily-performance.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { StudentPerformance } from '../../../../Models/LMS/student-performance';
 import { StudentMedal } from '../../../../Models/LMS/student-medal';
 import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance-master';
@@ -348,7 +348,7 @@ export class DailyPerformanceComponent {
       this.StudentPerformanceServ.Add(
         this.dailyPerformanceMaster,
         this.DomainName
-      ).subscribe((d) => {
+      ).subscribe(async (d) => {
         if (this.SelectedMedalId && this.selectedStudentIds.length) {
           this.selectedStudentIds.forEach((element) => {
             this.studentMedal = new StudentMedal();
@@ -360,6 +360,9 @@ export class DailyPerformanceComponent {
           });
         }
         this.isLoading = false;
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'success',
           title: 'Done',

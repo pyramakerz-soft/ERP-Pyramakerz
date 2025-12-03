@@ -3,7 +3,7 @@ import { JobCategories } from '../../../../Models/Administrator/job-categories';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -117,7 +117,9 @@ export class JobCategoriesComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') +this.translate.instant('Category') + this.translate.instant('?'),
       icon: 'warning',
@@ -171,7 +173,9 @@ export class JobCategoriesComponent {
             this.closeModal();
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false;
             if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
@@ -202,8 +206,10 @@ export class JobCategoriesComponent {
             this.closeModal();
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
             this.isLoading = false;
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',

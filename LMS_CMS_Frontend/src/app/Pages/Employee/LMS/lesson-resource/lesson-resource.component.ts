@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { LessonResource } from '../../../../Models/LMS/lesson-resource';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TokenData } from '../../../../Models/token-data';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { LessonResourceType } from '../../../../Models/LMS/lesson-resource-type';
@@ -330,7 +330,7 @@ export class LessonResourceComponent {
     this.lessonResource.attachmentFile = null; 
   }
 
-  Save() {  
+  async Save() {  
     this.lessonResource.lessonID = this.lessonId
     this.lessonResource.classes = [];
     this.lessonResource.newClassRooms = [];
@@ -362,7 +362,9 @@ export class LessonResourceComponent {
 
     if (this.isFormValid()) {
       this.isLoading = true;  
-        
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.editLessonResource == false) { 
         this.lessonResourceService.Add(this.lessonResource, this.DomainName).subscribe(
           (result: any) => {
@@ -433,7 +435,9 @@ export class LessonResourceComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +this.translate.instant('Lesson Resource') + this.translate.instant('?'),
       icon: 'warning',

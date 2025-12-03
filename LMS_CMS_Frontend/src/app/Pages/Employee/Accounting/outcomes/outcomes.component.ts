@@ -3,7 +3,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -141,7 +141,9 @@ export class OutcomesComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -204,7 +206,9 @@ export class OutcomesComponent {
             this.GetAllData();
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -223,7 +227,9 @@ export class OutcomesComponent {
             this.GetAllData();
             this.isLoading = false;
           },
-          (error) => {
+          async (error) => {
+            const Swal = await import('sweetalert2').then(m => m.default);
+
             this.isLoading = false;
             Swal.fire({
               icon: 'error',

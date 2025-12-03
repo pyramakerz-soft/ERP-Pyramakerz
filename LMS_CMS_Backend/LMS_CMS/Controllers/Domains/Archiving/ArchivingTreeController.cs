@@ -593,5 +593,68 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        [HttpPut]
+        [Authorize_Endpoint_(
+                allowedTypes: new[] { "octa", "employee" },
+                pages: new[] { "Archiving" } )]
+
+        public async Task<IActionResult> Update ( [FromBody] ArchivingEditDTO newArchive)
+        {
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+
+            if (newArchive.Id == 0)
+            {
+                return BadRequest("Enter Archiving Tree ID");
+            }
+            if (string.IsNullOrWhiteSpace(newArchive.Name))
+            {
+                return BadRequest("Name cannot be empty");
+            }
+            if (newArchive.Name.Trim().ToLower() == "content")
+            {
+                return BadRequest("Choose another name");
+            }
+
+            ArchivingTree archivingTree =  Unit_Of_Work.archivingTree_Repository
+                   .First_Or_Default(t => t.IsDeleted != true && t.ID == newArchive.Id);
+
+            if (archivingTree == null)
+            {
+                return NotFound("No Archiving with this ID");
+            }
+
+            if (archivingTree.Name == "Content")
+            {
+                return BadRequest("You can't rename this");
+            }
+
+            archivingTree.Name = newArchive.Name.Trim();
+            archivingTree.UpdatedAt = DateTime.UtcNow;
+            if (userTypeClaim == "octa")
+            {
+                archivingTree.UpdatedByOctaId = userId;
+            }
+            else {
+                archivingTree.UpdatedByUserId = userId;
+            }
+            Unit_Of_Work.archivingTree_Repository.Update(archivingTree);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+
+
+        }
     }
 }

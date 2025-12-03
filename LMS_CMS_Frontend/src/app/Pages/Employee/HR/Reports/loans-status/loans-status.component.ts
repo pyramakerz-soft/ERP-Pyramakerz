@@ -19,7 +19,7 @@ import { MenuService } from '../../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { LoanStatus } from '../../../../../Models/HR/loan-status';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 
@@ -274,8 +274,10 @@ export class LoansStatusComponent {
     ];
   }
 
-  Print() {
+  async Print() {
     if (this.cachedTableDataForPDF.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -320,8 +322,10 @@ export class LoansStatusComponent {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.cachedTableDataForPDF.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -335,6 +339,8 @@ export class LoansStatusComponent {
 
   async exportExcel() {
     if (this.LoanStatus.length == 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Warning',
         text: 'No data to export!',
@@ -430,7 +436,8 @@ export class LoansStatusComponent {
       });
 
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report',

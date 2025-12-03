@@ -21,7 +21,7 @@ import { QuestionBankService } from '../../../../../Services/Employee/LMS/questi
 import { QuestionBankTypeService } from '../../../../../Services/Employee/LMS/question-bank-type.service';
 import { QuestionBankType } from '../../../../../Models/LMS/question-bank-type';
 import { QuestionBank } from '../../../../../Models/LMS/question-bank';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AssignmentService } from '../../../../../Services/Employee/LMS/assignment.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
@@ -438,13 +438,15 @@ export class AssignmentEditComponent {
     }
   }
 
-  Save() {
+  async Save() {
     this.assignmentQuestion.assignmentID = this.AssignmentId;
     this.assignmentQuestion.questionIds = this.selectedQuestions;
     this.assignmentQuestion.lessonId = this.SelectedLessonID;
     this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
-    console.log(this.assignmentQuestion)
+     
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe({
         next: (d) => {
@@ -492,9 +494,11 @@ export class AssignmentEditComponent {
     }
   }
 
-  SaveFile() {
+  async SaveFile() {
     if (this.isFormValid()) {
       this.isLoading = true;
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.assignmentService.FileAssignment(
         this.assignment,
         this.DomainName
@@ -575,7 +579,9 @@ export class AssignmentEditComponent {
     this.validationErrors[field] = '';
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this Question?',
       icon: 'warning',

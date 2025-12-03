@@ -18,7 +18,7 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -145,10 +145,12 @@ export class AccountingEmployeeComponent {
     );
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'error',
       title: translatedTitle,

@@ -16,7 +16,7 @@ import { LinkFileService } from '../../../../Services/Employee/Accounting/link-f
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tree-chart';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
@@ -192,6 +192,7 @@ export class AccountingEntriesDetailsComponent {
   GetAccountingEntriesByID() {
     this.accountingEntriesService.GetByID(this.AccountingEntriesID, this.DomainName).subscribe(
       (data) => {
+        console.log(123,data)
         this.accountingEntries = data
         let totalCredit = 0
         let totalDebit = 0
@@ -276,7 +277,12 @@ export class AccountingEntriesDetailsComponent {
         this.validationErrorsForDetails[row.id][field] = '';
       }
     }
-
+    if(field == 'creditAmount'){
+      this.validationErrorsForDetails[row.id]['debitAmount'] = '';
+    }
+    if(field == 'debitAmount'){
+      this.validationErrorsForDetails[row.id]['creditAmount'] = '';
+    }
     this.CalcTotalData();  
   }
 
@@ -316,6 +322,15 @@ export class AccountingEntriesDetailsComponent {
           errors[field] = ''; 
         }
       });
+
+      const credit = Number(detail.creditAmount);
+      const debit = Number(detail.debitAmount);
+      
+      if(detail.creditAmount != null && detail.creditAmount != 0 && detail.debitAmount != null && detail.debitAmount != 0 ){
+        console.log(3232)
+        errors['debitAmount'] ='You cannot enter both Debit and Credit in the same row.'
+          isValid = false;
+      }
     });
 
     if(this.accountingEntries.newDetails && this.accountingEntries.newDetails.length > 0){
@@ -349,6 +364,15 @@ export class AccountingEntriesDetailsComponent {
             errors[field] = ''; 
           }
         });
+
+        const credit = Number(detail.creditAmount);
+        const debit = Number(detail.debitAmount);
+        
+        if(detail.creditAmount != null && detail.creditAmount != 0 && detail.debitAmount != null && detail.debitAmount != 0 ){
+          console.log(3232)
+          errors['debitAmount'] ='You cannot enter both Debit and Credit in the same row.'
+            isValid = false;
+        }
       });
     }
     return isValid;
@@ -390,7 +414,9 @@ export class AccountingEntriesDetailsComponent {
   }
 
 
-  Save() {
+  async Save() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.isCreate) {
       if (this.isFormValid()) {
         this.isSaveLoading = true;
@@ -442,7 +468,9 @@ export class AccountingEntriesDetailsComponent {
     this.accountingEntries.newDetails.push(newDetail)
   }
 
-  DeleteDetail(id: number) {
+  async DeleteDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
       icon: 'warning',
@@ -463,7 +491,9 @@ export class AccountingEntriesDetailsComponent {
     });
   }
 
-  DeleteNewDetail(id: number) {
+  async DeleteNewDetail(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
       icon: 'warning',

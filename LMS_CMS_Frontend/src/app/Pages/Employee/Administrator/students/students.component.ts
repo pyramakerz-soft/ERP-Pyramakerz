@@ -17,7 +17,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -184,9 +184,11 @@ export class StudentsComponent {
     this.isModalOpen = true;
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -210,7 +212,9 @@ export class StudentsComponent {
     this.router.navigateByUrl(`Employee/Student/` + id);
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
       icon: 'warning',
@@ -228,7 +232,9 @@ export class StudentsComponent {
     });
   }
 
-  suspend(stu:Student){ 
+  async suspend(stu:Student){ 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     let message = ""
     let doneMessage = ""
     let doneTitle = ""

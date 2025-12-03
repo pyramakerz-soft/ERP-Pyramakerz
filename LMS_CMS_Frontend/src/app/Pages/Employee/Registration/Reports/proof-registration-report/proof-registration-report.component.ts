@@ -382,4 +382,7 @@ export class ProofRegistrationReportComponent {
   getPassportNo(): string {
     return this.DataToPrint?.student?.passportNo || '-';
   }
+  getAcademicYearName(): string {
+    return this.DataToPrint?.class?.academicYearName || '-';
+  }
 }

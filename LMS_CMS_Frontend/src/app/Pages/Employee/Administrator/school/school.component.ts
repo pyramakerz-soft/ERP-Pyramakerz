@@ -12,7 +12,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Day } from '../../../../Models/day';
 import { DaysService } from '../../../../Services/Octa/days.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -259,8 +259,10 @@ export class SchoolComponent {
           this.isLoading = false;
           this.getSchoolData();
         },
-        (error) => {
+        async (error) => {
           this.isLoading = false;
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',

@@ -19,10 +19,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx-js-style';
-import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import { Student } from '../../../../../Models/student';
+// import Swal from 'sweetalert2'; 
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
@@ -104,11 +101,11 @@ export class EvaluationReportComponent {
     public classroomService: ClassroomService,
     public employeeService: EmployeeService,
     public SchoolServ: SchoolService,
-    public templateServ: EvaluationTemplateService, 
+    public templateServ: EvaluationTemplateService,
     private reportsService: ReportsService,
     private loadingService: LoadingService
 
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -131,18 +128,18 @@ export class EvaluationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
   onFilterChange() {
-  this.showTable = false;
-  this.reportData = [];
-  this.cachedTableDataForPDF = [];
-  this.collapsedEmployees.clear();
-}
+    this.showTable = false;
+    this.reportData = [];
+    this.cachedTableDataForPDF = [];
+    this.collapsedEmployees.clear();
+  }
 
   getClassData() {
     this.Classs = [];
@@ -202,8 +199,10 @@ export class EvaluationReportComponent {
       !!this.filterParams.fromDate && !!this.filterParams.toDate;
   }
 
-  generateReport() {
+  async generateReport() {
     if (this.filterParams.fromDate > this.filterParams.toDate) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Invalid Date Range',
         text: 'Start date cannot be later than end date.',
@@ -218,7 +217,7 @@ export class EvaluationReportComponent {
     this.GetData();
   }
 
- GetData() {
+  GetData() {
     this.reportData = [];
 
     // Prepare parameters
@@ -227,8 +226,8 @@ export class EvaluationReportComponent {
       params.templateId = this.filterParams.templateId;
     if (this.filterParams.fromDate)
       params.fromDate = this.filterParams.fromDate;
-    if (this.filterParams.toDate) 
-      params.toDate = this.filterParams.toDate; 
+    if (this.filterParams.toDate)
+      params.toDate = this.filterParams.toDate;
     if (this.filterParams.employeeId && +this.filterParams.employeeId !== 0)
       params.employeeId = this.filterParams.employeeId;
     if (this.filterParams.schoolId)
@@ -264,110 +263,110 @@ export class EvaluationReportComponent {
   }
 
 
-private prepareExportData(): void {
-  this.cachedTableDataForPDF = [];
+  private prepareExportData(): void {
+    this.cachedTableDataForPDF = [];
 
-  this.reportData.forEach((employee: any) => {
-    employee.reportsByDate.forEach((evaluation: any) => {
-      const evaluationDate = evaluation.date;
+    this.reportData.forEach((employee: any) => {
+      employee.reportsByDate.forEach((evaluation: any) => {
+        const evaluationDate = evaluation.date;
 
-      // Process question groups
-      if (evaluation.evaluationEmployeeQuestionGroups && evaluation.evaluationEmployeeQuestionGroups.length > 0) {
-        evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+        // Process question groups
+        if (evaluation.evaluationEmployeeQuestionGroups && evaluation.evaluationEmployeeQuestionGroups.length > 0) {
+          evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+            const section = {
+              header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+              data: [
+                { key: 'Employee', value: employee.employeeEnglishName || employee.employeeArabicName || '-' },
+                { key: 'Evaluation Date', value: evaluationDate },
+                { key: 'Question Group', value: group.englishTitle || group.arabicTitle || '-' },
+              ],
+              tableHeaders: ['Question', 'Rating', 'Notes', 'Average'],
+              tableData: [] as any[],
+            };
+
+            // Add questions
+            if (group.evaluationEmployeeQuestions && group.evaluationEmployeeQuestions.length > 0) {
+              group.evaluationEmployeeQuestions.forEach((question: any) => {
+                section.tableData.push({
+                  Question: question.questionEnglishTitle || question.questionArabicTitle || '-',
+                  Rating: question.mark || 0,
+                  Notes: question.note || '-',
+                  Average: question.average || '-',
+                });
+              });
+            }
+
+            this.cachedTableDataForPDF.push(section);
+          });
+        }
+
+        // Process student corrections
+        if (evaluation.evaluationEmployeeStudentBookCorrections && evaluation.evaluationEmployeeStudentBookCorrections.length > 0) {
           const section = {
-            header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+            header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
             data: [
               { key: 'Employee', value: employee.employeeEnglishName || employee.employeeArabicName || '-' },
               { key: 'Evaluation Date', value: evaluationDate },
-              { key: 'Question Group', value: group.englishTitle || group.arabicTitle || '-' },
             ],
-            tableHeaders: ['Question', 'Rating', 'Notes', 'Average'],
+            tableHeaders: ['Student', 'Correction Book', 'Status', 'Notes', 'Average'],
             tableData: [] as any[],
           };
 
-          // Add questions
-          if (group.evaluationEmployeeQuestions && group.evaluationEmployeeQuestions.length > 0) {
-            group.evaluationEmployeeQuestions.forEach((question: any) => {
-              section.tableData.push({
-                Question: question.questionEnglishTitle || question.questionArabicTitle || '-',
-                Rating: question.mark || 0,
-                Notes: question.note || '-',
-                Average: question.average || '-',
-              });
+          evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
+            section.tableData.push({
+              Student: correction.studentEnglishName || correction.studentArabicName || '-',
+              'Correction Book': correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
+              Status: correction.state || 0,
+              Notes: correction.note || '-',
+              Average: correction.averageStudent || '-',
             });
-          }
+          });
 
           this.cachedTableDataForPDF.push(section);
-        });
-      }
-
-      // Process student corrections
-      if (evaluation.evaluationEmployeeStudentBookCorrections && evaluation.evaluationEmployeeStudentBookCorrections.length > 0) {
-        const section = {
-          header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
-          data: [
-            { key: 'Employee', value: employee.employeeEnglishName || employee.employeeArabicName || '-' },
-            { key: 'Evaluation Date', value: evaluationDate },
-          ],
-          tableHeaders: ['Student', 'Correction Book', 'Status', 'Notes', 'Average'],
-          tableData: [] as any[],
-        };
-
-        evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
-          section.tableData.push({
-            Student: correction.studentEnglishName || correction.studentArabicName || '-',
-            'Correction Book': correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
-            Status: correction.state || 0,
-            Notes: correction.note || '-',
-            Average: correction.averageStudent || '-',
-          });
-        });
-
-        this.cachedTableDataForPDF.push(section);
-      }
+        }
+      });
     });
-  });
 
-  if (this.cachedTableDataForPDF.length === 0) {
-    this.cachedTableDataForPDF = [
-      {
-        header: 'No Evaluation Data Found',
-        data: [],
-        tableHeaders: [],
-        tableData: [],
-      },
-    ];
+    if (this.cachedTableDataForPDF.length === 0) {
+      this.cachedTableDataForPDF = [
+        {
+          header: 'No Evaluation Data Found',
+          data: [],
+          tableHeaders: [],
+          tableData: [],
+        },
+      ];
+    }
   }
-}
 
-collapsedEmployees: Set<number> = new Set();
-evaluationCollapsedState: Map<number, Set<number>> = new Map();
+  collapsedEmployees: Set<number> = new Set();
+  evaluationCollapsedState: Map<number, Set<number>> = new Map();
 
-toggleEmployeeCollapse(index: number) {
-  if (this.collapsedEmployees.has(index)) {
-    this.collapsedEmployees.delete(index);
-  } else {
-    this.collapsedEmployees.add(index);
+  toggleEmployeeCollapse(index: number) {
+    if (this.collapsedEmployees.has(index)) {
+      this.collapsedEmployees.delete(index);
+    } else {
+      this.collapsedEmployees.add(index);
+    }
   }
-}
 
-toggleEvaluationCollapse(empIndex: number, evalIndex: number) {
-  if (!this.evaluationCollapsedState.has(empIndex)) {
-    this.evaluationCollapsedState.set(empIndex, new Set());
-  }
-  
-  const evalSet = this.evaluationCollapsedState.get(empIndex);
-  if (evalSet?.has(evalIndex)) {
-    evalSet.delete(evalIndex);
-  } else {
-    evalSet?.add(evalIndex);
-  }
-}
+  toggleEvaluationCollapse(empIndex: number, evalIndex: number) {
+    if (!this.evaluationCollapsedState.has(empIndex)) {
+      this.evaluationCollapsedState.set(empIndex, new Set());
+    }
 
-isEvaluationCollapsed(empIndex: number, evalIndex: number): boolean {
-  const evalSet = this.evaluationCollapsedState.get(empIndex);
-  return !!evalSet && evalSet.has(evalIndex);
-} 
+    const evalSet = this.evaluationCollapsedState.get(empIndex);
+    if (evalSet?.has(evalIndex)) {
+      evalSet.delete(evalIndex);
+    } else {
+      evalSet?.add(evalIndex);
+    }
+  }
+
+  isEvaluationCollapsed(empIndex: number, evalIndex: number): boolean {
+    const evalSet = this.evaluationCollapsedState.get(empIndex);
+    return !!evalSet && evalSet.has(evalIndex);
+  }
 
 
   toggleCollapse(index: number) {
@@ -400,38 +399,38 @@ isEvaluationCollapsed(empIndex: number, evalIndex: number): boolean {
   }
 
 
-getTemplateName(): string {
-  // if (!this.filterParams.templateId) return 'All Templates';
-  const template = this.Templates.find(t => t.id == this.filterParams.templateId);
-  return template?.englishTitle || '-';
-}
+  getTemplateName(): string {
+    // if (!this.filterParams.templateId) return 'All Templates';
+    const template = this.Templates.find(t => t.id == this.filterParams.templateId);
+    return template?.englishTitle || '-';
+  }
 
-getEmployeeName(): string {
-  if (!this.filterParams.employeeId) return 'All Employees';
-  const employee = this.Employees.find(e => e.id == this.filterParams.employeeId);
-  return employee?.en_name || '-';
-}
+  getEmployeeName(): string {
+    if (!this.filterParams.employeeId) return 'All Employees';
+    const employee = this.Employees.find(e => e.id == this.filterParams.employeeId);
+    return employee?.en_name || '-';
+  }
 
-getSchoolName(): string {
-  if (!this.filterParams.schoolId) return 'All Schools';
-  const school = this.Schools.find(s => s.id == this.filterParams.schoolId);
-  return school?.name || '-';
-}
+  getSchoolName(): string {
+    if (!this.filterParams.schoolId) return 'All Schools';
+    const school = this.Schools.find(s => s.id == this.filterParams.schoolId);
+    return school?.name || '-';
+  }
 
-getClassName(): string {
-  if (!this.filterParams.classroomId) return 'All Classes';
-  const classroom = this.Classs.find(c => c.id == this.filterParams.classroomId);
-  return classroom?.name || '-';
-}
+  getClassName(): string {
+    if (!this.filterParams.classroomId) return 'All Classes';
+    const classroom = this.Classs.find(c => c.id == this.filterParams.classroomId);
+    return classroom?.name || '-';
+  }
 
-getDateRange(): string {
-  if (!this.filterParams.fromDate || !this.filterParams.toDate) return '-';
-  return `${this.filterParams.fromDate} to ${this.filterParams.toDate}`;
-}
+  getDateRange(): string {
+    if (!this.filterParams.fromDate || !this.filterParams.toDate) return '-';
+    return `${this.filterParams.fromDate} to ${this.filterParams.toDate}`;
+  }
 
-getGeneratedDate(): string {
-  return new Date().toLocaleDateString();
-}
+  getGeneratedDate(): string {
+    return new Date().toLocaleDateString();
+  }
 
   getInfoRows(): any[] {
     const selectedTemplate = this.Templates.find(
@@ -479,8 +478,10 @@ getGeneratedDate(): string {
     ];
   }
 
-  Print() {
+  async Print() {
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -525,8 +526,10 @@ getGeneratedDate(): string {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -538,142 +541,143 @@ getGeneratedDate(): string {
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportData.length === 0) {
-    Swal.fire({
-      title: 'Warning',
-      text: 'No data to export!',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
+  async exportExcel() {
+    if (this.reportData.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire({
+        title: 'Warning',
+        text: 'No data to export!',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
-  try {
-    const selectedTemplate = this.Templates.find(
-      (t) => t.id == this.filterParams.templateId
-    );
-    const selectedEmployee = this.Employees.find(
-      (e) => e.id == this.filterParams.employeeId
-    );
-    const selectedSchool = this.Schools.find(
-      (s) => s.id == this.filterParams.schoolId
-    );
-    const selectedClass = this.Classs.find(
-      (c) => c.id == this.filterParams.classroomId
-    );
+    try {
+      const selectedTemplate = this.Templates.find(
+        (t) => t.id == this.filterParams.templateId
+      );
+      const selectedEmployee = this.Employees.find(
+        (e) => e.id == this.filterParams.employeeId
+      );
+      const selectedSchool = this.Schools.find(
+        (s) => s.id == this.filterParams.schoolId
+      );
+      const selectedClass = this.Classs.find(
+        (c) => c.id == this.filterParams.classroomId
+      );
 
-    // Prepare tables data - FIXED VERSION
-    const tables: any[] = [];
+      // Prepare tables data - FIXED VERSION
+      const tables: any[] = [];
 
-    // Process each employee
-    this.reportData.forEach((employee: any) => {
-      // Process each evaluation for this employee
-      employee.reportsByDate.forEach((evaluation: any) => {
-        const evaluationDate = evaluation.date;
+      // Process each employee
+      this.reportData.forEach((employee: any) => {
+        // Process each evaluation for this employee
+        employee.reportsByDate.forEach((evaluation: any) => {
+          const evaluationDate = evaluation.date;
 
-        // Process question groups
-        if (
-          evaluation.evaluationEmployeeQuestionGroups &&
-          evaluation.evaluationEmployeeQuestionGroups.length > 0
-        ) {
-          evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
-            const tableData: any[][] = [];
-            
-            // Add headers as first row
-            tableData.push(['Question', 'Rating', 'Notes']);
+          // Process question groups
+          if (
+            evaluation.evaluationEmployeeQuestionGroups &&
+            evaluation.evaluationEmployeeQuestionGroups.length > 0
+          ) {
+            evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+              const tableData: any[][] = [];
 
-            // Add questions
-            if (
-              group.evaluationEmployeeQuestions &&
-              group.evaluationEmployeeQuestions.length > 0
-            ) {
-              group.evaluationEmployeeQuestions.forEach((question: any) => {
-                const stars = '★'.repeat(question.mark || 0) + '☆'.repeat(5 - (question.mark || 0));
-                tableData.push([
-                  question.questionEnglishTitle || question.questionArabicTitle || '-',
-                  stars,
-                  question.note || '-'
-                ]);
+              // Add headers as first row
+              tableData.push(['Question', 'Rating', 'Notes']);
+
+              // Add questions
+              if (
+                group.evaluationEmployeeQuestions &&
+                group.evaluationEmployeeQuestions.length > 0
+              ) {
+                group.evaluationEmployeeQuestions.forEach((question: any) => {
+                  const stars = '★'.repeat(question.mark || 0) + '☆'.repeat(5 - (question.mark || 0));
+                  tableData.push([
+                    question.questionEnglishTitle || question.questionArabicTitle || '-',
+                    stars,
+                    question.note || '-'
+                  ]);
+                });
+              }
+
+              tables.push({
+                title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+                headers: ['Question', 'Rating', 'Notes'],
+                data: tableData
               });
-            }
+            });
+          }
+
+          // Process student corrections
+          if (
+            evaluation.evaluationEmployeeStudentBookCorrections &&
+            evaluation.evaluationEmployeeStudentBookCorrections.length > 0
+          ) {
+            const tableData: any[][] = [];
+
+            // Add headers as first row
+            tableData.push(['Student', 'Correction Book', 'Status', 'Notes']);
+
+            // Add student corrections
+            evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
+              const statusStars = '★'.repeat(correction.state || 0) + '☆'.repeat(5 - (correction.state || 0));
+              tableData.push([
+                correction.studentEnglishName || correction.studentArabicName || '-',
+                correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
+                statusStars,
+                correction.note || '-'
+              ]);
+            });
 
             tables.push({
-              title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
-              headers: ['Question', 'Rating', 'Notes'],
+              title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
+              headers: ['Student', 'Correction Book', 'Status', 'Notes'],
               data: tableData
             });
-          });
-        }
-
-        // Process student corrections
-        if (
-          evaluation.evaluationEmployeeStudentBookCorrections &&
-          evaluation.evaluationEmployeeStudentBookCorrections.length > 0
-        ) {
-          const tableData: any[][] = [];
-          
-          // Add headers as first row
-          tableData.push(['Student', 'Correction Book', 'Status', 'Notes']);
-
-          // Add student corrections
-          evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
-            const statusStars = '★'.repeat(correction.state || 0) + '☆'.repeat(5 - (correction.state || 0));
-            tableData.push([
-              correction.studentEnglishName || correction.studentArabicName || '-',
-              correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
-              statusStars,
-              correction.note || '-'
-            ]);
-          });
-
-          tables.push({
-            title: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
-            headers: ['Student', 'Correction Book', 'Status', 'Notes'],
-            data: tableData
-          });
-        }
+          }
+        });
       });
-    });
 
-    // Prepare info rows
-    const infoRows = [
-      { key: 'Template', value: selectedTemplate?.englishTitle || 'All' },
-      { key: 'Employee', value: selectedEmployee?.en_name || 'All' },
-      { key: 'School', value: selectedSchool?.name || 'All' },
-      { key: 'Class', value: selectedClass?.name || 'All' },
-      { key: 'Start Date', value: this.filterParams.fromDate },
-      { key: 'End Date', value: this.filterParams.toDate },
-      { key: 'Generated On', value: new Date().toLocaleDateString() }
-    ];
+      // Prepare info rows
+      const infoRows = [
+        { key: 'Template', value: selectedTemplate?.englishTitle || 'All' },
+        { key: 'Employee', value: selectedEmployee?.en_name || 'All' },
+        { key: 'School', value: selectedSchool?.name || 'All' },
+        { key: 'Class', value: selectedClass?.name || 'All' },
+        { key: 'Start Date', value: this.filterParams.fromDate },
+        { key: 'End Date', value: this.filterParams.toDate },
+        { key: 'Generated On', value: new Date().toLocaleDateString() }
+      ];
 
-    // Generate Excel using ReportsService
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'EVALUATION REPORT',
-        ar: 'تقرير التقييم'
-      },
-      subHeaders: [
-        {
-          en: 'Employee Performance Evaluation Summary',
-          ar: 'ملخص تقييم أداء الموظفين'
-        }
-      ],
-      infoRows: infoRows,
-      // reportImage: 'assets/images/logo.png',
-      tables: tables,
-      filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
+      // Generate Excel using ReportsService
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'EVALUATION REPORT',
+          ar: 'تقرير التقييم'
+        },
+        subHeaders: [
+          {
+            en: 'Employee Performance Evaluation Summary',
+            ar: 'ملخص تقييم أداء الموظفين'
+          }
+        ],
+        infoRows: infoRows,
+        // reportImage: 'assets/images/logo.png',
+        tables: tables,
+        filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
 
-  } catch (error) {
-    console.error('Error generating Excel report:', error);
-    Swal.fire({
-      title: 'Error',
-      text: 'Failed to generate Excel report',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    });
+    } catch (error) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate Excel report',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   }
-}
 
 }

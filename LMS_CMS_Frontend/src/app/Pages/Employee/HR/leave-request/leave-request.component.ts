@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TokenData } from '../../../../Models/token-data';
@@ -158,7 +158,9 @@ export class LeaveRequestComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Request') + this.translate.instant('?'),
       icon: 'warning',
@@ -196,10 +198,12 @@ export class LeaveRequestComponent {
         this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
         this.MonthlyLeaveRequestBalanceError = false
         this.CalculateRemains();
-      }, error => {
-        console.log(error.error)
+      }, async error => { 
         if (typeof error.error === 'string' && error.error.includes("Monthly leave request for this employee is required")) {
           this.MonthlyLeaveRequestBalanceError = true
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -318,8 +322,10 @@ export class LeaveRequestComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
-    if (this.isFormValid()) {
+  async CreateOREdit() {
+    if (await this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.LeaveRequestServ.Add(this.leaveRequest, this.DomainName).subscribe(
@@ -396,7 +402,7 @@ export class LeaveRequestComponent {
     })
   }
 
-isFormValid(): boolean {
+  async isFormValid(): Promise<boolean> {
   let isValid = true;
   
   // Basic field validation
@@ -416,7 +422,7 @@ isFormValid(): boolean {
       }
     }
   }
-    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
+    if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0 || this.leaveRequest.hours == null && this.leaveRequest.minutes == null || this.leaveRequest.hours == 0 && this.leaveRequest.minutes == null || this.leaveRequest.hours == null && this.leaveRequest.minutes == 0) {
       this.validationErrors['hours'] = "Please enter hours or minutes."
       isValid = false;
     }
@@ -426,6 +432,8 @@ isFormValid(): boolean {
       isValid = false;
     }
     if (this.MonthlyLeaveRequestBalanceError) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

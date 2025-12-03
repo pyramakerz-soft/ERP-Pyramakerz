@@ -16,7 +16,7 @@ import { Question } from '../../../../Models/Registration/question';
 import { TestWithQuestion } from '../../../../Models/Registration/test-with-question';
 import { Answer } from '../../../../Models/Registration/answer';
 import { QuestionOption } from '../../../../Models/Registration/question-option';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
 import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -195,7 +195,9 @@ export class RegistraionTestComponent {
     return answer ? answer.answerID === optionId : false;
   }
 
-  Save() {
+  async Save() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.registerServ
       .Add(
         this.Answers,

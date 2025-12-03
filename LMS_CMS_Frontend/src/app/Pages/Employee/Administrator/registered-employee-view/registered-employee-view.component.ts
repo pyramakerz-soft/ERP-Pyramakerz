@@ -10,7 +10,7 @@ import { EmployeeTypeService } from '../../../../Services/Employee/employee-type
 import { RoleService } from '../../../../Services/Employee/role.service';
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
 import { Role } from '../../../../Models/Administrator/role';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -88,7 +88,9 @@ export class RegisteredEmployeeViewComponent {
     this.router.navigateByUrl(`Employee/Registered Employee`);
   }
 
-  reject() {
+  async reject() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to Reject And Delete This Employee?',
       icon: 'warning',
@@ -113,8 +115,10 @@ export class RegisteredEmployeeViewComponent {
     }); 
   }
 
-  accept() { 
+  async accept() { 
     if(this.employee.roleID == 0){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -125,6 +129,8 @@ export class RegisteredEmployeeViewComponent {
         }
       });
     } else if(this.employee.employeeTypeID == 0){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -136,6 +142,8 @@ export class RegisteredEmployeeViewComponent {
       });
 
     } else{
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'Are you sure you want to Accept This Employee?',
         icon: 'warning',
@@ -254,8 +262,11 @@ export class RegisteredEmployeeViewComponent {
           this.closeModal()
           this.GetRegisteredEmployee()
         },
-        error => {
+        async error => {
           this.isLoading = false;
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             title: 'Error',

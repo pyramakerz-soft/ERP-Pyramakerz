@@ -15,6 +15,7 @@
         //    return $"Data Source={dataSource};Initial Catalog={initialCatalog};User ID={userId};Password={password};{trustServerCertificate}";
         //}
 
+
         public string BuildConnectionString(string domainName) 
         {     
             var dataSource = ".";       

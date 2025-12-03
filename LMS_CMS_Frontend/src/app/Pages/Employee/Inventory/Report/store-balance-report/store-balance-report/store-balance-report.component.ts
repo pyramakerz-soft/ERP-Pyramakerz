@@ -1,10 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-
-import * as XLSX from 'xlsx';
-import Swal from 'sweetalert2';
+import { ActivatedRoute } from '@angular/router'; 
+// import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import {
   StoreBalanceItem,
@@ -14,8 +12,7 @@ import { InventoryDetailsService } from '../../../../../../Services/Employee/Inv
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { LanguageService } from '../../../../../../Services/shared/language.service';
-import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { LanguageService } from '../../../../../../Services/shared/language.service'; 
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ReportsService } from '../../../../../../Services/shared/reports.service';
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
@@ -383,8 +380,10 @@ totalRecords: number = 0;
     return this.reportType !== 'QuantityOnly';
   }
 
-  DownloadAsPDF() { 
+  async DownloadAsPDF() { 
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -395,8 +394,10 @@ totalRecords: number = 0;
     }, 500);
   }
 
-  Print() {
+  async Print() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -438,6 +439,8 @@ totalRecords: number = 0;
 
   async exportExcel() {
     if (!this.reportForExport.length) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }

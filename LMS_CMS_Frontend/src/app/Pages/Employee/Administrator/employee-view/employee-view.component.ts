@@ -9,7 +9,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EditPass } from '../../../../Models/Employee/edit-pass';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
@@ -194,7 +194,9 @@ export class EmployeeViewComponent {
     this.isChange = !this.isChange;
   }
 
-  UpdatePassword() {
+  async UpdatePassword() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(this.password != this.confirmPassword){
       Swal.fire({
         icon: 'error',
@@ -204,9 +206,8 @@ export class EmployeeViewComponent {
       });
     }else{
       if(this.password != ""){
-        this.editpasss.id=this.User_Data_After_Login.id;
-        this.editpasss.password=this.password 
-        console.log(this.editpasss)
+        this.editpasss.id=this.Data.id;
+        this.editpasss.password=this.password  
         this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
             this.isChange = false
             this.password = '';

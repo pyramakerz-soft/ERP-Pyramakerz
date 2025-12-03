@@ -21,7 +21,7 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SectionService } from '../../../../Services/Employee/LMS/section.service';
 import { Section } from '../../../../Models/LMS/section';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { RegistrationFormForFormSubmissionForFiles } from '../../../../Models/Registration/registration-form-for-form-submission-for-files';
 import { ParentService } from '../../../../Services/parent.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -323,9 +323,11 @@ export class RegistrationFormComponent {
     return el.schoolID == this.selectedSchool;
   }
 
-  handleFileUpload(event: any, fieldId: number) { 
+  async handleFileUpload(event: any, fieldId: number) { 
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
     if (!this.allowedExtensions.includes(fileExtension)) {
@@ -635,6 +637,8 @@ export class RegistrationFormComponent {
     }
 
     if (valid) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.IsEmailValid();
       if (this.isMotherEmailValid && this.isGuardianEmailValid && this.isGuardianEmailSameAsParent) {
         await this.CheckAgeForGrade();

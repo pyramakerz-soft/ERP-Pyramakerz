@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { RegisteredEmployee } from '../../../Models/Administrator/registered-employee';
 import { RegisteredEmployeeService } from '../../../Services/Employee/Administration/registered-employee.service';
 import { ApiService } from '../../../Services/api.service';
-import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
-import Swal from 'sweetalert2';
+import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -14,7 +14,7 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
 
 @Component({
   selector: 'app-sign-up-employee',
-  standalone: true,
+  standalone: true, 
   imports: [FormsModule, CommonModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up-employee.component.html',
   styleUrl: './sign-up-employee.component.css'
@@ -47,14 +47,14 @@ export class SignUpEmployeeComponent {
     }
   }
 
-  // onCaptchaResolved(token: string | null): void {
-  //   if (token) {
-  //     this.employee.recaptchaToken = token;
-  //     this.validationErrors['recaptchaToken'] = ''
-  //   } else {
-  //     this.employee.recaptchaToken = '';
-  //   }
-  // }
+  onCaptchaResolved(token: string | null): void {
+    if (token) {
+      this.employee.recaptchaToken = token;
+      this.validationErrors['recaptchaToken'] = ''
+    } else {
+      this.employee.recaptchaToken = '';
+    }
+  }
 
   validateNumber(event: any, field: keyof RegisteredEmployee): void {
     let value = event.target.value;
@@ -130,8 +130,10 @@ export class SignUpEmployeeComponent {
     this.IsConfimPassEmpty = false
   }
 
-  SignUp() {
+  async SignUp() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       this.registeredEmployeeService.Add(this.employee, this.DomainName).subscribe(
         data => {
@@ -145,13 +147,13 @@ export class SignUpEmployeeComponent {
           this.employee = new RegisteredEmployee()
           this.confirmPassword = ''
           this.isLoading = false;
-          // this.captchaRef.reset();
+          // this.captchaRef.reset(); 
         },
         error => {
           this.employee.recaptchaToken = '';
           this.isLoading = false;
           // if (this.captchaRef) {
-          //   this.captchaRef.reset();
+          //   this.captchaRef.reset(); 
           // }
           Swal.fire({
             icon: 'error',

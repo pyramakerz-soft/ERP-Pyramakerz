@@ -4,7 +4,7 @@ import { Category } from '../../../../Models/Inventory/category';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
 import { TokenData } from '../../../../Models/token-data';
@@ -153,10 +153,12 @@ export class StoresComponent {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(errorMessage);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -167,10 +169,12 @@ export class StoresComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
     const translatedMessage = this.translate.instant(message);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -229,7 +233,7 @@ export class StoresComponent {
     this.dropdownOpen = false;
   }
 
-  Delete(id: number): void {
+  async Delete(id: number) {
     const translatedTitle =
       this.translate.instant('Are you sure you want to') +
       ' ' +
@@ -241,6 +245,8 @@ export class StoresComponent {
       '?';
     const translatedConfirm = this.translate.instant('Delete');
     const translatedCancel = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,

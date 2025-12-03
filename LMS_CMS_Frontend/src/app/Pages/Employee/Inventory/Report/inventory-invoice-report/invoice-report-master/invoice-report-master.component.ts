@@ -5,18 +5,16 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '../../../../../../Models/Inventory/store';
 import { InventoryMaster } from '../../../../../../Models/Inventory/InventoryMaster';
 import { InventoryMasterService } from '../../../../../../Services/Employee/Inventory/inventory-master.service';
-import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
-import * as XLSX from 'xlsx';
+import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service'; 
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-import { ReportsService } from '../../../../../../Services/shared/reports.service';
-import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { ReportsService } from '../../../../../../Services/shared/reports.service'; 
 import { InitLoader } from '../../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../../Services/loading.service';
 
@@ -331,8 +329,10 @@ onFlagSelected() {
     });
   }
 
-viewReport() {
+  async viewReport() {
   if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Invalid Date Range',
       text: 'Start date cannot be later than end date.',
@@ -517,8 +517,10 @@ DownloadAsPDF() {
   }, 500);
 }
 
-  Print() {
+  async Print() {
     if (this.transactionsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }

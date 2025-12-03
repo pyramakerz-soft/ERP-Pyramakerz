@@ -56,14 +56,14 @@
                 if (IsExecutableContent(header))
                     return "File contains executable content";
 
-                if (_fileSignatures.TryGetValue(extension, out var signatures))
-                {
-                    bool signatureValid = signatures.Any(signature =>
-                        header.Take(signature.Length).SequenceEqual(signature));
+                //if (_fileSignatures.TryGetValue(extension, out var signatures))
+                //{
+                //    bool signatureValid = signatures.Any(signature =>
+                //        header.Take(signature.Length).SequenceEqual(signature));
 
-                    if (!signatureValid)
-                        return $"File content doesn't match its extension. Expected {extension} file.";
-                }
+                //    if (!signatureValid)
+                //        return $"File content doesn't match its extension. Expected {extension} file.";
+                //}
 
                 stream.Position = 0;
                 //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))

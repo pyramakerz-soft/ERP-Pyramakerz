@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../../Component/search/search.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../../Component/reuse-table/reuse-table.component';
 import { Router } from '@angular/router';
 import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
@@ -78,9 +78,11 @@ export class HygieneFormComponent implements OnInit {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+      
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -91,9 +93,11 @@ export class HygieneFormComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -270,7 +274,7 @@ export class HygieneFormComponent implements OnInit {
     }
   }
 
-  deleteHygieneForm(row: any) {
+  async deleteHygieneForm(row: any) {
     const translatedTitle = this.translate.instant('Are you sure?');
     const translatedText = this.translate.instant(
       'You will not be able to recover this hygiene form!'
@@ -278,6 +282,8 @@ export class HygieneFormComponent implements OnInit {
     const translatedConfirm = this.translate.instant('Yes, delete it!');
     const translatedCancel = this.translate.instant('No, keep it');
     const successMessage = this.translate.instant('Deleted successfully');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       title: translatedTitle,

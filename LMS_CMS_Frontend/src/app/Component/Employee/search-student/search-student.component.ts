@@ -11,7 +11,7 @@ import { ClassroomService } from '../../../Services/Employee/LMS/classroom.servi
 import { ApiService } from '../../../Services/api.service';
 import { StudentService } from '../../../Services/student.service';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -322,7 +322,9 @@ export class SearchStudentComponent {
     this.router.navigateByUrl(`Employee/Student/` + id);
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
     title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Student'),
           icon: 'warning',
@@ -340,7 +342,7 @@ export class SearchStudentComponent {
     });
   }
 
-  suspend(stu:Student){ 
+  async suspend(stu:Student){ 
     let message = ""
     let doneMessage = ""
     let doneTitle = ""
@@ -353,6 +355,9 @@ export class SearchStudentComponent {
       doneMessage = "The Student has been UnSuspend successfully."
       doneTitle = "UnSuspend!"
     }
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: message,
       icon: 'warning',

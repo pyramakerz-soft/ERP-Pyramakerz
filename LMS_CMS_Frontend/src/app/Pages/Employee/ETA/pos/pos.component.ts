@@ -11,11 +11,10 @@ import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { POSService } from '../../../../Services/Employee/ETA/pos.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs'; 
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 
@@ -116,10 +115,12 @@ export class POSComponent {
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'error',
       title: translatedTitle,
@@ -129,9 +130,11 @@ export class POSComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+    
+    const Swal = await import('sweetalert2').then(m => m.default);
     
     Swal.fire({
       icon: 'success',
@@ -324,11 +327,13 @@ export class POSComponent {
     }
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
     const deleteTitle = this.translate.instant('Are you sure you want to delete this POS?');
     const deleteButton = this.translate.instant('Delete');
     const cancelButton = this.translate.instant('Cancel');
     const successMessage = this.translate.instant('POS deleted successfully');
+    
+    const Swal = await import('sweetalert2').then(m => m.default);
     
     Swal.fire({
       title: deleteTitle,

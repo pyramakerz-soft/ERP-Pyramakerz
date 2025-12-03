@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BusStudentService } from '../../../../Services/Employee/Bus/bus-student.service';
 import { BusStudent } from '../../../../Models/Bus/bus-student';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../Services/api.service';
@@ -99,12 +99,12 @@ export class BusStudentComponent {
     public busStudentService: BusStudentService,
     public account: AccountService,
     public activeRoute: ActivatedRoute,
-    public EditDeleteServ: DeleteEditPermissionService, 
-    public menuService: MenuService, 
-    public ApiServ: ApiService, 
-    public schoolService: SchoolService, 
+    public EditDeleteServ: DeleteEditPermissionService,
+    public menuService: MenuService,
+    public ApiServ: ApiService,
+    public schoolService: SchoolService,
     private translate: TranslateService,
-    public busCategoryService: BusCategoryService,  
+    public busCategoryService: BusCategoryService,
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
@@ -139,7 +139,7 @@ export class BusStudentComponent {
     });
 
     this.GetSchoolsGroupByGradeGroupByClass()
-    this.GetBusCategories() 
+    this.GetBusCategories()
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -147,7 +147,7 @@ export class BusStudentComponent {
 
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -170,7 +170,7 @@ export class BusStudentComponent {
       this.selectedSection = this.busStudent.sectionID
       this.selectedGrade = this.busStudent.gradeID
       this.selectedClass = this.busStudent.classID
-      console.log("this.selectedClass" ,this.selectedClass)
+      console.log("this.selectedClass", this.selectedClass)
       this.selectedYear = this.busStudent.academicYearID
       this.sectionService.GetBySchoolId(this.selectedSchool ? this.selectedSchool : 0, this.DomainName).subscribe(
         (data) => {
@@ -193,7 +193,7 @@ export class BusStudentComponent {
         this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
           (data) => {
             this.filteredClasses = data
-            console.log(123,this.filteredClasses)
+            console.log(123, this.filteredClasses)
             this.studentService.GetByClassID(this.selectedClass ? this.selectedClass : 0, this.DomainName).subscribe((data) => {
               this.Students = data
             });
@@ -233,16 +233,18 @@ export class BusStudentComponent {
     });
   }
 
-  deleteBusStudent(busStudentId: number) {
-     Swal.fire({
-          title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#089B41',
-          cancelButtonColor: '#17253E',
-          confirmButtonText: this.translate.instant('Delete'),
-          cancelButtonText: this.translate.instant('Cancel'),
-        }).then((result) => {
+  async deleteBusStudent(busStudentId: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Student') + this.translate.instant('?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
+    }).then((result) => {
       if (result.isConfirmed) {
         this.busStudentService.DeleteBusStudent(busStudentId, this.DomainName).subscribe(
           (data: any) => {
@@ -460,7 +462,9 @@ export class BusStudentComponent {
     }
   }
 
-  OnSemesterChange() {
+  async OnSemesterChange() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID)
     if (stu) {
       Swal.fire({
@@ -480,8 +484,11 @@ export class BusStudentComponent {
         this.isLoading = false;
         this.GetStudentsByBusId(this.busId);
       },
-        error => {
+        async error => {
           this.isLoading = false;
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             text: error.error,
@@ -495,8 +502,11 @@ export class BusStudentComponent {
         this.isLoading = false;
         this.GetStudentsByBusId(this.busId);
       },
-        error => {
+        async error => {
           this.isLoading = false;
+      
+          const Swal = await import('sweetalert2').then(m => m.default);
+
           Swal.fire({
             icon: 'error',
             text: error.error,
@@ -508,7 +518,7 @@ export class BusStudentComponent {
     }
   }
 
-  SaveBusStudent() {
+  async SaveBusStudent() {
     this.busStudent.busID = this.busId
     if (this.editBusStudent == true) {
       this.busStudent.studentID = this.id
@@ -527,6 +537,8 @@ export class BusStudentComponent {
         const toDate = new Date(this.busStudent.exceptionToDate ? this.busStudent.exceptionToDate : 0);
         const semesterStart = new Date(semesteer[0].dateFrom);
         const semesterEnd = new Date(semesteer[0].dateTo);
+
+        const Swal = await import('sweetalert2').then(m => m.default);
 
         if (fromDate > toDate) {
           Swal.fire({
@@ -614,7 +626,9 @@ export class BusStudentComponent {
       this.closeTransferBusStudentModal()
       this.GetStudentsByBusId(this.busId)
     },
-      error => {
+      async error => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           text: error.error,

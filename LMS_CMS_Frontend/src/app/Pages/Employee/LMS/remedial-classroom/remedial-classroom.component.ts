@@ -24,7 +24,7 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
@@ -222,8 +222,10 @@ export class RemedialClassroomComponent {
     });
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
@@ -329,7 +331,9 @@ export class RemedialClassroomComponent {
     }
   }
 
-  delete(id: number) {
+  async delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Remedial Classroom') + this.translate.instant('?'),
       icon: 'warning',

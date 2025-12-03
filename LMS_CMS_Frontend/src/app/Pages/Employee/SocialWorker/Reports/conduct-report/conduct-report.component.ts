@@ -12,7 +12,7 @@ import { StudentService } from '../../../../../Services/student.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ConductTypeService } from '../../../../../Services/Employee/SocialWorker/conduct-type.service';
 import { ProcedureTypeService } from '../../../../../Services/Employee/SocialWorker/procedure-type.service';
 import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
@@ -24,6 +24,8 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-conduct-report',
@@ -38,7 +40,9 @@ export class ConductReportComponent implements OnInit {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   reportType: string = 'employee';
-  
+
+  currentLang: string = 'en';
+
   // Filter properties
   dateFrom: string = '';
   dateTo: string = '';
@@ -80,21 +84,21 @@ export class ConductReportComponent implements OnInit {
     reportHeaderTwoAr: 'سجلات سلوك الطلاب'
   };
 
-constructor(
-  private conductService: ConductService,
-  private conductTypeService: ConductTypeService,
-  private procedureTypeService: ProcedureTypeService,
-  private schoolService: SchoolService,
-  private gradeService: GradeService,
-  private classroomService: ClassroomService,
-  private studentService: StudentService,
-  private apiService: ApiService,
-  private languageService: LanguageService,   
-  public account: AccountService,    
-  private route: ActivatedRoute,
-  private reportsService: ReportsService,
-    private loadingService: LoadingService 
-) {}
+  constructor(
+    private conductService: ConductService,
+    private conductTypeService: ConductTypeService,
+    private procedureTypeService: ProcedureTypeService,
+    private schoolService: SchoolService,
+    private gradeService: GradeService,
+    private classroomService: ClassroomService,
+    private studentService: StudentService,
+    private apiService: ApiService,
+    private languageService: LanguageService,
+    public account: AccountService,
+    private route: ActivatedRoute,
+    private reportsService: ReportsService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.loadSchools();
@@ -103,23 +107,25 @@ constructor(
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
-    if(this.reportType == 'parent'){
+    if (this.reportType == 'parent') {
       this.getStudentsByParentId()
     }
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
+      this.currentLang = direction === 'rtl' ? 'ar' : 'en'; 
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+    this.currentLang = this.isRtl ? 'ar' : 'en'; 
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  getStudentsByParentId(){
+  getStudentsByParentId() {
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
       console.log(this.students)
@@ -183,7 +189,7 @@ constructor(
       this.selectedStudentId = null;
     }
   }
-
+ 
   async loadStudents() {
     if (this.selectedClassId) {
       try {
@@ -253,16 +259,18 @@ constructor(
 
   onFilterChange() {
     this.showTable = false;
-    if(this.reportType == 'parent'){
+    if (this.reportType == 'parent') {
       this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
     }
-    else{
-      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' ;
+    else {
+      this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
     }
     this.conductReports = [];
   }
 
   async viewReport() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
       Swal.fire({
         title: 'Invalid Date Range',
@@ -293,7 +301,7 @@ constructor(
       );
 
       console.log('API Response:', response);
-      
+
       // Handle the response directly as an array
       if (Array.isArray(response)) {
         this.conductReports = response;
@@ -308,38 +316,12 @@ constructor(
     } catch (error) {
       console.error('Error loading conduct reports:', error);
       this.conductReports = [];
-      this.reportsForExport =[]
-      this.reportsForPDF =[]
+      this.reportsForExport = []
+      this.reportsForPDF = []
       this.showTable = true;
-      // Swal.fire({
-      //   title: 'Error',
-      //   text: 'Failed to load conduct reports',
-      //   icon: 'error',
-      //   confirmButtonText: 'OK',
-      // });
     } finally {
       this.isLoading = false;
     }
-  }
-
-  private prepareExportData(): void {
-    // For Excel (array format)
-    this.reportsForExport = this.conductReports.map((report) => [
-      new Date(report.date).toLocaleDateString(),
-      report.studentEnName,
-      report.conductType?.name || '-',
-      report.procedureType?.name || '-',
-      report.details || '-'
-    ]);
-
-    // For PDF (object format with proper keys)
-    this.reportsForPDF = this.conductReports.map((report) => ({
-      'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentEnName,
-      'Conduct Type': report.conductType?.name || '-',
-      'Procedure Type': report.procedureType?.name || '-',
-      'Details': report.details || '-'
-    }));
   }
 
   getSchoolName(): string {
@@ -355,12 +337,12 @@ constructor(
   }
 
   getStudentName(): string {
-   if(this.reportType === 'employee'){
-     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
-   }
-   else{
-    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
-   }
+    if (this.reportType === 'employee') {
+      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+    }
+    else {
+      return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+    }
   }
 
   getConductTypeName(): string {
@@ -371,53 +353,13 @@ constructor(
     return this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || 'All Types';
   }
 
-  getInfoRows(): any[] {
-    if(this.reportType === 'employee'){
-       return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'School: ' + this.getSchoolName() },
-        { keyEn: 'Grade: ' + this.getGradeName() },
-        { keyEn: 'Class: ' + this.getClassName() },
-        { keyEn: 'Student: ' + this.getStudentName() },
-        { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-        { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
-      ];
-   }
-    else{
-      return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'Student: ' + this.getStudentName() },
-      ];
-    }
-  }
 
-  getInfoRowsExcel(): any[] {
-    if(this.reportType === 'employee'){
-      return [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() },
-        { key: 'Conduct Type', value: this.getConductTypeName() },
-        { key: 'Procedure Type', value: this.getProcedureTypeName() }      
-      ]; 
-    }
-    else{
-      return [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'Student', value: this.getStudentName() },
-        { key: 'Conduct Type', value: this.getConductTypeName() },
-        { key: 'Procedure Type', value: this.getProcedureTypeName() }  
-      ];
-    }
-  }
+ 
+  // Revised getInfoRowsExcel method --77
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
@@ -430,12 +372,14 @@ constructor(
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -443,7 +387,7 @@ constructor(
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -464,14 +408,14 @@ constructor(
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -479,37 +423,322 @@ constructor(
     }, 500);
   }
 
-async exportExcel() {
-  if (this.reportsForExport.length === 0) {
+// Adding by Gaber---7777
+
+
+async exportExcel() {        
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  if (this.conductReports.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');
     return;
   }
 
   try {
-    await this.reportsService.generateExcelReport({
+
+    const infoRows: { en: string; ar: string }[] = [];
+    
+    if (this.reportType === 'employee') {
+      infoRows.push(
+        { 
+          en: `From Date: ${this.dateFrom || ''}`, 
+          ar: `${this.dateFrom || ''}  :   من تاريخ` 
+        },
+        { 
+          en: `To Date: ${this.dateTo || ''}`, 
+          ar: `${this.dateTo || ''} :   إلى تاريخ` 
+        },
+        { 
+          en: `School: ${this.getSchoolName() || 'All Schools'}`, 
+          ar: `المدرسة: ${this.getSchoolNameAr() || 'كل المدارس'} ` 
+        },
+        { 
+          en: `Grade: ${this.getGradeName() || 'All Grades'}`, 
+          ar: `الصف : ${this.getGradeNameAr() || 'كل الصفوف'}` 
+        },
+        { 
+          en: `Class: ${this.getClassName() || 'All Classes'}`, 
+          ar: `الفصل: ${this.getClassNameAr() || 'كل الفصول'}` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || 'All Students'}`, 
+          ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+        },
+        { 
+          en: `Conduct Type: ${this.getConductTypeName() || 'All Types'}`, 
+          ar: ` نوع السلوك : ${this.getConductTypeNameAr() || 'كل الأنواع'}`
+        },
+        { 
+          en: `Procedure Type: ${this.getProcedureTypeName() || 'All Types'}`, 
+          ar: ` نوع الإجراء:${this.getProcedureTypeNameAr() || 'كل الأنواع'}`
+        }
+      );
+    } else {
+      infoRows.push(
+        { 
+          en: `From Date: ${this.dateFrom || ''}`, 
+          ar: `${this.dateFrom || ''}  :   من تاريخ` 
+        },
+        { 
+          en: `To Date: ${this.dateTo || ''}`, 
+          ar: `${this.dateTo || ''} :   إلى تاريخ` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || ''}`, 
+          ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+        },
+        { 
+          en: `Conduct Type: ${this.getConductTypeName() || 'All Types'}`, 
+          ar: `${this.getConductTypeNameAr() || 'كل الأنواع'} : نوع السلوك`
+        },
+        { 
+          en: `Procedure Type: ${this.getProcedureTypeName() || 'All Types'}`, 
+          ar: `${this.getProcedureTypeNameAr() || 'كل الأنواع'} : نوع الإجراء`
+        }
+      );
+    }
+    
+    infoRows.push(
+      { 
+        en: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, 
+        ar: `${new Date().toLocaleDateString('en-GB')} : تم الإنشاء في` 
+      }
+    );
+
+    const isArabic = this.currentLang === 'ar';
+    
+    let tableHeaders: string[];
+    let tableData: any[][];
+    
+    if (isArabic) {
+      tableHeaders = ['التاريخ', 'اسم الطالب', 'نوع السلوك', 'نوع الإجراء', 'التفاصيل'];
+      tableData = this.conductReports.map((report) => {
+        const date = new Date(report.date);
+        return [
+          this.formatDateForArabic(date.toISOString()),
+          report.studentArName || report.studentEnName || '-',
+          report.conductType?.ar_name || report.conductType?.en_name || '-',
+          report.procedureType?.name || report.procedureType?.name || '-',
+          report.details || '-'
+        ];
+      });
+    } else {
+      tableHeaders = ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'];
+      tableData = this.conductReports.map((report) => {
+        const date = new Date(report.date);
+        return [
+          date.toLocaleDateString('en-GB'),
+          report.studentEnName || '-',
+          report.conductType?.en_name || '-',
+          report.procedureType?.name || '-',
+          report.details || '-'
+        ];
+      });
+    }
+
+    const excelOptions = {
       mainHeader: {
         en: 'Conduct Report',
         ar: 'تقرير السلوك'
       },
-      subHeaders: [
-        {
-          en: 'Student Behavior Records',
-          ar: 'سجلات سلوك الطلاب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          // title: 'Conduct Report Data',
-          headers: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
-          data: this.reportsForExport
-        }
-      ],
+      subHeaders: [{
+        en: 'Student Behavior Records',
+        ar: 'سجلات سلوك الطلاب'
+      }],
+      infoRows: infoRows,
+      tables: [{
+        headers: tableHeaders,
+        data: tableData
+      }],
+      isRtl: isArabic,
       filename: `Conduct_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
+    };
+
+    await this.reportsService.generateExcelReport(excelOptions);
   } catch (error) {
     console.error('Error exporting to Excel:', error);
+    const Swal = await import('sweetalert2').then(m => m.default);
     Swal.fire('Error', 'Failed to export to Excel', 'error');
   }
 }
+
+
+private prepareExportData(): void {
+  const isArabic = this.currentLang === 'ar';
+  
+  // For Excel (array format)
+  this.reportsForExport = this.conductReports.map((report) => {
+    const date = new Date(report.date);
+    return [
+      date.toLocaleDateString('en-GB'),
+      isArabic ? (report.studentArName || report.studentEnName) : report.studentEnName,
+      isArabic ? (report.conductType?.ar_name || report.conductType?.en_name) : report.conductType?.en_name,
+      isArabic ? (report.procedureType?.name || report.procedureType?.name) : report.procedureType?.name,
+      report.details || '-'
+    ];
+  });
+
+  // For PDF (object format)
+  this.reportsForPDF = this.conductReports.map((report) => ({
+    'Date': new Date(report.date).toLocaleDateString(),
+    'Student Name': isArabic ? (report.studentArName || report.studentEnName) : report.studentEnName,
+    'Conduct Type': isArabic ? (report.conductType?.ar_name || report.conductType?.en_name) : report.conductType?.en_name,
+    'Procedure Type': isArabic ? (report.procedureType?.name || report.procedureType?.name) : report.procedureType?.name,
+    'Details': report.details || '-'
+  }));
+}
+
+
+getInfoRows(): any[] {
+  const fromDateAr = this.formatDateForArabic(this.dateFrom);
+  const toDateAr = this.formatDateForArabic(this.dateTo);
+  const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
+
+  const rows = [];
+
+  if (this.reportType === 'employee') {
+    rows.push(
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${fromDateAr}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${toDateAr}` },
+      { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة : ${this.getSchoolNameAr()} ` },
+
+      { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف : ${this.getGradeNameAr()} `},
+      { keyEn: `Class: ${this.getClassName()}`, keyAr:`الفصل : ${this.getClassNameAr()} ` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب : ${this.getStudentNameAr()}` },
+      { keyEn: `Conduct Type: ${this.getConductTypeName()}`, keyAr:`نوع السلوك : ${this.getConductTypeNameAr()}` },
+      { keyEn: `Procedure Type: ${this.getProcedureTypeName()}`, keyAr: `نوع الاجراء : ${this.getProcedureTypeNameAr()}` },
+      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    );
+  } else {
+    rows.push(
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${fromDateAr}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${toDateAr}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+      { keyEn: `Conduct Type: ${this.getConductTypeName()}`, keyAr: `${this.getConductTypeNameAr()} : نوع السلوك` },
+      { keyEn: `Procedure Type: ${this.getProcedureTypeName()}`, keyAr: `${this.getProcedureTypeNameAr()} : نوع الإجراء` },
+      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    );
+  }
+
+  return rows;
+}
+
+
+private formatDateForArabic(dateString: string): string {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString;
+  }
+}
+
+GetDataForPrint(): Observable<any[]> {
+  return of(this.conductReports).pipe(
+    map((reports) => {
+      if (reports.length === 0) {
+        return [];
+      }
+
+      return [{
+        header: {
+          en: 'Conduct Report',
+          ar: 'تقرير السلوك'
+        },
+        summary: this.getInfoRows(), 
+        table: {
+          headers: {
+            en: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
+            ar: ['التاريخ', 'اسم الطالب', 'نوع السلوك', 'نوع الإجراء', 'التفاصيل']
+          },
+          data: reports.map((item: any) => ({
+            'Date': new Date(item.date).toLocaleDateString('en-GB'),
+            'التاريخ': this.formatDateForArabic(item.date),
+            'Student Name': item.studentEnName,
+            'اسم الطالب': item.studentArName || item.studentEnName || '-',
+            'Conduct Type': item.conductType?.en_name || '-',
+            'نوع السلوك': item.conductType?.ar_name || item.conductType?.en_name || '-',
+            'Procedure Type': item.procedureType?.name || '-',
+            'نوع الإجراء': item.procedureType?.ar_name || item.procedureType?.name || '-',
+            'Details': item.details || '-',
+            'التفاصيل': item.details || '-'
+          }))
+        }
+      }];
+    })
+  );
+}
+
+
+getInfoRowsExcel(): any[] {
+  if (this.reportType === 'employee') {
+    return [
+      { key: 'From Date', value: this.dateFrom },
+      { key: 'To Date', value: this.dateTo },
+      { key: 'School', value: this.getSchoolName() },
+      { key: 'Grade', value: this.getGradeName() },
+      { key: 'Class', value: this.getClassName() },
+      { key: 'Student', value: this.getStudentName() },
+      { key: 'Conduct Type', value: this.getConductTypeName() },
+      { key: 'Procedure Type', value: this.getProcedureTypeName() },
+      { key: 'Generated On', value: new Date().toLocaleDateString('en-GB') }
+    ];
+  } else {
+    return [
+      { key: 'From Date', value: this.dateFrom },
+      { key: 'To Date', value: this.dateTo },
+      { key: 'Student', value: this.getStudentName() },
+      { key: 'Conduct Type', value: this.getConductTypeName() },
+      { key: 'Procedure Type', value: this.getProcedureTypeName() },
+      { key: 'Generated On', value: new Date().toLocaleDateString('en-GB') }
+    ];
+  }
+}
+ 
+
+getSchoolNameAr(): string {
+  const school = this.schools.find(s => s.id == this.selectedSchoolId);
+  return school?.ar_name || school?.name || 'كل المدارس';
+}
+
+getGradeNameAr(): string {
+  const grade = this.grades.find(g => g.id == this.selectedGradeId);
+  return grade?.ar_name || grade?.name || 'كل الصفوف';
+}
+
+getClassNameAr(): string {
+  const classItem = this.classes.find(c => c.id == this.selectedClassId);
+  return classItem?.ar_name || classItem?.name || 'كل الفصول';
+}
+
+getStudentNameAr(): string {
+  if (this.reportType === 'employee') {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.name || 'كل الطلاب';
+  } else {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.en_name || 'كل الطلاب';
+  }
+}
+
+getConductTypeNameAr(): string {
+  const conductType = this.conductTypes.find(ct => ct.id == this.selectedConductTypeId);
+  return conductType?.ar_name || conductType?.en_name || 'كل الأنواع';
+}
+
+getProcedureTypeNameAr(): string {
+  const procedureType = this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId);
+  return procedureType?.name || procedureType?.name || 'كل الأنواع';
+}
+
+
 }

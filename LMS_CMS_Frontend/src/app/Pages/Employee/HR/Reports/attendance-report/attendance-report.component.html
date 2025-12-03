@@ -165,7 +165,7 @@
                 { keyEn: 'Month: ' + this.month + '/' +this.year,  keyAr: this.month+ '/' +this.year + ': شهر' },
                 { keyEn: 'Job Category: ' + getJobCategoryName(), keyAr: getJobCategoryName() + ': فئة الوظيفة' },
                 { keyEn: 'Job: ' + getJobName(),               keyAr: getJobName() + ': الوظيفة' },
-                { keyEn: 'Employee: ' + getEmployeeName(),     keyAr:  'الموظف ' + getArEmployeeName() }
+                { keyEn: 'Employee: ' + getEmployeeName(),     keyAr:  'الموظف : ' + getArEmployeeName() }
                 ]"
                 [tableHeaders]="['Day', 'Day Status', 'Total Working Hours', 'Leave Request in Hours', 'Overtime in Hours', 'Deduction in Hours']" 
                 [tableData]="tableDataForPDF" #pdfComponentRef>

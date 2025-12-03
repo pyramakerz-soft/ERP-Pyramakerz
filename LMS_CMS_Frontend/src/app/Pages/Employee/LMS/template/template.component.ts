@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Template } from '../../../../Models/LMS/template';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -116,7 +116,9 @@ export class TemplateComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "+ this.translate.instant('the') +this.translate.instant('template') + this.translate.instant('?'),
       icon: 'warning',
@@ -160,8 +162,10 @@ export class TemplateComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.templateServ.Add(

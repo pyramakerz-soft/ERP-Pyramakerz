@@ -3,7 +3,7 @@ import { Stocking } from '../../../../Models/Inventory/stocking';
 import { StockingDetails } from '../../../../Models/Inventory/stocking-details';
 import { StockingService } from '../../../../Services/Employee/Inventory/stocking.service';
 import { StockingDetailsService } from '../../../../Services/Employee/Inventory/stocking-details.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -104,7 +104,7 @@ export class StockingDetailsComponent {
   showPrintMenu = false;
   IsActualStockHiddenForBlankPrint: boolean = false;
   StoreAndDateSpanWhenPrint: boolean = false;
-  NewDetailsWhenEdit: StockingDetails[] = [];
+  // NewDetailsWhenEdit: StockingDetails[] = [];
   DetailsToDeleted: StockingDetails[] = [];
   tableDataForPrint: any[] = []
   showPDF: boolean = false;
@@ -310,11 +310,15 @@ export class StockingDetailsComponent {
           this.TableData = [];
         }
         this.TableData = this.TableData.concat(this.FilteredDetails);
-        this.NewDetailsWhenEdit = this.NewDetailsWhenEdit.concat(
+        if (!this.Data.newDetailsWhenEdit) {
+          this.Data.newDetailsWhenEdit = [];
+        }
+        this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.concat(
           this.FilteredDetails
         );
         if (this.HasBallance) {
           this.TableData = this.TableData.filter((d) => d.currentStock !== 0);
+          this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter((d) => d.currentStock !== 0);
         }
       }
     });
@@ -365,13 +369,11 @@ export class StockingDetailsComponent {
             }
           } else if (this.mode == 'Edit') {
             this.TableData = this.TableData.concat(this.FilteredDetails);
-            this.NewDetailsWhenEdit = this.NewDetailsWhenEdit.concat(
+            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.concat(
               this.FilteredDetails
             );
             if (this.HasBallance) {
-              this.TableData = this.OriginDetails.filter(
-                (d) => d.currentStock != 0
-              );
+              this.TableData = this.OriginDetails.filter((d) => d.currentStock != 0);
             }
           }
         }
@@ -385,6 +387,10 @@ export class StockingDetailsComponent {
   }
 
   selectShopItem(item: ShopItem) {
+    this.Data.stockingDetails ??= [];
+    this.Data.newDetailsWhenEdit ??= [];
+    this.TableData ??= [];
+    this.OriginDetails ??= [];
     this.SelectedSopItem = item;
 
     const newItem = {
@@ -409,7 +415,7 @@ export class StockingDetailsComponent {
         this.Data.stockingDetails.push(newItem);
       }
     } else if (this.mode === 'Edit') {
-      this.NewDetailsWhenEdit.push(newItem);
+      this.Data.newDetailsWhenEdit.push(newItem);
       if (this.HasBallance) {
         this.TableData = this.OriginDetails.filter(d => d.currentStock != 0);
       } else {
@@ -460,7 +466,7 @@ export class StockingDetailsComponent {
           }
         } else if (this.mode == 'Edit') {
           this.TableData.push(detail);
-          this.NewDetailsWhenEdit.push(detail);
+          this.Data.newDetailsWhenEdit.push(detail);
           if (this.HasBallance) {
             this.TableData = this.OriginDetails.filter(
               (d) => d.currentStock != 0
@@ -469,7 +475,9 @@ export class StockingDetailsComponent {
         }
         this.BarCode = ''; // Clear input after search
       },
-      (error) => {
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Item not found',
@@ -517,8 +525,10 @@ export class StockingDetailsComponent {
   }
   /////////////////////////////////////////////////////// CRUD
 
-  Save() {
-    if (this.isFormValid()) {
+  async Save() {
+    if (await this.isFormValid()) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.StockingServ.Add(this.Data, this.DomainName).subscribe(
@@ -550,23 +560,12 @@ export class StockingDetailsComponent {
             this.HasBallance == true && originItem.currentStock == 0
         );
         this.DetailsToDeleted.forEach((element) => {
-          this.StockingDetailsServ.Delete(
-            element.id,
-            this.DomainName
-          ).subscribe((d) => { });
+          this.StockingDetailsServ.Delete(element.id,this.DomainName).subscribe((d) => { });
         });
         this.Data.stockingDetails = this.TableData;
-        this.StockingDetailsServ.Edit(
-          this.Data.stockingDetails,
-          this.DomainName
-        ).subscribe((d) => { });
-        this.StockingDetailsServ.Add(
-          this.NewDetailsWhenEdit,
-          this.DomainName
-        ).subscribe(
-          (d) => { },
-          (error) => { }
-        );
+        // this.StockingDetailsServ.Edit(this.Data.stockingDetails,this.DomainName).subscribe((d) => { });
+        // this.StockingDetailsServ.Add(this.Data.newDetailsWhenEdit,this.DomainName).subscribe((d) => { },(error) => { });
+        console.log(this.Data)
         this.StockingServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
             Swal.fire({
@@ -578,6 +577,7 @@ export class StockingDetailsComponent {
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
+            console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -596,7 +596,9 @@ export class StockingDetailsComponent {
     this.editingRowId = row.id;
   }
 
-  Delete(row: StockingDetails) {
+  async Delete(row: StockingDetails) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.mode == 'Edit') {
       Swal.fire({
         title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
@@ -608,14 +610,14 @@ export class StockingDetailsComponent {
         cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
-          if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
+          if (!this.Data.newDetailsWhenEdit || this.Data.newDetailsWhenEdit.length==0 || (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&!this.Data.newDetailsWhenEdit.find((s) => s.id == row.id))) {
             this.StockingDetailsServ.Delete(row.id, this.DomainName).subscribe(
               async (D) => {
                 await this.GetTableDataByID();
               }
             );
-          } else {
-            this.NewDetailsWhenEdit = this.NewDetailsWhenEdit.filter(
+          } else if (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&this.Data.newDetailsWhenEdit.find((s) => s.id == row.id)) {
+            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
               (s) => s.id != row.id
             );
             this.TableData = this.TableData.filter((s) => s.id != row.id);
@@ -643,6 +645,19 @@ export class StockingDetailsComponent {
 
   onStockChangeWhenEditRow(row: StockingDetails): void {
     row.theDifference = row.actualStock - row.currentStock;
+      // Initialize if null
+    if (!this.Data.updatedStockingDetails) {
+      this.Data.updatedStockingDetails = [];
+    }
+
+    const index = this.Data.updatedStockingDetails.findIndex(r => r.id === row.id);
+    if (index === -1) {
+      // Not yet added, push it
+      this.Data.updatedStockingDetails.push({ ...row });
+    } else {
+      // Already exists, update it
+      this.Data.updatedStockingDetails[index] = { ...row };
+    }
   }
 
   onStockChangeWhenAddRow(row: StockingDetails): void {
@@ -651,7 +666,7 @@ export class StockingDetailsComponent {
 
   ///////////////////////////////////// validation fOR Master
 
-  isFormValid(): boolean {
+  async isFormValid() {
     let isValid = true;
     for (const key in this.Data) {
       if (this.Data.hasOwnProperty(key)) {
@@ -666,6 +681,9 @@ export class StockingDetailsComponent {
         }
       }
     }
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.mode == 'Create' && this.Data.stockingDetails.length == 0) {
       Swal.fire({
         icon: 'warning',
@@ -684,8 +702,20 @@ export class StockingDetailsComponent {
       });
       return false;
     }
+    if (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length > 0) {
+      this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.map(item => ({
+        ...item,
+        actualStock: item.actualStock ?? 0, // if actualStock is null or undefined, set to 0
+      }));
+    }
+    if (this.Data.updatedStockingDetails && this.Data.updatedStockingDetails.length > 0) {
+      this.Data.updatedStockingDetails = this.Data.updatedStockingDetails.map(item => ({
+        ...item,
+        actualStock: item.actualStock ?? 0, // if actualStock is null or undefined, set to 0
+      }));
+    }
 
-    return isValid;
+  return isValid;
   }
 
   capitalizeField(field: keyof Stocking): string {
@@ -747,39 +777,33 @@ export class StockingDetailsComponent {
           5,
           (s) => s.theDifference < 0
         );
+          await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+          this.router.navigateByUrl(`Employee/Stocking`);
       }
       if (this.mode === 'Edit') {
-        if (this.Data.additionId != 0) {
-          try {
-            await this.InventoryMastrServ.Delete(
-              this.Data.additionId,
-              this.DomainName
-            ).toPromise();
-          } catch (error) {
-            console.error('Error deleting additionId:', error);
+        console.log(this.Data)
+        this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
+          console.log(12345,this.Data)
+          if (this.Data.additionId != 0 && this.Data.additionId != null) {
+            await this.InventoryMastrServ.Delete(this.Data.additionId,this.DomainName).toPromise();
           }
-        }
-        if (this.Data.disbursementId != 0) {
-          try {
-            await this.InventoryMastrServ.Delete(
-              this.Data.disbursementId,
-              this.DomainName
-            ).toPromise();
-          } catch (error) {
-            console.error('Error deleting disbursementId:', error);
+          if (this.Data.disbursementId != 0 && this.Data.disbursementId != null) {
+            await this.InventoryMastrServ.Delete(this.Data.disbursementId,this.DomainName).toPromise();
           }
-        }
-        this.Data.additionId = await this.prepareAdjustment(
-          3,
-          (s) => s.theDifference > 0
-        );
-        this.Data.disbursementId = await this.prepareAdjustment(
-          5,
-          (s) => s.theDifference < 0
-        );
+          this.Data.additionId = await this.prepareAdjustment(
+            3,
+            (s) => s.theDifference > 0
+          );
+          this.Data.disbursementId = await this.prepareAdjustment(
+            5,
+            (s) => s.theDifference < 0
+          );
+          this.Data.newDetailsWhenEdit =[]
+          this.Data.updatedStockingDetails =[]
+          await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+          this.router.navigateByUrl(`Employee/Stocking`);
+        })
       }
-      await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
-      this.router.navigateByUrl(`Employee/Stocking`);
     } catch (error) {
       console.error('Unexpected error in Adjustment():', error);
     } finally {

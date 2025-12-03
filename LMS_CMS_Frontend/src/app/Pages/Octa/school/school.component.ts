@@ -5,7 +5,7 @@ import { SearchComponent } from '../../../Component/search/search.component';
 import { DomainService } from '../../../Services/Employee/domain.service';
 import { Domain } from '../../../Models/domain';
 import { School } from '../../../Models/school';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SchoolType } from '../../../Models/Octa/school-type';
 import { SchoolTypeService } from '../../../Services/Octa/school-type.service';
 import { SchoolService } from '../../../Services/Employee/school.service';
@@ -143,7 +143,9 @@ export class SchoolComponent {
     }
   }
 
-  deleteSchool(busId: number) {
+  async deleteSchool(busId: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to delete this school?',
       icon: 'warning',

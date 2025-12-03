@@ -134,7 +134,7 @@
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Amount' | translate }}</label>
-        <input (input)="validateNumber($event, 'amount')" [(ngModel)]="Fees.amount" (input)="CalculateNet()"
+        <input [(ngModel)]="Fees.amount" (input)="validateNumber($event, 'amount')" (input)="CalculateNet()"
             (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
             placeholder="{{ 'Enter Amount' | translate }}">
@@ -144,7 +144,7 @@
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount Percentage' | translate }}</label>
-        <input (input)="validateNumberForDiscount($event)" [(ngModel)]="DiscountPercentage"
+        <input  [(ngModel)]="DiscountPercentage" (input)="validateNumberForDiscount($event)"
             (input)="CalculateDiscountFromPercentage()"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
             placeholder="{{ 'Enter Percentage' | translate }}">
@@ -152,8 +152,7 @@
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount Amount' | translate }}</label>
-        <input (input)="validateNumber($event, 'discount')" [(ngModel)]="Fees.discount"
-            (input)="CalculatePercentageFromDiscount()"
+        <input [(ngModel)]="Fees.discount" (input)="validateNumber($event, 'discount'); CalculatePercentageFromDiscount()" 
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
             placeholder="{{ 'Enter Discount' | translate }}">
     </div>

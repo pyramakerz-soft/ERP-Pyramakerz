@@ -14,7 +14,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 @Component({
@@ -73,8 +73,9 @@ export class SubjectWeeksComponent {
       (data) => {
         this.WorkingWeekData = data.weeks;
         this.SubjectName = data.subjectName;
-      },error=>{
-        console.log(error)
+      },async error=>{
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         this.SubjectName = error.error.subjectName;
         Swal.fire({
           icon: 'error',

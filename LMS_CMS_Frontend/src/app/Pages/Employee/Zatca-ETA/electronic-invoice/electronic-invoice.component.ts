@@ -4,7 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { School } from '../../../../Models/school';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
 import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
@@ -12,7 +12,7 @@ import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { StateService } from '../../../../Services/Employee/Inventory/state.service';
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
@@ -97,9 +97,11 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
   }
 
-    private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'error',
@@ -110,9 +112,11 @@ export class ElectronicInvoiceComponent implements OnInit {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     Swal.fire({
       icon: 'success',
@@ -175,6 +179,8 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   async viewReport() {
     if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: this.translate.instant('Invalid Date Range'),
         text: this.translate.instant('Start date cannot be later than end date'),
@@ -185,6 +191,8 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
 
     if (!this.selectedSchoolId) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: this.translate.instant('Missing Information'),
         text: this.translate.instant('Please select a school'),
@@ -268,8 +276,10 @@ export class ElectronicInvoiceComponent implements OnInit {
     ];
   }
 
-  downloadAsPDF() {
+  async downloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
     }
@@ -295,8 +305,10 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.printAll();
   }
 
-  printSelectedInvoices() {
+  async printSelectedInvoices() {
     if (this.selectedInvoices.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: this.translate.instant('No Selection'),
         text: this.translate.instant('Please select at least one invoice to print'),
@@ -319,8 +331,10 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.printAll();
   }
 
-  private printAll() {
+  private async printAll() {
     if (this.transactionsForExport.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
     }
@@ -365,12 +379,14 @@ export class ElectronicInvoiceComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
+  async exportExcel() {
     if (this.transactions.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire(this.translate.instant('Warning'), this.translate.instant('No data to export!'), this.translate.instant('warning'));
       return;
-    }
-
+    } 
+    const XLSX = await import('xlsx');
     const worksheet = XLSX.utils.json_to_sheet(
       this.transactions.map((t) => ({
         'Invoice ID': t.id,
@@ -455,6 +471,8 @@ export class ElectronicInvoiceComponent implements OnInit {
 
       await firstValueFrom(serviceCall);
 
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire(
         this.translate.instant('Success'),
         `${this.translate.instant('Invoice')} ${
@@ -483,6 +501,8 @@ export class ElectronicInvoiceComponent implements OnInit {
         } ${this.translate.instant('invoice')}`,
         error
       );
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.sendingInvoiceId = null;
@@ -491,6 +511,8 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   async sendAll() {
     if (this.selectedInvoices.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: this.translate.instant('No Selection'),
         text: this.translate.instant('Please select at least one invoice to send'),
@@ -517,6 +539,8 @@ export class ElectronicInvoiceComponent implements OnInit {
             );
 
       await firstValueFrom(serviceCall);
+
+      const Swal = await import('sweetalert2').then(m => m.default);
 
       Swal.fire(
         this.translate.instant('Success'),
@@ -550,6 +574,8 @@ export class ElectronicInvoiceComponent implements OnInit {
         } ${this.translate.instant('invoice')}`,
         error
       );
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.isSubmitting = false;

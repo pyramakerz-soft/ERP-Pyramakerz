@@ -13,6 +13,8 @@ export class Stocking {
         public schoolPCName: string = "",
         public storeName: string = '',
         public stockingDetails: StockingDetails[] = [],
+        public newDetailsWhenEdit: StockingDetails[] = [],
+        public updatedStockingDetails: StockingDetails[] = [],
         public insertedAt: string = "",
         public insertedByUserId: number = 0,
     ) { }

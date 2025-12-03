@@ -8,7 +8,7 @@ import { ShopItem } from '../../../../Models/Inventory/shop-item';
 import { CommonModule } from '@angular/common';
 import { CartShopItem } from '../../../../Models/Student/ECommerce/cart-shop-item';
 import { CartShopItemService } from '../../../../Services/Student/cart-shop-item.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { FormsModule } from '@angular/forms';
@@ -159,7 +159,9 @@ export class ShopItemComponent {
     }
   } 
 
-  addShopItemToCart(id: number) { 
+  async addShopItemToCart(id: number) { 
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.shopItemService.CheckIfHeCanAddItem(id, this.StuID, this.DomainName).subscribe(
       data =>{
         if(data == true){

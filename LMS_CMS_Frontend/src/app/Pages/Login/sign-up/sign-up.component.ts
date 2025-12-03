@@ -8,16 +8,16 @@ import { FormsModule } from '@angular/forms';
 import { ParentAdd } from '../../../Models/parent-add';
 import { ParentService } from '../../../Services/parent.service';
 import { ApiService } from '../../../Services/api.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
-import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
+import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-sign-up',
-  standalone: true,
+  standalone: true, 
   imports: [CommonModule, FormsModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
@@ -42,12 +42,12 @@ export class SignUpComponent {
   ConfirmPassword: string = ""
 
   validationErrors: { [key in keyof ParentAdd]?: string } = {};
-
+ 
   parentInfo: ParentAdd = new ParentAdd()
   isLoading = false;
 
   IsConfimPassEmpty = false
-  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
+  // @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent; 
 
   constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
   ngOnInit() {
@@ -80,14 +80,14 @@ export class SignUpComponent {
     this.IsConfimPassEmpty = false
   }
 
-  // onCaptchaResolved(token: string | null): void {
-  //   if (token) {
-  //     this.parentInfo.recaptchaToken = token;
-  //     this.validationErrors['recaptchaToken'] = ''
-  //   } else {
-  //     this.parentInfo.recaptchaToken = '';
-  //   }
-  // }
+  onCaptchaResolved(token: any): void {
+    if (token) {
+      this.parentInfo.recaptchaToken = token;
+      this.validationErrors['recaptchaToken'] = ''
+    } else {
+      this.parentInfo.recaptchaToken = '';
+    }
+  }
 
   SignUp() {
     if (this.isFormValid()) {
@@ -165,12 +165,15 @@ export class SignUpComponent {
             this.router.navigateByUrl("/Parent")
           }
         );
-      }, (error) => {
-        // this.parentInfo.recaptchaToken = '';
-        // this.isLoading = false;
+      }, async (error) => {
+        this.parentInfo.recaptchaToken = '';
+        this.isLoading = false;
         // if (this.captchaRef) {
-        //   this.captchaRef.reset();
+        //   this.captchaRef.reset(); 
         // }
+
+        const Swal = await import('sweetalert2').then(m => m.default);
+
         Swal.fire({
           icon: 'error',
           title: 'Oops...',

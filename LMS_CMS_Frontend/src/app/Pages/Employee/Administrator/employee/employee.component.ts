@@ -9,7 +9,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { TokenData } from '../../../../Models/token-data';
 import { EmployeeTypeService } from '../../../../Services/Employee/employee-type.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -17,7 +17,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Employee } from '../../../../Models/Employee/employee';
-import { LoadingService } from '../../../../Services/loading.service'; 
+import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @Component({
@@ -95,16 +95,18 @@ export class EmployeeComponent {
   }
 
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
+  private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');
     const translatedButton = this.translate.instant('Okay');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'error',
       title: translatedTitle,
@@ -114,10 +116,12 @@ export class EmployeeComponent {
     });
   }
 
-  private showSuccessAlert(message: string) {
+  private async showSuccessAlert(message: string) {
     const translatedTitle = this.translate.instant('Success');
     const translatedButton = this.translate.instant('Okay');
-    
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       icon: 'success',
       title: translatedTitle,
@@ -127,7 +131,9 @@ export class EmployeeComponent {
     });
   }
 
-  private showLoadingAlert(message: string) {
+  private async showLoadingAlert(message: string) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: message,
       allowOutsideClick: false,
@@ -192,81 +198,85 @@ export class EmployeeComponent {
 
   }
 
-Delete(id: number) {
-  const deleteTitle = this.translate.instant('Are you sure you want to delete this employee?');
-  const deleteButton = this.translate.instant('Delete');
-  const cancelButton = this.translate.instant('Cancel');
-  
-  Swal.fire({
-    title: deleteTitle,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: deleteButton,
-    cancelButtonText: cancelButton,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.showLoadingAlert(this.translate.instant('Deleting...'));
+  async Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this employee?');
+    const deleteButton = this.translate.instant('Delete');
+    const cancelButton = this.translate.instant('Cancel');
 
-      this.EmpServ.Delete(id, this.DomainName).subscribe({
-        next: () => {
-          this.showSuccessAlert(this.translate.instant('Employee deleted successfully'));
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: deleteButton,
+      cancelButtonText: cancelButton,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.showLoadingAlert(this.translate.instant('Deleting...'));
+
+        this.EmpServ.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.showSuccessAlert(this.translate.instant('Employee deleted successfully'));
             this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-        },
-        error: (error) => {
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete employee');
-          this.showErrorAlert(errorMessage);
-        },
-      });
-    }
-  });
-}
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete employee');
+            this.showErrorAlert(errorMessage);
+          },
+        });
+      }
+    });
+  }
 
   view(id: number) {
     this.router.navigateByUrl(`Employee/Employee/${id}`)
   }
 
-suspend(emp: Employee) {
-  const isSuspending = !emp.isSuspended;
-  
-  const message = isSuspending 
-    ? this.translate.instant('Are you sure you want to suspend this employee?')
-    : this.translate.instant('Are you sure you want to unsuspend this employee?');
-  
-  const confirmButtonText = isSuspending 
-    ? this.translate.instant('Suspend')
-    : this.translate.instant('Unsuspend');
-  
-  const cancelButton = this.translate.instant('Cancel');
-  
-  Swal.fire({
-    title: message,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: confirmButtonText,
-    cancelButtonText: cancelButton,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
-        next: () => {
-          const successMessage = isSuspending
-            ? this.translate.instant('Employee suspended successfully')
-            : this.translate.instant('Employee unsuspended successfully');
-          
-          this.showSuccessAlert(successMessage);
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-        },
-        error: (error) => {
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update employee status');
-          this.showErrorAlert(errorMessage);
-        },
-      });
-    }
-  });
-}
+  async suspend(emp: Employee) {
+    const isSuspending = !emp.isSuspended;
+
+    const message = isSuspending
+      ? this.translate.instant('Are you sure you want to suspend this employee?')
+      : this.translate.instant('Are you sure you want to unsuspend this employee?');
+
+    const confirmButtonText = isSuspending
+      ? this.translate.instant('Suspend')
+      : this.translate.instant('Unsuspend');
+
+    const cancelButton = this.translate.instant('Cancel');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: message,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButton,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
+          next: () => {
+            const successMessage = isSuspending
+              ? this.translate.instant('Employee suspended successfully')
+              : this.translate.instant('Employee unsuspended successfully');
+
+            this.showSuccessAlert(successMessage);
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update employee status');
+            this.showErrorAlert(errorMessage);
+          },
+        });
+      }
+    });
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
@@ -346,5 +356,5 @@ suspend(emp: Employee) {
       event.target.value = '';
       this.PageSize = 0;
     }
-  }  
+  }
 }

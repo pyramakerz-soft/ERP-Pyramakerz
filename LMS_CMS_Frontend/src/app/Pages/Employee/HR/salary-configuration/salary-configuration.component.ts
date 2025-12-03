@@ -15,7 +15,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LoadingService } from '../../../../Services/loading.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
@@ -62,9 +62,9 @@ export class SalaryConfigurationComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public SalaryConfigurationServ: SalaryConfigurationService, 
-    private translate: TranslateService ,
-    private loadingService: LoadingService 
+    public SalaryConfigurationServ: SalaryConfigurationService,
+    private translate: TranslateService,
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,37 +92,40 @@ export class SalaryConfigurationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-    private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   GetAllData() {
     this.salaryConfiguration = new SalaryConfiguration();
@@ -131,16 +134,16 @@ private showSuccessAlert(message: string) {
     });
   }
 
-isFormValid(): boolean {
-  let isValid = true;
-  this.validationErrors = {};
-  
-  if (this.salaryConfiguration.startDay > 28 || this.salaryConfiguration.startDay < 1) {
-    isValid = false;
-    this.validationErrors["startDay"] = this.translate.instant('Start day should be from 1 to 28');
+  isFormValid(): boolean {
+    let isValid = true;
+    this.validationErrors = {};
+
+    if (this.salaryConfiguration.startDay > 28 || this.salaryConfiguration.startDay < 1) {
+      isValid = false;
+      this.validationErrors["startDay"] = this.translate.instant('Start day should be from 1 to 28');
+    }
+    return isValid;
   }
-  return isValid;
-}
 
   onInputValueChange(event: { field: keyof SalaryConfiguration; value: any }) {
     const { field, value } = event;
@@ -150,24 +153,24 @@ isFormValid(): boolean {
     }
   }
 
- save() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe(
-      (d) => {
-        this.salaryConfiguration = d;
-        this.showSuccessAlert(this.translate.instant('Salary configuration updated successfully'));
-        this.GetAllData();
-        this.isLoading = false;
-      }, 
-      error => {
-        this.isLoading = false;
-        const errorMessage = error.error?.message || this.translate.instant('Failed to update salary configuration');
-        this.showErrorAlert(errorMessage);
-      }
-    );
+  save() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe(
+        (d) => {
+          this.salaryConfiguration = d;
+          this.showSuccessAlert(this.translate.instant('Salary configuration updated successfully'));
+          this.GetAllData();
+          this.isLoading = false;
+        },
+        error => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to update salary configuration');
+          this.showErrorAlert(errorMessage);
+        }
+      );
+    }
   }
-}
 
   validateNumber(event: any, field: keyof SalaryConfiguration): void {
     const value = event.target.value;

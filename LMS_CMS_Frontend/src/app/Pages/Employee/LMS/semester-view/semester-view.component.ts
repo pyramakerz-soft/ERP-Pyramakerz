@@ -11,7 +11,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { TokenData } from '../../../../Models/token-data';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -110,57 +110,104 @@ export class SemesterViewComponent {
     this.router.navigateByUrl('Employee/Semester/' + this.DomainName + '/' + this.semester.academicYearID)
   }
 
-  Generate(){
-    if(this.WorkingWeeks.length == 0){
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to generate the working weeks?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, generate!',
-        confirmButtonColor: '#089B41',
-        cancelButtonText: 'No, cancel'
-      }).then((result) => {
-        if (result.isConfirmed) { 
-          this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
-            data => {
-              this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
-            }, error => {
-              Swal.fire({ 
-                title: error.error,
-                icon: 'error', 
-                confirmButtonColor: '#089B41', 
-              })
-            }
-          );
-        }
-      });
-    } else{
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'This Action Will Remove All the Last Generated Weeks, Are You Sure?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'I am Sure',
-        confirmButtonColor: '#089B41',
-        cancelButtonText: 'No, cancel'
-      }).then((result) => {
-        if (result.isConfirmed) { 
-          this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
-            data => {
-              this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
-            }, error => {
-              Swal.fire({ 
-                title: error.error,
-                icon: 'error', 
-                confirmButtonColor: '#089B41', 
-              })
-            }
-          );
-        }
-      });
-    }
+  private async showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private async showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private getRequiredErrorMessage(fieldName: string): string {
+  const fieldTranslated = this.translate.instant(fieldName);
+  const requiredTranslated = this.translate.instant('Is Required');
+  
+  if (this.isRtl) {
+    return `${requiredTranslated} ${fieldTranslated}`;
+  } else {
+    return `${fieldTranslated} ${requiredTranslated}`;
   }
+}
+
+async Generate() {
+  const translatedTitle = this.translate.instant('Are you sure?');
+  const translatedCancel = this.translate.instant('No, cancel');
+  const translatedConfirm = this.translate.instant('Yes, generate!');
+  const translatedSure = this.translate.instant('I am Sure');
+  const successMessage = this.translate.instant('Generated successfully');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  if (this.WorkingWeeks.length == 0) {
+    Swal.fire({
+      title: translatedTitle,
+      text: this.translate.instant('Do you want to generate the working weeks?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: translatedConfirm,
+      confirmButtonColor: '#089B41',
+      cancelButtonText: translatedCancel
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe({
+          next: () => {
+            this.GetWorkingWeeksBySemesterById(this.semesterId, this.DomainName, this.CurrentPage, this.PageSize);
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to generate working weeks');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  } else {
+    Swal.fire({
+      title: translatedTitle,
+      text: this.translate.instant('This Action Will Remove All the Last Generated Weeks, Are You Sure?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: translatedSure,
+      confirmButtonColor: '#089B41',
+      cancelButtonText: translatedCancel
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe({
+          next: () => {
+            this.GetWorkingWeeksBySemesterById(this.semesterId, this.DomainName, this.CurrentPage, this.PageSize);
+            this.showSuccessAlert(successMessage);
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to regenerate working weeks');
+            this.showErrorAlert(errorMessage);
+          }
+        });
+      }
+    });
+  }
+}
 
   GetSemesterById(Id: number) {
     this.semesterService.GetByID(Id, this.DomainName).subscribe((data) => {
@@ -181,39 +228,43 @@ export class SemesterViewComponent {
   //   });
   // }
 
-  GetWorkingWeeksBySemesterById(Id: number ,DomainName: string, pageNumber: number, pageSize: number) {
-    this.WorkingWeeks = [];
-    this.semesterWorkingWeekService.GetBySemesterIDWithPaggination(Id ,DomainName, pageNumber, pageSize).subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage;
-        this.PageSize = data.pagination.pageSize;
-        this.TotalPages = data.pagination.totalPages;
-        this.TotalRecords = data.pagination.totalRecords;
-        this.WorkingWeeks = data.data;
-      },
-      (error) => {
-        if (error.status == 404) {
-          if (this.TotalRecords != 0) {
-            let lastPage;
-            if (this.isDeleting) {
-              lastPage = (this.TotalRecords - 1) / this.PageSize;
-            } else {
-              lastPage = this.TotalRecords / this.PageSize;
-            }
-            if (lastPage >= 1) {
-              if (this.isDeleting) {
-                this.CurrentPage = Math.floor(lastPage);
-                this.isDeleting = false;
-              } else {
-                this.CurrentPage = Math.ceil(lastPage);
-              }
-              this.GetWorkingWeeksBySemesterById(Id ,this.DomainName, this.CurrentPage, this.PageSize);
-            }
+GetWorkingWeeksBySemesterById(Id: number, DomainName: string, pageNumber: number, pageSize: number) {
+  this.WorkingWeeks = [];
+  this.semesterWorkingWeekService.GetBySemesterIDWithPaggination(Id, DomainName, pageNumber, pageSize).subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage;
+      this.PageSize = data.pagination.pageSize;
+      this.TotalPages = data.pagination.totalPages;
+      this.TotalRecords = data.pagination.totalRecords;
+      this.WorkingWeeks = data.data;
+    },
+    (error) => {
+      if (error.status == 404) {
+        if (this.TotalRecords != 0) {
+          let lastPage;
+          if (this.isDeleting) {
+            lastPage = (this.TotalRecords - 1) / this.PageSize;
+          } else {
+            lastPage = this.TotalRecords / this.PageSize;
           }
-        } 
+          if (lastPage >= 1) {
+            if (this.isDeleting) {
+              this.CurrentPage = Math.floor(lastPage);
+              this.isDeleting = false;
+            } else {
+              this.CurrentPage = Math.ceil(lastPage);
+            }
+            this.GetWorkingWeeksBySemesterById(Id, this.DomainName, this.CurrentPage, this.PageSize);
+          }
+        }
+      } else {
+        // Show error message for other errors
+        const errorMessage = error.error?.message || this.translate.instant('Failed to load working weeks');
+        this.showErrorAlert(errorMessage);
       }
-    );
-  }
+    }
+  );
+}
 
   openModal(Id?: number) {
     if (Id) {
@@ -240,52 +291,67 @@ export class SemesterViewComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.semesterWorkingWeek) {
-      if (this.semesterWorkingWeek.hasOwnProperty(key)) {
-        const field = key as keyof SemesterWorkingWeek;
-        if (!this.semesterWorkingWeek[field]) {
-          if(field == "englishName" || field == "arabicName" || field == "dateFrom" || field == "dateTo"){
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+isFormValid(): boolean {
+  let isValid = true;
+  for (const key in this.semesterWorkingWeek) {
+    if (this.semesterWorkingWeek.hasOwnProperty(key)) {
+      const field = key as keyof SemesterWorkingWeek;
+      if (!this.semesterWorkingWeek[field]) {
+        if (field == "englishName" || field == "arabicName" || field == "dateFrom" || field == "dateTo") {
+          const fieldName = this.capitalizeField(field);
+          this.validationErrors[field] = `*${this.translate.instant(fieldName)} ${this.translate.instant('Is Required')}`;
+          isValid = false;
+        }
+      } else {
+        if (field == "englishName" || field == "arabicName") {
+          if (this.semesterWorkingWeek[field]?.toString().length > 100) {
+            const fieldName = this.capitalizeField(field);
+            this.validationErrors[field] = `*${this.translate.instant(fieldName)} ${this.translate.instant('cannot be longer than 100 characters')}`;
             isValid = false;
           }
         } else {
-          if(field == "englishName" || field == "arabicName"){
-            if(this.semesterWorkingWeek.englishName.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-            if(this.semesterWorkingWeek.arabicName.length > 100){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
-              isValid = false;
-            }
-          } else{
-            this.validationErrors[field] = '';
-          }
+          this.validationErrors[field] = '';
         }
       }
     }
-    return isValid;
   }
+  return isValid;
+}
 
-  Delete(id:number){
-    Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Week') + this.translate.instant('?'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: this.translate.instant('Delete'),
-      cancelButtonText: this.translate.instant('Cancel'),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.semesterWorkingWeekService.Delete(id,this.DomainName).subscribe((D)=>{ 
-          this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
-        })
-      }
-    });
-  }
+async Delete(id: number) {
+  const translatedTitle = this.translate.instant('Are you sure?');
+  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedConfirm = this.translate.instant('Yes, delete it!');
+  const translatedCancel = this.translate.instant('No, keep it');
+  const successMessage = this.translate.instant('Deleted successfully');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  Swal.fire({
+    title: translatedTitle,
+    text: translatedText,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: translatedConfirm,
+    cancelButtonText: translatedCancel,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.semesterWorkingWeekService.Delete(id, this.DomainName).subscribe({
+        next: () => {
+          this.GetWorkingWeeksBySemesterById(this.semesterId, this.DomainName, this.CurrentPage, this.PageSize);
+          this.showSuccessAlert(successMessage);
+        },
+        error: (error) => {
+          console.error('Error deleting week:', error);
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the week');
+          this.showErrorAlert(errorMessage);
+        }
+      });
+    }
+  });
+}
 
   onInputValueChange(event: { field: keyof SemesterWorkingWeek, value: any }) {
     const { field, value } = event;
@@ -295,89 +361,78 @@ export class SemesterViewComponent {
     }
   }
   
-  checkFromToDate() {
-    let valid = true;
-  
-    const semesterFrom: Date = new Date(this.semester.dateFrom);
-    const semesterTo: Date = new Date(this.semester.dateTo);
-    const workingWeekFrom: Date = new Date(this.semesterWorkingWeek.dateFrom);
-    const workingWeekTo: Date = new Date(this.semesterWorkingWeek.dateTo);
-   
-    if (workingWeekTo.getTime() < workingWeekFrom.getTime()) {
-      valid = false;
-      Swal.fire({
-        title: 'From Date Must Be Before To Date',
-        icon: 'warning',
-        confirmButtonColor: '#089B41',
-        confirmButtonText: 'Ok',
-      });
-      this.isLoading = false;
-      return false;
-    }
-   
-    if (
-      workingWeekFrom.getTime() < semesterFrom.getTime() ||
-      workingWeekTo.getTime() > semesterTo.getTime()
-    ) {
-      valid = false;
-      Swal.fire({
-        title: 'Working Week dates must be within the Semester Range',
-        icon: 'warning',
-        confirmButtonColor: '#089B41',
-        confirmButtonText: 'Ok',
-      });
-      this.isLoading = false;
-      return false;
-    }
-  
-    return valid;
+async checkFromToDate() {
+  let valid = true;
+
+  const semesterFrom: Date = new Date(this.semester.dateFrom);
+  const semesterTo: Date = new Date(this.semester.dateTo);
+  const workingWeekFrom: Date = new Date(this.semesterWorkingWeek.dateFrom);
+  const workingWeekTo: Date = new Date(this.semesterWorkingWeek.dateTo);
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  if (workingWeekTo.getTime() < workingWeekFrom.getTime()) {
+    valid = false;
+    Swal.fire({
+      title: this.translate.instant('From Date Must Be Before To Date'),
+      icon: 'warning',
+      confirmButtonColor: '#089B41',
+      confirmButtonText: this.translate.instant('Ok'),
+    });
+    this.isLoading = false;
+    return false;
   }
+
+  if (
+    workingWeekFrom.getTime() < semesterFrom.getTime() ||
+    workingWeekTo.getTime() > semesterTo.getTime()
+  ) {
+    valid = false;
+    Swal.fire({
+      title: this.translate.instant('Working Week dates must be within the Semester Range'),
+      icon: 'warning',
+      confirmButtonColor: '#089B41',
+      confirmButtonText: this.translate.instant('Ok'),
+    });
+    this.isLoading = false;
+    return false;
+  }
+
+  return valid;
+}
    
-  Save(){
-    if(this.isFormValid()){
-      this.isLoading = true;
-      this.semesterWorkingWeek.semesterID = this.semesterId
-      if(this.checkFromToDate()){
-        if(this.editWorkingWeek == false){
-          this.semesterWorkingWeekService.Add(this.semesterWorkingWeek, this.DomainName).subscribe(
-            data =>{
-                this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
-                this.closeModal()
-                this.isLoading = false;
-            },
-            error => {
-              this.isLoading = false;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error.error,
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-            }
-          ) 
-        } else{
-          this.semesterWorkingWeekService.Edit(this.semesterWorkingWeek, this.DomainName).subscribe(
-            data =>{
-                this.GetWorkingWeeksBySemesterById(this.semesterId,this.DomainName, this.CurrentPage, this.PageSize);
-                this.closeModal()
-                this.isLoading = false;
-            },
-            error => {
-              this.isLoading = false;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error.error,
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-            }
-          ) 
-        }  
-      }
+async Save() {
+  if (this.isFormValid()) {
+    this.isLoading = true;
+    this.semesterWorkingWeek.semesterID = this.semesterId;
+    
+    if (await this.checkFromToDate()) {
+      const successMessage = this.editWorkingWeek
+        ? this.translate.instant('Updated successfully')
+        : this.translate.instant('Created successfully');
+
+      const operation = this.editWorkingWeek
+        ? this.semesterWorkingWeekService.Edit(this.semesterWorkingWeek, this.DomainName)
+        : this.semesterWorkingWeekService.Add(this.semesterWorkingWeek, this.DomainName);
+
+      operation.subscribe({
+        next: () => {
+          this.GetWorkingWeeksBySemesterById(this.semesterId, this.DomainName, this.CurrentPage, this.PageSize);
+          this.closeModal();
+          this.showSuccessAlert(successMessage);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error(`Error ${this.editWorkingWeek ? 'updating' : 'creating'} week:`, error);
+          const errorMessage = error.error?.message ||
+            this.translate.instant(`Failed to ${this.editWorkingWeek ? 'update' : 'create'} week`);
+          this.showErrorAlert(errorMessage);
+          this.isLoading = false;
+        },
+      });
     }
-  } 
+  }
+}
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords

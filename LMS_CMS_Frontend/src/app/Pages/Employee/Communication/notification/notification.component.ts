@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-import { FormsModule } from '@angular/forms'; 
+import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../../../Services/Employee/Communication/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TokenData } from '../../../../Models/token-data';
@@ -14,7 +14,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { Notification } from '../../../../Models/Communication/notification';
 import { UserTypeService } from '../../../../Services/Employee/Administration/user-type.service';
 import { UserType } from '../../../../Models/Administrator/user-type';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Department } from '../../../../Models/Administrator/department';
 import { Employee } from '../../../../Models/Employee/employee';
 import { School } from '../../../../Models/school';
@@ -44,35 +44,35 @@ import { LoadingService } from '../../../../Services/loading.service';
 @InitLoader()
 export class NotificationComponent {
 
-  TableData:Notification[] = []
+  TableData: Notification[] = []
   notification: Notification = new Notification()
   isLoading = false;
 
-  validationErrors: { [key in keyof Notification]?: string } = {}; 
-   isRtl: boolean = false;
+  validationErrors: { [key in keyof Notification]?: string } = {};
+  isRtl: boolean = false;
   subscription!: Subscription;
-  AllowDelete: boolean = false; 
+  AllowDelete: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = '';
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', ''); 
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
-  userTypes:UserType[] = []
+  userTypes: UserType[] = []
   selectedUserTypeId = 0
-  
+
   isEmployeeHovered = false;
   isStudentHovered = false;
   isParentHovered = false;
-  
-  departments:Department[] = []
-  employees:Employee[] = []
-  schools:School[] = []
-  sections:Section[] = []
-  grades:Grade[] = []
-  classrooms:Classroom[] = []
-  students:Student[] = []
+
+  departments: Department[] = []
+  employees: Employee[] = []
+  schools: School[] = []
+  sections: Section[] = []
+  grades: Grade[] = []
+  classrooms: Classroom[] = []
+  students: Student[] = []
   CurrentPage: number = 1;
   PageSize: number = 10;
   TotalPages: number = 1;
@@ -95,9 +95,9 @@ export class NotificationComponent {
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
-    public studentService: StudentService, 
+    public studentService: StudentService,
     private translate: TranslateService,
-    private loadingService: LoadingService  
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -112,63 +112,69 @@ export class NotificationComponent {
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
-      if (settingsPage) { 
+      if (settingsPage) {
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others; 
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
       }
     });
     this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
     this.getUserTypeData()
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-private showWarningAlert(message: string) {
-  const translatedTitle = this.translate.instant('Warning');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'warning',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showWarningAlert(message: string) {
+    const translatedTitle = this.translate.instant('Warning');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'warning',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   // getAllData(){
   //   this.TableData = []
@@ -218,20 +224,20 @@ private showWarningAlert(message: string) {
     );
   }
 
-  getNotificationById(id: number){
+  getNotificationById(id: number) {
     this.notification = new Notification()
     this.notificationService.GetById(id, this.DomainName).subscribe(
       data => {
-        this.notification = data 
-        if(this.notification.userTypeID == 1){
+        this.notification = data
+        if (this.notification.userTypeID == 1) {
           this.isEmployeeHovered = true;
           this.isStudentHovered = false;
           this.isParentHovered = false;
-        }else if(this.notification.userTypeID == 2){
+        } else if (this.notification.userTypeID == 2) {
           this.isStudentHovered = true;
           this.isEmployeeHovered = false;
           this.isParentHovered = false;
-        }else if(this.notification.userTypeID == 3){
+        } else if (this.notification.userTypeID == 3) {
           this.isParentHovered = true;
           this.isStudentHovered = false;
           this.isEmployeeHovered = false;
@@ -240,7 +246,7 @@ private showWarningAlert(message: string) {
     )
   }
 
-  getUserTypeData(){
+  getUserTypeData() {
     this.userTypes = []
     this.userTypeService.Get(this.DomainName).subscribe(
       data => {
@@ -250,10 +256,10 @@ private showWarningAlert(message: string) {
   }
 
   openModal(Id?: number) {
-    this.notification= new Notification();
+    this.notification = new Notification();
     this.isStudentHovered = true;
     this.notification.userTypeID = 2
-    this.getSchool() 
+    this.getSchool()
 
     if (Id) {
       this.getNotificationById(Id);
@@ -267,10 +273,10 @@ private showWarningAlert(message: string) {
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
-    this.validationErrors = {};  
-    
-    this.notification= new Notification();
-    this.isLoading = false 
+    this.validationErrors = {};
+
+    this.notification = new Notification();
+    this.isLoading = false
     this.isEmployeeHovered = false;
     this.isStudentHovered = false;
     this.isParentHovered = false;
@@ -283,40 +289,40 @@ private showWarningAlert(message: string) {
       this.AllowDeleteForOthers
     );
     return IsAllow;
-  } 
-  
-onImageFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  const input = event.target as HTMLInputElement;
-
-  if (file) {
-    if (file.size > 25 * 1024 * 1024) {
-      this.validationErrors['imageFile'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
-      this.notification.imageFile = null;
-      return; 
-    }
-    if (file.type === 'image/jpeg' || file.type === 'image/png') {
-      this.notification.imageFile = file; 
-      this.validationErrors['imageFile'] = ''; 
-
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-    } else {
-      this.validationErrors['imageFile'] = this.translate.instant('Invalid file type. Only JPEG, JPG and PNG are allowed');
-      this.notification.imageFile = null;
-      return; 
-    }
   }
-  
-  input.value = '';
-}
+
+  onImageFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['imageFile'] = this.translate.instant('The file size exceeds the maximum limit of 25 MB');
+        this.notification.imageFile = null;
+        return;
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        this.notification.imageFile = file;
+        this.validationErrors['imageFile'] = '';
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['imageFile'] = this.translate.instant('Invalid file type. Only JPEG, JPG and PNG are allowed');
+        this.notification.imageFile = null;
+        return;
+      }
+    }
+
+    input.value = '';
+  }
 
   onIsAllowDismissChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.notification.isAllowDismiss = isChecked
   }
 
-  selectType(userID:number) { 
+  selectType(userID: number) {
     this.notification.userTypeID = userID;
     this.notification.userFilters = new UserFilters()
     if (this.notification.userTypeID == 1) {
@@ -336,24 +342,24 @@ onImageFileSelected(event: any) {
       this.isStudentHovered = false;
       this.isParentHovered = true;
       this.getSchool()
-    } 
+    }
   }
 
   onDepartmentChange(event: Event) {
-    this.employees = [] 
+    this.employees = []
     this.notification.userFilters.employeeID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.notification.userFilters.departmentID = Number(selectedValue)
     if (this.notification.userFilters.departmentID) {
-      this.getEmployee(); 
+      this.getEmployee();
     }
   }
 
   onSchoolChange(event: Event) {
-    this.sections = [] 
-    this.grades = [] 
-    this.classrooms = [] 
-    this.students = [] 
+    this.sections = []
+    this.grades = []
+    this.classrooms = []
+    this.students = []
     this.notification.userFilters.sectionID = 0
     this.notification.userFilters.gradeID = 0
     this.notification.userFilters.classroomID = 0
@@ -361,102 +367,102 @@ onImageFileSelected(event: any) {
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.notification.userFilters.schoolID = Number(selectedValue)
     if (this.notification.userFilters.schoolID) {
-      this.getSection(); 
+      this.getSection();
     }
   }
 
-  onSectionChange(event: Event) { 
-    this.grades = [] 
-    this.classrooms = [] 
-    this.students = []  
+  onSectionChange(event: Event) {
+    this.grades = []
+    this.classrooms = []
+    this.students = []
     this.notification.userFilters.gradeID = 0
     this.notification.userFilters.classroomID = 0
     this.notification.userFilters.studentID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.notification.userFilters.sectionID = Number(selectedValue)
     if (this.notification.userFilters.sectionID) {
-      this.getGrade(); 
+      this.getGrade();
     }
   }
 
-  onGradeChange(event: Event) {  
-    this.classrooms = [] 
-    this.students = []   
+  onGradeChange(event: Event) {
+    this.classrooms = []
+    this.students = []
     this.notification.userFilters.classroomID = 0
     this.notification.userFilters.studentID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.notification.userFilters.gradeID = Number(selectedValue)
     if (this.notification.userFilters.gradeID) {
-      this.getClassroom(); 
+      this.getClassroom();
     }
   }
 
-  onClassroomChange(event: Event) {   
-    this.students = []    
+  onClassroomChange(event: Event) {
+    this.students = []
     this.notification.userFilters.studentID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.notification.userFilters.classroomID = Number(selectedValue)
     if (this.notification.userFilters.classroomID) {
-      this.getStudent(); 
+      this.getStudent();
     }
   }
-  
-  getDepartment(){
-    this.departments = [] 
+
+  getDepartment() {
+    this.departments = []
     this.departmentService.Get(this.DomainName).subscribe(
       data => {
         this.departments = data
       }
     )
   }
-  
-  getEmployee(){
-    this.employees = [] 
+
+  getEmployee() {
+    this.employees = []
     this.employeeService.GetByDepartmentId(this.notification.userFilters.departmentID, this.DomainName).subscribe(
       data => {
         this.employees = data
       }
     )
   }
-  
-  getSchool(){
-    this.schools = [] 
+
+  getSchool() {
+    this.schools = []
     this.schoolService.Get(this.DomainName).subscribe(
       data => {
         this.schools = data
       }
     )
   }
-  
-  getSection(){
-    this.sections = [] 
+
+  getSection() {
+    this.sections = []
     this.sectionService.GetBySchoolId(this.notification.userFilters.schoolID, this.DomainName).subscribe(
       data => {
         this.sections = data
       }
     )
   }
-  
-  getGrade(){
-    this.grades = [] 
+
+  getGrade() {
+    this.grades = []
     this.gradeService.GetBySectionId(this.notification.userFilters.sectionID, this.DomainName).subscribe(
       data => {
         this.grades = data
       }
     )
   }
-  
-  getClassroom(){
-    this.classrooms = [] 
+
+  getClassroom() {
+    this.classrooms = []
     this.classroomService.GetByGradeId(this.notification.userFilters.gradeID, this.DomainName).subscribe(
       data => {
         this.classrooms = data
       }
     )
   }
-  
-  getStudent(){
-    this.students = [] 
+
+  getStudent() {
+    this.students = []
     this.studentService.GetByClassID(this.notification.userFilters.classroomID, this.DomainName).subscribe(
       data => {
         this.students = data
@@ -464,65 +470,67 @@ onImageFileSelected(event: any) {
     )
   }
 
-Save(){
-  if(this.notification.text == '' && this.notification.link == '' && this.notification.imageFile == null){
-    this.showWarningAlert(this.translate.instant('You have to insert at least one item (Image - Text - Link)'));
-  } else{
-    this.isLoading = true;
-    this.notificationService.Add(this.notification, this.DomainName).subscribe(
-      (result: any) => {
-        this.closeModal();
-        console.log(this.selectedUserTypeId)
-        if(this.selectedUserTypeId == 0){
-          this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);;
-        }
-        else{
-          this.filterByTypeID(this.selectedUserTypeId);
-        }
-        this.showSuccessAlert(this.translate.instant('Notification created successfully'));
-      },
-      error => {
-        this.isLoading = false;
-        const errorMessage = error.error?.message || this.translate.instant('Failed to create notification');
-        this.showErrorAlert(errorMessage);
-      }
-    ); 
-  }
-}
-
-Delete(id: number) {
-  const deleteTitle = this.translate.instant('Are you sure you want to delete this notification?');
-  const confirmButton = this.translate.instant('Yes, I\'m sure');
-  const cancelButton = this.translate.instant('Cancel');
-  
-  Swal.fire({
-    title: deleteTitle,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#089B41',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: confirmButton,
-    cancelButtonText: cancelButton,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.notificationService.Delete(id, this.DomainName).subscribe(
-        (d) => {
-          if(this.selectedUserTypeId == 0){
+  Save() {
+    if (this.notification.text == '' && this.notification.link == '' && this.notification.imageFile == null) {
+      this.showWarningAlert(this.translate.instant('You have to insert at least one item (Image - Text - Link)'));
+    } else {
+      this.isLoading = true;
+      this.notificationService.Add(this.notification, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          console.log(this.selectedUserTypeId)
+          if (this.selectedUserTypeId == 0) {
             this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);;
           }
-          else{
+          else {
             this.filterByTypeID(this.selectedUserTypeId);
           }
-          this.showSuccessAlert(this.translate.instant('Notification deleted successfully'));
+          this.showSuccessAlert(this.translate.instant('Notification created successfully'));
         },
-        (error) => {
-          const errorMessage = error.error?.message || this.translate.instant('Failed to delete notification');
+        error => {
+          this.isLoading = false;
+          const errorMessage = error.error?.message || this.translate.instant('Failed to create notification');
           this.showErrorAlert(errorMessage);
         }
       );
     }
-  });  
-}
+  }
+
+  async Delete(id: number) {
+    const deleteTitle = this.translate.instant('Are you sure you want to delete this notification?');
+    const confirmButton = this.translate.instant('Yes, I\'m sure');
+    const cancelButton = this.translate.instant('Cancel');
+      
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: deleteTitle,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: confirmButton,
+      cancelButtonText: cancelButton,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.notificationService.Delete(id, this.DomainName).subscribe(
+          (d) => {
+            if (this.selectedUserTypeId == 0) {
+              this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);;
+            }
+            else {
+              this.filterByTypeID(this.selectedUserTypeId);
+            }
+            this.showSuccessAlert(this.translate.instant('Notification deleted successfully'));
+          },
+          (error) => {
+            const errorMessage = error.error?.message || this.translate.instant('Failed to delete notification');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
+    });
+  }
 
   // filterByTypeID($event: Event) {
   //   const selectedId = ($event.target as HTMLSelectElement).value; 
@@ -534,17 +542,17 @@ Delete(id: number) {
   //   )
   // }
 
-  resetPagginationData(){
-    this.CurrentPage= 1;
-    this.PageSize= 10;
-    this.TotalPages= 1;
-    this.TotalRecords= 0;
+  resetPagginationData() {
+    this.CurrentPage = 1;
+    this.PageSize = 10;
+    this.TotalPages = 1;
+    this.TotalRecords = 0;
     this.filterByTypeID(this.selectedUserTypeId);
   }
 
-  filterByTypeID(selectedUserTypeId : number) {
+  filterByTypeID(selectedUserTypeId: number) {
     this.TableData = []
-    this.notificationService.GetByUserTypeIDWithPaggination(selectedUserTypeId ,this.DomainName, this.CurrentPage, this.PageSize).subscribe(
+    this.notificationService.GetByUserTypeIDWithPaggination(selectedUserTypeId, this.DomainName, this.CurrentPage, this.PageSize).subscribe(
       (data) => {
         console.log(data)
         this.CurrentPage = data.pagination.currentPage;
@@ -582,7 +590,7 @@ Delete(id: number) {
     );
   }
 
-  ResetFilter(){
+  ResetFilter() {
     this.selectedUserTypeId = 0
     this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
 
@@ -590,10 +598,10 @@ Delete(id: number) {
 
   changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage;
-    if(this.selectedUserTypeId == 0){
+    if (this.selectedUserTypeId == 0) {
       this.getAllData(this.DomainName, this.CurrentPage, this.PageSize);
     }
-    else{
+    else {
       this.filterByTypeID(this.selectedUserTypeId);
     }
   }
@@ -638,13 +646,13 @@ Delete(id: number) {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
+
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
 }

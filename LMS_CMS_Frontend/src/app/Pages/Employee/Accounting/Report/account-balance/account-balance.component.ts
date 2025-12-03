@@ -14,7 +14,7 @@ import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../../Services/shared/delete-edit-permission.service';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
 import { LinkFile } from '../../../../../Models/Accounting/link-file';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
@@ -168,8 +168,10 @@ export class AccountBalanceComponent implements OnInit {
     this.pageNumber = 1;
   }
 
-viewReport() {
+async viewReport() {
   if (!this.toDate || !this.linkFileID) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Missing Information',
       text: 'Please select both Date and Account Type',
@@ -205,17 +207,20 @@ viewReport() {
         this.TotalRecords = response.pagination.totalRecords;
       }
     },
-    error: (error) => {
-      console.error('Error loading report:', error);
+    error: async (error) => {
+       
       this.reportData = null;
       this.showTable = true;
       this.isLoading = false;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load report data',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load report data',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     }
   });
 }
@@ -293,9 +298,11 @@ viewReport() {
     ];
   }
 
-  Print() {
+  async Print() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -340,9 +347,11 @@ viewReport() {
     }, 500);
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
     this.prepareExportData();
     if (this.cachedTableDataForPDF.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -356,6 +365,8 @@ viewReport() {
 
   async DownloadAsExcel() {
     if (!this.reportData || this.reportData.data.length === 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         title: 'No Data',
         text: 'No data available for export.',
@@ -409,7 +420,8 @@ viewReport() {
         filename: `Account_Balance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
-      console.error('Error generating Excel report:', error);
+      const Swal = await import('sweetalert2').then(m => m.default);
+      
       Swal.fire({
         title: 'Error',
         text: 'Failed to generate Excel report.',

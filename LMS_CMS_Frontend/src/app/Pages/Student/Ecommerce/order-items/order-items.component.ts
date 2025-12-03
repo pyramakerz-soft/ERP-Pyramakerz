@@ -7,24 +7,15 @@ import { TokenData } from '../../../../Models/token-data';
 import { CartService } from '../../../../Services/Student/cart.service';
 import { Cart } from '../../../../Models/Student/ECommerce/cart';
 import { OrderService } from '../../../../Services/Student/order.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { Order } from '../../../../Models/Student/ECommerce/order';  
-// import html2canvas from 'html2canvas';
-// import html2pdf from 'html2pdf.js';
-// import jsPDF from 'jspdf';
-// import { Order } from '../../../../Models/Student/ECommerce/order';   
-// import html2pdf from 'html2pdf.js';
 import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
-import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import {  Subscription } from 'rxjs';  
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
-import { LoadingService } from '../../../../Services/loading.service';
-import { LoadingOverlayComponent } from '../../../../Component/loading-overlay/loading-overlay.component';
+import { LoadingService } from '../../../../Services/loading.service'; 
 @Component({
   selector: 'app-order-items',
   standalone: true,
@@ -90,9 +81,12 @@ export class OrderItemsComponent {
   goToCart() {
     if(this.User_Data_After_Login.type == 'employee'){
       this.router.navigateByUrl("Employee/Cart")
-    } else{
+    } else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Cart")
     } 
+    else{
+      this.router.navigateByUrl("Parent/Cart")
+    }
   } 
 
   moveToOrders(){
@@ -102,9 +96,12 @@ export class OrderItemsComponent {
       } else {
         this.router.navigateByUrl("Employee/Order");
       }
-    } else{
+    } else if(this.User_Data_After_Login.type == 'student'){
       this.router.navigateByUrl("Student/Order")
     } 
+    else{
+      this.router.navigateByUrl("Parent/Order")
+    }
   }
 
   // getCartData(){
@@ -145,7 +142,9 @@ export class OrderItemsComponent {
     )
   }
 
-  CancelOrder(){
+  async CancelOrder(){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure you want to cancel this Order?',
       icon: 'warning',
@@ -172,6 +171,8 @@ export class OrderItemsComponent {
       return;
     } 
 
+    
+    // const html2canvas = (await import('html2canvas')).default;
     // html2canvas(orderElement, { scale: 2 }).then(canvas => {
     //   let imgData = canvas.toDataURL('image/png');
     //   let pdf = new jsPDF('p', 'mm', 'a4');

@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         #region Get By Doctor
         [HttpGet("GetByDoctor")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" , "parent" },
             pages: new[] { "Medical History" }
         )]
         public async Task<IActionResult> GetByDoctor()
@@ -127,7 +127,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         #region Get By ID By Doctor
         [HttpGet("GetByIdByDoctor/id")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"parent"},
             pages: new[] { "Medical History" }
         )]
         public async Task<IActionResult> GetByIdByDoctorAsync(long id)

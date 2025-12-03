@@ -9,7 +9,7 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { UpgradeStudentsService } from '../../../../Services/Employee/LMS/upgrade-students.service';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../Services/loading.service';
 
@@ -92,7 +92,9 @@ export class UpgradeStudentComponent {
     } 
   }
 
-  UpgradeStudents(){
+  async UpgradeStudents(){
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: 'Are you sure?',
       text: 'This action will upgrade students to the new academic year.',

@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -33,7 +33,7 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 
 @InitLoader()
 export class LoansComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -51,7 +51,7 @@ export class LoansComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'safeName' ,'amount'];
+  keysArray: string[] = ['id', 'employeeEnName', 'safeName', 'amount'];
 
   loan: Loans = new Loans();
 
@@ -79,8 +79,8 @@ export class LoansComponent {
     public LoansServ: LoansService,
     public SafeEmployeeServ: SafeEmployeeService,
     public EmployeeServ: EmployeeService,
-    private loadingService: LoadingService 
-  ) {}
+    private loadingService: LoadingService
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -108,74 +108,78 @@ export class LoansComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
-  this.TableData = [];
-  this.LoansServ.Get(DomainName, pageNumber, pageSize).subscribe(
-    (data) => {
-      this.CurrentPage = data.pagination.currentPage;
-      this.PageSize = data.pagination.pageSize;
-      this.TotalPages = data.pagination.totalPages;
-      this.TotalRecords = data.pagination.totalRecords;
-      this.TableData = data.data;
-    },
-    (error) => {
-      if (error.status == 404) {
-        if (this.TotalRecords != 0) {
-          let lastPage;
-          if (this.isDeleting) {
-            lastPage = (this.TotalRecords - 1) / this.PageSize;
-          } else {
-            lastPage = this.TotalRecords / this.PageSize;
-          }
-          if (lastPage >= 1) {
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
+    this.TableData = [];
+    this.LoansServ.Get(DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage;
             if (this.isDeleting) {
-              this.CurrentPage = Math.floor(lastPage);
-              this.isDeleting = false;
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
             } else {
-              this.CurrentPage = Math.ceil(lastPage);
+              lastPage = this.TotalRecords / this.PageSize;
             }
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
+              } else {
+                this.CurrentPage = Math.ceil(lastPage);
+              }
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            }
           }
+        } else {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to load loans');
+          this.showErrorAlert(errorMessage);
         }
-      } else {
-        const errorMessage = error.error?.message || this.translate.instant('Failed to load loans');
-        this.showErrorAlert(errorMessage);
       }
-    }
-  );
-}
+    );
+  }
 
   Create() {
     this.mode = 'Create';
@@ -184,7 +188,9 @@ GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title:
         this.translate.instant('Are you sure you want to') +
@@ -244,46 +250,46 @@ GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     return IsAllow;
   }
 
-CreateOREdit() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    console.log(this.loan);
-    if (this.mode == 'Create') {
-      this.LoansServ.Add(this.loan, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-          this.isLoading = false;
-          this.closeModal();
-        this.showSuccessAlert(
-          this.translate.instant('Loan') + ' ' + 
-          this.translate.instant('has been created successfully')
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      console.log(this.loan);
+      if (this.mode == 'Create') {
+        this.LoansServ.Add(this.loan, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(
+              this.translate.instant('Loan') + ' ' +
+              this.translate.instant('has been created successfully')
+            );
+          },
+          (error) => {
+            console.log(error);
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to create loan');
+            this.showErrorAlert(errorMessage);
+          }
         );
-        },
-        (error) => {
-          console.log(error);
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to create loan');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-    if (this.mode == 'Edit') {
-      this.LoansServ.Edit(this.loan, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(this.translate.instant('Loan updated successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update loan');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+      }
+      if (this.mode == 'Edit') {
+        this.LoansServ.Edit(this.loan, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(this.translate.instant('Loan updated successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update loan');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
   }
-}
 
   closeModal() {
     this.isModalVisible = false;
@@ -304,7 +310,7 @@ CreateOREdit() {
 
   getAllSaves() {
     this.safes = [];
-    this.SafeEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
+    this.SafeEmployeeServ.GetByEmployeeId(this.UserID, this.DomainName).subscribe((d) => {
       this.safes = d;
       console.log(this.safes);
     });
@@ -331,28 +337,28 @@ CreateOREdit() {
     }
   }
 
-isFormValid(): boolean {
-  let isValid = true;
-  for (const key in this.loan) {
-    if (this.loan.hasOwnProperty(key)) {
-      const field = key as keyof Loans;
-      if (!this.loan[field]) {
-        if (
-          field == 'date' ||
-          field == 'deductionStartMonth' ||
-          field == 'safeID' ||
-          field == 'employeeID' ||
-          field == 'numberOfDeduction' ||
-          field == 'amount'
-        ) {
-          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
-          isValid = false;
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.loan) {
+      if (this.loan.hasOwnProperty(key)) {
+        const field = key as keyof Loans;
+        if (!this.loan[field]) {
+          if (
+            field == 'date' ||
+            field == 'deductionStartMonth' ||
+            field == 'safeID' ||
+            field == 'employeeID' ||
+            field == 'numberOfDeduction' ||
+            field == 'amount'
+          ) {
+            this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
+            isValid = false;
+          }
         }
       }
     }
+    return isValid;
   }
-  return isValid;
-}
   capitalizeField(field: keyof Loans): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -365,7 +371,7 @@ isFormValid(): boolean {
     }
   }
 
-get displayStartMonth(): string {
+  get displayStartMonth(): string {
     if (this.loan.deductionStartYear && this.loan.deductionStartMonth) {
       return `${this.loan.deductionStartYear}-${this.loan.deductionStartMonth.toString().padStart(2, '0')}`;
     }

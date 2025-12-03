@@ -1,19 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
-import * as XLSX from 'xlsx';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import { MedalStudentReportItem } from '../../../../../Models/LMS/student-medal';
+import { TranslateModule } from '@ngx-translate/core'; 
+import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component'; 
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { ApiService } from '../../../../../Services/api.service';
-import { LanguageService } from '../../../../../Services/shared/language.service';
-import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-import Swal from 'sweetalert2';
+import { LanguageService } from '../../../../../Services/shared/language.service'; 
+// import Swal from 'sweetalert2';
 import { SocialWorkerMedalStudentService } from '../../../../../Services/Employee/SocialWorker/social-worker-medal-student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { ActivatedRoute } from '@angular/router';
@@ -199,6 +196,8 @@ export class StudentMedalReportComponent implements OnInit {
   }
 
   async viewReport() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if(this.reportType == 'employee'){
       if (!this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId) {
         Swal.fire({
@@ -229,9 +228,7 @@ export class StudentMedalReportComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
         this.medalReportService.GetByStudentID(this.selectedStudentId,domainName)
-      );
-
-      console.log('API Response:', response);
+      ); 
       
       if (Array.isArray(response)) {
         this.medalReports = response;
@@ -349,7 +346,9 @@ private prepareExportData(): void {
     }
   }
 
-  DownloadAsPDF() {
+  async DownloadAsPDF() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
@@ -362,7 +361,9 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  Print() {
+  async Print() {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
@@ -412,6 +413,8 @@ private prepareExportData(): void {
   }
 
 async exportExcel() {
+  const Swal = await import('sweetalert2').then(m => m.default);
+
   if (this.reportsForExcel.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');
     return;

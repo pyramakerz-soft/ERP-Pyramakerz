@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Employee } from '../../../../Models/Employee/employee';
 import { Bonus } from '../../../../Models/HR/bonus';
@@ -53,7 +53,7 @@ export class DeductionComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'employeeEnName' ,'deductionTypeName'];
+  keysArray: string[] = ['id', 'employeeEnName', 'deductionTypeName'];
 
   deduction: Deduction = new Deduction();
 
@@ -61,7 +61,7 @@ export class DeductionComponent {
   isLoading = false;
 
   employees: Employee[] = [];
-  SelectedEmployee: Employee= new Employee();
+  SelectedEmployee: Employee = new Employee();
   deductionType: DeductionType[] = [];
   CurrentPage: number = 1
   PageSize: number = 10
@@ -82,7 +82,7 @@ export class DeductionComponent {
     public DeductionTypeServ: DeductionTypeService,
     private translate: TranslateService,
     public EmployeeServ: EmployeeService,
-    private loadingService: LoadingService 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -109,7 +109,7 @@ export class DeductionComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -157,7 +157,9 @@ export class DeductionComponent {
     this.openModal();
   }
 
-  Delete(id: number) {
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Deduction') + this.translate.instant('?'),
       icon: 'warning',
@@ -201,10 +203,12 @@ export class DeductionComponent {
     return IsAllow;
   }
 
-  CreateOREdit() {
+  async CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.deduction)
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       if (this.mode == 'Create') {
         this.DeductionServ.Add(this.deduction, this.DomainName).subscribe(
           (d) => {
@@ -293,59 +297,59 @@ export class DeductionComponent {
       }
     }
     if (field == 'minutes') {
-      if (this.deduction.minutes &&this.deduction.minutes > 60) {
+      if (this.deduction.minutes && this.deduction.minutes > 60) {
         this.deduction.minutes = 0
       }
     }
   }
 
-isFormValid(): boolean {
-  this.SelectedEmployee = this.employees.find(e => e.id == this.deduction.employeeID) || new Employee();
-  
-  let isValid = true;
-  
-  // Basic field validation
-  for (const key in this.deduction) {
-    if (this.deduction.hasOwnProperty(key)) {
-      const field = key as keyof Deduction;
-      if (!this.deduction[field]) {
-        if (
-          field == 'date' ||
-          field == 'deductionTypeID' ||
-          field == 'employeeID'
-        ) {
-          this.validationErrors[field] = this.getRequiredErrorMessage(
-            this.capitalizeField(field)
-          );
-          isValid = false;
+  isFormValid(): boolean {
+    this.SelectedEmployee = this.employees.find(e => e.id == this.deduction.employeeID) || new Employee();
+
+    let isValid = true;
+
+    // Basic field validation
+    for (const key in this.deduction) {
+      if (this.deduction.hasOwnProperty(key)) {
+        const field = key as keyof Deduction;
+        if (!this.deduction[field]) {
+          if (
+            field == 'date' ||
+            field == 'deductionTypeID' ||
+            field == 'employeeID'
+          ) {
+            this.validationErrors[field] = this.getRequiredErrorMessage(
+              this.capitalizeField(field)
+            );
+            isValid = false;
+          }
         }
       }
     }
-  }
 
-  // Business logic validations
-  if (this.SelectedEmployee.hasAttendance != true && (this.deduction.deductionTypeID == 1 || this.deduction.deductionTypeID == 2)) {
-    isValid = false;
-    this.validationErrors['deductionTypeID'] = this.translate.instant('This Employee Has No Attendance so should take deduction by amount only');
-  }
+    // Business logic validations
+    if (this.SelectedEmployee.hasAttendance != true && (this.deduction.deductionTypeID == 1 || this.deduction.deductionTypeID == 2)) {
+      isValid = false;
+      this.validationErrors['deductionTypeID'] = this.translate.instant('This Employee Has No Attendance so should take deduction by amount only');
+    }
 
-  if (this.deduction.deductionTypeID == 3 && (this.deduction.amount == 0 || this.deduction.amount == null)) {
-    isValid = false;
-    this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
-  }
+    if (this.deduction.deductionTypeID == 3 && (this.deduction.amount == 0 || this.deduction.amount == null)) {
+      isValid = false;
+      this.validationErrors['amount'] = this.getRequiredErrorMessage('amount');
+    }
 
-  if (this.deduction.deductionTypeID == 2 && (this.deduction.numberOfDeductionDays == 0 || this.deduction.numberOfDeductionDays == null)) {
-    isValid = false;
-    this.validationErrors['numberOfDeductionDays'] = this.getRequiredErrorMessage('number Of Deduction Days');
-  }
+    if (this.deduction.deductionTypeID == 2 && (this.deduction.numberOfDeductionDays == 0 || this.deduction.numberOfDeductionDays == null)) {
+      isValid = false;
+      this.validationErrors['numberOfDeductionDays'] = this.getRequiredErrorMessage('number Of Deduction Days');
+    }
 
-  if (this.deduction.deductionTypeID == 1 && (this.deduction.minutes == 0 || this.deduction.minutes == null) &&(this.deduction.hours == 0 || this.deduction.hours == null)) {
-    isValid = false;
-    this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
-  }
+    if (this.deduction.deductionTypeID == 1 && (this.deduction.minutes == 0 || this.deduction.minutes == null) && (this.deduction.hours == 0 || this.deduction.hours == null)) {
+      isValid = false;
+      this.validationErrors['hours'] = this.getRequiredErrorMessage('hours');
+    }
 
-  return isValid;
-}
+    return isValid;
+  }
 
   capitalizeField(field: keyof Deduction): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -437,40 +441,40 @@ isFormValid(): boolean {
   }
 
   private getRequiredErrorMessage(fieldName: string): string {
-  const fieldTranslated = this.translate.instant(fieldName);
-  const requiredTranslated = this.translate.instant('Is Required');
-  
-  if (this.isRtl) {
-    return `${requiredTranslated} ${fieldTranslated}`;
-  } else {
-    return `${fieldTranslated} ${requiredTranslated}`;
-  }
-}
+    const fieldTranslated = this.translate.instant(fieldName);
+    const requiredTranslated = this.translate.instant('Is Required');
 
-getDeductionDisplayValue(deduction: any): string {
-  if (!deduction) return '-';
-  
-  const deductionTypeID = deduction.deductionTypeID;
-  
-  switch (deductionTypeID) {
-    case 1: // Hours
-      const hours = deduction.hours || 0;
-      const minutes = deduction.minutes || 0;
-      // Format hours and minutes with leading zeros
-      const formattedHours = hours.toString().padStart(2, '0');
-      const formattedMinutes = minutes.toString().padStart(2, '0');
-      return `${formattedHours}:H ${formattedMinutes}:M`;
-      
-    case 2: // Day
-      const days = deduction.numberOfDeductionDays || 0;
-      return days == 1 ? '1 day' : `${days} days`;
-      
-    case 3: // Amount
-      const amount = deduction.amount || 0;
-      return `${amount}`;
-      
-    default:
-      return '-';
+    if (this.isRtl) {
+      return `${requiredTranslated} ${fieldTranslated}`;
+    } else {
+      return `${fieldTranslated} ${requiredTranslated}`;
+    }
   }
-}
+
+  getDeductionDisplayValue(deduction: any): string {
+    if (!deduction) return '-';
+
+    const deductionTypeID = deduction.deductionTypeID;
+
+    switch (deductionTypeID) {
+      case 1: // Hours
+        const hours = deduction.hours || 0;
+        const minutes = deduction.minutes || 0;
+        // Format hours and minutes with leading zeros
+        const formattedHours = hours.toString().padStart(2, '0');
+        const formattedMinutes = minutes.toString().padStart(2, '0');
+        return `${formattedHours}:H ${formattedMinutes}:M`;
+
+      case 2: // Day
+        const days = deduction.numberOfDeductionDays || 0;
+        return days == 1 ? '1 day' : `${days} days`;
+
+      case 3: // Amount
+        const amount = deduction.amount || 0;
+        return `${amount}`;
+
+      default:
+        return '-';
+    }
+  }
 }

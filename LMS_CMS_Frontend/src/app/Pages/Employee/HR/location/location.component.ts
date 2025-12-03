@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -15,7 +15,6 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import 'leaflet-control-geocoder';
 import * as L from 'leaflet';
 import { LoadingService } from '../../../../Services/loading.service';
@@ -71,7 +70,7 @@ export class LocationComponent {
     public ApiServ: ApiService,
     private translate: TranslateService,
     public LocationServ: LocationService,
-    private loadingService: LoadingService 
+    private loadingService: LoadingService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -100,37 +99,41 @@ export class LocationComponent {
     );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-private showErrorAlert(errorMessage: string) {
-  const translatedTitle = this.translate.instant('Error');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'error',
-    title: translatedTitle,
-    text: errorMessage,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+  private async showErrorAlert(errorMessage: string) {
+    const translatedTitle = this.translate.instant('Error');
+    const translatedButton = this.translate.instant('Okay');
 
-private showSuccessAlert(message: string) {
-  const translatedTitle = this.translate.instant('Success');
-  const translatedButton = this.translate.instant('Okay');
-  
-  Swal.fire({
-    icon: 'success',
-    title: translatedTitle,
-    text: message,
-    confirmButtonText: translatedButton,
-    customClass: { confirmButton: 'secondaryBg' },
-  });
-}
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'error',
+      title: translatedTitle,
+      text: errorMessage,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
+
+  private async showSuccessAlert(message: string) {
+    const translatedTitle = this.translate.instant('Success');
+    const translatedButton = this.translate.instant('Okay');
+
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      icon: 'success',
+      title: translatedTitle,
+      text: message,
+      confirmButtonText: translatedButton,
+      customClass: { confirmButton: 'secondaryBg' },
+    });
+  }
 
   GetAllData() {
     this.TableData = [];
@@ -146,9 +149,11 @@ private showSuccessAlert(message: string) {
     this.openModal();
   }
 
-  Delete(id: number) {
-     Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Location') + this.translate.instant('?'),
+  async Delete(id: number) {
+    const Swal = await import('sweetalert2').then(m => m.default);
+
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Location') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -164,7 +169,9 @@ private showSuccessAlert(message: string) {
     });
   }
 
-  Edit(id: number) {
+  async Edit(id: number) {
+    // const L = await import('leaflet');
+
     this.mode = 'Edit';
     this.LocationServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.location = d;
@@ -176,10 +183,10 @@ private showSuccessAlert(message: string) {
             this.location.latitude,
             this.location.longitude
           );
-          if(this.location.zoom){
+          if (this.location.zoom) {
             this.map.setView(latlng, this.location.zoom); // center map
           }
-          else{
+          else {
             this.map.setView(latlng, 13); // center map
           }
           this.marker.setLatLng(latlng); // move marker
@@ -206,41 +213,41 @@ private showSuccessAlert(message: string) {
     return IsAllow;
   }
 
-CreateOREdit() {
-  if (this.isFormValid()) {
-    this.isLoading = true;
-    if (this.mode == 'Create') {
-      this.LocationServ.Add(this.location, this.DomainName).subscribe(
-        (d) => {
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-          this.showSuccessAlert(this.translate.instant('Location created successfully'));
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to create location');
-          this.showErrorAlert(errorMessage);
-        }
-      );
-    }
-    if (this.mode == 'Edit') {
-      this.LocationServ.Edit(this.location, this.DomainName).subscribe(
-        (d) => {
-          this.showSuccessAlert(this.translate.instant('Location updated successfully'));
-          this.GetAllData();
-          this.isLoading = false;
-          this.closeModal();
-        },
-        (error) => {
-          this.isLoading = false;
-          const errorMessage = error.error?.message || this.translate.instant('Failed to update location');
-          this.showErrorAlert(errorMessage);
-        }
-      );
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.mode == 'Create') {
+        this.LocationServ.Add(this.location, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(this.translate.instant('Location created successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to create location');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.LocationServ.Edit(this.location, this.DomainName).subscribe(
+          (d) => {
+            this.showSuccessAlert(this.translate.instant('Location updated successfully'));
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.message || this.translate.instant('Failed to update location');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
   }
-}
 
   validateNumber(event: any, field: keyof Location): void {
     const value = event.target.value;
@@ -275,8 +282,8 @@ CreateOREdit() {
         const field = key as keyof Location;
         if (!this.location[field]) {
           if (field == 'name' || field == 'latitude' || field == 'longitude' || field == 'range') {
-          this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
-          isValid = false;
+            this.validationErrors[field] = `${this.translate.instant(field)} ${this.translate.instant('Field is required')} `;
+            isValid = false;
           }
         }
       }
@@ -330,7 +337,8 @@ CreateOREdit() {
     this.initMap();
   }
 
-  private initMap(): void {
+  private async initMap(): Promise<void> {
+    // const L = await import('leaflet');
 
     // Create map
     this.map = L.map('map').setView([30.0444, 31.2357], 13);
@@ -384,7 +392,9 @@ CreateOREdit() {
   }
 
   /** Called when latitude or longitude inputs change */
-  onLatLngChange(): void {
+  async onLatLngChange(): Promise<void> {
+    // const L = await import('leaflet');
+
     if (this.location.latitude && this.location.longitude) {
       const latlng = L.latLng(this.location.latitude, this.location.longitude);
       this.marker.setLatLng(latlng);
@@ -399,7 +409,9 @@ CreateOREdit() {
   }
 
   /** Draw / update circle */
-  updateCircle(): void {
+  async updateCircle(): Promise<void> {
+    // const L = await import('leaflet');
+
     if (this.circle) {
       this.map.removeLayer(this.circle);
     }

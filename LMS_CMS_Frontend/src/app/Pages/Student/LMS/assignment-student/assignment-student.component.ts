@@ -16,7 +16,7 @@ import { Assignment } from '../../../../Models/LMS/assignment';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
@@ -213,13 +213,15 @@ export class AssignmentStudentComponent {
     this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
   }
 
-  Submit() {
+  async Submit() {
     if (!this.isFormValid()) return;
     this.isLoading = true;
     const isTextbook = this.assignment.assignmentTypeID === 1;
     const submitObservable = isTextbook
       ? this.assignmentStudentServ.AddWhenTextBookAssignment(this.assignmentStudent, this.DomainName)
       : this.assignmentStudentServ.Add(this.assignmentStudent, this.DomainName);
+
+    const Swal = await import('sweetalert2').then(m => m.default);
 
     submitObservable.subscribe({
       next: () => {

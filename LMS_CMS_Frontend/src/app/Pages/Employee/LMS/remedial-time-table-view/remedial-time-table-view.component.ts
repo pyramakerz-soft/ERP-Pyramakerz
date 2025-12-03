@@ -19,7 +19,7 @@ import { RemedialClassroomService } from '../../../../Services/Employee/LMS/reme
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { RemedialTimeTableDay } from '../../../../Models/LMS/remedial-time-table-day';
 import { RemedialTimeTableClasses } from '../../../../Models/LMS/remedial-time-table-classes';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import { RemedialTimeTableClassesService } from '../../../../Services/Employee/LMS/remedial-time-table-classes.service';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
@@ -173,7 +173,7 @@ export class RemedialTimeTableViewComponent {
     });
   }
 
-  onDrop(event: CdkDragDrop<any[]>, period: RemedialTimeTableDay) {
+  async onDrop(event: CdkDragDrop<any[]>, period: RemedialTimeTableDay) {
     if (event.previousContainer === event.container) return;
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
@@ -183,6 +183,8 @@ export class RemedialTimeTableViewComponent {
     }
     const IsThisTeacherBeasy = period.remedialTimeTableClasses.find(s => s.teacherID == draggedItem.teacherID)
     if (IsThisTeacherBeasy != null) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -244,11 +246,14 @@ export class RemedialTimeTableViewComponent {
     }
   }
 
-  Save() {
+  async Save() {
     if (this.DeletedRemedialTimeTableClasses.length > 0) {
       this.RemedialTimeTableClassesServ.Delete(this.DeletedRemedialTimeTableClasses, this.DomainName).subscribe((d) => {
       })
     }
+    
+    const Swal = await import('sweetalert2').then(m => m.default);
+
     this.RemedialTimeTableServ.Edit(this.NewremedialTimeTableClasses, this.DomainName).subscribe((d) => {
       Swal.fire({
         icon: 'success',

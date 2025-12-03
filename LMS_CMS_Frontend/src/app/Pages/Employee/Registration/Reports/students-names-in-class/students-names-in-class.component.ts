@@ -19,14 +19,14 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { LoadingService } from '../../../../../Services/loading.service';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, TranslateModule],
   templateUrl: './students-names-in-class.component.html',
   styleUrl: './students-names-in-class.component.css'
 })
@@ -74,7 +74,7 @@ export class StudentsNamesInClassComponent {
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
     public reportsService: ReportsService,
-    private loadingService: LoadingService 
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -85,13 +85,13 @@ export class StudentsNamesInClassComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getSchool()
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -218,7 +218,7 @@ export class StudentsNamesInClassComponent {
         console.error("Element not found!");
         return;
       }
-  
+
       // Create a print-specific stylesheet
       const printStyle = `
         <style>
@@ -245,16 +245,16 @@ export class StudentsNamesInClassComponent {
           }
         </style>
       `;
-  
+
       // Create a container for printing
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-  
+
       // Add to body and print
       document.body.appendChild(printContainer);
       window.print();
-      
+
       // Clean up
       setTimeout(() => {
         document.body.removeChild(printContainer);
@@ -264,22 +264,22 @@ export class StudentsNamesInClassComponent {
   }
 
   preparePDFData(): any[] {
-  return this.StudentData.map((student) => ({
-    'ID': student.id,
-    'Name': student.en_name,
-    // 'Mobile': student.mobile,
-    'Nationality': student.nationalityEnName,
-    'Gender': student.genderName
-  }));
-}
+    return this.StudentData.map((student) => ({
+      'ID': student.id,
+      'Name': student.en_name,
+      // 'Mobile': student.mobile,
+      'Nationality': student.nationalityEnName,
+      'Gender': student.genderName
+    }));
+  }
 
-DownloadAsPDF() {
-  this.showPDF = true;
-  setTimeout(() => {
-    this.pdfComponentRef.downloadPDF();
-    setTimeout(() => this.showPDF = false, 2000);
-  }, 500);
-}
+  DownloadAsPDF() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => this.showPDF = false, 2000);
+    }, 500);
+  }
 
   async DownloadAsExcel() {
     await this.reportsService.generateExcelReport({
@@ -312,15 +312,15 @@ DownloadAsPDF() {
     });
   }
 
-inforows() {
-  return [
-          { keyEn: 'Class : ' + (this.class?.name || this.Classrooms.find(c => c.id == this.ClassId)?.name || '')},
-          { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
-          { keyEn: 'School : ' + (this.school?.name || this.Schools.find(s => s.id == this.SchoolId)?.name || '') },
-          { keyEn: 'Year : ' + this.AcademicYearName },
-          { keyEn: 'Grade : ' + this.GradeName },
-          { keyEn: 'Generated On : ' + (this.date || this.formatDate(new Date().toISOString(), this.direction)) },
+  inforows() {
+    return [
+      { keyEn: 'Class : ' + (this.class?.name || this.Classrooms.find(c => c.id == this.ClassId)?.name || '') },
+      { keyEn: 'Number of Students : ' + this.studentsCount.toString() },
+      { keyEn: 'School : ' + (this.school?.name || this.Schools.find(s => s.id == this.SchoolId)?.name || '') },
+      { keyEn: 'Year : ' + this.AcademicYearName },
+      { keyEn: 'Grade : ' + this.GradeName },
+      { keyEn: 'Generated On : ' + (this.date || this.formatDate(new Date().toISOString(), this.direction)) },
 
-      ];
-    }
+    ];
+  }
 }
