@@ -159,7 +159,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                 return BadRequest("Octa cannot be null");
             }
 
-            LMS_CMS_DAL.Models.Octa.Octa octaExists = _Unit_Of_Work.octa_Repository.First_Or_Default_Octa(b => b.ID == editedAcc.Id && b.IsDeleted != true);
+            LMS_CMS_DAL.Models.Octa.Octa octaExists = _Unit_Of_Work.octa_Repository.First_Or_Default_Octa(b => b.ID == userId && b.IsDeleted != true);
             if (octaExists == null || octaExists.IsDeleted == true)
             {
                 return NotFound("No Octa with this ID");

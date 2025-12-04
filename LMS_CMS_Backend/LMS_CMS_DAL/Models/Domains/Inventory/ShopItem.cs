@@ -41,14 +41,14 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public long InventorySubCategoriesID { get; set; }
 
         [ForeignKey("School")]
-        public long SchoolID { get; set; }
+        public long? SchoolID { get; set; }
         
         [ForeignKey("Grade")]
         public long? GradeID { get; set; }
 
         public Gender? Gender { get; set; }
         public InventorySubCategories InventorySubCategories { get; set; }
-        public School School { get; set; }
+        public School? School { get; set; }
         public Grade? Grade { get; set; }
 
         public ICollection<InventoryDetails> InventoryDetails { get; set; } = new HashSet<InventoryDetails>();
