@@ -1422,5 +1422,9 @@
   "Conduct Report" : "تقرير السلوك",
   "Conduct Types": "أنواع السلوك",
   "Procedure Types" : "أنواع الإجراءات",
-  "Login" : "تسجيل الدخول"
+  "Login" : "تسجيل الدخول",
+  "Student Certificate" : "شهادة الطالب",
+  "Student Issue Report" : "تقرير مشكلة الطالب",
+  "Certificate Name" : "أسم الشهادة",
+  "Late Time(minutes)" : "الوقت المتأخر (بالدقائق)"
 }

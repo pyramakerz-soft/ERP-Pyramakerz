@@ -1297,7 +1297,8 @@ namespace LMS_CMS_BL.Config
 
             // New mapping for StudentIssueReportDTO
             CreateMap<StudentIssue, StudentIssueReportDTO>()
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name ?? src.Student.ar_name))
+                .ForMember(dest => dest.studentEnName, opt => opt.MapFrom(src => src.Student.en_name ))
+                .ForMember(dest => dest.studentArName, opt => opt.MapFrom(src => src.Student.ar_name))
                 .ForMember(dest => dest.IssuesType, opt => opt.MapFrom(src => new IssuesTypeDTO
                 {
                     ID = src.IssuesType.ID,
@@ -1368,7 +1369,8 @@ namespace LMS_CMS_BL.Config
             // New mapping for AttendanceReportDTO
             CreateMap<AttendanceStudent, AttendanceReportDTO>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Attendance.Date))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name ?? src.Student.ar_name))
+                .ForMember(dest => dest.studentEnName, opt => opt.MapFrom(src => src.Student.en_name ))
+                .ForMember(dest => dest.studentArName , opt => opt.MapFrom(src => src.Student.ar_name))
                 .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.Note));
             //--77
 
