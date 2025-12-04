@@ -559,9 +559,6 @@ export class StockingDetailsComponent {
           this.StockingDetailsServ.Delete(element.id,this.DomainName).subscribe((d) => { });
         });
         this.Data.stockingDetails = this.TableData;
-        // this.StockingDetailsServ.Edit(this.Data.stockingDetails,this.DomainName).subscribe((d) => { });
-        // this.StockingDetailsServ.Add(this.Data.newDetailsWhenEdit,this.DomainName).subscribe((d) => { },(error) => { });
-        console.log(this.Data)
         this.StockingServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
             Swal.fire({
@@ -607,11 +604,9 @@ export class StockingDetailsComponent {
       }).then((result) => {
         if (result.isConfirmed) {
           if (!this.Data.newDetailsWhenEdit || this.Data.newDetailsWhenEdit.length==0 || (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&!this.Data.newDetailsWhenEdit.find((s) => s.id == row.id))) {
-            this.StockingDetailsServ.Delete(row.id, this.DomainName).subscribe(
-              async (D) => {
-                await this.GetTableDataByID();
-              }
-            );
+            this.TableData = this.TableData.filter((s) => s.id != row.id);
+            this.Data.deletedStockingDetails = this.Data.deletedStockingDetails || []
+            this.Data.deletedStockingDetails.push(row.id)
           } else if (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&this.Data.newDetailsWhenEdit.find((s) => s.id == row.id)) {
             this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
               (s) => s.id != row.id

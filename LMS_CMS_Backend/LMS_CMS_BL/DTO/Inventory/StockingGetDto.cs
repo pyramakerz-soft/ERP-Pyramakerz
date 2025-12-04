@@ -22,5 +22,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? SchoolPCName { get; set; }
         public List<StockingDetailsGetDto>? UpdatedStockingDetails { get; set; }
         public List<StockingDetailsGetDto>? NewDetailsWhenEdit { get; set; }
+        public List<long>? DeletedStockingDetails { get; set; }
     } 
 }

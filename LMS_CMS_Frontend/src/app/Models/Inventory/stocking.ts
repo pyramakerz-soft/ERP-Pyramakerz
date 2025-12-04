@@ -15,6 +15,7 @@ export class Stocking {
         public stockingDetails: StockingDetails[] = [],
         public newDetailsWhenEdit: StockingDetails[] = [],
         public updatedStockingDetails: StockingDetails[] = [],
+        public deletedStockingDetails: number[] = [],
         public insertedAt: string = "",
         public insertedByUserId: number = 0,
     ) { }
