@@ -264,6 +264,7 @@ export class StockingDetailsComponent {
   }
 
   selectCategory(categoryId: number) {
+    this.ShopItems = [];
     this.GetSubCategories(categoryId);
     this.SelectedCategoryId = categoryId;
     if (this.AllItems) {
@@ -272,12 +273,7 @@ export class StockingDetailsComponent {
   }
 
   GetAllShopItems(categoryId: number) {
-    this.StockingDetailsServ.GetCurrentStockForAllItems(
-      this.Data.storeID,
-      categoryId,
-      this.Data.date,
-      this.DomainName
-    ).subscribe((d) => {
+    this.StockingDetailsServ.GetCurrentStockForAllItems(this.Data.storeID,categoryId,this.Data.date,this.DomainName).subscribe((d) => {
       this.ShopItems = d;
       this.FilteredDetails = this.ShopItems.map((item) => ({
         id: Date.now() + Math.floor(Math.random() * 1000),

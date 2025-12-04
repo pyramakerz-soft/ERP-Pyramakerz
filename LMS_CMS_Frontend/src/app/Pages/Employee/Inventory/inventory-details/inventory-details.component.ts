@@ -117,7 +117,7 @@ export class InventoryDetailsComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
   TableData: InventoryDetails[] = [];
-  NewDetailsWhenEdit: InventoryDetails[] = [];
+  // NewDetailsWhenEdit: InventoryDetails[] = [];
   Item: InventoryDetails = new InventoryDetails();
   ShopItem: ShopItem = new ShopItem();
   MasterId: number = 0;
@@ -656,16 +656,13 @@ export class InventoryDetailsComponent {
         );
       }
       if (this.mode == 'Edit') {
-        this.Data.inventoryDetails = this.TableData;
-        this.salesItemServ
-          .Edit(this.Data.inventoryDetails, this.DomainName)
-          .subscribe(
+        this.Data.inventoryDetails = this.TableData ?? [];
+        this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit ?? [];
+        this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe(
             (d) => {},
             (error) => {}
           );
-        this.salesItemServ
-          .Add(this.NewDetailsWhenEdit, this.DomainName)
-          .subscribe(
+        this.salesItemServ.Add(this.Data.newDetailsWhenEdit, this.DomainName).subscribe(
             (d) => {},
             (error) => {}
           );
@@ -751,16 +748,16 @@ export class InventoryDetailsComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         if (this.mode == 'Edit') {
-          if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
-            this.salesItemServ
-              .Delete(row.id, this.DomainName)
-              .subscribe(async (D) => {
-                // await this.GetTableDataByID();
-                this.TableData = this.TableData.filter((s) => s.id != row.id);
-                this.TotalandRemainingCalculate();
-              });
+          if (!this.Data.newDetailsWhenEdit || !this.Data.newDetailsWhenEdit.find((s) => s.id == row.id)) {
+            this.TableData = this.TableData.filter((s) => s.id != row.id);
+            this.Data.deletedInventoryDetails = this.Data.deletedInventoryDetails || []
+            this.Data.deletedInventoryDetails.push(row.id);
+            this.TotalandRemainingCalculate();
+            // this.salesItemServ.Delete(row.id, this.DomainName).subscribe(async (D) => {
+            // });
+
           } else {
-            this.NewDetailsWhenEdit = this.NewDetailsWhenEdit.filter(
+            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
               (s) => s.id != row.id
             );
             this.TableData = this.TableData.filter((s) => s.id != row.id);
@@ -805,10 +802,10 @@ export class InventoryDetailsComponent {
     }
     if (this.mode === 'Edit') {
       this.Item.inventoryMasterId = this.MasterId;
-      if (!this.NewDetailsWhenEdit) {
-        this.NewDetailsWhenEdit = [];
+      if (!this.Data.newDetailsWhenEdit) {
+        this.Data.newDetailsWhenEdit = [];
       }
-      this.NewDetailsWhenEdit.push(this.Item);
+      this.Data.newDetailsWhenEdit.push(this.Item);
       this.TableData.push(this.Item);
     }
     this.TotalandRemainingCalculate();
@@ -1383,7 +1380,7 @@ export class InventoryDetailsComponent {
             this.Data.inventoryDetails.push(detail);
           } else if (this.mode == 'Edit') {
             this.TableData.push(detail);
-            this.NewDetailsWhenEdit.push(detail);
+            this.Data.newDetailsWhenEdit.push(detail);
           }
           this.TotalandRemainingCalculate();
           this.BarCode = '';
@@ -1466,27 +1463,51 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
-    const value = event.target.value;
-    const numValue = Number(value);
+  // validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
+  //   const value = event.target.value;
+  //   const numValue = Number(value);
 
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof row[field] === 'string') {
-        row[field] = '' as never;
-      }
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     if (typeof row[field] === 'string') {
+  //       row[field] = '' as never;
+  //     }
+  //   }
+
+  //   if (field === 'quantity') {
+  //     let value = event.target.value;
+  //     value = value.replace(/[^0-9]/g, '');
+  //     event.target.value = value;
+  //     if (isNaN(value) || value === '') {
+  //       event.target.value = '';
+  //       if (typeof row[field] === 'string') {
+  //         row[field] = '' as never;
+  //       }
+  //     }
+  //     return;
+  //   }
+  // }
+
+  validateNumberRow(event: any, field: keyof InventoryDetails, row: InventoryDetails): void {
+    let value = event.target.value;
+
+    // PRICE → allow decimals only
+    if (field === 'price') {
+      value = value.replace(/[^0-9.]/g, '');  // remove minus & anything else
+      event.target.value = value;
+      row[field] = value ? Number(value) : 0;
+
+      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
+      return;
     }
 
+    // QUANTITY → digits only
     if (field === 'quantity') {
-      let value = event.target.value;
       value = value.replace(/[^0-9]/g, '');
       event.target.value = value;
-      if (isNaN(value) || value === '') {
-        event.target.value = '';
-        if (typeof row[field] === 'string') {
-          row[field] = '' as never;
-        }
-      }
+      row[field] = value ? Number(value) : 0;
+
+      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
       return;
     }
   }
