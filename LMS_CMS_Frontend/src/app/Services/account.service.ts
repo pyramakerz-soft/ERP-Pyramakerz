@@ -58,6 +58,18 @@ export class AccountService {
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Account/EditPass`, editpass, { headers });
   }
+ 
+  EditPasswordByToken(editpass: EditPass, DomainName?: string) { // view 
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Account/EditPasswordByToken`, editpass, { headers });
+  }
 
   Get_Data_Form_Token(isFromLogin?:boolean){
     let User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")

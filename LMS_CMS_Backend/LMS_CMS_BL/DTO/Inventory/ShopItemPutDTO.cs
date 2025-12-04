@@ -26,7 +26,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public bool AvailableInShop { get; set; }
         public long? GenderID { get; set; }
         public long InventorySubCategoriesID { get; set; }
-        public long SchoolID { get; set; }
+        public long? SchoolID { get; set; }
         public long? GradeID { get; set; }
         public IFormFile? MainImageFile { get; set; }
         public IFormFile? OtherImageFile { get; set; }

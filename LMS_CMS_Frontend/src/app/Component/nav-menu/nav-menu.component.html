@@ -355,7 +355,7 @@
             </div>  -->
             <div class="flex flex-col w-full mb-4"> 
                 <label class="primaryTxt mb-2 font-medium" for="Password"> {{ 'Password' | translate }}</label>
-                <input id="Password" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }}  {{ 'the password' | translate }}"
+                <input id="Password" type="password" autocomplete="new-password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'the password' | translate }}"
                 (input)="onPasswordChange()" [(ngModel)]="password"/>
                 <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
             </div> 

@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
+        public string ArabicName { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }
