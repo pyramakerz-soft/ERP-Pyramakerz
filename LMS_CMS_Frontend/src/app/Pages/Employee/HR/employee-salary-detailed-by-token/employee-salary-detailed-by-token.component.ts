@@ -165,33 +165,33 @@ export class EmployeeSalaryDetailedByTokenComponent {
     }, 500);
   }
 
-async getPDFData() {
-  // Build rows for each subject
-  this.tableDataForPDF = this.monthlyAttendenc.map(d => {
-    const row: Record<string, string> = {};
-    row['Day'] = d.day.toString();
-    row['Day Status'] = d.dayStatusName;
-    row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
-    row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
-    row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
-    row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
-    return row;
-  });
+  async getPDFData() {
+    // Build rows for each subject
+    this.tableDataForPDF = this.monthlyAttendenc.map(d => {
+      const row: Record<string, string> = {};
+      row['Day'] = d.day.toString();
+      row['Day Status'] = d.dayStatusName;
+      row['Total Working Hours'] = d.workingHours + ':' + d.workingMinutes;
+      row['Leave Request in Hours'] = d.leaveRequestHours + ':' + d.leaveRequestMinutes;
+      row['Overtime in Hours'] = d.overtimeHours + ':' + d.overtimeMinutes;
+      row['Deduction in Hours'] = d.deductionHours + ':' + d.deductionMinutes;
+      return row;
+    });
 
-  // Add total row (empty for first three columns, totals for last three)
-  const totalRow: Record<string, string> = {
-    'Day': 'Total',
-    'Day Status': '',
-    'Total Working Hours': '',
-    'Leave Request in Hours': this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
-    'Overtime in Hours': this.getTotal('overtimeHours', 'overtimeMinutes'),
-    'Deduction in Hours': this.getTotal('deductionHours', 'deductionMinutes')
-  };
-  
-  this.tableDataForPDF.push(totalRow);
+    // Add total row (empty for first three columns, totals for last three)
+    const totalRow: Record<string, string> = {
+      'Day': 'Total',
+      'Day Status': '',
+      'Total Working Hours': '',
+      'Leave Request in Hours': this.getTotal('leaveRequestHours', 'leaveRequestMinutes'),
+      'Overtime in Hours': this.getTotal('overtimeHours', 'overtimeMinutes'),
+      'Deduction in Hours': this.getTotal('deductionHours', 'deductionMinutes')
+    };
+    
+    this.tableDataForPDF.push(totalRow);
 
-  console.log('Prepared PDF data:', this.tableDataForPDF);
-}
+    console.log('Prepared PDF data:', this.tableDataForPDF);
+  }
 
   async Print() {
     await this.GetEmployeeName();
