@@ -181,27 +181,30 @@ export class CertificateStudentReportComponent implements OnInit {
   }
 
   async loadStudents() {
-    if (this.selectedClassId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.studentService.GetByClassID(this.selectedClassId, domainName)
-        );
-        this.students = data.map((student: any) => ({
-          id: student.id,
-          name: student.en_name || student.ar_name || 'Unknown',
-        }));
-        this.selectedStudentId = 0;
+  if (this.selectedClassId) {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.studentService.GetByClassID(this.selectedClassId, domainName)
+      );
+      this.students = data.map((student: any) => ({
+        id: student.id,
+        en_name: student.en_name || '',
+        ar_name: student.ar_name || '',
+        name: this.isRtl ? (student.ar_name || student.en_name || 'غير معروف') : 
+        (student.en_name || student.ar_name || 'Unknown'),
+      }));
+    this.selectedStudentId = 0;
         this.onFilterChange();
       } catch (error) {
         console.error('Error loading students:', error);
       }
-    } else {
-      this.students = [];
+  } else {
+    this.students = [];
       this.selectedStudentId = 0;
       this.onFilterChange();
-    }
   }
+}
 
   onFilterChange() {
     this.showTable = false;
@@ -275,19 +278,6 @@ export class CertificateStudentReportComponent implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    // For PDF (object format) - keep only the fields shown in the table
-    this.reportsForExport = this.certificateReports.map((report) => ({
-      'Certificate Name': report.certificateTypeName, // Changed from 'Medal Name' to match table
-      'Added By': report.insertedByUserName
-    }));
-
-    this.reportsForExcel = this.certificateReports.map((report) => [
-      report.certificateTypeName, // Only certificate name
-      report.insertedByUserName    // Only added by
-    ]);
-  }
-
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
   }
@@ -302,27 +292,100 @@ export class CertificateStudentReportComponent implements OnInit {
 
   getStudentName(): string {
     if (this.reportType === 'employee') {
-      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+      const student = this.students.find(s => s.id == this.selectedStudentId);
+      return student?.name || 'All Students';
     }
     else if (this.reportType === 'parent') {
-      return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
+      const student = this.students.find(s => s.id == this.selectedStudentId);
+      return student?.en_name || '';
     } else {
-      return this.Student.en_name
+      return this.Student.en_name || '';
     }
   }
 
+
+getSchoolNameAr(): string {
+  const school = this.schools.find(s => s.id == this.selectedSchoolId);
+  return school?.ar_name || school?.name || ' All Schools ';
+}
+
+getGradeNameAr(): string {
+  const grade = this.grades.find(g => g.id == this.selectedGradeId);
+  return grade?.ar_name || grade?.name || 'All Schools ';
+}
+
+getClassNameAr(): string {
+  const classItem = this.classes.find(c => c.id == this.selectedClassId);
+  return classItem?.ar_name || classItem?.name || 'All Schools ';
+}
+
+getStudentNameAr(): string {
+  if (this.reportType === 'employee') {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.name || 'All Students';
+  } else {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.en_name || 'All Students';
+  }
+}
+
+
+
   getInfoRows(): any[] {
+  const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
     if (this.reportType === 'employee') {
       return [
-        { keyEn: 'School: ' + this.getSchoolName() },
-        { keyEn: 'Grade: ' + this.getGradeName() },
-        { keyEn: 'Class: ' + this.getClassName() },
-        { keyEn: 'Student: ' + this.getStudentName() }
+      { keyEn: `School: ${this.getSchoolName() || 'All Schools'}`,       keyAr: `${this.getSchoolNameAr()} : المدرسة `},
+      { keyEn: `Grade: ${this.getGradeName() || 'All Grades'}`,         keyAr: `${this.getGradeNameAr()} :الصف`},
+      { keyEn: `Class: ${this.getClassName() || 'All Classes'}`,        keyAr: ` ${this.getClassNameAr()} :الفصل  `},
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: ` ${this.getStudentNameAr()} :الطالب  `},
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ];
     }
     else {
       return [
-        { keyEn: 'Student: ' + this.getStudentName() }
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+      ];
+    }
+  }
+
+
+private formatDateForArabic(dateString: string): string {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString;
+  }
+}
+
+
+  getInfoRowsForPdf(): any[] {
+    const generatedOnAr = new Date().toLocaleDateString('ar-EG');
+    
+    if (this.reportType === 'employee') {
+      return [
+        { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة: ${this.getSchoolNameAr()}` },
+        { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف: ${this.getGradeNameAr()}` },
+        { keyEn: `Class: ${this.getClassName()}`, keyAr: `الفصل: ${this.getClassNameAr()}` },
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+      ];
+    }
+    else {
+      return [
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ];
     }
   }
@@ -330,17 +393,34 @@ export class CertificateStudentReportComponent implements OnInit {
   getInfoRowsExcel(): any[] {
     if (this.reportType === 'employee') {
       return [
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() },
+        { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة: ${this.getSchoolNameAr()}` },
+        { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف: ${this.getGradeNameAr()}` },
+        { keyEn: `Class: ${this.getClassName()}`, keyAr: `الفصل: ${this.getClassNameAr()}` },
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` }
       ];
     }
     else {
       return [
-        { key: 'Student', value: this.getStudentName() },
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` }
       ];
     }
+  }
+
+  private prepareExportData(): void {
+    // For PDF (object format) - keep only the fields shown in the table
+    this.reportsForExport = this.certificateReports.map((report) => ({
+      'Certificate Name': report.certificateTypeName,
+      'Added By': report.insertedByUserName,
+      
+      // البيانات بالعربية
+      'اسم الشهادة': report.certificateTypeName || report.certificateTypeName,
+      'تم الإضافة بواسطة': report.insertedByUserName
+    }));
+
+    this.reportsForExcel = this.certificateReports.map((report) => [
+      report.certificateTypeName,
+      report.insertedByUserName
+    ]);
   }
 
   async DownloadAsPDF() {
@@ -412,7 +492,7 @@ export class CertificateStudentReportComponent implements OnInit {
   async exportExcel() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExcel.length === 0) {
+    if (this.certificateReports.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -420,26 +500,86 @@ export class CertificateStudentReportComponent implements OnInit {
     this.isExporting = true;
 
     try {
-      await this.reportsService.generateExcelReport({
+      const infoRows: { en: string; ar: string }[] = [];
+      
+      if (this.reportType === 'employee') {
+        infoRows.push(
+               { 
+          en: `School: ${this.getSchoolName() || 'All Schools'}`, 
+          ar: ` ${this.getSchoolNameAr() || 'كل المدارس'} : المدرسة ` 
+        },
+        { 
+          en: `Grade: ${this.getGradeName() || 'All Grades'}`, 
+          ar: ` ${this.getGradeNameAr() || 'كل الصفوف'} : الصف ` 
+        },
+        { 
+          en: `Class: ${this.getClassName() || 'All Classes'}`, 
+          ar: `${this.getClassNameAr() || 'كل الفصول'} : الفصل ` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || 'All Students'}`, 
+          ar: ` ${this.getStudentNameAr() || 'كل الطلاب'} : الطالب ` 
+        },
+        );
+      } else {
+        infoRows.push(
+        { 
+          en: `Student: ${this.getStudentName() || ''}`, 
+          ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+        },
+        );
+      }
+      
+      infoRows.push(
+        { 
+          en: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, 
+          ar: `${new Date().toLocaleDateString('en-GB')} : تم الإنشاء في` 
+        }
+      );
+
+      const currentLang = document.documentElement.lang || 'en';
+      const isArabic = currentLang === 'ar' || this.isRtl;
+      
+      let tableHeaders: string[];
+      let tableData: any[][];
+      
+      if (isArabic) {
+        tableHeaders = ['اسم الشهادة', 'تم الإضافة بواسطة'];
+        tableData = this.certificateReports.map((report) => {
+          return [
+            report.certificateTypeName || report.certificateTypeName || '-',
+            report.insertedByUserName || '-'
+          ];
+        });
+      } else {
+        tableHeaders = ['Certificate Name', 'Added By'];
+        tableData = this.certificateReports.map((report) => {
+          return [
+            report.certificateTypeName || '-',
+            report.insertedByUserName || '-'
+          ];
+        });
+      }
+
+      const excelOptions = {
         mainHeader: {
           en: 'Certificate Student Report',
           ar: 'تقرير شهادات الطالب'
         },
-        subHeaders: [
-          {
-            en: 'Student Certificate Records',
-            ar: 'سجلات شهادات الطالب'
-          }
-        ],
-        infoRows: this.getInfoRowsExcel(),
-        tables: [
-          {
-            headers: ['Certificate Name', 'Added By'], // Updated headers to match table
-            data: this.reportsForExcel
-          }
-        ],
+        subHeaders: [{
+          en: 'Student Certificate Records',
+          ar: 'سجلات شهادات الطالب'
+        }],
+        infoRows: infoRows,
+        tables: [{
+          headers: tableHeaders,
+          data: tableData
+        }],
+        isRtl: isArabic,
         filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-      });
+      };
+
+      await this.reportsService.generateExcelReport(excelOptions);
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       Swal.fire('Error', 'Failed to export to Excel', 'error');
@@ -447,7 +587,6 @@ export class CertificateStudentReportComponent implements OnInit {
       this.isExporting = false;
     }
   }
-
 
   downloadCertificate(row: CertificateStudent) {
     const imageUrl = row.certificateTypeFile;
@@ -484,6 +623,4 @@ export class CertificateStudentReportComponent implements OnInit {
       })
       .catch(err => console.error('Error loading image:', err));
   }
-
-
 }

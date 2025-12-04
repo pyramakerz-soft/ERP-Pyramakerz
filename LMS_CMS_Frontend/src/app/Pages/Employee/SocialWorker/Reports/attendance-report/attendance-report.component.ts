@@ -75,6 +75,7 @@ export class AttendanceReportComponent implements OnInit {
     reportHeaderOneAr: 'تقرير الحضور',
     reportHeaderTwoAr: 'سجلات حضور الطلاب'
   };
+  current: any;
   constructor(
     private attendanceService: AttendanceService,
     private schoolService: SchoolService,
@@ -206,27 +207,29 @@ export class AttendanceReportComponent implements OnInit {
       this.selectedStudentId = null;
     }
   }
-
   async loadStudents() {
-    if (this.selectedClassId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.studentService.GetByClassID(this.selectedClassId, domainName)
-        );
-        this.students = data.map((student: any) => ({
-          id: student.id,
-          name: student.en_name || student.ar_name || 'Unknown',
-        }));
-        this.selectedStudentId = null;
-      } catch (error) {
-        console.error('Error loading students:', error);
-      }
-    } else {
-      this.students = [];
+  if (this.selectedClassId) {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.studentService.GetByClassID(this.selectedClassId, domainName)
+      );
+      this.students = data.map((student: any) => ({
+        id: student.id,
+        en_name: student.en_name || '',
+        ar_name: student.ar_name || '',
+        name: this.isRtl ? (student.ar_name || student.en_name || 'غير معروف') : 
+        (student.en_name || student.ar_name || 'Unknown'),
+      }));
       this.selectedStudentId = null;
+    } catch (error) {
+      console.error('Error loading students:', error);
     }
+  } else {
+    this.students = [];
+    this.selectedStudentId = null;
   }
+}
 
   onSchoolChange() {
     this.loadAcademicYears();
@@ -314,26 +317,6 @@ export class AttendanceReportComponent implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    // For PDF (object format)
-    this.reportsForExport = this.attendanceReports.map((report) => ({
-      'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentName,
-      'Status': report.isLate ? 'Late' : 'Present',
-      'Late Time (minutes)': report.isLate ? report.lateTimeInMinutes : '-',
-      'Notes': report.notes || '-'
-    }));
-
-    // For Excel (array format)
-    this.reportsForExcel = this.attendanceReports.map((report) => [
-      new Date(report.date).toLocaleDateString(),
-      report.studentName,
-      report.isLate ? 'Late' : 'Present',
-      report.isLate ? report.lateTimeInMinutes : '-',
-      report.notes || '-'
-    ]);
-  }
-
   getSchoolName(): string {
     return this.schools.find(s => s.id === this.selectedSchoolId)?.name || 'All Schools';
   }
@@ -350,54 +333,12 @@ export class AttendanceReportComponent implements OnInit {
     return this.classes.find(c => c.id === this.selectedClassId)?.name || 'All Classes';
   }
 
-  getStudentName(): string {
+  getStudentName(): string { 
     if (this.reportType === 'employee') {
-      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+      return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
     }
     else {
       return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
-    }
-  }
-
-  getInfoRows(): any[] {
-    if (this.reportType === 'employee') {
-      return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'School: ' + this.getSchoolName() },
-        { keyEn: 'Academic Year: ' + this.getAcademicYearName() },
-        { keyEn: 'Grade: ' + this.getGradeName() },
-        { keyEn: 'Class: ' + this.getClassName() },
-        { keyEn: 'Student: ' + this.getStudentName() }
-      ];
-    }
-    else {
-      return [
-        { keyEn: 'From Date: ' + this.dateFrom },
-        { keyEn: 'To Date: ' + this.dateTo },
-        { keyEn: 'Student: ' + this.getStudentName() }
-      ];
-    }
-  }
-
-  getInfoRowsExcel(): any[] {
-    if (this.reportType === 'employee') {
-      return [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Academic Year', value: this.getAcademicYearName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Class', value: this.getClassName() },
-        { key: 'Student', value: this.getStudentName() }
-      ];
-    }
-    else {
-      return [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'Student', value: this.getStudentName() }
-      ];
     }
   }
 
@@ -467,43 +408,280 @@ export class AttendanceReportComponent implements OnInit {
     }, 500);
   }
 
-  async exportExcel() {
-    const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExcel.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
+// Adding BY Gaber ---77
+async exportExcel() {
+  const Swal = await import('sweetalert2').then(m => m.default);
 
-    this.isExporting = true;
-
-    try {
-      await this.reportsService.generateExcelReport({
-        mainHeader: {
-          en: 'Attendance Report',
-          ar: 'تقرير الحضور'
-        },
-        subHeaders: [
-          {
-            en: 'Student Attendance Records',
-            ar: 'سجلات حضور الطلاب'
-          }
-        ],
-        infoRows: this.getInfoRowsExcel(),
-        tables: [
-          {
-            // title: 'Attendance Report Data',
-            headers: ['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes'],
-            data: this.reportsForExcel
-          }
-        ],
-        filename: `Attendance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-      });
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      Swal.fire('Error', 'Failed to export to Excel', 'error');
-    } finally {
-      this.isExporting = false;
-    }
+  if (this.attendanceReports.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  this.isExporting = true;
+
+  try {
+    const infoRows: { en: string; ar: string }[] = [];
+    
+    if (this.reportType === 'employee') {
+      infoRows.push(
+        { 
+          en: `From Date: ${this.dateFrom || ''}`, 
+          ar: `${this.dateFrom || ''}  :   من تاريخ` 
+        },
+        { 
+          en: `To Date: ${this.dateTo || ''}`, 
+          ar: `${this.dateTo || ''} :   إلى تاريخ` 
+        },
+  { 
+          en: `School: ${this.getSchoolName() || 'All Schools'}`, 
+          ar: ` ${this.getSchoolNameAr() || 'كل المدارس'} : المدرسة ` 
+        },
+        { 
+          en: `Academic Year: ${this.getAcademicYearName() || 'All Academic Years'}`, 
+          ar: ` ${this.getAcademicYearNameAr() || 'كل السنوات الأكاديمية'} : السنة الأكاديمية ` 
+        },
+        { 
+          en: `Grade: ${this.getGradeName() || 'All Grades'}`, 
+          ar: ` ${this.getGradeNameAr() || 'كل الصفوف'} : الصف ` 
+        },
+        { 
+          en: `Class: ${this.getClassName() || 'All Classes'}`, 
+          ar: `${this.getClassNameAr() || 'كل الفصول'} : الفصل ` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || 'All Students'}`, 
+          ar: ` ${this.getStudentNameAr() || 'كل الطلاب'} : الطالب ` 
+        },
+      );
+    } else {
+      infoRows.push(
+        { 
+          en: `From Date: ${this.dateFrom || ''}`, 
+          ar: `${this.dateFrom || ''}  :   من تاريخ` 
+        },
+        { 
+          en: `To Date: ${this.dateTo || ''}`, 
+          ar: `${this.dateTo || ''} :   إلى تاريخ` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || ''}`, 
+          ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+        }
+      );
+    }
+    
+    infoRows.push(
+       { 
+        en: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, 
+        ar: `${new Date().toLocaleDateString('en-GB')} : تم الإنشاء في` 
+      }
+    );
+
+    const currentLang = document.documentElement.lang || 'en';
+    const isArabic = currentLang === 'ar' || this.isRtl;
+    
+    let tableHeaders: string[];
+    let tableData: any[][];
+    
+    if (isArabic) {
+      tableHeaders = ['التاريخ', 'اسم الطالب', 'الحالة', 'وقت التأخير (دقائق)', 'ملاحظات'];
+      tableData = this.attendanceReports.map((report) => {
+        const date = new Date(report.date);
+        return [
+          date.toLocaleDateString('ar-EG'),
+          report.studentArName || report.studentEnName || '-',
+          report.isLate ? 'متأخر' : 'حاضر',
+          report.isLate ? report.lateTimeInMinutes : '-',
+          report.notes || '-'
+        ];
+      });
+    } else {
+      tableHeaders = ['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes'];
+      tableData = this.attendanceReports.map((report) => {
+        const date = new Date(report.date);
+        return [
+          date.toLocaleDateString('en-GB'),
+          report.studentEnName || '-',
+          report.isLate ? 'Late' : 'Present',
+          report.isLate ? report.lateTimeInMinutes : '-',
+          report.notes || '-'
+        ];
+      });
+    }
+
+    const excelOptions = {
+      mainHeader: {
+        en: 'Attendance Report',
+        ar: 'تقرير الحضور'
+      },
+      subHeaders: [{
+        en: 'Student Attendance Records',
+        ar: 'سجلات حضور الطلاب'
+      }],
+      infoRows: infoRows,
+      tables: [{
+        headers: tableHeaders,
+        data: tableData
+      }],
+      isRtl: isArabic,
+      filename: `Attendance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    };
+
+    await this.reportsService.generateExcelReport(excelOptions);
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  } finally {
+    this.isExporting = false;
+  }
+}
+
+getSchoolNameAr(): string {
+  const school = this.schools.find(s => s.id == this.selectedSchoolId);
+  return school?.ar_name || school?.name || ' All Schools ';
+}
+
+getAcademicYearNameAr(): string {
+  const AcademicYearName = this.academicYears.find(a => a.id == this.selectedAcademicYearId);
+  return AcademicYearName?.ar_name || AcademicYearName?.name || 'All AcademicYear' ;
+}
+
+getGradeNameAr(): string {
+  const grade = this.grades.find(g => g.id == this.selectedGradeId);
+  return grade?.ar_name || grade?.name || 'All Grades ';
+}
+
+getClassNameAr(): string {
+  const classItem = this.classes.find(c => c.id == this.selectedClassId);
+  return classItem?.ar_name || classItem?.name || 'All Classes ';
+}
+
+getStudentNameAr(): string {
+  if (this.reportType === 'employee') {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+   return student?.ar_name || student?.name || 'All Students';
+    } else {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.en_name || 'All Students';
+  }
+}  
+ 
+
+getInfoRows(): any[] {
+   const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
+   const rows = [];
+  if (this.reportType === 'employee') {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `School: ${this.getSchoolName() || 'All Schools'}`,       keyAr: `${this.getSchoolNameAr()} : المدرسة `},
+      { keyEn: `Academic Year: ${this.getAcademicYearName() || 'All Academic Years'}`,    keyAr: `${this.getAcademicYearNameAr()} :السنة الأكاديمية`},
+
+      { keyEn: `Grade: ${this.getGradeName() || 'All Grades'}`,         keyAr: `${this.getGradeNameAr()} :الصف`},
+      { keyEn: `Class: ${this.getClassName() || 'All Classes'}`,        keyAr: ` ${this.getClassNameAr()} :الفصل  `},
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: ` ${this.getStudentNameAr()} :الطالب  `},
+      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    ];
+  } else {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+       { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    ];
+  }
+}
+
+private formatDateForArabic(dateString: string): string {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString;
+  }
+}
+
+getInfoRowsExcel(): any[] {
+  if (this.reportType === 'employee') {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة: ${this.getSchoolNameAr()}` },
+      { keyEn: `Academic Year: ${this.getAcademicYearName()}`, keyAr: `السنة الأكاديمية: ${this.getAcademicYearNameAr()}` },
+      { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف: ${this.getGradeNameAr()}` },
+      { keyEn: `Class: ${this.getClassName()}`, keyAr: `الفصل: ${this.getClassNameAr()}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` }
+    ];
+  } else {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` }
+    ];
+  }
+}
+
+getInfoRowsForPdf(): any[] {
+  const generatedOnAr = new Date().toLocaleDateString('ar-EG');
+  
+  if (this.reportType === 'employee') {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة: ${this.getSchoolNameAr()}` },
+      { keyEn: `Academic Year: ${this.getAcademicYearName()}`, keyAr: `السنة الأكاديمية: ${this.getAcademicYearNameAr()}` },
+      { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف: ${this.getGradeNameAr()}` },
+      { keyEn: `Class: ${this.getClassName()}`, keyAr: `الفصل: ${this.getClassNameAr()}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    ];
+  } else {
+    return [
+      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${this.dateFrom}` },
+      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${this.dateTo}` },
+      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
+      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+    ];
+  }
+}
+
+private prepareExportData(): void {
+  const isArabic = this.isRtl;
+  
+  this.reportsForExport = this.attendanceReports.map((report) => {
+    const studentName = isArabic ? 
+      (report.studentArName || report.studentEnName || '-') : 
+      (report.studentEnName || '-');
+    
+    const status = isArabic ? 
+      (report.isLate ? 'متأخر' : 'حاضر') : 
+      (report.isLate ? 'Late' : 'Present');
+    
+    return {
+      'Date': new Date(report.date).toLocaleDateString(),
+      'Student Name': studentName,
+      'Status': status,
+      'Late Time(minutes)': report.isLate ? report.lateTimeInMinutes : '-',
+      'Notes': report.notes || '-',
+      
+      'التاريخ': this.formatDateForArabic(report.date),
+      'اسم الطالب': studentName,
+      'الحالة': status,
+      'وقت التأخير (دقائق)': report.isLate ? report.lateTimeInMinutes : '-',
+      'ملاحظات': report.notes || '-'
+    };
+  });
+}
+
+
 }

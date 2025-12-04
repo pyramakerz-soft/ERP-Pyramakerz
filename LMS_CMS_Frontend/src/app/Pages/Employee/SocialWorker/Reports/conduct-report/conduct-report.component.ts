@@ -190,26 +190,32 @@ export class ConductReportComponent implements OnInit {
     }
   }
  
-  async loadStudents() {
-    if (this.selectedClassId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.studentService.GetByClassID(this.selectedClassId, domainName)
-        );
-        this.students = data.map((student: any) => ({
-          id: student.id,
-          name: student.en_name || student.ar_name || 'Unknown',
-        }));
-        this.selectedStudentId = null;
-      } catch (error) {
-        console.error('Error loading students:', error);
-      }
-    } else {
-      this.students = [];
+
+async loadStudents() {
+  if (this.selectedClassId) {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.studentService.GetByClassID(this.selectedClassId, domainName)
+      );
+    
+      this.students = data.map((student: any) => ({
+        id: student.id,
+        en_name: student.en_name || '',
+        ar_name: student.ar_name || '',
+        name: this.isRtl ? (student.ar_name || student.en_name || 'غير معروف') : 
+                         (student.en_name || student.ar_name || 'Unknown'),
+      }));
       this.selectedStudentId = null;
+    } catch (error) {
+      console.error('Error loading students:', error);
     }
+  } else {
+    this.students = [];
+    this.selectedStudentId = null;
   }
+}
+
 
   async loadConductTypes() {
     if (this.selectedSchoolId) {
@@ -338,7 +344,7 @@ export class ConductReportComponent implements OnInit {
 
   getStudentName(): string {
     if (this.reportType === 'employee') {
-      return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+      return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
     }
     else {
       return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
@@ -450,27 +456,27 @@ async exportExcel() {
         },
         { 
           en: `School: ${this.getSchoolName() || 'All Schools'}`, 
-          ar: `المدرسة: ${this.getSchoolNameAr() || 'كل المدارس'} ` 
+          ar: ` ${this.getSchoolNameAr() || 'كل المدارس'} : المدرسة ` 
         },
         { 
           en: `Grade: ${this.getGradeName() || 'All Grades'}`, 
-          ar: `الصف : ${this.getGradeNameAr() || 'كل الصفوف'}` 
+          ar: ` ${this.getGradeNameAr() || 'كل الصفوف'} : الصف ` 
         },
         { 
           en: `Class: ${this.getClassName() || 'All Classes'}`, 
-          ar: `الفصل: ${this.getClassNameAr() || 'كل الفصول'}` 
+          ar: `${this.getClassNameAr() || 'كل الفصول'} : الفصل ` 
         },
         { 
           en: `Student: ${this.getStudentName() || 'All Students'}`, 
-          ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+          ar: ` ${this.getStudentNameAr() || 'كل الطلاب'} : الطالب ` 
         },
         { 
           en: `Conduct Type: ${this.getConductTypeName() || 'All Types'}`, 
-          ar: ` نوع السلوك : ${this.getConductTypeNameAr() || 'كل الأنواع'}`
+          ar: ` ${this.getConductTypeNameAr() || 'كل الأنواع'} : نوع السلوك `
         },
         { 
           en: `Procedure Type: ${this.getProcedureTypeName() || 'All Types'}`, 
-          ar: ` نوع الإجراء:${this.getProcedureTypeNameAr() || 'كل الأنواع'}`
+          ar: ` ${this.getProcedureTypeNameAr() || 'كل الأنواع'} : نوع الإجراء `
         }
       );
     } else {
@@ -588,37 +594,45 @@ private prepareExportData(): void {
   }));
 }
 
-
 getInfoRows(): any[] {
-  const fromDateAr = this.formatDateForArabic(this.dateFrom);
-  const toDateAr = this.formatDateForArabic(this.dateTo);
-  const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
-  const rows = [];
+  const fromAr = formatDate(this.dateFrom);
+  const toAr = formatDate(this.dateTo);
+  const genAr = formatDate(new Date().toISOString().split('T')[0]);
+
+  const rows: any[] = [
+    { keyEn: `From Date: ${this.dateFrom || ''}`, keyAr: `من تاريخ: ${fromAr}` },
+    { keyEn: `To Date: ${this.dateTo || ''}`,     keyAr: `إلى تاريخ: ${toAr}` },
+  ];
 
   if (this.reportType === 'employee') {
     rows.push(
-      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${fromDateAr}` },
-      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${toDateAr}` },
-      { keyEn: `School: ${this.getSchoolName()}`, keyAr: `المدرسة : ${this.getSchoolNameAr()} ` },
-
-      { keyEn: `Grade: ${this.getGradeName()}`, keyAr: `الصف : ${this.getGradeNameAr()} `},
-      { keyEn: `Class: ${this.getClassName()}`, keyAr:`الفصل : ${this.getClassNameAr()} ` },
-      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب : ${this.getStudentNameAr()}` },
-      { keyEn: `Conduct Type: ${this.getConductTypeName()}`, keyAr:`نوع السلوك : ${this.getConductTypeNameAr()}` },
-      { keyEn: `Procedure Type: ${this.getProcedureTypeName()}`, keyAr: `نوع الاجراء : ${this.getProcedureTypeNameAr()}` },
-      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+      { keyEn: `School: ${this.getSchoolName() || 'All Schools'}`,       keyAr: `${this.getSchoolNameAr()} : المدرسة `},
+      { keyEn: `Grade: ${this.getGradeName() || 'All Grades'}`,         keyAr: `${this.getGradeNameAr()} :الصف`},
+      { keyEn: `Class: ${this.getClassName() || 'All Classes'}`,        keyAr: ` ${this.getClassNameAr()} :الفصل  `},
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: ` ${this.getStudentNameAr()} :الطالب  `},
+      { keyEn: `Conduct Type: ${this.getConductTypeName() || 'All Types'}`, keyAr: ` ${this.getConductTypeNameAr()} : نوع السلوك `},
+      { keyEn: `Procedure Type: ${this.getProcedureTypeName() || 'All Types'}`, keyAr:` ${this.getProcedureTypeNameAr()} : نوع الإجراء `}
     );
   } else {
     rows.push(
-      { keyEn: `From Date: ${this.dateFrom}`, keyAr: `من تاريخ: ${fromDateAr}` },
-      { keyEn: `To Date: ${this.dateTo}`, keyAr: `إلى تاريخ: ${toDateAr}` },
-      { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` },
-      { keyEn: `Conduct Type: ${this.getConductTypeName()}`, keyAr: `${this.getConductTypeNameAr()} : نوع السلوك` },
-      { keyEn: `Procedure Type: ${this.getProcedureTypeName()}`, keyAr: `${this.getProcedureTypeNameAr()} : نوع الإجراء` },
-      { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
+      { keyEn: `Student: ${this.getStudentName() || ''}`,   keyAr: `الطالب: ${this.getStudentNameAr()}` },
+      { keyEn: `Conduct Type: ${this.getConductTypeName() || 'All Types'}`, keyAr: `نوع السلوك: ${this.getConductTypeNameAr()}` },
+      { keyEn: `Procedure Type: ${this.getProcedureTypeName() || 'All Types'}`, keyAr: `نوع الإجراء: ${this.getProcedureTypeNameAr()}` }
     );
   }
+
+  rows.push(
+    { keyEn: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, keyAr: `تم الإنشاء في: ${genAr}` }
+  );
 
   return rows;
 }
@@ -651,7 +665,7 @@ GetDataForPrint(): Observable<any[]> {
 
       return [{
         header: {
-          en: 'Conduct Report',
+          en: 'Conduct Report', 
           ar: 'تقرير السلوك'
         },
         summary: this.getInfoRows(), 
@@ -707,37 +721,38 @@ getInfoRowsExcel(): any[] {
 
 getSchoolNameAr(): string {
   const school = this.schools.find(s => s.id == this.selectedSchoolId);
-  return school?.ar_name || school?.name || 'كل المدارس';
+  return school?.ar_name || school?.name || ' All Schools ';
 }
 
 getGradeNameAr(): string {
   const grade = this.grades.find(g => g.id == this.selectedGradeId);
-  return grade?.ar_name || grade?.name || 'كل الصفوف';
+  return grade?.ar_name || grade?.name || 'All Schools ';
 }
 
 getClassNameAr(): string {
   const classItem = this.classes.find(c => c.id == this.selectedClassId);
-  return classItem?.ar_name || classItem?.name || 'كل الفصول';
+  return classItem?.ar_name || classItem?.name || 'All Schools ';
 }
 
 getStudentNameAr(): string {
   if (this.reportType === 'employee') {
     const student = this.students.find(s => s.id == this.selectedStudentId);
-    return student?.ar_name || student?.name || 'كل الطلاب';
+    return student?.ar_name || student?.name || 'All Students';
   } else {
     const student = this.students.find(s => s.id == this.selectedStudentId);
-    return student?.ar_name || student?.en_name || 'كل الطلاب';
+    return student?.ar_name || student?.en_name || 'All Students';
   }
 }
 
+
 getConductTypeNameAr(): string {
   const conductType = this.conductTypes.find(ct => ct.id == this.selectedConductTypeId);
-  return conductType?.ar_name || conductType?.en_name || 'كل الأنواع';
+  return conductType?.ar_name || conductType?.en_name || 'All Types ';
 }
 
 getProcedureTypeNameAr(): string {
   const procedureType = this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId);
-  return procedureType?.name || procedureType?.name || 'كل الأنواع';
+  return procedureType?.name || procedureType?.name || 'All Types ';
 }
 
 

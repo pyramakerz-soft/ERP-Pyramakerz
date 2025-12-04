@@ -119,7 +119,7 @@
                     {{ 'Status' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Late Time (minutes)' | translate }}
+                    {{ 'Late Time(minutes)' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Notes' | translate }}
@@ -140,7 +140,7 @@
                     {{ report.date | date:'mediumDate' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.studentName }}
+                    {{ !isRtl ? report.studentEnName : report.studentArName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ report.isLate ? ('Late' | translate) : ('Present' | translate) }}
@@ -161,7 +161,7 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Attendance Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes']"
+            [tableHeaders]="['Date', 'Student Name', 'Status', 'Late Time(minutes)', 'Notes']"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
