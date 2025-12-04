@@ -66,18 +66,7 @@ import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 })
 @InitLoader()
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -241,13 +230,7 @@ export class InventoryDetailsComponent {
       }
     }
 
-    if (
-      this.FlagId == 9 ||
-      this.FlagId == 10 ||
-      this.FlagId == 11 ||
-      this.FlagId == 12 ||
-      this.FlagId == 13
-    ) {
+    if (this.FlagId == 9 ||this.FlagId == 10 ||this.FlagId == 11 ||this.FlagId == 12 ||this.FlagId == 13) {
       this.IsRemainingCashVisa = true;
     }
 
@@ -656,8 +639,8 @@ export class InventoryDetailsComponent {
         );
       }
       if (this.mode == 'Edit') {
-        this.Data.inventoryDetails = this.TableData ?? [];
-        this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit ?? [];
+        this.Data.inventoryDetails = this.TableData || [];
+        this.Data.newDetailsWhenEdit =this.Data.newDetailsWhenEdit || []
         this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe(
             (d) => {},
             (error) => {}
@@ -748,14 +731,14 @@ export class InventoryDetailsComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         if (this.mode == 'Edit') {
-          if (!this.Data.newDetailsWhenEdit || !this.Data.newDetailsWhenEdit.find((s) => s.id == row.id)) {
+          if (!this.Data.newDetailsWhenEdit?.find((s) => s.id == row.id)) {
+            this.Data.deletedInventoryDetails =this.Data.deletedInventoryDetails || []
+            this.Data.deletedInventoryDetails.push(row.id)
             this.TableData = this.TableData.filter((s) => s.id != row.id);
-            this.Data.deletedInventoryDetails = this.Data.deletedInventoryDetails || []
-            this.Data.deletedInventoryDetails.push(row.id);
             this.TotalandRemainingCalculate();
             // this.salesItemServ.Delete(row.id, this.DomainName).subscribe(async (D) => {
-            // });
-
+            //     // await this.GetTableDataByID();
+            //   });
           } else {
             this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
               (s) => s.id != row.id
@@ -1463,51 +1446,27 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  // validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
-  //   const value = event.target.value;
-  //   const numValue = Number(value);
+  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
+    const value = event.target.value;
+    const numValue = Number(value);
 
-  //   if (isNaN(value) || value === '') {
-  //     event.target.value = '';
-  //     if (typeof row[field] === 'string') {
-  //       row[field] = '' as never;
-  //     }
-  //   }
-
-  //   if (field === 'quantity') {
-  //     let value = event.target.value;
-  //     value = value.replace(/[^0-9]/g, '');
-  //     event.target.value = value;
-  //     if (isNaN(value) || value === '') {
-  //       event.target.value = '';
-  //       if (typeof row[field] === 'string') {
-  //         row[field] = '' as never;
-  //       }
-  //     }
-  //     return;
-  //   }
-  // }
-
-  validateNumberRow(event: any, field: keyof InventoryDetails, row: InventoryDetails): void {
-    let value = event.target.value;
-
-    // PRICE → allow decimals only
-    if (field === 'price') {
-      value = value.replace(/[^0-9.]/g, '');  // remove minus & anything else
-      event.target.value = value;
-      row[field] = value ? Number(value) : 0;
-
-      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
-      return;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
+      }
     }
 
-    // QUANTITY → digits only
     if (field === 'quantity') {
+      let value = event.target.value;
       value = value.replace(/[^0-9]/g, '');
       event.target.value = value;
-      row[field] = value ? Number(value) : 0;
-
-      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
+      if (isNaN(value) || value === '') {
+        event.target.value = '';
+        if (typeof row[field] === 'string') {
+          row[field] = '' as never;
+        }
+      }
       return;
     }
   }
