@@ -108,7 +108,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             //var refreshToken = _generateJWT.GenerateRefreshToken();
 
-            //// Save refresh token in DB
+            // Save refresh token in DB
             //var refreshTokenEntity = new RefreshTokens
             //{
             //    Token = refreshToken,
