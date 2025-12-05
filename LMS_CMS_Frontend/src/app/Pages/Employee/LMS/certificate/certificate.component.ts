@@ -135,7 +135,7 @@ isInfoRowsLoading: boolean = false;
       if (this.User_Data_After_Login.type == 'student') {
         this.mode = 'student'
         this.SelectedStudentId = this.UserID
-        this.StudentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
+        this.StudentServ.GetByIDByToken(this.DomainName).subscribe((d) => {
           this.student = d
           this.SelectedSchoolId = this.student.currentSchoolId
           this.Grades=[]

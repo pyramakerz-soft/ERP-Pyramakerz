@@ -425,5 +425,109 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             return Ok();
         }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("TransferToTheSameGrade")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Upgrade Students" }
+        )]
+        public IActionResult TransferToTheSameGrade(UpgradeDTO upgradeDTO)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            AcademicYear academicYearFrom = Unit_Of_Work.academicYear_Repository.First_Or_Default(
+                s => s.ID == upgradeDTO.FromAcademicYearID && s.IsDeleted != true);
+            if (academicYearFrom == null)
+            {
+                return BadRequest("This Academic Year is not found");
+            }
+
+            AcademicYear academicYearTo = Unit_Of_Work.academicYear_Repository.First_Or_Default(
+                s => s.ID == upgradeDTO.ToAcademicYearID && s.IsDeleted != true);
+            if (academicYearTo == null)
+            {
+                return BadRequest("This Academic Year is not found");
+            }
+             
+            List<FailedStudents> failedStudents = Unit_Of_Work.failedStudents_Repository.FindBy(
+                d => d.IsDeleted != true && d.Student.IsDeleted != true && d.Grade.IsDeleted != true && d.Subject.IsDeleted != true && d.AcademicYearID == academicYearFrom.ID);
+
+            if (failedStudents == null || !failedStudents.Any())
+            {
+                return NotFound("No Students To Upgrade");
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            var groupedFailedStudents = failedStudents
+                .GroupBy(fs => fs.StudentID)
+                .ToList();
+             
+            foreach (var studentGroup in groupedFailedStudents)
+            {
+                long studentId = studentGroup.Key;
+                List<long> failedSubjects = studentGroup.Select(fs => fs.SubjectID).ToList();  
+                long academicYearId = studentGroup.First().AcademicYearID;
+                long gradeId = studentGroup.First().GradeID;
+
+                foreach (long subjectID in failedSubjects)
+                {
+                    FailedStudents failedRecord = studentGroup.FirstOrDefault(fs => fs.SubjectID == subjectID);
+
+                    if (failedRecord != null)
+                    {
+                        failedRecord.IsDeleted = true;
+                        failedRecord.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                        if (userTypeClaim == "octa")
+                            failedRecord.DeletedByOctaId = userId;
+                        else if (userTypeClaim == "employee")
+                            failedRecord.DeletedByUserId = userId;
+
+                        Unit_Of_Work.failedStudents_Repository.Update(failedRecord);
+                    } 
+                }
+                 
+                StudentGrade studentCurrent = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == studentId && d.AcademicYearID == academicYearFrom.ID);
+
+                StudentGrade student = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == studentId && d.GradeID == gradeId && d.AcademicYearID == academicYearTo.ID);
+                if (student == null)
+                {
+                    StudentGrade studentGrade = new StudentGrade();
+                    studentGrade.GradeID = studentCurrent.GradeID;
+                    studentGrade.AcademicYearID = academicYearTo.ID;
+                    studentGrade.StudentID = studentId;
+
+                    studentGrade.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        studentGrade.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        studentGrade.InsertedByUserId = userId;
+                    }
+                    Unit_Of_Work.studentGrade_Repository.Add(studentGrade);
+                }
+            } 
+
+            Unit_Of_Work.SaveChanges(); 
+             
+            return Ok();
+        }
     }
 }

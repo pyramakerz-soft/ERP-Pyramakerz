@@ -125,6 +125,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.Role_Name, opt => opt.MapFrom(src => src.Role.Name))
                 .ForMember(dest => dest.Role_ID, opt => opt.MapFrom(src => src.Role.ID))
                 .ForMember(dest => dest.EmployeeTypeName, opt => opt.MapFrom(src => src.EmployeeType.Name))
+                .ForMember(dest => dest.EmployeeTypeArabicName, opt => opt.MapFrom(src => src.EmployeeType.ArabicName))
                 .ForMember(dest => dest.EmployeeTypeID, opt => opt.MapFrom(src => src.EmployeeType.ID))
                 .ForMember(dest => dest.BusCompanyID, opt => opt.MapFrom(src => src.BusCompany.ID))
                 .ForMember(dest => dest.BusCompanyName, opt => opt.MapFrom(src => src.BusCompany.Name));
@@ -143,6 +144,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<Parent, ParentGetDTO>();
             CreateMap<ParentGetDTO, Parent>();
+
+             CreateMap<Student, StudentGetForCreateDTO>();
 
              CreateMap<Student, StudentGetDTO>()
               .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name))
@@ -207,6 +210,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Violation, ViolationGetDTO>()
                  .ForMember(dest => dest.EmployeeTypeId, opt => opt.MapFrom(src => src.Employee.EmployeeTypeID))
                  .ForMember(dest => dest.EmployeeTypeName, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
+                 .ForMember(dest => dest.EmployeeTypeArabicName, opt => opt.MapFrom(src => src.Employee.EmployeeType.ArabicName))
                  .ForMember(dest => dest.ViolationTypeName, opt => opt.MapFrom(src => src.ViolationType.Name))
                  .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
                  .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
@@ -1293,7 +1297,8 @@ namespace LMS_CMS_BL.Config
 
             // New mapping for StudentIssueReportDTO
             CreateMap<StudentIssue, StudentIssueReportDTO>()
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name ?? src.Student.ar_name))
+                .ForMember(dest => dest.studentEnName, opt => opt.MapFrom(src => src.Student.en_name ))
+                .ForMember(dest => dest.studentArName, opt => opt.MapFrom(src => src.Student.ar_name))
                 .ForMember(dest => dest.IssuesType, opt => opt.MapFrom(src => new IssuesTypeDTO
                 {
                     ID = src.IssuesType.ID,
@@ -1364,7 +1369,8 @@ namespace LMS_CMS_BL.Config
             // New mapping for AttendanceReportDTO
             CreateMap<AttendanceStudent, AttendanceReportDTO>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Attendance.Date))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name ?? src.Student.ar_name))
+                .ForMember(dest => dest.studentEnName, opt => opt.MapFrom(src => src.Student.en_name ))
+                .ForMember(dest => dest.studentArName , opt => opt.MapFrom(src => src.Student.ar_name))
                 .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.Note));
             //--77
 

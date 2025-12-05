@@ -189,7 +189,7 @@
                             <input [disabled]="isView" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 (input)="validateNumberEditDetails(row ,$event, 'amount')"
                                 [(ngModel)]="row.amount"
-                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); AddInUpdated(row)"  />
+                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); AddInUpdated(row); CalculateTotal()"  />
                             <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['amount']" class="text-red-500 ml-3 font-normal">
                                 {{ validationErrorsForDetails[row.id]['amount'] }}
                             </span>                        </td>
@@ -245,7 +245,7 @@
                             <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 (input)="validateNumberEditDetails(row ,$event, 'amount')"
                                 [(ngModel)]="row.amount"
-                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event })"  />
+                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); CalculateTotal()"  />
                             <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['amount']" class="text-red-500 ml-3 font-normal">
                                {{ validationErrorsForDetails[row.id]['amount'] }}
                             </span>                        </td>

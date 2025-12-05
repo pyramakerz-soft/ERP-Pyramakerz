@@ -222,7 +222,7 @@
   "limit": "الحد",
   "Genders": "الأنواع",
   "Sub": "فرعي",
-  "Vat for Foreign": "ضريبة القيمة المضافة للأجانب",
+  "Vat for Foreign Percentage": "ضريبة القيمة المضافة للأجانب بالنسبة المئوية",
   "Vat": "الضريبة",
   "Arabic": "العربية",
   "w" : "ب",
@@ -1414,23 +1414,17 @@
   "Leave Request" : "طلب إجازة",
   "DateFrom" : "من تاريخ",
   "VacationTypesID" : "أنواع الإجازات",
-  "BackPrice" : "سعر الاسترجاع",
+  "BackPrice" : "سعر الاسترجاع", 
   "MorningPrice" : "سعر الصباح",
   "TwoWaysPrice" : "سعر الذهاب والعودة",
   "Deduction Percentage after cutoff date": "نسبة الخصم بعد تاريخ القطع",
   "Attendance Report" : "تقرير الحضور",
-
-
-
-
-
-
-
-
-
-
-
+  "Conduct Report" : "تقرير السلوك",
   "Conduct Types": "أنواع السلوك",
   "Procedure Types" : "أنواع الإجراءات",
-  "Login" : "تسجيل الدخول"
+  "Login" : "تسجيل الدخول",
+  "Student Certificate" : "شهادة الطالب",
+  "Student Issue Report" : "تقرير مشكلة الطالب",
+  "Certificate Name" : "أسم الشهادة",
+  "Late Time(minutes)" : "الوقت المتأخر (بالدقائق)"
 }

@@ -195,7 +195,7 @@
                                 [attr.placeholder]="!row.amount ? 'Enter Amount' : ''"
                                 (input)="validateNumberEditDetails(row , $event, 'amount'); "
                                 [(ngModel)]="row.amount"
-                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); AddInUpdated(row)" />
+                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); AddInUpdated(row); this.CalculateTotal();" />
                             <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['amount']" class="text-red-500 ml-3 font-normal">
                                 {{ validationErrorsForDetails[row.id]['amount'] }}
                             </span>
@@ -258,7 +258,7 @@
                                 [attr.placeholder]="!row.amount ? 'Enter Amount' : ''"
                                 (input)="validateNumberEditDetails(row ,$event, 'amount')"
                                 [(ngModel)]="row.amount"
-                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event })" />
+                                (ngModelChange)="onInputValueChangeForEditDetails(row , { field: 'amount', value: $event }); this.CalculateTotal();" />
                             <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['amount']" class="text-red-500 ml-3 font-normal">
                                {{ validationErrorsForDetails[row.id]['amount'] }}
                             </span>

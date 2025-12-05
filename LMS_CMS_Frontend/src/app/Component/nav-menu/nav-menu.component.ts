@@ -461,8 +461,7 @@ export class NavMenuComponent {
         confirmButtonColor: '#089B41',
       });
     }else{
-      if(this.password != "" ){
-        this.editpasss.id=this.User_Data_After_Login.id;
+      if(this.password != "" ){ 
         this.editpasss.password=this.password 
         this.isLoading = true
         if(this.User_Data_After_Login.type == "octa"){
@@ -506,7 +505,7 @@ export class NavMenuComponent {
             } 
           ) 
         }else{
-          this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+          this.account.EditPasswordByToken(this.editpasss,this.DomainName).subscribe(()=>{
               this.closeModal()
               Swal.fire({
                 icon: 'success',

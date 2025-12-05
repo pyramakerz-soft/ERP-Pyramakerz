@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Http;
@@ -194,7 +195,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     return accessCheck;
                 }
             }
-
+            Store store = Unit_Of_Work.store_Repository.First_Or_Default(b => b.ID == newData.StoreID && b.IsDeleted != true);
+            if (store == null)
+            {
+                return NotFound("Store cannot be null");
+            }
+            School school = new School();
+            if (newData.SchoolId != 0 && newData.SchoolId != null)
+            {
+                school = Unit_Of_Work.school_Repository.First_Or_Default(b => b.ID == newData.SchoolId && b.IsDeleted != true);
+                if (school == null)
+                {
+                    return NotFound("school not found.");
+                }
+            }
+            else
+            {
+                newData.SchoolId = null;
+            }
+            if (newData.SchoolPCId != 0 && newData.SchoolPCId != null)
+            {
+                SchoolPCs SchoolPCId = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(b => b.ID == newData.SchoolPCId && b.SchoolId == newData.SchoolId && b.IsDeleted != true);
+                if (SchoolPCId == null)
+                {
+                    return NotFound("SchoolPCId not found.");
+                }
+            }
+            else
+            {
+                newData.SchoolPCId = null;
+            }
             mapper.Map(newData, data);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -311,7 +341,50 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 await Unit_Of_Work.SaveChangesAsync();
             }
 
+            // delete Details 
+            if(newData.DeletedStockingDetails != null && newData.DeletedStockingDetails.Count > 0)
+            {
+                foreach (var item in newData.DeletedStockingDetails)
+                {
+                    StockingDetails stockingDetails = Unit_Of_Work.stockingDetails_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (stockingDetails == null)
+                    {
+                        return NotFound("No Stocking Details with this ID");
+                    }
 
+
+                    if (userTypeClaim == "employee")
+                    {
+                        IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Inventory", roleId, userId, stockingDetails);
+                        if (accessCheck != null)
+                        {
+                            return accessCheck;
+                        }
+                    }
+
+                    stockingDetails.IsDeleted = true;
+                    stockingDetails.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        stockingDetails.DeletedByOctaId = userId;
+                        if (stockingDetails.DeletedByUserId != null)
+                        {
+                            stockingDetails.DeletedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        stockingDetails.DeletedByUserId = userId;
+                        if (stockingDetails.DeletedByOctaId != null)
+                        {
+                            stockingDetails.DeletedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.stockingDetails_Repository.Update(stockingDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
             return Ok(newData);
         }
 

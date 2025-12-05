@@ -70,7 +70,7 @@
   "limit": "limit",
   "Genders": "Genders",
   "Sub": "Sub",
-  "Vat for Foreign": "Vat for Foreign",
+  "Vat for Foreign Percentage": "Vat for Foreign Percentage",
   "Vat": "Vat",
   "Arabic": "Arabic",
   "English": "English",
@@ -1411,26 +1411,14 @@
   "TwoWaysPrice" : "Two Ways Price",
   "Deduction Percentage after cutoff date": "Deduction Percentage after cutoff date",
   "Attendance Report" : "Attendance Report",
+  "Conduct Report" : "Conduct Report",
+  "Conduct Types" : "Conduct Types",
+  "Procedure Types" : "Procedure Types",
+  "Login" : "Login",
+  "Student Issue Report" : "Student Issue Report",
+  "Student Certificate" : "Student Certificate",
+  "Certificate Name" : "Certificate Name",
+  "Late Time(minutes)" : "Late Time(minutes)"
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"Conduct Types" : "Conduct Types",
-"Procedure Types" : "Procedure Types",
-"Login" : "Login"
 }

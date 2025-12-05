@@ -4,7 +4,7 @@ import { Classroom } from '../../../../Models/LMS/classroom';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
@@ -77,7 +77,8 @@ export class AttendanceComponent {
   constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,
     public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceService: AttendanceService,
-    private loadingService: LoadingService ) { }
+    private loadingService: LoadingService,  private translate: TranslateService
+ ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -120,26 +121,40 @@ export class AttendanceComponent {
     this.router.navigateByUrl(`Employee/Attendance/` + id);
   }
 
-  async Delete(id: number) {
-    const Swal = await import('sweetalert2').then(m => m.default);
+async Delete(id: number) {
+  const translatedTitle = this.translate.instant('Are you sure?');
+  const translatedText = this.translate.instant('You will not be able to recover this item!');
+  const translatedConfirm = this.translate.instant('Yes, delete it!');
+  const translatedCancel = this.translate.instant('No, keep it');
+  const successMessage = this.translate.instant('Deleted successfully');
 
-    Swal.fire({
-      title: 'Are you sure you want to delete this Attendance?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.AttendanceService.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllAttendance(this.CurrentPage, this.PageSize)
-        });
-      }
-    });
-  }
+  const Swal = await import('sweetalert2').then(m => m.default);
 
+  Swal.fire({
+    title: translatedTitle,
+    text: translatedText,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#089B41',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: translatedConfirm,
+    cancelButtonText: translatedCancel,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.AttendanceService.Delete(id, this.DomainName).subscribe({
+        next: () => {
+          this.GetAllAttendance(this.CurrentPage, this.PageSize);
+          this.showSuccessAlert(successMessage);
+        },
+        error: (error) => {
+          console.error('Error deleting attendance:', error);
+          const errorMessage = error.error?.message || this.translate.instant('Failed to delete the attendance');
+          this.showErrorAlert(errorMessage);
+        }
+      });
+    }
+  });
+}
   GetAllSchools() {
     this.Schools = []
     this.Grades = []
@@ -192,35 +207,40 @@ export class AttendanceComponent {
     this.SelectedAcademicYearId = 0
   }
 
-  GetAllAttendance(pageNumber: number, pageSize: number) {
-    this.TableData = []
-    this.IsViewTable = true
-    this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName, pageNumber, pageSize).subscribe(
-      (data) => {
-        this.CurrentPage = data.pagination.currentPage
-        this.PageSize = data.pagination.pageSize
-        this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords
-        this.TableData = data.data
-      },
-      (error) => {
-        if (error.status == 404) {
-          if (this.TotalRecords != 0) {
-            let lastPage = this.TotalRecords / this.PageSize
-            if (lastPage >= 1) {
-              if (this.isDeleting) {
-                this.CurrentPage = Math.floor(lastPage)
-                this.isDeleting = false
-              } else {
-                this.CurrentPage = Math.ceil(lastPage)
-              }
-              // this.GetAllAttendance(this.CurrentPage, this.PageSize)
+GetAllAttendance(pageNumber: number, pageSize: number) {
+  this.TableData = []
+  this.IsViewTable = true
+  this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName, pageNumber, pageSize).subscribe(
+    (data) => {
+      this.CurrentPage = data.pagination.currentPage
+      this.PageSize = data.pagination.pageSize
+      this.TotalPages = data.pagination.totalPages
+      this.TotalRecords = data.pagination.totalRecords
+      this.TableData = data.data
+    },
+    (error) => {
+      if (error.status == 404) {
+        if (this.TotalRecords != 0) {
+          let lastPage = this.TotalRecords / this.PageSize
+          if (lastPage >= 1) {
+            if (this.isDeleting) {
+              this.CurrentPage = Math.floor(lastPage)
+              this.isDeleting = false
+            } else {
+              this.CurrentPage = Math.ceil(lastPage)
             }
           }
+        } else {
+          const errorMessage = error.error?.message || this.translate.instant('Failed to load attendance data');
+          this.showErrorAlert(errorMessage);
         }
+      } else {
+        const errorMessage = error.error?.message || this.translate.instant('An error occurred while loading data');
+        this.showErrorAlert(errorMessage);
       }
-    )
-  }
+    }
+  )
+}
 
   changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
@@ -305,4 +325,34 @@ export class AttendanceComponent {
       this.TableData = [];
     }
   }
+
+  private async showErrorAlert(errorMessage: string) {
+  const translatedTitle = this.translate.instant('Error');
+  const translatedButton = this.translate.instant('Okay');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  Swal.fire({
+    icon: 'error',
+    title: translatedTitle,
+    text: errorMessage,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
+
+private async showSuccessAlert(message: string) {
+  const translatedTitle = this.translate.instant('Success');
+  const translatedButton = this.translate.instant('Okay');
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  Swal.fire({
+    icon: 'success',
+    title: translatedTitle,
+    text: message,
+    confirmButtonText: translatedButton,
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
 }

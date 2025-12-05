@@ -203,6 +203,9 @@ export class AccountingEntriesDetailsComponent {
         this.totalCredit = totalCredit
         this.totalDebit = totalDebit
         this.theDifference = this.totalCredit - this.totalDebit
+      },error=>{
+        console.log(error.error)
+        console.log(error)
       }
     )
   }

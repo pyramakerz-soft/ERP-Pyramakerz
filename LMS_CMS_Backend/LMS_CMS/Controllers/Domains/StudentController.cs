@@ -225,12 +225,56 @@ namespace LMS_CMS_PL.Controllers.Domains
 
 
         [HttpGet("{Id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Student Accounting", "Student Medal", "Academic Sequential Report", "Proof Registration And Success Form", "Proof Registration", "Student Information",
+                "Transferred  From Kindergarten Report", "Add Medal To Student", "Add Certificate To Student" }
+        )]
         public async Task<IActionResult> GetByIDAsync(long Id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
                 query => query.IsDeleted != true && query.ID == Id,
+                query => query.Include(stu => stu.Gender),
+                query => query.Include(stu => stu.AccountNumber));
+
+            if (student == null || student.IsDeleted == true)
+            {
+                return NotFound("No Student found");
+            }
+
+            StudentGetDTO StudentDTO = mapper.Map<StudentGetDTO>(student);
+            Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(StudentDTO.Nationality);
+            if (nationality != null)
+            {
+                StudentDTO.NationalityEnName = nationality.Name;
+                StudentDTO.NationalityArName = nationality.ArName;
+            }
+
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(s => s.StudentID == StudentDTO.ID && s.AcademicYear.IsActive == true && s.IsDeleted != true && s.AcademicYear.IsDeleted != true && s.AcademicYear.School.IsDeleted != true && s.Grade.IsDeleted != true,
+                 query => query.Include(emp => emp.AcademicYear),
+                 query => query.Include(emp => emp.AcademicYear.School)
+                 );
+
+            if (studentGrade != null)
+            {
+                StudentDTO.CurrentSchoolId = studentGrade.AcademicYear.SchoolID;
+                StudentDTO.CurrentSchoolName = studentGrade.AcademicYear.School.Name;
+            }
+
+            return Ok(StudentDTO);
+        }
+
+        [HttpGet("GetByIDByToken")]
+        public async Task<IActionResult> GetByIDByToken()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+
+            Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
+                query => query.IsDeleted != true && query.ID == userId,
                 query => query.Include(stu => stu.Gender),
                 query => query.Include(stu => stu.AccountNumber));
 

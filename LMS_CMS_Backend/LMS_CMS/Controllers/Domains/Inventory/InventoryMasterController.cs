@@ -1143,7 +1143,48 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Unit_Of_Work.inventoryMaster_Repository.Update(sale);
             Unit_Of_Work.SaveChanges();
 
-           
+           if(newSale.DeletedInventoryDetails != null && newSale.DeletedInventoryDetails.Count > 0)
+            {
+                foreach (var item in newSale.DeletedInventoryDetails)
+                {
+                    InventoryDetails salesItem = Unit_Of_Work.inventoryDetails_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (salesItem == null)
+                    {
+                        return NotFound("No SaleItem with this ID");
+                    }
+
+                    if (userTypeClaim == "employee")
+                    {
+                        IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Inventory", roleId, userId, salesItem);
+                        if (accessCheck != null)
+                        {
+                            return accessCheck;
+                        }
+                    }
+
+                    salesItem.IsDeleted = true;
+                    salesItem.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        salesItem.DeletedByOctaId = userId;
+                        if (salesItem.DeletedByUserId != null)
+                        {
+                            salesItem.DeletedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        salesItem.DeletedByUserId = userId;
+                        if (salesItem.DeletedByOctaId != null)
+                        {
+                            salesItem.DeletedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.inventoryDetails_Repository.Update(salesItem);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
             return Ok(newSale);
         }
 
@@ -1176,7 +1217,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("Enter Store ID");
             }
 
-            InventoryMaster sales = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);
+            InventoryMaster sales = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(t => t.ID == id);
 
             if (sales == null)
             {

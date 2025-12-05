@@ -28,7 +28,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long InventoryCategoriesID { get; set; }
         public long InventorySubCategoriesID { get; set; }
         public string InventorySubCategoriesName { get; set; }
-        public long SchoolID { get; set; }
+        public long? SchoolID { get; set; }
         public string SchoolName { get; set; }
         public long GradeID { get; set; }
         public string GradeName { get; set; }

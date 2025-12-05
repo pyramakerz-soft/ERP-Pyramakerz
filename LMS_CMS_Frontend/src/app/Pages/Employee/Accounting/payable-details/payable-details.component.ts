@@ -154,6 +154,12 @@ export class PayableDetailsComponent {
     this.router.navigateByUrl('Employee/Payable');
   }
 
+  CalculateTotal() {
+    const oldTotal =this.payable.payableDetails?.map(s => Number(s.amount) || 0).reduce((a, c) => a + c, 0) || 0;
+    const newTotal =this.payable.newDetails?.map(s => Number(s.amount) || 0).reduce((a, c) => a + c, 0) || 0;
+    this.totalAmount = oldTotal + newTotal;
+  }
+
   GetDocType() {
     this.payableDocTypeService.Get(this.DomainName).subscribe((data) => {
       this.dataTypesData = data;
@@ -161,17 +167,16 @@ export class PayableDetailsComponent {
   }
 
   GetPayableByID() {
-    this.payableService
-      .GetByID(this.PayableID, this.DomainName)
-      .subscribe((data) => {
-        this.payable = data;
-        this.GetAllLinkFilesTypeData()
-        console.log(this.payable)
-        if (this.payable.linkFileID == 5) {
-          this.getSaveData();
-        } else if (this.payable.linkFileID == 6) {
-          this.getBankData();
-        }
+    this.payableService.GetByID(this.PayableID, this.DomainName).subscribe((data) => {
+      this.payable = data;
+      this.GetAllLinkFilesTypeData()
+      console.log(this.payable)
+      if (this.payable.linkFileID == 5) {
+        this.getSaveData();
+      } else if (this.payable.linkFileID == 6) {
+        this.getBankData();
+      }
+      this.CalculateTotal();
       });
   }
 
@@ -449,6 +454,13 @@ export class PayableDetailsComponent {
             },
             (error) => {
               this.isSaveLoading = false;
+              Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
             }
           );
         }
@@ -470,11 +482,22 @@ export class PayableDetailsComponent {
           (error) => {
             console.log(error)
             this.isSaveLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
           }
         );
       }
     }
   }
+
+  // CalcTotal(){
+    
+  // }
 
   GetLinkFiles() {
     this.linkFileService.Get(this.DomainName).subscribe((data) => {
@@ -587,6 +610,7 @@ export class PayableDetailsComponent {
           this.payable.updatedDetails = (this.payable.updatedDetails || []).filter(p => p.id != id);
           this.payable.payableDetails = [...this.payable.payableDetails];
           this.payable.updatedDetails = [...this.payable.updatedDetails];
+          this.CalculateTotal();
         });
       }
     });
@@ -613,8 +637,9 @@ export class PayableDetailsComponent {
       cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-       this.payable.newDetails=this.payable.newDetails.filter(p=>p.id!=id)
-      }
+        this.payable.newDetails=this.payable.newDetails.filter(p=>p.id!=id)
+          this.CalculateTotal();
+        }
     });
   }
 

@@ -61,11 +61,11 @@
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
-      <label class="mb-2" for="schoolPCs"> {{'SchoolPCs'| translate }}</label>
+      <label class="mb-2" for="schoolPCs"> {{'School PCs'| translate }}</label>
       <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolPCs"
         [disabled]="!Data.schoolId" (ngModelChange)="onInputValueChange({ field: 'schoolPCId', value: $event })"
         [(ngModel)]="Data.schoolPCId">
-        <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'SchoolPCs'| translate }}</option>
+        <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'School PCs'| translate }}</option>
         <option *ngFor="let s of schoolPCs" [value]="s.id">{{ s.pcName }}</option>
         <option *ngIf="schoolPCs.length === 0" disabled selected>
           {{'No Data Found'| translate }}
@@ -92,6 +92,8 @@
   </div>
 
   <div class="my-5 flex justify-end space-x-4 items-center rtl:space-x-reverse" *ngIf="mode == 'Edit'">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" />
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" />
     <div class="relative inline-block text-left rtl:text-right" (clickOutside)="showPrintMenu = false">
       <button (click)="togglePrintMenu()" class="text-gray-700 hover:text-blue-600">
         <i class="fa-solid fa-print text-2xl"></i>
@@ -118,8 +120,6 @@
         </div>
       </div>
     </div>
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" />
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" />
   </div>
 
   <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse mb-3">
@@ -239,7 +239,7 @@
             <td *ngIf="!IsActualStockHiddenForBlankPrint"
               class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               <input [(ngModel)]="row.actualStock" type="number"
-                (input)="validateNumberRow($event, 'actualStock' , row)" (ngModelChange)="onStockChangeWhenEditRow(row)"
+                (input)="validateNumberRow($event, 'actualStock' , row)"
                 class="w-full border border-gray-300 px-2 py-1 rounded-md" />
             </td>
             <!-- Show empty input when hiding actual stock (e.g., Blank Print) -->

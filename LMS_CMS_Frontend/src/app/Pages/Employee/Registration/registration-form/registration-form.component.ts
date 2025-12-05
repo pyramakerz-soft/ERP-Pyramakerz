@@ -172,7 +172,7 @@ export class RegistrationFormComponent {
 
   getParentByID() {
     this.parentService
-      .GetByID(this.UserID, this.DomainName)
+      .GetByIDByToken(this.DomainName)
       .subscribe((data) => {
         this.parent = data;
       });

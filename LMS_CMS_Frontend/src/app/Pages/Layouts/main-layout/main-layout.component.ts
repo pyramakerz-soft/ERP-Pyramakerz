@@ -170,11 +170,6 @@ export class MainLayoutComponent {
     } else if (this.User_Data_After_Login.type == "parent") {
       this.menuItems = [
         {
-          label: this.translateFunction('Dashboard'),
-          route: '#',
-          icon: 'Dashboard'
-        },
-        {
           label: this.translateFunction('Registrations'),
           subItems: [
             {

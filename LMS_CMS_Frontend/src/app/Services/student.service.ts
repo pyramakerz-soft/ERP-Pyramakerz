@@ -68,6 +68,19 @@ export class StudentService {
 
     return this.http.get<Student>(`${this.baseUrl}/Student/${id}`, { headers })
   }
+  
+  GetByIDByToken(DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<Student>(`${this.baseUrl}/Student/GetByIDByToken`, { headers })
+  }
 
   GetByAcademicYearID(id:number,DomainName?:string){
     if(DomainName!=null) {

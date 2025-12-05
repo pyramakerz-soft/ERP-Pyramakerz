@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Archiving
     public class ArchivingEditDTO
     {
 
-        public long Id { get; set; }
+        public long ID { get; set; }
         public string Name { get; set; } 
     }
 }
