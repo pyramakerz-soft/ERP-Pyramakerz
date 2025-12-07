@@ -129,11 +129,25 @@
                 <tr *ngFor="let row of chunk.data; let i = index" 
                     [ngClass]="{ 'bg-gray-100': i % 2 === 1 }"
                     class="pdf-table-row">
-                    <td *ngFor="let header of chunk.headers" 
-                        class="p-2 border break-words whitespace-normal align-top"
-                        [ngClass]="{'details-cell': header.toLowerCase() === 'details'}">
-                        {{ row[header] }}
-                    </td>
+<td *ngFor="let header of chunk.headers" 
+    class="p-2 border break-words whitespace-normal align-top"
+    [ngClass]="{'details-cell': header.toLowerCase() === 'details', 
+                'image-cell': header.toLowerCase().includes('medal') || header.toLowerCase().includes('الميدالية')}">
+  
+  <!-- Check if this is an image column and value is an image URL -->
+  <ng-container *ngIf="(header.toLowerCase().includes('medal') || header.toLowerCase().includes('الميدالية')) 
+                      && row[header] && (row[header].startsWith('http') || row[header].startsWith('data:'))">
+    <img [src]="row[header]" 
+         style="max-width: 50px; max-height: 50px; width: auto; height: auto;"
+         alt="Medal"
+         onerror="this.style.display='none'">
+  </ng-container>
+  
+  <ng-container *ngIf="!(header.toLowerCase().includes('medal') || header.toLowerCase().includes('الميدالية')) 
+                      || !row[header] || (!row[header].startsWith('http') && !row[header].startsWith('data:'))">
+    {{ row[header] }}
+  </ng-container>
+</td>
                 </tr>
             </tbody>
         </table>

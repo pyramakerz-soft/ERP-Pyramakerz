@@ -465,5 +465,84 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        [HttpGet("for-student")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "student" })]
+        public async Task<IActionResult> GetDiscussions()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long studentId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userTypeClaim != "student")
+            {
+                return BadRequest("This endpoint is only available for students.");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(
+                 s => s.IsDeleted != true && s.ID == studentId);
+
+            if (student == null)
+            {
+                return NotFound("Student not found.");
+            }
+
+            StudentGrade studentGrade = await Unit_Of_Work.studentGrade_Repository
+                      .FindByIncludesAsync(sg => sg.IsDeleted != true
+                                            && sg.StudentID == studentId
+                                            && sg.AcademicYear.IsActive == true,
+                                        q => q.Include(sg => sg.AcademicYear)
+                                              .Include(sg => sg.Grade));
+
+            if (studentGrade == null)
+            {
+                // or NotFound 
+                return Ok(new List<DiscussionRoomGetDTO>());
+            }
+
+            List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository
+                .FindBy(sc => sc.IsDeleted != true
+                              && sc.StudentID == studentId
+                              && sc.Classroom.AcademicYearID == studentGrade.AcademicYearID
+                              && sc.Classroom.GradeID == studentGrade.GradeID)
+                .ToList();
+
+            if (!studentClassrooms.Any())
+            {
+                return Ok(new List<DiscussionRoomGetDTO>());
+            }
+
+            var studentClassroomIds = studentClassrooms.Select(sc => sc.ID).ToList();
+
+            var discussionRoomLinks = Unit_Of_Work.discussionRoomStudentClassroom_Repository
+                   .FindBy(dsc => dsc.IsDeleted != true
+                                 && studentClassroomIds.Contains(dsc.StudentClassroomID))
+                   .ToList();
+
+            if (!discussionRoomLinks.Any())
+            {
+                return Ok(new List<DiscussionRoomGetDTO>());
+            }
+
+            var discussionRoomIds = discussionRoomLinks.Select(d => d.DiscussionRoomID).Distinct().ToList();
+
+            var discussionRooms = Unit_Of_Work.discussionRoom_Repository
+                 .FindBy(d => d.IsDeleted != true && discussionRoomIds.Contains(d.ID))
+                 .ToList();
+
+            List<DiscussionRoomGetDTO> dto = mapper.Map<List<DiscussionRoomGetDTO>>(discussionRooms);
+
+            foreach (var discussionRoom in dto)
+            {
+                discussionRoom.ImageLink = _fileService.GetFileUrl(discussionRoom.ImageLink, Request, HttpContext);
+            }
+
+            return Ok(dto);
+        }
+
     }
+
 }

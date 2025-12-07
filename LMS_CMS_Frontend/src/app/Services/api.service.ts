@@ -23,7 +23,6 @@ export class ApiService {
     // var Header = hostname.split('.')[0] 
       
     var Header = 'Domain_One';        
-
     return Header;
   }
 }

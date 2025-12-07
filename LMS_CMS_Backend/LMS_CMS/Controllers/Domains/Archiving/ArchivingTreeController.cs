@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Linq;
 using System.Net;
 
@@ -594,27 +595,30 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             return Ok();
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPut]
         [Authorize_Endpoint_(
-                allowedTypes: new[] { "octa", "employee" },
-                pages: new[] { "Archiving" } )]
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1, 
+            pages: new[] { "Archiving" } 
+        )]
 
-        public async Task<IActionResult> Update ( [FromBody] ArchivingEditDTO newArchive)
-        {
-
+        public async Task<IActionResult> Update(ArchivingEditDTO newArchive)
+        { 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
             if (userIdClaim == null || userTypeClaim == null)
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-
-
-            if (newArchive.Id == 0)
+             
+            if (newArchive.ID == 0)
             {
                 return BadRequest("Enter Archiving Tree ID");
             }
@@ -628,11 +632,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
 
             ArchivingTree archivingTree =  Unit_Of_Work.archivingTree_Repository
-                   .First_Or_Default(t => t.IsDeleted != true && t.ID == newArchive.Id);
+                   .First_Or_Default(t => t.IsDeleted != true && t.ID == newArchive.ID);
 
             if (archivingTree == null)
             {
                 return NotFound("No Archiving with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Archiving", roleId, userId, archivingTree);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             if (archivingTree.Name == "Content")

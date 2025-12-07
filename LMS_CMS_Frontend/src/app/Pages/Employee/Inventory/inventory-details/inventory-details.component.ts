@@ -641,14 +641,8 @@ export class InventoryDetailsComponent {
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData || [];
         this.Data.newDetailsWhenEdit =this.Data.newDetailsWhenEdit || []
-        this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe(
-            (d) => {},
-            (error) => {}
-          );
-        this.salesItemServ.Add(this.Data.newDetailsWhenEdit, this.DomainName).subscribe(
-            (d) => {},
-            (error) => {}
-          );
+        this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => {},(error) => {});
+        this.salesItemServ.Add(this.Data.newDetailsWhenEdit, this.DomainName).subscribe((d) => {},(error) => {});
         this.salesServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
             this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
@@ -736,9 +730,6 @@ export class InventoryDetailsComponent {
             this.Data.deletedInventoryDetails.push(row.id)
             this.TableData = this.TableData.filter((s) => s.id != row.id);
             this.TotalandRemainingCalculate();
-            // this.salesItemServ.Delete(row.id, this.DomainName).subscribe(async (D) => {
-            //     // await this.GetTableDataByID();
-            //   });
           } else {
             this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
               (s) => s.id != row.id
@@ -913,37 +904,11 @@ export class InventoryDetailsComponent {
     this.Data.visaAmount = Number(this.Data.visaAmount) || 0;
     return new Promise((resolve) => {
       if (this.mode == 'Create') {
-        // this.Data.total = this.Data.inventoryDetails.reduce(
-        //   (sum, item) => sum + (item.totalPrice || 0),
-        //   0
-        // );
-        // this.Data.remaining =
-        //   +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
-
-        this.Data.total = this.round2(
-          this.Data.inventoryDetails.reduce(
-            (sum, item) => sum + (item.totalPrice || 0),
-            0
-          )
-        );
-        this.Data.remaining = this.round2(
-          this.Data.total - (this.Data.cashAmount + this.Data.visaAmount)
-        );
+        this.Data.total = this.round2(this.Data.inventoryDetails.reduce((sum, item) => sum + (item.totalPrice || 0),0));
+        this.Data.remaining = this.round2(this.Data.total - (this.Data.cashAmount + this.Data.visaAmount));
       } else if (this.mode == 'Edit') {
-        // this.Data.total = this.TableData.reduce(
-        //   (sum, item) => sum + (item.totalPrice || 0),
-        //   0
-        // );
-        // this.Data.remaining =
-        //   +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
-
         this.Data.total = this.round2(this.TableData.reduce((sum, item) => sum + Number(item.totalPrice || 0), 0));
         this.Data.remaining = this.round2(this.Data.total - (this.Data.cashAmount + this.Data.visaAmount));
-  
-        console.log('Cash:', this.Data.cashAmount);
-        console.log('Visa:', this.Data.visaAmount);
-        console.log('Total:', this.Data.total);
-        console.log('Remaining:', this.Data.remaining);
       }
 
       resolve();
@@ -1446,27 +1411,26 @@ export class InventoryDetailsComponent {
     this.SaleId = 0;
   }
 
-  validateNumberRow(event: any,field: keyof InventoryDetails,row: InventoryDetails): void {
-    const value = event.target.value;
-    const numValue = Number(value);
+  validateNumberRow(event: any, field: keyof InventoryDetails, row: InventoryDetails): void {
+    let value = event.target.value;
 
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof row[field] === 'string') {
-        row[field] = '' as never;
-      }
+    // PRICE → allow decimals only
+    if (field === 'price') {
+      value = value.replace(/[^0-9.]/g, '');  // remove minus & anything else
+      event.target.value = value;
+      row[field] = value ? Number(value) : 0;
+
+      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
+      return;
     }
 
+    // QUANTITY → digits only
     if (field === 'quantity') {
-      let value = event.target.value;
       value = value.replace(/[^0-9]/g, '');
       event.target.value = value;
-      if (isNaN(value) || value === '') {
-        event.target.value = '';
-        if (typeof row[field] === 'string') {
-          row[field] = '' as never;
-        }
-      }
+      row[field] = value ? Number(value) : 0;
+
+      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
       return;
     }
   }
