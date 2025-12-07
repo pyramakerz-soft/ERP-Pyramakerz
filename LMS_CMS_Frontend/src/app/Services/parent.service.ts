@@ -16,8 +16,8 @@ export class ParentService {
     this.baseUrl=ApiServ.BaseUrl
     this.header = ApiServ.GetHeader()
   }
-
-  GetByID(id:number,DomainName?:string){
+ 
+  GetByIDByToken(DomainName?:string){
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -27,7 +27,7 @@ export class ParentService {
     .set('domain-name', this.header)
     .set('Content-Type', 'application/json')
     
-    return this.http.get<Parent>(`${this.baseUrl}/Parent/${id}`, { headers })
+    return this.http.get<Parent>(`${this.baseUrl}/Parent/GetByIDByToken`, { headers })
   }
 
   GetByStudentID(id:number,DomainName?:string){

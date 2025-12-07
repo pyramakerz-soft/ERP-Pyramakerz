@@ -9,7 +9,7 @@ namespace LMS_CMS_PL.Services
 {
     public class CreateStudentService
     {
-        public async Task<StudentGetDTO> CreateStudentDtoObj(UOW Unit_Of_Work, long registrationFormParentID)
+        public async Task<StudentGetForCreateDTO> CreateStudentDtoObj(UOW Unit_Of_Work, long registrationFormParentID)
         {
             var registerationFormParent = Unit_Of_Work.registerationFormParent_Repository
                 .First_Or_Default(r => r.ID == registrationFormParentID && r.IsDeleted != true); 
@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Services
                 parentId = Convert.ToInt64(registerationFormParent.ParentID);
             }
 
-            var studentDto = new StudentGetDTO
+            var studentDto = new StudentGetForCreateDTO
             {
                 en_name = submittionEName?.TextAnswer,
                 ar_name = submittionAName?.TextAnswer,
@@ -73,7 +73,7 @@ namespace LMS_CMS_PL.Services
             return submittion;
         }
 
-        public async Task<Student> CreateNewStudent(UOW Unit_Of_Work, StudentGetDTO studentDto, string userTypeClaim, long userId, long startAcademicYearID)
+        public async Task<Student> CreateNewStudent(UOW Unit_Of_Work, StudentGetForCreateDTO studentDto, string userTypeClaim, long userId, long startAcademicYearID)
         {
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 

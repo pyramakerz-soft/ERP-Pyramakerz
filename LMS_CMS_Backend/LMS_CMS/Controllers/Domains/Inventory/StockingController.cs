@@ -341,7 +341,50 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 await Unit_Of_Work.SaveChangesAsync();
             }
 
+            // delete Details 
+            if(newData.DeletedStockingDetails != null && newData.DeletedStockingDetails.Count > 0)
+            {
+                foreach (var item in newData.DeletedStockingDetails)
+                {
+                    StockingDetails stockingDetails = Unit_Of_Work.stockingDetails_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (stockingDetails == null)
+                    {
+                        return NotFound("No Stocking Details with this ID");
+                    }
 
+
+                    if (userTypeClaim == "employee")
+                    {
+                        IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Inventory", roleId, userId, stockingDetails);
+                        if (accessCheck != null)
+                        {
+                            return accessCheck;
+                        }
+                    }
+
+                    stockingDetails.IsDeleted = true;
+                    stockingDetails.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        stockingDetails.DeletedByOctaId = userId;
+                        if (stockingDetails.DeletedByUserId != null)
+                        {
+                            stockingDetails.DeletedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        stockingDetails.DeletedByUserId = userId;
+                        if (stockingDetails.DeletedByOctaId != null)
+                        {
+                            stockingDetails.DeletedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.stockingDetails_Repository.Update(stockingDetails);
+                    Unit_Of_Work.SaveChanges();
+                }
+            }
             return Ok(newData);
         }
 

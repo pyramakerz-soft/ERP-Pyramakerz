@@ -11,7 +11,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long ID { get; set; }
         public DateOnly Date { get; set; }
         public long StudentID { get; set; }
-        public string StudentName { get; set; } // Will use Student.en_name or Student.ar_name
+        public string? studentEnName { get; set; } 
+        public string? studentArName { get; set; } 
         public IssuesTypeDTO IssuesType { get; set; }
         public string? Details { get; set; }
     }
@@ -19,6 +20,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
     public class IssuesTypeDTO
     {
         public long ID { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }

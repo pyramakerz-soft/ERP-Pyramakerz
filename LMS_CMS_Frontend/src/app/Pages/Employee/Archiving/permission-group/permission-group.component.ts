@@ -231,12 +231,12 @@ export class PermissionGroupComponent {
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
 
-closeModal() {
-  document.getElementById('Add_Modal')?.classList.remove('flex');
-  document.getElementById('Add_Modal')?.classList.add('hidden'); 
-  this.permissionGroup = new PermissionGroup(); 
-  this.validationErrors = {};
-}
+  closeModal() {
+    document.getElementById('Add_Modal')?.classList.remove('flex');
+    document.getElementById('Add_Modal')?.classList.add('hidden'); 
+    this.permissionGroup = new PermissionGroup(); 
+    this.validationErrors = {};
+  }
 
   capitalizeField(field: keyof PermissionGroup): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');

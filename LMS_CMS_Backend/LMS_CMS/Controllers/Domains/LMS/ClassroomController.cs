@@ -907,7 +907,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return NotFound("Academic year not found.");
                 }
 
-                StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registrationFormParentID);
+                StudentGetForCreateDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registrationFormParentID);
                 Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, AccademicYearId);
 
                 //StudentAcademicYear studentAcademicYear = new StudentAcademicYear

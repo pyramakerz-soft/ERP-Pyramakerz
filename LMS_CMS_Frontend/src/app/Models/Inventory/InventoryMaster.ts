@@ -48,6 +48,8 @@ export class InventoryMaster {
             public NewAttachments : File [] =[] ,
             public DeletedAttachments : string [] =[] ,
             public inventoryDetails : InventoryDetails [] =[] ,
+            public newDetailsWhenEdit : InventoryDetails [] =[] ,
+            public deletedInventoryDetails : number [] =[] ,
         ) {}
 }
 

@@ -73,7 +73,7 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[33%]">
-        <label class="mb-2 primaryTxt font-medium" for="Vat"> {{ 'Vat for Foreign' | translate }}</label>
+        <label class="mb-2 primaryTxt font-medium" for="Vat"> {{ 'Vat for Foreign Percentage' | translate }}</label>
         <input id="Vat" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (input)="validateNumber($event, 'vatForForeign')" placeholder="{{ 'Enter' | translate }} {{ 'Vat' | translate }}"
             [(ngModel)]="ShopItem.vatForForeign" />
@@ -106,13 +106,19 @@
 
     <div class="flex flex-col w-[49%] mb-4">
         <label class="mb-2 font-medium primaryTxt" for="School"> {{ 'Schools' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
-            [(ngModel)]="ShopItem.schoolID" (change)="onSchoolChange($event)"
-            (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
-            <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
-            <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
-        </select>
+        <div class="flex items-center">
+            <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto w-full" id="School"
+                [(ngModel)]="ShopItem.schoolID" (change)="onSchoolChange($event)"
+                (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                <option [value]="null" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+                <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
+                <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
+            </select>
+            <button type="button" (click)="ShopItem.schoolID = null; SchoolId = 0; ShopItem.gradeID = null; Grades = [];"
+                class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-600">
+                ✖
+            </button>
+        </div>
         <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID']
             }}</span>
     </div>
@@ -135,7 +141,7 @@
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Gender"
             [(ngModel)]="ShopItem.genderID">
             <option [value]="0 || null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Gender' | translate }}</option>
-            <option value="0">  {{ 'All' | translate }}{{ 'Genders' | translate }}</option>
+            <option value="0">  {{ 'All' | translate }} {{ 'Genders' | translate }}</option>
             <option *ngFor="let g of gender" [value]="g.id">{{ g.name }}</option>
             <option *ngIf="gender.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>

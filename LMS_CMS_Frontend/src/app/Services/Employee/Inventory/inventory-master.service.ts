@@ -93,6 +93,12 @@ export class InventoryMasterService {
       });
     }
 
+    if (master.deletedInventoryDetails && master.deletedInventoryDetails.length > 0) {
+      master.deletedInventoryDetails.forEach((id, index) => {
+        formData.append(`deletedInventoryDetails[${index}]`, id.toString());
+      });
+    }
+
     if (master.inventoryDetails && master.inventoryDetails.length > 0) {
       master.inventoryDetails.forEach((item, index) => {
         formData.append(`inventoryDetails[${index}][price]`, (item.price ?? 0).toString());
@@ -158,6 +164,12 @@ export class InventoryMasterService {
     if (master.NewAttachments && master.NewAttachments.length > 0) {
       master.NewAttachments.forEach((file, index) => {
         formData.append('NewAttachments', file);
+      });
+    }
+
+    if (master.deletedInventoryDetails && master.deletedInventoryDetails.length > 0) {
+      master.deletedInventoryDetails.forEach((id, index) => {
+        formData.append(`deletedInventoryDetails[${index}]`, id.toString());
       });
     }
 

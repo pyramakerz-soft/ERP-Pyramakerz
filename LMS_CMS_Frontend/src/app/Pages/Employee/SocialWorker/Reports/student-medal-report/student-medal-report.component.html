@@ -120,12 +120,26 @@
 </div>
 
 <!-- Hidden PDF Container -->
-<div class="absolute -top-[9999px] -left-[9999px]">
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Medal Student Report'"
             [infoRows]="getInfoRows()"
             [tableHeaders]="['Medal Name', 'Added By']"
             [tableData]="reportsForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->
+
+<!-- في student-medal-report.component.html -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" 
+            [school]="school" 
+            [fileName]="'Medal Student Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="currentLang === 'ar' ? ['اسم الميدالية', 'تم الإضافة بواسطة'] : ['Medal Name', 'Added By']"
+            [tableData]="reportsForPDF"
+            #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
