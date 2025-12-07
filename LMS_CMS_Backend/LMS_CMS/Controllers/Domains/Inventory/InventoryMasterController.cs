@@ -1185,6 +1185,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     Unit_Of_Work.SaveChanges();
                 }
             }
+
             return Ok(newSale);
         }
 

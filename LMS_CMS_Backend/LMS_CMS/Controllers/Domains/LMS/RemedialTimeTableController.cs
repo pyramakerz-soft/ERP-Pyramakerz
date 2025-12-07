@@ -149,7 +149,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         PeriodIndex = p.PeriodIndex,
                         RemedialTimeTableClasses = mapper.Map<List<RemedialTimeTableClassesGetDTO>>(
                         p.RemedialTimeTableClasses
-                         .Where(c => c.IsDeleted != true) // 🔍 Filter here
+                         .Where(c => c.IsDeleted != true && c.RemedialClassroom.IsDeleted != true) // 🔍 Filter here
                          .ToList()
                     )
                     }).ToList()
