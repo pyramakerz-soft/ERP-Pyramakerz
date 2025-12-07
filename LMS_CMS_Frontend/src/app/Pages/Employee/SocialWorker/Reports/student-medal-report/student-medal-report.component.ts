@@ -321,7 +321,6 @@ export class StudentMedalReportComponent implements OnInit {
    }
   }
 
-  // إضافة الدوال العربية
   getSchoolNameAr(): string {
     const school = this.schools.find(s => s.id == this.selectedSchoolId);
     return school?.ar_name || school?.name || 'كل المدارس';
@@ -370,7 +369,6 @@ export class StudentMedalReportComponent implements OnInit {
     }
   }
 
-  // دوال التحقق التي كانت مفقودة
   OrCheck(): boolean {
     if (this.reportType === 'employee') {
       return !this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId;
@@ -424,10 +422,12 @@ export class StudentMedalReportComponent implements OnInit {
           summary: this.getInfoRows(), 
           table: {
             headers: {
-              en: ['Medal Name', 'Added By'],
-              ar: ['اسم الميدالية', 'تم الإضافة بواسطة']
+              en: ['Medal', 'Medal Name', 'Added By'], // Add Medal column
+              ar: ['الميدالية', 'اسم الميدالية', 'تم الإضافة بواسطة'] // Add Arabic for Medal
             },
             data: reports.map((item: any) => ({
+              'Medal': item.socialWorkerMedalFile || '', // Add medal image
+              'الميدالية': item.socialWorkerMedalFile || '',
               'Medal Name': item.socialWorkerMedalName || '-',
               'اسم الميدالية': item.socialWorkerMedalArName || item.socialWorkerMedalName || '-',
               'Added By': item.insertedByUserName || '-',
@@ -458,35 +458,48 @@ export class StudentMedalReportComponent implements OnInit {
   private prepareExportData(): void {
     const isArabic = this.currentLang === 'ar';
     
-    // For PDF (object format)
+    // For PDF (object format) - Add Medal image
     this.reportsForPDF = this.medalReports.map((report) => ({
+      'Medal': report.socialWorkerMedalFile || '', // Add medal image URL
       'Medal Name': isArabic ? (report.socialWorkerMedalName || report.socialWorkerMedalName) : report.socialWorkerMedalName,
       'Added By': report.insertedByUserName,
       'اسم الميدالية': report.socialWorkerMedalName || report.socialWorkerMedalName,
       'تم الإضافة بواسطة': report.insertedByUserName
     }));
 
-    // For Excel (array format)
+    // For Excel (array format) - Add medal image URL as text
     this.reportsForExport = this.medalReports.map((report) => [
+      report.socialWorkerMedalFile || '', // Add medal image URL
       report.socialWorkerMedalName,
       report.insertedByUserName
     ]);
   }
 
-  async DownloadAsPDF() {
-    const Swal = await import('sweetalert2').then(m => m.default);
+async DownloadAsPDF() {
+  const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForPDF.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF();
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
+  if (this.reportsForPDF.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  // Convert images to base64 before exporting
+  this.isExporting = true;
+  try {
+    this.reportsForPDF = await this.convertImagesToBase64(this.reportsForPDF);
+  } catch (error) {
+    console.error('Image conversion failed, proceeding with original URLs:', error);
+  }
+  
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => {
+      this.showPDF = false;
+      this.isExporting = false;
+    }, 2000);
+  }, 500);
+}
 
   async Print() {
     const Swal = await import('sweetalert2').then(m => m.default);
@@ -588,27 +601,29 @@ export class StudentMedalReportComponent implements OnInit {
       );
 
       const isArabic = this.currentLang === 'ar';
-      
-      let tableHeaders: string[];
-      let tableData: any[][];
-      
-      if (isArabic) {
-        tableHeaders = ['اسم الميدالية', 'تم الإضافة بواسطة'];
-        tableData = this.medalReports.map((report) => {
-          return [
-            report.socialWorkerMedalName || report.socialWorkerMedalName || '-',
-            report.insertedByUserName || '-'
-          ];
-        });
-      } else {
-        tableHeaders = ['Medal Name', 'Added By'];
-        tableData = this.medalReports.map((report) => {
-          return [
-            report.socialWorkerMedalName || '-',
-            report.insertedByUserName || '-'
-          ];
-        });
-      }
+      // In the exportExcel() method, update the tableHeaders and tableData:
+let tableHeaders: string[];
+let tableData: any[][];
+
+if (isArabic) {
+  tableHeaders = ['الميدالية', 'اسم الميدالية', 'تم الإضافة بواسطة']; // Add Arabic header
+  tableData = this.medalReports.map((report) => {
+    return [
+      report.socialWorkerMedalFile || '', // Add medal image URL
+      report.socialWorkerMedalName || report.socialWorkerMedalName || '-',
+      report.insertedByUserName || '-'
+    ];
+  });
+} else {
+  tableHeaders = ['Medal', 'Medal Name', 'Added By']; // Add English header
+  tableData = this.medalReports.map((report) => {
+    return [
+      report.socialWorkerMedalFile || '', // Add medal image URL
+      report.socialWorkerMedalName || '-',
+      report.insertedByUserName || '-'
+    ];
+  });
+}
 
       const excelOptions = {
         mainHeader: {
@@ -636,4 +651,60 @@ export class StudentMedalReportComponent implements OnInit {
       this.isExporting = false;
     }
   }
+
+  // Add this method to student-medal-report.component.ts
+private async convertImagesToBase64(data: any[]): Promise<any[]> {
+  const convertedData = [];
+  
+  for (const item of data) {
+    const convertedItem = { ...item };
+    
+    // Check if this item has a medal image
+    if (item['Medal'] && (item['Medal'].startsWith('http') || item['Medal'].startsWith('https'))) {
+      try {
+        convertedItem['Medal'] = await this.convertImgToBase64URL(item['Medal']);
+        if (convertedItem['الميدالية']) {
+          convertedItem['الميدالية'] = convertedItem['Medal'];
+        }
+      } catch (error) {
+        console.error('Failed to convert image to base64:', error);
+        // Keep original URL if conversion fails
+      }
+    }
+    
+    convertedData.push(convertedItem);
+  }
+  
+  return convertedData;
+}
+
+private convertImgToBase64URL(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject('Could not get canvas context');
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      try {
+        const dataURL = canvas.toDataURL('image/png');
+        resolve(dataURL);
+      } catch (e) {
+        console.error('toDataURL failed:', e);
+        reject(e);
+      }
+    };
+    img.onerror = (e) => {
+      console.error('Failed to load image', e);
+      reject(e);
+    };
+    img.src = url;
+  });
+}
 }

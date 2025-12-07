@@ -130,14 +130,13 @@
     </div>
 </div> -->
 
-<!-- في student-medal-report.component.html -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" 
             [school]="school" 
             [fileName]="'Medal Student Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="currentLang === 'ar' ? ['اسم الميدالية', 'تم الإضافة بواسطة'] : ['Medal Name', 'Added By']"
+            [tableHeaders]="currentLang === 'ar' ? ['الميدالية', 'اسم الميدالية', 'تم الإضافة بواسطة'] : ['Medal', 'Medal Name', 'Added By']"
             [tableData]="reportsForPDF"
             #pdfComponentRef>
         </app-pdf-print>

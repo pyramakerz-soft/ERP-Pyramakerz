@@ -29,7 +29,7 @@
     </div>
 </div>
 
-<div class="flex justify-start items-center mt-2">
+<div class="flex justify-start items-center mt-2 rtl:space-x-reverse space-x-4">
     <div class="w-[80%]">
         <label for="Student" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Student' | translate }}</label>
         <ng-container *ngIf="!isSearching">
@@ -53,10 +53,10 @@
     </div>
 
     <div class="mt-7 ml-2">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
+        <button class="p-3 font-medium text-xl rounded-lg " (click)="ViewReport()"
             [disabled]="!SelectedSchoolId || !SelectedStudentId || !SelectedYearId"
             [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedStudentId || !SelectedYearId, 'secondaryBg text-white': SelectedSchoolId && SelectedStudentId && SelectedYearId }">
-            View Report</button>
+            {{'View Report' | translate}}</button>
     </div>
 </div>
 
@@ -115,7 +115,7 @@
         <!-- Student Name -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">This is to certify that Student / {{getStudentName()}}</div>
+                <div class="text-lg leading-8"><strong>This is to certify that Student /</strong>{{getStudentName()}}</div>
             </div>
             <div class="w-1/2 text-right">
                 <div class="text-lg leading-8"><strong>نفيدكم بأن الطالب/ة /</strong>{{getStudentArabicName()}} </div>
@@ -125,7 +125,7 @@
         <!-- Nationality -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">{{getNationality()}} Nationality</div>
+                <div class="text-lg leading-8">{{getNationality()}}<strong> Nationality</strong></div>
             </div>
             <div class="w-1/2 text-right">
                 <div class="text-lg leading-8"> <strong>تحمل الجنسية /</strong> {{getArabicNationality()}}</div>
@@ -135,7 +135,7 @@
         <!-- Identity Number -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">and identity No. {{DataToPrint?.student?.nationalID || 'N/A'}}</div>
+                <div class="text-lg leading-8"><strong>and identity No. </strong>{{DataToPrint?.student?.nationalID || 'N/A'}}</div>
             </div>
             <div class="w-1/2 text-right">
                 <div class="text-lg leading-8">{{DataToPrint?.student?.nationalID || 'غير متوفر'}} <strong>/ هوية رقم</strong></div>
@@ -145,7 +145,7 @@
         <!-- Passport Number -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">Hold Passport No. {{getPassportNo()}}</div>
+                <div class="text-lg leading-8"><strong>Hold Passport No. </strong>{{getPassportNo()}}</div>
             </div>
             <div class="w-1/2 text-right">
                 <div class="text-lg leading-8">{{getPassportNo()}} <strong>/ و جواز سفر رقم</strong></div>
@@ -155,7 +155,7 @@
         <!-- Registration -->
         <div class="flex justify-between">
             <div class="w-1/2 text-left">
-                <div class="text-lg leading-8">Is registered in this school this year {{DataToPrint?.student?.startAcademicYearName}}</div>
+                <div class="text-lg leading-8"><strong>Is registered in this school this year </strong>{{DataToPrint?.student?.startAcademicYearName}}</div>
             </div>
             <div class="w-1/2 text-right">
                 <div class="text-lg leading-8">{{DataToPrint?.student?.startAcademicYearName}} <strong>مقيدة لدينا من للعام الدراسي الحالى</strong></div>
@@ -202,23 +202,23 @@
         },
         {
           keyEn: 'This is to certify that Student / ' + getStudentName(),
-          keyAr: 'نفيدكم بأن الطالبة / ' + getStudentArabicName()
+          keyAr: 'نفيدكم بأن الطالب/ة / ' + getStudentArabicName()
         },
         {
           keyEn: getNationality() + ' Nationality',
-          keyAr: 'تحمل الجنسية / ' + getArabicNationality()
+          keyAr: 'تحمل الجنسية : ' + getArabicNationality()
         },
         {
-          keyEn: 'and identity No. ' + (DataToPrint?.student?.nationalID || 'N/A'),
-          keyAr: (DataToPrint?.student?.nationalID || 'غير متوفر') + ' / هوية رقم'
+          keyEn: 'and identity No. ' + (DataToPrint?.student?.nationalID || '-'),
+          keyAr: (DataToPrint?.student?.nationalID || '-') + ' : هوية رقم'
         },
         {
           keyEn: 'Hold Passport No.  ' + getPassportNo(),
-          keyAr: getPassportNo() + ' / و جواز سفر رقم'
+          keyAr: getPassportNo() + ' : و جواز سفر رقم'
         },
         {
-          keyEn: 'Is registered in this school this year ' + getCurrentGrade(),
-          keyAr: getCurrentGrade() + '/ مقيدة لدينا من للعام الدراسي الحالى'
+          keyEn: 'Is registered in this school this year: ' + DataToPrint?.student?.startAcademicYearName,
+          keyAr: DataToPrint?.student?.startAcademicYearName + ' : مقيدة لدينا من للعام الدراسي الحالى '
         },
         {
           keyEn: 'And he/she was given this certificate to be presented to whom it may concern, without bearing any responsibility on the part of the school.',
