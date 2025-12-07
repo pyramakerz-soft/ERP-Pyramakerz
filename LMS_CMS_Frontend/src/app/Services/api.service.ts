@@ -9,7 +9,7 @@ export class ApiService {
   BaseUrlSignalR = 'https://localhost:7205/';
 
   // BaseUrl = 'http://localhost:5094/api/with-domain';
-  // BaseUrlOcta = 'http://localhost:5094/api';
+  // BaseUrlOcta = 'http://localhost:5094/api'; 
   // BaseUrlSignalR = 'http://localhost:5094/'; 
 
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
@@ -22,7 +22,7 @@ export class ApiService {
     // const hostname = window.location.hostname; 
     // var Header = hostname.split('.')[0] 
       
-    var Header = 'domain';        
+    var Header = 'Domain_One';        
 
     return Header;
   }

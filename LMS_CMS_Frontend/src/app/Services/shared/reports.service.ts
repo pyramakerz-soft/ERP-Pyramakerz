@@ -11,16 +11,6 @@ export class ReportsService {
 
   constructor() { }
 
-applyBorderToRow(row: any) {
-  row.eachCell((cell: any) => {
-    cell.border = {
-      top:    { style: 'thin', color: { argb: 'FF0000FF' } },
-      left:   { style: 'thin', color: { argb: 'FF0000FF' } },
-      bottom: { style: 'thin', color: { argb: 'FF0000FF' } },
-      right:  { style: 'thin', color: { argb: 'FF0000FF' } }
-    };
-  });
-}
   DownloadAsPDF(name: string) {
     const elements = document.querySelectorAll('.print-area');
 
@@ -99,148 +89,125 @@ applyBorderToRow(row: any) {
       reader.readAsDataURL(blob);
     });
   }
-async generateExcelReport(options: {
-  mainHeader?: { en: string; ar: string };
-  subHeaders?: { en: string; ar: string }[];
 
-  infoRows?: { en: string; ar: string }[] |
-             { key: string; value: string | number | boolean | Date | null | undefined }[];
+  async generateExcelReport(options: {
+    mainHeader?: { en: string; ar: string };
+    subHeaders?: { en: string; ar: string }[];
 
-  reportImage?: string;
-  isRtl?: boolean;
-  tables: {
-    title?: string;
-    headers: string[];
-    data: (string | number | boolean)[][];
-  }[];
+    infoRows?: { en: string; ar: string }[] |
+               { key: string; value: string | number | boolean | Date | null | undefined }[];
 
-  filename?: string;
+    reportImage?: string;
+    isRtl?: boolean;
+    tables: {
+      title?: string;
+      headers: string[];
+      data: (string | number | boolean)[][];
+    }[];
 
-}) {
+    filename?: string;
 
-  const ExcelJS = await import('exceljs');
-  const Excel = ExcelJS.default || ExcelJS;
+  }) {
 
-  const workbook = new Excel.Workbook();
-  const worksheet = workbook.addWorksheet("Report");
+    const ExcelJS = await import('exceljs');
+    const Excel = ExcelJS.default || ExcelJS;
 
- const applyBorderToRow = (row: any) => {
-  row.eachCell((cell: any) => {
-    cell.border = {
-      top:    { style: 'thin', color: { argb: 'FF0000FF' } },
-      left:   { style: 'thin', color: { argb: 'FF0000FF' } },
-      bottom: { style: 'thin', color: { argb: 'FF0000FF' } },
-      right:  { style: 'thin', color: { argb: 'FF0000FF' } }
-    };
-  });
-};
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet("Report");
 
+    worksheet.mergeCells(`A1:D1`);
+    worksheet.getCell(`A1`).value = options.mainHeader?.en;
+    worksheet.getCell(`A1`).font = { bold: true, size: 16 };
+    worksheet.getCell(`A1`).alignment = { horizontal: 'left' };
 
-  worksheet.mergeCells(`A1:D1`);
-  worksheet.getCell(`A1`).value = options.mainHeader?.en;
-  worksheet.getCell(`A1`).font = { bold: true, size: 16 };
-  worksheet.getCell(`A1`).alignment = { horizontal: 'left' };
-
-  worksheet.mergeCells(`F1:I1`);
-  worksheet.getCell(`F1`).value = options.mainHeader?.ar;
-  worksheet.getCell(`F1`).font = { bold: true, size: 16 };
-  worksheet.getCell(`F1`).alignment = { horizontal: 'right' };
+    worksheet.mergeCells(`F1:I1`);
+    worksheet.getCell(`F1`).value = options.mainHeader?.ar;
+    worksheet.getCell(`F1`).font = { bold: true, size: 16 };
+    worksheet.getCell(`F1`).alignment = { horizontal: 'right' };
 
 
-  options.subHeaders?.forEach((header, i) => {
-    const rowIndex = i + 2;
+    options.subHeaders?.forEach((header, i) => {
+      const rowIndex = i + 2;
 
-    worksheet.mergeCells(`A${rowIndex}:D${rowIndex}`);
-    worksheet.getCell(`A${rowIndex}`).value = header.en;
-    worksheet.getCell(`A${rowIndex}`).alignment = { horizontal: 'left' };
+      worksheet.mergeCells(`A${rowIndex}:D${rowIndex}`);
+      worksheet.getCell(`A${rowIndex}`).value = header.en;
+      worksheet.getCell(`A${rowIndex}`).alignment = { horizontal: 'left' };
 
-    worksheet.mergeCells(`F${rowIndex}:I${rowIndex}`);
-    worksheet.getCell(`F${rowIndex}`).value = header.ar;
-    worksheet.getCell(`F${rowIndex}`).alignment = { horizontal: 'right' };
-  });
+      worksheet.mergeCells(`F${rowIndex}:I${rowIndex}`);
+      worksheet.getCell(`F${rowIndex}`).value = header.ar;
+      worksheet.getCell(`F${rowIndex}`).alignment = { horizontal: 'right' };
+    });
 
-  worksheet.addRow([]);
+    worksheet.addRow([]);
 
+    options.infoRows?.forEach((infoRow: any) => {
+      let englishValue = '';
+      let arabicValue = '';
 
-  options.infoRows?.forEach((infoRow: any) => {
-    let englishValue = '';
-    let arabicValue = '';
+      if ('en' in infoRow && 'ar' in infoRow) {
+        englishValue = infoRow.en || '';
+        arabicValue = infoRow.ar || '';
+      } else {
+        englishValue = infoRow.key || '';
+        arabicValue = infoRow.value instanceof Date
+          ? infoRow.value.toLocaleDateString()
+          : (infoRow.value ?? '').toString();
+      }
 
-    if ('en' in infoRow && 'ar' in infoRow) {
-      englishValue = infoRow.en || '';
-      arabicValue = infoRow.ar || '';
-    } else {
-      englishValue = infoRow.key || '';
-      arabicValue = infoRow.value instanceof Date
-        ? infoRow.value.toLocaleDateString()
-        : (infoRow.value ?? '').toString();
-    }
+      const row = worksheet.addRow([englishValue]);
+      worksheet.mergeCells(`A${row.number}:D${row.number}`);
+      row.alignment = { horizontal: 'left' };
+      row.font = { bold: true };
 
-    const row = worksheet.addRow([englishValue]);
-    worksheet.mergeCells(`A${row.number}:D${row.number}`);
-    row.alignment = { horizontal: 'left' };
-    row.font = { bold: true };
+      const arRow = worksheet.getRow(row.number);
+      arRow.getCell('F').value = arabicValue;
+      worksheet.mergeCells(`F${row.number}:I${row.number}`);
+      arRow.getCell('F').alignment = { horizontal: 'right' };
+      arRow.getCell('F').font = { bold: true };
+    });
 
-    const arRow = worksheet.getRow(row.number);
-    arRow.getCell('F').value = arabicValue;
-    worksheet.mergeCells(`F${row.number}:I${row.number}`);
-    arRow.getCell('F').alignment = { horizontal: 'right' };
-    arRow.getCell('F').font = { bold: true };
+    worksheet.addRow([]);
 
-    applyBorderToRow(row);
-  });
+    for (const table of options.tables) {
 
-  worksheet.addRow([]);
+      if (table.title) {
+        const titleRow = worksheet.addRow([table.title]);
+        titleRow.font = { bold: true, size: 14 };
+        worksheet.mergeCells(`A${titleRow.number}:I${titleRow.number}`);
+        titleRow.alignment = { horizontal: 'center' };
+        worksheet.addRow([]);
+      }
 
-  for (const table of options.tables) {
+      const headerRow = worksheet.addRow(table.headers);
+      headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } }; 
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF6495ED' },
+      };
 
-    // ---- Title Row (with borders)
-    if (table.title) {
-      const titleRow = worksheet.addRow([table.title]);
-      titleRow.font = { bold: true, size: 14 };
-      worksheet.mergeCells(`A${titleRow.number}:I${titleRow.number}`);
-      titleRow.alignment = { horizontal: 'center' };
+      headerRow.eachCell((cell) => {
+        cell.alignment = { horizontal: 'left' };
+      });
+      table.data.forEach((rowData: any[]) => {
+        const dataRow = worksheet.addRow(rowData);
+        dataRow.eachCell((cell) => {
+          cell.alignment = { horizontal: 'left' };
+        });
 
-      applyBorderToRow(titleRow);
+      });
 
       worksheet.addRow([]);
     }
 
-    const headerRow = worksheet.addRow(table.headers);
-    headerRow.font = { bold: true,color: { argb: "FF0000FF" } };
-    headerRow.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: '4472C4' },
-    };
-
-    headerRow.eachCell((cell) => {
-      cell.alignment = { horizontal: 'left' };
+    worksheet.columns.forEach((col) => {
+      col.width = 20;
     });
 
-    applyBorderToRow(headerRow);
+    const FileSaver = await import('file-saver');
+    const saveAs = FileSaver.default || FileSaver;
 
-    // ---- Data Rows (with borders)
-    table.data.forEach((rowData: any[]) => {
-      const dataRow = worksheet.addRow(rowData);
-      dataRow.eachCell((cell) => {
-        cell.alignment = { horizontal: 'left' };
-      });
-
-      applyBorderToRow(dataRow);
-    });
-
-    worksheet.addRow([]);
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), options.filename || "Report.xlsx");
   }
-
-  worksheet.columns.forEach((col) => {
-    col.width = 20;
-  });
-
-  const FileSaver = await import('file-saver');
-  const saveAs = FileSaver.default || FileSaver;
-
-  const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), options.filename || "Report.xlsx");
-}
 }

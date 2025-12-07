@@ -115,6 +115,15 @@ export class StudentIssueReportComponent  implements OnInit {
     }
   }
 
+  clearData(): void {
+    this.studentIssueReports = [];
+    this.reportsForExport = [];
+    this.reportsForExcel = [];
+    this.showTable = false;
+    
+    console.log('All data cleared');
+  }
+
   getStudentsByParentId(){
     this.studentService.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
       this.students = d
@@ -230,6 +239,7 @@ export class StudentIssueReportComponent  implements OnInit {
   }
 
   onFilterChange() {
+     this.clearData();
     this.showTable = false;
     if(this.reportType == 'parent'){
       this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
@@ -252,7 +262,7 @@ export class StudentIssueReportComponent  implements OnInit {
       });
       return;
     }
-
+    this.clearData();
     this.isLoading = true;
     this.showTable = false;
 
@@ -460,7 +470,6 @@ private prepareExportData(): void {
       'Issue Type': issueType,
       'Details': report.details || '-',
       
-      // البيانات بالعربية
       'التاريخ': this.formatDateForArabic(report.date),
       'اسم الطالب': studentName,
       'نوع المشكلة': issueType,
@@ -479,7 +488,14 @@ private prepareExportData(): void {
   
 
   async DownloadAsPDF() {
-    const Swal = await import('sweetalert2').then(m => m.default);
+    const Swal = await import('sweetalert2').then(m => m.default); 
+    
+    if (!this.studentIssueReports || this.studentIssueReports.length === 0) {
+      Swal.fire('Warning', 'No data to export! Please run the report first.', 'warning');
+      return;
+    }
+
+    this.prepareExportData();
 
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
@@ -495,7 +511,13 @@ private prepareExportData(): void {
 
   async Print() {
     const Swal = await import('sweetalert2').then(m => m.default);
-   
+
+    if (!this.studentIssueReports || this.studentIssueReports.length === 0) {
+      Swal.fire('Warning', 'No data to print! Please run the report first.', 'warning');
+      return;
+    } 
+
+    this.prepareExportData();
     if (this.reportsForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
