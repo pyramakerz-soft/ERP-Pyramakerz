@@ -234,7 +234,7 @@ export class InventoryMasterComponent {
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) {   // To prevent non-numeric input
+  validatePageSize(event: any) {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
@@ -271,10 +271,7 @@ export class InventoryMasterComponent {
 
   validateNumber(event: any): void {
     const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      this.PageSize = 0
-    }
+    this.PageSize = 0
   }
 
 }

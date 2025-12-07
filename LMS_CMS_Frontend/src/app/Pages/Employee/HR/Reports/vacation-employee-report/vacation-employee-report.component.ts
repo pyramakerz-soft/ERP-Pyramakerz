@@ -282,8 +282,8 @@ private prepareExportData(): void {
           'Half Day': vac.halfDay ? 'Yes' : 'No',
           'Date From': vac.dateFrom,
           'Date To': vac.dateTo || '-',
-          'Balance': vac.balance,
-          'Used': vac.used,
+          // 'Balance': vac.balance,
+          // 'Used': vac.used,
           'Notes': vac.notes || '-'
         });
       });
@@ -306,8 +306,8 @@ private prepareExportData(): void {
         'Half Day': '-',
         'Date From': '-',
         'Date To': '-',
-        'Balance': '-',
-        'Used': '-',
+        // 'Balance': '-',
+        // 'Used': '-',
         'Notes': '-'
       });
     }
@@ -440,8 +440,8 @@ private prepareExportData(): void {
               'Half Day',
               'Date From',
               'Date To',
-              'Balance',
-              'Used',
+              // 'Balance',
+              // 'Used',
               // 'Remains',
               'Notes'
             ],
