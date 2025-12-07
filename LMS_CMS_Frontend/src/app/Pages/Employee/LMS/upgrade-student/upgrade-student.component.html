@@ -36,14 +36,25 @@
             <option *ngIf="filteredAcademicYearTo.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
-    
-    <div class="w-[20%]">
-        <div class="flex w-full space-x-5 rtl:space-x-reverse items-center">
-            <input type="checkbox" id="Summer" class="w-5 h-5"
-                [(ngModel)]="isSummerCourse" />
-            <label for="Summer" class="text-sm">Summer Course</label>
-        </div> 
+
+    <div class="w-[20%] flex flex-col space-y-3 rtl:space-y-reverse">
+        <div class="w-full">
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center">
+                <input type="checkbox" id="Summer" class="w-5 h-5"
+                    [(ngModel)]="isSummerCourse" (ngModelChange)="onSummerChange()" />
+                <label for="Summer" class="text-sm">Summer Course</label>
+            </div> 
+        </div>
+        
+        <div class="w-full">
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center">
+                <input type="checkbox" id="Transfer" class="w-5 h-5"
+                    [(ngModel)]="isTransferToTheSameGrade" (ngModelChange)="onTransferChange()" />
+                <label for="Transfer" class="text-sm">Transfer To the Same Grade</label>
+            </div> 
+        </div>
     </div>
+    
 
     <div>
         <button class="p-3 rounded-lg"

@@ -82,6 +82,19 @@ export class ArchivingService {
 
     return this.http.post(`${this.baseUrl}/ArchivingTree`, formData, { headers });
   } 
+
+  Edit(archivingTree: ArchivingTree, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`);
+ 
+    return this.http.put(`${this.baseUrl}/ArchivingTree`, archivingTree, { headers });
+  } 
  
   Delete(id: number, DomainName: string) {
     if (DomainName != null) {

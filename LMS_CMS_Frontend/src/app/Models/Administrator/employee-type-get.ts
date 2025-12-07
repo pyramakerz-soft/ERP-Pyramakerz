@@ -3,6 +3,7 @@ export class EmployeeTypeGet {
         public empTypeVId:number =0,
         public id: number = 0,
         public name: string = '',
+        public arabicName: string = '',
         public insertedByUserId :number =0,
     ) { }
 }

@@ -20,6 +20,8 @@ import { SocialWorkerMedalStudent } from '../../../../../Models/SocialWorker/soc
 import { Student } from '../../../../../Models/student';
 import { InitLoader } from '../../../../../core/Decorator/init-loader.decorator';
 import { LoadingService } from '../../../../../Services/loading.service';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-student-medal-report',
@@ -36,6 +38,8 @@ export class StudentMedalReportComponent implements OnInit {
   reportType: string = 'employee';
   DomainName: string = '';
 
+  currentLang: string = 'en';
+
   // Filter properties (all mandatory)
   selectedSchoolId: number = 0;
   selectedGradeId: number = 0;
@@ -47,14 +51,15 @@ export class StudentMedalReportComponent implements OnInit {
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
-  Student: Student= new Student();
+  Student: Student = new Student();
 
   // Report data
   medalReports: SocialWorkerMedalStudent[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   isExporting: boolean = false;
-  reportsForExcel: any[] = [];
+  showViewReportBtn: boolean = false;
+  reportsForPDF: any[] = [];
 
   // Language and RTL
   isRtl: boolean = false;
@@ -92,6 +97,7 @@ export class StudentMedalReportComponent implements OnInit {
     this.UserID = this.User_Data_After_Login.id;
     this.reportType = this.route.snapshot.data['reportType'] || 'employee';
     console.log(this.reportType)
+    
     if(this.reportType == 'parent'){
       this.getStudentsByParentId()
     }
@@ -104,15 +110,18 @@ export class StudentMedalReportComponent implements OnInit {
     
       this.studentService.GetByID(this.UserID,this.DomainName).subscribe((d)=>{
         console.log(d)
-        this.Student =d
+        this.Student = d
       },error=>{
         console.log(error)
       })
     }
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
+      this.currentLang = direction === 'rtl' ? 'ar' : 'en'; 
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+    this.currentLang = this.isRtl ? 'ar' : 'en';
   }
 
   ngOnDestroy(): void { 
@@ -151,9 +160,18 @@ export class StudentMedalReportComponent implements OnInit {
         this.selectedClassId = 0;
         this.students = [];
         this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading grades:', error);
       }
+    } else {
+      this.grades = [];
+      this.selectedGradeId = 0;
+      this.classes = [];
+      this.selectedClassId = 0;
+      this.students = [];
+      this.selectedStudentId = 0;
+      this.onFilterChange();
     }
   }
 
@@ -168,9 +186,16 @@ export class StudentMedalReportComponent implements OnInit {
         this.selectedClassId = 0;
         this.students = [];
         this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading classes:', error);
       }
+    } else {
+      this.classes = [];
+      this.selectedClassId = 0;
+      this.students = [];
+      this.selectedStudentId = 0;
+      this.onFilterChange();
     }
   }
 
@@ -186,13 +211,27 @@ export class StudentMedalReportComponent implements OnInit {
           name: student.en_name || student.ar_name || 'Unknown',
         }));
         this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading students:', error);
       }
     } else {
       this.students = [];
       this.selectedStudentId = 0;
+      this.onFilterChange();
     }
+  }
+
+  onFilterChange() {
+    this.showTable = false;
+    if (this.reportType == 'parent') {
+      this.showViewReportBtn = !!this.selectedStudentId;
+    }
+    else if (this.reportType == 'employee') {
+      this.showViewReportBtn = !!this.selectedSchoolId && !!this.selectedGradeId &&
+        !!this.selectedClassId && !!this.selectedStudentId;
+    }
+    this.medalReports = [];
   }
 
   async viewReport() {
@@ -242,8 +281,8 @@ export class StudentMedalReportComponent implements OnInit {
       this.showTable = true;
     } catch (error: any) { 
       this.medalReports = [];
-      this.reportsForExcel=[]
-      this.reportsForExport =[]
+      this.reportsForExport = []
+      this.reportsForPDF = []
       this.showTable = true;
       if(error.status !== 404){
         Swal.fire({
@@ -258,21 +297,6 @@ export class StudentMedalReportComponent implements OnInit {
     }
   }
 
-private prepareExportData(): void {
-  // For PDF (object format)
-  this.reportsForExport = this.medalReports.map((report) => ({
-    'Medal Name': report.socialWorkerMedalName,
-    'Added By': report.insertedByUserName
-  }));
-
-  // For Excel (array format)
-  this.reportsForExcel = this.medalReports.map((report) => [
-    // report.socialWorkerMedalID,
-    report.socialWorkerMedalName,
-    report.insertedByUserName
-  ]);
-}
-
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
   }
@@ -285,71 +309,174 @@ private prepareExportData(): void {
     return this.classes.find(c => c.id == this.selectedClassId)?.name || 'All Classes';
   }
 
-  getStudentName(): string{
+  getStudentName(): string {
    if(this.reportType === 'employee'){
-     return this.students.find(s => s.id == this.selectedStudentId)?.name || '';
+     return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
    }
    else if(this.reportType === 'parent'){
-    return this.students.find(s => s.id == this.selectedStudentId)?.en_name || '';
-   }else{
-     return this.Student.en_name
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.en_name || '';
+   } else {
+     return this.Student.en_name || '';
    }
   }
 
-  OrCheck():boolean{
-    if(this.reportType === 'employee'){
-      return !this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId 
-    }
-    else{
-      return !this.selectedStudentId 
-    }
+  // إضافة الدوال العربية
+  getSchoolNameAr(): string {
+    const school = this.schools.find(s => s.id == this.selectedSchoolId);
+    return school?.ar_name || school?.name || 'كل المدارس';
   }
 
-  AndCheck():boolean{
-    if(this.reportType === 'employee'){
-     return (!!this.selectedSchoolId && !!this.selectedGradeId && !!this.selectedClassId && !!this.selectedStudentId && !this.isLoading )
+  getGradeNameAr(): string {
+    const grade = this.grades.find(g => g.id == this.selectedGradeId);
+    return grade?.ar_name || grade?.name || 'كل الصفوف';
+  }
+
+  getClassNameAr(): string {
+    const classItem = this.classes.find(c => c.id == this.selectedClassId);
+    return classItem?.ar_name || classItem?.name || 'كل الفصول';
+  }
+
+  getStudentNameAr(): string {
+    if (this.reportType === 'employee') {
+      const student = this.students.find(s => s.id == this.selectedStudentId);
+      return student?.ar_name || student?.name || 'كل الطلاب';
     }
-    else{
-      return (!!this.selectedStudentId && !this.isLoading )
+    else if (this.reportType === 'parent') {
+      const student = this.students.find(s => s.id == this.selectedStudentId);
+      return student?.ar_name || student?.en_name || 'كل الطلاب';
+    } else {
+      return this.Student.ar_name || this.Student.en_name || 'الطالب';
     }
   }
 
   getInfoRows(): any[] {
+    const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
+
     if(this.reportType === 'employee'){
       return [
-        { keyEn: 'School: ' + this.getSchoolName() },
-        { keyEn: 'Grade: ' + this.getGradeName() },
-        { keyEn: 'Class: ' + this.getClassName() },
-        { keyEn: 'Student: ' + this.getStudentName() }
+        { keyEn: `School: ${this.getSchoolName()}`,  keyAr: `${this.getSchoolNameAr()} :المدرسة `},
+        { keyEn: `Grade: ${this.getGradeName()}`, keyAr: ` ${this.getGradeNameAr()} :الصف`},
+        { keyEn: `Class: ${this.getClassName()}`, keyAr:`${this.getClassNameAr()}:الفصل `},
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `${this.getStudentNameAr()} :الطالب `},    
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ]; 
    }
     else{
       return [
-        { keyEn: 'Student: ' + this.getStudentName() }
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب : ${this.getStudentNameAr()}` },
+        { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ];
     }
+  }
+
+  // دوال التحقق التي كانت مفقودة
+  OrCheck(): boolean {
+    if (this.reportType === 'employee') {
+      return !this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId;
+    }
+    else if (this.reportType === 'parent') {
+      return !this.selectedStudentId;
+    }
+    return false;
+  }
+
+  AndCheck(): boolean {
+    if (this.reportType === 'employee') {
+      return (!!this.selectedSchoolId && !!this.selectedGradeId && !!this.selectedClassId && !!this.selectedStudentId && !this.isLoading);
+    }
+    else if (this.reportType === 'parent') {
+      return (!!this.selectedStudentId && !this.isLoading);
+    }
+    return false;
+  }
+
+  private formatDateForArabic(dateString: string): string {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}-${month}-${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
+  }
+
+  GetDataForPrint(): Observable<any[]> {
+    return of(this.medalReports).pipe(
+      map((reports) => {
+        if (reports.length === 0) {
+          return [];
+        }
+
+        return [{
+          header: {
+            en: 'Medal Student Report',
+            ar: 'تقرير ميداليات الطالب'
+          },
+          summary: this.getInfoRows(), 
+          table: {
+            headers: {
+              en: ['Medal Name', 'Added By'],
+              ar: ['اسم الميدالية', 'تم الإضافة بواسطة']
+            },
+            data: reports.map((item: any) => ({
+              'Medal Name': item.socialWorkerMedalName || '-',
+              'اسم الميدالية': item.socialWorkerMedalArName || item.socialWorkerMedalName || '-',
+              'Added By': item.insertedByUserName || '-',
+              'تم الإضافة بواسطة': item.insertedByUserName || '-'
+            }))
+          }
+        }];
+      })
+    );
   }
 
   getInfoRowsExcel(): any[] {
     if(this.reportType === 'employee'){
       return [
-          { key: 'School', value: this.getSchoolName() },
-          { key: 'Grade', value: this.getGradeName() },
-          { key: 'Class', value: this.getClassName() },
-          { key: 'Student', value: this.getStudentName() }, 
+        { keyEn: `School: ${this.getSchoolName()}`,  keyAr: `${this.getSchoolNameAr()} :المدرسة `},
+        { keyEn: `Grade: ${this.getGradeName()}`, keyAr: ` ${this.getGradeNameAr()} :الصف`},
+        { keyEn: `Class: ${this.getClassName()}`, keyAr:`${this.getClassNameAr()}:الفصل `},
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `${this.getStudentNameAr()} :الطالب `}, 
       ]; 
     }
     else{
       return [
-          { key: 'Student', value: this.getStudentName() }, 
+        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `الطالب: ${this.getStudentNameAr()}` }
       ];
     }
+  }
+
+  private prepareExportData(): void {
+    const isArabic = this.currentLang === 'ar';
+    
+    // For PDF (object format)
+    this.reportsForPDF = this.medalReports.map((report) => ({
+      'Medal Name': isArabic ? (report.socialWorkerMedalName || report.socialWorkerMedalName) : report.socialWorkerMedalName,
+      'Added By': report.insertedByUserName,
+      'اسم الميدالية': report.socialWorkerMedalName || report.socialWorkerMedalName,
+      'تم الإضافة بواسطة': report.insertedByUserName
+    }));
+
+    // For Excel (array format)
+    this.reportsForExport = this.medalReports.map((report) => [
+      report.socialWorkerMedalName,
+      report.insertedByUserName
+    ]);
   }
 
   async DownloadAsPDF() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForPDF.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
@@ -364,7 +491,7 @@ private prepareExportData(): void {
   async Print() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExport.length === 0) {
+    if (this.reportsForPDF.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
@@ -412,43 +539,101 @@ private prepareExportData(): void {
     }, 500);
   }
 
-async exportExcel() {
-  const Swal = await import('sweetalert2').then(m => m.default);
+  async exportExcel() {
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-  if (this.reportsForExcel.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
+    if (this.medalReports.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
 
-  this.isExporting = true;
-  
-  try {
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Medal Student Report',
-        ar: 'تقرير ميداليات الطالب'
-      },
-      subHeaders: [
-        {
+    this.isExporting = true;
+    
+    try {
+      const infoRows: { en: string; ar: string }[] = [];
+      
+      if (this.reportType === 'employee') {
+    infoRows.push(
+              { 
+          en: `School: ${this.getSchoolName() || 'All Schools'}`, 
+          ar: ` ${this.getSchoolNameAr() || 'كل المدارس'} : المدرسة ` 
+        },
+        { 
+          en: `Grade: ${this.getGradeName() || 'All Grades'}`, 
+          ar: ` ${this.getGradeNameAr() || 'كل الصفوف'} : الصف ` 
+        },
+        { 
+          en: `Class: ${this.getClassName() || 'All Classes'}`, 
+          ar: `${this.getClassNameAr() || 'كل الفصول'} : الفصل ` 
+        },
+        { 
+          en: `Student: ${this.getStudentName() || 'All Students'}`, 
+          ar: ` ${this.getStudentNameAr() || 'كل الطلاب'} : الطالب ` 
+        },
+      );
+      } else {
+        infoRows.push(
+          { 
+            en: `Student: ${this.getStudentName() || ''}`, 
+            ar: `الطالب: ${this.getStudentNameAr() || 'كل الطلاب'}` 
+          }
+        );
+      }
+      
+      infoRows.push(
+        { 
+          en: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, 
+          ar: `${new Date().toLocaleDateString('en-GB')} : تم الإنشاء في` 
+        }
+      );
+
+      const isArabic = this.currentLang === 'ar';
+      
+      let tableHeaders: string[];
+      let tableData: any[][];
+      
+      if (isArabic) {
+        tableHeaders = ['اسم الميدالية', 'تم الإضافة بواسطة'];
+        tableData = this.medalReports.map((report) => {
+          return [
+            report.socialWorkerMedalName || report.socialWorkerMedalName || '-',
+            report.insertedByUserName || '-'
+          ];
+        });
+      } else {
+        tableHeaders = ['Medal Name', 'Added By'];
+        tableData = this.medalReports.map((report) => {
+          return [
+            report.socialWorkerMedalName || '-',
+            report.insertedByUserName || '-'
+          ];
+        });
+      }
+
+      const excelOptions = {
+        mainHeader: {
+          en: 'Medal Student Report',
+          ar: 'تقرير ميداليات الطالب'
+        },
+        subHeaders: [{
           en: 'Student Medal Records',
           ar: 'سجلات ميداليات الطالب'
-        }
-      ],
-      infoRows: this.getInfoRowsExcel(),
-      tables: [
-        {
-          // title: 'Medal Report Data',
-          headers: ['Medal Name', 'Added By'],
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Medal_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
-  } finally {
-    this.isExporting = false;
+        }],
+        infoRows: infoRows,
+        tables: [{
+          headers: tableHeaders,
+          data: tableData
+        }],
+        isRtl: isArabic,
+        filename: `Medal_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      };
+
+      await this.reportsService.generateExcelReport(excelOptions);
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
-}
 }

@@ -108,7 +108,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             //var refreshToken = _generateJWT.GenerateRefreshToken();
 
-            //// Save refresh token in DB
+            // Save refresh token in DB
             //var refreshTokenEntity = new RefreshTokens
             //{
             //    Token = refreshToken,
@@ -230,9 +230,10 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize]
         [HttpPut("EditPass")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
         )]
-        public async Task<IActionResult> EditPasswordAsync(EditPasswordDTO model)
+        public async Task<IActionResult> EditPasswordAsync(EditPasswordEmpDTO model)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -255,6 +256,73 @@ namespace LMS_CMS_PL.Controllers.Domains
                 "employee" => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == model.Id && emp.IsDeleted != true),
                 "student" => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == model.Id && stu.IsDeleted != true),
                 "parent" => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == model.Id && par.IsDeleted != true),
+                _ => null,
+            };
+             
+            //bool isMatch = BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password);
+            //if (isMatch == false)
+            //{
+            //    return BadRequest("Old Password isn't right");
+            //}
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            if (userTypeClaim == "octa")
+            {
+                user.UpdatedByOctaId = userId;
+                user.UpdatedByUserId = null;
+            }
+            else if (userTypeClaim == "employee")
+            {
+                user.UpdatedByUserId = userId;
+                user.UpdatedByOctaId = null;
+            }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            user.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone); 
+            switch (userTypeClaim)
+            {
+                case "employee":
+                    Unit_Of_Work.employee_Repository.Update(user);
+                    break;
+                case "student":
+                    Unit_Of_Work.student_Repository.Update(user);
+                    break;
+                case "parent":
+                    Unit_Of_Work.parent_Repository.Update(user);
+                    break;
+            }
+            await Unit_Of_Work.SaveChangesAsync();
+            return Ok();
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        [Authorize]
+        [HttpPut("EditPasswordByToken")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> EditPasswordByToken(EditPasswordDTO model)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;  
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (model.Password == "")
+            {
+                return BadRequest("password cannot be empty");
+            }
+
+            dynamic user = userTypeClaim switch
+            {
+                "employee" => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == userId && emp.IsDeleted != true),
+                "student" => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == userId && stu.IsDeleted != true),
+                "parent" => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == userId && par.IsDeleted != true),
                 _ => null,
             };
              

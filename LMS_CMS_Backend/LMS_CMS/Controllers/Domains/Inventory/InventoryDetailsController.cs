@@ -1380,11 +1380,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Unit_Of_Work.inventoryDetails_Repository.Update(salesItem);
             Unit_Of_Work.SaveChanges();
 
-            List<InventoryDetails> AllinventoryDetails = Unit_Of_Work.inventoryDetails_Repository.FindBy(s=>s.InventoryMasterId == salesItem.InventoryMasterId && s.IsDeleted != true);
-            InventoryMaster inventoryMaster = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(s => s.ID == salesItem.InventoryMasterId && s.IsDeleted != true);
-            inventoryMaster.Total = AllinventoryDetails.Select(s=>s.TotalPrice).Sum();
-            Unit_Of_Work.inventoryMaster_Repository.Update(inventoryMaster);
-            Unit_Of_Work.SaveChanges();
+            //List<InventoryDetails> AllinventoryDetails = Unit_Of_Work.inventoryDetails_Repository.FindBy(s=>s.InventoryMasterId == salesItem.InventoryMasterId && s.IsDeleted != true);
+            //InventoryMaster inventoryMaster = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(s => s.ID == salesItem.InventoryMasterId && s.IsDeleted != true);
+            //inventoryMaster.Total = AllinventoryDetails.Select(s=>s.TotalPrice).Sum();
+            //Unit_Of_Work.inventoryMaster_Repository.Update(inventoryMaster);
+            //Unit_Of_Work.SaveChanges();
             return Ok();
         }
 

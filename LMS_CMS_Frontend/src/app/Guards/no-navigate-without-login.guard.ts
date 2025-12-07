@@ -41,7 +41,7 @@ export const noNavigateWithoutLoginGuard: CanActivateFn = (route, state) => {
       );
 
     case 'parent':
-      return parentService.GetByID(userId).pipe(
+      return parentService.GetByIDByToken().pipe(
         map(() => true), 
         catchError((error) => { 
           logOutService.logOut();
@@ -51,7 +51,7 @@ export const noNavigateWithoutLoginGuard: CanActivateFn = (route, state) => {
       );
 
     case 'student':
-      return studentSer.GetByID(userId).pipe(
+      return studentSer.GetByIDByToken().pipe(
         map(() => true), 
         catchError((error) => { 
           logOutService.logOut();

@@ -45,4 +45,20 @@ export class UpgradeStudentsService {
       responseType: 'text' as 'json'
     });
   }
+ 
+  TransferToTheSameGrade(UpgradeStudents: UpgradeStudents,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.post(`${this.baseUrl}/UpgradeStudent/TransferToTheSameGrade`, UpgradeStudents, {
+      headers: headers,
+      responseType: 'text' as 'json'
+    });
+  }
 }

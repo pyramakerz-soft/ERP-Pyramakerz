@@ -22,6 +22,7 @@ export class Employee {
         public monthlyLeaveRequestBalance: number = 0,
         public monthlyLeaveRequestUsed: number = 0,
         public employeeTypeName: string = '',
+        public employeeTypeArabicName: string = '',
         public files: EmployeeAttachment[] = [],
         public editedFiles: EmployeeAttachment[] = [],
         public canReceiveRequest: boolean = false,

@@ -30,6 +30,7 @@ export class UpgradeStudentComponent {
   academicYearTo: AcademicYear[] = [];
   SelectedToAcademicYearId: number = 0; 
   isSummerCourse = false;
+  isTransferToTheSameGrade = false;
   filteredAcademicYearFrom: AcademicYear[] = [];
   filteredAcademicYearTo: AcademicYear[] = [];
 
@@ -91,16 +92,32 @@ export class UpgradeStudentComponent {
       this.filteredAcademicYearFrom = this.academicYearFrom.filter(year => year.id !== +this.SelectedToAcademicYearId);
     } 
   }
+ 
+  onSummerChange() {
+    if (this.isSummerCourse) {
+      this.isTransferToTheSameGrade = false;
+    }
+  }
+
+  onTransferChange() {
+    if (this.isTransferToTheSameGrade) {
+      this.isSummerCourse = false;
+    }
+  }
 
   async UpgradeStudents(){
     const Swal = await import('sweetalert2').then(m => m.default);
 
+    const message = this.isTransferToTheSameGrade
+    ? 'This action will transfer the students to the same grade.'
+    : 'This action will upgrade students to the new academic year.';
+    
     Swal.fire({
       title: 'Are you sure?',
-      text: 'This action will upgrade students to the new academic year.',
+      text: message,
       icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, upgrade',
+      showCancelButton: true, 
+      confirmButtonText: this.isTransferToTheSameGrade ? 'Yes, transfer' : 'Yes, upgrade',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#6F6F6F'
@@ -113,10 +130,11 @@ export class UpgradeStudentComponent {
           toAcademicYearID: this.SelectedToAcademicYearId
         };
  
-        const upgradeObservable = this.isSummerCourse
-          ? this.upgradeStudentsService.UpgradeStudentAfterSummerCourse(upgradeStudents, this.DomainName)
+        const upgradeObservable = 
+          this.isSummerCourse ? this.upgradeStudentsService.UpgradeStudentAfterSummerCourse(upgradeStudents, this.DomainName)
+          : this.isTransferToTheSameGrade ? this.upgradeStudentsService.TransferToTheSameGrade(upgradeStudents, this.DomainName)
           : this.upgradeStudentsService.UpgradeStudent(upgradeStudents, this.DomainName);
- 
+  
         upgradeObservable.subscribe({
           next: (data) => {
             this.isLoading = false;

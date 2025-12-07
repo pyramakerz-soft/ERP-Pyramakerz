@@ -120,10 +120,12 @@ export class ShopItemsAddEditComponent {
           this.GetSubCategoryData(); 
         }
 
-        this.SchoolId = this.ShopItem.schoolID
-        if (this.SchoolId) {
-          this.GetAllGrades(); 
-        }
+        if(this.ShopItem.schoolID != null){
+          this.SchoolId = this.ShopItem.schoolID
+          if (this.SchoolId) {
+            this.GetAllGrades(); 
+          }
+        } 
  
         this.ShopItem.shopItemColors.forEach((element: { name: string; }) => {
           this.colors.push(element.name)
@@ -276,7 +278,7 @@ export class ShopItemsAddEditComponent {
         const field = key as keyof ShopItem;
         if (!this.ShopItem[field]) {
           if (field == 'enName'|| field == 'arName'|| field == 'enDescription'|| field == 'arDescription'|| field == 'purchasePrice'|| field == 'salesPrice' 
-            || field == 'limit'|| field == 'inventorySubCategoriesID'|| field == 'schoolID') {
+            || field == 'limit'|| field == 'inventorySubCategoriesID') {
             this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
             isValid = false;
           }

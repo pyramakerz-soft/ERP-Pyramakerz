@@ -35,6 +35,9 @@ namespace LMS_CMS_BL.DTO.Inventory
         public int? ETAPOSID { get; set; }
         public char? InvoiceType { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
+        public List<InventoryDetailsPutDTO>? InventoryDetails { get; set; }
+        public List<InventoryDetailsPutDTO>? NewDetailsWhenEdit { get; set; }
+        public List<long>? DeletedInventoryDetails { get; set; }
 
     }
 }

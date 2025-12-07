@@ -19,15 +19,17 @@ export class StudentIssue {
     ) { }
 }
 export class StudentIssueReportItem {
+
     constructor(
   public id: number,
   public date: string,
   public studentID: number,
-  public studentName: string,
+  public studentEnName: string,
+  public studentArName: string,
   public issuesType: {
      id: number,
      name: string,
   },
-  public details: string,
+  public details: string,  
 ){}
 }

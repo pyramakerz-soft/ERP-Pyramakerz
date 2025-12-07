@@ -20,6 +20,7 @@ namespace LMS_CMS_BL.DTO.Violation
         public long EmployeeID { get; set; }
         public long EmployeeTypeId { get; set; }
         public string EmployeeTypeName { get; set; }
+        public string EmployeeTypeArabicName { get; set; }
         public string EmployeeEnglishName { get; set; }
         public string EmployeeArabicName { get; set; }
 

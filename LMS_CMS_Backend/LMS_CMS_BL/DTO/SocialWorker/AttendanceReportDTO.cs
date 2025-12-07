@@ -11,7 +11,9 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long ID { get; set; } // From AttendanceStudent
         public DateOnly Date { get; set; } // From Attendance
         public long StudentID { get; set; } // From AttendanceStudent
-        public string StudentName { get; set; } // Will use Student.en_name or Student.ar_name
+        public string? studentEnName { get; set; }
+        public string? studentArName { get; set; }
+
         public string? Notes { get; set; } // From AttendanceStudent (Note)
         public bool IsLate { get; set; } // From AttendanceStudent
         public int? LateTimeInMinutes { get; set; } // From AttendanceStudent

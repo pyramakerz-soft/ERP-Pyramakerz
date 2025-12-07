@@ -81,17 +81,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 totalRecords = linkFileID switch
                 {
                     2 => (await context.Suppliers.Where(s => s.IsDeleted != true).ToListAsync()).Count(),
-                    3 => (await context.Debits.Select(d => d.IsDeleted != true).ToListAsync()).Count(),
-                    4 => (await context.Credits.Select(c => c.IsDeleted != true).ToListAsync()).Count(),
-                    5 => (await context.Saves.Select(s => s.IsDeleted != true).ToListAsync()).Count(),
-                    6 => (await context.Banks.Select(b => b.IsDeleted != true).ToListAsync()).Count(),
-                    7 => (await context.Incomes.Select(i => i.IsDeleted != true).ToListAsync()).Count(),
-                    8 => (await context.Outcomes.Select(o => o.IsDeleted != true).ToListAsync()).Count(),
-                    9 => (await context.Assets.Select(a => a.IsDeleted != true).ToListAsync()).Count(),
-                    10 => (await context.Employee.Select(e => e.IsDeleted != true).ToListAsync()).Count(),
-                    11 => (await context.TuitionFeesTypes.Select(t => t.IsDeleted != true).ToListAsync()).Count(),
-                    12 => (await context.TuitionDiscountTypes.Select(t => t.IsDeleted != true).ToListAsync()).Count(),
-                    13 => (await context.Student.Select(s => s.IsDeleted != true).ToListAsync()).Count(),
+                    3 => (await context.Debits.Where(d => d.IsDeleted != true).ToListAsync()).Count(),
+                    4 => (await context.Credits.Where(c => c.IsDeleted != true).ToListAsync()).Count(),
+                    5 => (await context.Saves.Where(s => s.IsDeleted != true).ToListAsync()).Count(),
+                    6 => (await context.Banks.Where(b => b.IsDeleted != true).ToListAsync()).Count(),
+                    7 => (await context.Incomes.Where(i => i.IsDeleted != true).ToListAsync()).Count(),
+                    8 => (await context.Outcomes.Where(o => o.IsDeleted != true).ToListAsync()).Count(),
+                    9 => (await context.Assets.Where(a => a.IsDeleted != true).ToListAsync()).Count(),
+                    10 => (await context.Employee.Where(e => e.IsDeleted != true).ToListAsync()).Count(),
+                    11 => (await context.TuitionFeesTypes.Where(t => t.IsDeleted != true).ToListAsync()).Count(),
+                    12 => (await context.TuitionDiscountTypes.Where(t => t.IsDeleted != true).ToListAsync()).Count(),
+                    13 => (await context.Student.Where(s => s.IsDeleted != true).ToListAsync()).Count(),
                     _ => throw new InvalidOperationException("Invalid LinkFileID")
                 };
 
@@ -137,17 +137,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 totalRecords = linkFileID switch
                 {
                     2 => (await context.Suppliers.Where(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
-                    3 => (await context.Debits.Select(d => d.AccountNumberID == accountID && d.IsDeleted != true).ToListAsync()).Count(),
-                    4 => (await context.Credits.Select(c => c.AccountNumberID == accountID && c.IsDeleted != true).ToListAsync()).Count(),
-                    5 => (await context.Saves.Select(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
-                    6 => (await context.Banks.Select(b => b.AccountNumberID == accountID && b.IsDeleted != true).ToListAsync()).Count(),
-                    7 => (await context.Incomes.Select(i => i.AccountNumberID == accountID && i.IsDeleted != true).ToListAsync()).Count(),
-                    8 => (await context.Outcomes.Select(o => o.AccountNumberID == accountID && o.IsDeleted != true).ToListAsync()).Count(),
-                    9 => (await context.Assets.Select(a => a.AccountNumberID == accountID && a.IsDeleted != true).ToListAsync()).Count(),
-                    10 => (await context.Employee.Select(e => e.AccountNumberID == accountID && e.IsDeleted != true).ToListAsync()).Count(),
-                    11 => (await context.TuitionFeesTypes.Select(t => t.AccountNumberID == accountID && t.IsDeleted != true).ToListAsync()).Count(),
-                    12 => (await context.TuitionDiscountTypes.Select(t => t.AccountNumberID == accountID && t.IsDeleted != true).ToListAsync()).Count(),
-                    13 => (await context.Student.Select(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
+                    3 => (await context.Debits.Where(d => d.AccountNumberID == accountID && d.IsDeleted != true).ToListAsync()).Count(),
+                    4 => (await context.Credits.Where(c => c.AccountNumberID == accountID && c.IsDeleted != true).ToListAsync()).Count(),
+                    5 => (await context.Saves.Where(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
+                    6 => (await context.Banks.Where(b => b.AccountNumberID == accountID && b.IsDeleted != true).ToListAsync()).Count(),
+                    7 => (await context.Incomes.Where(i => i.AccountNumberID == accountID && i.IsDeleted != true).ToListAsync()).Count(),
+                    8 => (await context.Outcomes.Where(o => o.AccountNumberID == accountID && o.IsDeleted != true).ToListAsync()).Count(),
+                    9 => (await context.Assets.Where(a => a.AccountNumberID == accountID && a.IsDeleted != true).ToListAsync()).Count(),
+                    10 => (await context.Employee.Where(e => e.AccountNumberID == accountID && e.IsDeleted != true).ToListAsync()).Count(),
+                    11 => (await context.TuitionFeesTypes.Where(t => t.AccountNumberID == accountID && t.IsDeleted != true).ToListAsync()).Count(),
+                    12 => (await context.TuitionDiscountTypes.Where(t => t.AccountNumberID == accountID && t.IsDeleted != true).ToListAsync()).Count(),
+                    13 => (await context.Student.Where(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
                     _ => throw new InvalidOperationException("Invalid LinkFileID")
                 };
 

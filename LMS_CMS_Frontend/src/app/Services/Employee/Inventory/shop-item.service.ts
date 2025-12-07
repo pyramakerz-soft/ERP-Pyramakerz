@@ -153,7 +153,7 @@ export class ShopItemService {
     }
     formData.append('availableInShop', ShopItem.availableInShop ? 'true' : 'false');
     formData.append('inventorySubCategoriesID', ShopItem.inventorySubCategoriesID.toString());
-    formData.append('schoolID', ShopItem.schoolID.toString());
+    formData.append('schoolID', ShopItem.schoolID ? ShopItem.schoolID.toString() : '');
     if (ShopItem.gradeID !== null) {
       formData.append('gradeID', ShopItem.gradeID.toString());
     }
@@ -225,7 +225,7 @@ if (ShopItem.unitType !== null) {
     }
     formData.append('availableInShop', ShopItem.availableInShop ? 'true' : 'false');
     formData.append('inventorySubCategoriesID', ShopItem.inventorySubCategoriesID.toString());
-    formData.append('schoolID', ShopItem.schoolID.toString());
+    formData.append('schoolID', ShopItem.schoolID ? ShopItem.schoolID.toString() : '');
     if (ShopItem.gradeID !== null) {
       formData.append('gradeID', ShopItem.gradeID.toString());
     } 

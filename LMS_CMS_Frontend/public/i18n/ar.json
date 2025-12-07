@@ -222,7 +222,7 @@
   "limit": "الحد",
   "Genders": "الأنواع",
   "Sub": "فرعي",
-  "Vat for Foreign": "ضريبة القيمة المضافة للأجانب",
+  "Vat for Foreign Percentage": "ضريبة القيمة المضافة للأجانب بالنسبة المئوية",
   "Vat": "الضريبة",
   "Arabic": "العربية",
   "w" : "ب",
@@ -1422,5 +1422,9 @@
   "Conduct Report" : "تقرير السلوك",
   "Conduct Types": "أنواع السلوك",
   "Procedure Types" : "أنواع الإجراءات",
-  "Login" : "تسجيل الدخول"
+  "Login" : "تسجيل الدخول",
+  "Student Certificate" : "شهادة الطالب",
+  "Student Issue Report" : "تقرير مشكلة الطالب",
+  "Certificate Name" : "أسم الشهادة",
+  "Late Time(minutes)" : "الوقت المتأخر (بالدقائق)"
 }

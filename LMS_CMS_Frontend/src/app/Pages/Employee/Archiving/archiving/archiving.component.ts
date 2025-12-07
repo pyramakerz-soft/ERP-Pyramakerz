@@ -28,7 +28,9 @@ import { LoadingService } from '../../../../Services/loading.service';
 export class ArchivingComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
  
-  AllowDelete: boolean = false; 
+  AllowEdit: boolean = false;
+  AllowDelete: boolean = false;
+  AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false; 
   
   DomainName: string = '';
@@ -68,8 +70,10 @@ export class ArchivingComponent {
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) { 
+        this.AllowEdit = settingsPage.allow_Edit;
         this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others; 
+        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
 
@@ -92,6 +96,18 @@ export class ArchivingComponent {
       }
     )
   }
+  
+  getById(id:number){
+    this.newArchiving = new ArchivingTree(); 
+    this.archivingService.GetById(id, this.DomainName).subscribe(
+      (data) => { 
+        this.newArchiving = data
+        if(this.newArchiving.fileLink != null && this.newArchiving.fileLink != ''){
+          this.isAddFileOpen = true
+        }
+      }
+    )
+  }
 
   GetContent(){
     this.archiving = new ArchivingTree()
@@ -105,6 +121,31 @@ export class ArchivingComponent {
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
     return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  } 
+
+  Edit(Id: number) {
+    if (Id) { 
+      this.getById(Id);
+    } 
+
+    document.getElementById('Edit_Modal')?.classList.remove('hidden');
+    document.getElementById('Edit_Modal')?.classList.add('flex');
+  }
+
+  closeModal() {
+    document.getElementById('Edit_Modal')?.classList.remove('flex');
+    document.getElementById('Edit_Modal')?.classList.add('hidden');  
+    this.isAddFileOpen = false
+    this.newArchiving = new ArchivingTree();
   }
 
   async Delete(child: ArchivingTree) {
@@ -243,6 +284,47 @@ export class ArchivingComponent {
           }
         ); 
       }
+    } else{
+      const Swal = await import('sweetalert2').then(m => m.default);
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: this.isAddFileOpen ? 'Please Enter File Name' : 'Please Enter Folder Name',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    } 
+  }  
+
+  async SaveEdit(){ 
+    if(this.newArchiving.name && this.newArchiving.name.trim() !== ''){ 
+      this.isLoading = true;     
+      this.archivingService.Edit(this.newArchiving, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          if(this.archiving.id){ 
+            this.GetDataByID(this.archiving.id)
+          }else{
+            this.GetContent()
+          }
+          this.GetAllData()
+          this.isLoading = false;
+        },
+        async (error) => {
+          this.isLoading = false;
+
+          const Swal = await import('sweetalert2').then(m => m.default);
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );  
     } else{
       const Swal = await import('sweetalert2').then(m => m.default);
 

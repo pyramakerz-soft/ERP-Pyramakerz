@@ -144,13 +144,13 @@
                     {{ report.studentID }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.studentName }}
+                      {{ !isRtl ? report.studentEnName : report.studentArName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.issuesType.name || 'N/A' }}
+                    {{ report.issuesType.name }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.details || 'N/A' }}
+                    {{ report.details || '-' }}
                 </td>
             </tr>
         </tbody>

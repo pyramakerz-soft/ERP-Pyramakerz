@@ -27,14 +27,16 @@ namespace LMS_CMS_PL.Controllers.Domains
             this.mapper = mapper;
             _iamNotRobotService = iamNotRobotService;
         }
-
-        [HttpGet("{Id}")]
+         
+        [HttpGet("GetByIDByToken")]
         [Authorize]
-        public IActionResult GetByID(long Id)
+        public IActionResult GetByIDByToken()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
 
-            Parent parent = Unit_Of_Work.parent_Repository.Select_By_Id(Id);
+            Parent parent = Unit_Of_Work.parent_Repository.Select_By_Id(userId);
 
             if (parent == null || parent.IsDeleted == true)
             {

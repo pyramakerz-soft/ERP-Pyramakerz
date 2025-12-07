@@ -367,6 +367,8 @@ export class LocationComponent {
       const pos = e.target.getLatLng();
       this.location.latitude = pos.lat;
       this.location.longitude = pos.lng;
+      this.validationErrors['latitude'] =''
+      this.validationErrors['longitude'] =''
       this.updateCircle();
     });
 
@@ -375,6 +377,8 @@ export class LocationComponent {
       this.marker.setLatLng(e.latlng);
       this.location.latitude = e.latlng.lat;
       this.location.longitude = e.latlng.lng;
+      this.validationErrors['latitude'] =''
+      this.validationErrors['longitude'] =''
       this.updateCircle();
     });
 
@@ -416,11 +420,7 @@ export class LocationComponent {
       this.map.removeLayer(this.circle);
     }
 
-    if (
-      this.location.range &&
-      this.location.latitude &&
-      this.location.longitude
-    ) {
+    if (this.location.range &&this.location.latitude &&this.location.longitude) {
       this.circle = L.circle(
         [this.location.latitude, this.location.longitude],
         {
