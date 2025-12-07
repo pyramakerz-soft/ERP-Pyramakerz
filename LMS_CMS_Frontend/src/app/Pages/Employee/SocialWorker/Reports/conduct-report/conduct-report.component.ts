@@ -54,6 +54,17 @@ export class ConductReportComponent implements OnInit {
   selectedProcedureTypeId: number | null = null;
   DomainName: string = '';
 
+  clearData(): void {
+  this.conductReports = [];
+  this.reportsForExport = [];
+  this.reportsForPDF = [];
+  this.showTable = false;
+  localStorage.removeItem('conductReportData');
+  sessionStorage.removeItem('conductReportData');
+  
+  console.log('All data cleared');
+}
+
   // Data sources
   schools: any[] = [];
   grades: any[] = [];
@@ -120,6 +131,7 @@ export class ConductReportComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+     this.clearData();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -264,6 +276,7 @@ async loadStudents() {
   }
 
   onFilterChange() {
+     this.clearData();
     this.showTable = false;
     if (this.reportType == 'parent') {
       this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
@@ -286,6 +299,7 @@ async loadStudents() {
       });
       return;
     }
+     this.clearData();
 
     this.isLoading = true;
     this.showTable = false;
@@ -359,15 +373,18 @@ async loadStudents() {
     return this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || 'All Types';
   }
 
-
- 
-  // Revised getInfoRowsExcel method --77
-
   async DownloadAsPDF() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
+    if (!this.conductReports || this.conductReports.length === 0) {
+      Swal.fire('Warning', 'No data to export! Please run the report first.', 'warning');
+      return;
+    }
+
+    this.prepareExportData();
+    
     if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
+      Swal.fire('Warning', 'No data prepared for export!', 'warning');
       return;
     }
 
@@ -378,14 +395,20 @@ async loadStudents() {
     }, 500);
   }
 
-  async Print() {
-    const Swal = await import('sweetalert2').then(m => m.default);
+ async Print() {
+  const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to print!', 'warning');
-      return;
-    }
+  if (!this.conductReports || this.conductReports.length === 0) {
+    Swal.fire('Warning', 'No data to print! Please run the report first.', 'warning');
+    return;
+  }
 
+  this.prepareExportData();
+  
+  if (this.reportsForPDF.length === 0) {
+    Swal.fire('Warning', 'No data prepared for printing!', 'warning');
+    return;
+  }
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -570,6 +593,15 @@ async exportExcel() {
 
 
 private prepareExportData(): void {
+
+  this.reportsForExport = [];
+  this.reportsForPDF = [];
+  
+  if (!this.conductReports || this.conductReports.length === 0) {
+    console.warn('No conduct reports to prepare for export');
+    return;
+  }
+
   const isArabic = this.currentLang === 'ar';
   
   // For Excel (array format)

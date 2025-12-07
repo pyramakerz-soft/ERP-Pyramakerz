@@ -49,7 +49,7 @@
             <option [ngValue]="null" selected >{{ 'All' | translate }} {{ 'Classes' | translate }}</option>
             <option *ngIf="classes.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
-        </select>
+        </select> 
     </div>
 
     <!-- Student Selector -->
@@ -96,7 +96,7 @@
         </select>
     </div>
 
-    <div class="flex justify-end mb-4 w-[24%]">
+    <div class="flex justify-end mb-4">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
             'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 

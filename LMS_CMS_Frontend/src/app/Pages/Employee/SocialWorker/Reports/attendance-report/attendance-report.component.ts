@@ -107,6 +107,15 @@ export class AttendanceReportComponent implements OnInit {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  clearData(): void {
+    this.attendanceReports = [];
+    this.reportsForExport = [];
+    // this.reportsForPDF = [];
+    this.reportsForExcel = [];
+    this.showTable = false;
+    
+    console.log('All data cleared');
+  }
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
@@ -252,6 +261,7 @@ export class AttendanceReportComponent implements OnInit {
   }
 
   onFilterChange() {
+    this.clearData();
     this.showTable = false;
     if (this.reportType == 'parent') {
       this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '' && !!this.selectedStudentId;
@@ -274,7 +284,7 @@ export class AttendanceReportComponent implements OnInit {
       });
       return;
     }
-
+     this.clearData();
     this.isLoading = true;
     this.showTable = false;
 
@@ -345,11 +355,12 @@ export class AttendanceReportComponent implements OnInit {
   async DownloadAsPDF() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
+    if (!this.attendanceReports || this.attendanceReports.length === 0) {
+      Swal.fire('Warning', 'No data to export! Please run the report first.', 'warning');
       return;
     }
 
+    this.prepareExportData();
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
@@ -357,13 +368,15 @@ export class AttendanceReportComponent implements OnInit {
     }, 500);
   }
 
-  async Print() {
+   async Print() {
     const Swal = await import('sweetalert2').then(m => m.default);
 
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to print!', 'warning');
+    if (!this.attendanceReports || this.attendanceReports.length === 0) {
+      Swal.fire('Warning', 'No data to print! Please run the report first.', 'warning');
       return;
     }
+
+    this.prepareExportData();
 
     this.showPDF = true;
     setTimeout(() => {
@@ -656,6 +669,13 @@ getInfoRowsForPdf(): any[] {
 }
 
 private prepareExportData(): void {
+    this.reportsForExport = [];
+    this.reportsForExcel = [];
+    
+    if (!this.attendanceReports || this.attendanceReports.length === 0) {
+      console.warn('No attendance reports to prepare for export');
+      return;
+    }
   const isArabic = this.isRtl;
   
   this.reportsForExport = this.attendanceReports.map((report) => {
