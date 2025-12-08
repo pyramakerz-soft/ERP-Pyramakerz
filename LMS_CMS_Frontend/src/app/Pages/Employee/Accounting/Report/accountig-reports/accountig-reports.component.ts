@@ -51,9 +51,9 @@ export class AccountigReportsComponent {
 
   school = {
     reportHeaderOneEn: 'Accounting Report',
-    reportHeaderTwoEn: 'Detailed Transaction Summary',
+    reportHeaderTwoEn: '',
     reportHeaderOneAr: 'تقرير المحاسبة',
-    reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+    reportHeaderTwoAr: '',
     reportImage: 'assets/images/logo.png',
   };
 
@@ -331,9 +331,9 @@ Print() {
     // Update school object with bilingual headers based on report type
     this.school = {
       reportHeaderOneEn: this.type + ' Report',
-      reportHeaderTwoEn: 'Detailed Transaction Summary',
+      reportHeaderTwoEn: '',
       reportHeaderOneAr: this.getArabicReportTitle(),
-      reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+      reportHeaderTwoAr: '',
       reportImage: '',
     };
 
@@ -395,9 +395,9 @@ DownloadAsPDF() {
     
     this.school = {
       reportHeaderOneEn: this.type + ' Report',
-      reportHeaderTwoEn: 'Detailed Transaction Summary',
+      reportHeaderTwoEn: '',
       reportHeaderOneAr: this.getArabicReportTitle(),
-      reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+      reportHeaderTwoAr: '',
       reportImage: '',
     };
 
@@ -437,8 +437,8 @@ DownloadAsPDF() {
                   { key: 'Doc Type', value: t.payableDocTypesName },
                   { key: 'Doc Number', value: t.docNumber },
                   { key: 'Date', value: t.date },
-                  { key: 'Bank Or Save ?', value: t.linkFileName },
-                  { key: 'Bank Or Save Data', value: t.bankOrSaveName },
+                  { key: 'Bank / Safe ', value: t.linkFileName },
+                  { key: 'Bank / Safe Data', value: t.bankOrSaveName },
                   { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
@@ -477,8 +477,8 @@ DownloadAsPDF() {
                   { key: 'Doc Type', value: t.receivableDocTypesName },
                   { key: 'Doc Number', value: t.docNumber },
                   { key: 'Date', value: t.date },
-                  { key: 'Bank Or Save ?', value: t.linkFileName },
-                  { key: 'Bank Or Save Data', value: t.bankOrSaveName },
+                  { key: 'Bank / Safe ', value: t.linkFileName },
+                  { key: 'Bank / Safe Data', value: t.bankOrSaveName },
                   { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
@@ -672,7 +672,7 @@ async DownloadAsExcel() {
 
     // Get Arabic main header
     const arabicMainHeader = this.getArabicReportTitle();
-    const arabicSubHeader = 'ملخص المعاملات التفصيلي';
+    const arabicSubHeader = '';
 
     // Generate the Excel report using the shared service
     await this.sharedReportsService.generateExcelReport({
@@ -682,7 +682,7 @@ async DownloadAsExcel() {
       },
       subHeaders: [
         { 
-          en: 'Detailed Transaction Summary', 
+          en: '', 
           ar: arabicSubHeader 
         }
       ],
