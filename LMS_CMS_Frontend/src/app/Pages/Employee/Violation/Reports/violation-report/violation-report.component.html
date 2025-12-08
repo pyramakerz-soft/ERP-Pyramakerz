@@ -19,7 +19,7 @@
         <select id="employeeType" [(ngModel)]="SelectedEmployeeTypeId" (change)="GetViolationTypes()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
             <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Employee Type'| translate }}</option>
-            <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
+            <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ !isRtl ? empType.name  :  empType.arabicName }} </option>
             <option *ngIf="empTypes.length == 0" [value]="0" disabled>{{ 'No Data' | translate }}</option>
         </select>
     </div>
@@ -103,9 +103,14 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 violation-type">
                         {{ data.violationType }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.employeeType }}
-                    </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <div class="flex justify-start">
+                <div class="mr-2 border border-[#EAECF0] border-t-0 border-l-0 bg-[#EBEBEB] p-1">
+                  {{!isRtl ? data.employeeType  :  data.employeeType  }} 
+                  <!-- fix when backend done -->
+              </div>
+            </div>
+          </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.employeeEnglishName }}
                     </td>
