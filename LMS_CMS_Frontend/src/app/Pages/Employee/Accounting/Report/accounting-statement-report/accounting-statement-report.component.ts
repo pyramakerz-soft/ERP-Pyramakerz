@@ -74,7 +74,7 @@ export class AccountingStatementReportComponent implements OnInit {
     reportHeaderTwoEn: 'Detailed Account Statement Summary',
     reportHeaderOneAr: 'تقرير كشف الحساب',
     reportHeaderTwoAr: 'ملخص كشف الحساب التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

@@ -290,6 +290,17 @@ export class ClassroomComponent {
     );
   }
 
+  get filteredFromAcademicYears() {
+    return this.AcademicYears.filter(
+      y => +y.id !== +(this.copyClassroom.toAcademicYearID ?? -1)
+    );
+  }
+
+  get filteredToAcademicYears() {
+    return this.AcademicYears.filter(
+      y => +y.id !== +(this.copyClassroom.fromAcademicYearID ?? -1)
+    );
+  }
 
   AcademicYearIsChanged(){
     this.classroomData=[]

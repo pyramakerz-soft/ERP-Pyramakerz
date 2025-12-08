@@ -51,7 +51,7 @@ export class ReportItemCardComponent implements OnInit {
     reportHeaderTwoEn: 'Item Transactions',
     reportHeaderOneAr: 'تقرير بطاقة الصنف',
     reportHeaderTwoAr: 'معاملات الصنف',
-    // reportImage: 'assets/images/logo.png',
+    //  
   };
 
   constructor(

@@ -52,7 +52,7 @@ export class ViolationReportComponent {
     reportHeaderTwoEn: 'Detailed Violation Summary',
     reportHeaderOneAr: 'تقرير المخالفات',
     reportHeaderTwoAr: 'ملخص المخالفات التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

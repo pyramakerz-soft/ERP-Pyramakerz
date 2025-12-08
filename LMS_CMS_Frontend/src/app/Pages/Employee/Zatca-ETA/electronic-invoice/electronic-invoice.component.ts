@@ -57,7 +57,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     reportHeaderTwoEn: 'Invoice Summary',
     reportHeaderOneAr: 'تقرير الفواتير الإلكترونية',
     reportHeaderTwoAr: 'ملخص الفواتير',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

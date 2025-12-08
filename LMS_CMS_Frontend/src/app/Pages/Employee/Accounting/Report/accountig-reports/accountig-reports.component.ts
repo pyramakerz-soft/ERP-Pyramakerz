@@ -54,7 +54,7 @@ export class AccountigReportsComponent {
     reportHeaderTwoEn: 'Detailed Transaction Summary',
     reportHeaderOneAr: 'تقرير المحاسبة',
     reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
