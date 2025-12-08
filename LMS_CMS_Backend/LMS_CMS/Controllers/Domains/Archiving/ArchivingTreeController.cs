@@ -559,14 +559,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             permissionGroupIDsForUser = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
 
             bool hasDeletePermission;
-            if (archivingTreeExist.FileLink == null || archivingTreeExist.FileLink == "")
+            if (archivingTreeExist.FileLink != null && archivingTreeExist.FileLink != "")
             {
                 hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
                     .Any(permissionGroupDetail =>
                         permissionGroupDetail.Allow_Delete == true && (
                         permissionGroupDetail.Allow_Delete_For_Others == true ||
                         (permissionGroupDetail.Allow_Delete_For_Others == false &&
-                            permissionGroupDetail.InsertedByUserId == userId)));
+                            archivingTreeExist.InsertedByUserId == userId)));
             }
             else{
                 hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == archivingTreeExist.ArchivingTreeParentID)
@@ -574,7 +574,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                         permissionGroupDetail.Allow_Delete == true && (
                         permissionGroupDetail.Allow_Delete_For_Others == true ||
                         (permissionGroupDetail.Allow_Delete_For_Others == false &&
-                            permissionGroupDetail.InsertedByUserId == userId)));
+                            archivingTreeExist.InsertedByUserId == userId)));
             }
             if (!hasDeletePermission)
             {
