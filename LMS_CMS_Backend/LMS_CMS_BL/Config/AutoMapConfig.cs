@@ -198,7 +198,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>()
                  .ForMember(dest => dest.EmpTypeVId, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.ID, opt => opt.MapFrom(src => src.EmployeeType.ID))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.EmployeeType.Name));
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.EmployeeType.Name))
+                .ForMember(dest => dest.ArabicName, opt => opt.MapFrom(src => src.EmployeeType.ArabicName));
             CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
 
