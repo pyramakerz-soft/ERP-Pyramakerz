@@ -149,6 +149,13 @@ export class StudentMedalReportComponent implements OnInit {
 
   async loadGrades() {
     if (this.selectedSchoolId) {
+        this.grades = [];
+        this.selectedGradeId = 0;
+        this.classes = [];
+        this.selectedClassId = 0;
+        this.students = [];
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -177,6 +184,11 @@ export class StudentMedalReportComponent implements OnInit {
 
   async loadClasses() {
     if (this.selectedGradeId) {
+        this.classes = [];
+        this.selectedClassId = 0;
+        this.students = [];
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -201,6 +213,9 @@ export class StudentMedalReportComponent implements OnInit {
 
   async loadStudents() {
     if (this.selectedClassId) {
+      this.selectedStudentId = 0;
+      this.students =[]
+      this.onFilterChange();
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(

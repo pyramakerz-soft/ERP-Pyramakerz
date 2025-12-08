@@ -485,9 +485,7 @@ export class InventoryDetailsComponent {
       if (this.Data.isCash == false) {
         this.Data.saveID = 0;
       }
-      this.schoolpcsServ
-        .GetBySchoolId(this.Data.schoolId, this.DomainName)
-        .subscribe((d) => {
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
           this.schoolPCs = d;
         });
       this.GetCategories();
@@ -514,11 +512,9 @@ export class InventoryDetailsComponent {
 
   GetCategories() {
     this.Categories = [];
-    this.CategoriesServ.GetByStoreId(
-      this.DomainName,
-      this.Data.storeID
-    ).subscribe((d) => {
+    this.CategoriesServ.GetByStoreId(this.DomainName,this.Data.storeID).subscribe((d) => {
       this.Categories = d;
+      console.log(12,this.Categories)
     });
   }
 
@@ -794,29 +790,31 @@ export class InventoryDetailsComponent {
   }
 
   ConvertToPurcase() {
-    this.Data.isConvertedToPurchase = true;
-    this.salesServ.Edit(this.Data, this.DomainName).subscribe(
-      (d) => {
-        this.Data.isEditInvoiceNumber = true;
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        this.Data.date = `${year}-${month}-${day}`;
-        this.Data.inventoryDetails = this.TableData;
-        this.Data.flagId = 9;
-        this.salesServ.Add(this.Data, this.DomainName).subscribe(
-          (d) => {
-            this.showSuccessAlert(
-              this.translate.instant('Convert Successfully')
-            );
-            this.router.navigateByUrl(`Employee/Purchases`);
-          },
-          (error) => {}
-        );
-      },
-      (error) => {}
-    );
+    if (this.isFormValid()) {
+      this.Data.isConvertedToPurchase = true;
+      this.salesServ.Edit(this.Data, this.DomainName).subscribe(
+        (d) => {
+          this.Data.isEditInvoiceNumber = true;
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          this.Data.date = `${year}-${month}-${day}`;
+          this.Data.inventoryDetails = this.TableData;
+          this.Data.flagId = 9;
+          this.salesServ.Add(this.Data, this.DomainName).subscribe(
+            (d) => {
+              this.showSuccessAlert(
+                this.translate.instant('Convert Successfully')
+              );
+              this.router.navigateByUrl(`Employee/Purchases`);
+            },
+            (error) => {}
+          );
+        },
+        (error) => {}
+      );
+    }
   }
 
   onImageFileSelected(event: any) {

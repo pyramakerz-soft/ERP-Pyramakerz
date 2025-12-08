@@ -76,7 +76,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<StoreCategories> StoreCategories = await Unit_Of_Work.storeCategories_Repository.Select_All_With_IncludesById<StoreCategories>(
-                    b => b.IsDeleted != true && b.StoreID==id ,
+                    b => b.IsDeleted != true && b.StoreID==id && b.InventoryCategories.IsDeleted != true,
                     query => query.Include(store => store.InventoryCategories)
                     );
 
