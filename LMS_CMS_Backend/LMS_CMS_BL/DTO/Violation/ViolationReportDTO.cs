@@ -12,6 +12,7 @@ namespace LMS_CMS_BL.DTO.Violation
         public DateOnly Date { get; set; } 
         public string ViolationType { get; set; }
         public string EmployeeType { get; set; }
+        public string EmployeeTypeArabicName { get; set; }
         public string EmployeeEnglishName { get; set; }
         public string EmployeeArabicName { get; set; }
         public string? Details { get; set; }
