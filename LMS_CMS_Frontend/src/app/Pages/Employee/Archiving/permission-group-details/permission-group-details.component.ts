@@ -64,7 +64,7 @@ export class PermissionGroupDetailsComponent {
   GetPermissionGroupDetails(){
     this.PermissionGroupDetailsData = []
     this.permissionGroupDetailsService.GetByPermissionGroupID(this.permissionGroupID, this.DomainName).subscribe(
-      data => {
+      data => { 
         this.PermissionGroupDetailsData = data 
         this.matchPermissionGroups();
       }
@@ -96,7 +96,7 @@ export class PermissionGroupDetailsComponent {
       this.archivingTrees.forEach(tree => {
         this.applyPermissions(tree);
       });
- 
+  
       this.SelectedPermissionGroupDetails = [...this.PermissionGroupDetailsData];
     }
   }
@@ -137,7 +137,7 @@ export class PermissionGroupDetailsComponent {
     } 
   }
  
-  async Save() { 
+  async Save() {  
     if(this.SelectedPermissionGroupDetails.length > 0){
       let PermissionGroupDetail = new PermissionGroupDetails()
       PermissionGroupDetail.permissionGroupID = this.permissionGroupID
