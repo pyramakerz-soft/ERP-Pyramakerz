@@ -204,7 +204,7 @@ export class ReportItemCardComponent implements OnInit {
         this.currentPage = response.pagination.currentPage || this.currentPage;
         this.pageSize = response.pagination.pageSize || this.pageSize;
         this.totalPages = response.pagination.totalPages || 1;
-        this.totalRecords = response.pagination.totalRecords || 0;
+        this.totalRecords = response.pagination.totalRecord || 0;
       } else {
 
         this.totalRecords = response.transactions?.length || 0;
@@ -841,7 +841,7 @@ export class ReportItemCardComponent implements OnInit {
   currentPage: number = 1;
   pageSize: number = 10;
   totalPages: number = 1;
-  totalRecords: number = 0;
+  totalRecords: number = 0;           // New property to hold total records---
 
   get visiblePages(): number[] {
     const total = this.totalPages;
