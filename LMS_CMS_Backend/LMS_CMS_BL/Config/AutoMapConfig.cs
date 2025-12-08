@@ -222,6 +222,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Violation, ViolationReportDTO>()
                 .ForMember(dest => dest.ViolationType, opt => opt.MapFrom(src => src.ViolationType.Name))
                 .ForMember(dest => dest.EmployeeType, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
+                .ForMember(dest => dest.EmployeeTypeArabicName, opt => opt.MapFrom(src => src.Employee.EmployeeType.ArabicName))
                 .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name))
                 .ForMember(dest => dest.AttachmentUrl, opt => opt.MapFrom(src => src.Attach));
