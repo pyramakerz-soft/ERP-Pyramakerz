@@ -1743,30 +1743,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 }
 
             }
-            //////delete all empStudents
-            
-            List<EmployeeStudent> employeeStudents = await Unit_Of_Work.employeeStudent_Repository.Select_All_With_IncludesById<EmployeeStudent>(
-                    sem => sem.EmployeeID == newEmployee.ID);
-          
-            foreach (EmployeeStudent emp in employeeStudents)
-            {
-                Unit_Of_Work.employeeStudent_Repository.Delete(emp.ID);
-                Unit_Of_Work.SaveChanges();
-            }
-          
-            foreach (var empStudent in newEmployee.Students)
-            {
-                Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == empStudent && s.IsDeleted != true);
-                if (student != null)
-                {
-                    EmployeeStudent emp = new EmployeeStudent();
-                    emp.EmployeeID = newEmployee.ID;
-                    emp.StudentID = empStudent;
-                    Unit_Of_Work.employeeStudent_Repository.Add(emp);
-                    Unit_Of_Work.SaveChanges();
 
-                }
-            }
 
             if (newEmployee.AnnualVacationEmployee.Count > 0)
             {

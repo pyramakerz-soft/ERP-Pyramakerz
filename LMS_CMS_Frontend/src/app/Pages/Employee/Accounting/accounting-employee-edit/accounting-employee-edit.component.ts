@@ -194,6 +194,9 @@ export class AccountingEmployeeEditComponent {
     })
     this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
       this.TableData = d
+      console.log(2323,this.TableData)
+    },error=>{
+      console.log(error)
     })
 
   }
