@@ -64,7 +64,7 @@ export class ViolationReportComponent {
     public apiService: ApiService,
     public accountService: AccountService,
     private languageService: LanguageService, 
-    private reportsService: ReportsService, // Add this line
+    private reportsService: ReportsService,
     private loadingService: LoadingService 
   ) {}
 
