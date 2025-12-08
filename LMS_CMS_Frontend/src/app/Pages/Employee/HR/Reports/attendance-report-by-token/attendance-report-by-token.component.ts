@@ -63,6 +63,7 @@ export class AttendanceReportByTokenComponent {
   year: number = 0
   selectedMonth: string = '';
   SelectedEmpName: string = '';
+  SelectedArName: string = '';
   school = {
     reportHeaderOneEn: 'Attendance Report',
     reportHeaderOneAr: ' تقرير الحضور '
@@ -108,6 +109,7 @@ export class AttendanceReportByTokenComponent {
   GetEmployeeName() {
     this.EmployeeServ.Get_Employee_By_ID(this.UserID, this.DomainName).subscribe((d) => {
       this.SelectedEmpName = d.en_name
+      this.SelectedArName = d.ar_name
     })
   }
 

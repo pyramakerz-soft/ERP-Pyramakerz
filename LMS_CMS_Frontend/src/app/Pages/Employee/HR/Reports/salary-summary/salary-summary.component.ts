@@ -182,7 +182,7 @@ export class SalarySummaryComponent {
 
   getArEmployeeName(): string {
     return this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
-           'All Employees';
+           'جميع الموظفين';
   }
 
   DownloadAsPDF() {

@@ -317,7 +317,7 @@ async DownloadAsExcel() {
   getArEmployeeName(): string {
     return this.employees.find(e => e.id == this.SelectedEmpId)?.ar_name || 
            this.employees.find(e => e.id == this.SelectedEmpId)?.en_name || 
-           'All Employees';
+           'جميع الموظفين';
   }
 
 
