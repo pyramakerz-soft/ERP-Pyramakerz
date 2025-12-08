@@ -614,10 +614,10 @@ async exportExcel() {
     //   { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
     // ],
     infoRows: [
-      { key: 'From Date', value: this.dateFrom },
-      { key: 'To Date', value: this.dateTo },
-      { key: 'Store', value: this.getStoreName() },
-      { key: 'Transaction Types', value: this.getSelectedFlagNames() }
+      { key: 'From Date :', value: this.dateFrom },
+      { key: 'To Date :', value: this.dateTo },
+      { key: 'Store :', value: this.getStoreName() },
+      { key: 'Transaction Types :', value: this.getSelectedFlagNames() }
     ],
     reportImage: '',
     filename: `${this.reportType}_Transactions_Report.xlsx`,
@@ -632,7 +632,7 @@ async exportExcel() {
 
 
 
-// adding pagination functions  by Gaber ..777
+// adding pagination functions ..777
 
 validateNumber(event: any): void {
   const value = event.target.value;

@@ -79,7 +79,7 @@ export interface Pagination {
   currentPage: number;
   pageSize: number;
   totalPages: number;
-  totalRecords: number;
+  totalRecord: number;
 }
 
 // Inventory Net Combined Response Model
@@ -113,7 +113,7 @@ export class InventoryNetCombinedResponse {
       currentPage: 1,
       pageSize: 10,
       totalPages: 1,
-      totalRecords: this.transactions.length
+      totalRecord: this.transactions.length
     };
   }
 }
