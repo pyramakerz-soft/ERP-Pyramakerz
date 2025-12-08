@@ -296,7 +296,7 @@ GetData(pageNumber: number, pageSize: number) {
     return [
       {
         keyEn: 'Report Type: ' + this.type,
-        keyAr: 'نوع التقرير: ' + this.type,
+        keyAr:  this.type + ' :نوع التقري ' ,
       },
       {
         keyEn: 'Start Date: ' + this.SelectedStartDate,
@@ -322,66 +322,101 @@ GetData(pageNumber: number, pageSize: number) {
     }));
   }
 
-  Print() {
-    this.DataToPrint = [];
+Print() {
+  this.DataToPrint = [];
 
-    this.GetDataForPrint().subscribe((result) => {
-      this.DataToPrint = result;
-      this.showPDF = true;
-      setTimeout(() => {
-        const printContents = document.getElementById('Data')?.innerHTML;
-        if (!printContents) {
-          console.error('Element not found!');
-          return;
-        }
+  this.GetDataForPrint().subscribe((result) => {
+    this.DataToPrint = result;
+    
+    // Update school object with bilingual headers based on report type
+    this.school = {
+      reportHeaderOneEn: this.type + ' Report',
+      reportHeaderTwoEn: 'Detailed Transaction Summary',
+      reportHeaderOneAr: this.getArabicReportTitle(),
+      reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+      reportImage: '',
+    };
 
-        const printStyle = `
-          <style>
-            @page { size: auto; margin: 0mm; }
-            body { margin: 0; }
-            @media print {
-              body > *:not(#print-container) { display: none !important; }
-              #print-container {
-                display: block !important;
-                position: static !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-                margin: 0 !important;
-              }
+    this.showPDF = true;
+    
+    setTimeout(() => {
+      // Update the PDF component with current data
+      if (this.pdfComponentRef) {
+        this.pdfComponentRef.school = this.school;
+        this.pdfComponentRef.fileName = this.fileName;
+        this.pdfComponentRef.infoRows = this.getInfoRows();
+        this.pdfComponentRef.tableDataWithHeaderArray = this.getTableDataWithHeader();
+      }
+
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
+        return;
+      }
+
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) { display: none !important; }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
             }
-          </style>
-        `;
+          }
+        </style>
+      `;
 
-        const printContainer = document.createElement('div');
-        printContainer.id = 'print-container';
-        printContainer.innerHTML = printStyle + printContents;
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
 
-        document.body.appendChild(printContainer);
-        window.print();
-
-        setTimeout(() => {
-          document.body.removeChild(printContainer);
-          this.showPDF = false;
-        }, 100);
-      }, 500);
-    });
-  }
-
-  DownloadAsPDF() {
-    this.DataToPrint = [];
-
-    this.GetDataForPrint().subscribe((result) => {
-      this.DataToPrint = result;
-
-      this.showPDF = true;
+      document.body.appendChild(printContainer);
+      window.print();
 
       setTimeout(() => {
-        this.pdfComponentRef.downloadPDF();
-        setTimeout(() => (this.showPDF = false), 2000);
-      }, 500);
-    });
-  }
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  });
+}
+
+DownloadAsPDF() {
+  this.DataToPrint = [];
+
+  this.GetDataForPrint().subscribe((result) => {
+    this.DataToPrint = result;
+    
+    this.school = {
+      reportHeaderOneEn: this.type + ' Report',
+      reportHeaderTwoEn: 'Detailed Transaction Summary',
+      reportHeaderOneAr: this.getArabicReportTitle(),
+      reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+      reportImage: '',
+    };
+
+    this.showPDF = true;
+
+    setTimeout(() => {
+      // Update the PDF component with current data
+      if (this.pdfComponentRef) {
+        this.pdfComponentRef.school = this.school;
+        this.pdfComponentRef.fileName = this.fileName;
+        this.pdfComponentRef.infoRows = this.getInfoRows();
+        this.pdfComponentRef.tableDataWithHeaderArray = this.getTableDataWithHeader();
+      }
+      
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
+  });
+}
 
   GetDataForPrint(): Observable<any[]> {
     switch (this.type) {
@@ -570,6 +605,34 @@ async DownloadAsExcel() {
       return;
     }
 
+    // Prepare info rows following the conduct report pattern
+    const infoRows: { en: string; ar: string }[] = [
+      { 
+        en: `Report Type: ${this.type}`, 
+        ar: `نوع التقرير: ${this.getArabicReportTitle().replace('تقرير ', '')}`
+      },
+      { 
+        en: `From Date: ${this.SelectedStartDate || ''}`, 
+        ar: `من تاريخ: ${this.SelectedStartDate || ''}` 
+      },
+      { 
+        en: `To Date: ${this.SelectedEndDate || ''}`, 
+        ar: `إلى تاريخ: ${this.SelectedEndDate || ''}` 
+      },
+      { 
+        en: `Total Records: ${this.TotalRecords || 0}`, 
+        ar: `إجمالي السجلات: ${this.TotalRecords || 0}` 
+      },
+      { 
+        en: `Number of Invoices: ${exportData.length || 0}`, 
+        ar: `عدد الفواتير: ${exportData.length || 0}` 
+      },
+      { 
+        en: `Generated On: ${new Date().toLocaleDateString('en-GB')}`, 
+        ar: `تم الإنشاء في: ${new Date().toLocaleDateString('en-GB')}` 
+      }
+    ];
+
     // Prepare tables for the Excel report
     const tables = exportData.map((section: any, index: number) => {
       // Create table data
@@ -584,55 +647,54 @@ async DownloadAsExcel() {
         });
       });
 
+      // Get Arabic headers based on type
+      let arabicHeaders: string[] = [];
+      if (this.type === 'Payable') {
+        arabicHeaders = ['رقم', 'المبلغ', 'الملف المرتبط', 'نوع الملف المرتبط'];
+      } else if (this.type === 'Receivable') {
+        arabicHeaders = ['رقم', 'المبلغ', 'الملف المرتبط', 'نوع الملف المرتبط'];
+      } else if (this.type === 'Installment Deduction') {
+        arabicHeaders = ['رقم', 'المبلغ', 'التاريخ', 'نوع الرسوم'];
+      } else if (this.type === 'Accounting Entries') {
+        arabicHeaders = ['رقم', 'المبلغ الدائن', 'المبلغ المدين', 'شجرة الحسابات', 'الحساب الفرعي'];
+      }
+
       return {
-        title: section.header,
+        title: {
+          en: section.header,
+          ar: this.getArabicInvoiceTitle(section.header)
+        },
         headers: section.table.headers,
+        arabicHeaders: arabicHeaders,
         data: tableData
       };
     });
 
-    // Prepare info rows
-    const infoRows = [
-      { key: 'Report Type', value: this.type },
-      { key: 'Start Date', value: this.SelectedStartDate },
-      { key: 'End Date', value: this.SelectedEndDate },
-      { key: 'Total Records', value: this.TotalRecords },
-      { key: 'Generated On', value: new Date().toLocaleDateString() }
-    ];
-
-    // Add section summaries as additional info
-    if (exportData.length > 0) {
-      infoRows.push({ key: 'Number of Invoices', value: exportData.length });
-    }
+    // Get Arabic main header
+    const arabicMainHeader = this.getArabicReportTitle();
+    const arabicSubHeader = 'ملخص المعاملات التفصيلي';
 
     // Generate the Excel report using the shared service
     await this.sharedReportsService.generateExcelReport({
       mainHeader: {
-        en: `${this.type.toUpperCase()} REPORT`,
-        ar: this.getArabicReportTitle()
+        en: `${this.type} Report`,
+        ar: arabicMainHeader
       },
       subHeaders: [
         { 
           en: 'Detailed Transaction Summary', 
-          ar: 'ملخص المعاملات التفصيلي' 
+          ar: arabicSubHeader 
         }
       ],
       infoRows: infoRows,
-      reportImage: '', // Add your logo URL if needed
+      // reportImage: '', 
       filename: `${this.type.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.xlsx`,
-      tables: tables
-    });
-
-    const Swal = await import('sweetalert2').then(m => m.default);
-
-    // Show success message
-    Swal.fire({
-      title: 'Export Successful',
-      text: `${this.type} report has been exported to Excel successfully.`,
-      icon: 'success',
-      confirmButtonColor: '#089B41',
-      timer: 2000,
-      showConfirmButton: false
+      tables: tables.map(table => ({
+        title: table.title?.en || '',
+        headers: table.headers,
+        data: table.data
+      })),
+      isRtl: false // Or set based on current language
     });
 
   } catch (error) {
@@ -647,7 +709,25 @@ async DownloadAsExcel() {
   }
 }
 
-// Helper method to get Arabic title
+private getArabicInvoiceTitle(englishTitle: string): string {
+  // Extract invoice number if present
+  const invoiceMatch = englishTitle.match(/Invoice (\d+)/);
+  const invoiceNum = invoiceMatch ? invoiceMatch[1] : '';
+  
+  switch(this.type) {
+    case 'Payable':
+      return invoiceNum ? `فاتورة الدفع ${invoiceNum}` : 'فاتورة الدفع';
+    case 'Receivable':
+      return invoiceNum ? `فاتورة الاستحقاق ${invoiceNum}` : 'فاتورة الاستحقاق';
+    case 'Installment Deduction':
+      return invoiceNum ? `فاتورة خصم الأقساط ${invoiceNum}` : 'فاتورة خصم الأقساط';
+    case 'Accounting Entries':
+      return invoiceNum ? `فاتورة القيود المحاسبية ${invoiceNum}` : 'فاتورة القيود المحاسبية';
+    default:
+      return englishTitle;
+  }
+}
+
 private getArabicReportTitle(): string {
   switch (this.type) {
     case 'Payable':
@@ -661,5 +741,84 @@ private getArabicReportTitle(): string {
     default:
       return 'تقرير المحاسبة';
   }
+}
+
+// Helper method to get Arabic title
+// private getArabicReportTitle(): string {
+//   switch (this.type) {
+//     case 'Payable':
+//       return 'تقرير الدفع';
+//     case 'Receivable':
+//       return 'تقرير الاستحقاق';
+//     case 'Installment Deduction':
+//       return 'تقرير خصم الأقساط';
+//     case 'Accounting Entries':
+//       return 'تقرير القيود المحاسبية';
+//     default:
+//       return 'تقرير المحاسبة';
+//   }
+// }
+
+private loadingOperation: string = '';
+private loadingDebounceTimeout: any = null;
+
+get isExportLoading(): boolean {
+    return !!this.loadingOperation;
+}
+
+get isLoadingPdf(): boolean {
+    return this.loadingOperation === 'pdf';
+}
+
+get isLoadingPrint(): boolean {
+    return this.loadingOperation === 'print';
+}
+
+get isLoadingExcel(): boolean {
+    return this.loadingOperation === 'excel';
+}
+
+private setLoading(operation: string, enable: boolean): void {
+    if (this.loadingDebounceTimeout) {
+        clearTimeout(this.loadingDebounceTimeout);
+    }
+
+    if (enable) {
+        this.loadingOperation = operation;
+    } else {
+        this.loadingDebounceTimeout = setTimeout(() => {
+            this.loadingOperation = '';
+        }, 300);
+    }
+}
+
+private async executeWithLoading(operation: string, operationFn: () => Promise<void> | void): Promise<void> {
+    if (this.loadingOperation) {
+        return;
+    }
+
+    try {
+        this.setLoading(operation, true);
+        const result = operationFn();
+        if (result instanceof Promise) {
+            await result;
+        }
+    } catch (error) {
+        console.error(`${operation} error:`, error);
+    } finally {
+        this.setLoading(operation, false);
+    }
+}
+
+async safeDownloadPdf(): Promise<void> {
+    await this.executeWithLoading('pdf', () => this.DownloadAsPDF());
+}
+
+async safePrint(): Promise<void> {
+    await this.executeWithLoading('print', () => this.Print());
+}
+
+async safeDownloadExcel(): Promise<void> {
+    await this.executeWithLoading('excel', () => this.DownloadAsExcel());
 }
 }

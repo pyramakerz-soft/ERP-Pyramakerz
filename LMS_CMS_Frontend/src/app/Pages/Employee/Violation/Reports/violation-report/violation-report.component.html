@@ -107,12 +107,11 @@
             <div class="flex justify-start">
                 <div class="mr-2 border border-[#EAECF0] border-t-0 border-l-0 bg-[#EBEBEB] p-1">
                   {{!isRtl ? data.employeeType  :  data.employeeTypeArabicName  }} 
-                  <!-- fix when backend done -->
               </div>
             </div>
           </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.employeeEnglishName }}
+                        {{!isRtl ? data.employeeEnglishName  :  data.employeeArabicName}}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.details }}

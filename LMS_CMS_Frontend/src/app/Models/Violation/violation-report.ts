@@ -5,5 +5,6 @@ export class ViolationReport {
   employeeType: string = '';
   employeeTypeArabicName: string = '';
   employeeEnglishName: string = '';
+  employeeArabicName: string = '';
   details: string = '';
 }
