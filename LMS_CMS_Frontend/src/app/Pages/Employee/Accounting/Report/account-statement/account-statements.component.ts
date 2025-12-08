@@ -55,7 +55,7 @@ export class AccountStatementsComponent {
     reportHeaderTwoEn: 'Detailed Transaction Summary',
     reportHeaderOneAr: 'كشف الحساب',
     reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

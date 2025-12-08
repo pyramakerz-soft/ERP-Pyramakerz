@@ -53,8 +53,8 @@ export class AccountigReportsComponent {
     reportHeaderOneEn: 'Accounting Report',
     reportHeaderTwoEn: '',
     reportHeaderOneAr: 'تقرير المحاسبة',
-    reportHeaderTwoAr: '',
-    reportImage: 'assets/images/logo.png',
+    reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -334,7 +334,6 @@ Print() {
       reportHeaderTwoEn: '',
       reportHeaderOneAr: this.getArabicReportTitle(),
       reportHeaderTwoAr: '',
-      reportImage: '',
     };
 
     this.showPDF = true;
@@ -398,7 +397,6 @@ DownloadAsPDF() {
       reportHeaderTwoEn: '',
       reportHeaderOneAr: this.getArabicReportTitle(),
       reportHeaderTwoAr: '',
-      reportImage: '',
     };
 
     this.showPDF = true;

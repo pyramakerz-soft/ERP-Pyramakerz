@@ -72,7 +72,7 @@ export class AccountBalanceComponent implements OnInit {
     reportHeaderTwoEn: 'Detailed Account Balance Summary',
     reportHeaderOneAr: 'تقرير أرصدة الحسابات',
     reportHeaderTwoAr: 'ملخص أرصدة الحسابات التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

@@ -74,7 +74,7 @@ export class EvaluationReportComponent {
     reportHeaderTwoEn: 'Employee Performance Evaluation Summary',
     reportHeaderOneAr: 'تقرير التقييم',
     reportHeaderTwoAr: 'ملخص تقييم أداء الموظفين',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -664,7 +664,7 @@ export class EvaluationReportComponent {
           }
         ],
         infoRows: infoRows,
-        // reportImage: 'assets/images/logo.png',
+        //  
         tables: tables,
         filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });

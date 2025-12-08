@@ -74,21 +74,21 @@ export class MaintenanceReportComponent implements OnInit {
     private maintenanceCompaniesService: MaintenanceCompaniesService,
     private maintenanceEmployeesService: MaintenanceEmployeesService,
     private apiService: ApiService,
-    private languageService: LanguageService, 
+    private languageService: LanguageService,
     private reportsService: ReportsService,
-    private loadingService: LoadingService 
-  ) {}
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit() {
     this.loadDropdownData();
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -97,13 +97,13 @@ export class MaintenanceReportComponent implements OnInit {
   async loadDropdownData() {
     try {
       const domainName = this.apiService.GetHeader();
-      
+
       // Load maintenance items
       this.maintenanceItems = await firstValueFrom(this.maintenanceItemService.Get(domainName));
-      
+
       // Load maintenance companies
       this.maintenanceCompanies = await firstValueFrom(this.maintenanceCompaniesService.Get(domainName));
-      
+
       // Load maintenance employees
       this.maintenanceEmployees = await firstValueFrom(this.maintenanceEmployeesService.Get(domainName));
     } catch (error) {
@@ -131,108 +131,120 @@ export class MaintenanceReportComponent implements OnInit {
     this.onFilterChange();
   }
 
-async viewReport() {
-  if (this.filterByCompany && this.selectedCompanyId && this.selectedCompanyId > 0 && 
+  async viewReport() {
+    if(!this.filterByCompany && !this.filterByEmployee){
+      const Swal = await import('sweetalert2').then(m => m.default);
+
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'Plrease select at least one filter: Company or Employee.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (this.filterByCompany && this.selectedCompanyId && this.selectedCompanyId > 0 &&
       this.filterByEmployee && this.selectedEmployeeId && this.selectedEmployeeId > 0) {
-    const Swal = await import('sweetalert2').then(m => m.default);
-    
-    Swal.fire({
-      title: 'Invalid Selection',
-      text: 'You cannot select specific IDs for both Company and Employee at the same time. Please select "All" for one of them or disable one filter.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
+      const Swal = await import('sweetalert2').then(m => m.default);
 
-  // Existing date validation
-  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-    const Swal = await import('sweetalert2').then(m => m.default);
-    
-    Swal.fire({
-      title: 'Invalid Date Range',
-      text: 'Start date cannot be later than end date.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
-
-  this.isLoading = true;
-  this.showTable = false;
-
-  try {
-    const domainName = this.apiService.GetHeader();
-    
-    // Build request object based on filter checkboxes
-    const request: any = {
-      fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
-      toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
-    };
-
-    // Add itemId if selected
-    if (this.selectedItemId && this.selectedItemId !== 0) {
-      request.itemId = this.selectedItemId;
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'You cannot select specific IDs for both Company and Employee at the same time. Please select "All" for one of them or disable one filter.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
 
-    // Determine filterBy value based on checkboxes
-    if (this.filterByCompany && !this.filterByEmployee) {
-      // Only companies
-      request.filterBy = 1;
-      if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
-        request.companyId = this.selectedCompanyId;
-      }
-    } else if (!this.filterByCompany && this.filterByEmployee) {
-      // Only employees
-      request.filterBy = 2;
-      if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-        request.maintenanceEmployeeId = this.selectedEmployeeId;
-      }
-    } else if (this.filterByCompany && this.filterByEmployee) {
-      // Both filters are enabled
-      // At this point, we know they're not both specific IDs (due to validation above)
-      
-      // If company has specific ID, employee must be "All" or null
-      if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
-        request.companyId = this.selectedCompanyId;
-        // Employee should be "All" or not included
-        if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
-          // Employee is "All", so don't include it
-        }
-      }
-      // If employee has specific ID, company must be "All" or null
-      else if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
-        request.maintenanceEmployeeId = this.selectedEmployeeId;
-        // Company should be "All" or not included
-        if (!this.selectedCompanyId || this.selectedCompanyId === 0) {
-          // Company is "All", so don't include it
-        }
-      }
-      // If both are "All" (0) or null, don't include either
-    }
-    // If both are false, only dates are sent
+    // Existing date validation
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      const Swal = await import('sweetalert2').then(m => m.default);
 
-    const response = await firstValueFrom(
-      this.maintenanceReportService.getMaintenanceReport(domainName, request)
-    ); 
-    
-    if (Array.isArray(response)) {
-      this.maintenanceReports = response; 
-    } else { 
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.showTable = false;
+
+    try {
+      const domainName = this.apiService.GetHeader();
+
+      // Build request object based on filter checkboxes
+      const request: any = {
+        fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
+        toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
+      };
+
+      // Add itemId if selected
+      if (this.selectedItemId && this.selectedItemId !== 0) {
+        request.itemId = this.selectedItemId;
+      }
+
+      // Determine filterBy value based on checkboxes
+      if (this.filterByCompany && !this.filterByEmployee) {
+        // Only companies
+        request.filterBy = 1;
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
+        }
+      } else if (!this.filterByCompany && this.filterByEmployee) {
+        // Only employees
+        request.filterBy = 2;
+        if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+        }
+      } else if (this.filterByCompany && this.filterByEmployee) {
+        // Both filters are enabled
+        // At this point, we know they're not both specific IDs (due to validation above)
+
+        // If company has specific ID, employee must be "All" or null
+        if (this.selectedCompanyId && this.selectedCompanyId !== 0) {
+          request.companyId = this.selectedCompanyId;
+          // Employee should be "All" or not included
+          if (!this.selectedEmployeeId || this.selectedEmployeeId === 0) {
+            // Employee is "All", so don't include it
+          }
+        }
+        // If employee has specific ID, company must be "All" or null
+        else if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+          request.maintenanceEmployeeId = this.selectedEmployeeId;
+          // Company should be "All" or not included
+          if (!this.selectedCompanyId || this.selectedCompanyId === 0) {
+            // Company is "All", so don't include it
+          }
+        }
+        // If both are "All" (0) or null, don't include either
+      }
+      // If both are false, only dates are sent
+
+      const response = await firstValueFrom(
+        this.maintenanceReportService.getMaintenanceReport(domainName, request)
+      );
+
+      if (Array.isArray(response)) {
+        this.maintenanceReports = response;
+      } else {
+        this.maintenanceReports = [];
+      }
+
+      this.prepareExportData();
+      this.showTable = true;
+    } catch (error) {
       this.maintenanceReports = [];
+      this.showTable = true;
+      const Swal = await import('sweetalert2').then(m => m.default);
+      Swal.fire('Error', 'Failed to load maintenance reports', 'error');
+    } finally {
+      this.isLoading = false;
     }
-
-    this.prepareExportData();
-    this.showTable = true;
-  } catch (error) { 
-    this.maintenanceReports = [];
-    this.showTable = true;
-    const Swal = await import('sweetalert2').then(m => m.default);
-    Swal.fire('Error', 'Failed to load maintenance reports', 'error');
-  } finally {
-    this.isLoading = false;
   }
-}
 
   private prepareExportData(): void {
     // For PDF (object format)
@@ -323,7 +335,7 @@ async viewReport() {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -331,7 +343,7 @@ async viewReport() {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -352,14 +364,14 @@ async viewReport() {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -375,7 +387,7 @@ async viewReport() {
     }
 
     this.isExporting = true;
-    
+
     try {
       const infoRows = [
         { key: 'From Date', value: this.dateFrom },
