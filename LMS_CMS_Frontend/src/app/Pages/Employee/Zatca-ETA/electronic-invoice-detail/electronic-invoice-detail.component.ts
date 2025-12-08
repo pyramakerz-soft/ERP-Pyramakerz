@@ -73,7 +73,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     reportHeaderTwoEn: 'Simplified Tax Invoice',
     reportHeaderOneAr: 'تقرير الفاتورة',
     reportHeaderTwoAr: 'فاتورة ضريبة مبسطة',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   constructor(

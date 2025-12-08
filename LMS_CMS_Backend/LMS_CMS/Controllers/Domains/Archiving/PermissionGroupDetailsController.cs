@@ -47,7 +47,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
 
             List<PermissionGroupDetails> permissionGroupDetails = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(
-                f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.PermissionGroup.IsDeleted != true && f.ArchivingTree.IsDeleted != true
+                f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.PermissionGroup.IsDeleted != true && f.ArchivingTree.IsDeleted != true &&
+                (f.ArchivingTree.FileLink == null || f.ArchivingTree.FileLink == "")
                 );
 
             if (permissionGroupDetails == null || permissionGroupDetails.Count == 0)
@@ -126,13 +127,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                         d => d.IsDeleted != true && d.ArchivingTreeParentID == item.ArchivingTreeID && d.FileLink != null && d.FileLink != "");
                     if (fileArchivingTree.Count > 0)
                     {
-                        foreach (var file in fileArchivingTree)
+                        foreach (ArchivingTree file in fileArchivingTree)
                         {
                             treesToKeep.Add(file.ID);
 
                             PermissionGroupDetails existingFilePermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
                                 p => p.ArchivingTreeID == file.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
-                            if (existingPermission == null)
+                            if (existingFilePermission == null)
                             {
                                 PermissionGroupDetails permissionFileGroupDetails = new PermissionGroupDetails
                                 {
@@ -160,23 +161,30 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 }
                 else
                 {
+                    List<ArchivingTree> fileArchivingTree = Unit_Of_Work.archivingTree_Repository.FindBy(
+                        d => d.IsDeleted != true && d.ArchivingTreeParentID == existingPermission.ArchivingTreeID && d.FileLink != null && d.FileLink != "");
+
+                    if (fileArchivingTree.Count > 0)
+                    { 
+                        foreach (ArchivingTree file in fileArchivingTree)
+                        {
+                            treesToKeep.Add(file.ID);
+                        }
+                    }
+                     
                     if (existingPermission.Allow_Delete != item.Allow_Delete || existingPermission.Allow_Delete_For_Others != item.Allow_Delete_For_Others)
                     {
                         existingPermission.Allow_Delete = item.Allow_Delete;
                         existingPermission.Allow_Delete_For_Others = item.Allow_Delete_For_Others;
                         Unit_Of_Work.permissionGroupDetails_Repository.Update(existingPermission);
 
-                        List<ArchivingTree> fileArchivingTree = Unit_Of_Work.archivingTree_Repository.FindBy(
-                            d => d.IsDeleted != true && d.ArchivingTreeParentID == existingPermission.ArchivingTreeID && d.FileLink != null && d.FileLink != "");
                         if (fileArchivingTree.Count > 0)
                         {
-                            foreach (var file in fileArchivingTree)
-                            {
-                                treesToKeep.Add(file.ID);
-
+                            foreach (ArchivingTree file in fileArchivingTree)
+                            { 
                                 PermissionGroupDetails existingFilePermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
                                     p => p.ArchivingTreeID == file.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
-                                if (existingPermission == null)
+                                if (existingFilePermission == null)
                                 {
                                     PermissionGroupDetails permissionFileGroupDetails = new PermissionGroupDetails
                                     {

@@ -68,7 +68,7 @@ export class AccountingSubledgerComponent implements OnInit {
     reportHeaderTwoEn: 'Detailed Subledger Summary',
     reportHeaderOneAr: 'تقرير دفتر الأستاذ المساعد',
     reportHeaderTwoAr: 'ملخص دفتر الأستاذ المساعد التفصيلي',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;

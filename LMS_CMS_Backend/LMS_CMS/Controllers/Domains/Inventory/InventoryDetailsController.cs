@@ -66,8 +66,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 var transactionsResult = await GetInventoryNetTransactionsInternalAsync(storeId, shopItemId, fromDate, toDate);
 
                 // ========== Pagination Applied to Transactions ==========
-                int totalCount = transactionsResult.Count;
-                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                int totalRecords = transactionsResult.Count;
+                //int totalCount = transactionsResult.Count;
+                int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
 
                 var paginatedTransactions = transactionsResult
                     .Skip((pageNumber - 1) * pageSize)
@@ -82,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     {
                         Page = pageNumber,
                         PageSize = pageSize,
-                        TotalCount = totalCount,
+                        totalRecord = totalRecords,
                         TotalPages = totalPages
                     }
                 };

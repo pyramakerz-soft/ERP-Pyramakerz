@@ -68,7 +68,7 @@
             <div class="flex justify-start">
               <div *ngFor="let emp of row.employeeTypes; let j = index">
                 <div class="mr-2 border border-[#EAECF0] border-t-0 border-l-0 bg-[#EBEBEB] p-1">
-                  {{ emp.name }}
+                  {{ !isRtl ? emp.name  :  emp.arabicName }}
                 </div>
               </div>
             </div>
@@ -140,7 +140,7 @@
                   <ul>
                     <li *ngFor="let employeeType of empTypes" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       (click)="selectEmployeeType(employeeType)" (ngModelChange)="onInputValueChange({ field: 'employeeTypeIds', value: $event })">
-                      {{ employeeType.name }}
+                      {{  !isRtl ? employeeType.name  :  employeeType.arabicName  }}
                     </li>
                   </ul>
                 </div>
