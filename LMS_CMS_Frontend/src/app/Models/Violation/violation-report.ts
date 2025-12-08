@@ -3,6 +3,7 @@ export class ViolationReport {
   date: string = '';
   violationType: string = '';
   employeeType: string = '';
+  employeeTypeArabicName: string = '';
   employeeEnglishName: string = '';
   details: string = '';
 }
