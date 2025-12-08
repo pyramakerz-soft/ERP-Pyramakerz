@@ -7,17 +7,17 @@
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectResources()">
-            <img src="Icons/GreenResource.png" />
+            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/GreenResource.png" />
              {{ 'Resources' | translate }}
         </button>
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectAssignments()">
-            <img src="Icons/GreenAssignment.png" />
+            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/GreenAssignment.png" />
              {{ 'Assignments' | translate }}
         </button>
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectLive()">
-            <img src="Icons/GreenLessonLive.png" />
+            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/GreenLessonLive.png" />
              {{ 'Lesson Live' | translate }}
         </button>
     </div>
@@ -27,7 +27,7 @@
     <div *ngFor="let week of WorkingWeekData; let i = index" (click)="moveToLessons(week.id)"
         class="w-[15%] rounded-2xl shadow text-center flex space-x-2 rtl:space-x-reverse p-3 items-center"
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
-        <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
+        <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
         <h1 class="text-lg font-bold text-[#003366]">{{ week.englishName }}</h1>
     </div>
 </div>

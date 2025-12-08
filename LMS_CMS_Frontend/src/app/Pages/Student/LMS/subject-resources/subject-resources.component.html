@@ -7,7 +7,7 @@
     <div *ngFor="let resource of SubjectResourcesData; let i = index" 
         class="w-[15%] rounded-2xl shadow text-center flex space-x-2 rtl:space-x-reverse p-3 items-center cursor-pointer" (click)="openLink(resource.fileLink)"
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
-        <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
+        <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
         <h1 class="text-lg font-bold text-[#003366] ">{{ resource.englishName }}</h1>
     </div>
 </div>

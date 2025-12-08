@@ -17,7 +17,7 @@
 <div class="mt-7 flex justify-between">
     <div class="p-6 bg-[#F7F7F7] w-[35%] rounded-3xl overflow-x-auto">
         <div class="flex space-x-2 rtl:space-x-reverse items-center w-full cursor-pointer" (click)="GetContent()">
-            <img src="Icons/Folder.png">
+            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Folder.png">
             <p class="text-2xl">Content</p>
         </div>
 
@@ -29,7 +29,7 @@
     <div *ngIf="archiving.id" class="p-6 bg-[#F7F7F7] w-[60%] rounded-3xl">
         <div class="flex space-x-3 rtl:space-x-reverse items-center w-full">
             <div class="w-full flex space-x-2 rtl:space-x-reverse items-center">
-                <img src="Icons/Folder.png">
+                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Folder.png">
                 <p class="text-2xl">{{archiving.name}}</p>
             </div>
             <button *ngIf="AllowEdit && IsAllowEdit(archiving.insertedByUserId) && archiving.name != 'Content'"
@@ -110,8 +110,8 @@
                     <div class="flex justify-center w-full">
                         <label for="file"
                             class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                            <img *ngIf="!newArchiving.fileFile" src="Images/Icon frame.png" class="w-1/4">
-                            <img *ngIf="newArchiving.fileFile" src="Images/FileAttached.png" class="w-1/4">
+                            <img *ngIf="!newArchiving.fileFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/4">
+                            <img *ngIf="newArchiving.fileFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/FileAttached.png" class="w-1/4">
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span
                                     class="secondaryTxt">Click to Upload </span></p>
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(Max. File size: 25 MB)</p>

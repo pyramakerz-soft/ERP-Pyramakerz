@@ -35,7 +35,7 @@
                     <div class="flex hover:bg-gray-100 p-3 items-start"
                         [ngClass]="{'border-b': i != requests.length, 'bg-[#e3ebf0b6]': (!request.seenOrNot && request.receiverID == User_Data_After_Login.id && request.receiverUserTypeName == User_Data_After_Login.type) || request.id == requestByID.id}">
                         <div class="flex-shrink-0">
-                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14"
+                            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14"
                                 alt="Profile Photo">
                         </div>
                         <div *ngIf="request.receiverID == User_Data_After_Login.id && request.receiverUserTypeName == User_Data_After_Login.type" class="ml-4 text-start w-full">
@@ -53,7 +53,7 @@
                                     {{request.message}}
                                 </div>
                                 <div *ngIf="request.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                    <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                                     <span
                                         class="primaryTxt text-sm font-semibold">{{getFileName(request.fileLink)}}</span>
                                 </div>
@@ -131,7 +131,7 @@
                                     {{request.message}}
                                 </div>
                                 <div *ngIf="request.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                    <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                                     <span
                                         class="primaryTxt text-sm font-semibold">{{getFileName(request.fileLink)}}</span>
                                 </div>
@@ -182,7 +182,7 @@
         class="w-[48%] bg-[#F7F7F7] rounded-md h-auto max-h-[75vh] overflow-y-auto overflow-x-hidden">
         <div class="flex p-3 items-start">
             <div class="flex-shrink-0">
-                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
             </div>
             <div *ngIf="requestByID.receiverID == User_Data_After_Login.id && requestByID.receiverUserTypeName == User_Data_After_Login.type" class="ml-4 text-start w-full">
                 <p *ngIf="requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{
@@ -195,7 +195,7 @@
                         requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span> {{ 'Requested From You' | translate }}</p>
                 <div class="mt-4 flex flex-col space-y-3 ">
                     <div *ngIf="requestByID.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">
-                        <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                        <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                         <a href={{requestByID.fileLink}} class="secondaryTxt" target="_blank">
                             {{ 'Click to' | translate }} {{ 'Download' | translate }}
                         </a> 
@@ -274,7 +274,7 @@
                 </p>
                 <div class="mt-4 flex flex-col space-y-3 ">
                     <div *ngIf="requestByID.fileLink" class="flex space-x-2 rtl:space-x-reverse items-center">
-                        <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                        <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                         <a href={{requestByID.fileLink}} class="secondaryTxt" target="_blank">
                             {{ 'Click to' | translate }} {{ 'Download' | translate }}
                         </a> 
@@ -335,15 +335,15 @@
             <div *ngIf="User_Data_After_Login.type == 'employee'" class="w-full m-auto mt-5"> 
                 <div class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
                     <div>
-                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        <img [src]="isStudentHovered ? 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/Student_Hover.png' : 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/student.png'" alt="Student"
                         (click)="selectType(2)">
                     </div>
                     <div>
-                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        <img [src]="isParentHovered ? 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/parent_hover.png' : 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/parent.png'" alt="Parent"
                         (click)="selectType(3)">
                     </div>
                     <div>
-                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        <img [src]="isEmployeeHovered ? 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/employee_hover.png' : 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/employee.png'" alt="Employee"
                         (click)="selectType(1)">
                     </div>
                 </div> 
@@ -488,8 +488,8 @@
                     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                         <div class="flex justify-center w-full">
                             <label for="fileFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                                <img *ngIf="!requestToBeSend.fileFile" src="Images/Icon frame.png" class="w-1/4">
-                                <img *ngIf="requestToBeSend.fileFile" src="Images/FileAttached.png" class="w-1/4"> 
+                                <img *ngIf="!requestToBeSend.fileFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/4">
+                                <img *ngIf="requestToBeSend.fileFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/FileAttached.png" class="w-1/4"> 
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{ 'Click to' | translate }} {{ 'Upload' | translate }}</span></p>
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' | translate }}</p>
                             </label>

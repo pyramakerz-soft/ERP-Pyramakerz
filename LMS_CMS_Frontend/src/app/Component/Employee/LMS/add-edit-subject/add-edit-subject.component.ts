@@ -315,7 +315,7 @@ export class AddEditSubjectComponent {
         this.isLoading = true;
         if (this.editSubject == false) {
           if (!this.subject.iconFile) {
-            fetch('Images/DummySubject.jpg')
+            fetch('https://d393tpgdl2mqkp.cloudfront.net/public/Images/DummySubject.jpg')
               .then(res => res.blob())
               .then(blob => {
                 this.subject.iconFile = new File([blob], 'DummySubject.jpg', { type: 'image/jpeg' });
