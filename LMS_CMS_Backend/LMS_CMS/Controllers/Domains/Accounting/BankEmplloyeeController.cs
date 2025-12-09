@@ -47,7 +47,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             List<BankEmployee> bankEmployees = await Unit_Of_Work.bankEmployee_Repository.Select_All_With_IncludesById<BankEmployee>(
-                               f => f.IsDeleted != true && f.EmployeeID == EmpId,
+                               f => f.IsDeleted != true && f.EmployeeID == EmpId && f.Bank.IsDeleted != true,
                                query => query.Include(d => d.Bank),
                                query => query.Include(d => d.Employee));
 
