@@ -11,8 +11,9 @@
     </div>
 
     <div class="flex space-x-2 rtl:space-x-reverse items-center">
-      <button class="secondaryBg text-white font-medium px-6 py-3 rounded-lg" (click)="Save()">
-        {{'Save'| translate }}
+      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+        <span *ngIf="!isLoading">{{'Save'| translate }}</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
       </button>
     </div>
   </div>
@@ -285,15 +286,19 @@
     </div>
 
     <div class="flex items-end mb-4">
-      <button class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center"
+      <!-- <button class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center"
         (click)="Adjustment()">
         {{'Adjustment'| translate }}
+      </button> -->
+      <button [disabled]="adiustmentLoading" class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center" (click)="Adjustment()">
+        <span *ngIf="!adiustmentLoading">{{'Adjustment'| translate }}</span>
+        <i *ngIf="adiustmentLoading" class="fas fa-spinner fa-spin"></i>
       </button>
     </div>
   </div>
 
   <!-- Loading Overlay -->
-  <div *ngIf="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div *ngIf="adiustmentLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
     <div class="text-center">
       <div class="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
       <p class="mt-4 text-white text-lg font-semibold">
