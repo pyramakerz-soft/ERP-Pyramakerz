@@ -799,9 +799,8 @@ export class InventoryDetailsComponent {
           this.Data.date = `${year}-${month}-${day}`;
           this.Data.inventoryDetails = this.TableData;
           this.Data.flagId = 9;
-          this.salesServ.Add(this.Data, this.DomainName).subscribe(
-            (d) => {
-              this.showSuccessAlert(
+          this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
+            this.showSuccessAlert(
                 this.translate.instant('Convert Successfully')
               );
               this.router.navigateByUrl(`Employee/Purchases`);
@@ -809,7 +808,10 @@ export class InventoryDetailsComponent {
             (error) => {}
           );
         },
-        (error) => {}
+        (error) => {
+          this.Data.isConvertedToPurchase = false;
+          this.showErrorAlert(error.error);
+        }
       );
     }
   }
