@@ -101,11 +101,11 @@ export class StockingDetailsComponent {
   adiustmentDisbursement: InventoryMaster = new InventoryMaster();
   AllShopItems: ShopItem[] = [];
   isLoading = false;
+  adiustmentLoading = false;
+
   showPrintMenu = false;
   IsActualStockHiddenForBlankPrint: boolean = false;
   StoreAndDateSpanWhenPrint: boolean = false;
-  // NewDetailsWhenEdit: StockingDetails[] = [];
-  DetailsToDeleted: StockingDetails[] = [];
   tableDataForPrint: any[] = []
   showPDF: boolean = false;
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -536,6 +536,7 @@ export class StockingDetailsComponent {
               text: 'Stocking Added Successfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading = false;
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
@@ -551,13 +552,13 @@ export class StockingDetailsComponent {
         );
       }
       if (this.mode == 'Edit') {
-        this.DetailsToDeleted = this.OriginDetails.filter(
-          (originItem) =>
-            this.HasBallance == true && originItem.currentStock == 0
-        );
-        this.DetailsToDeleted.forEach((element) => {
-          this.StockingDetailsServ.Delete(element.id,this.DomainName).subscribe((d) => { });
-        });
+        // this.DetailsToDeleted = this.OriginDetails.filter(
+        //   (originItem) =>
+        //     this.HasBallance == true && originItem.currentStock == 0
+        // );
+        // this.DetailsToDeleted.forEach((element) => {
+        //   this.StockingDetailsServ.Delete(element.id,this.DomainName).subscribe((d) => { });
+        // });
         this.Data.stockingDetails = this.TableData;
         this.StockingServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
@@ -567,6 +568,7 @@ export class StockingDetailsComponent {
               text: 'Stocking Edited Successfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading = false;
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
@@ -746,10 +748,9 @@ export class StockingDetailsComponent {
 
   async Adjustment() {
     if (await this.isFormValid()){
-      this.isLoading = true;
+      this.adiustmentLoading = true;
       try {
         if (this.mode === 'Create') {
-          this.TableData = this.Data.stockingDetails;
           this.StockingServ.Add(this.Data,this.DomainName).subscribe(async (addedData)=>{
             this.Data.id = addedData;
             this.MasterId = addedData;
@@ -758,8 +759,10 @@ export class StockingDetailsComponent {
             this.Data.additionId = await this.prepareAdjustment(3,(s) => s.theDifference > 0);
             this.Data.disbursementId = await this.prepareAdjustment(5,(s) => s.theDifference < 0);
             await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+            this.adiustmentLoading = false;
             this.router.navigateByUrl(`Employee/Stocking`);
           },async error=>{
+            this.adiustmentLoading = false;
             const Swal = await import('sweetalert2').then(m => m.default);
             Swal.fire({
               icon: 'error',
@@ -771,9 +774,10 @@ export class StockingDetailsComponent {
           })
         }
         if (this.mode === 'Edit') {
-          console.log(this.Data)
+          console.log(123,this.Data.deletedStockingDetails)
+          this.Data.stockingDetails = this.TableData;
           this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
-            console.log(12345,this.Data)
+            console.log(45,this.Data)
             if (this.Data.additionId != 0 && this.Data.additionId != null) {
               await this.InventoryMastrServ.Delete(this.Data.additionId,this.DomainName).toPromise();
             }
@@ -783,15 +787,18 @@ export class StockingDetailsComponent {
             this.Data.additionId = await this.prepareAdjustment(3,(s) => s.theDifference > 0);
             this.Data.disbursementId = await this.prepareAdjustment(5,(s) => s.theDifference < 0);
             this.Data.newDetailsWhenEdit =[]
+            this.Data.deletedStockingDetails =[]
             this.Data.updatedStockingDetails =[]
             await this.StockingServ.Edit(this.Data, this.DomainName).toPromise();
+            this.adiustmentLoading = false;
             this.router.navigateByUrl(`Employee/Stocking`);
           })
         }
       } catch (error) {
         console.error('Unexpected error in Adjustment():', error);
+        this.adiustmentLoading = false;
       } finally {
-        this.isLoading = false;
+        this.adiustmentLoading = false;
       }
     }
   }

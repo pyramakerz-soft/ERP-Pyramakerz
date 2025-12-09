@@ -381,10 +381,7 @@ export class InventoryDetailsComponent {
   }
 
   GetAllBanks() {
-    this.BankEmployeeServ.GetByEmployeeId(
-      this.UserID,
-      this.DomainName
-    ).subscribe((d) => {
+    this.BankEmployeeServ.GetByEmployeeId(this.UserID,this.DomainName).subscribe((d) => {
       this.Banks = d;
     });
   }
@@ -802,9 +799,8 @@ export class InventoryDetailsComponent {
           this.Data.date = `${year}-${month}-${day}`;
           this.Data.inventoryDetails = this.TableData;
           this.Data.flagId = 9;
-          this.salesServ.Add(this.Data, this.DomainName).subscribe(
-            (d) => {
-              this.showSuccessAlert(
+          this.salesServ.Add(this.Data, this.DomainName).subscribe((d) => {
+            this.showSuccessAlert(
                 this.translate.instant('Convert Successfully')
               );
               this.router.navigateByUrl(`Employee/Purchases`);
@@ -812,7 +808,10 @@ export class InventoryDetailsComponent {
             (error) => {}
           );
         },
-        (error) => {}
+        (error) => {
+          this.Data.isConvertedToPurchase = false;
+          this.showErrorAlert(error.error);
+        }
       );
     }
   }
@@ -1257,25 +1256,33 @@ export class InventoryDetailsComponent {
   }
 
   validateCashVisaNumber(event: any, field: keyof InventoryMaster): void {
-    let value = event.target.value;
-    if (isNaN(value) || value === '') {
+    let value: string = event.target.value;
+
+    // ❌ If not a number except empty or only a dot
+    if (value !== '' && value !== '.' && isNaN(Number(value))) {
       event.target.value = '';
-      if (typeof this.Data[field] === 'string') {
-        this.Data[field] = '' as never;
+      this.Data[field] = '' as never;
+      return;
+    }
+
+    // ✅ Allow "100." without converting to 100
+    if (value.endsWith('.')) {
+      this.Data[field] = value as never;
+      return;
+    }
+
+    // 🔥 Limit to 2 decimals only when decimals exist
+    if (value.includes('.')) {
+      const [int, dec] = value.split('.');
+      if (dec.length > 2) {
+        value = `${int}.${dec.substring(0, 2)}`;
+        event.target.value = value;
       }
     }
 
-      // 🔥 NEW: allow only 2 decimal digits
-    if (value.includes('.')) {
-      const parts = value.split('.');
-      if (parts[1].length > 2) {
-        console.log(453)
-        value = `${parts[0]}.${parts[1].substring(0, 2)}`;
-        event.target.value = value;
-        this.Data[field] = value as never;
-      }
-    }
+    this.Data[field] = value as never;
   }
+
 
   ////////////////////////////// search
 
@@ -1414,11 +1421,22 @@ export class InventoryDetailsComponent {
 
     // PRICE → allow decimals only
     if (field === 'price') {
-      value = value.replace(/[^0-9.]/g, '');  // remove minus & anything else
-      event.target.value = value;
-      row[field] = value ? Number(value) : 0;
+      value = value.replace(/[^0-9.]/g, ''); // keep only numbers + dots
 
-      this.CalculateTotalPrice(row);  // recalc AFTER sanitizing
+      // 🔥 If more than one '.', keep only the first one
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '');
+      }
+
+      event.target.value = value;
+
+      // allow "20." without converting to NaN
+      row[field] = value === '' || value === '.' || value.endsWith('.') 
+        ? value as any 
+        : Number(value);
+
+      this.CalculateTotalPrice(row);
       return;
     }
 
