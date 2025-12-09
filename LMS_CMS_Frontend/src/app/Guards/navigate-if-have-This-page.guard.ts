@@ -72,16 +72,10 @@ export const navigateIfHaveSettingPageGuard: CanActivateFn = (route, state) => {
     return of(false);
   }
 
-  // const rawPath = route.routeConfig?.path || '';
-  // const firstSegment = rawPath.split('/')[0];
-  // const pageName = decodeURIComponent(firstSegment);
-  const pageName = route.routeConfig?.data?.['pageName'];
+  const rawPath = route.routeConfig?.path || '';
+  const firstSegment = rawPath.split('/')[0];
+  const pageName = decodeURIComponent(firstSegment);
 
-  if (!pageName) {
-    router.navigateByUrl('');
-    return of(false);
-  }
-  
   return roleDetailsService.CheckPageAccess(userData.role, pageName).pipe(
     map(() => true),
 
