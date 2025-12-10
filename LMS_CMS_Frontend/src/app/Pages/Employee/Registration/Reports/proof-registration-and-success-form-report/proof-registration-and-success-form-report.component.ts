@@ -309,6 +309,21 @@ GetData(): Promise<void> {
     });
   }
   
+getRegistrationTextAr(): string {
+  const fromGrade = this.DataToPrint?.classFrom?.gradeName || 'غير محدد';
+  const fromYear = this.DataToPrint?.classFrom?.academicYearName || 'غير محدد';
+  const toGrade = this.DataToPrint?.classTo?.gradeName || 'غير محدد';
+  
+  return `مقيدة لدينا من الصف ${fromGrade} عام ${fromYear} إلى الصف ${toGrade}`;
+}
+
+getRegistrationTextEn(): string {
+  const fromGrade = this.DataToPrint?.classFrom?.gradeName || 'N/A';
+  const fromYear = this.DataToPrint?.classFrom?.academicYearName || 'N/A';
+  const toGrade = this.DataToPrint?.classTo?.gradeName || 'N/A';
+  
+  return `Is registered in this school from ${fromGrade} Year ${fromYear} to ${toGrade}`;
+}
 
   // GetData(): Promise<void> {
   //   return new Promise((resolve, reject) => {
