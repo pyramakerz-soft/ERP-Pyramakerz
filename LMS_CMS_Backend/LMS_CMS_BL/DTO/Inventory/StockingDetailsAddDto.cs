@@ -9,8 +9,8 @@ namespace LMS_CMS_BL.DTO.Inventory
 {
     public class StockingDetailsAddDto
     {
-        public long CurrentStock { get; set; }
-        public long ActualStock { get; set; }
+        public long? CurrentStock { get; set; }
+        public long? ActualStock { get; set; }
         public long TheDifference { get; set; }
         public long ShopItemID { get; set; }
         public long StockingId { get; set; }
