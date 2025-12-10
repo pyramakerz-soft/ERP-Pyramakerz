@@ -524,7 +524,7 @@ export class StockingDetailsComponent {
   async Save() {
     if (await this.isFormValid()) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
+      console.log(this.Data)
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.StockingServ.Add(this.Data, this.DomainName).subscribe(
@@ -540,6 +540,7 @@ export class StockingDetailsComponent {
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
+           console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -637,9 +638,8 @@ export class StockingDetailsComponent {
   }
 
   onStockChangeWhenEditRow(row: StockingDetails): void {
+    row.actualStock =row.actualStock || 0
     row.theDifference = row.actualStock - row.currentStock;
-    console.log(row.theDifference , row.actualStock , row.currentStock)
-      // Initialize if null
     if (!this.Data.updatedStockingDetails) {
       this.Data.updatedStockingDetails = [];
     }
@@ -655,7 +655,10 @@ export class StockingDetailsComponent {
   }
 
   onStockChangeWhenAddRow(row: StockingDetails): void {
-    row.theDifference = row.actualStock - row.currentStock;
+    const actual = Number(row.actualStock) || 0;
+    const current = Number(row.currentStock) || 0;
+
+    row.theDifference = actual - current;
   }
 
   ///////////////////////////////////// validation fOR Master
@@ -898,8 +901,8 @@ export class StockingDetailsComponent {
       : JSON.parse(JSON.stringify(this.Data.stockingDetails));
     const targetData = isEditMode ? this.TableData : this.Data.stockingDetails;
     targetData.forEach(row => {
-      row.actualStock = "";
-      row.theDifference = "";
+      row.actualStock = null;
+      row.theDifference = null;
     });
     this.cdr.detectChanges();
     await new Promise<void>(resolve =>
