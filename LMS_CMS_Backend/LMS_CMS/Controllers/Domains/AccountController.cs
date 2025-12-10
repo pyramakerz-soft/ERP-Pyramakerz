@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         [HttpPost]
         public IActionResult Login([FromBody] LoginDTO UserInfo)
-        { 
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             if (UserInfo == null)
@@ -71,10 +71,10 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (isMatch == false)
             {
                 return BadRequest("UserName or Password is Invalid");
-            } 
+            }
 
             if (UserInfo.Type == "employee" && user.IsSuspended)
-            { 
+            {
                 return Forbid();
             }
             else if (UserInfo.Type == "student" && user.IsSuspended)
@@ -97,48 +97,276 @@ namespace LMS_CMS_PL.Controllers.Domains
                 var token = _generateJWT.Generate_Jwt_Token(par.User_Name, par.ID.ToString(), UserInfo.Type);
                 return Ok(new { Token = token });
             }
-            return BadRequest(new { error = "Unexpected user type." });
+            return BadRequest(new { error = "Unexpected user type." }); 
+        }
+        //[HttpPost]
+        //public IActionResult Login([FromBody] LoginDTO UserInfo)
+        //{ 
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            //var accessToken = _generateJWT.Generate_Jwt_Token(
-            //    user.User_Name,
-            //    user.ID.ToString(),
-            //    UserInfo.Type,
-            //    user.Role_ID?.ToString()
-            //);
+        //    if (UserInfo == null)
+        //    {
+        //        return BadRequest("Data Can't be null");
+        //    }
+        //    if (UserInfo.Type == null || !new[] { "employee", "student", "parent" }.Contains(UserInfo.Type.ToLower()))
+        //    {
+        //        return BadRequest("Invalid user type.");
+        //    }
+        //    if (UserInfo.User_Name.Length == 0)
+        //    {
+        //        return BadRequest("User_Name Can't be null");
+        //    }
+        //    if (UserInfo.Password.Length == 0)
+        //    {
+        //        return BadRequest("Password Can't be null");
+        //    }
 
-            //var refreshToken = _generateJWT.GenerateRefreshToken();
+        //    dynamic user = UserInfo.Type switch
+        //    {
+        //        "employee" => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.User_Name == UserInfo.User_Name && emp.IsDeleted != true),
+        //        "student" => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.User_Name == UserInfo.User_Name && stu.IsDeleted != true),
+        //        "parent" => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.User_Name == UserInfo.User_Name && par.IsDeleted != true),
+        //        _ => null,
+        //    };
 
-            // Save refresh token in DB
-            //var refreshTokenEntity = new RefreshTokens
-            //{
-            //    Token = refreshToken,
-            //    UserID = user.ID,
-            //    UserTypeID = UserInfo.Type == "employee" ? 1 : UserInfo.Type == "parent" ? 3 : 2,
-            //    ExpiresAt = DateTime.UtcNow.AddDays(7),
-            //    IsRevoked = false
-            //};
+        //    if (user == null)
+        //    {
+        //        return BadRequest("UserName or Password is Invalid");
+        //    }
+        //    bool isMatch = BCrypt.Net.BCrypt.Verify(UserInfo.Password, user.Password);
+        //    if (isMatch == false)
+        //    {
+        //        return BadRequest("UserName or Password is Invalid");
+        //    } 
 
-            //Unit_Of_Work.refreshTokens_Repository.Add(refreshTokenEntity);
-            //Unit_Of_Work.SaveChanges();
+        //    if (UserInfo.Type == "employee" && user.IsSuspended)
+        //    { 
+        //        return Forbid();
+        //    }
+        //    else if (UserInfo.Type == "student" && user.IsSuspended)
+        //    {
+        //        return Forbid();
+        //    }
 
-            //return Ok(new
-            //{
-            //    AccessToken = accessToken,
-            //    RefreshToken = refreshToken
-            //});
+        //    //if (UserInfo.Type == "employee" && user is Employee emp)
+        //    //{
+        //    //    var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
+        //    //    return Ok(new { Token = tokenEmp });
+        //    //}
+        //    //else if (UserInfo.Type == "student" && user is Student stu)
+        //    //{
+        //    //    var token = _generateJWT.Generate_Jwt_Token(stu.User_Name, stu.ID.ToString(), UserInfo.Type);
+        //    //    return Ok(new { Token = token });
+        //    //}
+        //    //else if (UserInfo.Type == "parent" && user is Parent par)
+        //    //{
+        //    //    var token = _generateJWT.Generate_Jwt_Token(par.User_Name, par.ID.ToString(), UserInfo.Type);
+        //    //    return Ok(new { Token = token });
+        //    //}
+        //    //return BadRequest(new { error = "Unexpected user type." });
+
+        //    string? roleId = UserInfo.Type == "employee" ? user.Role_ID?.ToString() : null;
+
+        //    var accessToken = _generateJWT.Generate_Jwt_Token(
+        //        user.User_Name,
+        //        user.ID.ToString(),
+        //        UserInfo.Type,
+        //        roleId
+        //    ); 
+
+        //    var refreshToken = _generateJWT.GenerateRefreshToken();
+
+        //    //Save refresh token in DB
+        //    var refreshTokenEntity = new RefreshTokens
+        //    {
+        //        Token = refreshToken,
+        //        UserID = user.ID,
+        //        UserTypeID = UserInfo.Type == "employee" ? 1 : UserInfo.Type == "parent" ? 3 : 2,
+        //        ExpiresAt = DateTime.UtcNow.AddDays(7),
+        //        IsRevoked = false
+        //    };
+
+        //    Unit_Of_Work.refreshTokens_Repository.Add(refreshTokenEntity);
+        //    Unit_Of_Work.SaveChanges();
+
+        //    //return Ok(new
+        //    //{
+        //    //    AccessToken = accessToken,
+        //    //    RefreshToken = refreshToken
+        //    //});
+
+        //    // set token in a HttpOnly cookie 
+        //    Response.Cookies.Append("AuthToken", accessToken, new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true, // set to false if testing on localhost HTTP
+        //        SameSite = SameSiteMode.Strict,
+        //        Expires = DateTime.UtcNow.AddMinutes(15) // same as token time
+        //    });
+
+        //    Response.Cookies.Append("RefreshToken", refreshToken, new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true, // false only on local HTTP
+        //        SameSite = SameSiteMode.Strict,
+        //        Expires = DateTime.UtcNow.AddDays(7) // same as refresh token time
+        //    });
+
+        //    // Return user info only
+        //    return Ok(new
+        //    {
+        //        id = user.ID,
+        //        user_Name = user.User_Name,
+        //        type = UserInfo.Type,
+        //        roleId = roleId,
+        //    });
+        //}
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("RefreshTokenForWeb")]
+        public async Task<IActionResult> RefreshTokenForWeb()
+        {
+            var refreshToken = Request.Cookies["RefreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized("Refresh token missing");
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            RefreshTokens refreshTokenEntity = Unit_Of_Work.refreshTokens_Repository.First_Or_Default(rt => rt.Token == refreshToken);
+
+            if (refreshTokenEntity == null)
+                return Unauthorized("Invalid refresh token");
+             
+            if (refreshTokenEntity.IsRevoked)
+            {
+                // Revoke all user tokens to prevent reuse
+                var userTokens = Unit_Of_Work.refreshTokens_Repository
+                    .FindBy(rt => rt.UserID == refreshTokenEntity.UserID && !rt.IsRevoked)
+                    .ToList();
+
+                foreach (var token in userTokens)
+                    token.IsRevoked = true;
+
+                Unit_Of_Work.refreshTokens_Repository.UpdateRange(userTokens);
+                Unit_Of_Work.SaveChanges();
+
+                return Unauthorized("Refresh token already used or invalidated");
+            }
+
+            if (refreshTokenEntity.ExpiresAt < DateTime.UtcNow)
+                return Unauthorized("Refresh token expired");
+
+            var userTypeId = refreshTokenEntity.UserTypeID;
+            string userType = userTypeId switch
+            {
+                1 => "employee",
+                2 => "student",
+                3 => "parent",
+                _ => null
+            };
+
+            if (userType == null)
+                return Unauthorized("Invalid user type");
+             
+            dynamic user = userType switch
+            {
+                "employee" => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == refreshTokenEntity.UserID && emp.IsDeleted != true),
+                "student" => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == refreshTokenEntity.UserID && stu.IsDeleted != true),
+                "parent" => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == refreshTokenEntity.UserID && par.IsDeleted != true),
+                _ => null,
+            };
+
+            if (user == null)
+                return Unauthorized("User not found or inactive");
+
+            string? roleId = userType == "employee" ? user.Role_ID?.ToString() : null;
+
+            var newAccessToken = _generateJWT.Generate_Jwt_Token(
+                user.User_Name,
+                user.ID.ToString(),
+                userType,
+                roleId
+            );
+             
+            var newRefreshToken = _generateJWT.GenerateRefreshToken();
+             
+            refreshTokenEntity.IsRevoked = true;
+            Unit_Of_Work.refreshTokens_Repository.Update( refreshTokenEntity);
+            Unit_Of_Work.refreshTokens_Repository.Add(new RefreshTokens
+            {
+                Token = newRefreshToken,
+                UserID = user.ID,
+                UserTypeID = refreshTokenEntity.UserTypeID,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                IsRevoked = false
+            });
+
+            Unit_Of_Work.SaveChanges();
+
+            // Set new access token in HttpOnly cookie
+            Response.Cookies.Append("AuthToken", newAccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // false if testing on localhost HTTP
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(15) // same as token expiration
+            });
+
+            Response.Cookies.Append("RefreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok();
+            //return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken });
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        [Authorize]
+        [HttpPost("LogoutForWeb")]
+        public IActionResult LogoutForWeb()
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            
+            var refreshToken = Request.Cookies["RefreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("No refresh token found");
+
+            RefreshTokens refreshTokenEntity = Unit_Of_Work.refreshTokens_Repository
+                .First_Or_Default(rt => rt.Token == refreshToken && rt.UserID.ToString() == userIdClaim);
+
+            if (refreshTokenEntity == null)
+                return BadRequest("Invalid refresh token");
+
+            refreshTokenEntity.IsRevoked = true;
+            Unit_Of_Work.refreshTokens_Repository.Update(refreshTokenEntity);
+            Unit_Of_Work.SaveChanges();
+
+            Response.Cookies.Delete("AuthToken");
+            Response.Cookies.Delete("RefreshToken");
+
+            return Ok("Logged out successfully");
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost("RefreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest model)
+        public async Task<IActionResult> RefreshTokenMobile([FromBody] RefreshRequest model)
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);  
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             RefreshTokens refreshTokenEntity = Unit_Of_Work.refreshTokens_Repository.First_Or_Default(rt => rt.Token == model.RefreshToken);
 
             if (refreshTokenEntity == null)
                 return Unauthorized("Invalid refresh token");
-             
+
             if (refreshTokenEntity.IsRevoked)
             {
                 // Optional: Revoke all user tokens to prevent reuse
@@ -188,11 +416,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                 userType,
                 user.Role_ID?.ToString()
             );
-             
+
             var newRefreshToken = _generateJWT.GenerateRefreshToken();
-             
+
             refreshTokenEntity.IsRevoked = true;
-            Unit_Of_Work.refreshTokens_Repository.Update( refreshTokenEntity);
+            Unit_Of_Work.refreshTokens_Repository.Update(refreshTokenEntity);
             Unit_Of_Work.refreshTokens_Repository.Add(new RefreshTokens
             {
                 Token = newRefreshToken,
@@ -203,14 +431,14 @@ namespace LMS_CMS_PL.Controllers.Domains
             });
 
             Unit_Of_Work.SaveChanges();
-             
+
             return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken });
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost("Logout")]
-        public IActionResult Logout([FromBody] RefreshRequest model)
+        public IActionResult LogoutMobile([FromBody] RefreshRequest model)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             RefreshTokens refreshTokenEntity = Unit_Of_Work.refreshTokens_Repository.First_Or_Default(rt => rt.Token == model.RefreshToken);
