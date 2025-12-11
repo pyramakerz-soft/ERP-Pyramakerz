@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 // import Swal from 'sweetalert2';
@@ -191,6 +191,7 @@ export class InventoryDetailsComponent {
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
     private languageService: LanguageService,
+    private cdr: ChangeDetectorRef ,
     private loadingService: LoadingService
   ) {}
 
@@ -1144,15 +1145,19 @@ export class InventoryDetailsComponent {
     }, 500);
   }
 
+  
   async DownloadAsPDF() {
     this.showPDF = true;
     await this.formateData();
+    this.cdr.detectChanges();
+
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
+      this.showPDF = false;
+      this.cdr.detectChanges();
+    }, 0);
   }
-
+  
   async DownloadAsExcel() {
     const headerKeyMap = [
       { header: 'BarCode', key: 'barCode' },
@@ -1429,12 +1434,21 @@ export class InventoryDetailsComponent {
         value = parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '');
       }
 
+      // 🔥 NEW: limit to 2 decimals (only if decimals exist & not just "20.")
+      if (value.includes('.') && !value.endsWith('.')) {
+        const [int, dec] = value.split('.');
+        if (dec.length > 2) {
+          value = `${int}.${dec.substring(0, 2)}`;
+        }
+      }
+
       event.target.value = value;
 
       // allow "20." without converting to NaN
-      row[field] = value === '' || value === '.' || value.endsWith('.') 
-        ? value as any 
-        : Number(value);
+      row[field] =
+        value === '' || value === '.' || value.endsWith('.')
+          ? (value as any)
+          : Number(value);
 
       this.CalculateTotalPrice(row);
       return;

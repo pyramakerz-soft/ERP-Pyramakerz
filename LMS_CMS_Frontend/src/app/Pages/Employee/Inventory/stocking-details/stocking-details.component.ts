@@ -997,12 +997,14 @@ export class StockingDetailsComponent {
   }
 
   async DownloadAsPDF() {
-    this.showPDF = true;
-    await this.formateData()
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
-    }, 500);
+      this.showPDF = true;
+      await this.formateData(); 
+      setTimeout(() => {
+          this.pdfComponentRef.downloadPDF();
+          setTimeout(() => {
+              this.showPDF = false;
+          }, 2000); 
+      }, 500); 
   }
 
   formateData() {

@@ -309,12 +309,13 @@
 </div>
 
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-  <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="[
-        { keyEn: 'Store : ' + Data.storeName },
-        { keyEn: 'Date : ' + Data.date }
-      ]" [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Current_Stock', 'Actual_Stock', 'The_Difference']"
-      [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
-  </div>
+<div id="pdfContainer" style=" position: fixed; top: -9999px; left: -9999px; visibility: hidden; opacity: 0; pointer-events: none;">
+  <app-pdf-print #pdfComponentRef [fileName]="'Inventory'" [infoRows]="[
+      { keyEn: 'Store : ' + Data.storeName },
+      { keyEn: 'Date : ' + Data.date }
+    ]"
+    [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Current_Stock', 'Actual_Stock', 'The_Difference']"
+    [tableData]="tableDataForPrint"></app-pdf-print>
 </div>
+
+

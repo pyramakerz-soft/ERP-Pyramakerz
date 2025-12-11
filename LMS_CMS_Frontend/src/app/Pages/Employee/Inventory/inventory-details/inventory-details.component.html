@@ -640,10 +640,31 @@
 </div>
 
 
-<div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
-  <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows"
-      [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
-      [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
-  </div>
-</div>
+<!-- Keep it rendered but invisible and non-interactive -->
+<app-pdf-print
+  *ngIf="showPDF"
+  [fileName]="'Inventory'"
+  [infoRows]="[
+    { keyEn: 'Store : ' + Data.storeName },
+    { keyEn: 'Date : ' + Data.date }
+  ]"
+  [tableHeaders]="[
+    'BarCode',
+    'Item_Id',
+    'Item_Name',
+    'Current_Stock',
+    'Actual_Stock',
+    'The_Difference'
+  ]"
+  [tableData]="tableDataForPrint"
+  #pdfComponentRef
+  [ngStyle]="{
+    position: 'fixed',
+    top: '-10000px',
+    left: '-10000px',
+    opacity: 0,
+    'pointer-events': 'none',
+    'z-index': -1
+  }"
+></app-pdf-print>
+
