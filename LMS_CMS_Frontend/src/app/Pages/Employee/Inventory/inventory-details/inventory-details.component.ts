@@ -1291,69 +1291,74 @@ export class InventoryDetailsComponent {
 
   ////////////////////////////// search
 
-  SearchToggle() {
-    this.IsSearchOpen = true;
-    setTimeout(() => {
-      const input = document.querySelector(
-        'input[type="number"]'
-      ) as HTMLInputElement;
-      if (input) input.focus();
-    }, 100);
-  }
+  // SearchToggle() {
+  //   this.IsSearchOpen = true;
+  //   setTimeout(() => {
+  //     const input = document.querySelector(
+  //       'input[type="number"]'
+  //     ) as HTMLInputElement;
+  //     if (input) input.focus();
+  //   }, 100);
+  // }
 
-  CloseSearch() {
-    this.IsSearchOpen = false;
-    this.BarCode = '';
-  }
+  // CloseSearch() {
+  //   this.IsSearchOpen = false;
+  //   this.BarCode = '';
+  // }
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-    this.shopitemServ
-      .GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName)
-      .subscribe(
-        (d) => {
-          let price = 0;
-          if (this.FlagId === 11 || this.FlagId === 12) {
-            price = d.salesPrice ?? 0;
-          } else {
-            price = d.purchasePrice ?? 0;
-          }
-          const detail: InventoryDetails = {
-            id: Date.now() + Math.floor(Math.random() * 1000),
-            insertedAt: '',
-            insertedByUserId: 0,
-            shopItemID: d.id,
-            shopItemName: d.enName,
-            barCode: d.barCode,
-            quantity: 1,
-            salesId: 0,
-            price: price,
-            totalPrice: price,
-            name: '',
-            inventoryMasterId: this.MasterId,
-            salesName: '',
-            notes: '',
-          };
-          if (this.mode == 'Create') {
-            this.Data.inventoryDetails.push(detail);
-          } else if (this.mode == 'Edit') {
-            this.TableData.push(detail);
-            this.Data.newDetailsWhenEdit.push(detail);
-          }
-          this.TotalandRemainingCalculate();
-          this.BarCode = '';
-        },
-        async (error) => {
-          const Swal = await import('sweetalert2').then(m => m.default);
-
-          Swal.fire({
-            icon: 'error',
-            title: 'Item not found',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
+    this.IsSearchOpen = true;
+    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe((d) => {
+      this.BarCode = "";
+      let price = 0;
+      if (this.FlagId === 11 || this.FlagId === 12) {
+        price = d.salesPrice ?? 0;
+      } else {
+          price = d.purchasePrice ?? 0;
         }
-      );
+        const detail: InventoryDetails = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          insertedAt: '',
+          insertedByUserId: 0,
+          shopItemID: d.id,
+          shopItemName: d.enName,
+          barCode: d.barCode,
+          quantity: 1,
+          salesId: 0,
+          price: price,
+          totalPrice: price,
+          name: '',
+          inventoryMasterId: this.MasterId,
+          salesName: '',
+          notes: '',
+        };
+        if (this.mode == 'Create') {
+          this.Data.inventoryDetails=this.Data.inventoryDetails || []
+          this.Data.inventoryDetails.push(detail);
+        } else if (this.mode == 'Edit') {
+          this.TableData=this.TableData || []
+          this.Data.newDetailsWhenEdit=this.Data.newDetailsWhenEdit || []
+          this.TableData.push(detail);
+          this.Data.newDetailsWhenEdit.push(detail);
+        }
+        this.TotalandRemainingCalculate();
+        this.BarCode = '';
+        this.IsSearchOpen = false;
+        console.log(this.IsSearchOpen)
+      },
+      async (error) => {
+        const Swal = await import('sweetalert2').then(m => m.default);
+        Swal.fire({
+          icon: 'error',
+          title: 'Item not found',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+        this.BarCode = '';
+        this.IsSearchOpen = false;
+      }
+    );
   }
 
   getStoreNameById(id: number | string): string {
