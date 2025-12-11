@@ -1571,6 +1571,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Student, SubAccountDTO>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.en_name));
             CreateMap<TuitionFeesType, SubAccountDTO>();
+            CreateMap<TuitionDiscountType, SubAccountDTO>();
             CreateMap<Asset, SubAccountDTO>();
             CreateMap<Income, SubAccountDTO>();
             CreateMap<Debit, SubAccountDTO>();
