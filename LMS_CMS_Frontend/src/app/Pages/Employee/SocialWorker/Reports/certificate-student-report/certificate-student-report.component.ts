@@ -335,13 +335,13 @@ getClassNameAr(): string {
 }
 
 getStudentNameAr(): string {
-  if (this.reportType === 'employee') {
-    const student = this.students.find(s => s.id == this.selectedStudentId);
-    return student?.ar_name || student?.name || 'All Students';
-  } else {
+  // if (this.reportType === 'employee') {
+  //   const student = this.students.find(s => s.id == this.selectedStudentId);
+  //   return student?.ar_name || student?.name || 'All Students';
+  // } else {
     const student = this.students.find(s => s.id == this.selectedStudentId);
     return student?.ar_name || student?.en_name || 'All Students';
-  }
+  // }
 }
 
 
@@ -353,7 +353,7 @@ getStudentNameAr(): string {
       { keyEn: `School: ${this.getSchoolName() || 'All Schools'}`,       keyAr: `${this.getSchoolNameAr()} : المدرسة `},
       { keyEn: `Grade: ${this.getGradeName() || 'All Grades'}`,         keyAr: `${this.getGradeNameAr()} :الصف`},
       { keyEn: `Class: ${this.getClassName() || 'All Classes'}`,        keyAr: ` ${this.getClassNameAr()} :الفصل  `},
-      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: ` ${this.getStudentNameAr()} :الطالب  `},
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: `(${this.getStudentNameAr()}) : الطالب/ة`},
         { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ];
     }

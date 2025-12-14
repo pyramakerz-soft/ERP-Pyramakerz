@@ -1101,8 +1101,7 @@ export const routes: Routes = [
             { path: "Order/:id", loadComponent: () => import('./Pages/Student/Ecommerce/order-items/order-items.component').then(m => m.OrderItemsComponent), title: "Order Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Lesson Live", loadComponent: () => import('./Pages/Student/LMS/student-lesson-live/student-lesson-live.component').then(m => m.StudentLessonLiveComponent), title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "Assignment/:id", loadComponent: () => import('./Pages/Student/LMS/assignment-student/assignment-student.component').then(m => m.AssignmentStudentComponent), title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "Subject", loadComponent: () => import('./Pages/Student/LMS/subject/subject.component').then(m => m.SubjectComponent), title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
-            { path: "SubjectWeeks/:id", loadComponent: () => import('./Pages/Student/LMS/subject-weeks/subject-weeks.component').then(m => m.SubjectWeeksComponent), title: "SubjectWeeks", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
+            { path: "Subject", loadComponent: () => import('./Pages/Student/LMS/subject/subject.component').then(m => m.SubjectComponent), title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },            { path: "SubjectWeeks/:id", loadComponent: () => import('./Pages/Student/LMS/subject-weeks/subject-weeks.component').then(m => m.SubjectWeeksComponent), title: "SubjectWeeks", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "SubjectWeeksLesson/:SubjectId/:WeekId", loadComponent: () => import('./Pages/Student/LMS/subject-week-lesson/subject-week-lesson.component').then(m => m.SubjectWeekLessonComponent), title: "SubjectWeeksLesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "SubjectResources/:SubjectId", loadComponent: () => import('./Pages/Student/LMS/subject-resources/subject-resources.component').then(m => m.SubjectResourcesComponent), title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
             { path: "SubjectLive/:SubjectId", loadComponent: () => import('./Pages/Student/LMS/subject-lesson-live/subject-lesson-live.component').then(m => m.SubjectLessonLiveComponent), title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] },
@@ -1114,6 +1113,9 @@ export const routes: Routes = [
             { path: 'Students Medal', loadComponent: () => import('./Pages/Employee/SocialWorker/Reports/student-medal-report/student-medal-report.component').then(m => m.StudentMedalReportComponent), title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard], data: { reportType: 'student' } },
             { path: 'Time Table', loadComponent: () => import('./Pages/Student/time-table-student/time-table-student.component').then(m => m.TimeTableStudentComponent), title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard], data: { reportType: 'student' } },
             // { path: "Certificate", loadComponent: () => import('./Pages/Employee/LMS/certificate/certificate.component').then(m => m.CertificateComponent), title: "Certificate", canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard] }, 
+
+            { path: "Discussion Room", loadComponent: () => import('./Pages/Student/LMS/discussion-room/discussion-room.component').then(m => m.DiscussionRoomComponent), title: "Discussion Room", canActivate: [] },
+
         ]
     },
     {
