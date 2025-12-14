@@ -796,6 +796,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
             CreateMap<StockingAddDTO, Stocking>();
             CreateMap<StockingGetDto, Stocking>();
+            CreateMap<StockingEditDto, Stocking>();
 
             CreateMap<EvaluationTemplate, EvaluationTemplateGetDTO>();
             CreateMap<EvaluationTemplateAddDTO, EvaluationTemplate>();
