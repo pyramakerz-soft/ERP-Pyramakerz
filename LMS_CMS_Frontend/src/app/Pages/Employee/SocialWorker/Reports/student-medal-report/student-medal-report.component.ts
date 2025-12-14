@@ -351,18 +351,25 @@ export class StudentMedalReportComponent implements OnInit {
     return classItem?.ar_name || classItem?.name || 'كل الفصول';
   }
 
-  getStudentNameAr(): string {
-    if (this.reportType === 'employee') {
-      const student = this.students.find(s => s.id == this.selectedStudentId);
-      return student?.ar_name || student?.name || 'كل الطلاب';
+getStudentNameAr(): string {
+  if (this.reportType === 'employee') {
+    // For employee view, try to get Arabic name from the medal reports
+    if (this.medalReports.length > 0) {
+      return this.medalReports[0].studentArName || this.medalReports[0].studentEnName || '';
     }
-    else if (this.reportType === 'parent') {
-      const student = this.students.find(s => s.id == this.selectedStudentId);
-      return student?.ar_name || student?.en_name || 'كل الطلاب';
-    } else {
-      return this.Student.ar_name || this.Student.en_name || 'الطالب';
-    }
+    // Fallback to finding student in the students array
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.name || '';
   }
+  else if (this.reportType === 'parent') {
+    const student = this.students.find(s => s.id == this.selectedStudentId);
+    return student?.ar_name || student?.en_name || '';
+  } 
+  else {
+    // For student view, use the Student object
+    return this.Student.ar_name || this.Student.en_name || '';
+  }
+}
 
   getInfoRows(): any[] {
     const generatedOnAr = this.formatDateForArabic(new Date().toISOString().split('T')[0]);
@@ -372,7 +379,7 @@ export class StudentMedalReportComponent implements OnInit {
         { keyEn: `School: ${this.getSchoolName()}`,  keyAr: `${this.getSchoolNameAr()} :المدرسة `},
         { keyEn: `Grade: ${this.getGradeName()}`, keyAr: ` ${this.getGradeNameAr()} :الصف`},
         { keyEn: `Class: ${this.getClassName()}`, keyAr:`${this.getClassNameAr()}:الفصل `},
-        { keyEn: `Student: ${this.getStudentName()}`, keyAr: `${this.getStudentNameAr()} :الطالب `},    
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: `(${this.getStudentNameAr()}) : الطالب/ة`},
         { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ]; 
    }

@@ -18,7 +18,7 @@
         public string BuildConnectionString(string domainName)  
 
         {      
-            var dataSource = ".\\SQLEXPRESS";         
+            var dataSource = ".";         
 
                
             
