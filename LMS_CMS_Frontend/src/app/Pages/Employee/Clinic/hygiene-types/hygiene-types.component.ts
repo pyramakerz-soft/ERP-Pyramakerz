@@ -114,8 +114,7 @@ export class HygieneTypesComponent implements OnInit {
     try {
       const data = await firstValueFrom(
         this.hygieneTypesService.Get(this.DomainName)
-      );
-      console.log('Fetched hygiene types:', data);
+      ); 
       this.hygieneTypes = data.map((item) => {
         // const insertedAtDate = new Date(item.insertedAt);
         // const options: Intl.DateTimeFormatOptions = {

@@ -150,8 +150,7 @@ export class CreateHygieneFormComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(this.hygieneTypesService.Get(domainName));
       this.hygieneTypes = data;
-    } catch (error) {
-      console.error('Error loading hygiene types:', error);
+    } catch (error) { 
     }
   }
 
@@ -160,8 +159,7 @@ export class CreateHygieneFormComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(this.schoolService.Get(domainName));
       this.schools = data;
-    } catch (error) {
-      console.error('Error loading schools:', error);
+    } catch (error) { 
       this.errorMessage = 'Failed to load schools.';
     }
   }
@@ -172,8 +170,7 @@ export class CreateHygieneFormComponent implements OnInit {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(this.gradeService.GetBySchoolId(this.selectedSchool, domainName));
         this.grades = data;
-      } catch (error) {
-        console.error('Error loading grades:', error);
+      } catch (error) { 
         this.errorMessage = 'Failed to load grades.';
       }
     }
@@ -185,8 +182,7 @@ export class CreateHygieneFormComponent implements OnInit {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(this.classroomService.GetByGradeId(this.selectedGrade, domainName));
         this.classes = data;
-      } catch (error) {
-        console.error('Error loading classes:', error);
+      } catch (error) { 
         this.errorMessage = 'Failed to load classes.';
       }
     }
@@ -196,8 +192,7 @@ export class CreateHygieneFormComponent implements OnInit {
     if (this.selectedClass) {
       try {
         const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(this.studentService.GetByClassID(this.selectedClass, domainName));
-        console.log('Loaded students:', data);
+        const data = await firstValueFrom(this.studentService.GetByClassID(this.selectedClass, domainName)); 
         if (data.length === 0) {
           // show a friendly "no students" message (translated)
           this.errorMessage = this.translate.instant('No students found for the selected class.');
@@ -211,8 +206,7 @@ export class CreateHygieneFormComponent implements OnInit {
             actionTaken: '',
           }));
         }
-      } catch (error) {
-        console.error('Error loading students: ', error);
+      } catch (error) { 
         this.errorMessage = this.translate.instant('No students found for the selected class.');
       }
     }
@@ -358,8 +352,7 @@ export class CreateHygieneFormComponent implements OnInit {
           this.showSuccessAlert(this.translate.instant('Created successfully'));
           this.router.navigate(['/Employee/Hygiene Form Medical Report']);
         },
-        error: (error) => {
-          console.error('Error saving hygiene form:', error);
+        error: (error) => { 
           const errorMessage = error.error?.message || this.translate.instant('Failed to save the item');
           this.showErrorAlert(errorMessage);
         },

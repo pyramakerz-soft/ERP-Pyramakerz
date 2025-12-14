@@ -142,6 +142,11 @@ export class SalaryConfigurationComponent {
       isValid = false;
       this.validationErrors["startDay"] = this.translate.instant('Start day should be from 1 to 28');
     }
+    console.log(this.salaryConfiguration.overtimeStartAfterMinutes)
+    if(this.salaryConfiguration.overtimeStartAfterMinutes == null || !this.salaryConfiguration.overtimeStartAfterMinutes){
+      isValid = false;
+      this.validationErrors["overtimeStartAfterMinutes"] = this.translate.instant('Overtime Start After Minutes Is Required');
+    }
     return isValid;
   }
 

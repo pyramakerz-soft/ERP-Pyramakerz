@@ -148,53 +148,107 @@ namespace LMS_CMS
                         ValidateLifetime = true,
                         ValidIssuer = builder.Configuration["JWT:Issuer"],
                         ValidAudience = builder.Configuration["JWT:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
                     };
 
-                    // Add these for SignalR
                     option.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
-                            var accessToken = context.Request.Query["access_token"];
+                            // 1) Read token from cookie
+                            var cookieToken = context.Request.Cookies["AuthToken"];
+                            if (!string.IsNullOrEmpty(cookieToken))
+                            {
+                                context.Token = cookieToken;
+                                return Task.CompletedTask;
+                            }
 
-                            // If the request is for our hub...
+                            // 2) Fallback for SignalR
+                            var accessToken = context.Request.Query["access_token"];
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
                             {
                                 context.Token = accessToken;
                             }
-                            //if (!string.IsNullOrEmpty(accessToken) &&
-                            //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
-                            //{
-                            //    context.Token = accessToken;
-                            //}
+
+                            return Task.CompletedTask;
+                        },
+
+                        OnTokenValidated = context =>
+                        {
+                            var validator = context.HttpContext.RequestServices.GetRequiredService<CachedJwtValidator>();
+
+                            if (context.SecurityToken is JwtSecurityToken jwt)
+                            {
+                                bool valid = validator.ValidateToken(jwt.RawData);
+                                if (!valid)
+                                {
+                                    context.Fail("Invalid or expired token (cached check).");
+                                }
+                            }
+
                             return Task.CompletedTask;
                         }
                     };
-
-                    option.Events.OnTokenValidated = context =>
-                    {
-                        var validator = context.HttpContext.RequestServices.GetRequiredService<CachedJwtValidator>();
-
-                        // Ensure we have a JWT token
-                        if (context.SecurityToken is JwtSecurityToken token)
-                        {
-                            bool isValid = validator.ValidateToken(token.RawData);
-                            if (!isValid)
-                            {
-                                context.Fail("Invalid or expired token (cached check).");
-                            }
-                        }
-                        else
-                        {
-                            // If token is missing (rare for HTTP), let default validation handle it
-                            // Do NOT fail here, otherwise normal requests might break
-                        }
-
-                        return Task.CompletedTask;
-                    };
                 });
+            //.AddJwtBearer(option =>
+            //{
+            //    option.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuerSigningKey = true,
+            //        ValidateIssuer = true,
+            //        ValidateAudience = true,
+            //        ValidateLifetime = true,
+            //        ValidIssuer = builder.Configuration["JWT:Issuer"],
+            //        ValidAudience = builder.Configuration["JWT:Audience"],
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+            //    };
+
+            //    // Add these for SignalR
+            //    option.Events = new JwtBearerEvents
+            //    {
+            //        OnMessageReceived = context =>
+            //        {
+            //            var accessToken = context.Request.Query["access_token"];
+
+            //            // If the request is for our hub...
+            //            var path = context.HttpContext.Request.Path;
+            //            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/appHub"))
+            //            {
+            //                context.Token = accessToken;
+            //            }
+            //            //if (!string.IsNullOrEmpty(accessToken) &&
+            //            //     (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
+            //            //{
+            //            //    context.Token = accessToken;
+            //            //}
+            //            return Task.CompletedTask;
+            //        }
+            //    };
+
+            //    option.Events.OnTokenValidated = context =>
+            //    {
+            //        var validator = context.HttpContext.RequestServices.GetRequiredService<CachedJwtValidator>();
+
+            //        // Ensure we have a JWT token
+            //        if (context.SecurityToken is JwtSecurityToken token)
+            //        {
+            //            bool isValid = validator.ValidateToken(token.RawData);
+            //            if (!isValid)
+            //            {
+            //                context.Fail("Invalid or expired token (cached check).");
+            //            }
+            //        }
+            //        else
+            //        {
+            //            // If token is missing (rare for HTTP), let default validation handle it
+            //            // Do NOT fail here, otherwise normal requests might break
+            //        }
+
+            //        return Task.CompletedTask;
+            //    };
+            //});
 
 
             //////// DB

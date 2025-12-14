@@ -144,8 +144,7 @@ export class LoginComponent {
           localStorage.removeItem("current_token");
           let count = localStorage.getItem("count")
           this.getAllTokens();
-
-          this.accountService.isAuthenticated = true;
+ 
           const token = JSON.parse(d).token;
           let add = true;
           let Counter = 0;

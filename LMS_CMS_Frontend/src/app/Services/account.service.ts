@@ -23,9 +23,7 @@ export class AccountService {
   baseUrl=""
   baseUrlOcta=""
 
-  header=""
-
-  isAuthenticated = !!localStorage.getItem("current_token");
+  header="" 
 
   constructor(public http: HttpClient ,private router: Router , public ApiServ:ApiService, 
     public employeeService:EmployeeService, public studentService:StudentService, public parentService:ParentService, public octaService:OctaService,
