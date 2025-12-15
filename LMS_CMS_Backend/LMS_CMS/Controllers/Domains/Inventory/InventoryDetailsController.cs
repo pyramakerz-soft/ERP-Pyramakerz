@@ -188,37 +188,52 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             .OrderBy(d => d.InventoryMaster.Date)
             .ToList();
 
+            var groupedData = transactionData
+                .GroupBy(d => new
+                {
+                    d.InventoryMaster.InvoiceNumber,
+                    d.InventoryMaster.FlagId,
+                    d.InventoryMaster.Date
+                })
+                .OrderBy(g => g.Key.Date)
+                .ToList();
 
             var runningBalance = previousBalance;
             var transactions = new List<InventoryNetTransactionDTO>();
 
-            foreach (var d in transactionData)
+            foreach (var g in groupedData)
             {
-                var itemInOut = d.InventoryMaster.InventoryFlags.ItemInOut;
-                var signedQty = d.Quantity * itemInOut;
+                var first = g.First();
+                var itemInOut = first.InventoryMaster.InventoryFlags.ItemInOut;
+
+                var totalQty = g.Sum(x => x.Quantity);
+                var signedQty = totalQty * itemInOut;
                 runningBalance += signedQty;
 
                 transactions.Add(new InventoryNetTransactionDTO
                 {
-                    Date = d.InventoryMaster.Date,
-                    FlagId = d.InventoryMaster.FlagId,
-                    FlagName = d.InventoryMaster.InventoryFlags.enName,
-                    InvoiceNumber = d.InventoryMaster.InvoiceNumber,
-                    Notes = d.InventoryMaster.Notes,
-                    Quantity = d.Quantity,
-                    inQuantity = d.Quantity * (itemInOut == 1 ? 1 : 0),
-                    outQuantity = d.Quantity * (itemInOut == -1 ? 1 : 0),
+                    Date = g.Key.Date,
+                    FlagId = g.Key.FlagId,
+                    FlagName = first.InventoryMaster.InventoryFlags.enName,
+                    InvoiceNumber = g.Key.InvoiceNumber,
+                    Notes = first.InventoryMaster.Notes,
+                    Quantity = totalQty,
+                    inQuantity = itemInOut == 1 ? totalQty : 0,
+                    outQuantity = itemInOut == -1 ? totalQty : 0,
                     Balance = runningBalance,
-                    Price = d.Price,
-                    TotalPrice = d.TotalPrice,
-                    AverageCost = d.AverageCost,
+                    Price = first.Price,
+                    TotalPrice = g.Sum(x => x.TotalPrice),
+                    AverageCost = first.AverageCost,
                     ItemInOut = itemInOut,
-                    SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
-                    StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
-                    StoreName = d.InventoryMaster.Store?.Name,
-                    StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null
+
+                    SupplierName = (new long[] { 9, 10, 13 }.Contains(first.InventoryMaster.FlagId))? first.InventoryMaster.Supplier?.Name: null,
+
+                    StudentName = (new long[] { 11, 12 }.Contains(first.InventoryMaster.FlagId)) ? first.InventoryMaster.Student?.en_name : null,
+
+                    StoreName = first.InventoryMaster.Store?.Name,StoreToName = (first.InventoryMaster.FlagId == 8)? first.InventoryMaster.StoreToTransform?.Name : null
                 });
             }
+
             return transactions;
         }
 
