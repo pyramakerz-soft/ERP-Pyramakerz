@@ -18,9 +18,6 @@
                             {{ 'Title' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ 'Status' | translate }}
-                        </th>
-                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             {{ 'Days' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -46,7 +43,7 @@
                 <tbody>
                     <!-- No Data Row -->
                     <tr *ngIf="TableData.length === 0">
-                        <td colspan="10"
+                        <td colspan="9"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                               {{ 'No Data Found' | translate }}
                         </td>
@@ -63,39 +60,33 @@
                             {{ row.title }}
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <span [ngClass]="getStatusClass(row)" 
-                                  class="px-2 py-1 rounded-full text-xs font-semibold">
-                                {{ getStatusText(row) | translate }}
-                            </span>
-                        </td>  
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex flex-wrap gap-1">
                                 <span *ngIf="row.saturday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#E8F5E9] text-[#2E7D32] px-2 py-1 rounded text-xs font-medium">
                                     Sat
                                 </span>
                                 <span *ngIf="row.sunday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#E3F2FD] text-[#1565C0] px-2 py-1 rounded text-xs font-medium">
                                     Sun
                                 </span>
                                 <span *ngIf="row.monday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#F3E5F5] text-[#7B1FA2] px-2 py-1 rounded text-xs font-medium">
                                     Mon
                                 </span>
                                 <span *ngIf="row.tuesday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#FFF3E0] text-[#EF6C00] px-2 py-1 rounded text-xs font-medium">
                                     Tue
                                 </span>
                                 <span *ngIf="row.wednesday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#E0F7FA] text-[#00838F] px-2 py-1 rounded text-xs font-medium">
                                     Wed
                                 </span>
                                 <span *ngIf="row.thursday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#FCE4EC] text-[#AD1457] px-2 py-1 rounded text-xs font-medium">
                                     Thu
                                 </span>
                                 <span *ngIf="row.friday" 
-                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                      class="bg-[#FFF8E1] text-[#F57F17] px-2 py-1 rounded text-xs font-medium">
                                     Fri
                                 </span>
                                 <span *ngIf="!row.saturday && !row.sunday && !row.monday && !row.tuesday && !row.wednesday && !row.thursday && !row.friday"

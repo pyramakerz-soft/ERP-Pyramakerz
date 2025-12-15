@@ -593,5 +593,42 @@ private getRequiredErrorMessage(fieldName: string): string {
     return `${fieldTranslated} ${requiredTranslated}`;
   }
 }
+
+// Add these methods to the existing employee component:
+
+joinMeeting(meetingLink: string) {
+    if (meetingLink) {
+        window.open(meetingLink, '_blank');
+    }
+}
+
+watchRecording(recordLink: string) {
+    if (recordLink) {
+        window.open(recordLink, '_blank');
+    }
+}
+
+// Status checking methods
+isUpcoming(room: DiscussionRoom): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(room.startDate);
+    return startDate >= today;
+}
+
+isOngoing(room: DiscussionRoom): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(room.startDate);
+    const endDate = new Date(room.endDate);
+    return startDate <= today && endDate >= today;
+}
+
+isPast(room: DiscussionRoom): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(room.endDate);
+    return endDate < today;
+}
    
 }
