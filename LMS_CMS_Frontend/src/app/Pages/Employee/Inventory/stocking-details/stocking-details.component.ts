@@ -752,56 +752,95 @@ export class StockingDetailsComponent {
   }
 
   private async prepareAdjustment(flagId: number,filterCondition: (item: any) => boolean) {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    this.adiustmentLoading = true;
 
-    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
-    this.adiustmentDisbursement.date = date
-    this.adiustmentDisbursement.storeID = this.Data.storeID;
-    this.adiustmentDisbursement.schoolId = this.Data.schoolId;
-    this.adiustmentDisbursement.schoolPCId = this.Data.schoolPCId;
-    this.adiustmentDisbursement.flagId = flagId;
-    this.adiustmentDisbursement.inventoryDetails = this.Data.stockingDetails.filter(filterCondition)
-      .map((item) => {
-        const foundItem = this.AllShopItems.find((s) => s.id == item.shopItemID);
-        const price = foundItem?.purchasePrice ?? 0;
-        const quantity = item.theDifference ?? 0;
+    try {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
 
-        const adjustedQuantity = flagId === 5 ? -1 * quantity : quantity;
-        const adjustedTotalPrice = flagId === 5 ? -1 * price * quantity : price * quantity;
+      const date = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-        return {
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          insertedAt: '',
-          barCode: '',
-          name: '',
-          shopItemName: '',
-          salesName: '',
-          notes: '',
-          salesId: 0,
-          insertedByUserId: 0,
-          shopItemID: item.shopItemID,
-          quantity: adjustedQuantity,
-          totalPrice: adjustedTotalPrice,
-          price: price,
-          inventoryMasterId: this.MasterId,
-        };
+      this.adiustmentDisbursement.date = date;
+      this.adiustmentDisbursement.storeID = this.Data.storeID;
+      this.adiustmentDisbursement.schoolId = this.Data.schoolId;
+      this.adiustmentDisbursement.schoolPCId = this.Data.schoolPCId;
+      this.adiustmentDisbursement.flagId = flagId;
+
+      this.adiustmentDisbursement.inventoryDetails =
+        this.Data.stockingDetails
+          .filter(filterCondition)
+          .map((item) => {
+            const foundItem = this.AllShopItems.find(
+              (s) => s.id == item.shopItemID
+            );
+
+            const price = foundItem?.purchasePrice ?? 0;
+            const quantity = item.theDifference ?? 0;
+
+            const adjustedQuantity = flagId === 5 ? -quantity : quantity;
+            const adjustedTotalPrice =
+              flagId === 5 ? -price * quantity : price * quantity;
+
+            return {
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              insertedAt: '',
+              barCode: '',
+              name: '',
+              shopItemName: '',
+              salesName: '',
+              notes: '',
+              salesId: 0,
+              insertedByUserId: 0,
+              shopItemID: item.shopItemID,
+              quantity: adjustedQuantity,
+              totalPrice: Number(adjustedTotalPrice.toFixed(2)),
+              price: price,
+              inventoryMasterId: this.MasterId,
+            };
+          });
+
+      // total (2 decimals)
+      this.adiustmentDisbursement.total = Number(
+        this.adiustmentDisbursement.inventoryDetails
+          .reduce((sum, item) => sum + (item.totalPrice ?? 0), 0)
+          .toFixed(2)
+      );
+
+      if (this.adiustmentDisbursement.inventoryDetails.length === 0) {
+        this.adiustmentLoading = false;
+        return;
+      }
+
+      // ✅ API call
+      const response = await this.InventoryMastrServ
+        .Add(this.adiustmentDisbursement, this.DomainName)
+        .toPromise();
+
+      return response;
+
+    } catch (error: any) {
+      // ❌ Handle error here
+      this.adiustmentLoading = false;
+
+      const Swal = (await import('sweetalert2')).default;
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error?.error ?? 'Something went wrong. Please try again.',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
       });
 
-    this.adiustmentDisbursement.total = this.adiustmentDisbursement.inventoryDetails.reduce(
-      (sum, item) => sum + (item.totalPrice ?? 0),
-      0
-    );
+      return null;
 
-    if (this.adiustmentDisbursement.inventoryDetails.length > 0) {
-      const response = await this.InventoryMastrServ.Add(this.adiustmentDisbursement,this.DomainName ).toPromise();
-      return response;
-    } else {
-      return;
+    } finally {
+      // ✅ Always stop loader
+      this.adiustmentLoading = false;
     }
   }
 

@@ -196,14 +196,29 @@ export class ShopItemsAddEditComponent {
     }
   }
  
-  validateNumber(event: any, field: keyof ShopItem): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = ''; 
-      if (typeof this.ShopItem[field] === 'string') {
-        this.ShopItem[field] = '' as never;  
-      }
+  validateNumber(event: KeyboardEvent | any, field: keyof ShopItem): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    value = value.replace(/-/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
     }
+
+    input.value = value;
+    (this.ShopItem as any)[field] = value === '' ? '' : Number(value);
+  }
+
+  validateLimit(event: any, field: keyof ShopItem): void {
+      let value = event.target.value;
+  
+      if (field === 'limit') {
+        value = value.replace(/[^0-9]/g, '');
+        event.target.value = value;
+        this.ShopItem[field] = value ? Number(value) : 0;
+        return;
+      }
   }
 
   async Save() {
