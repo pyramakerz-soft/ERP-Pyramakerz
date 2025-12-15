@@ -50,6 +50,7 @@ using LMS_CMS_PL.Services.Dashboard;
 using LMS_CMS_PL.Services.S3;
 using System.IO.Compression;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace LMS_CMS
 {
@@ -379,6 +380,44 @@ namespace LMS_CMS
 
             app.UseRouting();
             app.UseCors(txt); // you can keep it permissive; same-origin won't need it
+            app.Use(async (context, next) =>
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                var method = context.Request.Method;
+                var route = context.GetEndpoint()?.DisplayName ?? context.Request.Path.ToString();
+                var traceId = System.Diagnostics.Activity.Current?.TraceId.ToString() ?? context.TraceIdentifier;
+                try
+                {
+                    await next();
+                }
+                finally
+                {
+                    sw.Stop();
+                    var ms = sw.ElapsedMilliseconds;
+                    var status = context.Response?.StatusCode ?? 0;
+                    // Warning لو الطلب بطيء
+                    if (ms > 200)
+                        logger.LogWarning("Request {Method} {Route} took {ElapsedMs}ms status {Status} trace {TraceId}",
+                            method, route, ms, status, traceId);
+                    else
+                        logger.LogInformation("Request {Method} {Route} took {ElapsedMs}ms status {Status} trace {TraceId}",
+                            method, route, ms, status, traceId);
+                }
+            });
+
+            app.UseExceptionHandler(error =>
+            {
+                error.Run(async context =>
+                {
+                    var err = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+                    // console log
+                    Console.WriteLine(":fire: ERROR:");
+                    Console.WriteLine(err);
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("error");
+                });
+            });
 
             app.UseAuthentication();
 
