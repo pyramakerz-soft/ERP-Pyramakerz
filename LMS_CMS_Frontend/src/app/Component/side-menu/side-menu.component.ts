@@ -63,7 +63,7 @@ export class SideMenuComponent {
   } 
   
   getImageSrc(item: any): string {
-    return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
+    return `https://d393tpgdl2mqkp.cloudfront.net/public/Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
   }
   
   isMenuActive(route?: string): boolean {

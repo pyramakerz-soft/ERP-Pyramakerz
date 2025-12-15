@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LMS_CMS_BL.DTO.Inventory
+{
+    public class StockingEditDto
+    {
+        public long? ID { get; set; }
+        public string Date { get; set; }
+        public long StoreID { get; set; }
+        public long? AdditionId { get; set; }
+        public long? DisbursementId { get; set; }
+        public string? StoreName { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public long? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
+        public long? SchoolPCId { get; set; }
+        public string? SchoolPCName { get; set; }
+        public List<StockingDetailsGetDto>? UpdatedStockingDetails { get; set; }
+        public List<StockingDetailsGetDto>? NewDetailsWhenEdit { get; set; }
+        public List<long>? DeletedStockingDetails { get; set; }
+    }
+}

@@ -55,7 +55,7 @@ export class AllStoresBalanceReportComponent implements OnInit {
     reportHeaderTwoEn: '',
     reportHeaderOneAr: '',
     reportHeaderTwoAr: '',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   constructor(

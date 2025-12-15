@@ -1,0 +1,147 @@
+<div class="">
+    <div class="flex justify-between">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Discussion Rooms' | translate }}</h1>
+        <div class="flex justify-between items-center">
+            <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
+        </div>
+    </div> 
+
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'ID' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Title' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Status' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Days' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Is Repeated Weekly' | translate }} 
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                              {{ 'Start Date' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                              {{ 'End Date' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                              {{ 'Time' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                             {{ 'Meeting' | translate }} {{ 'Link' | translate }}     
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                              {{ 'Record' | translate }} {{ 'Link' | translate }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="10"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                              {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of TableData; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.id }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.title }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <span [ngClass]="getStatusClass(row)" 
+                                  class="px-2 py-1 rounded-full text-xs font-semibold">
+                                {{ getStatusText(row) | translate }}
+                            </span>
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex flex-wrap gap-1">
+                                <span *ngIf="row.saturday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Sat
+                                </span>
+                                <span *ngIf="row.sunday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Sun
+                                </span>
+                                <span *ngIf="row.monday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Mon
+                                </span>
+                                <span *ngIf="row.tuesday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Tue
+                                </span>
+                                <span *ngIf="row.wednesday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Wed
+                                </span>
+                                <span *ngIf="row.thursday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Thu
+                                </span>
+                                <span *ngIf="row.friday" 
+                                      class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    Fri
+                                </span>
+                                <span *ngIf="!row.saturday && !row.sunday && !row.monday && !row.tuesday && !row.wednesday && !row.thursday && !row.friday"
+                                      class="text-gray-400 text-xs">
+                                    -
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                            <i *ngIf="row.isRepeatedWeekly" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                            <i *ngIf="!row.isRepeatedWeekly" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i> 
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.startDate }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.endDate }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.time }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <button *ngIf="row.meetingLink && (isOngoing(row) || isUpcoming(row))"
+                                    (click)="joinMeeting(row.meetingLink)"
+                                    class="text-[#089B41] hover:text-[#067A33] font-medium text-sm flex items-center gap-1">
+                                <i class="fas fa-video text-sm"></i>
+                                {{ 'Join' | translate }}
+                            </button>
+                            <span *ngIf="!row.meetingLink || isPast(row)" class="text-gray-400">
+                                {{ '-' | translate }}
+                            </span>
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <button *ngIf="row.recordLink"
+                                    (click)="watchRecording(row.recordLink)"
+                                    class="text-[#003366] hover:text-[#002244] font-medium text-sm flex items-center gap-1">
+                                <i class="fas fa-play-circle text-sm"></i>
+                                {{ 'Watch' | translate }}
+                            </button>
+                            <span *ngIf="!row.recordLink" class="text-gray-400">
+                                {{ '-' | translate }}
+                            </span>
+                        </td>  
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

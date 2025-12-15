@@ -500,7 +500,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (studentGrade == null)
             {
                 // or NotFound 
-                return Ok(new List<DiscussionRoomGetDTO>());
+                //return Ok(new List<DiscussionRoomGetDTO>());
+                return NotFound();
             }
 
             List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository
@@ -512,7 +513,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (!studentClassrooms.Any())
             {
-                return Ok(new List<DiscussionRoomGetDTO>());
+                return NotFound();
             }
 
             var studentClassroomIds = studentClassrooms.Select(sc => sc.ID).ToList();
@@ -524,7 +525,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (!discussionRoomLinks.Any())
             {
-                return Ok(new List<DiscussionRoomGetDTO>());
+                return NotFound();
             }
 
             var discussionRoomIds = discussionRoomLinks.Select(d => d.DiscussionRoomID).Distinct().ToList();

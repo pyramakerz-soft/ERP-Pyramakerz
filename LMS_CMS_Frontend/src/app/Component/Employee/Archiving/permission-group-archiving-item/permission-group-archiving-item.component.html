@@ -26,14 +26,14 @@
             <div class="flex items-center">
                 <input type="checkbox" [(ngModel)]="archiving.allow_Delete" [disabled]="!archiving.selected" 
                     (change)="selectData(archiving, 'allowDelete'); $event.stopPropagation()">
-                <label>Allow Delete</label>
+                <label>Allow Delete For Content</label>
             </div>
 
             <div class="flex items-center"> 
                 <input type="checkbox" [(ngModel)]="archiving.allow_Delete_For_Others"
                     [disabled]="!archiving.selected"
                     (change)="selectData(archiving, 'allowDeleteForOthers'); $event.stopPropagation()">
-                <label>Allow Delete for Others</label>
+                <label>Allow Delete for Others For Content</label>
             </div>
 
             <div *ngIf="archiving.fileLink == ''" class="px-3 py-[6px] rounded bg-white secondaryTxt"

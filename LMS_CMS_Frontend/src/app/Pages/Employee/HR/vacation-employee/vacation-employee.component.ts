@@ -437,6 +437,11 @@ async isFormValid() {
       isValid = false;
     }
 
+    if (this.vacationEmployee.dateTo && new Date(this.vacationEmployee.dateFrom) > new Date(this.vacationEmployee.dateTo)) {
+      isValid = false;
+      this.validationErrors['dateTo'] ='Date To cannot be earlier than Date From..'
+    }
+
     if (this.HireDateError == true) {
       const Swal = await import('sweetalert2').then(m => m.default);
 

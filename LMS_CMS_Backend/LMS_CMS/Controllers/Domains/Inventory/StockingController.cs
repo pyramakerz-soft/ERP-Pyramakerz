@@ -104,7 +104,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             StockingGetDto DTO = mapper.Map<StockingGetDto>(Data);
-          
+
+            List<StockingDetails> stockingDetails = await Unit_Of_Work.stockingDetails_Repository.Select_All_With_IncludesById<StockingDetails>(
+                    f => f.IsDeleted != true && f.StockingId == id,
+                    query => query.Include(s => s.ShopItem),
+                    query => query.Include(s => s.Stocking)
+                    );
+
+            if (stockingDetails == null || stockingDetails.Count == 0)
+            {
+                DTO.StockingDetails = new List<StockingDetailsGetDto>();
+            }
+
+            DTO.StockingDetails = mapper.Map<List<StockingDetailsGetDto>>(stockingDetails);
+
             return Ok(DTO);
         }
         /////////////////////////////////////////////////////////////////////////////
@@ -166,7 +179,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             allowEdit: 1,
              pages: new[] { "Inventory" }
         )]
-        public async Task<IActionResult> EditAsync( StockingGetDto newData)
+        public async Task<IActionResult> EditAsync(StockingEditDto newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 

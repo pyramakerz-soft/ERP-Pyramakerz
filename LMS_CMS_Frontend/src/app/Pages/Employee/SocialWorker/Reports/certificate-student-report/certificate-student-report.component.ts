@@ -144,6 +144,13 @@ export class CertificateStudentReportComponent implements OnInit {
 
   async loadGrades() {
     if (this.selectedSchoolId) {
+        this.grades = [];
+        this.selectedGradeId = 0;
+        this.classes = [];
+        this.selectedClassId = 0;
+        this.students = [];
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -164,6 +171,11 @@ export class CertificateStudentReportComponent implements OnInit {
 
   async loadClasses() {
     if (this.selectedGradeId) {
+        this.classes = [];
+        this.selectedClassId = 0;
+        this.students = [];
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(
@@ -182,6 +194,9 @@ export class CertificateStudentReportComponent implements OnInit {
 
   async loadStudents() {
   if (this.selectedClassId) {
+    this.selectedStudentId = 0;
+    this.students =[]
+    this.onFilterChange();
     try {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(
@@ -320,13 +335,13 @@ getClassNameAr(): string {
 }
 
 getStudentNameAr(): string {
-  if (this.reportType === 'employee') {
-    const student = this.students.find(s => s.id == this.selectedStudentId);
-    return student?.ar_name || student?.name || 'All Students';
-  } else {
+  // if (this.reportType === 'employee') {
+  //   const student = this.students.find(s => s.id == this.selectedStudentId);
+  //   return student?.ar_name || student?.name || 'All Students';
+  // } else {
     const student = this.students.find(s => s.id == this.selectedStudentId);
     return student?.ar_name || student?.en_name || 'All Students';
-  }
+  // }
 }
 
 
@@ -338,7 +353,7 @@ getStudentNameAr(): string {
       { keyEn: `School: ${this.getSchoolName() || 'All Schools'}`,       keyAr: `${this.getSchoolNameAr()} : المدرسة `},
       { keyEn: `Grade: ${this.getGradeName() || 'All Grades'}`,         keyAr: `${this.getGradeNameAr()} :الصف`},
       { keyEn: `Class: ${this.getClassName() || 'All Classes'}`,        keyAr: ` ${this.getClassNameAr()} :الفصل  `},
-      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: ` ${this.getStudentNameAr()} :الطالب  `},
+      { keyEn: `Student: ${this.getStudentName() || 'All Students'}`,   keyAr: `(${this.getStudentNameAr()}) : الطالب/ة`},
         { keyEn: `Generated On: ${new Date().toLocaleDateString()}`, keyAr: `تم الإنشاء في: ${generatedOnAr}` }
       ];
     }

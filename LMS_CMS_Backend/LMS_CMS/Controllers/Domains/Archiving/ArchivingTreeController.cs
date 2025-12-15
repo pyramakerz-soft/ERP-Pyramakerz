@@ -558,13 +558,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             List<long> permissionGroupIDsForUser = new List<long>();
             permissionGroupIDsForUser = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
 
-            bool hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
-                .Any(permissionGroupDetail =>
-                    permissionGroupDetail.Allow_Delete == true && (
-                    permissionGroupDetail.Allow_Delete_For_Others == true ||
-                    (permissionGroupDetail.Allow_Delete_For_Others == false &&
-                        permissionGroupDetail.InsertedByUserId == userId)));
-
+            bool hasDeletePermission;
+            if (archivingTreeExist.FileLink != null && archivingTreeExist.FileLink != "")
+            {
+                hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
+                    .Any(permissionGroupDetail =>
+                        permissionGroupDetail.Allow_Delete == true && (
+                        permissionGroupDetail.Allow_Delete_For_Others == true ||
+                        (permissionGroupDetail.Allow_Delete_For_Others == false &&
+                            archivingTreeExist.InsertedByUserId == userId)));
+            }
+            else{
+                hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == archivingTreeExist.ArchivingTreeParentID)
+                    .Any(permissionGroupDetail =>
+                        permissionGroupDetail.Allow_Delete == true && (
+                        permissionGroupDetail.Allow_Delete_For_Others == true ||
+                        (permissionGroupDetail.Allow_Delete_For_Others == false &&
+                            archivingTreeExist.InsertedByUserId == userId)));
+            }
             if (!hasDeletePermission)
             {
                 return BadRequest("You don't have permission to delete this");
@@ -630,6 +641,38 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             {
                 return BadRequest("Choose another name");
             }
+
+            List<PermissionGroupEmployee> permissionGroupsEmployee = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(
+               d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
+            if (permissionGroupsEmployee == null || !permissionGroupsEmployee.Any())
+            {
+                return BadRequest("You Don't have access");
+            }
+
+            List<long> permissionGroupIDs = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
+            List<long> ArchivingTreeIDs = new List<long>();
+
+            foreach (var permId in permissionGroupIDs)
+            {
+                List<PermissionGroupDetails> permissionGroupDetails = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(
+                    d => d.IsDeleted != true && d.PermissionGroupID == permId && d.ArchivingTree.IsDeleted != true);
+                if (permissionGroupDetails != null)
+                {
+                    ArchivingTreeIDs.AddRange(permissionGroupDetails.Select(d => d.ArchivingTreeID).ToList());
+                }
+            }
+
+            if (ArchivingTreeIDs.Count == 0)
+            {
+                return BadRequest("You Don't have access");
+            }
+
+            ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
+
+            if (!ArchivingTreeIDs.Contains(newArchive.ID))
+            {
+                return BadRequest("You Don't have access");
+            } 
 
             ArchivingTree archivingTree =  Unit_Of_Work.archivingTree_Repository
                    .First_Or_Default(t => t.IsDeleted != true && t.ID == newArchive.ID);

@@ -79,11 +79,11 @@
   </div>
 
   <div class="flex flex-col w-[24%] mb-4">
-    <label class="mb-2" for="schoolPCs"> {{'SchoolPCs'| translate }}</label>
+    <label class="mb-2" for="schoolPCs"> {{'School PCs'| translate }}</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolPCs"
       [disabled]="!Data.schoolId" (ngModelChange)="onInputValueChange({ field: 'schoolPCId', value: $event })"
       [(ngModel)]="Data.schoolPCId">
-      <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'SchoolPCs'| translate }}</option>
+      <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'School PCs'| translate }}</option>
       <option *ngFor="let s of schoolPCs" [value]="s.id">{{ s.pcName }}</option>
       <option *ngIf="schoolPCs.length === 0" disabled selected>
         {{'No Data Found'| translate }}
@@ -209,7 +209,7 @@
     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
       <div class="flex justify-center w-full">
         <label for="NewAttachments" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-          <img src="Images/Icon frame.png" class="w-1/4" />
+          <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/4" />
           <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
             <span class="secondaryTxt"> {{'Click to'| translate }} {{'Upload'| translate }} </span> 
           </p>
@@ -299,22 +299,23 @@
 </div>
 
 <div class="my-5 flex justify-end space-x-4 rtl:space-x-reverse" *ngIf="mode == 'Edit'">
-  <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
-  <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
-  <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+  <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Excel.png" (click)="DownloadAsExcel()">
+  <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/PDF.png" (click)="DownloadAsPDF()">
+  <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Print.png" (click)="Print()">
 </div>
 
 <div class="flex justify-end items-center space-x-2 rtl:space-x-reverse mb-3">
   <div class="flex justify-between items-center">
     <div
       class="relative flex items-center w-full max-w-[432px] sm:max-w-[300px] xs:max-w-[200px] h-[45px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg py-3 ltr:mr-3">
-      <input type="text" [(ngModel)]="BarCode" (keydown.enter)="SearchOnBarCode()"
+      <input type="text" [(ngModel)]="BarCode" [disabled]="IsSearchOpen" (keydown.enter)="SearchOnBarCode()"
         placeholder=" {{'Search by Barcode'| translate }}"
         class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full ltr:pl-1 rtl:pr-1" />
-      <i class="fas fa-times cursor-pointer text-gray-400 ml-2" (click)="CloseSearch()"></i>
+      <!-- <i class="fas fa-times cursor-pointer text-gray-400 ml-2" (click)="CloseSearch()"></i> -->
     </div>
     <i class="fas fa-search ltr:mr-3 rtl:ml-3 text-gray-500 cursor-pointer"
-      style="width: 22.51px; height: 22.51px; font-size: 22.51px" (click)="SearchOnBarCode()">
+      style="width: 22.51px; height: 22.51px; font-size: 22.51px"  [class.opacity-50]="IsSearchOpen"
+      [class.cursor-not-allowed]="IsSearchOpen" (click)="IsSearchOpen ? null : SearchOnBarCode()" >
     </i>
   </div>
 </div>
@@ -441,7 +442,8 @@
             {{ row.totalPrice }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.notes" type="notes" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+            <textarea [(ngModel)]="row.notes"
+              class="w-full border border-gray-300 px-2 py-2 rounded-md resize-none overflow-x-auto overflow-y-hidden whitespace-pre h-12"></textarea>
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <div class="flex space-x-4 rtl:space-x-reverse">
@@ -530,7 +532,8 @@
             {{ row.totalPrice }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.notes" type="notes" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+            <textarea [(ngModel)]="row.notes"
+              class="w-full border border-gray-300 px-2 py-2 rounded-md resize-none overflow-x-auto overflow-y-hidden whitespace-pre h-12"></textarea>
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <div class="flex space-x-4 rtl:space-x-reverse">
@@ -575,86 +578,94 @@
   </div>
 </div>
 
+<div id="default-modal" tabindex="-1" aria-hidden="true" 
+     [ngClass]="{ hidden: !isModalVisible }"
+     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
 
-<!-- Modal --> <!-- in sales return only   -->
-<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
-  class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-  <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md max-h-[90vh] overflow-y-auto">
+  <div class="relative bg-white w-[750px] rounded-2xl p-12 shadow-md">
+    
     <!-- Close Icon -->
     <button (click)="closeModal()"
       class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
       <i class="fa-solid fa-xmark text-2xl"></i>
     </button>
-    <div class="mt-1 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-      <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+
+    <div class="mt-1 bg-[#F7F7F7] w-full rounded-[24px] p-[16px_24px]">
+
+      <!-- ⭐ Fixed height + only ONE scrollbar -->
+      <div class="mt-5 rounded-2xl border border-[#BDBDBD]
+                  overflow-x-auto overflow-y-auto"
+           style="max-height:40vh;">
+
+        <table class="min-w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
           <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Sales id'| translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Bar Code'| translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Item'| translate }} {{'ID'| translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Item'| translate }} {{'Name'| translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Quantity'| translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{'Price'| translate }}
-              </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Sales id'| translate }} </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Bar Code'| translate }} </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Item'| translate }} {{'ID'| translate }} </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Item'| translate }} {{'Name'| translate }} </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Quantity'| translate }} </th>
+              <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0]"> {{'Price'| translate }} </th>
             </tr>
           </thead>
+
           <tbody>
-            <!-- No Data Row -->
-            <tr
-              *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId != 12">
-              <td colspan="6"
-                class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            <tr *ngIf="SalesItem?.length === 0">
+              <td colspan="6" 
+                  class="bg-white px-4 py-2 text-center border-t border-gray-300 text-xs md:text-sm">
                 {{'No Data Found'| translate }}
               </td>
             </tr>
-            <!-- Data Rows -->
-            <tr *ngFor=" let row of  SalesItem; let i = index"
-              [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-              class="border-t border-gray-300 text-xs md:text-sm" (dblclick)="SelectItemFromSaleInvoive(row)">
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.inventoryMasterId }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.barCode }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.shopItemID }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.shopItemName }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.price }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.price }}
-              </td>
+
+            <tr *ngFor="let row of SalesItem; let i = index"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                class="border-t border-gray-300 text-xs md:text-sm"
+                (dblclick)="SelectItemFromSaleInvoive(row)">
+
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.inventoryMasterId }} </td>
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.barCode }} </td>
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.shopItemID }} </td>
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.shopItemName }} </td>
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.quantity }} </td>
+              <td class="py-5 px-4 border border-[#EAECF0]"> {{ row.price }} </td>
+
             </tr>
+
           </tbody>
         </table>
+
       </div>
     </div>
   </div>
+
 </div>
 
 
+<!-- Keep it rendered but invisible and non-interactive -->
+<app-pdf-print
+  *ngIf="showPDF"
+  [fileName]="'Inventory'"
+  [infoRows]="[
+    { keyEn: 'Store : ' + Data.storeName },
+    { keyEn: 'Date : ' + Data.date }
+  ]"
+  [tableHeaders]="[
+    'BarCode',
+    'Item_Id',
+    'Item_Name',
+    'Current_Stock',
+    'Actual_Stock',
+    'The_Difference'
+  ]"
+  [tableData]="tableDataForPrint"
+  #pdfComponentRef
+  [ngStyle]="{
+    position: 'fixed',
+    top: '-10000px',
+    left: '-10000px',
+    opacity: 0,
+    'pointer-events': 'none',
+    'z-index': -1
+  }"
+></app-pdf-print>
 
-<div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
-  <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows"
-      [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
-      [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
-  </div>
-</div>

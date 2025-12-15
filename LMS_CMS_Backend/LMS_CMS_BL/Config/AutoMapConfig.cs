@@ -198,7 +198,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>()
                  .ForMember(dest => dest.EmpTypeVId, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.ID, opt => opt.MapFrom(src => src.EmployeeType.ID))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.EmployeeType.Name));
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.EmployeeType.Name))
+                .ForMember(dest => dest.ArabicName, opt => opt.MapFrom(src => src.EmployeeType.ArabicName));
             CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
 
@@ -221,6 +222,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Violation, ViolationReportDTO>()
                 .ForMember(dest => dest.ViolationType, opt => opt.MapFrom(src => src.ViolationType.Name))
                 .ForMember(dest => dest.EmployeeType, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
+                .ForMember(dest => dest.EmployeeTypeArabicName, opt => opt.MapFrom(src => src.Employee.EmployeeType.ArabicName))
                 .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name))
                 .ForMember(dest => dest.AttachmentUrl, opt => opt.MapFrom(src => src.Attach));
@@ -794,6 +796,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
             CreateMap<StockingAddDTO, Stocking>();
             CreateMap<StockingGetDto, Stocking>();
+            CreateMap<StockingEditDto, Stocking>();
 
             CreateMap<EvaluationTemplate, EvaluationTemplateGetDTO>();
             CreateMap<EvaluationTemplateAddDTO, EvaluationTemplate>();
@@ -1569,6 +1572,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Student, SubAccountDTO>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.en_name));
             CreateMap<TuitionFeesType, SubAccountDTO>();
+            CreateMap<TuitionDiscountType, SubAccountDTO>();
             CreateMap<Asset, SubAccountDTO>();
             CreateMap<Income, SubAccountDTO>();
             CreateMap<Debit, SubAccountDTO>();

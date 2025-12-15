@@ -122,10 +122,10 @@
 
         <div class="no-print flex justify-end mt-5 space-x-4 rtl:space-x-reverse items-center">
             <div class="flex space-x-4 rtl:space-x-reverse" *ngIf="!isCreate">
-                <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()"
+                <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Excel.png" (click)="DownloadAsExcel()"
                     title="Export to Excel">
-                <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
-                <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print">
+                <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
+                <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Print.png" (click)="Print()" title="Print">
             </div>
             <button *ngIf="!isView" [disabled]="isSaveLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">

@@ -213,7 +213,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 return NotFound();
             }
-             
+            
+            EmployeeStudent employeeStudent = Unit_Of_Work.employeeStudent_Repository.First_Or_Default(s=>s.EmployeeID == newMaster.EmployeeID && s.StudentID == newMaster.StudentID && s.IsDeleted != true);
+            if (employeeStudent == null)
+            {
+                return NotFound("this child not found");
+            }
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Installment Deduction", roleId, userId, master);

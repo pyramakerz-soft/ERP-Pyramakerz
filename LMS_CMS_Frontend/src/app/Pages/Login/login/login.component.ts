@@ -24,9 +24,9 @@ export class LoginComponent {
   userInfo: Login = new Login("", "", "", "");
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
-  employeeImage = 'Images/employee.png';
-  studentImage = 'Images/student.png';
-  parentImage = 'Images/parent.png';
+  employeeImage = 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/employee.png';
+  studentImage = 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/student.png';
+  parentImage = 'https://d393tpgdl2mqkp.cloudfront.net/public/Images/parent.png';
   isRtl: boolean = false;
   subscription!: Subscription;
   isEmployeeHovered = false;
@@ -144,8 +144,7 @@ export class LoginComponent {
           localStorage.removeItem("current_token");
           let count = localStorage.getItem("count")
           this.getAllTokens();
-
-          this.accountService.isAuthenticated = true;
+ 
           const token = JSON.parse(d).token;
           let add = true;
           let Counter = 0;

@@ -71,7 +71,7 @@ export class LoansStatusComponent {
     reportHeaderTwoEn: 'Employee Loans Summary',
     reportHeaderOneAr: 'تقرير حالة القروض',
     reportHeaderTwoAr: 'ملخص قروض الموظفين',
-    reportImage: 'assets/images/logo.png',
+     
   };
 
   constructor(

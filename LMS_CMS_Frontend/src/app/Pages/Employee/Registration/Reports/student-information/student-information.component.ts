@@ -41,6 +41,9 @@ export class StudentInformationComponent {
   UserID: number = 0;
   path: string = '';
 
+  SelectedClassId: number = 0;
+  isClassSelected: boolean = false;
+
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -204,13 +207,15 @@ export class StudentInformationComponent {
     this.getAllStudents();
   }
 
-  onStudentChange() {
-    this.showTable = false;
-    this.showViewReportBtn =
-      this.SelectedSchoolId !== 0 &&
-      this.SelectedYearId !== 0 &&
-      this.SelectedStudentId !== 0;
-  }
+onStudentChange() {
+  this.showTable = false;
+  this.SelectedClassId = 0;
+  this.isClassSelected = false;
+  this.showViewReportBtn =
+    this.SelectedSchoolId !== 0 &&
+    this.SelectedYearId !== 0 &&
+    this.SelectedStudentId !== 0;
+}
 
   searchStudents() {
     if (this.searchQuery) {
@@ -230,14 +235,16 @@ export class StudentInformationComponent {
     }
   }
 
-  async ViewReport() {
-    if (this.SelectedSchoolId && this.SelectedYearId && this.SelectedStudentId) {
-      await this.GetData();
-      this.showTable = true;
-      this.GetStudentById();
-      this.displayDetailedData();
-    }
+async ViewReport() {
+  if (this.SelectedSchoolId && this.SelectedYearId && this.SelectedStudentId && this.isClassSelected) {
+    await this.GetData();
+    this.showTable = true;
+    this.GetStudentById();
+    this.displayDetailedData();
+  } else if (!this.isClassSelected) {
+    console.log('Please select a class first');
   }
+}
 
   displayDetailedData() {
     if (this.DataToPrint && this.DataToPrint.length > 0) {
@@ -362,226 +369,238 @@ export class StudentInformationComponent {
     });
   }
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.SelectedSchoolId || !this.SelectedYearId || !this.SelectedStudentId) {
-        reject(new Error('School, Year, and Student must be selected'));
-        return;
-      }
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!this.SelectedSchoolId || !this.SelectedYearId || !this.SelectedStudentId) {
+      reject(new Error('School, Year, and Student must be selected'));
+      return;
+    }
 
-      this.studentServ.GetByYear(
-        this.SelectedYearId,
-        this.SelectedStudentId,
-        this.SelectedSchoolId,
-        this.DomainName
-      ).subscribe({
-        next: (d) => {
-          this.DataToPrint = []; // Clear existing data
-          this.school = d.school;
-          this.CurrentDate = d.date;
-          this.CurrentDate = this.formatDate(
-            this.CurrentDate,
-            this.direction
-          );
-          
-          const formatDateString = (dateString: string): string => {
-            if (!dateString || dateString === '-') return '-';
-            try {
-              const date = new Date(dateString);
-              return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            } catch {
-              return dateString;
-            }
-          };
+    this.studentServ.GetByYear(
+      this.SelectedYearId,
+      this.SelectedStudentId,
+      this.SelectedSchoolId,
+      this.DomainName
+    ).subscribe({
+      next: (d) => {
+        this.DataToPrint = []; // Clear existing data
+        this.school = d.school;
+        this.CurrentDate = d.date;
+        this.CurrentDate = this.formatDate(
+          this.CurrentDate,
+          this.direction
+        );
+        
+        // Check if class data is available and update selection status
+        if (d.class && d.class.id) {
+          this.SelectedClassId = d.class.id;
+          this.isClassSelected = true;
+        } else {
+          this.SelectedClassId = 0;
+          this.isClassSelected = false;
+        }
+        
+        const formatDateString = (dateString: string): string => {
+          if (!dateString || dateString === '-') return '-';
+          try {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+          } catch {
+            return dateString;
+          }
+        };
 
-          const generalInfo = {
-            header: 'General Information',
-            data: [
-              {
-                key: 'Student Full Name',
-                value: d.student?.en_name || '-',
-              },
-              { key: 'Arabic Name', value: d.student?.ar_name || '-' },
-              {
-                key: 'Admission Date',
-                value: formatDateString(d.student?.insertedAt) || '-',
-              },
-              // { key: 'Mobile', value: d.student?.mobile || '-' },
-              // { key: 'Alternative Mobile', value: d.student?.phone || '-' },
-              {
-                key: 'Date of Birth',
-                value: formatDateString(d.student?.dateOfBirth) || '-',
-              },
-              { key: 'Gender', value: d.student?.genderName || '-' },
-              {
-                key: 'Nationality',
-                value: d.student?.nationalityEnName || '-',
-              },
-              {
-                key: "Student' Passport Number",
-                value: d.student?.passportNo || '-',
-              },
-              {
-                key: "Student's Id Number",
-                value: d.student?.nationalID || '-',
-              },
-              { key: 'Religion', value: d.student?.religion || '-' },
-              // {
-              //   key: 'Place To Birth',
-              //   value: d.student?.placeOfBirth || '-',
-              // },
-              {
-                key: 'previous School',
-                value: d.student?.previousSchool || '-',
-              },
-            ],
-          };
-          this.DataToPrint.push(generalInfo);
+        const generalInfo = {
+          header: 'General Information',
+          data: [
+            {
+              key: 'Student Full Name',
+              value: d.student?.en_name || '-',
+            },
+            { key: 'Arabic Name', value: d.student?.ar_name || '-' },
+            {
+              key: 'Admission Date',
+              value: formatDateString(d.student?.insertedAt) || '-',
+            },
+            // { key: 'Mobile', value: d.student?.mobile || '-' },
+            // { key: 'Alternative Mobile', value: d.student?.phone || '-' },
+            {
+              key: 'Date of Birth',
+              value: formatDateString(d.student?.dateOfBirth) || '-',
+            },
+            { key: 'Gender', value: d.student?.genderName || '-' },
+            {
+              key: 'Nationality',
+              value: d.student?.nationalityEnName || '-',
+            },
+            {
+              key: "Student' Passport Number",
+              value: d.student?.passportNo || '-',
+            },
+            {
+              key: "Student's Id Number",
+              value: d.student?.nationalID || '-',
+            },
+            { key: 'Religion', value: d.student?.religion || '-' },
+            // {
+            //   key: 'Place To Birth',
+            //   value: d.student?.placeOfBirth || '-',
+            // },
+            {
+              key: 'previous School',
+              value: d.student?.previousSchool || '-',
+            },
+          ],
+        };
+        this.DataToPrint.push(generalInfo);
 
-          const classInfo = {
-            header: 'Class Information',
-            data: [{ key: 'Class', value: d.class?.name || '-' }],
-          };
-          this.DataToPrint.push(classInfo);
+        const classInfo = {
+          header: 'Class Information',
+          data: [{ key: 'Class', value: d.class?.name || '-' }],
+        };
+        this.DataToPrint.push(classInfo);
 
-          const GuardianInformation = {
-            header: 'Guardian Information',
-            data: [
-              {
-                key: "Guardian's Name",
-                value: d.student?.guardianName || '-',
-              },
-              // {
-              //   key: 'Relationship',
-              //   value: d.student?.guardianRelation || '-',
-              // },
-              {
-                key: 'Passport',
-                value: d.student?.guardianPassportNo || '-',
-              },
-              {
-                key: 'Identity',
-                value: d.student?.guardianNationalID || '-',
-              },
-              {
-                key: 'Qualification',
-                value: d.student?.guardianQualification || '-',
-              },
-              // {
-              //   key: 'Profession',
-              //   value: d.student?.guardianProfession || '-',
-              // },
-              {
-                key: 'WorkPlace',
-                value: d.student?.guardianWorkPlace || '-',
-              },
-              {
-                key: 'E-mail Address',
-                value: d.student?.guardianEmail || '-',
-              },
-              // {
-              //   key: 'Identity Expiration',
-              //   value: formatDateString(d.student?.guardianNationalIDExpiredDate) || '-',
-              // },
-              // {
-              //   key: 'Passport Expiration',
-              //   value: formatDateString(d.student?.guardianPassportExpireDate) || '-',
-              // },
-            ],
-          };
-          this.DataToPrint.push(GuardianInformation);
+        const GuardianInformation = {
+          header: 'Guardian Information',
+          data: [
+            {
+              key: "Guardian's Name",
+              value: d.student?.guardianName || '-',
+            },
+            // {
+            //   key: 'Relationship',
+            //   value: d.student?.guardianRelation || '-',
+            // },
+            {
+              key: 'Passport',
+              value: d.student?.guardianPassportNo || '-',
+            },
+            {
+              key: 'Identity',
+              value: d.student?.guardianNationalID || '-',
+            },
+            {
+              key: 'Qualification',
+              value: d.student?.guardianQualification || '-',
+            },
+            // {
+            //   key: 'Profession',
+            //   value: d.student?.guardianProfession || '-',
+            // },
+            {
+              key: 'WorkPlace',
+              value: d.student?.guardianWorkPlace || '-',
+            },
+            {
+              key: 'E-mail Address',
+              value: d.student?.guardianEmail || '-',
+            },
+            // {
+            //   key: 'Identity Expiration',
+            //   value: formatDateString(d.student?.guardianNationalIDExpiredDate) || '-',
+            // },
+            // {
+            //   key: 'Passport Expiration',
+            //   value: formatDateString(d.student?.guardianPassportExpireDate) || '-',
+            // },
+          ],
+        };
+        this.DataToPrint.push(GuardianInformation);
 
-          const MotherInformation = {
-            header: 'Mother Information',
-            data: [
-              { key: "Mother's Name", value: d.student?.motherName || '-' },
-              {
-                key: 'Passport',
-                value: d.student?.motherPassportNo || '-',
-              },
-              {
-                key: 'Identity',
-                value: d.student?.motherNationalID || '-',
-              },
-              // {
-              //   key: 'Passport Expiration',
-              //   value: formatDateString(d.student?.motherPassportExpireDate) || '-',
-              // },
-              {
-                key: 'Qualification',
-                value: d.student?.motherQualification || '-',
-              },
-              // {
-              //   key: 'Profession',
-              //   value: d.student?.motherProfession || '-',
-              // },
-              {
-                key: 'WorkPlace',
-                value: d.student?.motherWorkPlace || '-',
-              },
-              {
-                key: 'E-mail Address',
-                value: d.student?.motherEmail || '-',
-              },
-              // {
-              //   key: 'Experiences',
-              //   value: d.student?.motherExperiences || '-',
-              // },
-            ],
-          };
-          this.DataToPrint.push(MotherInformation);
+        const MotherInformation = {
+          header: 'Mother Information',
+          data: [
+            { key: "Mother's Name", value: d.student?.motherName || '-' },
+            {
+              key: 'Passport',
+              value: d.student?.motherPassportNo || '-',
+            },
+            {
+              key: 'Identity',
+              value: d.student?.motherNationalID || '-',
+            },
+            // {
+            //   key: 'Passport Expiration',
+            //   value: formatDateString(d.student?.motherPassportExpireDate) || '-',
+            // },
+            {
+              key: 'Qualification',
+              value: d.student?.motherQualification || '-',
+            },
+            // {
+            //   key: 'Profession',
+            //   value: d.student?.motherProfession || '-',
+            // },
+            {
+              key: 'WorkPlace',
+              value: d.student?.motherWorkPlace || '-',
+            },
+            {
+              key: 'E-mail Address',
+              value: d.student?.motherEmail || '-',
+            },
+            // {
+            //   key: 'Experiences',
+            //   value: d.student?.motherExperiences || '-',
+            // },
+          ],
+        };
+        this.DataToPrint.push(MotherInformation);
 
-          // const EmergencyContactPerson = {
-          //   header: 'Emergency Contact Person',
-          //   data: [
-          //     {
-          //       key: 'Name',
-          //       value: d.student?.emergencyContactName || '-',
-          //     },
-          //     {
-          //       key: 'RelationShip',
-          //       value: d.student?.emergencyContactRelation || '-',
-          //     },
-          //     {
-          //       key: 'Mobile',
-          //       value: d.student?.emergencyContactMobile || '-',
-          //     },
-          //   ],
-          // };
-          // this.DataToPrint.push(EmergencyContactPerson);
+        // const EmergencyContactPerson = {
+        //   header: 'Emergency Contact Person',
+        //   data: [
+        //     {
+        //       key: 'Name',
+        //       value: d.student?.emergencyContactName || '-',
+        //     },
+        //     {
+        //       key: 'RelationShip',
+        //       value: d.student?.emergencyContactRelation || '-',
+        //     },
+        //     {
+        //       key: 'Mobile',
+        //       value: d.student?.emergencyContactMobile || '-',
+        //     },
+        //   ],
+        // };
+        // this.DataToPrint.push(EmergencyContactPerson);
 
-          // const AddressInformation = {
-          //   header: 'Address Information',
-          //   data: [{ key: 'Address', value: d.student?.address || '-' }],
-          // };
-          // this.DataToPrint.push(AddressInformation);
+        // const AddressInformation = {
+        //   header: 'Address Information',
+        //   data: [{ key: 'Address', value: d.student?.address || '-' }],
+        // };
+        // this.DataToPrint.push(AddressInformation);
 
-          // const PersonResponsibleToPickUpAndReceiveTheStudent = {
-          //   header: 'Person Responsible To Pick Up And Receive The Student',
-          //   data: [
-          //     {
-          //       key: 'Pick_name',
-          //       value: d.student?.pickUpContactName || '-',
-          //     },
-          //     {
-          //       key: 'Pick_Relation',
-          //       value: d.student?.pickUpContactRelation || '-',
-          //     },
-          //     {
-          //       key: 'Pick_mobile',
-          //       value: d.student?.pickUpContactMobile || '-',
-          //     },
-          //   ],
-          // };
-          // this.DataToPrint.push(
-          //   PersonResponsibleToPickUpAndReceiveTheStudent
-          // );
-          resolve();
-        },
-        error: (err) => {
-          reject(err);
-        },
-      });
+        // const PersonResponsibleToPickUpAndReceiveTheStudent = {
+        //   header: 'Person Responsible To Pick Up And Receive The Student',
+        //   data: [
+        //     {
+        //       key: 'Pick_name',
+        //       value: d.student?.pickUpContactName || '-',
+        //     },
+        //     {
+        //       key: 'Pick_Relation',
+        //       value: d.student?.pickUpContactRelation || '-',
+        //     },
+        //     {
+        //       key: 'Pick_mobile',
+        //       value: d.student?.pickUpContactMobile || '-',
+        //     },
+        //   ],
+        // };
+        // this.DataToPrint.push(
+        //   PersonResponsibleToPickUpAndReceiveTheStudent
+        // );
+        resolve();
+      },
+      error: (err) => {
+        // Reset class selection on error
+        this.SelectedClassId = 0;
+        this.isClassSelected = false;
+        reject(err);
+      },
     });
-  }
+  });
+}
 }

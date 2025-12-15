@@ -128,13 +128,34 @@ export class AcademicSequentialReportComponent {
     }
   }
 
-  getAllStudents() {
-    this.studentServ.GetByStudentID(this.SelectedSchoolId,this.DomainName).subscribe((d) => {
-      this.Students = d;
-      this.filteredStudents = d; 
-      console.log(d)
-    });
+onSchoolChange() {
+  this.SelectedStudentId = 0;
+  this.SelectedStudent = new Student();
+  this.showTable = false;
+  this.filteredStudents = [];
+  this.Students = [];
+  this.searchQuery = '';
+  this.isSearching = false;
+  
+  if (this.SelectedSchoolId) {
+    this.getAllStudents();
   }
+}
+
+// Update the getAllStudents method to reset selection if no students found
+getAllStudents() {
+  this.studentServ.GetByStudentID(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+    this.Students = d;
+    this.filteredStudents = d;
+    
+    // If no students found or selection is invalid, reset the student ID
+    if (d.length === 0 || !d.some(s => s.id === this.SelectedStudentId)) {
+      this.SelectedStudentId = 0;
+      this.SelectedStudent = new Student();
+    }
+    console.log(d);
+  });
+}
 
   searchStudents() {
     if (this.searchQuery) {

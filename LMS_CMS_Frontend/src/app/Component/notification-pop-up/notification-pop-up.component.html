@@ -8,7 +8,7 @@
                <div class="bg-[#F0F1F5] hover:bg-gray-100 p-3 mb-3 flex flex-wrap justify-between items-start"> 
                     <div class="flex items-start w-[75%]">
                         <div class="flex-shrink-0">
-                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                         </div>
                         <div class="ml-4 text-start w-full"> 
                             <p *ngIf="notification.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> Notifed You</p>
@@ -17,7 +17,7 @@
                                     {{notification.text}}
                                 </div> 
                                 <div *ngIf="notification.imageLink" class="flex space-x-2 items-center">
-                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                    <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                                     <span class="primaryTxt text-sm font-semibold">{{getImageName(notification.imageLink)}}</span>
                                 </div> 
                                 <div *ngIf="notification.link" class="secondaryTxt text-sm font-semibold">        
@@ -53,7 +53,7 @@
 
         <div class="flex p-3 items-start max-w-full overflow-y-auto overflow-x-hide">
             <div class="flex-shrink-0">
-                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
             </div>
             <div class="ml-4 text-start"> 
                 <p *ngIf="notificationByID.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notificationByID.insertedByUserName }}</span> Notifed You</p>

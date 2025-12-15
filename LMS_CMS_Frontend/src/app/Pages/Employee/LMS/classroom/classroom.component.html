@@ -5,7 +5,7 @@
 
         <button (click)="openCopyModal()"
             class="grayBorder border text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-              {{ 'Copy' | translate }} {{ 'Form' | translate }}
+              {{ 'Copy' | translate }} {{ 'From' | translate }}
         </button>
 
         <button (click)="openModal()"
@@ -288,7 +288,7 @@
 <div id="Copy_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9"> {{ 'Copy' | translate }}  {{ 'Form' | translate }}</h1>
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Copy' | translate }}  {{ 'From' | translate }}</h1>
             <button (click)="closeCopyModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
@@ -313,7 +313,7 @@
                     [(ngModel)]="copyClassroom.fromAcademicYearID" [disabled]="!selectedSchool"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }">
                     <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
-                    <option *ngFor="let academicYear of AcademicYears" [value]="academicYear.id">{{ academicYear.name }}
+                    <option *ngFor="let academicYear of filteredFromAcademicYears" [value]="academicYear.id">{{ academicYear.name }}
                     </option>
                     <option *ngIf="AcademicYears.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
@@ -325,8 +325,8 @@
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="ac"
                     [(ngModel)]="copyClassroom.toAcademicYearID" [disabled]="!selectedSchool"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }">
-                    <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }}{{ 'Academic Year' | translate }}</option>
-                    <option *ngFor="let academicYear of AcademicYears" [value]="academicYear.id">{{ academicYear.name }}
+                    <option [value]="null" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
+                    <option *ngFor="let academicYear of filteredToAcademicYears" [value]="academicYear.id">{{ academicYear.name }}
                     </option>
                     <option *ngIf="AcademicYears.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>

@@ -78,11 +78,8 @@ export class ViewHygieneFormComponent implements OnInit {
       const data = await firstValueFrom(
         this.hygieneTypesService.Get(domainName)
       );
-      this.hygieneTypes = data;
-      console.log('testing hygiene types');
-      console.log(this.hygieneTypes);
-    } catch (error) {
-      console.error('Error loading hygiene types:', error);
+      this.hygieneTypes = data; 
+    } catch (error) { 
     }
   }
 
@@ -91,16 +88,13 @@ export class ViewHygieneFormComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       this.hygieneFormService.GetById(id, domainName).subscribe({
         next: (hygieneForm) => {
-          this.hygieneForm = hygieneForm;
-          console.log(hygieneForm);
+          this.hygieneForm = hygieneForm; 
           this.prepareStudentData(hygieneForm);
         },
-        error: (error) => {
-          console.error('Error loading hygiene form:', error);
+        error: (error) => { 
         },
       });
-    } catch (error) {
-      console.error('Error in loadHygieneForm:', error);
+    } catch (error) { 
     }
   }
 

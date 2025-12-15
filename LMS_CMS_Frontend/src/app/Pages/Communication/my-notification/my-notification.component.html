@@ -8,7 +8,7 @@
                 </div>
                 <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != TableData.length, 'bg-[#e3ebf0b6]': !data.seenOrNot || data.id == notification.id}">
                     <div class="flex-shrink-0">
-                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                        <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                     </div>
                     <div class="ml-4 text-start w-full"> 
                         <p *ngIf="data.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ data.insertedByUserName }}</span> {{ 'Notifed You' | translate }}</p>
@@ -17,7 +17,7 @@
                                 {{data.text}}
                             </div> 
                             <div *ngIf="data.imageLink" class="flex space-x-2 rtl:space-x-reverse items-center">
-                                <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                                 <span class="primaryTxt text-sm font-semibold">{{getImageName(data.imageLink)}}</span>
                             </div> 
                             <div *ngIf="data.link" class="secondaryTxt text-sm font-semibold">        
@@ -42,7 +42,7 @@
     <div *ngIf="notification.id" class="w-[48%] bg-[#F7F7F7] rounded-md h-auto max-h-[75vh] overflow-y-auto overflow-x-hidden">
         <div class="flex p-3 items-start">
             <div class="flex-shrink-0">
-                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
             </div>
             <div class="ml-4 text-start w-full"> 
                 <p *ngIf="notification.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> {{ 'Notifed You' | translate }}</p>

@@ -68,9 +68,9 @@
     </div>
 </div>
 
-<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse items-center">
+    <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="https://d393tpgdl2mqkp.cloudfront.net/public/Icons/Print.png" (click)="Print()">
 </div>
 
 <!-- Certificate Display on Main Page -->
@@ -123,7 +123,7 @@
       
       <p><strong>تحية طيبة وبعد</strong></p>
       
-      <p>نفيدكم بأن الطالبة / {{DataToPrint?.student?.ar_name || SelectedStudent.ar_name}}</p>
+      <p>نفيدكم بأن الطالب/ة / {{DataToPrint?.student?.ar_name || SelectedStudent.ar_name}}</p>
       
       <p>تحمل الجنسية / {{DataToPrint?.student?.nationalityArName}}</p>
       
@@ -146,7 +146,8 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [Title]="'Identifier Letter /  افاده'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Proof Registration and Success Form report'" [Title]="'Identification Letter'"
+
         [infoRows]="[
         {
           keyEn: 'Date : ' + this.CurrentDate,
@@ -158,15 +159,15 @@
         },
         {
           keyEn: 'This to certify that Student / ' + this.DataToPrint.student.en_name,
-          keyAr: 'نفيدكم بأن الطالبة / ' + this.DataToPrint.student.ar_name
+          keyAr: 'نفيدكم بأن الطالب/ة / ' + this.DataToPrint.student.ar_name
         },
         {
           keyEn: this.DataToPrint.student.nationalityEnName + ' Nationality',
           keyAr: 'تحمل الجنسية / ' + this.DataToPrint.student.nationalityArName
         },
         {
-            keyEn: ' and identity no ' + this.DataToPrint.student.nationalIDExpiredDate,
-            keyAr: 'وتحمل هوية مقيم / ' + this.DataToPrint.student.nationalIDExpiredDate
+            keyEn: ' and identity no ' + this.DataToPrint.student.nationalID,
+            keyAr:  this.DataToPrint.student.nationalID + '/ وتحمل هوية مقيم '
           },
   
         {
