@@ -22,6 +22,9 @@
                             {{ 'Title' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Days' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             {{ 'Is Repeated Weekly' | translate }} 
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -47,7 +50,7 @@
                 <tbody>
                     <!-- No Data Row -->
                     <tr *ngIf="TableData.length === 0">
-                        <td colspan="9"
+                        <td colspan="10"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                               {{ 'No Data Found' | translate }}
                         </td>
@@ -63,6 +66,43 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.title }}
                         </td>  
+                        <!-- Days Column Added -->
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex flex-wrap gap-1">
+                                <span *ngIf="row.saturday" 
+                                      class="bg-[#E8F5E9] text-[#2E7D32] px-2 py-1 rounded text-xs font-medium">
+                                    Sat
+                                </span>
+                                <span *ngIf="row.sunday" 
+                                      class="bg-[#E3F2FD] text-[#1565C0] px-2 py-1 rounded text-xs font-medium">
+                                    Sun
+                                </span>
+                                <span *ngIf="row.monday" 
+                                      class="bg-[#F3E5F5] text-[#7B1FA2] px-2 py-1 rounded text-xs font-medium">
+                                    Mon
+                                </span>
+                                <span *ngIf="row.tuesday" 
+                                      class="bg-[#FFF3E0] text-[#EF6C00] px-2 py-1 rounded text-xs font-medium">
+                                    Tue
+                                </span>
+                                <span *ngIf="row.wednesday" 
+                                      class="bg-[#E0F7FA] text-[#00838F] px-2 py-1 rounded text-xs font-medium">
+                                    Wed
+                                </span>
+                                <span *ngIf="row.thursday" 
+                                      class="bg-[#FCE4EC] text-[#AD1457] px-2 py-1 rounded text-xs font-medium">
+                                    Thu
+                                </span>
+                                <span *ngIf="row.friday" 
+                                      class="bg-[#FFF8E1] text-[#F57F17] px-2 py-1 rounded text-xs font-medium">
+                                    Fri
+                                </span>
+                                <span *ngIf="!row.saturday && !row.sunday && !row.monday && !row.tuesday && !row.wednesday && !row.thursday && !row.friday"
+                                      class="text-gray-400 text-xs">
+                                    -
+                                </span>
+                            </div>
+                        </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
                             <i *ngIf="row.isRepeatedWeekly" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
                             <i *ngIf="!row.isRepeatedWeekly" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i> 
@@ -76,11 +116,29 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.time }}
                         </td>  
+                        <!-- Updated Meeting Link with Button -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.meetingLink }}
+                            <button *ngIf="row.meetingLink && (isOngoing(row) || isUpcoming(row))"
+                                    (click)="joinMeeting(row.meetingLink)"
+                                    class="text-[#089B41] hover:text-[#067A33] font-medium text-sm flex items-center gap-1">
+                                <i class="fas fa-video text-sm"></i>
+                                {{ 'Join' | translate }}
+                            </button>
+                            <span *ngIf="!row.meetingLink || isPast(row)" class="text-gray-400">
+                                {{ '-' | translate }}
+                            </span>
                         </td>  
+                        <!-- Updated Record Link with Button -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.recordLink || '-' }}
+                            <button *ngIf="row.recordLink"
+                                    (click)="watchRecording(row.recordLink)"
+                                    class="text-[#003366] hover:text-[#002244] font-medium text-sm flex items-center gap-1">
+                                <i class="fas fa-play-circle text-sm"></i>
+                                {{ 'Watch' | translate }}
+                            </button>
+                            <span *ngIf="!row.recordLink" class="text-gray-400">
+                                {{ '-' | translate }}
+                            </span>
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex space-x-4 rtl:space-x-reverse">
@@ -96,239 +154,6 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
- 
-
-
-<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
-        <div class="flex justify-between items-center">
-            <h1 *ngIf="discussionRoom.id == 0" class="font-semibold text-2xl leading-9">   {{ 'Create' | translate }}  {{ 'Discussion Room' | translate }}</h1>
-            <h1 *ngIf="discussionRoom.id != 0" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }}  {{ 'Discussion Room' | translate }}</h1>
-            <button (click)="closeModal()" type="button"
-                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
-        </div>
-
-        <div class="mt-6 mb-4 flex justify-between flex-wrap">
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="title">{{ 'Title' | translate }}</label>
-                <input id="title" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder=" {{ 'Enter' | translate }} {{ 'Title' | translate }}" [(ngModel)]="discussionRoom.title"
-                    (ngModelChange)="onInputValueChange({ field: 'title', value: $event })" />
-                <span *ngIf="validationErrors['title']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['title'] }}</span>
-            </div>
-
-            <div class="flex flex-col mb-4 w-full">
-
-                <label class="mb-2 primaryTxt" for="School">{{ 'School' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
-                    (change)="getStudentClassData()" [(ngModel)]="discussionRoom.schoolID"
-                    (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'School' | translate }} </option>
-                    <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="schools.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
-                </select>
-                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
-            </div>
-
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt">  {{ 'Classes' | translate }} ({{choosedStudentsClass.length}})</label>
-
-                <div class="border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer mb-4"   [ngClass]="{ 'pointer-events-none opacity-50': !discussionRoom.schoolID }"
-                    (click)="toggleClassesToChooseStudents()">
-                    <div class="flex flex-wrap gap-2">
-                        <span *ngIf="choosedStudentsClass.length == 0" class="text-gray-400 font-normal">
-                            {{ 'Click to' | translate }}  {{ 'Choose' | translate }}  {{ 'Students' | translate }}
-                        </span>
-
-                        <span *ngFor="let classroom of choosedClasss; let i = index"
-                            class="flex items-center bg-gray-200 rounded px-3 py-1 text-sm">
-                            {{ classroom.classroomName }} ({{ getStudentCount(classroom.classroomId) }})
-                            <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1"
-                                (click)="removeStudentFromClass(classroom.classroomId, $event)">
-                                &times;
-                            </button>
-                        </span>
-                    </div>
-                    <i class="fa-solid fa-chevron-down text-gray-500 ml-2"></i>
-                </div>
-
-                <span *ngIf="validationErrors['studentClassrooms']" class="text-red-500 ml-3 font-normal">{{ validationErrors['studentClassrooms'] }}</span>
-
-                <div *ngIf="viewClassStudents" class="rounded-lg shadow">
-                    <div *ngIf="studentsClass.length != 0" class="p-4 rounded-lg border"> 
-                        <div *ngIf="!viewStudents">
-                            <div *ngFor="let studentClass of studentsClass; let i = index">
-                                <div class="flex justify-between w-full items-center"
-                                    [ngClass]="{ 'mb-4': i != (studentsClass.length - 1)}">
-                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
-                                        <input type="checkbox" [id]="studentClass.classroomId" class="w-5 h-5"
-                                            (change)="onClassSelectChange(studentClass)"
-                                            [checked]="isClassSelected(studentClass.classroomId)">
-                                        <label [for]="studentClass.classroomId"
-                                            class="text-sm">{{studentClass.classroomName}}
-                                            ({{studentClass.students.length}})</label>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-left ltr:rotate-180 cursor-pointer text-gray-400"
-                                        (click)="openStudent(studentClass)"></i>
-                                </div>
-                                <hr class="my-2" *ngIf="i != (studentsClass.length - 1)">
-                            </div>
-                        </div>
-
-                        <div *ngIf="viewStudents">
-                            <div class="flex items-center space-x-5 rtl:space-x-reverse mb-5">
-                                <i class="fa-solid fa-chevron-left rtl:rotate-180 cursor-pointer"
-                                    (click)="returnToClases()"></i>
-                                <h1 class="primaryTxt font-semibold text-lg leading-9">
-                                    {{studentClassWhenSelectClass.classroomName}}
-                                    ({{studentClassWhenSelectClass.students.length}})</h1>
-                            </div>
-                            <div *ngIf="studentClassWhenSelectClass.students.length != 0" class="mb-6">
-                                <div class="flex justify-between w-full items-center">
-                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
-                                        <input type="checkbox" [id]="studentClassWhenSelectClass.classroomId"
-                                            class="w-5 h-5"
-                                            [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomId)"
-                                            (change)="onSelectAllChange(studentClassWhenSelectClass.classroomId, $event)">
-                                        <label [for]="studentClassWhenSelectClass.classroomId" class="text-sm">  {{ 'Select' | translate }}  {{ 'All' | translate }}</label>
-                                    </div>
-                                </div>
-                                <hr class="my-2 border">
-                            </div>
-                            <div *ngIf="studentClassWhenSelectClass.students.length == 0" class="border">
-                                <p class="text-center primaryTxt text-xs">
-                                  {{ 'No Data Found' | translate }}
-                                </p>
-                            </div>
-                            <div
-                                *ngFor="let studentClass of studentClassWhenSelectClass.students; let i = index">
-                                <div class="flex justify-between w-full items-center"
-                                    [ngClass]="{ 'mb-4': i != (studentClassWhenSelectClass.students.length - 1)}">
-                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
-                                        <input type="checkbox" [id]="studentClass.id" class="w-5 h-5"
-                                            (change)="onStudentSelectChange(studentClass)"
-                                            [checked]="isStudentSelected(studentClass.id)">
-                                        <label [for]="studentClass.id"
-                                            class="text-sm">{{studentClass.studentEnglishName}}</label>
-                                    </div>
-                                </div>
-                                <hr class="my-2"
-                                    *ngIf="i != (studentClassWhenSelectClass.students.length - 1)">
-                            </div>
-                        </div> 
-                    </div>
-                    <div *ngIf="studentsClass.length == 0" class="rounded-lg border">
-                        <p class="text-center primaryTxt text-xs">
-                              {{ 'No Data Found' | translate }}
-                        </p>
-                    </div>
-                </div> 
-            </div>   
-            
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="meetingLink">{{ 'Meeting' | translate }}  {{ 'Link' | translate }}</label>
-                <input id="meetingLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter' | translate }}  {{ 'Meeting' | translate }}  {{ 'Link' | translate }}" [(ngModel)]="discussionRoom.meetingLink"
-                    (ngModelChange)="onInputValueChange({ field: 'meetingLink', value: $event })" />
-                <span *ngIf="validationErrors['meetingLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['meetingLink'] }}</span>
-            </div>   
-            <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="startDate">  {{ 'Start Date' | translate }}</label>
-                <input id="startDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    [(ngModel)]="discussionRoom.startDate"
-                    (ngModelChange)="onInputValueChange({ field: 'startDate', value: $event })" />
-                <span *ngIf="validationErrors['startDate']" class="text-red-500 ml-3 font-normal">{{
-                    validationErrors['startDate'] }}</span>
-            </div> 
-            <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="endDate">{{ 'End Date' | translate }}</label>
-                <input id="endDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    [(ngModel)]="discussionRoom.endDate"
-                    (ngModelChange)="onInputValueChange({ field: 'endDate', value: $event })" />
-                <span *ngIf="validationErrors['endDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['endDate'] }}</span>
-            </div>
-            <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="time">  {{ 'Time' | translate }}</label>
-                <input id="time" type="time" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    [(ngModel)]="discussionRoom.time"
-                    (ngModelChange)="onInputValueChange({ field: 'time', value: $event })" />
-                <span *ngIf="validationErrors['time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['time'] }}</span>
-            </div> 
-            <div class="flex justify-center flex-wrap">
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="saturday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.saturday">
-                    <label for="saturday" class="text-sm">Saturday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="sunday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.sunday">
-                    <label for="sunday" class="text-sm">Sunday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="monday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.monday">
-                    <label for="monday" class="text-sm">Monday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="tuesday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.tuesday">
-                    <label for="tuesday" class="text-sm">Tuesday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="wednesday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.wednesday">
-                    <label for="wednesday" class="text-sm">Wednesday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="thursday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.thursday">
-                    <label for="thursday" class="text-sm">Thursday</label>
-                </div>
-                <div class="flex w-[33%] space-x-5 items-center mb-4">
-                    <input type="checkbox" id="friday" class="w-5 h-5" (change)="onDayChange($event)"
-                        [checked]="discussionRoom.friday">
-                    <label for="friday" class="text-sm">Friday</label>
-                </div>
-            </div>
-            <div class="flex w-full space-x-5 items-center mb-4">
-                <input type="checkbox" id="repeatedWeekly" class="w-5 h-5" (change)="onIsRepeatedWeeklyChange($event)"
-                    [checked]="discussionRoom.isRepeatedWeekly">
-                <label for="repeatedWeekly" class="text-sm">Is Repeated Weekly</label>
-            </div>
-            <div class="w-full mb-4"> 
-                <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
-                    <div class="flex justify-center w-full">
-                        <label for="imageFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                            <img *ngIf="!discussionRoom.imageLink && !discussionRoom.imageFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/4">
-                            <img *ngIf="discussionRoom.imageFile" src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/FileAttached.png" class="w-1/4">
-                            <img *ngIf="discussionRoom.imageLink && !discussionRoom.imageFile" [src]="discussionRoom.imageLink" class="w-1/3 object-cover">
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{ 'Click to' | translate }}  {{ 'Upload' | translate }}</span></p>
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{ '(Max. File size: 25 MB)' | translate }}</p>
-                        </label>
-                        <input id="imageFile" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
-                    </div>
-                </div> 
-                <span *ngIf="validationErrors['imageFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['imageFile'] }}</span>
-            </div> 
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="recordLink">  {{ 'Record' | translate }}  {{ 'Link' | translate }}</label>
-                <input id="recordLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter' | translate }}  {{ 'Record' | translate }}  {{ 'Link' | translate }}" [(ngModel)]="discussionRoom.recordLink"
-                    (ngModelChange)="onInputValueChange({ field: 'recordLink', value: $event })" />
-                <span *ngIf="validationErrors['recordLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['recordLink'] }}</span>
-            </div>   
-        </div>
-
-        <div class="flex justify-end">
-            <button [disabled]="isLoading"
-                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
-                <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
-                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-            </button>
         </div>
     </div>
 </div>
