@@ -136,4 +136,16 @@ export class DiscussionRoomService {
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/DiscussionRoom/${id}`, { headers })
   }
+
+    GetForStudent(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<DiscussionRoom[]>(`${this.baseUrl}/DiscussionRoom/for-student`, { headers })
+  }
 }

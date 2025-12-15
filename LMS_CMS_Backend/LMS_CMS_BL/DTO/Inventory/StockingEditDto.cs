@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Inventory
 {
-    public class StockingGetDto
+    public class StockingEditDto
     {
         public long? ID { get; set; }
         public string Date { get; set; }
@@ -20,6 +19,8 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? SchoolName { get; set; }
         public long? SchoolPCId { get; set; }
         public string? SchoolPCName { get; set; }
-        public List<StockingDetailsGetDto>? StockingDetails { get; set; }
-    } 
+        public List<StockingDetailsGetDto>? UpdatedStockingDetails { get; set; }
+        public List<StockingDetailsGetDto>? NewDetailsWhenEdit { get; set; }
+        public List<long>? DeletedStockingDetails { get; set; }
+    }
 }

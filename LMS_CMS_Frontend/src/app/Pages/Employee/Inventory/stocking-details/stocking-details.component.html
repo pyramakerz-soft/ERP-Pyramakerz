@@ -214,14 +214,14 @@
             </td>
           </tr>
 
-          <tr *ngIf="TableData?.length === 0 && mode === 'Edit'">
+          <!-- <tr *ngIf="TableData?.length === 0 && mode === 'Edit'">
             <td colspan="11"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
               {{'No Data Found'| translate }}
             </td>
-          </tr>
+          </tr> -->
           <!-- Data Rows -->
-          <tr *ngFor=" let row of (mode === 'Create'? Data.stockingDetails: TableData) || []; let i = index "
+          <tr *ngFor=" let row of this.Data.stockingDetails|| []; let i = index "
             [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
             class="border-t border-gray-300 text-xs md:text-sm">
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -286,10 +286,6 @@
     </div>
 
     <div class="flex items-end mb-4">
-      <!-- <button class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center"
-        (click)="Adjustment()">
-        {{'Adjustment'| translate }}
-      </button> -->
       <button [disabled]="adiustmentLoading" class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center" (click)="Adjustment()">
         <span *ngIf="!adiustmentLoading">{{'Adjustment'| translate }}</span>
         <i *ngIf="adiustmentLoading" class="fas fa-spinner fa-spin"></i>

@@ -76,7 +76,7 @@ export class StockingDetailsComponent {
   schools: School[] = []
   schoolPCs: SchoolPCs[] = []
 
-  TableData: StockingDetails[] = [];
+  // TableData: StockingDetails[] = [];
   Item: StockingDetails = new StockingDetails();
   // ShopItem: ShopItem = new ShopItem()
   MasterId: number = 0;
@@ -156,7 +156,7 @@ export class StockingDetailsComponent {
       this.Data.date = `${year}-${month}-${day}`;
     } else {
       this.mode = 'Edit';
-      this.GetTableDataByID();
+      // this.GetTableDataByID();
       this.GetMasterInfo();
     }
 
@@ -224,6 +224,8 @@ export class StockingDetailsComponent {
   GetMasterInfo() {
     this.StockingServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      this.Data.stockingDetails = d.stockingDetails;
+      this.OriginDetails = JSON.parse(JSON.stringify(this.Data.stockingDetails)); // ✅ Deep copy
       this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
         this.schoolPCs = d
       })
@@ -246,10 +248,7 @@ export class StockingDetailsComponent {
 
   GetCategories() {
     this.Categories = [];
-    this.CategoriesServ.GetByStoreId(
-      this.DomainName,
-      this.Data.storeID
-    ).subscribe(
+    this.CategoriesServ.GetByStoreId(this.DomainName,this.Data.storeID).subscribe(
       (d) => {
         this.Categories = d;
         this.subCategories = [];
@@ -302,10 +301,10 @@ export class StockingDetailsComponent {
           );
         }
       } else if (this.mode == 'Edit') {
-        if (!this.TableData) {
-          this.TableData = [];
+        if (!this.Data.stockingDetails) {
+          this.Data.stockingDetails = [];
         }
-        this.TableData = this.TableData.concat(this.FilteredDetails);
+        this.Data.stockingDetails = this.Data.stockingDetails.concat(this.FilteredDetails);
         if (!this.Data.newDetailsWhenEdit) {
           this.Data.newDetailsWhenEdit = [];
         }
@@ -313,7 +312,7 @@ export class StockingDetailsComponent {
           this.FilteredDetails
         );
         if (this.HasBallance) {
-          this.TableData = this.TableData.filter((d) => d.currentStock !== 0);
+          this.Data.stockingDetails = this.Data.stockingDetails.filter((d) => d.currentStock !== 0);
           this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter((d) => d.currentStock !== 0);
         }
       }
@@ -322,22 +321,14 @@ export class StockingDetailsComponent {
 
   GetSubCategories(categoryId: number) {
     this.subCategories = [];
-    this.SubCategoriesServ.GetByCategoryId(
-      categoryId,
-      this.DomainName
-    ).subscribe((d) => {
+    this.SubCategoriesServ.GetByCategoryId(categoryId,this.DomainName).subscribe((d) => {
       this.subCategories = d;
     });
   }
 
   GetItems() {
     if (this.SelectedSubCategoryId)
-      this.StockingDetailsServ.GetCurrentStockForAllItemsBySub(
-        this.Data.storeID,
-        this.SelectedSubCategoryId,
-        this.Data.date,
-        this.DomainName
-      ).subscribe((d) => {
+      this.StockingDetailsServ.GetCurrentStockForAllItemsBySub(this.Data.storeID,this.SelectedSubCategoryId,this.Data.date,this.DomainName).subscribe((d) => {
         this.ShopItems = d;
         if (this.AllItems) {
           this.FilteredDetails = this.ShopItems.map((item) => ({
@@ -354,23 +345,12 @@ export class StockingDetailsComponent {
             ItemPrice: item.purchasePrice ?? 0,
           }));
           this.OriginDetails = this.OriginDetails.concat(this.FilteredDetails);
-          if (this.mode == 'Create') {
-            this.Data.stockingDetails = this.Data.stockingDetails.concat(
-              this.FilteredDetails
-            );
-            if (this.HasBallance) {
-              this.Data.stockingDetails = this.OriginDetails.filter(
-                (d) => d.currentStock != 0
-              );
-            }
-          } else if (this.mode == 'Edit') {
-            this.TableData = this.TableData.concat(this.FilteredDetails);
-            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.concat(
-              this.FilteredDetails
-            );
-            if (this.HasBallance) {
-              this.TableData = this.OriginDetails.filter((d) => d.currentStock != 0);
-            }
+          this.Data.stockingDetails = this.Data.stockingDetails.concat(this.FilteredDetails);
+          if (this.HasBallance) {
+            this.Data.stockingDetails = this.OriginDetails.filter((d) => d.currentStock != 0);
+          }
+          if (this.mode == 'Edit') {
+            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.concat(this.FilteredDetails);
           }
         }
       });
@@ -385,7 +365,7 @@ export class StockingDetailsComponent {
   selectShopItem(item: ShopItem) {
     this.Data.stockingDetails ??= [];
     this.Data.newDetailsWhenEdit ??= [];
-    this.TableData ??= [];
+    this.Data.stockingDetails ??= [];
     this.OriginDetails ??= [];
     this.SelectedSopItem = item;
 
@@ -402,22 +382,17 @@ export class StockingDetailsComponent {
       barCode: item.barCode,
       ItemPrice: item.purchasePrice ?? 0,
     };
-
+    console.log(56,this.Data.stockingDetails,this.OriginDetails,newItem)
     this.OriginDetails.push(newItem);
-    if (this.mode === 'Create') {
-      if (this.HasBallance) {
-        this.Data.stockingDetails = this.OriginDetails.filter(d => d.currentStock != 0);
-      } else {
-        this.Data.stockingDetails.push(newItem);
-      }
-    } else if (this.mode === 'Edit') {
-      this.Data.newDetailsWhenEdit.push(newItem);
-      if (this.HasBallance) {
-        this.TableData = this.OriginDetails.filter(d => d.currentStock != 0);
-      } else {
-        this.TableData.push(newItem);
-      }
+    if (this.HasBallance) {
+      this.Data.stockingDetails = this.OriginDetails.filter(d => d.currentStock != 0);
+    } else {
+      this.Data.stockingDetails.push(newItem);
     }
+    if (this.mode === 'Edit') {
+      this.Data.newDetailsWhenEdit.push(newItem);
+    }
+    console.log(78,this.Data.stockingDetails,this.OriginDetails)
   }
 
   SearchToggle() {
@@ -453,21 +428,12 @@ export class StockingDetailsComponent {
           ItemPrice: d.purchasePrice ?? 0,
         };
         this.OriginDetails.push(detail);
-        if (this.mode == 'Create') {
-          this.Data.stockingDetails.push(detail);
-          if (this.HasBallance) {
-            this.Data.stockingDetails = this.OriginDetails.filter(
-              (d) => d.currentStock != 0
-            );
-          }
-        } else if (this.mode == 'Edit') {
-          this.TableData.push(detail);
+        this.Data.stockingDetails.push(detail);
+        if (this.HasBallance) {
+          this.Data.stockingDetails = this.OriginDetails.filter((d) => d.currentStock != 0);
+        }
+        if (this.mode == 'Edit') {
           this.Data.newDetailsWhenEdit.push(detail);
-          if (this.HasBallance) {
-            this.TableData = this.OriginDetails.filter(
-              (d) => d.currentStock != 0
-            );
-          }
         }
         this.BarCode = ''; // Clear input after search
       },
@@ -484,47 +450,35 @@ export class StockingDetailsComponent {
     );
   }
 
-  async GetTableDataByID(): Promise<void> {
-    return new Promise((resolve) => {
-      this.StockingDetailsServ.GetBySalesId(
-        this.MasterId,
-        this.DomainName
-      ).subscribe(
-        (d) => {
-          this.TableData = d;
-          this.OriginDetails = JSON.parse(JSON.stringify(d)); // ✅ Deep copy
-          resolve();
-        },
-        (error) => {
-          this.TableData = [];
-        }
-      );
-    });
-  }
+  // async GetTableDataByID(): Promise<void> {
+  //   return new Promise((resolve) => {
+  //     this.StockingDetailsServ.GetBySalesId(this.MasterId,this.DomainName).subscribe(
+  //       (d) => {
+  //         this.Data.stockingDetails = d;
+  //         this.OriginDetails = JSON.parse(JSON.stringify(d)); // ✅ Deep copy
+  //         resolve();
+  //       },
+  //       (error) => {
+  //         this.Data.stockingDetails = [];
+  //       }
+  //     );
+  //   });
+  // }
 
   toggleHasBalance() {
+    console.log(12,this.Data.stockingDetails,this.OriginDetails)
     if (this.HasBallance == true) {
-      if (this.mode == 'Create') {
-        this.Data.stockingDetails = this.OriginDetails.filter(
-          (s) => s.currentStock != 0
-        );
-      } else if (this.mode == 'Edit') {
-        this.TableData = this.OriginDetails.filter((s) => s.currentStock != 0);
-      }
+      this.Data.stockingDetails = this.OriginDetails.filter((s) => s.currentStock != 0);
     } else if (this.HasBallance == false) {
-      if (this.mode == 'Create') {
-        this.Data.stockingDetails = this.OriginDetails;
-      } else if (this.mode == 'Edit') {
-        this.TableData = this.OriginDetails;
-      }
+      this.Data.stockingDetails = [...this.OriginDetails];
     }
+    console.log(34,this.Data.stockingDetails,this.OriginDetails)
   }
   /////////////////////////////////////////////////////// CRUD
 
   async Save() {
     if (await this.isFormValid()) {
       const Swal = await import('sweetalert2').then(m => m.default);
-      console.log(this.Data)
       this.isLoading = true;
       if (this.mode == 'Create') {
         this.StockingServ.Add(this.Data, this.DomainName).subscribe(
@@ -540,7 +494,6 @@ export class StockingDetailsComponent {
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
-           console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -560,7 +513,7 @@ export class StockingDetailsComponent {
         // this.DetailsToDeleted.forEach((element) => {
         //   this.StockingDetailsServ.Delete(element.id,this.DomainName).subscribe((d) => { });
         // });
-        this.Data.stockingDetails = this.TableData;
+        this.Data.stockingDetails = this.Data.stockingDetails || [];
         this.StockingServ.Edit(this.Data, this.DomainName).subscribe(
           (d) => {
             Swal.fire({
@@ -573,7 +526,6 @@ export class StockingDetailsComponent {
             this.router.navigateByUrl(`Employee/Stocking`);
           },
           (error) => {
-            console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -607,14 +559,13 @@ export class StockingDetailsComponent {
       }).then((result) => {
         if (result.isConfirmed) {
           if (!this.Data.newDetailsWhenEdit || this.Data.newDetailsWhenEdit.length==0 || (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&!this.Data.newDetailsWhenEdit.find((s) => s.id == row.id))) {
-            this.TableData = this.TableData.filter((s) => s.id != row.id);
+            this.Data.stockingDetails = this.Data.stockingDetails.filter((s) => s.id != row.id);
             this.Data.deletedStockingDetails = this.Data.deletedStockingDetails || []
             this.Data.deletedStockingDetails.push(row.id)
           } else if (this.Data.newDetailsWhenEdit && this.Data.newDetailsWhenEdit.length>0 &&this.Data.newDetailsWhenEdit.find((s) => s.id == row.id)) {
-            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter(
-              (s) => s.id != row.id
-            );
-            this.TableData = this.TableData.filter((s) => s.id != row.id);
+            this.Data.newDetailsWhenEdit = this.Data.newDetailsWhenEdit.filter((s) => s.id != row.id);
+            this.Data.stockingDetails = this.Data.stockingDetails.filter((s) => s.id != row.id);
+            this.OriginDetails = this.OriginDetails.filter((s) => s.id != row.id);
           }
         }
       });
@@ -629,9 +580,7 @@ export class StockingDetailsComponent {
         cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
-          this.Data.stockingDetails = this.Data.stockingDetails.filter(
-            (item) => item.id !== row.id
-          );
+          this.Data.stockingDetails = this.Data.stockingDetails.filter((item) => item.id !== row.id);
         }
       });
     }
@@ -690,7 +639,7 @@ export class StockingDetailsComponent {
       });
       return false;
     }
-    if (this.mode == 'Edit' && this.TableData.length == 0) {
+    if (this.mode == 'Edit' && this.Data.stockingDetails.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
@@ -777,10 +726,8 @@ export class StockingDetailsComponent {
           })
         }
         if (this.mode === 'Edit') {
-          console.log(123,this.Data.deletedStockingDetails)
-          this.Data.stockingDetails = this.TableData;
+          this.Data.stockingDetails = this.Data.stockingDetails || [];
           this.StockingServ.Edit(this.Data, this.DomainName).subscribe(async (d)=>{
-            console.log(45,this.Data)
             if (this.Data.additionId != 0 && this.Data.additionId != null) {
               await this.InventoryMastrServ.Delete(this.Data.additionId,this.DomainName).toPromise();
             }
@@ -800,16 +747,11 @@ export class StockingDetailsComponent {
       } catch (error) {
         console.error('Unexpected error in Adjustment():', error);
         this.adiustmentLoading = false;
-      } finally {
-        this.adiustmentLoading = false;
       }
     }
   }
 
-  private async prepareAdjustment(
-    flagId: number,
-    filterCondition: (item: any) => boolean
-  ) {
+  private async prepareAdjustment(flagId: number,filterCondition: (item: any) => boolean) {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -823,9 +765,7 @@ export class StockingDetailsComponent {
     this.adiustmentDisbursement.schoolId = this.Data.schoolId;
     this.adiustmentDisbursement.schoolPCId = this.Data.schoolPCId;
     this.adiustmentDisbursement.flagId = flagId;
-
-    this.adiustmentDisbursement.inventoryDetails = this.TableData
-      .filter(filterCondition)
+    this.adiustmentDisbursement.inventoryDetails = this.Data.stockingDetails.filter(filterCondition)
       .map((item) => {
         const foundItem = this.AllShopItems.find((s) => s.id == item.shopItemID);
         const price = foundItem?.purchasePrice ?? 0;
@@ -858,10 +798,7 @@ export class StockingDetailsComponent {
     );
 
     if (this.adiustmentDisbursement.inventoryDetails.length > 0) {
-      const response = await this.InventoryMastrServ.Add(
-        this.adiustmentDisbursement,
-        this.DomainName
-      ).toPromise();
+      const response = await this.InventoryMastrServ.Add(this.adiustmentDisbursement,this.DomainName ).toPromise();
       return response;
     } else {
       return;
@@ -895,11 +832,8 @@ export class StockingDetailsComponent {
   }
 
   async Blank(): Promise<void> {
-    const isEditMode = this.mode === 'Edit';
-    const originalData = isEditMode
-      ? JSON.parse(JSON.stringify(this.TableData))
-      : JSON.parse(JSON.stringify(this.Data.stockingDetails));
-    const targetData = isEditMode ? this.TableData : this.Data.stockingDetails;
+    const originalData =JSON.parse(JSON.stringify(this.Data.stockingDetails))
+    const targetData = this.Data.stockingDetails;
     targetData.forEach(row => {
       row.actualStock = null;
       row.theDifference = null;
@@ -908,11 +842,7 @@ export class StockingDetailsComponent {
     await new Promise<void>(resolve =>
       setTimeout(async () => {
         await this.Print();
-        if (isEditMode) {
-          this.TableData = originalData;
-        } else {
-          this.Data.stockingDetails = originalData;
-        }
+        this.Data.stockingDetails = originalData;
         this.cdr.detectChanges();
         resolve();
       }, 300)
@@ -920,26 +850,14 @@ export class StockingDetailsComponent {
   }
 
   async Differences(): Promise<void> {
-    const isEditMode = this.mode === 'Edit';
-    const originalData = isEditMode
-      ? [...this.TableData]
-      : [...this.Data.stockingDetails];
+    const originalData =  [...this.Data.stockingDetails]
     const filteredData = originalData.filter(f => f.theDifference !== 0);
-    if (isEditMode) {
-      this.TableData = filteredData;
-    } else {
-      this.Data.stockingDetails = filteredData;
-    }
+    this.Data.stockingDetails = filteredData;
     this.cdr.detectChanges();
     await new Promise<void>(resolve =>
       setTimeout(async () => {
         await this.Print();
-
-        if (isEditMode) {
-          this.TableData = originalData;
-        } else {
-          this.Data.stockingDetails = originalData;
-        }
+        this.Data.stockingDetails = originalData;
         this.cdr.detectChanges();
         resolve();
       }, 300)
@@ -1008,7 +926,7 @@ export class StockingDetailsComponent {
   }
 
   formateData() {
-    const sourceData = this.mode === "Create" ? this.Data?.stockingDetails ?? [] : this.TableData ?? [];
+    const sourceData = this.Data?.stockingDetails ?? []
     this.tableDataForPrint = sourceData.map((row) => {
       return {
         BarCode: row.barCode || '',
@@ -1031,9 +949,7 @@ export class StockingDetailsComponent {
       'The Difference',
     ];
 
-    const tableData = (
-      this.mode === 'Create' ? this.Data.stockingDetails : this.TableData || []
-    ).map((row) => {
+    const tableData = (this.Data.stockingDetails || []).map((row) => {
       return [
         row.barCode || '',
         row.shopItemID || '',

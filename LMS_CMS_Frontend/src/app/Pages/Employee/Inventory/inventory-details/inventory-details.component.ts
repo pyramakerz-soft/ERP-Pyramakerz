@@ -218,9 +218,7 @@ export class InventoryDetailsComponent {
       this.mode = 'Edit';
       this.GetTableDataByID();
       this.GetMasterInfo();
-      this.schoolpcsServ
-        .GetBySchoolId(this.Data.schoolId, this.DomainName)
-        .subscribe((d) => {
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
           this.schoolPCs = d;
         });
       if (this.Data.saveID == null) {
@@ -628,6 +626,7 @@ export class InventoryDetailsComponent {
           },
           (error) => {
             this.isLoading = false;
+            console.log(error)
             this.showErrorAlert(error.error);
           }
         );
@@ -881,7 +880,7 @@ export class InventoryDetailsComponent {
         this.Data.remaining =
           +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
       } else {
-        row.totalPrice = row.quantity * row.price;
+        row.totalPrice = Math.round((row.quantity * row.price + Number.EPSILON) * 100) / 100;
         this.TotalandRemainingCalculate();
       }
     } else if (this.mode == 'Edit') {
@@ -891,7 +890,7 @@ export class InventoryDetailsComponent {
         this.Data.remaining =
           +this.Data.total - (+this.Data.cashAmount + +this.Data.visaAmount);
       } else {
-        row.totalPrice = row.quantity * row.price;
+        row.totalPrice = Math.round((row.quantity * row.price + Number.EPSILON) * 100) / 100;
         this.TotalandRemainingCalculate();
       }
     }
