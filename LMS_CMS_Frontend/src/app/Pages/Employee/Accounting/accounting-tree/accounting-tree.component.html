@@ -90,6 +90,7 @@
                  [disabled]="accountingTreeChart.subTypeID == 1"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="linkFile">
                     <option *ngIf="accountingTreeChart.subTypeID != 1" [value]="0" disabled selected hidden> {{ 'Select Link File' | translate }}</option>
+                    <option *ngIf="accountingTreeChart.subTypeID == 2" [value]="0"> {{ 'No Link File' | translate }}</option>
                     <option *ngFor="let type of LinkFileData" [value]="type.id">{{ type.name }}</option>
                     <option *ngIf="accountingTreeChart.subTypeID != 2" [value]="0"> {{ 'No Link File' | translate }}</option>
                 </select>

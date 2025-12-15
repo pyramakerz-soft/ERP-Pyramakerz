@@ -187,6 +187,7 @@ export class AccountingEntriesDetailsComponent {
         }
       )
     }
+    console.log(row.subAccountingID)
   }
 
   GetAccountingEntriesByID() {
@@ -309,8 +310,7 @@ export class AccountingEntriesDetailsComponent {
 
       // Validate only these fields
       const requiredFields: (keyof AccountingEntriesDetails)[] = [
-        'accountingTreeChartID',
-        'subAccountingID'
+        'accountingTreeChartID'
       ];
 
       requiredFields.forEach((field) => {
@@ -332,7 +332,12 @@ export class AccountingEntriesDetailsComponent {
       if(detail.creditAmount != null && detail.creditAmount != 0 && detail.debitAmount != null && detail.debitAmount != 0 ){
         console.log(3232)
         errors['debitAmount'] ='You cannot enter both Debit and Credit in the same row.'
-          isValid = false;
+        isValid = false;
+      }
+      
+      if(detail.subAccountData && detail.subAccountData.length>0 && (detail.subAccountingID ==0 || detail.subAccountingID ==null )){
+        errors['subAccountingID'] ='subAccounting ID Is Required.'
+        isValid = false;
       }
     });
 
@@ -351,8 +356,7 @@ export class AccountingEntriesDetailsComponent {
 
         // Validate only these fields
         const requiredFields: (keyof AccountingEntriesDetails)[] = [
-          'accountingTreeChartID',
-          'subAccountingID'
+          'accountingTreeChartID'
         ];
 
         requiredFields.forEach((field) => {
@@ -374,7 +378,12 @@ export class AccountingEntriesDetailsComponent {
         if(detail.creditAmount != null && detail.creditAmount != 0 && detail.debitAmount != null && detail.debitAmount != 0 ){
           console.log(3232)
           errors['debitAmount'] ='You cannot enter both Debit and Credit in the same row.'
-            isValid = false;
+          isValid = false;
+        }
+
+        if(detail.subAccountData.length>0 && (detail.subAccountingID ==0 || detail.subAccountingID ==null )){
+          errors['subAccountingID'] ='subAccounting ID Is Required.'
+          isValid = false;
         }
       });
     }

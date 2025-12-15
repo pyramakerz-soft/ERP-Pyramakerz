@@ -276,10 +276,10 @@ isFormValid(): boolean {
       isValid = false;
     }
     
-    if (!this.accountingTreeChart.linkFileID) {
-      this.validationErrors['linkFileID'] = this.getRequiredErrorMessage('Link File');
-      isValid = false;
-    }
+    // if (!this.accountingTreeChart.linkFileID) {
+    //   this.validationErrors['linkFileID'] = this.getRequiredErrorMessage('Link File');
+    //   isValid = false;
+    // }
   }
 
   if (!this.accountingTreeChart.mainAccountNumberID) {
@@ -358,7 +358,7 @@ isFormValid(): boolean {
   async Save() {
     if (this.isFormValid()) {
       const Swal = await import('sweetalert2').then(m => m.default);
-
+      console.log(this.accountingTreeChart)
       if (this.isEdit) {
         if (this.AllowEdit && this.IsAllowEdit(this.accountingTreeChart.insertedByUserId)) {
           this.accountingTreeChartService.Edit(this.accountingTreeChart, this.DomainName).subscribe(
@@ -372,6 +372,7 @@ isFormValid(): boolean {
                 confirmButtonColor: '#089B41'
               })
             }, (error) => {
+              console.log(error)
             }
           )
         } else {

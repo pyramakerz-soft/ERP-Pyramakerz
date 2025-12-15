@@ -14,6 +14,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? Note { get; set; }
         public long AccountingTreeChartID { get; set; }
         public long AccountingEntriesMasterID { get; set; }
-        public long SubAccountingID { get; set; }
+        public long? SubAccountingID { get; set; }
     }
 }

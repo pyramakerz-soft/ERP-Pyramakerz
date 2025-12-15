@@ -452,11 +452,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     {
                         return BadRequest("Main Account Number ID cannot be null");
                     }
-
-                    LinkFile linkFile = Unit_Of_Work.linkFile_Repository.Select_By_Id(NewAccountingTreeChart.LinkFileID);
-                    if (linkFile == null)
+                    if (NewAccountingTreeChart.LinkFileID != 0 && NewAccountingTreeChart.LinkFileID != null)
+                    { 
+                        LinkFile linkFile = Unit_Of_Work.linkFile_Repository.Select_By_Id(NewAccountingTreeChart.LinkFileID);
+                        if (linkFile == null)
+                        {
+                            return NotFound("No Link File with this Id");
+                        }
+                    }
+                    else
                     {
-                        return NotFound("No Link File with this Id");
+                        NewAccountingTreeChart.LinkFileID = null;
                     }
                 }
             }
@@ -639,11 +645,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     return BadRequest("Main Accounting Number ID cannot be null");
                 }
+                if(EditedAccountingTreeChart.LinkFileID != 0 && EditedAccountingTreeChart.LinkFileID != null){
+                    LinkFile linkFile = Unit_Of_Work.linkFile_Repository.Select_By_Id(EditedAccountingTreeChart.LinkFileID);
+                    if (linkFile == null)
+                    {
+                        return NotFound("No Link File with this Id" + EditedAccountingTreeChart.LinkFileID);
+                    }
 
-                LinkFile linkFile = Unit_Of_Work.linkFile_Repository.Select_By_Id(EditedAccountingTreeChart.LinkFileID);
-                if (linkFile == null)
+                }
+                else
                 {
-                    return NotFound("No Link File with this Id");
+                    EditedAccountingTreeChart.LinkFileID = null;
                 }
             }
              

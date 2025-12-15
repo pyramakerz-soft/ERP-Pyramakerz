@@ -249,10 +249,10 @@
                             (ngModelChange)="onInputValueChangeForDetails(row,{ field: 'subAccountingID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                             id="subAccountingID" [(ngModel)]="row.subAccountingID">
-                            <option [value]="null" disabled selected hidden> {{ 'Choose Sub Account Data' | translate }}</option>
+                            <option [value]="null" disabled selected > {{ 'Choose Sub Account Data' | translate }}</option>
                             <option *ngFor="let sub of row.subAccountData" [value]="sub.id">{{ sub.en_name }} {{
                                 sub.name }}</option>
-                            <option *ngIf="(row.subAccountData?.length ?? 0) === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                            <option *ngIf="(row.subAccountData?.length ?? 0) === 0 || !row.subAccountData" disabled selected>{{ 'No Data Found' | translate }}</option>
                         </select>
                         <span *ngIf="validationErrorsForDetails[row.id] && validationErrorsForDetails[row.id]['subAccountingID']" class="text-red-500 ml-3 font-normal">
                             {{ validationErrorsForDetails[row.id]['subAccountingID'] }}
