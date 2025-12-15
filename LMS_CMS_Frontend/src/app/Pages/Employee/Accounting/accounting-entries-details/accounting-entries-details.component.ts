@@ -193,7 +193,6 @@ export class AccountingEntriesDetailsComponent {
   GetAccountingEntriesByID() {
     this.accountingEntriesService.GetByID(this.AccountingEntriesID, this.DomainName).subscribe(
       (data) => {
-        console.log(123,data)
         this.accountingEntries = data
         let totalCredit = 0
         let totalDebit = 0
@@ -204,6 +203,13 @@ export class AccountingEntriesDetailsComponent {
         this.totalCredit = totalCredit
         this.totalDebit = totalDebit
         this.theDifference = this.totalCredit - this.totalDebit
+        this.accountingEntries.accountingEntriesDetails.forEach(row => {
+          if (!row.subAccountData || row.subAccountData.length === 0) {
+            row.subAccountingID = null; // instead of 0
+            row.subAccountData = []; // instead of 0
+          }
+        });
+        console.log(123,this.accountingEntries)
       },error=>{
         console.log(error.error)
         console.log(error)
