@@ -36,6 +36,19 @@ namespace LMS_CMS_DAL.Models.Domains
         public string Password { get; set; }
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
+        public DateTime GraduationYear { get; set; }
+        public string? MaritalStatus { get; set; }
+        public string? Gender { get; set; }
+        public string University { get; set; }
+        public string faculty { get; set; }
+        public string Major { get; set; }
+        public string SchoolYouGraduatedFrom { get; set; }
+        public string OtherStudies { get; set; }
+        public string ComputerSkills { get; set; }
+        public string Hobbies { get; set; }
+        public DateTime ApplicationDate { get; set; }
+        public string PositionAppliedFor { get; set; }
+ 
         [EmailAddress]
         public string? Email { get; set; }
         public string? LicenseNumber { get; set; }
@@ -56,7 +69,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public decimal? AnnualLeaveBalance { get; set; }
         public decimal? CasualLeavesBalance { get; set; }
         public decimal? MonthlyLeaveRequestBalance { get; set; }
-        public int? GraduationYear { get; set; }
         public string? Note { get; set; }
         public string? SerialNumber { get; set; }
         public bool? CanReceiveRequest { get; set; } 

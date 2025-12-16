@@ -26,6 +26,19 @@ namespace LMS_CMS_BL.DTO
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
+        public DateTime GraduationYear { get; set; }
+        public string? MaritalStatus { get; set; }
+        public string? Gender { get; set; }
+        public string University { get; set; }
+        public string faculty { get; set; }
+        public string Major { get; set; }
+        public string SchoolYouGraduatedFrom { get; set; }
+        public string OtherStudies { get; set; }
+        public string ComputerSkills { get; set; }
+        public string Hobbies { get; set; }
+        public DateTime ApplicationDate { get; set; }
+        public string PositionAppliedFor { get; set; }
+
         public string? LicenseNumber { get; set; }
         public string? ExpireDate { get; set; }
         public string? Address { get; set; }
