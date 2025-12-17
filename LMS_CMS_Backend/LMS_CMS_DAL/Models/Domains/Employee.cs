@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
@@ -13,6 +6,14 @@ using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains
 {
@@ -48,7 +49,24 @@ namespace LMS_CMS_DAL.Models.Domains
         public string Hobbies { get; set; }
         public DateTime ApplicationDate { get; set; }
         public string PositionAppliedFor { get; set; }
- 
+        public string PreviousExperiencePlace { get; set; }
+        public string Position { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public string HowDidYouFindUs { get; set; }
+        public string ReasonforLeavingtheJob { get; set; }
+        public string DidYouHaveAnyRelativeHere { get; set; }
+        public string YourLevelInEnglish { get; set; }
+        public string YourLevelInFrensh { get; set; }
+        public string DoYouSpeakAnyOtherLanguages { get; set; }
+        public string CurrentJob { get; set; }
+        public decimal LastSalary { get; set; }
+        public bool AuthorizeInvestigation { get; set; }
+
+        public string FullName { get; set; }
+        public DateTime EnterDate { get; set; }
+        public string Signature { get; set; }
+
         [EmailAddress]
         public string? Email { get; set; }
         public string? LicenseNumber { get; set; }

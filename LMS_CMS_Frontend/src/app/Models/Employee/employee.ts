@@ -1,3 +1,4 @@
+import { Gender } from './../gender';
 import { AnnualVacationEmployee } from "../HR/annual-vacation-employee";
 import { EmployeeAttachment } from "./employee-attachment";
 
@@ -21,6 +22,22 @@ export class Employee {
         public hobbies: string = '',
         public applicationDate: string = '',    
         public positionAppliedFor: string = '',
+        public previousExperiencePlace: string = '',
+        public position: string = '',
+        public fromDate: string = '',
+        public toDate: string = '',
+        public howDidYouFindUs: string =  '',
+        public reasonforLeavingtheJob: string = '',
+        public didYouHaveAnyRelativeHere: string = '',
+        public yourLevelInEnglish: string = '',
+        public yourLevelInFrensh: string = '',
+        public doYouSpeakAnyOtherLanguages: string = '',
+        public currentJob: string = '',
+        public lastSalary: number = 0,
+        public authorizeInvestigation: boolean = false,
+        public fullName: string = '',
+        public enterDate: string = '',
+        public signature: string = '',
         public licenseNumber: string = '',
         public expireDate: string = '',
         public address: string = '',
@@ -85,6 +102,7 @@ export class Employee {
         public accountNumberID: number = 0,
         public insertedByUserId: number = 0,
         public insertedAt: number = 0,
+        public gender : string = '',
     ) { }
 }
 

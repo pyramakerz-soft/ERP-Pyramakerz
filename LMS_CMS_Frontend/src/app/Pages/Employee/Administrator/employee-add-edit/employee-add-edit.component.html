@@ -7,21 +7,81 @@
           {{ mode === 'Create' ? ('Create Application For Employee ' | translate) : ('Edit Application For Employee' | translate) }}
         </h1>
     </div>
-    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+    <button [disabled]="isLoading" class="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg mb-4" (click)="Save()">
         <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
 </div>
 
-<!-- <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
-    <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'User Name' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-   placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.user_Name"
-            (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
-        <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["user_Name"]}}</span>
-    </div> -->
+<div *ngIf="!showRegistrationForm">
+
+<div class="flex gap-6 p-6 bg-gray-100 rounded-lg mb-6">
+
+  <!-- Left Side (Inputs under each other) -->
+  <div class="flex flex-col w-[49%]">
+
+    <!-- Application Date -->
+    <div class="flex flex-col mb-4">
+      <label class="mb-2 primaryTxt" for="applicationDate">
+        {{ 'Application Date' | translate }}
+      </label>
+      <input
+        id="applicationDate"
+        type="date"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        placeholder="{{ 'Enter application Date' | translate }}"
+        [(ngModel)]="Data.applicationDate"
+        (ngModelChange)="onInputValueChange({ field: 'applicationDate', value: $event })"
+      />
+      <span *ngIf="validationErrors['applicationDate']" class="text-red-500 ml-3 font-normal">
+        {{ validationErrors['applicationDate'] }}
+      </span>
+    </div>
+
+    <!-- Position Applied For -->
+    <div class="flex flex-col mb-4">
+      <label class="mb-2 primaryTxt" for="positionAppliedFor">
+        {{ 'Position Applied For' | translate }}
+      </label>
+      <input
+        id="positionAppliedFor"
+        type="text"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        placeholder="{{ 'Enter position Applied For' | translate }}"
+        [(ngModel)]="Data.positionAppliedFor"
+        (ngModelChange)="onInputValueChange({ field: 'positionAppliedFor', value: $event })"
+      />
+      <span *ngIf="validationErrors['positionAppliedFor']" class="text-red-500 ml-3 font-normal">
+        {{ validationErrors['positionAppliedFor'] }}
+      </span>
+    </div>
+
+  </div>
+
+  <!-- Right Side (Image centered perfectly) -->
+  <div class="w-[35%] flex justify-center items-center">
+    <img
+      src="assets/images/profile-placeholder.png"
+      alt="Profile Image"
+      class="w-40 h-40 object-cover rounded-lg border border-gray-300"
+    />
+  </div>
+
+</div>
+
+       <h1 class="font-semibold text-2xl leading-9">
+          {{ 'Registration Form ' | translate }}
+        </h1>
+
+
+<div class="flex flex-col mt-6 bg-[#FFF5EE] w-[100%] border rounded-lg mb-4">
+  <h1 class="order-1 font-semibold text-2xl leading-9 text-orange-700">
+    {{ 'Personal Information' | translate }}
+  </h1>
+</div>
+
+
+ <div class="mt-12 mb-4 rounded-3xl flex justify-between flex-wrap"> 
 
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="enName">  {{ 'English Name' | translate }}</label>
@@ -53,6 +113,27 @@
             validationErrors["faculty"]}}</span>
     </div>
 
+  <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="nationalityName">  {{ 'Nationality Name' | translate }}</label>
+        <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'nationalityName', value: $event })"  
+         placeholder="{{ 'Enter nationality name' | translate }}"
+             [(ngModel)]="Data.nationalityName" />
+        <span *ngIf="validationErrors['nationalityName']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["nationalityName"]}}</span>
+    </div>
+
+
+       <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="nationality">  {{ 'Nationality ID' | translate }}</label>
+        <input id="faculty" type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'nationality', value: $event })"  
+         placeholder="{{ 'Enter Name nationality ID' | translate }}"
+             [(ngModel)]="Data.nationality" />
+        <span *ngIf="validationErrors['nationality']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["nationality"]}}</span>
+    </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="university">  {{ 'University' | translate }}</label>
         <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -61,6 +142,25 @@
              [(ngModel)]="Data.university" />
         <span *ngIf="validationErrors['university']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["university"]}}</span>
+    </div>
+   <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="gender">  {{ 'gender' | translate }}</label>
+        <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'gender', value: $event })"  
+         placeholder="{{ 'Enter gender' | translate }}"
+             [(ngModel)]="Data.gender" />
+        <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["gender"]}}</span>
+    </div>
+
+      <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="birthdayDate">  {{ 'Birth Day Date' | translate }}</label>
+        <input id="faculty" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'birthdayDate', value: $event })"  
+         placeholder="{{ 'Enter birth day Date' | translate }}"
+             [(ngModel)]="Data.birthdayDate" />
+        <span *ngIf="validationErrors['birthdayDate']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["birthdayDate"]}}</span>
     </div>
 
        <div class="flex flex-col mb-4 w-[49%]">
@@ -73,9 +173,18 @@
             validationErrors["maritalStatus"]}}</span>
     </div>
     
+      <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="passportNumber">  {{ 'passport Number' | translate }}</label>
+        <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'passportNumber', value: $event })"  
+         placeholder="{{ 'Enter passport Number' | translate }}"
+             [(ngModel)]="Data.passportNumber" />
+        <span *ngIf="validationErrors['passportNumber']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["passportNumber"]}}</span>
+    </div>
        <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="graduationYear">  {{ 'Graduation Year' | translate }}</label>
-        <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <input id="faculty" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'graduationYear', value: $event })"  
          placeholder="{{ 'Enter graduation Year' | translate }}"
              [(ngModel)]="Data.graduationYear" />
@@ -83,6 +192,16 @@
             validationErrors["graduationYear"]}}</span>
     </div>
     
+        <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="schoolYouGraduatedFrom">  {{ 'school You Graduated From' | translate }}</label>
+        <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'schoolYouGraduatedFrom', value: $event })"  
+         placeholder="{{ 'enter school you graduated from name' | translate }}"
+             [(ngModel)]="Data.schoolYouGraduatedFrom" />
+        <span *ngIf="validationErrors['schoolYouGraduatedFrom']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["schoolYouGraduatedFrom"]}}</span>
+    </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="major">  {{' Major ' | translate }}</label>
         <input id="faculty" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -145,304 +264,296 @@
   placeholder="{{ 'Enter Address' | translate }}" [(ngModel)]="Data.address" />
     </div>
 
-   
-    <!-- <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="employeeType"> {{ 'Employee Type' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeType"
-            (ngModelChange)="onInputValueChange({ field: 'employeeTypeID', value: $event })"
-            [(ngModel)]="Data.employeeTypeID">
-            <option [value]="0" disabled selected hidden>  {{ 'Choose Employee Type' | translate }}</option>
-            <option *ngFor="let employeeType of empTypes" [value]="employeeType.id">{{ employeeType.name }}</option>
-            <option *ngIf="empTypes.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
-        </select>
-        <span *ngIf="validationErrors['employeeTypeID']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["employeeTypeID"]}}</span>
-    </div> -->
+ <div class="flex justify-between items-start w-full">
 
-    <!-- <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="License">  {{ 'License Number' | translate }}</label>
-        <input id="License" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'licenseNumber', value: $event })"
-            (input)="validateNumber($event, 'licenseNumber')" 
-              placeholder="{{ 'Enter License Number' | translate }}"
-
-            [(ngModel)]="Data.licenseNumber" />
-        <span *ngIf="validationErrors['licenseNumber']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["licenseNumber"]}}</span>
-    </div> -->
-
-    <!-- <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="expireDate">  {{ 'Expire Date' | translate }}</label>
-        <input id="expireDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'expireDate', value: $event })" 
-            
-              placeholder="{{ 'Enter Expiry Date' | translate }}"
-
-            [(ngModel)]="Data.expireDate" />
-        <span *ngIf="validationErrors['expireDate']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["expireDate"]}}</span>
-    </div> -->
-
-    <!-- <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="bus"
-            [(ngModel)]="Data.busCompanyID">
-            <option [value]="0" disabled selected hidden>  {{ 'Choose Bus Company' | translate }}</option>
-            <option *ngFor="let bus of BusCompany" [value]="bus.id">{{ bus.name }}</option>
-            <option *ngIf="BusCompany.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
-        </select>
-    </div> -->
-
-    <!-- <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
-        <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequest">
-        <label class="mb-2" for="canReceiveRequest">  {{ 'Can Receive Request' | translate }}</label>
-    </div>   -->
-
-    <!-- <div class="flex align-middle space-x-2 mb-4 w-full  rtl:space-x-reverse">
-        <input type="checkbox" id="canReceiveRequestFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequestFromParent">
-        <label class="mb-2" for="canReceiveRequestFromParent">  {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
-    </div> -->
-
-    <!-- <div class="flex align-middle space-x-2 mb-4 w-full rtl:space-x-reverse">
-        <input type="checkbox" id="canReceiveMessageFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessageFromParent">
-        <label class="mb-2" for="canReceiveMessageFromParent">  {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
-    </div> -->
-
-    <!-- <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
-            <input type="checkbox" id="isRestrictedForLoctaion" class="w-5 h-5" [(ngModel)]="Data.isRestrictedForLoctaion" (change)="onLocationChange()">
-            <label class="mb-2" for="isRestrictedForLoctaion">  {{ 'is Restricted For Location' | translate }}</label>
-        </div>
-        <div class="flex flex-col mb-4 w-[49%]" *ngIf="Data.isRestrictedForLoctaion" >
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Location' | translate }}</label>
-            <div #locationDropdown class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]" 
-                    (click)="LocationtoggleDropdown($event)" tabindex="0">
-                    <ng-container *ngIf="locationsSelected.length > 0; else placeholder">
-                        <div class="flex flex-wrap">
-                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                *ngFor="let selected of locationsSelected">
-                                {{ selected.name }}
-                                <span class="ml-2 cursor-pointer text-red-500" (click)="LocationremoveSelected(selected.id)">
-                                    &times;
-                                </span>
-                            </span>
-                        </div>
-                    </ng-container>
-                    <ng-template #placeholder>
-                        <span class="text-gray-400">  {{ 'Choose Location' | translate }}</span>
-                    </ng-template>
-                </div>
-                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                    *ngIf="LocationdropdownOpen">
-                    <ul>
-                        <li *ngFor="let Type of locations" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="LocationselectType(Type)">
-                            {{ Type.name }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>     -->
-
-    <!-- <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
-
-            <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" (change)="onFloorsSupervisorChange()">
-            <label class="mb-2" for="isFloorMonitor">  {{ 'Floor Monitor' | translate }}</label>
-        </div>
-        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isFloorMonitor" >
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Floors' | translate }}</label>
-            <div class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="toggleDropdown($event)" tabindex="0">
-                    <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
-                        <div class="flex flex-wrap">
-                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                *ngFor="let selected of floorsSelected">
-                                {{ selected.name }}
-                                <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
-                                    &times;
-                                </span>
-                            </span>
-                        </div>
-                    </ng-container>
-                    <ng-template #placeholder>
-                        <span class="text-gray-400">  {{ 'Choose Floor' | translate }}</span>
-                    </ng-template>
-                </div>
-                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                    *ngIf="dropdownOpen">
-                    <ul>
-                        <li *ngFor="let Type of floors" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="selectType(Type)">
-                            {{ Type.name }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-    <!-- <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
-            <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor" (change)="onGradeSupervisorChange()">
-            <label class="mb-2" for="isGradeSupervisor">  {{ 'Grade Supervisor' | translate }}</label>
-        </div>
-        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isGradeSupervisor">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Grades' | translate }}</label>
-            <div class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="GradetoggleDropdown($event)" tabindex="0">
-                    <ng-container *ngIf="gradeSelected.length > 0; else placeholder">
-                        <div class="flex flex-wrap">
-                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                *ngFor="let selected of gradeSelected">
-                                {{ selected.name }}
-                                <span class="ml-2 cursor-pointer text-red-500" (click)="GraderemoveSelected(selected.id)">
-                                    &times;
-                                </span>
-                            </span>
-                        </div>
-                    </ng-container>
-                    <ng-template #placeholder>
-                        <span class="text-gray-400">  {{ 'Choose Grade' | translate }}</span>
-                    </ng-template>
-                </div>
-                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                    *ngIf="GradedropdownOpen">
-                    <ul>
-                        <li *ngFor="let Type of grades" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="GradeselectType(Type)">
-                            {{ Type.name }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div> -->
-<!-- 
-    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
-        <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
-            <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor" (change)="onSubjectSupervisorChange()">
-            <label class="mb-2" for="isSubjectSupervisor">  {{ 'Subject Supervisor' | translate }}</label>
-        </div>
-        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isSubjectSupervisor">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Subjects' | translate }}</label>
-            <div class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="SubjecttoggleDropdown($event)" tabindex="0">
-                    <ng-container *ngIf="subjectSelected.length > 0; else placeholder">
-                        <div class="flex flex-wrap">
-                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                *ngFor="let selected of subjectSelected">
-                                {{ selected.en_name }}
-                                <span class="ml-2 cursor-pointer text-red-500" (click)="SubjectremoveSelected(selected.id)">
-                                    &times;
-                                </span>
-                            </span>
-                        </div>
-                    </ng-container>
-                    <ng-template #placeholder>
-                        <span class="text-gray-400">  {{ 'Choose Subject' | translate }}</span>
-                    </ng-template>
-                </div>
-                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                    *ngIf="SubjectdropdownOpen">
-                    <ul>
-                        <li *ngFor="let Type of subject" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="SubjectselectType(Type)">
-                            {{ Type.en_name }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-    <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed mb-4 border-2">
-        <div class="flex justify-center w-full">
-            <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                    <span class="secondaryTxt">  {{ 'Click To Upload' | translate }}</span>
-                </p>
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{'Max. File size' | translate}} 25 MB</p>
-            </label>
-            <input id="file" type="file" class="hidden" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" multiple
-                (change)="onFilesSelected($event)" />
-        </div>
+    <!-- صندوق رفع الملفات -->
+    <div class="bg-[#F6F6F6] flex items-center justify-center rounded-md border-dashed border-2 w-[49%]">
+        <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl scroll-px-4 py-5 w-[49%]">
+            <img src="https://d393tpgdl2mqkp.cloudfront.net/public/Images/Icon frame.png" class="w-1/8" alt="Upload Icon">
+            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
+                <span class="secondaryTxt">{{ 'Click To Upload' | translate }}</span>
+            </p>
+            <p class="font-normal text-xs md:text-sm text-[#8E8E93]">
+                {{ 'Max. File size' | translate }} 25 MB
+            </p>
+        </label>
+        <input id="file" type="file" class="hidden"
+               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xls,.xlsx,.csv,.mp4,.avi,.mkv,.mov" 
+               multiple
+               (change)="onFilesSelected($event)" />
     </div>
-<!-- </div> -->
 
-<div *ngIf="Data.files.length > 0" class="bg-white p-4 rounded-lg">
-    <div class="flex flex-wrap gap-4">
-        <div *ngFor="let file of Data.files; let i = index" class="flex w-full items-center gap-4 mb-4">
-            <div *ngIf="!isFileInSelected(file)" class="flex w-full items-center gap-4 mb-4">
-                <div class="flex flex-col w-[34%]">
-                    <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
-                    <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
-                    <div class="border border-cacaca rounded-lg p-6">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                                <i class="fa-solid fa-file"></i>
-    
-                            </div>
-                            <button (click)="deleteFile(i)">
-                                <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                        </div> 
-                        <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
-                              {{ 'Click to View' | translate }}
-                        </p>
-                    </div>
-                </div>
-    
-                <div class="w-[64%]">
-                    <div class="flex flex-col">
-                        <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
-                        <input id="name-{{ i }}" type="text" [value]="file.name"
-                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                           
-                           placeholder="{{ 'Enter Attachment Name' | translate }}"
-                           (change)="changeFileName(file.id, $event)" />
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!--Next -->
+    <div class="w-[49%] flex justify-end items-center">
+        <button class="bg-orange-500 text-white font-medium px-6 py-3 rounded-lg flex items-center"
+                (click)="goToNextPage()">
+            {{ 'Next' | translate }}
+            <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
     </div>
 </div>
+</div>
 
-<div *ngIf="SelectedFiles.length > 0" class="bg-white p-4 rounded-lg">
-    <div class="flex flex-wrap gap-4">
-        <div *ngFor="let file of SelectedFiles; let i = index" class="flex w-full items-center gap-4 mb-4">
-            <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
-                <p class="text-sm font-medium text-gray-700 mb-4">{{ file.file.name }}</p>
-                <div class="border border-cacaca rounded-lg p-6">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                            <i class="fa-solid fa-file"></i>
-                            <p class="text-sm font-medium text-gray-700 truncate max-w-[150px]">{{ file.name }}</p>
-                        </div>
-                        <button (click)="deleteFileFromSelectedFile(file.file)">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="w-[64%]">
-                <div class="flex flex-col">
-                    <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
-                    <input id="name-{{ i }}" type="text" [value]="file.name"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                         
-                        placeholder="{{ 'Enter Attachment Name' | translate }}"
-                         (change)="changeFileName(i, $event)" />
-                </div>
-            </div>
-        </div>
+
+<!-- Registration Form Section -->
+<!-- ===== الجزء الثاني: Registration Form بـ Tailwind CSS ===== -->
+<div *ngIf="showRegistrationForm " class="max-w-4xl mx-auto mt-8">
+  <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+    <!-- Header برتقالي زي الصورة -->
+    <div class="bg-orange-500 text-white text-center py-4">
+      <h3 class="text-2xl font-bold">Registration Form</h3>
     </div>
+
+    <div class="p-8">
+      <!-- صورة الموظف في الوسط (اختياري) -->
+      <div class="flex justify-center mb-6">
+        <img [src]="Data || 'assets/default-avatar.png'" class="w-32 h-32 rounded-full border-4 border-gray-300" alt="Employee Photo">
+      </div>
+
+      <!-- Grid للحقول -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Application Date</label>
+          <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" [(ngModel)]="Data.applicationDate" name="applicationDate">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Position Applied For</label>
+          <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" [(ngModel)]="Data.positionAppliedFor" name="positionAppliedFor">
+        </div>
+      </div>
+
+             <h1 class="font-semibold text-2xl leading-9">
+          {{ 'Registration Form ' | translate }}
+        </h1>
+
+
+    <div class="flex flex-col mt-6 bg-[#FFF5EE] w-[100%] border rounded-lg mb-4">
+      <h1 class="order-1 font-semibold text-2xl leading-9 text-orange-700">
+        {{ 'Experience Info' | translate }}
+      </h1>
+    </div>
+
+<div class="mt-12 mb-4 rounded-3xl flex justify-between flex-wrap"> 
+
+
+ <div class="flex flex-col mb-4 w-[24%]">
+        <label class="mb-2 primaryTxt" for="previousExperiencePlace">  {{ 'previous Experience Place' | translate }}</label>
+        <input id="ArName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'previousExperiencePlace', value: $event })"  
+         placeholder="{{ 'Enter Arabic Name' | translate }}"
+             [(ngModel)]="Data.previousExperiencePlace" />
+        <span *ngIf="validationErrors['previousExperiencePlace']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["previousExperiencePlace"]}}</span>
+    </div>
+
+    <div class="flex flex-col mb-4 w-[24%]">
+        <label class="mb-2 primaryTxt" for="Position">  {{ 'Position' | translate }}</label>
+        <input id="position" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'position', value: $event })"  
+         placeholder="{{ 'Enter Position' | translate }}"
+             [(ngModel)]="Data.position" />
+        <span *ngIf="validationErrors['position']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["position"]}}</span>
+    </div>
+
+    <div class="flex flex-col mb-4 w-[24%]">
+        <label class="mb-2 primaryTxt" for="From">  {{ 'From' | translate }}</label>
+        <input id="From" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'fromDate', value: $event })"  
+         placeholder="{{ 'Enter from date' | translate }}"
+             [(ngModel)]="Data.fromDate" />
+        <span *ngIf="validationErrors['fromDate']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["fromDate"]}}</span>
+    </div>
+
+    <div class="flex flex-col mb-4 w-[24%]">
+        <label class="mb-2 primaryTxt" for="toDate">  {{ 'toDate' | translate }}</label>
+        <input id="toDate" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'toDate', value: $event })"  
+         placeholder="{{ 'Enter to Date' | translate }}"
+             [(ngModel)]="Data.toDate" />
+        <span *ngIf="validationErrors['toDate']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["toDate"]}}</span>
+    </div>
+
+</div>
+ 
+
+      <!-- زر إضافة خبرة إضافية -->
+      <button type="button" class="bg-orange-500 text-white px-6 py-2 rounded-md mb-6 hover:bg-orange-600">
+        + Add Additional Company
+      </button>
+
+      
+   <div class="mt-12 mb-4 rounded-3xl flex justify-between flex-wrap"> 
+     
+  <div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="howDidYouFindUs">{{ 'How Did You Find Us?' | translate }}</label>
+  <select id="howDidYouFindUs"class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.howDidYouFindUs" name="howDidYouFindUs"
+    (ngModelChange)="onInputValueChange({ field: 'howDidYouFindUs', value: $event })">
+    <option value="" disabled selected>{{ 'Choose Option' | translate }}</option>
+    <option value="Internet">{{ 'Internet' | translate }}</option>
+    <option value="Friend">{{ 'Friend' | translate }}</option>
+    <option value="Newspaper">{{ 'Newspaper' | translate }}</option>
+    <option value="Other">{{ 'Other' | translate }}</option>  
+  </select>
+</div>
+
+
+      <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="reasonforLeavingtheJob">  {{ 'Reason for Leaving The Job' | translate }}</label>
+        <input id="reasonforLeavingtheJob" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'reasonforLeavingtheJob', value: $event })"  
+         placeholder="{{ 'Enter reason for Leaving The Job' | translate }}"
+             [(ngModel)]="Data.reasonforLeavingtheJob" />
+        <span *ngIf="validationErrors['reasonforLeavingtheJob']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["reasonforLeavingtheJob"]}}</span>
+    </div>
+
+      <!-- باقي الحقول بنفس الطريقة -->
+  
+          <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="didYouHaveAnyRelativeHere">  {{ 'Do You Have Any Relatives Here?' | translate }}</label>
+        <input id="didYouHaveAnyRelativeHere" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'didYouHaveAnyRelativeHere', value: $event })"  
+         placeholder="{{ 'Enter Do You Have Any Relatives Here?' | translate }}"
+             [(ngModel)]="Data.didYouHaveAnyRelativeHere" />
+        <span *ngIf="validationErrors['didYouHaveAnyRelativeHere']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["didYouHaveAnyRelativeHere"]}}</span>
+            <select class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.didYouHaveAnyRelativeHere" name="didYouHaveAnyRelativeHere">
+            <option value="">Choose Option</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+    </div>
+     
+     <div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="englishLevel">
+    {{ 'Your Level In English' | translate }}</label>
+  <select id="englishLevel"class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.yourLevelInEnglish" name="yourLevelInEnglish"
+    (ngModelChange)="onInputValueChange({ field: 'yourLevelInEnglish', value: $event })">
+    <option value="" disabled selected>{{ 'Enter Your Fluency' | translate }}
+    </option>
+    <option value="Beginner">{{ 'Beginner' | translate }}</option>
+    <option value="Intermediate">{{ 'Intermediate' | translate }}</option>
+    <option value="Advanced">{{ 'Advanced' | translate }}</option>
+    <option value="Native">{{ 'Native' | translate }}</option>
+  </select>
+  <!-- رسالة الخطأ إذا كان الحقل مطلوب وفاضي -->
+  <span *ngIf="validationErrors['yourLevelInEnglish']" class="text-red-500 ml-3 font-normal mt-1">
+    {{ validationErrors['yourLevelInEnglish'] }}
+  </span>
+</div>
+
+    <div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="frenchLevel">
+    {{ 'Your Level In French' | translate }}</label>
+  <select id="frenchLevel"class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.yourLevelInFrensh" name="yourLevelInFrensh"
+    (ngModelChange)="onInputValueChange({ field: 'yourLevelInFrensh', value: $event })">
+      <option value="" disabled selected>    {{ 'Enter Your Fluency' | translate }}
+    </option>
+    <option value="Beginner">{{ 'Beginner' | translate }}</option>
+    <option value="Intermediate">{{ 'Intermediate' | translate }}</option>
+    <option value="Advanced">{{ 'Advanced' | translate }}</option>
+    <option value="Native">{{ 'Native' | translate }}</option>
+  </select>
+  <span *ngIf="validationErrors['yourLevelInFrensh']" class="text-red-500 ml-3 font-normal mt-1">{{ validationErrors['yourLevelInFrensh'] }}
+  </span>
+</div>
+
+
+      <div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="otherLanguages">
+    {{ 'Do You Speak Any Other Languages?' | translate }}
+  </label>
+  <select 
+    id="otherLanguages"
+    class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.doYouSpeakAnyOtherLanguages" 
+    name="doYouSpeakAnyOtherLanguages"
+    (ngModelChange)="onInputValueChange({ field: 'doYouSpeakAnyOtherLanguages', value: $event })">
+    
+    <option value="" disabled selected>
+      {{ 'Choose Option' | translate }}
+    </option>
+    <option value="Yes">{{ 'Yes' | translate }}</option>
+    <option value="No">{{ 'No' | translate }}</option>
+  </select>
+  <span *ngIf="validationErrors['doYouSpeakAnyOtherLanguages']" 
+        class="text-red-500 ml-3 font-normal mt-1">
+    {{ validationErrors['doYouSpeakAnyOtherLanguages'] }}
+  </span>
+</div>
+      </div>
+
+     
+      <div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="currentJob">{{ 'Current Job' | translate }}</label><input id="currentJob" type="text"
+    class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.currentJob" name="currentJob" placeholder="{{ 'Enter Current Job' | translate }}"
+    (ngModelChange)="onInputValueChange({ field: 'currentJob', value: $event })" />
+  
+  <span *ngIf="validationErrors['currentJob']" class="text-red-500 ml-3 font-normal mt-1">
+    {{ validationErrors['currentJob'] }}
+  </span>
+</div>
+
+<div class="flex flex-col mb-4 w-[49%]">
+  <label class="mb-2 primaryTxt" for="lastSalary">{{ 'Last Salary' | translate }}</label>
+  <input id="lastSalary"type="number"
+    class="rounded-lg border border-solid border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+    [(ngModel)]="Data.lastSalary" name="lastSalary"
+    placeholder="{{ 'Enter Last Salary' | translate }}"
+    (ngModelChange)="onInputValueChange({ field: 'lastSalary', value: $event })" />
+  
+  <span *ngIf="validationErrors['lastSalary']" class="text-red-500 ml-3 font-normal mt-1">
+    {{ validationErrors['lastSalary'] }}
+  </span>
+</div>
+</div>
+
+
+      <!-- Checkbox -->
+      <div class="flex items-start mb-8">
+        <input type="checkbox" class="mt-1 mr-3" [(ngModel)]="Data.authorizeInvestigation" name="authorizeInvestigation">
+        <label class="text-sm text-gray-700">
+          I Certify That All The Answers Given Here Are True And Complete. I Authorize Investigation On All Statements Contained In This Application.
+        </label>
+        <span *ngIf="validationErrors['authorizeInvestigation']" class="text-red-500 ml-8 font-normal block mt-1">
+            {{ validationErrors['authorizeInvestigation'] }}
+               </span>
+      </div>
+
+
+      <!-- التوقيع في الأسفل -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.fullName" name="fullName">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Enter Date</label>
+          <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.enterDate" name="enterDate">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Signature</label>
+          <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.signature" name="signature">
+        </div>
+      </div>
+
+      <!-- الأزرار -->
+      <div class="flex justify-center mt-10 space-x-4">
+        <button type="button" class="bg-gray-500 text-white px-8 py-3 rounded-md hover:bg-gray-600" (click)="goBackToFirstPart()">
+          Back
+        </button>
+        <button type="button" class="bg-green-600 text-white px-8 py-3 rounded-md hover:bg-green-700" (click)="Save()" [disabled]="isLoading">
+          {{ isLoading ? 'Saving...' : 'Submit Application' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
