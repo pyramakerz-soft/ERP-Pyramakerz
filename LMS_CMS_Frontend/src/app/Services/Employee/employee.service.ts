@@ -76,6 +76,33 @@ export class EmployeeService {
     formData.append('mobile', employee.mobile || '');
     formData.append('phone', employee.phone || '');
     formData.append('email', employee.email || '');
+    // formData.append('graduationYear', employee.graduationYear || '');
+    formData.append('maritalStatus', employee.maritalStatus || '');
+    formData.append('university', employee.university || '');
+    formData.append('faculty', employee.faculty || '');
+    formData.append('major', employee.major || ''); 
+    formData.append('schoolYouGraduatedFrom', employee.schoolYouGraduatedFrom || '');
+    formData.append('otherStudies', employee.otherStudies || '');
+    formData.append('computerSkills', employee.computerSkills || '');
+    formData.append('hobbies', employee.hobbies || '');
+    formData.append('applicationDate', employee.applicationDate || '');
+    formData.append('positionAppliedFor', employee.positionAppliedFor || '');
+    formData.append('previousExperiencePlace', employee.previousExperiencePlace || '');
+    formData.append('position', employee.position || '');
+    formData.append('fromDate', employee.fromDate || '');
+    formData.append('toDate', employee.toDate || '');
+    formData.append('howDidYouFindUs', employee.howDidYouFindUs ||  '');
+    formData.append('reasonforLeavingtheJob', employee.reasonforLeavingtheJob || '');
+    formData.append('didYouHaveAnyRelativeHere', employee.didYouHaveAnyRelativeHere || '');
+    formData.append('yourLevelInEnglish', employee.yourLevelInEnglish || '');
+    formData.append('yourLevelInFrensh', employee.yourLevelInFrensh || '');
+    formData.append('doYouSpeakAnyOtherLanguages', employee.doYouSpeakAnyOtherLanguages || '');
+    formData.append('currentJob', employee.currentJob || '');
+    formData.append('lastSalary', employee.lastSalary?.toString() ?? '0');
+    formData.append('authorizeInvestigation', employee.authorizeInvestigation?.toString() ?? 'false');
+    formData.append('fullName', employee.fullName || '');
+    formData.append('enterDate', employee.enterDate || '');
+    formData.append('signature', employee.signature || '');
     formData.append('licenseNumber', employee.licenseNumber || '');
     formData.append('expireDate', employee.expireDate || '');
     formData.append('address', employee.address || '');
@@ -86,6 +113,9 @@ export class EmployeeService {
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
     formData.append('isRestrictedForLoctaion', employee.isRestrictedForLoctaion?.toString() ?? 'false');
+
+
+
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
@@ -138,6 +168,32 @@ export class EmployeeService {
     formData.append('password', employee.password);
     formData.append('mobile', employee.mobile || '');
     formData.append('phone', employee.phone || '');
+    formData.append('maritalStatus', employee.maritalStatus || '');
+    formData.append('university', employee.university || '');
+    formData.append('faculty', employee.faculty || '');
+    formData.append('major', employee.major || ''); 
+    formData.append('schoolYouGraduatedFrom', employee.schoolYouGraduatedFrom || '');
+    formData.append('otherStudies', employee.otherStudies || '');
+    formData.append('computerSkills', employee.computerSkills || '');
+    formData.append('hobbies', employee.hobbies || '');
+    formData.append('applicationDate', employee.applicationDate || '');
+    formData.append('positionAppliedFor', employee.positionAppliedFor || '');
+    formData.append('previousExperiencePlace', employee.previousExperiencePlace || '');
+    formData.append('position', employee.position || '');
+    formData.append('fromDate', employee.fromDate || '');
+    formData.append('toDate', employee.toDate || '');
+    formData.append('howDidYouFindUs', employee.howDidYouFindUs ||  '');
+    formData.append('reasonforLeavingtheJob', employee.reasonforLeavingtheJob || '');
+    formData.append('didYouHaveAnyRelativeHere', employee.didYouHaveAnyRelativeHere || '');
+    formData.append('yourLevelInEnglish', employee.yourLevelInEnglish || '');
+    formData.append('yourLevelInFrensh', employee.yourLevelInFrensh || '');
+    formData.append('doYouSpeakAnyOtherLanguages', employee.doYouSpeakAnyOtherLanguages || '');
+    formData.append('currentJob', employee.currentJob || '');
+    formData.append('lastSalary', employee.lastSalary?.toString() ?? '0');
+    formData.append('authorizeInvestigation', employee.authorizeInvestigation?.toString() ?? 'false');
+    formData.append('fullName', employee.fullName || '');
+    formData.append('enterDate', employee.enterDate || '');
+    formData.append('signature', employee.signature || '');
     formData.append('email', employee.email || '');
     formData.append('licenseNumber', employee.licenseNumber || '');
     formData.append('expireDate', employee.expireDate || '');

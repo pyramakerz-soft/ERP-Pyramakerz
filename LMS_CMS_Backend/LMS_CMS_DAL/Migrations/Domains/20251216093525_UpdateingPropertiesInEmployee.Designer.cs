@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20251216093525_UpdateingPropertiesInEmployee")]
+    partial class UpdateingPropertiesInEmployee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4685,9 +4688,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("AttendanceTime")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("AuthorizeInvestigation")
-                        .HasColumnType("bit");
-
                     b.Property<string>("BirthdayDate")
                         .HasColumnType("nvarchar(max)");
 
@@ -4713,10 +4713,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("ConnectionStatusID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("CurrentJob")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("DateOfLeavingWork")
                         .HasColumnType("nvarchar(max)");
 
@@ -4738,38 +4734,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("DepartureTime")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DidYouHaveAnyRelativeHere")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DoYouSpeakAnyOtherLanguages")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<long>("EmployeeTypeID")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime>("EnterDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ExpireDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("GraduationYear")
-                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("HasAttendance")
                         .HasColumnType("bit");
@@ -4778,10 +4753,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("date");
 
                     b.Property<string>("Hobbies")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HowDidYouFindUs")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -4805,9 +4776,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long?>("JobID")
                         .HasColumnType("bigint");
-
-                    b.Property<decimal>("LastSalary")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("LicenseNumber")
                         .HasColumnType("nvarchar(max)");
@@ -4852,24 +4820,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PositionAppliedFor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PreviousExperiencePlace")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("ReasonOfLeavingID")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("ReasonforLeavingtheJob")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ResidenceNumber")
                         .HasColumnType("nvarchar(max)");
@@ -4883,13 +4839,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<string>("SerialNumber")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Signature")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ToDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("University")
                         .IsRequired()
@@ -4908,14 +4857,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("YourLevelInEnglish")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YourLevelInFrensh")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ar_name")
                         .HasMaxLength(100)

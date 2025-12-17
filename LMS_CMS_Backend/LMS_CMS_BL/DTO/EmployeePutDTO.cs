@@ -27,6 +27,35 @@ namespace LMS_CMS_BL.DTO
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
+        public DateTime GraduationYear { get; set; }
+        public string? MaritalStatus { get; set; }
+        public string? Gender { get; set; }
+        public string University { get; set; }
+        public string faculty { get; set; }
+        public string Major { get; set; }
+        public string SchoolYouGraduatedFrom { get; set; }
+        public string OtherStudies { get; set; }
+        public string ComputerSkills { get; set; }
+        public string Hobbies { get; set; }
+        public DateTime ApplicationDate { get; set; }
+        public string PositionAppliedFor { get; set; }
+        public string PreviousExperiencePlace { get; set; }
+        public string Position { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public string HowDidYouFindUs { get; set; }
+        public string ReasonforLeavingtheJob { get; set; }
+        public string DidYouHaveAnyRelativeHere { get; set; }
+        public string YourLevelInEnglish { get; set; }
+        public string YourLevelInFrensh { get; set; }
+        public string DoYouSpeakAnyOtherLanguages { get; set; }
+        public string CurrentJob { get; set; }
+        public decimal LastSalary { get; set; }
+        public bool AuthorizeInvestigation { get; set; }
+
+        public string FullName { get; set; }
+        public DateTime EnterDate { get; set; }
+        public string Signature { get; set; }
         public string? LicenseNumber { get; set; }
         public string? ExpireDate { get; set; }
         public string? Address { get; set; }
