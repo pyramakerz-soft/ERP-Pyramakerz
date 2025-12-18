@@ -80,8 +80,12 @@ export class EmployeeAddEditComponent {
   LocationdropdownOpen = false;
   GradedropdownOpen = false;
   SubjectdropdownOpen = false;
-// أضف هذا المتغير مع المتغيرات الأخرى
+
  showRegistrationForm: boolean = false;
+ showFirstSection: boolean = true;
+
+   // التحكم بالصفحات الثلاثة
+  currentSection: number = 1;
 
   private readonly allowedExtensions: string[] = [
     '.jpg', '.jpeg', '.png', '.gif',
@@ -260,14 +264,14 @@ goBackToFirstPart() {
       a.href = fileURL;
       a.download = file.name;
       a.click();
-      // URL.revokeObjectURL(fileURL);
+      URL.revokeObjectURL(fileURL);
     } else if (this.mode == 'Edit') {
       const fileURL = file.link;
       const a = document.createElement('a');
       a.href = fileURL;
       a.target = '_blank'; // Open in a new tab
       a.click();
-      // URL.revokeObjectURL(fileURL);
+      URL.revokeObjectURL(fileURL);
     }
   }
 
@@ -330,6 +334,26 @@ goBackToFirstPart() {
   // }
 
 
+  // مصفوفة لتخزين الخبرات
+  experiences: {
+    previousExperiencePlace: string;
+    position: string;
+    fromDate: string;
+    toDate: string;
+  }[] = [
+    { previousExperiencePlace: '', position: '', fromDate: '', toDate: '' } // الصف الأول موجود افتراضياً
+  ];
+
+  // دالة لإضافة صف جديد
+  addExperience() {
+    this.experiences.push({ previousExperiencePlace: '', position: '', fromDate: '', toDate: '' });
+  }
+
+  // دالة لتحديث القيم (إذا لازمتك لتحديث Data بشكل مركزي)
+  onInputValueChangeExp(index: number, field: string, value: any) {
+    (this.experiences[index] as any)[field] = value;
+  }
+
 
   isFormValid(): boolean {
   let isValid = true;
@@ -367,7 +391,7 @@ goBackToFirstPart() {
 
   // فحص الحقول النصية (string)
   for (const field of requiredStringFields) {
-    const value = this.Data[field];
+   const value = this.Data[field] || '';
     if (!value || (typeof value === 'string' && value.trim() === '')) {
       this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
       isValid = false;
@@ -395,64 +419,120 @@ goBackToFirstPart() {
     this.validationErrors['authorizeInvestigation'] = `*You must certify and authorize the investigation`;
     isValid = false;
   }
-
-  return isValid;
+return isValid;
 }
 
-goToNextPage() {
-  // الحقول الإلزامية في الجزء الأول فقط
-  const firstSectionRequired: (keyof Employee)[] = [
-    'applicationDate',
-    'positionAppliedFor',
-    'maritalStatus',
-    'university',
-    'faculty',
-    'major',
-    'schoolYouGraduatedFrom',
-    'otherStudies',
-    'computerSkills',
-    'hobbies',
-    'en_name', // أضفت en_name
-    'email'   // أضفت email
-  ];
+// goToNextPage() {
+//   console.log('First section values:', this.Data);
 
-  let firstValid = true;
-  this.validationErrors = {};
+//   // الحقول الإلزامية في الجزء الأول فقط
+//   const firstSectionRequired: (keyof Employee)[] = [
+//     'applicationDate',
+//     'positionAppliedFor',
+//     'maritalStatus',
+//     'university',
+//     'faculty',
+//     'major',
+//     'schoolYouGraduatedFrom',
+//     'otherStudies',
+//     'en_name',
+//     'email'
+//   ];
 
-  for (const field of firstSectionRequired) {
-    const value = this.Data[field];
-    if (!value || (typeof value === 'string' && value.trim() === '')) {
-      this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-      firstValid = false;
-    }
+//   let firstValid = true;
+//   this.validationErrors = {}; 
 
-    // تحقق إضافي لـ en_name و email
-    if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
-      this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
-      firstValid = false;
-    }
-    if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
-      this.validationErrors['email'] = `*Email is not valid`;
-      firstValid = false;
+//   for (const field of firstSectionRequired) {
+//     const value = this.Data[field] || '';
+//     console.log(`Checking field "${field}":`, value);
+
+//     if (!value || (typeof value === 'string' && value.trim() === '')) {
+//       this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+//       firstValid = false;
+//     }
+
+//     if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
+//       this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
+//       firstValid = false;
+//     }
+//     if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
+//       this.validationErrors['email'] = `*Email is not valid`;
+//       firstValid = false;
+//     }
+//   }
+
+
+ // الانتقال للصفحة التالية
+  goToNextPage() {
+    if (this.currentSection === 1) {
+      // التحقق من الحقول المطلوبة في الصفحة الأولى
+      const firstSectionRequired: (keyof Employee)[] = [
+        'applicationDate', 'positionAppliedFor', 'maritalStatus',
+        'university', 'faculty', 'major', 'schoolYouGraduatedFrom',
+        'otherStudies', 'en_name', 'email'
+      ];
+      let firstValid = true;
+      this.validationErrors = {};
+
+      for (const field of firstSectionRequired) {
+        const value = this.Data[field] || '';
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+          firstValid = false;
+        }
+        if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
+          this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
+          firstValid = false;
+        }
+        if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
+          this.validationErrors['email'] = `*Email is not valid`;
+          firstValid = false;
+        }
+      }
+
+
+//   if (firstValid) {
+//      this.showFirstSection = false;   // اخفاء الجزء الأول
+//     this.showRegistrationForm = true; // اظهار الجزء الثاني
+//   } else {
+//     import('sweetalert2').then(Swal => {
+//       Swal.default.fire({
+//         icon: 'warning',
+//         title: 'Required Fields',
+//         text: 'Please fill all required fields in the first section before proceeding.',
+//         confirmButtonColor: '#089B41',
+//       });
+//     });
+//   }
+// }
+
+   if (firstValid) {
+        this.currentSection = 2; // الانتقال للصفحة الثانية
+      } else {
+        import('sweetalert2').then(Swal => {
+          Swal.default.fire({
+            icon: 'warning',
+            title: 'Required Fields',
+            text: 'Please fill all required fields in the first section before proceeding.',
+            confirmButtonColor: '#089B41',
+          });
+        });
+      }
+
+    } else if (this.currentSection === 2) {
+      // التحقق من الحقول المطلوبة في الصفحة الثانية (خبرات، إلخ)
+      // يمكن إضافة تحقق للصفحة الثانية هنا إذا رغبت
+      this.currentSection = 3; // الانتقال للصفحة الثالثة
     }
   }
 
-  if (firstValid) {
-    this.showRegistrationForm = true;
-  } else {
-    import('sweetalert2').then(Swal => {
-      Swal.default.fire({
-        icon: 'warning',
-        title: 'Required Fields',
-        text: 'Please fill all required fields in the first section before proceeding.',
-        confirmButtonColor: '#089B41',
-      });
-    });
-  }
+
+
+
+backToFirstSection() {
+   this.showFirstSection = true;
+  this.showRegistrationForm = false;
 }
-
-
-
 
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -475,6 +555,14 @@ goToNextPage() {
       if (typeof this.Data[field] === 'string') {
         this.Data[field] = '' as never;
       }
+    }
+  }
+
+
+  // الرجوع للصفحة السابقة
+  goToPreviousPage() {
+    if (this.currentSection > 1) {
+      this.currentSection--;
     }
   }
 

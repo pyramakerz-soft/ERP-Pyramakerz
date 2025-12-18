@@ -20,10 +20,10 @@
         </div>
         <div class="text-xl" >
             <details *ngFor="let item of menuItems; let i = index" #details
-            [ngClass]="{'bg-[#FFFFFF1A] rounded-br-lg rounded-tr-lg border-l mb-3': details.open && item.subItems}"
+            [ngClass]="{'bg-[#5203031a] rounded-br-lg rounded-tr-lg border-l mb-3': details.open && item.subItems}"
             [open]="isMenuActive(item.route) || isSubItemActive(item.subItems)"
             [ngClass]="{
-                'bg-[#FFFFFF1A] rounded-br-lg rounded-tr-lg border-l mb-3': (isMenuActive(item.route) || isSubItemActive(item.subItems)) && item.subItems
+                'bg-[#7e0b0b1a] rounded-br-lg rounded-tr-lg border-l mb-3': (isMenuActive(item.route) || isSubItemActive(item.subItems)) && item.subItems
             }">
                 <summary 
                 [routerLink]="item.route"  
