@@ -8,17 +8,17 @@
 
 .primaryBg{
     /* background-color: #2E3646; */
-    background-color: #394B6E;
+    background-color:rgb(83, 3, 3);
 }
 
 .primaryTxt{
     /* color: #2E3646; */
-    color: #394B6E;
+    color:#394B6E;
 }
 
 .secondaryBg{
     /* background-color: #089B41; */
-    background-color: #089B41;
+    background-color: white;
 }
 
 .secondaryTxt{
@@ -28,16 +28,16 @@
 
 .secondaryBorder {
     /* border: 1px solid #089B41; */
-    border: 1px solid #089B41;
+    border: 1px solid white;
 }
 
 .primaryBorder {
     /* border: 1px solid #089B41; */
-    border: 1px solid #394B6E;
+    border: 1px solid rgb(75, 72, 72);
 }
 
 .grayBorder {
-    border: 1px solid #6F6F6F;
+    border: 1px solid white;
 }
 
 /* .Primary{
