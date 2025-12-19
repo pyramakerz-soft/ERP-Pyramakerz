@@ -81,6 +81,12 @@ export class EmployeeAddEditComponent {
   GradedropdownOpen = false;
   SubjectdropdownOpen = false;
 
+ showRegistrationForm: boolean = false;
+ showFirstSection: boolean = true;
+
+   // التحكم بالصفحات الثلاثة
+  currentSection: number = 1;
+
   private readonly allowedExtensions: string[] = [
     '.jpg', '.jpeg', '.png', '.gif',
     '.pdf', '.doc', '.docx', '.txt',
@@ -173,23 +179,20 @@ export class EmployeeAddEditComponent {
             });
           });
         }
-        this.GetBusCompany();
-        this.GetRole();
-        this.GetFloors();
-        this.GetLocations();
-        this.GetGrade();
-        this.GetSubject();
-        this.GetEmployeeType();
+        // this.GetBusCompany();
+        // this.GetRole();
+        // this.GetFloors();
+        // this.GetLocations();
+        // this.GetGrade();
+        // this.GetSubject();
+        // this.GetEmployeeType();
       });
     }
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-
   }
-
-
   ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
@@ -197,52 +200,9 @@ export class EmployeeAddEditComponent {
   }
 
 
-  GetBusCompany() {
-    this.BusCompanyServ.Get(this.DomainName).subscribe((data) => {
-      this.BusCompany = data;
-    });
-  }
-
-  GetFloors() {
-    this.floors = [];
-    this.FloorServ.Get(this.DomainName).subscribe((data) => {
-      this.floors = data;
-    });
-  }
-
-  GetLocations() {
-    this.locations = [];
-    this.LocationServ.Get(this.DomainName).subscribe((data) => {
-      this.locations = data;
-    });
-  }
-
-  GetGrade() {
-    this.grades = [];
-    this.GradeServ.Get(this.DomainName).subscribe((data) => {
-      this.grades = data;
-    });
-  }
-
-  GetSubject() {
-    this.subject = [];
-    this.SubjectServ.Get(this.DomainName).subscribe((data) => {
-      this.subject = data;
-    });
-  }
-
-  GetRole() {
-    this.RoleServ.Get_Roles(this.DomainName).subscribe((data) => {
-      this.Roles = data;
-    });
-  }
-
-  GetEmployeeType() {
-    this.empTypeServ.Get(this.DomainName).subscribe((data) => {
-      this.empTypes = data;
-    });
-  }
-
+goBackToFirstPart() {
+  this.showRegistrationForm = false;
+}
   async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
       
@@ -304,73 +264,275 @@ export class EmployeeAddEditComponent {
       a.href = fileURL;
       a.download = file.name;
       a.click();
-      // URL.revokeObjectURL(fileURL);
+      URL.revokeObjectURL(fileURL);
     } else if (this.mode == 'Edit') {
       const fileURL = file.link;
       const a = document.createElement('a');
       a.href = fileURL;
       a.target = '_blank'; // Open in a new tab
       a.click();
-      // URL.revokeObjectURL(fileURL);
+      URL.revokeObjectURL(fileURL);
     }
   }
 
+  // isFormValid(): boolean {
+  //   let isValid = true;
+  //   for (const key in this.Data) {
+  //     if (this.Data.hasOwnProperty(key)) {
+  //       const field = key as keyof Employee;
+  //       if (!this.Data[field]) {
+  //         if (
+  //           field == 'user_Name' ||
+  //           field == 'en_name' ||
+  //           field == 'password' ||
+  //           field == 'role_ID' ||
+  //           field == 'employeeTypeID' ||
+  //           field == 'email'
+            
+  //         ) {
+  //           this.validationErrors[field] = `*${this.capitalizeField(
+  //             field
+  //           )} is required`;
+  //           isValid = false;
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   if (this.Data.employeeTypeID == 2) {
+  //     if (this.Data.licenseNumber == '') {
+  //       this.validationErrors['licenseNumber'] = `*License Number is required`;
+  //       isValid = false;
+  //     }
+  //     // if (this.Data.expireDate == '') {
+  //     //   this.validationErrors['expireDate'] = `*Expire Data is required`;
+  //     //   isValid = false;
+  //     // }
+  //   }
+
+  //   if (this.Data.email && !this.emailPattern.test(this.Data.email)) {
+  //     this.validationErrors['email'] = `*Email is not valid`;
+  //     isValid = false;
+  //   }
+
+  //   if (this.Data.user_Name.length > 100) {
+  //     this.validationErrors['user_Name'] = `*UserName cannot be longer than 100 characters`;
+  //     isValid = false;
+  //   }
+
+  //   if (this.Data.en_name && this.Data.en_name.length > 100) {
+  //     this.validationErrors['en_name'] = `*English Name cannot be longer than 100 characters`;
+  //     isValid = false;
+  //   }
+
+  //   if (this.Data.ar_name && this.Data.ar_name.length > 100) {
+  //     this.validationErrors['ar_name'] = `*Arabic Name cannot be longer than 100 characters`;
+  //     isValid = false;
+  //   }
+
+  //   return isValid;
+  // }
+
+
+  // مصفوفة لتخزين الخبرات
+  experiences: {
+    previousExperiencePlace: string;
+    position: string;
+    fromDate: string;
+    toDate: string;
+  }[] = [
+    { previousExperiencePlace: '', position: '', fromDate: '', toDate: '' } // الصف الأول موجود افتراضياً
+  ];
+
+  // دالة لإضافة صف جديد
+  addExperience() {
+    this.experiences.push({ previousExperiencePlace: '', position: '', fromDate: '', toDate: '' });
+  }
+
+  // دالة لتحديث القيم (إذا لازمتك لتحديث Data بشكل مركزي)
+  onInputValueChangeExp(index: number, field: string, value: any) {
+    (this.experiences[index] as any)[field] = value;
+  }
+
+
   isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.Data) {
-      if (this.Data.hasOwnProperty(key)) {
-        const field = key as keyof Employee;
-        if (!this.Data[field]) {
-          if (
-            field == 'user_Name' ||
-            field == 'en_name' ||
-            field == 'password' ||
-            field == 'role_ID' ||
-            field == 'employeeTypeID' ||
-            field == 'email'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-      }
+  let isValid = true;
+  this.validationErrors = {}; // مسح الأخطاء السابقة
+
+  // قائمة كل الحقول الإلزامية في نموذج التقديم
+  const requiredStringFields: (keyof Employee)[] = [
+    'maritalStatus',
+    'university',
+    'faculty',
+    'major',
+    'schoolYouGraduatedFrom',
+    'otherStudies',
+    'computerSkills',
+    'hobbies',
+    'applicationDate',
+    'positionAppliedFor',
+    'previousExperiencePlace',
+    'position',
+    'fromDate',
+    'toDate',
+    'howDidYouFindUs',
+    'reasonforLeavingtheJob',
+    'didYouHaveAnyRelativeHere',
+    'yourLevelInEnglish',
+    'yourLevelInFrensh',
+    'doYouSpeakAnyOtherLanguages',
+    'currentJob',
+    'fullName',
+    'enterDate',
+    'signature',
+    'en_name', // أضفت en_name هنا لأنه مش موجود في القائمة السابقة
+    'email'   // أضفت email هنا لأنه مش موجود في القائمة السابقة
+  ];
+
+  // فحص الحقول النصية (string)
+  for (const field of requiredStringFields) {
+   const value = this.Data[field] || '';
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+      isValid = false;
     }
 
-    if (this.Data.employeeTypeID == 2) {
-      if (this.Data.licenseNumber == '') {
-        this.validationErrors['licenseNumber'] = `*License Number is required`;
-        isValid = false;
-      }
-      if (this.Data.expireDate == '') {
-        this.validationErrors['expireDate'] = `*Expire Data is required`;
-        isValid = false;
-      }
+    // تحقق إضافي لـ en_name و email
+    if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
+      this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
+      isValid = false;
     }
-
-    if (this.Data.email && !this.emailPattern.test(this.Data.email)) {
+    if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
       this.validationErrors['email'] = `*Email is not valid`;
       isValid = false;
     }
-
-    if (this.Data.user_Name.length > 100) {
-      this.validationErrors['user_Name'] = `*UserName cannot be longer than 100 characters`;
-      isValid = false;
-    }
-
-    if (this.Data.en_name && this.Data.en_name.length > 100) {
-      this.validationErrors['en_name'] = `*English Name cannot be longer than 100 characters`;
-      isValid = false;
-    }
-
-    if (this.Data.ar_name && this.Data.ar_name.length > 100) {
-      this.validationErrors['ar_name'] = `*Arabic Name cannot be longer than 100 characters`;
-      isValid = false;
-    }
-
-    return isValid;
   }
+
+  // فحص lastSalary (number) - لازم يكون أكبر من 0
+  if (!this.Data.lastSalary || this.Data.lastSalary <= 0) {
+    this.validationErrors['lastSalary'] = `*Last Salary is required and must be greater than 0`;
+    isValid = false;
+  }
+
+  // فحص authorizeInvestigation (boolean) - لازم يكون true (مختار)
+  if (!this.Data.authorizeInvestigation) {
+    this.validationErrors['authorizeInvestigation'] = `*You must certify and authorize the investigation`;
+    isValid = false;
+  }
+return isValid;
+}
+
+// goToNextPage() {
+//   console.log('First section values:', this.Data);
+
+//   // الحقول الإلزامية في الجزء الأول فقط
+//   const firstSectionRequired: (keyof Employee)[] = [
+//     'applicationDate',
+//     'positionAppliedFor',
+//     'maritalStatus',
+//     'university',
+//     'faculty',
+//     'major',
+//     'schoolYouGraduatedFrom',
+//     'otherStudies',
+//     'en_name',
+//     'email'
+//   ];
+
+//   let firstValid = true;
+//   this.validationErrors = {}; 
+
+//   for (const field of firstSectionRequired) {
+//     const value = this.Data[field] || '';
+//     console.log(`Checking field "${field}":`, value);
+
+//     if (!value || (typeof value === 'string' && value.trim() === '')) {
+//       this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+//       firstValid = false;
+//     }
+
+//     if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
+//       this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
+//       firstValid = false;
+//     }
+//     if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
+//       this.validationErrors['email'] = `*Email is not valid`;
+//       firstValid = false;
+//     }
+//   }
+
+
+ // الانتقال للصفحة التالية
+  goToNextPage() {
+    if (this.currentSection === 1) {
+      // التحقق من الحقول المطلوبة في الصفحة الأولى
+      const firstSectionRequired: (keyof Employee)[] = [
+        'applicationDate', 'positionAppliedFor', 'maritalStatus',
+        'university', 'faculty', 'major', 'schoolYouGraduatedFrom',
+        'otherStudies', 'en_name', 'email'
+      ];
+      let firstValid = true;
+      this.validationErrors = {};
+
+      for (const field of firstSectionRequired) {
+        const value = this.Data[field] || '';
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+          firstValid = false;
+        }
+        if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
+          this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
+          firstValid = false;
+        }
+        if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
+          this.validationErrors['email'] = `*Email is not valid`;
+          firstValid = false;
+        }
+      }
+
+
+//   if (firstValid) {
+//      this.showFirstSection = false;   // اخفاء الجزء الأول
+//     this.showRegistrationForm = true; // اظهار الجزء الثاني
+//   } else {
+//     import('sweetalert2').then(Swal => {
+//       Swal.default.fire({
+//         icon: 'warning',
+//         title: 'Required Fields',
+//         text: 'Please fill all required fields in the first section before proceeding.',
+//         confirmButtonColor: '#089B41',
+//       });
+//     });
+//   }
+// }
+
+   if (firstValid) {
+        this.currentSection = 2; // الانتقال للصفحة الثانية
+      } else {
+        import('sweetalert2').then(Swal => {
+          Swal.default.fire({
+            icon: 'warning',
+            title: 'Required Fields',
+            text: 'Please fill all required fields in the first section before proceeding.',
+            confirmButtonColor: '#089B41',
+          });
+        });
+      }
+
+    } else if (this.currentSection === 2) {
+      // التحقق من الحقول المطلوبة في الصفحة الثانية (خبرات، إلخ)
+      // يمكن إضافة تحقق للصفحة الثانية هنا إذا رغبت
+      this.currentSection = 3; // الانتقال للصفحة الثالثة
+    }
+  }
+
+
+
+
+backToFirstSection() {
+   this.showFirstSection = true;
+  this.showRegistrationForm = false;
+}
 
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -393,6 +555,14 @@ export class EmployeeAddEditComponent {
       if (typeof this.Data[field] === 'string') {
         this.Data[field] = '' as never;
       }
+    }
+  }
+
+
+  // الرجوع للصفحة السابقة
+  goToPreviousPage() {
+    if (this.currentSection > 1) {
+      this.currentSection--;
     }
   }
 
@@ -571,200 +741,200 @@ export class EmployeeAddEditComponent {
   
   //////////////////////////////////////////////////// floor
 
-  toggleDropdown(event: MouseEvent): void {
-    event.stopPropagation();
-    this.dropdownOpen = !this.dropdownOpen;
-  }
+  // toggleDropdown(event: MouseEvent): void {
+  //   event.stopPropagation();
+  //   this.dropdownOpen = !this.dropdownOpen;
+  // }
 
-  selectType(Type: Floor): void {
-    if (!this.floorsSelected.some((e) => e.id === Type.id)) {
-      this.floorsSelected.push(Type);
-    }
-    if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newFloorsSelected)) {
-        this.Data.newFloorsSelected = [];
-      }
-      this.Data.newFloorsSelected.push(Type.id);
-    }
-    this.dropdownOpen = false;
-  }
+  // selectType(Type: Floor): void {
+  //   if (!this.floorsSelected.some((e) => e.id === Type.id)) {
+  //     this.floorsSelected.push(Type);
+  //   }
+  //   if (this.mode == 'Edit') {
+  //     if (!Array.isArray(this.Data.newFloorsSelected)) {
+  //       this.Data.newFloorsSelected = [];
+  //     }
+  //     this.Data.newFloorsSelected.push(Type.id);
+  //   }
+  //   this.dropdownOpen = false;
+  // }
 
-  removeSelected(id: number): void {
-    const index = this.floorsSelected.findIndex((tag) => tag.id === id);
-    if (index === -1) return; // Tag not found
-    const removed = this.floorsSelected.splice(index, 1)[0];
-    if (this.floorsSelected.length == 0) {
-      this.isFloorMonitor = false
-    }
-    if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
-      this.Data.deletedFloorsSelected.push(removed.id);
-    }
-    this.dropdownOpen = false;
-  }
+  // removeSelected(id: number): void {
+  //   const index = this.floorsSelected.findIndex((tag) => tag.id === id);
+  //   if (index === -1) return; // Tag not found
+  //   const removed = this.floorsSelected.splice(index, 1)[0];
+  //   if (this.floorsSelected.length == 0) {
+  //     this.isFloorMonitor = false
+  //   }
+  //   if (this.mode === 'Edit' && removed?.id !== 0) {
+  //     this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
+  //     this.Data.deletedFloorsSelected.push(removed.id);
+  //   }
+  //   this.dropdownOpen = false;
+  // }
 
-  onFloorsSupervisorChange() {
-    if (!this.isFloorMonitor) {
-      if (this.mode === 'Edit') {
-        this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
-        const selectedIds = (this.floorsSelected || []).map(s => s.id);
-        this.Data.deletedFloorsSelected.push(...selectedIds);
-      }
-      this.floorsSelected = [];
-    }
-    this.dropdownOpen = false;
-  }
+  // onFloorsSupervisorChange() {
+  //   if (!this.isFloorMonitor) {
+  //     if (this.mode === 'Edit') {
+  //       this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
+  //       const selectedIds = (this.floorsSelected || []).map(s => s.id);
+  //       this.Data.deletedFloorsSelected.push(...selectedIds);
+  //     }
+  //     this.floorsSelected = [];
+  //   }
+  //   this.dropdownOpen = false;
+  // }
 
   //////////////////////////////////////////////////// Locations
 
-  LocationtoggleDropdown(event: MouseEvent): void {
-    event.stopPropagation();
-    this.LocationdropdownOpen = !this.LocationdropdownOpen;
-  }
+  // LocationtoggleDropdown(event: MouseEvent): void {
+  //   event.stopPropagation();
+  //   this.LocationdropdownOpen = !this.LocationdropdownOpen;
+  // }
 
-  LocationselectType(Type: Location): void {
-    if (!this.locationsSelected.some((e) => e.id === Type.id)) {
-      this.locationsSelected.push(Type);
-    }
-    if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newLocationSelected)) {
-        this.Data.newLocationSelected = [];
-      }
-      this.Data.newLocationSelected.push(Type.id);
-    }
-    this.LocationdropdownOpen = false;
-  }
+  // LocationselectType(Type: Location): void {
+  //   if (!this.locationsSelected.some((e) => e.id === Type.id)) {
+  //     this.locationsSelected.push(Type);
+  //   }
+  //   if (this.mode == 'Edit') {
+  //     if (!Array.isArray(this.Data.newLocationSelected)) {
+  //       this.Data.newLocationSelected = [];
+  //     }
+  //     this.Data.newLocationSelected.push(Type.id);
+  //   }
+  //   this.LocationdropdownOpen = false;
+  // }
 
-  LocationremoveSelected(id: number): void {
-    const index = this.locationsSelected.findIndex((tag) => tag.id === id);
-    if (index === -1) return; // Tag not found
-    const removed = this.locationsSelected.splice(index, 1)[0];
-    if (this.locationsSelected.length == 0) {
-      this.isFloorMonitor = false
-    }
-    if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
-      this.Data.deletedLocationSelected.push(removed.id);
-    }
-    this.LocationdropdownOpen = false;
-  }
+  // LocationremoveSelected(id: number): void {
+  //   const index = this.locationsSelected.findIndex((tag) => tag.id === id);
+  //   if (index === -1) return; // Tag not found
+  //   const removed = this.locationsSelected.splice(index, 1)[0];
+  //   if (this.locationsSelected.length == 0) {
+  //     this.isFloorMonitor = false
+  //   }
+  //   if (this.mode === 'Edit' && removed?.id !== 0) {
+  //     this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+  //     this.Data.deletedLocationSelected.push(removed.id);
+  //   }
+  //   this.LocationdropdownOpen = false;
+  // }
 
-  onLocationChange() {
-    if (!this.Data.isRestrictedForLoctaion) {
-      if (this.mode === 'Edit') {
-        this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
-        const selectedIds = (this.locationsSelected || []).map(s => s.id);
-        this.Data.deletedLocationSelected.push(...selectedIds);
-      }
-      this.locationsSelected = [];
-    }
-    this.LocationdropdownOpen = false;
-  }
+  // onLocationChange() {
+  //   if (!this.Data.isRestrictedForLoctaion) {
+  //     if (this.mode === 'Edit') {
+  //       this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+  //       const selectedIds = (this.locationsSelected || []).map(s => s.id);
+  //       this.Data.deletedLocationSelected.push(...selectedIds);
+  //     }
+  //     this.locationsSelected = [];
+  //   }
+  //   this.LocationdropdownOpen = false;
+  // }
 
   //////////////////////////////////////////////////// Grade
 
-  GradetoggleDropdown(event: MouseEvent): void {
-    event.stopPropagation();
-    this.GradedropdownOpen = !this.GradedropdownOpen;
+  // GradetoggleDropdown(event: MouseEvent): void {
+  //   event.stopPropagation();
+  //   this.GradedropdownOpen = !this.GradedropdownOpen;
+  // }
+
+  // GradeselectType(Type: Grade): void {
+  //   if (!this.gradeSelected.some((e) => e.id === Type.id)) {
+  //     this.gradeSelected.push(Type);
+  //   }
+  //   if (this.mode == 'Edit') {
+  //     if (!Array.isArray(this.Data.newGradesSelected)) {
+  //       this.Data.newGradesSelected = [];
+  //     }
+  //     this.Data.newGradesSelected.push(Type.id);
+  //   }
+  //   this.GradedropdownOpen = false;
+  // }
+
+  // GraderemoveSelected(id: number): void {
+  //   const index = this.gradeSelected.findIndex((tag) => tag.id === id);
+  //   if (index === -1) return; // Tag not found
+  //   const removed = this.gradeSelected.splice(index, 1)[0];
+  //   if (this.gradeSelected.length == 0) {
+  //     this.isGradeSupervisor = false
+  //   }
+  //   if (this.mode === 'Edit' && removed?.id !== 0) {
+  //     this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
+  //     this.Data.deletedGradesSelected.push(removed.id);
+  //   }
+  //   this.GradedropdownOpen = false;
   }
 
-  GradeselectType(Type: Grade): void {
-    if (!this.gradeSelected.some((e) => e.id === Type.id)) {
-      this.gradeSelected.push(Type);
-    }
-    if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newGradesSelected)) {
-        this.Data.newGradesSelected = [];
-      }
-      this.Data.newGradesSelected.push(Type.id);
-    }
-    this.GradedropdownOpen = false;
-  }
-
-  GraderemoveSelected(id: number): void {
-    const index = this.gradeSelected.findIndex((tag) => tag.id === id);
-    if (index === -1) return; // Tag not found
-    const removed = this.gradeSelected.splice(index, 1)[0];
-    if (this.gradeSelected.length == 0) {
-      this.isGradeSupervisor = false
-    }
-    if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
-      this.Data.deletedGradesSelected.push(removed.id);
-    }
-    this.GradedropdownOpen = false;
-  }
-
-  onGradeSupervisorChange() {
-    if (!this.isGradeSupervisor) {
-      if (this.mode === 'Edit') {
-        this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
-        const selectedIds = (this.gradeSelected || []).map(s => s.id);
-        this.Data.deletedGradesSelected.push(...selectedIds);
-      }
-      this.gradeSelected = [];
-    }
-    this.GradedropdownOpen = false;
-  }
+  // onGradeSupervisorChange() {
+  //   if (!this.isGradeSupervisor) {
+  //     if (this.mode === 'Edit') {
+  //       this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
+  //       const selectedIds = (this.gradeSelected || []).map(s => s.id);
+  //       this.Data.deletedGradesSelected.push(...selectedIds);
+  //     }
+  //     this.gradeSelected = [];
+  //   }
+  //   this.GradedropdownOpen = false;
+  // }
   //////////////////////////////////////////////////// Subject
 
-  SubjecttoggleDropdown(event: MouseEvent): void {
-    event.stopPropagation();
-    this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
-  }
+  // SubjecttoggleDropdown(event: MouseEvent): void {
+  //   event.stopPropagation();
+  //   this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
+  // }
 
-  SubjectselectType(Type: Subject): void {
-    if (!this.subjectSelected.some((e) => e.id === Type.id)) {
-      this.subjectSelected.push(Type);
-    }
-    if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newSubjectsSelected)) {
-        this.Data.newSubjectsSelected = [];
-      }
-      this.Data.newSubjectsSelected.push(Type.id);
-    }
-    this.SubjectdropdownOpen = false;
-  }
+  // SubjectselectType(Type: Subject): void {
+  //   if (!this.subjectSelected.some((e) => e.id === Type.id)) {
+  //     this.subjectSelected.push(Type);
+  //   }
+  //   if (this.mode == 'Edit') {
+  //     if (!Array.isArray(this.Data.newSubjectsSelected)) {
+  //       this.Data.newSubjectsSelected = [];
+  //     }
+  //     this.Data.newSubjectsSelected.push(Type.id);
+  //   }
+  //   this.SubjectdropdownOpen = false;
+  // }
 
-  SubjectremoveSelected(id: number): void {
-    const index = this.subjectSelected.findIndex((tag) => tag.id === id);
-    if (index === -1) return; // Tag not found
-    const removed = this.subjectSelected.splice(index, 1)[0];
-    if (this.subjectSelected.length == 0) {
-      this.isSubjectSupervisor = false
-    }
-    if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
-      this.Data.deletedSubjectsSelected.push(removed.id);
-    }
-    this.SubjectdropdownOpen = false;
-  }
+  // SubjectremoveSelected(id: number): void {
+  //   const index = this.subjectSelected.findIndex((tag) => tag.id === id);
+  //   if (index === -1) return; // Tag not found
+  //   const removed = this.subjectSelected.splice(index, 1)[0];
+  //   if (this.subjectSelected.length == 0) {
+  //     this.isSubjectSupervisor = false
+  //   }
+  //   if (this.mode === 'Edit' && removed?.id !== 0) {
+  //     this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
+  //     this.Data.deletedSubjectsSelected.push(removed.id);
+  //   }
+  //   this.SubjectdropdownOpen = false;
+  // }
 
-  onSubjectSupervisorChange(): void {
-    if (!this.isSubjectSupervisor) {
-      if (this.mode === 'Edit') {
-        this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
-        const selectedIds = (this.subjectSelected || []).map(s => s.id);
-        this.Data.deletedSubjectsSelected.push(...selectedIds);
-      }
-      this.subjectSelected = [];
-    }
-    this.SubjectdropdownOpen = false;
-  }
+//   onSubjectSupervisorChange(): void {
+//     if (!this.isSubjectSupervisor) {
+//       if (this.mode === 'Edit') {
+//         this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
+//         const selectedIds = (this.subjectSelected || []).map(s => s.id);
+//         this.Data.deletedSubjectsSelected.push(...selectedIds);
+//       }
+//       this.subjectSelected = [];
+//     }
+//     this.SubjectdropdownOpen = false;
+//   }
 
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
+//   @HostListener('document:click', ['$event'])
+//   onClickOutside(event: MouseEvent) {
+//     const target = event.target as HTMLElement;
 
-    const clickedInsideLocation = this.locationDropdown?.nativeElement.contains(target);
-    const clickedInsideFloor = this.floorDropdown?.nativeElement.contains(target);
-    const clickedInsideGrade = this.gradeDropdown?.nativeElement.contains(target);
-    const clickedInsideSubject = this.subjectDropdown?.nativeElement.contains(target);
+//     // const clickedInsideLocation = this.locationDropdown?.nativeElement.contains(target);
+//     // const clickedInsideFloor = this.floorDropdown?.nativeElement.contains(target);
+//     // const clickedInsideGrade = this.gradeDropdown?.nativeElement.contains(target);
+//     // const clickedInsideSubject = this.subjectDropdown?.nativeElement.contains(target);
 
-    if (!clickedInsideLocation) this.LocationdropdownOpen = false;
-    if (!clickedInsideFloor) this.dropdownOpen = false;
-    if (!clickedInsideGrade) this.GradedropdownOpen = false;
-    if (!clickedInsideSubject) this.SubjectdropdownOpen = false;
-  }
+//     // if (!clickedInsideLocation) this.LocationdropdownOpen = false;
+//     // if (!clickedInsideFloor) this.dropdownOpen = false;
+//     // if (!clickedInsideGrade) this.GradedropdownOpen = false;
+//     // if (!clickedInsideSubject) this.SubjectdropdownOpen = false;
+//   }
 
-}
+// }

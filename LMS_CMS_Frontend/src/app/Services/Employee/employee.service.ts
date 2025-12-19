@@ -87,6 +87,22 @@ export class EmployeeService {
     formData.append('hobbies', employee.hobbies || '');
     formData.append('applicationDate', employee.applicationDate || '');
     formData.append('positionAppliedFor', employee.positionAppliedFor || '');
+    formData.append('previousExperiencePlace', employee.previousExperiencePlace || '');
+    formData.append('position', employee.position || '');
+    formData.append('fromDate', employee.fromDate || '');
+    formData.append('toDate', employee.toDate || '');
+    formData.append('howDidYouFindUs', employee.howDidYouFindUs ||  '');
+    formData.append('reasonforLeavingtheJob', employee.reasonforLeavingtheJob || '');
+    formData.append('didYouHaveAnyRelativeHere', employee.didYouHaveAnyRelativeHere || '');
+    formData.append('yourLevelInEnglish', employee.yourLevelInEnglish || '');
+    formData.append('yourLevelInFrensh', employee.yourLevelInFrensh || '');
+    formData.append('doYouSpeakAnyOtherLanguages', employee.doYouSpeakAnyOtherLanguages || '');
+    formData.append('currentJob', employee.currentJob || '');
+    formData.append('lastSalary', employee.lastSalary?.toString() ?? '0');
+    formData.append('authorizeInvestigation', employee.authorizeInvestigation?.toString() ?? 'false');
+    formData.append('fullName', employee.fullName || '');
+    formData.append('enterDate', employee.enterDate || '');
+    formData.append('signature', employee.signature || '');
     formData.append('licenseNumber', employee.licenseNumber || '');
     formData.append('expireDate', employee.expireDate || '');
     formData.append('address', employee.address || '');
@@ -97,6 +113,7 @@ export class EmployeeService {
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
     formData.append('isRestrictedForLoctaion', employee.isRestrictedForLoctaion?.toString() ?? 'false');
+
 
 
 
@@ -161,6 +178,22 @@ export class EmployeeService {
     formData.append('hobbies', employee.hobbies || '');
     formData.append('applicationDate', employee.applicationDate || '');
     formData.append('positionAppliedFor', employee.positionAppliedFor || '');
+    formData.append('previousExperiencePlace', employee.previousExperiencePlace || '');
+    formData.append('position', employee.position || '');
+    formData.append('fromDate', employee.fromDate || '');
+    formData.append('toDate', employee.toDate || '');
+    formData.append('howDidYouFindUs', employee.howDidYouFindUs ||  '');
+    formData.append('reasonforLeavingtheJob', employee.reasonforLeavingtheJob || '');
+    formData.append('didYouHaveAnyRelativeHere', employee.didYouHaveAnyRelativeHere || '');
+    formData.append('yourLevelInEnglish', employee.yourLevelInEnglish || '');
+    formData.append('yourLevelInFrensh', employee.yourLevelInFrensh || '');
+    formData.append('doYouSpeakAnyOtherLanguages', employee.doYouSpeakAnyOtherLanguages || '');
+    formData.append('currentJob', employee.currentJob || '');
+    formData.append('lastSalary', employee.lastSalary?.toString() ?? '0');
+    formData.append('authorizeInvestigation', employee.authorizeInvestigation?.toString() ?? 'false');
+    formData.append('fullName', employee.fullName || '');
+    formData.append('enterDate', employee.enterDate || '');
+    formData.append('signature', employee.signature || '');
     formData.append('email', employee.email || '');
     formData.append('licenseNumber', employee.licenseNumber || '');
     formData.append('expireDate', employee.expireDate || '');
