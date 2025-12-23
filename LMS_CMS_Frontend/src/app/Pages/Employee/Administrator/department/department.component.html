@@ -4,9 +4,10 @@
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
-        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-         {{ 'Create Department' | translate }}
+              class="rounded-lg bg-orange-500 text-white px-4 py-3 flex items-center justify-center gap-2 hover:bg-orange-600 transition-colors duration-200">
+        {{ 'Create Department' | translate }}
       </button>
+
     </div>
   </div>
 
@@ -52,6 +53,10 @@
                 <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row)">
                   <i class="fa-solid fa-pencil"></i>
                 </button>
+                  <!-- View Button -->
+             <button *ngIf="AllowView" (click)="View(row)" class="text-green-600 hover:text-green-800 transition">
+              <i class="fa-regular fa-eye"></i>
+             </button>
               </div>
             </td>
           </tr>
@@ -83,14 +88,14 @@
         <div class="flex flex-col">
           <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
             [(ngModel)]="department.name" 
-  placeholder="{{ 'Enter department' | translate }}"
-  (ngModelChange)="
-              onInputValueChange({ field: 'name', value: $event })
+              placeholder="{{ 'Enter department' | translate }}"
+              (ngModelChange)="
+            onInputValueChange({ field: 'name', value: $event })
             " />
           <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]
             }}</span>
         </div>
-        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+        <button [disabled]="isLoading" class=" bg-orange-500 text-white  font-medium px-4 py-2 rounded-lg"
           (click)="CreateOREdit()">
           <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
           <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>

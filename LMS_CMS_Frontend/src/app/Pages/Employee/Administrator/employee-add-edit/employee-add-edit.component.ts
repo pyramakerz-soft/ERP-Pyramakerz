@@ -422,7 +422,9 @@ goBackToFirstPart() {
 return isValid;
 }
 
-// goToNextPage() {
+
+
+
 //   console.log('First section values:', this.Data);
 
 //   // الحقول الإلزامية في الجزء الأول فقط
@@ -462,77 +464,84 @@ return isValid;
 //   }
 
 
- // الانتقال للصفحة التالية
-  goToNextPage() {
-    if (this.currentSection === 1) {
-      // التحقق من الحقول المطلوبة في الصفحة الأولى
-      const firstSectionRequired: (keyof Employee)[] = [
-        'applicationDate', 'positionAppliedFor', 'maritalStatus',
-        'university', 'faculty', 'major', 'schoolYouGraduatedFrom',
-        'otherStudies', 'en_name', 'email'
-      ];
-      let firstValid = true;
-      this.validationErrors = {};
 
-      for (const field of firstSectionRequired) {
-        const value = this.Data[field] || '';
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
-          firstValid = false;
-        }
-        if (field === 'en_name' && value && typeof value === 'string' && value.trim().length < 2) {
-          this.validationErrors['en_name'] = `*English Name must be at least 2 characters`;
-          firstValid = false;
-        }
-        if (field === 'email' && value && typeof value === 'string' && !this.emailPattern.test(value.trim())) {
-          this.validationErrors['email'] = `*Email is not valid`;
-          firstValid = false;
-        }
+
+
+// الانتقال للصفحة التالية
+goToNextPage() {
+
+  //  الصفحة الأولى → الثانية
+  if (this.currentSection === 1) {
+
+    const firstSectionRequired: (keyof Employee)[] = [
+      'applicationDate',
+      'positionAppliedFor',
+      'maritalStatus',
+      'university',
+      'faculty',
+      'major',
+      'schoolYouGraduatedFrom',
+      'otherStudies',
+      'en_name',
+      'email'
+    ];
+
+    let firstValid = true;
+    this.validationErrors = {};
+
+    for (const field of firstSectionRequired) {
+      const value = this.Data[field];
+
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+        firstValid = false;
       }
 
-
-//   if (firstValid) {
-//      this.showFirstSection = false;   // اخفاء الجزء الأول
-//     this.showRegistrationForm = true; // اظهار الجزء الثاني
-//   } else {
-//     import('sweetalert2').then(Swal => {
-//       Swal.default.fire({
-//         icon: 'warning',
-//         title: 'Required Fields',
-//         text: 'Please fill all required fields in the first section before proceeding.',
-//         confirmButtonColor: '#089B41',
-//       });
-//     });
-//   }
-// }
-
-   if (firstValid) {
-        this.currentSection = 2; // الانتقال للصفحة الثانية
-      } else {
-        import('sweetalert2').then(Swal => {
-          Swal.default.fire({
-            icon: 'warning',
-            title: 'Required Fields',
-            text: 'Please fill all required fields in the first section before proceeding.',
-            confirmButtonColor: '#089B41',
-          });
-        });
+      if (
+        field === 'en_name' &&
+        typeof value === 'string' &&
+        value.trim().length < 2
+      ) {
+        this.validationErrors['en_name'] =
+          '*English Name must be at least 2 characters';
+        firstValid = false;
       }
 
-    } else if (this.currentSection === 2) {
-      // التحقق من الحقول المطلوبة في الصفحة الثانية (خبرات، إلخ)
-      // يمكن إضافة تحقق للصفحة الثانية هنا إذا رغبت
-      this.currentSection = 3; // الانتقال للصفحة الثالثة
+      if (
+        field === 'email' &&
+        typeof value === 'string' &&
+        !this.emailPattern.test(value.trim())
+      ) {
+        this.validationErrors['email'] = '*Email is not valid';
+        firstValid = false;
+      }
     }
+
+    if (!firstValid) {
+      import('sweetalert2').then(Swal => {
+        Swal.default.fire({
+          icon: 'warning',
+          title: 'Required Fields',
+          text: 'Please fill all required fields in the first section before proceeding.',
+          confirmButtonColor: '#089B41',
+        });
+      });
+      return;
+    }
+
+    //  لو كله تمام
+    this.currentSection = 2;
+    return;
   }
 
-
-
-
-backToFirstSection() {
-   this.showFirstSection = true;
-  this.showRegistrationForm = false;
+  //  الصفحة الثانية → الثالثة
+  else if (this.currentSection === 2) {
+    this.currentSection = 3;
+    return;
+  }
 }
+
+
 
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -560,17 +569,28 @@ backToFirstSection() {
 
 
   // الرجوع للصفحة السابقة
-  goToPreviousPage() {
-    if (this.currentSection > 1) {
-      this.currentSection--;
-    }
+ goToPreviousPage() {
+  if (this.currentSection > 1) {
+    this.currentSection--;
   }
+}
+
 
   async Save() {
-    this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
-    this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
-    this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
-    this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
+    // this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
+    // this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
+    // this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
+    // this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
+   // إضافة الملاحظات من الصفحة الثالثة
+  this.Data.note = this.Data.note || '';
+
+  // استدعاء دالة Save الموجودة بالفعل
+  const result = await this.Save();
+
+  if(result) {
+    console.log('Employee saved successfully', this.Data);
+  }
+
     if (this.isFormValid()) {
       this.isLoading = true;
 

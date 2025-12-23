@@ -15,7 +15,8 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
 
-
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        public ICollection<Title> Titles { get; set; } = new List<Title>();
+        public ICollection<Offer> Offers { get; set; } = new List<Offer>();
     }
 }
