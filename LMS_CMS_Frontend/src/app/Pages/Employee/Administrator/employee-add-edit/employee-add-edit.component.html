@@ -1,4 +1,5 @@
-<div *ngIf="showFirstSection">
+<!-- <div *ngIf="showFirstSection"> -->
+<div *ngIf="currentSection === 1">
   <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
       <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
@@ -7,11 +8,11 @@
         translate) }}
       </h1>
     </div>
-    <button [disabled]="isLoading" class="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg mb-4"
+    <!-- <button [disabled]="isLoading" class="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg mb-4"
       (click)="Save()">
       <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
       <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-    </button>
+    </button> -->
   </div>
 
   <!-- <div *ngIf="!showRegistrationForm"> -->
@@ -268,254 +269,289 @@
   </div>
 </div>
 
-    <!------------------------------------------------------ Registration Form Section ------------------------------------------------------------------------------>
+<!------------------------------------------------------ Registration Form Section ------------------------------------------------------------------------------>
 
 
-  <div *ngIf="showRegistrationForm" class="w-full mt-2">
+<div *ngIf="currentSection === 2" class="w-full mt-2">
 
-        <div class=" text-white text-start ">
-          <h1 class="primaryTxt font-semibold text-2xl leading-9">
-            {{ mode === 'Create' ? (' Application For Employee' | translate) : ('Edit Application For Employee' | translate) }}
-          </h1>
-        </div>
+  <div class=" text-white text-start ">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">
+      {{ mode === 'Create' ? (' Application For Employee' | translate) : ('Edit Application For Employee' | translate)
+      }}
+    </h1>
+  </div>
 
-        <div class="flex gap-6 p-6 bg-gray-100 rounded-lg mb-6">
+  <div class="flex gap-6 p-6 bg-gray-100 rounded-lg mb-6">
 
-          <!-- Left Side (Inputs under each other) -->
-          <div class="flex flex-col w-[49%]">
-            <!-- Application Date -->
-            <div class="flex flex-col mb-4">
-              <label class="mb-2 primaryTxt" for="applicationDate">
-                {{ 'Application Date' | translate }}
-              </label>
-              <input id="applicationDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="{{ 'Enter application Date' | translate }}" [(ngModel)]="Data.applicationDate"
-                (ngModelChange)="onInputValueChange({ field: 'applicationDate', value: $event })" />
-              <span *ngIf="validationErrors['applicationDate']" class="text-red-500 ml-3 font-normal">
-                {{ validationErrors['applicationDate'] }}
-              </span>
-            </div>
-
-            <!-- Position Applied For -->
-            <div class="flex flex-col mb-4">
-              <label class="mb-2 primaryTxt" for="positionAppliedFor">
-                {{ 'Position Applied For' | translate }}
-              </label>
-              <input id="positionAppliedFor" type="text"
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="{{ 'Enter position Applied For' | translate }}" [(ngModel)]="Data.positionAppliedFor"
-                (ngModelChange)="onInputValueChange({ field: 'positionAppliedFor', value: $event })" />
-              <span *ngIf="validationErrors['positionAppliedFor']" class="text-red-500 ml-3 font-normal">
-                {{ validationErrors['positionAppliedFor'] }}
-              </span>
-            </div>
-
-          </div>
-
-          <!-- Right Side (Image centered perfectly) -->
-          <div class="w-[35%] flex justify-center items-center">
-            <img src="assets/images/profile-placeholder.png" alt="Profile Image"
-              class="w-40 h-40 object-cover rounded-lg border border-gray-300" />
-          </div>
-
-        </div>
-
-
-        <h1 class="font-semibold text-2xl leading-9">{{ 'Registration Form' |translate }}</h1>
-
-        <div class="flex flex-col mt-6 bg-[#FFF5EE] w-[100%] border rounded-lg mb-4">
-          <h1 class="order-1 font-semibold text-2xl leading-9 text-orange-700">
-            {{ 'Experience Info' | translate }}
-          </h1>
-        </div>
-
-      <div *ngFor="let exp of experiences; let i = index" class="mt-12 mb-4 flex gap-4 flex-nowrap">
-
-        <!-- Previous Experience Place -->
-        <div class="flex flex-col w-[25%]">
-          <label class="mb-2 primaryTxt">{{ 'Previous Experience Place' | translate}}</label>
-          <input type="text" class="rounded-lg border border-gray-300 px-4 py-3"
-            [(ngModel)]="exp.previousExperiencePlace"
-            (ngModelChange)="onInputValueChangeExp(i, 'previousExperiencePlace', $event)"
-            placeholder="{{ 'Enter previous Experience Place' | translate }}" />
-        </div>
-
-        <!-- Position -->
-        <div class="flex flex-col w-[25%]">
-          <label class="mb-2 primaryTxt">{{ 'Position' | translate }}</label>
-          <input type="text" class="rounded-lg border border-gray-300 px-4 py-3"
-            [(ngModel)]="exp.position"
-            (ngModelChange)="onInputValueChangeExp(i, 'position', $event)"
-            placeholder="{{ 'Enter Position' | translate }}" />
-        </div>
-
-        <!-- From -->
-        <div class="flex flex-col w-[25%]">
-          <label class="mb-2 primaryTxt">{{ 'From' | translate }}</label>
-          <input type="date" class="rounded-lg border border-gray-300 px-4 py-3"
-            [(ngModel)]="exp.fromDate"
-            (ngModelChange)="onInputValueChangeExp(i, 'fromDate', $event)" />
-        </div>
-
-        <!-- To -->
-        <div class="flex flex-col w-[25%]">
-          <label class="mb-2 primaryTxt">{{ 'To' | translate }}</label>
-          <input type="date" class="rounded-lg border border-gray-300 px-4 py-3"
-            [(ngModel)]="exp.toDate"
-            (ngModelChange)="onInputValueChangeExp(i, 'toDate', $event)" />
-        </div>
-
+    <!-- Left Side (Inputs under each other) -->
+    <div class="flex flex-col w-[49%]">
+      <!-- Application Date -->
+      <div class="flex flex-col mb-4">
+        <label class="mb-2 primaryTxt" for="applicationDate">
+          {{ 'Application Date' | translate }}
+        </label>
+        <input id="applicationDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+          placeholder="{{ 'Enter application Date' | translate }}" [(ngModel)]="Data.applicationDate"
+          (ngModelChange)="onInputValueChange({ field: 'applicationDate', value: $event })" />
+        <span *ngIf="validationErrors['applicationDate']" class="text-red-500 ml-3 font-normal">
+          {{ validationErrors['applicationDate'] }}
+        </span>
       </div>
 
-       
+      <!-- Position Applied For -->
+      <div class="flex flex-col mb-4">
+        <label class="mb-2 primaryTxt" for="positionAppliedFor">
+          {{ 'Position Applied For' | translate }}
+        </label>
+        <input id="positionAppliedFor" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+          placeholder="{{ 'Enter position Applied For' | translate }}" [(ngModel)]="Data.positionAppliedFor"
+          (ngModelChange)="onInputValueChange({ field: 'positionAppliedFor', value: $event })" />
+        <span *ngIf="validationErrors['positionAppliedFor']" class="text-red-500 ml-3 font-normal">
+          {{ validationErrors['positionAppliedFor'] }}
+        </span>
+      </div>
 
-    <div class="flex justify-end mb-6">
-      <button type="button" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600"
-        (click)="addExperience()">
-        + Add Additional Company
-      </button>
     </div>
 
+    <!-- Right Side (Image centered perfectly) -->
+    <div class="w-[35%] flex justify-center items-center">
+      <img src="assets/images/profile-placeholder.png" alt="Profile Image"
+        class="w-40 h-40 object-cover rounded-lg border border-gray-300" />
+    </div>
 
-        <div class="mt-12 mb-4 flex flex-wrap justify-between gap-y-4">
+  </div>
 
-          <!-- 1 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'How Did You Find Us?' | translate }}
-            </label>
-            <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.howDidYouFindUs">
-              <option value="">Choose</option>
-              <option>Internet</option>
-              <option>Friend</option>
-              <option>Newspaper</option>
-              <option>Other</option>
-            </select>
-          </div>
 
-          <!-- 2 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Reason for Leaving The Job' | translate }}
-            </label>
-            <input type="text" class="rounded-lg border border-gray-300 px-4 py-3"
-              [(ngModel)]="Data.reasonforLeavingtheJob" />
-          </div>
+  <h1 class="font-semibold text-2xl leading-9">{{ 'Registration Form' |translate }}</h1>
 
-          <!-- 3 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Do You Have Any Relatives Here?' | translate }}
-            </label>
-            <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.didYouHaveAnyRelativeHere">
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
+  <div class="flex flex-col mt-6 bg-[#FFF5EE] w-[100%] border rounded-lg mb-4">
+    <h1 class="order-1 font-semibold text-2xl leading-9 text-orange-700">
+      {{ 'Experience Info' | translate }}
+    </h1>
+  </div>
 
-          <!-- 4 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Your Level In English' | translate }}
-            </label>
-            <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.yourLevelInEnglish">
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-              <option>Native</option>
-            </select>
-          </div>
+  <div *ngFor="let exp of experiences; let i = index" class="mt-12 mb-4 flex gap-4 flex-nowrap">
 
-          <!-- 5 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Your Level In French' | translate }}
-            </label>
-            <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.yourLevelInFrensh">
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-              <option>Native</option>
-            </select>
-          </div>
+    <!-- Previous Experience Place -->
+    <div class="flex flex-col w-[25%]">
+      <label class="mb-2 primaryTxt">{{ 'Previous Experience Place' | translate}}</label>
+      <input type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="exp.previousExperiencePlace"
+        (ngModelChange)="onInputValueChangeExp(i, 'previousExperiencePlace', $event)"
+        placeholder="{{ 'Enter previous Experience Place' | translate }}" />
+    </div>
 
-          <!-- 6 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Do You Speak Any Other Languages?' | translate }}
-            </label>
-            <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.doYouSpeakAnyOtherLanguages">
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
+    <!-- Position -->
+    <div class="flex flex-col w-[25%]">
+      <label class="mb-2 primaryTxt">{{ 'Position' | translate }}</label>
+      <input type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="exp.position"
+        (ngModelChange)="onInputValueChangeExp(i, 'position', $event)"
+        placeholder="{{ 'Enter Position' | translate }}" />
+    </div>
 
-          <!-- 7 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Current Job' | translate }}
-            </label>
-            <input type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.currentJob" />
-          </div>
+    <!-- From -->
+    <div class="flex flex-col w-[25%]">
+      <label class="mb-2 primaryTxt">{{ 'From' | translate }}</label>
+      <input type="date" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="exp.fromDate"
+        (ngModelChange)="onInputValueChangeExp(i, 'fromDate', $event)" />
+    </div>
 
-          <!-- 8 -->
-          <div class="flex flex-col w-[49%]">
-            <label class="mb-2 primaryTxt">
-              {{ 'Last Salary' | translate }}
-            </label>
-            <input type="number" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.lastSalary" />
-          </div>
+    <!-- To -->
+    <div class="flex flex-col w-[25%]">
+      <label class="mb-2 primaryTxt">{{ 'To' | translate }}</label>
+      <input type="date" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="exp.toDate"
+        (ngModelChange)="onInputValueChangeExp(i, 'toDate', $event)" />
+    </div>
 
-        </div>
+  </div>
 
 
 
-        <!-- Checkbox -->
-        <div class="flex items-start mb-8">
-          <input type="checkbox" class="mt-1 mr-3" [(ngModel)]="Data.authorizeInvestigation"
-            name="authorizeInvestigation">
-          <label class="text-sm text-gray-700">
-            I Certify That All The Answers Given Here Are True And Complete. I Authorize Investigation On All Statements
-            Contained In This Application.
-          </label>
-          <span *ngIf="validationErrors['authorizeInvestigation']" class="text-red-500 ml-8 font-normal block mt-1">
-            {{ validationErrors['authorizeInvestigation'] }}
-          </span>
-        </div>
+  <div class="flex justify-end mb-6">
+    <button type="button" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600"
+      (click)="addExperience()">
+      + Add Additional Company
+    </button>
+  </div>
 
 
-        <!-- التوقيع في الأسفل -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.fullName"
-              name="fullName">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Enter Date</label>
-            <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.enterDate"
-              name="enterDate">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Signature</label>
-            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.signature"
-              name="signature">
-          </div>
-        </div>
+  <div class="mt-12 mb-4 flex flex-wrap justify-between gap-y-4">
 
-        <!-- الأزرار -->
-        <div class="flex justify-center mt-10 space-x-4">
-          <button type="button" class="bg-orange-500 text-white px-8 py-3 rounded-md hover:bg-gray-600"
-            (click)="backToFirstSection()">
-            Back
-          </button>
+    <!-- 1 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'How Did You Find Us?' | translate }}
+      </label>
+      <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.howDidYouFindUs">
+        <option value="">Choose</option>
+        <option>Internet</option>
+        <option>Friend</option>
+        <option>Newspaper</option>
+        <option>Other</option>
+      </select>
+    </div>
 
-          <button type="button" class="bg-orange-500 text-white px-8 py-3 rounded-md hover:bg-green-700" (click)="Save()"
-            [disabled]="isLoading">
-            {{ isLoading ? 'Saving...' : 'Submit Application' }}
-          </button>
+    <!-- 2 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Reason for Leaving The Job' | translate }}
+      </label>
+      <input type="text" class="rounded-lg border border-gray-300 px-4 py-3"
+        [(ngModel)]="Data.reasonforLeavingtheJob" />
+    </div>
 
-          
-        </div>
-     </div>
+    <!-- 3 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Do You Have Any Relatives Here?' | translate }}
+      </label>
+      <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.didYouHaveAnyRelativeHere">
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
 
+    <!-- 4 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Your Level In English' | translate }}
+      </label>
+      <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.yourLevelInEnglish">
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+        <option>Native</option>
+      </select>
+    </div>
+
+    <!-- 5 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Your Level In French' | translate }}
+      </label>
+      <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.yourLevelInFrensh">
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+        <option>Native</option>
+      </select>
+    </div>
+
+    <!-- 6 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Do You Speak Any Other Languages?' | translate }}
+      </label>
+      <select class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.doYouSpeakAnyOtherLanguages">
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <!-- 7 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Current Job' | translate }}
+      </label>
+      <input type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.currentJob" />
+    </div>
+
+    <!-- 8 -->
+    <div class="flex flex-col w-[49%]">
+      <label class="mb-2 primaryTxt">
+        {{ 'Last Salary' | translate }}
+      </label>
+      <input type="number" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="Data.lastSalary" />
+    </div>
+
+  </div>
+
+
+
+  <!-- Checkbox -->
+  <div class="flex items-start mb-8">
+    <input type="checkbox" class="mt-1 mr-3" [(ngModel)]="Data.authorizeInvestigation" name="authorizeInvestigation">
+    <label class="text-sm text-gray-700">
+      I Certify That All The Answers Given Here Are True And Complete. I Authorize Investigation On All Statements
+      Contained In This Application.
+    </label>
+    <span *ngIf="validationErrors['authorizeInvestigation']" class="text-red-500 ml-8 font-normal block mt-1">
+      {{ validationErrors['authorizeInvestigation'] }}
+    </span>
+  </div>
+
+
+  <!-- التوقيع في الأسفل -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+      <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.fullName"
+        name="fullName">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Enter Date</label>
+      <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.enterDate"
+        name="enterDate">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Signature</label>
+      <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" [(ngModel)]="Data.signature"
+        name="signature">
+    </div>
+  </div>
+
+  <!-- الأزرار -->
+  <div class="flex justify-between items-center mt-10 w-full">
+    <button type="button" class="bg-orange-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition"
+      (click)="goToPreviousPage()">
+      Back
+    </button>
+
+    <button type="button"
+      class="bg-orange-500 text-white font-medium px-6 py-3 rounded-lg flex items-center hover:bg-orange-600 transition-colors duration-200"
+      (click)="goToNextPage()">
+      {{ 'Next' | translate }}
+      <i class="fa-solid fa-arrow-right ml-2"></i>
+    </button>
+
+  </div>
+
+</div>
+
+<!-------------------------------------------------- الصفحة الثالثة ------------------------------------------------------------>
+<div *ngIf="currentSection === 3" class="w-full mt-8">
+
+  <h2 class="text-xl font-semibold mb-4 primaryTxt">
+    Additional Notes / Job Comments
+  </h2>
+
+  <!-- Textarea بعرض الصفحة -->
+  <div class="w-full mb-8">
+    <label class="block mb-2 primaryTxt">
+      Write any comments related to the job you are applying for
+    </label>
+
+    <textarea rows="6"
+      class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+      placeholder="Write your comment here..." [(ngModel)]="Data.note">
+    </textarea>
+  </div>
+
+  <!-- الأزرار -->
+  <div class="flex justify-between items-center mt-10">
+
+    <!-- Back -->
+    <button type="button" class="bg-orange-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition"
+      (click)="goToPreviousPage()">
+      Back
+    </button>
+
+    <!-- Finish -->
+    <button type="button" [disabled]="isLoading"
+      class="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg mb-4 flex items-center justify-center"
+      (click)="Save()">
+      <span *ngIf="!isLoading">{{ 'Save' | translate }} </span>
+      <i *ngIf="isLoading" class="fas fa-spinner fa-spin ml-2"></i>
+    </button>
+  </div>
+
+</div>

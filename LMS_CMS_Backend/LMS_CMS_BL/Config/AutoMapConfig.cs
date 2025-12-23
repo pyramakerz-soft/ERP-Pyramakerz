@@ -90,6 +90,23 @@ namespace LMS_CMS_BL.Config
             CreateMap<BusTypeEditDTO, BusType>();
             CreateMap<BusType, BusTypeEditDTO>();
 
+            // Title Mappings--77
+            CreateMap<TitleAddDto, Title>();
+            CreateMap<Title, TitleGetDto>()
+                .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null));
+
+            CreateMap<TitleGetDto, Title>()
+            .ForMember(dest => dest.ID, opt => opt.Ignore())           
+            .ForMember(dest => dest.Department, opt => opt.Ignore());
+
+            // Offer Mappings--77
+
+            CreateMap<Offer, OfferGetDto>()
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
+            .ForMember(dest => dest.TitleName, opt => opt.MapFrom(src => src.Title != null ? src.Title.Name : null))
+            .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.UploadedFilePath)));  // اسم الملف بس للعرض
+
+
 
 
             CreateMap<BusDistrict, BusDistrictAddDTO>();

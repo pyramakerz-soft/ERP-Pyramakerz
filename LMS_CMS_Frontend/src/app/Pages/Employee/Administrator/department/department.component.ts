@@ -37,12 +37,13 @@ export class DepartmentComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
+  AllowView: boolean = false;
 
   TableData: Department[] = [];
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -86,6 +87,7 @@ export class DepartmentComponent {
         this.AllowDelete = settingsPage.allow_Delete;
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
+        this.AllowView = settingsPage.allow_View ?? true;  //--77
       }
     });
 
@@ -141,9 +143,21 @@ export class DepartmentComponent {
     this.DepartmentServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.department = d;
     });
-    this.validationErrors = {};
+    this.validationErrors = {}; 
     this.openModal();
   }
+
+// --77
+View(row: Department) {
+  console.log('1. View button clicked');
+  console.log('2. Department ID:', row.id);
+  console.log('3. Current route:', this.router.url);
+  
+  // الاحتمال 1
+  this.router.navigate(['Employee', 'Department', row.id], { 
+    queryParams: { name: row.name } 
+  });
+}
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(

@@ -8,7 +8,7 @@
 
 .primaryBg{
     /* background-color: #2E3646; */
-    background-color:rgb(83, 3, 3);
+    background-color:#253672;
 }
 
 .primaryTxt{
@@ -18,7 +18,7 @@
 
 .secondaryBg{
     /* background-color: #089B41; */
-    background-color: white;
+    background-color: rgb(71, 49, 49);
 }
 
 .secondaryTxt{

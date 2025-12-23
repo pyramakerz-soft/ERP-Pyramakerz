@@ -270,6 +270,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<SalaryHistory> SalaryHistory { get; set; }
         public DbSet<EmployeeLoans> EmployeeLoans { get; set; } 
         public DbSet<EmployeeLoans> FailedStudents { get; set; } 
+        public DbSet<Title> Titles { get; set; }
+        public DbSet<Offer> Offers { get; set; }
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -343,6 +346,64 @@ namespace LMS_CMS_DAL.Models.Domains
                .IsUnique();
 
             ///////////////////////// No Identity: /////////////////////////
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(p => p.Department)
+                .WithMany(p => p.Employees)
+                .HasForeignKey(p => p.DepartmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // جديد: Title configurations
+            modelBuilder.Entity<Title>()
+                .HasOne(t => t.Department)
+                .WithMany(d => d.Titles)
+                .HasForeignKey(t => t.DepartmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Title>()
+                .HasIndex(t => new { t.Name, t.DepartmentID })
+                .IsUnique()
+                .HasDatabaseName("IX_Title_Name_DepartmentID_Unique");
+
+            modelBuilder.Entity<Title>()
+                .HasIndex(t => t.DepartmentID)
+                .HasDatabaseName("IX_Title_DepartmentID");
+
+            modelBuilder.Entity<Title>()
+                .HasIndex(t => t.Date)
+                .HasDatabaseName("IX_Title_Date");
+
+            //modelBuilder.Entity<Title>()
+            //    .HasIndex(t => t.IsDeleted)
+            //    .HasDatabaseName("IX_Title_IsDeleted");
+
+            // Optional
+            //modelBuilder.Entity<Title>()
+            //    .HasOne(t => t.DeletedByEmployee)
+            //    .WithMany()
+            //    .HasForeignKey(t => t.DeletedByUserId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Offer>()
+                .HasOne(o => o.Department)
+                .WithMany(d => d.Offers)
+                .HasForeignKey(o => o.DepartmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Offer>()
+                .HasOne(o => o.Title)
+                .WithMany(t => t.Offers)
+                .HasForeignKey(o => o.TitleID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Offer>()
+                .HasIndex(o => o.IsDeleted)
+                .HasDatabaseName("IX_Offer_IsDeleted");
+
+
+            ////////////////--77
+
+
 
             modelBuilder.Entity<Page>()
                 .Property(p => p.ID)
