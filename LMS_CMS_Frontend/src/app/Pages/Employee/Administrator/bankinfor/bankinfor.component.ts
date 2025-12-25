@@ -13,18 +13,18 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
-import { Bank, BankAddMinimal } from '../../../../Models/Accounting/bank';
+import { Bank } from '../../../../Models/Accounting/bank';
 import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
   selector: 'app-bankinfor',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
-  templateUrl: './bank.component.html',
-  styleUrl: './bank.component.css'
+  templateUrl: './bankinfor.component.html',
+  styleUrl: './bankinfor.component.css'
 })
 @InitLoader()
-export class BankComponent implements OnInit, OnDestroy {
+export class BankinforComponent implements OnInit, OnDestroy {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -157,114 +157,50 @@ export class BankComponent implements OnInit, OnDestroy {
     );
   }
 
-  // CreateOREdit() {
-  //   if (this.isFormValid()) {
-  //     this.isLoading = true;
-  //     const bankData: Bank = {
-  //       ...this.bank,
-       
-  //       name: this.bank.bankName, 
-  //       bankAccountName: this.bank.bankName 
-        
-  //     };
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
 
-  //     if (this.mode == 'Create') {
-  //       this.BankServ.Add(bankData, this.DomainName).subscribe(
-  //         (d) => {
-  //           this.GetAllData();
-  //           this.isLoading = false;
-  //           this.closeModal();
-  //           this.showSuccessAlert(this.translate.instant('Created successfully'));
-  //         },
-  //         (error) => {
-  //           this.isLoading = false;
-  //           const errorMessage = error.error || this.translate.instant('Failed to create bank information');
-  //           this.showErrorAlert(errorMessage);
-  //         }
-  //       );
-  //     }
-  //     if (this.mode == 'Edit') {
-  //       this.BankServ.Edit(bankData, this.DomainName).subscribe(
-  //         (d) => {
-  //           this.GetAllData();
-  //           this.isLoading = false;
-  //           this.closeModal();
-  //           this.showSuccessAlert(this.translate.instant('Updated successfully'));
-  //         },
-  //         (error) => {
-  //           this.isLoading = false;
-  //           const errorMessage = error.error || this.translate.instant('Failed to update bank information');
-  //           this.showErrorAlert(errorMessage);
-  //         }
-  //       );
-  //     }
-  //   }
-  // }
+      // نسخ البيانات فقط للحقول المطلوبة
+      const bankData: Bank = {
+        ...this.bank,
+        // يمكن إضافة قيم افتراضية للحقول الأخرى إذا لزم الأمر
+        name: this.bank.bankName, // قد ترغب في تعيين name أيضاً
+        bankAccountName: this.bank.bankName // أو أي قيمة افتراضية
+      };
 
-CreateOREdit() {
-  if (!this.isFormValid()) return;
-
-  this.isLoading = true;
-
-  const bankDto: BankAddMinimal = {
-    Name: this.bank.bankName?.trim(),
-    bankBranch: this.bank.bankBranch?.trim()
-  };
-
-  const obs = this.mode === 'Create'
-    ? this.BankServ.Add(bankDto, this.DomainName)
-    : this.BankServ.Edit(this.bank as any, this.DomainName); // Edit يمكن أن تبقيه كما هو
-
-  obs.subscribe({
-    next: () => {
-      this.isLoading = false;
-      this.closeModal();
-      this.GetAllData();
-      this.showSuccessAlert(
-        this.mode === 'Create'
-          ? this.translate.instant('Created successfully')
-          : this.translate.instant('Updated successfully')
-      );
-    },
-    error: async (error) => {
-      this.isLoading = false;
-      const Swal = await import('sweetalert2').then(m => m.default);
-
-      if (error.error && typeof error.error === 'string') {
-        if (error.error.includes("Name cannot be longer than 100 characters")) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: this.translate.instant('Name cannot be longer than 100 characters'),
-            confirmButtonText: this.translate.instant('Okay'),
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          return;
-        }
-        if (error.error.includes("Access denied")) {
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('Access Denied'),
-            text: this.translate.instant('You do not have permission to perform this action.'),
-            confirmButtonText: this.translate.instant('Okay'),
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          return;
-        }
+      if (this.mode == 'Create') {
+        this.BankServ.Add(bankData, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(this.translate.instant('Created successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error || this.translate.instant('Failed to create bank information');
+            this.showErrorAlert(errorMessage);
+          }
+        );
       }
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: error.error || this.translate.instant('An error occurred. Please try again.'),
-        confirmButtonText: this.translate.instant('Okay'),
-        customClass: { confirmButton: 'secondaryBg' },
-      });
+      if (this.mode == 'Edit') {
+        this.BankServ.Edit(bankData, this.DomainName).subscribe(
+          (d) => {
+            this.GetAllData();
+            this.isLoading = false;
+            this.closeModal();
+            this.showSuccessAlert(this.translate.instant('Updated successfully'));
+          },
+          (error) => {
+            this.isLoading = false;
+            const errorMessage = error.error || this.translate.instant('Failed to update bank information');
+            this.showErrorAlert(errorMessage);
+          }
+        );
+      }
     }
-  });
-}
-
-
+  }
 
   closeModal() {
     this.validationErrors = {};

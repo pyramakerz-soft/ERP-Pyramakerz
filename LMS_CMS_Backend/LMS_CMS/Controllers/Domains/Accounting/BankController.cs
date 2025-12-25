@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bank" ,"Inventory" }
+            pages: new[] { "Bank Infor Details", "Inventory" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -58,9 +58,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpPost]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Bank" }
+        pages: new[] { "Bank Infor Details" }
          )]
-        public IActionResult Add(BankAddDto newBank)
+        public IActionResult Add([FromBody] BankAddDto newBank)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -83,24 +83,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return BadRequest("the name cannot be null");
             }
 
-            AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newBank.AccountNumberID);
+            //AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true );
 
-            if (account == null)
-            {
-                return NotFound("No Account chart with this Id");
-            }
-            else
-            {
-                if (account.SubTypeID == 1)
-                {
-                    return BadRequest("You can't use main account, only sub account");
-                }
+            //if (account == null)
+            //{
+            //    return NotFound("No Account chart with this Id");
+            //}
+            //else
+            //{
+            //    if (account.SubTypeID == 1)
+            //    {
+            //        return BadRequest("You can't use main account, only sub account");
+            //    }
 
-                if (account.LinkFileID != 6)
-                {
-                    return BadRequest("Wrong Link File, it should be Bank file link ");
-                }
-            }
+            //    if (account.LinkFileID != 6)
+            //    {
+            //        return BadRequest("Wrong Link File, it should be Bank file link ");
+            //    }
+            //}
 
             Bank bank = mapper.Map<Bank>(newBank);
 
@@ -125,7 +125,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bank" }
+            pages: new[] { "Bank Infor Details" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -156,7 +156,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
         allowEdit: 1,
-        pages: new[] { "Bank" }
+        pages: new[] { "Bank Infor Details" }
      )]
         public IActionResult Edit(BankGetDTO newBank)
         {
@@ -248,7 +248,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-        pages: new[] { "Bank" }
+        pages: new[] { "Bank Infor Details" }
       )]
         public IActionResult Delete(long id)
         {

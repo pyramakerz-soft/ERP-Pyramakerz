@@ -24,8 +24,6 @@ namespace LMS_CMS_BL.DTO.Administration
 
         [Required]
         public long TitleID { get; set; }
-
-        [Required(ErrorMessage = "Please upload a file")]
-        public IFormFile? UploadedFile { get; set; } 
+        public IFormFile? UploadedFile { get; set; }
     }
 }

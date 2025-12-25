@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Octa;
+using Microsoft.EntityFrameworkCore.Migrations;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 #nullable disable
 
@@ -25,3 +28,4 @@ namespace LMS_CMS_DAL.Migrations.Octa
         }
     }
 }
+

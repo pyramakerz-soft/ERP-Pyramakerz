@@ -1,7 +1,8 @@
 export class Bank {
     constructor(
         public id: number = 0,
-        public name: string = '',
+        public name: string = '',  
+        public bankBranch: string = '',   // new
         public bankAccountName: string = '',
         public bankName: string = '',
         public iban: string = '',
@@ -14,4 +15,10 @@ export class Bank {
         public insertedAt :number =0,
     ) {}
 }
+
+export interface BankAddMinimal {
+  Name: string;       // Bank Name
+  bankBranch: string; // Branch Name
+}
+
 

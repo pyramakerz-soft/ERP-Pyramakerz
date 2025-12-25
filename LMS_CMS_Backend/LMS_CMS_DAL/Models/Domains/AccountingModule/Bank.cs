@@ -1,11 +1,16 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Migrations.Domains;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Octa;
+using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LMS_CMS_DAL.Models.Domains.Inventory;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LMS_CMS_DAL.Models.Domains.AccountingModule
 {
@@ -16,17 +21,19 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public string BankAccountName { get; set; }
+        public string bankBranch { get; set; }
+        public string? BankAccountName { get; set; }
         public string BankName { get; set; }
-        public string IBAN { get; set; }
-        public string BankAccountNumber { get; set; }
-        public string AccountOpeningDate { get; set; }
-        public string AccountClosingDate { get; set; }
+        public string? IBAN { get; set; }
+        public string? BankAccountNumber { get; set; }
+        public string? AccountOpeningDate { get; set; }
+        public string? AccountClosingDate { get; set; }   // يجب ان يكون NULL 
+        public DateTime? CreatedDate { get; set; }
 
         [ForeignKey("AccountNumber")]
-        public long AccountNumberID { get; set; }
+        public long? AccountNumberID { get; set; }
 
-        public AccountingTreeChart AccountNumber { get; set; }
+        public AccountingTreeChart? AccountNumber { get; set; }
         public ICollection<InventoryMaster> InventoryMasters { get; set; } = new HashSet<InventoryMaster>();
         public ICollection<BankEmployee> BankEmployees { get; set; } = new HashSet<BankEmployee>();
 

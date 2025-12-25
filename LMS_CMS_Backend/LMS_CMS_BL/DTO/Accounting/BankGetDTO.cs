@@ -12,6 +12,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     {
         public long ID { get; set; }
         public string Name { get; set; }
+        public string bankBranch { get; set; }
         public string BankAccountName { get; set; }
         public string BankName { get; set; }
         public string IBAN { get; set; }

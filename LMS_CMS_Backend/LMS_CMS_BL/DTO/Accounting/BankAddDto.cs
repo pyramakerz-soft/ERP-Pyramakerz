@@ -15,13 +15,14 @@ namespace LMS_CMS_BL.DTO.Accounting
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public string BankAccountName { get; set; }
-        public string BankName { get; set; }
-        public string IBAN { get; set; }
-        public string BankAccountNumber { get; set; }
-        public string AccountOpeningDate { get; set; }
-        public string AccountClosingDate { get; set; }
-        public long AccountNumberID { get; set; }
+        public string bankBranch { get; set; }
+        //public string BankAccountName { get; set; }
+        //public string BankName { get; set; }
+        //public string IBAN { get; set; }
+        //public string BankAccountNumber { get; set; }
+        //public string AccountOpeningDate { get; set; }
+        //public string AccountClosingDate { get; set; }
+        //public long AccountNumberID { get; set; }
 
     }
 }

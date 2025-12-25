@@ -104,10 +104,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<Offer, OfferGetDto>()
             .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
             .ForMember(dest => dest.TitleName, opt => opt.MapFrom(src => src.Title != null ? src.Title.Name : null))
-            .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.UploadedFilePath)));  // اسم الملف بس للعرض
+            .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.UploadedFilePath)));
 
-
-
+            CreateMap<OfferAddDto, Offer>();
 
             CreateMap<BusDistrict, BusDistrictAddDTO>();
             CreateMap<BusDistrictAddDTO, BusDistrict>();

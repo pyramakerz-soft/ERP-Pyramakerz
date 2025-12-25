@@ -16,6 +16,7 @@ using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -272,9 +273,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<EmployeeLoans> FailedStudents { get; set; } 
         public DbSet<Title> Titles { get; set; }
         public DbSet<Offer> Offers { get; set; }
+        //public DbSet<BankInfo> BankInfos { get; set; }
 
-
-
+        
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
             : base(options)
         {
@@ -401,9 +402,24 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasDatabaseName("IX_Offer_IsDeleted");
 
 
+            //modelBuilder.Entity<BankInfo>()
+            //.HasIndex(b => b.BankName)
+            //.HasDatabaseName("IX_BankInfo_BankName");
+
+            //modelBuilder.Entity<BankInfo>()
+            //.HasIndex(b => b.AccountNumber)
+            //.IsUnique()  
+            //.HasDatabaseName("IX_BankInfo_AccountNumber_Unique");
+
+            ////modelBuilder.Entity<BankInfo>()
+            ////    .HasIndex(b => b.CreatedDate)
+            ////    .HasDatabaseName("IX_BankInfo_CreatedDate");
+
+            ////modelBuilder.Entity<BankInfo>()
+            ////    .HasIndex(b => b.IsDeleted)
+            ////    .HasDatabaseName("IX_BankInfo_IsDeleted");
+
             ////////////////--77
-
-
 
             modelBuilder.Entity<Page>()
                 .Property(p => p.ID)

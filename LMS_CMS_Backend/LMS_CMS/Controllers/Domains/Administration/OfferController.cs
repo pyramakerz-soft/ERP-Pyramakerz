@@ -73,7 +73,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
         ///////////////////////////////////////////////////////////////////////////////////////// GET: api/with-domain/Offer/{id}
         [HttpGet("{id}")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offer" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offers" })]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -104,207 +104,200 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
 
         ///////////////////////////////////////////////////////////////////////////////////// POST: api/with-domain/Offer
-        //[HttpPost]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offer" })]
-        //public async Task<IActionResult> Add([FromForm] OfferAddDto newOffer)
-        //{
-        //    if (newOffer == null)
-        //        return BadRequest("Offer data is required");
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        [HttpPost]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offers" })]
+        public async Task<IActionResult> Add([FromForm] OfferAddDto newOffer)
+        {
+            if (newOffer == null)
+                return BadRequest("Offer data is required");
 
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //    long.TryParse(userIdClaim, out long userId);
-        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            try
+            {
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        //    if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
-        //        return Unauthorized("User claims not found");
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-        //    // تحقق من Department و Title
-        //    var dept = Unit_Of_Work.department_Repository.First_Or_Default(d => d.ID == newOffer.DepartmentID && d.IsDeleted != true);
-        //    if (dept == null) return BadRequest("Invalid Department");
+                if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+                    return Unauthorized("User claims not found");
 
-        //    var title = Unit_Of_Work.title_Repository.First_Or_Default(t => t.ID == newOffer.TitleID && t.DepartmentID == newOffer.DepartmentID && t.IsDeleted != true);
-        //    if (title == null) return BadRequest("Invalid Title");
+                if (!long.TryParse(userIdClaim, out long userId))
+                    return Unauthorized("Invalid user ID claim");
 
-        //    // تحقق من الملف
-        //    if (newOffer.UploadedFile == null || newOffer.UploadedFile.Length == 0)
-        //        return BadRequest("File is required");
+                var dept = Unit_Of_Work.department_Repository.First_Or_Default(d => d.ID == newOffer.DepartmentID && d.IsDeleted != true);
+                if (dept == null) return BadRequest("Invalid Department");
 
-        //    if (newOffer.UploadedFile.Length > 25 * 1024 * 1024) // 25MB
-        //        return BadRequest("File size exceeds 25MB");
+                var title = Unit_Of_Work.title_Repository.First_Or_Default(t => t.ID == newOffer.TitleID && t.DepartmentID == newOffer.DepartmentID && t.IsDeleted != true);
+                if (title == null) return BadRequest("Invalid Title");
 
-        //    string validationResult = await _fileValidationService.ValidateFileWithTimeoutAsync(newOffer.UploadedFile);
-        //    if (validationResult != null)
-        //        return BadRequest(validationResult);
+                if (newOffer.UploadedFile == null || newOffer.UploadedFile.Length == 0)
+                    return BadRequest("File is required");
 
-        //    var offer = _mapper.Map<Offer>(newOffer);
+                //if (newOffer.UploadedFile.Length > 25 * 1024 * 1024) // 25MB
+                //    return BadRequest("File size exceeds 25MB");
 
-        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-        //    offer.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-        //    offer.TimeLogged = DateTime.Now; // التاريخ التلقائي
+                Offer offer = mapper.Map<Offer>(newOffer);
 
-        //    if (userTypeClaim == "octa")
-        //        offer.InsertedByOctaId = userId;
-        //    else if (userTypeClaim == "employee")
-        //        offer.InsertedByUserId = userId;
+                TimeZoneInfo cairoZone;
+                try
+                {
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                }
+                catch
+                {
+                    cairoZone = TimeZoneInfo.Local; // fallback
+                }
+                offer.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                offer.TimeLogged = DateTime.Now;
 
-        //    Unit_Of_Work.offer_Repository.Add(offer);
-        //    Unit_Of_Work.SaveChanges(); // لازم Save عشان نأخذ الـ ID
+                if (userTypeClaim == "octa")
+                    offer.InsertedByOctaId = userId;
+                else if (userTypeClaim == "employee")
+                    offer.InsertedByUserId = userId;
 
-        //    // رفع الملف بعد حفظ الـ Offer عشان نستخدم الـ ID
-        //    offer.UploadedFilePath = await _fileService.UploadFileAsync(
-        //        newOffer.UploadedFile,
-        //        "Offer/Offer",  // مجلد التخزين
-        //        offer.ID,
-        //        HttpContext);
+                offer.UploadedFilePath = "temp";
 
-        //    Unit_Of_Work.offer_Repository.Update(offer);
-        //    Unit_Of_Work.SaveChanges();
+                Unit_Of_Work.offer_Repository.Add(offer);
+                Unit_Of_Work.SaveChanges();
 
-        //    var result = _mapper.Map<OfferGetDto>(offer);
-        //    result.UploadedFilePath = _fileService.GetFileUrl(result.UploadedFilePath, Request, HttpContext);
+                offer.UploadedFilePath = await _fileService.UploadFileAsync(newOffer.UploadedFile, "Offer/Offer", offer.ID, HttpContext);
+                Unit_Of_Work.offer_Repository.Update(offer);
+                Unit_Of_Work.SaveChanges();
 
-        //    return Ok(result);
-        //}
+                var result = mapper.Map<OfferGetDto>(offer);
+                result.UploadedFilePath = _fileService.GetFileUrl(result.UploadedFilePath, Request, HttpContext);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////// PUT: api/with-domain/Offer
-        //[HttpPut]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Offer" })]
-        //public async Task<IActionResult> Edit([FromForm] OfferEditDto updatedOffer)
-        //{
-        //    if (updatedOffer == null)
-        //        return BadRequest("Offer data is required");
+        [HttpPut("{id}")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offers" })]
+        public async Task<IActionResult> Update(long id, [FromForm] OfferAddDto updatedOffer)
+        {
+            if (updatedOffer == null)
+                return BadRequest("Offer data is required");
 
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            try
+            {
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //    long.TryParse(userIdClaim, out long userId);
-        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-        //    var roleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-        //    long.TryParse(roleClaim, out long roleId);
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-        //    if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
-        //        return Unauthorized("User claims not found");
+                if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+                    return Unauthorized("User claims not found");
 
-        //    var offer = Unit_Of_Work.offer_Repository.First_Or_Default(o => o.ID == updatedOffer.ID && o.IsDeleted != true);
-        //    if (offer == null)
-        //        return NotFound();
+                if (!long.TryParse(userIdClaim, out long userId))
+                    return Unauthorized("Invalid user ID claim");
 
-        //    // تحقق من الصلاحيات لو employee
-        //    if (userTypeClaim == "employee")
-        //    {
-        //        IActionResult? access = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Offer", roleId, userId, offer.Department);
-        //        if (access != null) return access;
-        //    }
+                var offer = Unit_Of_Work.offer_Repository.First_Or_Default(o => o.ID == id);
+                if (offer == null)
+                    return NotFound("Offer not found");
 
-        //    // تحقق من الملف الجديد لو موجود
-        //    if (updatedOffer.UploadedFile != null)
-        //    {
-        //        if (updatedOffer.UploadedFile.Length > 25 * 1024 * 1024)
-        //            return BadRequest("File size exceeds 25MB");
+                var dept = Unit_Of_Work.department_Repository.First_Or_Default(d => d.ID == updatedOffer.DepartmentID && d.IsDeleted != true);
+                if (dept == null) return BadRequest("Invalid Department");
 
-        //        string validationResult = await _fileValidationService.ValidateFileWithTimeoutAsync(updatedOffer.UploadedFile);
-        //        if (validationResult != null)
-        //            return BadRequest(validationResult);
+                var title = Unit_Of_Work.title_Repository.First_Or_Default(t => t.ID == updatedOffer.TitleID && t.DepartmentID == updatedOffer.DepartmentID && t.IsDeleted != true);
+                if (title == null) return BadRequest("Invalid Title");
 
-        //        // استبدال الملف القديم
-        //        offer.UploadedFilePath = await _fileService.ReplaceFileAsync(
-        //            updatedOffer.UploadedFile,
-        //            offer.UploadedFilePath,
-        //            "Offer/Offer",
-        //            offer.ID,
-        //            HttpContext);
-        //    }
-        //    else if (!string.IsNullOrEmpty(updatedOffer.DeletedFile))
-        //    {
-        //        // حذف الملف لو الـ Client طلب حذف
-        //        await _fileService.DeleteFileAsync(
-        //            updatedOffer.DeletedFile,
-        //            "Offer/Offer",
-        //            updatedOffer.ID,
-        //            HttpContext);
-        //        offer.UploadedFilePath = null;
-        //    }
+                mapper.Map(updatedOffer, offer);
 
-        //    _mapper.Map(updatedOffer, offer);
+                TimeZoneInfo cairoZone;
+                try
+                {
+                    cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                }
+                catch
+                {
+                    cairoZone = TimeZoneInfo.Local;
+                }
+                offer.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                offer.TimeLogged = DateTime.Now;
 
-        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-        //    offer.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                    offer.UpdatedByOctaId = userId;
+                else if (userTypeClaim == "employee")
+                    offer.UpdatedByUserId = userId;
 
-        //    if (userTypeClaim == "octa")
-        //    {
-        //        offer.UpdatedByOctaId = userId;
-        //        offer.UpdatedByUserId = null;
-        //    }
-        //    else if (userTypeClaim == "employee")
-        //    {
-        //        offer.UpdatedByUserId = userId;
-        //        offer.UpdatedByOctaId = null;
-        //    }
+                if (updatedOffer.UploadedFile != null && updatedOffer.UploadedFile.Length > 0)
+                {
+                    //if (updatedOffer.UploadedFile.Length > 25 * 1024 * 1024)
+                    //    return BadRequest("File size exceeds 25MB");
 
-        //    Unit_Of_Work.offer_Repository.Update(offer);
-        //    Unit_Of_Work.SaveChanges();
+                    offer.UploadedFilePath = await _fileService.UploadFileAsync(updatedOffer.UploadedFile, "Offer/Offer", offer.ID, HttpContext);
+                }
 
-        //    var result = _mapper.Map<OfferGetDto>(offer);
-        //    result.UploadedFilePath = _fileService.GetFileUrl(result.UploadedFilePath, Request, HttpContext);
+                Unit_Of_Work.offer_Repository.Update(offer);
+                Unit_Of_Work.SaveChanges();
 
-        //    return Ok(result);
-        //}
+                var result = mapper.Map<OfferGetDto>(offer);
+                result.UploadedFilePath = _fileService.GetFileUrl(result.UploadedFilePath, Request, HttpContext);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////// DELETE: api/with-domain/Offer/{id}
-        //[HttpDelete("{id}")]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowDelete: 1, pages: new[] { "Offer" })]
-        //public async Task<IActionResult> Delete(long id)
-        //{
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offers" })]
+        public IActionResult Delete(long id, [FromQuery] bool softDelete = true)
+        {
+            try
+            {
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //    long.TryParse(userIdClaim, out long userId);
-        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-        //    var roleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-        //    long.TryParse(roleClaim, out long roleId);
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+                    return Unauthorized("User claims not found");
 
-        //    if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
-        //        return Unauthorized("User claims not found");
+                if (!long.TryParse(userIdClaim, out long userId))
+                    return Unauthorized("Invalid user ID claim");
 
-        //    var offer = Unit_Of_Work.offer_Repository.First_Or_Default(o => o.ID == id && o.IsDeleted != true,
-        //        q => q.Include(o => o.Department));
+                var offer = Unit_Of_Work.offer_Repository.First_Or_Default(o => o.ID == id);
+                if (offer == null)
+                    return NotFound("Offer not found");
 
-        //    if (offer == null)
-        //        return NotFound();
+                if (softDelete)
+                {
+                    offer.IsDeleted = true;
 
-        //    if (userTypeClaim == "employee")
-        //    {
-        //        IActionResult? access = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Offer", roleId, userId, offer.Department);
-        //        if (access != null) return access;
-        //    }
+                    TimeZoneInfo cairoZone;
+                    try { cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"); }
+                    catch { cairoZone = TimeZoneInfo.Local; }
+                    offer.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    offer.UpdatedByUserId = userTypeClaim == "employee" ? userId : null;
+                    offer.UpdatedByOctaId = userTypeClaim == "octa" ? userId : null;
 
-        //    // حذف الملف لو موجود
-        //    if (!string.IsNullOrEmpty(offer.UploadedFilePath))
-        //    {
-        //        await _fileService.DeleteFileAsync(offer.UploadedFilePath, "Offer/Offer", id, HttpContext);
-        //    }
+                    Unit_Of_Work.offer_Repository.Update(offer);
+                }
+                else
+                {
+                    Unit_Of_Work.offer_Repository.Update(offer);
+                }
 
-        //    offer.IsDeleted = true;
-        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-        //    offer.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                Unit_Of_Work.SaveChanges();
 
-        //    if (userTypeClaim == "octa")
-        //    {
-        //        offer.DeletedByOctaId = userId;
-        //        offer.DeletedByUserId = null;
-        //    }
-        //    else if (userTypeClaim == "employee")
-        //    {
-        //        offer.DeletedByUserId = userId;
-        //        offer.DeletedByOctaId = null;
-        //    }
+                return Ok(new { message = softDelete ? "Offer soft deleted successfully" : "Offer deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
 
-        //    Unit_Of_Work.offer_Repository.Update(offer);
-        //    Unit_Of_Work.SaveChanges();
-
-        //    return Ok();
-        //}
     }
+
 }
+
 
