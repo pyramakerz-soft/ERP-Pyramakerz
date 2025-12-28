@@ -13,14 +13,15 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long ID { get; set; }
         public string Name { get; set; }
         public string bankBranch { get; set; }
-        public string BankAccountName { get; set; }
-        public string BankName { get; set; }
-        public string IBAN { get; set; }
-        public string BankAccountNumber { get; set; }
-        public string AccountOpeningDate { get; set; }
-        public string AccountClosingDate { get; set; }
-        public long AccountNumberID { get; set; }
-        public string? AccountNumberName { get; set; }
-        public long InsertedByUserId { get; set; }
+        public long? InsertedByUserId { get; set; }
+  
+        //public string? BankAccountName { get; set; }
+        //public string? BankName { get; set; }
+        //public string? IBAN { get; set; }
+        //public string? BankAccountNumber { get; set; }
+        //public string? AccountOpeningDate { get; set; }
+        //public string? AccountClosingDate { get; set; }
+        //public long AccountNumberID { get; set; }
+        //public string? AccountNumberName { get; set; }
     }
 }

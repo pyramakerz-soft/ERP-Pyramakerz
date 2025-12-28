@@ -4,10 +4,11 @@
     <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Bank information details' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-      <button (click)="Create()"
-        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        {{ 'Create Bank info details' | translate }}
-      </button>
+    <button (click)="Create()"
+    class="rounded-lg bg-orange-500 text-white px-4 py-3 flex items-center justify-center gap-2 hover:bg-orange-600 transition duration-200 shadow-md">
+    <i class="fas fa-plus-circle"></i>
+    {{ 'Create Bank infor details' | translate }}
+  </button>
     </div>
   </div>
 
@@ -40,7 +41,7 @@
             [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
             class="border-t border-gray-300 text-xs md:text-sm">
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.bankName }}
+              {{ row.name }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.bankBranch }}
@@ -68,7 +69,7 @@
   <div class="relative bg-white w-[669px] rounded-2xl p-12 gap-4 shadow-md">
     <!-- Close Icon -->
     <button (click)="closeModal()"
-      class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
+      class="absolute top-4 right-4  text-black hover:text-gray-900 transition duration-200">
       <i class="fa-solid fa-xmark text-2xl"></i>
     </button>
 
@@ -82,14 +83,14 @@
           <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Bank Name' | translate }}</h6>
           <input type="text" 
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankName" 
+            [(ngModel)]="bank.name" 
             placeholder="{{ 'Enter Bank Name' | translate }}"
-            (ngModelChange)="onInputValueChange('bankName', $event)" />
-          <span *ngIf="validationErrors['bankName']" class="text-red-500 font-normal">
-            {{ validationErrors['bankName'] }}
+            (ngModelChange)="onInputValueChange('name', $event)" />
+          <span *ngIf="validationErrors['name']" class="text-red-500 font-normal">
+            {{ validationErrors['name'] }}
           </span>
         </div>
-
+   
         <!-- Bank Branch -->
         <div class="flex flex-col w-full mt-3">
           <h6 class="font-medium text-base leading-6 mb-1">{{ 'Branch Name' | translate }}</h6>
@@ -106,7 +107,7 @@
         <!-- Save Button -->
         <div class="flex justify-end mt-4 w-full">
           <button [disabled]="isLoading" 
-            class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+            class="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg"
             (click)="CreateOREdit()">
             <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>

@@ -40,8 +40,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Bank> banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(
-                    f => f.IsDeleted != true,
-                    query => query.Include(b => b.AccountNumber));
+                    f => f.IsDeleted != true);
 
             if (banks == null || banks.Count == 0)
             {
@@ -137,8 +136,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             Bank Bank = await Unit_Of_Work.bank_Repository.FindByIncludesAsync(
-                    credit => credit.IsDeleted != true && credit.ID == id,
-                    query => query.Include(credit => credit.AccountNumber));
+                    credit => credit.IsDeleted != true && credit.ID == id
+                    //query => query.Include(credit => credit.AccountNumber)
+                    );
 
             if (Bank == null)
             {
@@ -157,7 +157,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         allowedTypes: new[] { "octa", "employee" },
         allowEdit: 1,
         pages: new[] { "Bank Infor Details" }
-     )]
+        )]
         public IActionResult Edit(BankGetDTO newBank)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -189,28 +189,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("No Bank with this ID");
             }
 
-            AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newBank.AccountNumberID);
+            //AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true );
 
-            if (account == null)
-            {
-                return NotFound("No Account chart with this Id");
-            }
-            else
-            {
-                if (account.SubTypeID == 1)
-                {
-                    return BadRequest("You can't use main account, only sub account");
-                }
+            //if (account == null)
+            //{
+            //    return NotFound("No Account chart with this Id");
+            //}
+            //else
+            //{
+            //    if (account.SubTypeID == 1)
+            //    {
+            //        return BadRequest("You can't use main account, only sub account");
+            //    }
 
-                if (account.LinkFileID != 6)
-                {
-                    return BadRequest("Wrong Link File, it should be Bank file link ");
-                }
-            }
+            //    if (account.LinkFileID != 6)
+            //    {
+            //        return BadRequest("Wrong Link File, it should be Bank file link ");
+            //    }
+            //}
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Bank", roleId, userId, bank);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Bank Infor Details", roleId, userId, bank);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -280,7 +280,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
              
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Bank", roleId, userId, bank);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Bank Infor Details", roleId, userId, bank);
                 if (accessCheck != null)
                 {
                     return accessCheck;

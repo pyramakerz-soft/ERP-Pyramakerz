@@ -100,6 +100,28 @@ namespace LMS_CMS_BL.Config
             .ForMember(dest => dest.Department, opt => opt.Ignore());
 
             // Offer Mappings--77
+            CreateMap<AppointmentDocument, AppointmentDocumentGetDTO>();
+
+            // Add DTO → Entity
+            CreateMap<AppointmentDocumentAddDTO, AppointmentDocument>();
+                //.ForMember(dest => dest.AppointmentDate, opt => opt.Ignore())
+                //.ForMember(dest => dest.InsertedAt, opt => opt.Ignore())
+                //.ForMember(dest => dest.InsertedByUserId, opt => opt.Ignore())
+                //.ForMember(dest => dest.InsertedByOctaId, opt => opt.Ignore());
+
+
+            // Edit: Get DTO --
+            CreateMap<AppointmentDocumentGetDTO, AppointmentDocument>();
+                //.ForMember(dest => dest.AppointmentDate, opt => opt.Ignore()) 
+                //.ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                //.ForMember(dest => dest.UpdatedByUserId, opt => opt.Ignore())
+                //.ForMember(dest => dest.UpdatedByOctaId, opt => opt.Ignore())
+                //.ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                //.ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                //.ForMember(dest => dest.DeletedByUserId, opt => opt.Ignore())
+                //.ForMember(dest => dest.DeletedByOctaId, opt => opt.Ignore());
+               
+
 
             CreateMap<Offer, OfferGetDto>()
             .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
@@ -525,8 +547,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<SupplierAddDTO, Supplier>();
             CreateMap<SupplierGetDTO, Supplier>();
 
-            CreateMap<Bank, BankGetDTO>()
-               .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name));
+            CreateMap<Bank, BankGetDTO>();
             CreateMap<BankAddDto, Bank>();
             CreateMap<BankGetDTO, Bank>();
 

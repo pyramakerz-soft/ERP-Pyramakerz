@@ -101,8 +101,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             return Ok(offerDto);
         }
-
-
+   
         ///////////////////////////////////////////////////////////////////////////////////// POST: api/with-domain/Offer
         [HttpPost]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Offers" })]

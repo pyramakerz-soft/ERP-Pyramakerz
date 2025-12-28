@@ -273,7 +273,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<EmployeeLoans> FailedStudents { get; set; } 
         public DbSet<Title> Titles { get; set; }
         public DbSet<Offer> Offers { get; set; }
-        //public DbSet<BankInfo> BankInfos { get; set; }
+        public DbSet<AppointmentDocument> AppointmentDocuments { get; set; }
+       
 
         
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -401,23 +402,24 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(o => o.IsDeleted)
                 .HasDatabaseName("IX_Offer_IsDeleted");
 
+       
+            modelBuilder.Entity<AppointmentDocument>(entity =>
+            {
+               
+                entity.HasIndex(e => e.AppointmentDate)
+                      .HasDatabaseName("IX_AppointmentDocument_AppointmentDate");
 
-            //modelBuilder.Entity<BankInfo>()
-            //.HasIndex(b => b.BankName)
-            //.HasDatabaseName("IX_BankInfo_BankName");
+                entity.HasIndex(e => e.IsDeleted)
+               .HasDatabaseName("IX_AppointmentDocument_IsDeleted");
 
-            //modelBuilder.Entity<BankInfo>()
-            //.HasIndex(b => b.AccountNumber)
-            //.IsUnique()  
-            //.HasDatabaseName("IX_BankInfo_AccountNumber_Unique");
+                //entity.HasIndex(e => e.DocumentStatus)
+                //      .HasDatabaseName("IX_AppointmentDocument_DocumentStatus");
 
-            ////modelBuilder.Entity<BankInfo>()
-            ////    .HasIndex(b => b.CreatedDate)
-            ////    .HasDatabaseName("IX_BankInfo_CreatedDate");
+                //entity.HasIndex(e => e.SubmissionDate)
+                //      .HasDatabaseName("IX_AppointmentDocument_SubmissionDate");
 
-            ////modelBuilder.Entity<BankInfo>()
-            ////    .HasIndex(b => b.IsDeleted)
-            ////    .HasDatabaseName("IX_BankInfo_IsDeleted");
+            });
+
 
             ////////////////--77
 

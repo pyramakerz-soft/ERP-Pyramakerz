@@ -16,6 +16,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
         public string bankBranch { get; set; }
+
         //public string BankAccountName { get; set; }
         //public string BankName { get; set; }
         //public string IBAN { get; set; }

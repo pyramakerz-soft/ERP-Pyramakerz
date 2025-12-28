@@ -13,7 +13,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
-import { Bank, BankAddMinimal } from '../../../../Models/Accounting/bank';
+import { Bank, BankAddMinimal, BankEditDTO } from '../../../../Models/Accounting/bank';
 import { BankService } from '../../../../Services/Employee/Accounting/bank.service';
 import { InitLoader } from '../../../../core/Decorator/init-loader.decorator';
 @Component({
@@ -132,14 +132,16 @@ export class BankComponent implements OnInit, OnDestroy {
     });
   }
 
-  Edit(row: Bank) {
-    this.mode = 'Edit';
-    this.BankServ.GetById(row.id, this.DomainName).subscribe((d) => {
-      this.bank = d;
-    });
-    this.validationErrors = {};
-    this.openModal();
-  }
+Edit(row: Bank) {
+  this.mode = 'Edit';
+  this.validationErrors = {};
+
+  this.BankServ.GetById(row.id, this.DomainName).subscribe((d) => {
+    this.bank = d;
+    this.openModal(); 
+  });
+}
+
 
   IsAllowDelete(InsertedByID: number) {
     return this.EditDeleteServ.IsAllowDelete(
@@ -157,115 +159,90 @@ export class BankComponent implements OnInit, OnDestroy {
     );
   }
 
-  // CreateOREdit() {
-  //   if (this.isFormValid()) {
-  //     this.isLoading = true;
-  //     const bankData: Bank = {
-  //       ...this.bank,
-       
-  //       name: this.bank.bankName, 
-  //       bankAccountName: this.bank.bankName 
-        
-  //     };
+// CreateOREdit() {
+//   if (!this.isFormValid()) return;
 
-  //     if (this.mode == 'Create') {
-  //       this.BankServ.Add(bankData, this.DomainName).subscribe(
-  //         (d) => {
-  //           this.GetAllData();
-  //           this.isLoading = false;
-  //           this.closeModal();
-  //           this.showSuccessAlert(this.translate.instant('Created successfully'));
-  //         },
-  //         (error) => {
-  //           this.isLoading = false;
-  //           const errorMessage = error.error || this.translate.instant('Failed to create bank information');
-  //           this.showErrorAlert(errorMessage);
-  //         }
-  //       );
-  //     }
-  //     if (this.mode == 'Edit') {
-  //       this.BankServ.Edit(bankData, this.DomainName).subscribe(
-  //         (d) => {
-  //           this.GetAllData();
-  //           this.isLoading = false;
-  //           this.closeModal();
-  //           this.showSuccessAlert(this.translate.instant('Updated successfully'));
-  //         },
-  //         (error) => {
-  //           this.isLoading = false;
-  //           const errorMessage = error.error || this.translate.instant('Failed to update bank information');
-  //           this.showErrorAlert(errorMessage);
-  //         }
-  //       );
-  //     }
-  //   }
-  // }
+//   this.isLoading = true;
 
+//   if (this.mode === 'Create') { 
+//     this.BankServ.Add(this.bank, this.DomainName).subscribe({
+//       next: () => this.handleSuccess(),
+//       error: (error) => this.handleError(error) 
+//     });
+//   } else if (this.mode === 'Edit') { 
+//     this.BankServ.Edit(this.bank, this.DomainName).subscribe({
+//       next: () => this.handleSuccess(),
+//       error: (error) => this.handleError(error)
+//     });
+//   }
+// }
+
+// عند الضغط على Save
 CreateOREdit() {
   if (!this.isFormValid()) return;
 
   this.isLoading = true;
 
-  const bankDto: BankAddMinimal = {
-    Name: this.bank.bankName?.trim(),
-    bankBranch: this.bank.bankBranch?.trim()
-  };
+  if (this.mode === 'Create') {
+    const bankDto: BankAddMinimal = {
+      name: this.bank.name?.trim() || '',
+      bankBranch: this.bank.bankBranch?.trim() || ''
+    };
 
-  const obs = this.mode === 'Create'
-    ? this.BankServ.Add(bankDto, this.DomainName)
-    : this.BankServ.Edit(this.bank as any, this.DomainName); // Edit يمكن أن تبقيه كما هو
+    this.BankServ.Add(bankDto, this.DomainName).subscribe({
+      next: () => this.handleSuccess(),
+      error: (error) => this.handleError(error)
+    });
 
-  obs.subscribe({
-    next: () => {
-      this.isLoading = false;
-      this.closeModal();
-      this.GetAllData();
-      this.showSuccessAlert(
-        this.mode === 'Create'
-          ? this.translate.instant('Created successfully')
-          : this.translate.instant('Updated successfully')
-      );
-    },
-    error: async (error) => {
-      this.isLoading = false;
-      const Swal = await import('sweetalert2').then(m => m.default);
+  } else if (this.mode === 'Edit') {
+    const bankDto: BankEditDTO = {
+      id: this.bank.id,
+      name: this.bank.name?.trim() || '',
+      bankBranch: this.bank.bankBranch?.trim() || '',
+      InsertedByUserId: this.bank.insertedByUserId || null
+    };
 
-      if (error.error && typeof error.error === 'string') {
-        if (error.error.includes("Name cannot be longer than 100 characters")) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: this.translate.instant('Name cannot be longer than 100 characters'),
-            confirmButtonText: this.translate.instant('Okay'),
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          return;
-        }
-        if (error.error.includes("Access denied")) {
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('Access Denied'),
-            text: this.translate.instant('You do not have permission to perform this action.'),
-            confirmButtonText: this.translate.instant('Okay'),
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          return;
-        }
-      }
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: error.error || this.translate.instant('An error occurred. Please try again.'),
-        confirmButtonText: this.translate.instant('Okay'),
-        customClass: { confirmButton: 'secondaryBg' },
-      });
-    }
-  });
+    this.BankServ.Edit(bankDto, this.DomainName).subscribe({
+      next: () => this.handleSuccess(),
+      error: (error) => this.handleError(error)
+    });
+  }
 }
 
+handleSuccess() {
+  this.isLoading = false;
+  this.closeModal();
+  this.GetAllData();
+  this.showSuccessAlert(
+    this.mode === 'Create'
+      ? this.translate.instant('Created successfully')
+      : this.translate.instant('Updated successfully')
+  );
+}
 
+async handleError(error: any) {
+  this.isLoading = false;
+  const Swal = await import('sweetalert2').then(m => m.default);
 
+  let text = error.error || this.translate.instant('An error occurred. Please try again.');
+
+  if (error.error && typeof error.error === 'string') {
+    if (error.error.includes("Name cannot be longer than 100 characters")) {
+      text = this.translate.instant('Name cannot be longer than 100 characters');
+    }
+    if (error.error.includes("Access denied")) {
+      text = this.translate.instant('You do not have permission to perform this action.');
+    }
+  }
+
+  Swal.fire({
+    icon: 'error',
+    title: 'Oops...',
+    text: text,
+    confirmButtonText: this.translate.instant('Okay'),
+    customClass: { confirmButton: 'secondaryBg' },
+  });
+}
   closeModal() {
     this.validationErrors = {};
     this.isModalVisible = false;
@@ -275,22 +252,44 @@ CreateOREdit() {
     this.isModalVisible = true;
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    this.validationErrors = {};
+//   isFormValid(): boolean {
+//     let isValid = true;
+//     this.validationErrors = {};
 
-    if (!this.bank.bankName?.trim()) {
-      this.validationErrors['bankName'] = this.getRequiredErrorMessage('Bank Name');
-      isValid = false;
-    }
+//     // if (!this.bank.bankName?.trim()) {
+//     //   this.validationErrors['bankName'] = this.getRequiredErrorMessage('Bank Name');
+//     //   isValid = false;
+//     // }
 
-    if (!this.bank.bankBranch?.trim()) {
-      this.validationErrors['bankBranch'] = this.getRequiredErrorMessage('Bank Branch');
-      isValid = false;
-    }
+//     if (!this.bank.name?.trim()) {
+//   this.validationErrors['name'] = this.getRequiredErrorMessage('Bank Name');
+// }
 
-    return isValid;
+
+//     if (!this.bank.bankBranch?.trim()) {
+//       this.validationErrors['bankBranch'] = this.getRequiredErrorMessage('Bank Branch');
+//       isValid = false;
+//     }
+
+//     return isValid;
+//   }
+
+isFormValid(): boolean {
+  let isValid = true;
+  this.validationErrors = {};
+
+  if (!this.bank.name?.trim()) {
+    this.validationErrors['name'] = this.getRequiredErrorMessage('Bank Name');
+    isValid = false;
   }
+
+  if (!this.bank.bankBranch?.trim()) {
+    this.validationErrors['bankBranch'] = this.getRequiredErrorMessage('Branch Name');
+    isValid = false;
+  }
+
+  return isValid;
+}
 
   private async showErrorAlert(errorMessage: string) {
     const translatedTitle = this.translate.instant('Error');

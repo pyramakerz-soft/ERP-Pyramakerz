@@ -804,6 +804,8 @@ export const routes: Routes = [
             { path: "Department", loadComponent: () => import('./Pages/Employee/Administrator/department/department.component').then(m => m.DepartmentComponent), title: "Department", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Offers", loadComponent: () => import('./Pages/Employee/Administrator/offer/offer.component').then(m => m.OfferComponent), title: "Offers", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
 
+            { path: "Appointment Documents", loadComponent: () => import('./Pages/Employee/Administrator/appointment-document/appointment-document.component').then(m => m.AppointmentDocumentComponent), title: "Appointment Documents", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+
             { path: 'Department/:id',loadComponent: () => import('./Pages/Employee/Administrator/title/title/title.component').then(m => m.TitleComponent),title: 'Titles',canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Outcome", loadComponent: () => import('./Pages/Employee/Accounting/outcomes/outcomes.component').then(m => m.OutcomesComponent), title: "Outcome", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Income", loadComponent: () => import('./Pages/Employee/Accounting/incomes/incomes.component').then(m => m.IncomesComponent), title: "Income", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

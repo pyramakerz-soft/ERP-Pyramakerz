@@ -283,6 +283,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<FailedStudents> FailedStudents_Repository; 
         GenericRepo<Title> Title_Repository;
         GenericRepo<Offer> Offer_Repository;
+        GenericRepo<AppointmentDocument> AppointmentDocument_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -308,6 +309,19 @@ namespace LMS_CMS_BL.UOW
                 return Employee_Repository;
             }
         }
+
+        public GenericRepo<AppointmentDocument> appointmentDocument_Repository
+        {
+            get
+            {
+                if (AppointmentDocument_Repository == null)
+                {
+                    AppointmentDocument_Repository = new GenericRepo<AppointmentDocument>(db);
+                }
+                return AppointmentDocument_Repository;
+            }
+        }
+       
 
         public GenericRepo<Title> title_Repository
         {
@@ -3254,7 +3268,9 @@ namespace LMS_CMS_BL.UOW
                 }
                 return FailedStudents_Repository;
             }
-        } 
+        }
+
+   
 
         public void SaveChanges()
         {

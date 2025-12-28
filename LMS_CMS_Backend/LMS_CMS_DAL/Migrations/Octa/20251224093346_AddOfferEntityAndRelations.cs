@@ -31,7 +31,7 @@ namespace LMS_CMS_DAL.Migrations.Octa
 
 
 // Update-Database -Context Octa_DbContext
-//  Add-Migration AddBankInfoEntityAndRelations -Context Octa_DbContext -OutputDir Migrations/Octa
+//  Add-Migration AddAppointmentDocument -Context Octa_DbContext -OutputDir Migrations/Octa
 
 //   migrationBuilder.Sql(@"UPDATE Page SET arDisplayName_name = N'الطلاب' WHERE ID = 158;");
 // Add-Migration AddNullEntityAndRelations -Context LMS_CMS_Context -OutputDir Migrations/Domains

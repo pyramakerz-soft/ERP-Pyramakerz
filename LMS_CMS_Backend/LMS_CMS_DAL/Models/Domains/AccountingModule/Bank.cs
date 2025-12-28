@@ -23,7 +23,7 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
         public string Name { get; set; }
         public string bankBranch { get; set; }
         public string? BankAccountName { get; set; }
-        public string BankName { get; set; }
+        public string? BankName { get; set; }
         public string? IBAN { get; set; }
         public string? BankAccountNumber { get; set; }
         public string? AccountOpeningDate { get; set; }
@@ -39,3 +39,4 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
 
     }
 }
+// Add-Migration updateAccountClosingDateNull -Context LMS_CMS_Context -OutputDir Migrations/Domains

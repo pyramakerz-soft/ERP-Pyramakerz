@@ -17,8 +17,13 @@ export class Bank {
 }
 
 export interface BankAddMinimal {
-  Name: string;       // Bank Name
+  name: string;       // Bank Name
   bankBranch: string; // Branch Name
 }
 
-
+export interface BankEditDTO {
+  id: number;
+  name: string;
+  bankBranch: string;
+  InsertedByUserId?: number | null;
+}
