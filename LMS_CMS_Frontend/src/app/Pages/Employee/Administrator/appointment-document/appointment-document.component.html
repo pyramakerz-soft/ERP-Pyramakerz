@@ -1,0 +1,106 @@
+<div class="container mx-auto ">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-semibold text-[#17253E]">
+        {{ 'Appointment Documents' | translate }}
+      </h1>
+    </div>
+
+    <button (click)="Create()"
+      class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+      <span>+</span>
+      {{ 'Create Document' | translate }}
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-6 flex justify-end">
+    <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+      <thead class="bg-[#EBEBEB] text-sm md:text-base">
+        <tr>
+          <th class="py-3 px-6 border border-[#EAECF0] border-t-0 border-l-0 whitespace-nowrap">
+            {{ 'Date' | translate }}
+          </th>
+          <th class="py-3 px-6 border border-[#EAECF0] border-t-0 border-l-0 whitespace-nowrap">
+            {{ 'Document Name' | translate }}
+          </th>
+          <th class="py-3 px-6 border border-[#EAECF0] border-t-0 border-l-0 whitespace-nowrap">
+            {{ 'Actions' | translate }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- No Data -->
+        <tr *ngIf="TableData.length === 0">
+          <td colspan="3" class="text-center py-8 text-gray-500">
+            {{ 'No Data Found' | translate }}
+          </td>
+        </tr>
+
+        <!-- Data Rows -->
+        <tr *ngFor="let doc of TableData; let i = index"
+          [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 === 0 }">
+          <td class="py-4 px-6 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ doc.appointmentDate | date:'dd MMM yyyy' }}
+          </td>
+          <td class="py-4 px-6 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ doc.documentName }}
+          </td>
+          <td class="py-4 px-6 border border-[#EAECF0] border-t-0 border-l-0">
+            <div class="flex gap-4">
+
+            <button *ngIf="AllowDelete && IsAllowDelete(doc.insertedByUserId)" (click)="Delete(doc.id)">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+
+            <button *ngIf="AllowEdit && IsAllowEdit(doc.insertedByUserId)" (click)="Edit(doc)">
+              <i class="fa-solid fa-pencil"></i>
+            </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div *ngIf="isModalVisible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-8 relative">
+    <!-- Close Button -->
+    <button (click)="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+      <i class="fa-solid fa-xmark text-2xl"></i>
+    </button>
+
+    <h2 class="text-2xl font-semibold text-[#17253E] mb-6">
+      {{ 'Create Document' | translate }}
+    </h2>
+
+    <div class="bg-[#F7F7F7] rounded-3xl p-6">
+      <label class="block text-base font-medium text-[#17253E] mb-2">
+        {{ 'Document Name' | translate }}
+      </label>
+      <input type="text" [(ngModel)]="currentDocument.documentName" (ngModelChange)="validationErrors.documentName = ''"
+        placeholder="Enter"
+        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-orange-500" />
+
+      <span *ngIf="validationErrors.documentName" class="text-red-500 text-sm mt-1 block">
+        {{ validationErrors.documentName }}
+      </span>
+
+      <div class="flex justify-end mt-6">
+        <button (click)="SaveDocument()" [disabled]="isLoading"
+          class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg flex items-center gap-2 transition-colors">
+          <span *ngIf="!isLoading">{{ 'Create' | translate }}</span>
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

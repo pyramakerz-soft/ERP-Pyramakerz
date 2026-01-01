@@ -101,13 +101,43 @@ namespace LMS_CMS_BL.Config
 
             // Offer Mappings--77
 
+            CreateMap<AppointmentDocument, AppointmentDocumentGetDTO>();
+
+            // Add DTO → Entity
+            CreateMap<AppointmentDocumentAddDTO, AppointmentDocument>();
+
+            // Edit: Get DTO --
+            CreateMap<AppointmentDocumentEditeDTO, AppointmentDocument>()
+              .ForMember(dest => dest.AppointmentDate, opt => opt.Ignore());
+
+
+            CreateMap<SocialInsurance, SocialInsuranceGetDTO>();
+            CreateMap<SocialInsuranceAddDTO, SocialInsurance>();
+
+            // Edit: Get DTO --
+            CreateMap<SocialInsuranceEditDTO, SocialInsurance>()
+                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore());
+
+
+            // BounsCategory Mappings--77
+
+            CreateMap<BounsCategory, BounsCategoryGetDTO>();
+            CreateMap<BounsCategoryAddDTO, BounsCategory>();
+            CreateMap<BounsCategoryEditeDTO, BounsCategory>();
+
+
+            // DeductionCategory Mappings--77
+
+            CreateMap<DeductionCategory, DeductionCategoryGetDTO>();
+            CreateMap<DeductionCategoryAddDTO, DeductionCategory>();
+            CreateMap<DeductionCategoryEditeDTO, DeductionCategory>();
+
             CreateMap<Offer, OfferGetDto>()
             .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
             .ForMember(dest => dest.TitleName, opt => opt.MapFrom(src => src.Title != null ? src.Title.Name : null))
-            .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.UploadedFilePath)));  // اسم الملف بس للعرض
+            .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.UploadedFilePath)));
 
-
-
+            CreateMap<OfferAddDto, Offer>();
 
             CreateMap<BusDistrict, BusDistrictAddDTO>();
             CreateMap<BusDistrictAddDTO, BusDistrict>();
@@ -147,11 +177,11 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.BusCompanyID, opt => opt.MapFrom(src => src.BusCompany.ID))
                 .ForMember(dest => dest.BusCompanyName, opt => opt.MapFrom(src => src.BusCompany.Name));
 
-            CreateMap<Employee, EmployeeAddDTO>()
-               .ForMember(dest => dest.Role_ID, opt => opt.MapFrom(src => src.Role.ID))
-               .ForMember(dest => dest.EmployeeTypeID, opt => opt.MapFrom(src => src.EmployeeType.ID))
-               .ForMember(dest => dest.BusCompanyID, opt => opt.MapFrom(src => src.BusCompany.ID));
-            CreateMap<EmployeeAddDTO, Employee>();
+            //CreateMap<Employee, EmployeeAddDTO>()
+            //   .ForMember(dest => dest.Role_ID, opt => opt.MapFrom(src => src.Role.ID))
+            //   .ForMember(dest => dest.EmployeeTypeID, opt => opt.MapFrom(src => src.EmployeeType.ID))
+            //   .ForMember(dest => dest.BusCompanyID, opt => opt.MapFrom(src => src.BusCompany.ID));
+            //CreateMap<EmployeeAddDTO, Employee>();
 
             CreateMap<Employee, EmployeePutDTO>()
               .ForMember(dest => dest.Role_ID, opt => opt.MapFrom(src => src.Role.ID))
@@ -526,8 +556,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<SupplierAddDTO, Supplier>();
             CreateMap<SupplierGetDTO, Supplier>();
 
-            CreateMap<Bank, BankGetDTO>()
-               .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name));
+            CreateMap<Bank, BankGetDTO>();
             CreateMap<BankAddDto, Bank>();
             CreateMap<BankGetDTO, Bank>();
 

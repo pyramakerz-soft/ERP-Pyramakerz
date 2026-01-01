@@ -38,23 +38,18 @@ export class DepartmentComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   AllowView: boolean = false;
-
   TableData: Department[] = [];
-
   DomainName: string = '';
   UserID: number = 0;
   isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
-
   path: string = '';
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
-
   department: Department = new Department();
-
   validationErrors: { [key in keyof Department]?: string } = {};
   isLoading = false;
 
@@ -152,8 +147,7 @@ View(row: Department) {
   console.log('1. View button clicked');
   console.log('2. Department ID:', row.id);
   console.log('3. Current route:', this.router.url);
-  
-  // الاحتمال 1
+
   this.router.navigate(['Employee', 'Department', row.id], { 
     queryParams: { name: row.name } 
   });

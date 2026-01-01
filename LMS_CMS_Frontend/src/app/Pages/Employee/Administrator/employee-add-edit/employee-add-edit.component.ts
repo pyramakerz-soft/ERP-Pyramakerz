@@ -50,7 +50,7 @@ export class EmployeeAddEditComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
   Data: Employee = new Employee();
-  BusCompany: BusType[] = [];
+  // BusCompany: BusType[] = [];
   Roles: Role[] = [];
   empTypes: EmployeeTypeGet[] = [];
   mode: string = '';
@@ -64,27 +64,25 @@ export class EmployeeAddEditComponent {
   SelectedFiles: EmployeeAttachment[] = [];
   NewFile: EmployeeAttachment = new EmployeeAttachment();
   isLoading = false;
-  floors: Floor[] = [];
-  floorsSelected: Floor[] = [];
-  locations: Location[] = [];
-  locationsSelected: Location[] = [];
-  grades: Grade[] = [];
-  gradeSelected: Grade[] = [];
-  subject: Subject[] = [];
-  subjectSelected: Subject[] = [];
-  isFloorMonitor = false;
-  isGradeSupervisor = false;
-  isSubjectSupervisor = false;
+  // floors: Floor[] = [];
+  // floorsSelected: Floor[] = [];
+  // locations: Location[] = [];
+  // locationsSelected: Location[] = [];
+  // grades: Grade[] = [];
+  // gradeSelected: Grade[] = [];
+  // subject: Subject[] = [];
+  // subjectSelected: Subject[] = [];
+  // isFloorMonitor = false;
+  // isGradeSupervisor = false;
+  // isSubjectSupervisor = false;
 
   dropdownOpen = false;
-  LocationdropdownOpen = false;
-  GradedropdownOpen = false;
-  SubjectdropdownOpen = false;
+  // LocationdropdownOpen = false;
+  // GradedropdownOpen = false;
+  // SubjectdropdownOpen = false;
 
  showRegistrationForm: boolean = false;
  showFirstSection: boolean = true;
-
-   // التحكم بالصفحات الثلاثة
   currentSection: number = 1;
 
   private readonly allowedExtensions: string[] = [
@@ -120,79 +118,106 @@ export class EmployeeAddEditComponent {
   ) { }
 
   ngOnInit() {
-    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-    this.UserID = this.User_Data_After_Login.id;
-    if (this.User_Data_After_Login.type === 'employee') {
-      this.DomainName = this.ApiServ.GetHeader();
-      this.activeRoute.url.subscribe((url) => {
+  this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+  this.UserID = this.User_Data_After_Login.id;
+
+  if (this.User_Data_After_Login.type === 'employee') {
+    this.DomainName = this.ApiServ.GetHeader();
+
+    this.activeRoute.url.subscribe((url) => {
       this.path = url.map(segment => segment.path).join('/');
 
-        if (this.path.endsWith("Employee/Create")) {
-          this.mode = 'Create';
-        }else{
-          this.mode = 'Edit';
-          this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-          this.EmpServ.Get_Employee_By_ID(
-            this.EmpId,
-            this.DomainName
-          ).subscribe(async (data) => {
-            this.Data = data;
-            this.Data.editedFiles = [];
-            if (data.files == null) {
-              this.Data.files = [];
+      if (this.path.endsWith("Employee/Create")) {
+        this.mode = 'Create';
+        
+      } else {
+        this.mode = 'Edit';
+        this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+
+        this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
+          this.Data = data;
+          this.Data.editedFiles = [];
+          if (data.files == null) {
+            this.Data.files = [];
+          }
+          this.Data.id = this.EmpId;
+
+          // =====================================================
+          // تعليق مؤقت: تحميل بيانات الأدوار الإشرافية (Floors, Locations, Grades, Subjects)
+          // هذه الأجزاء مش مطلوبة في نموذج التقديم للوظيفة (Job Application)
+          // لو احتجت ترجعها في المستقبل، شيل علامات /* و */
+          // =====================================================
+          /*
+          this.FloorServ.Get(this.DomainName).subscribe((data) => {
+            this.floors = data;
+            if (this.Data.floorsSelected.length > 0) {
+              this.isFloorMonitor = true;
+              this.floorsSelected = this.floors.filter((s) =>
+                this.Data.floorsSelected.includes(s.id)
+              );
             }
-            this.Data.id = this.EmpId;
-            this.FloorServ.Get(this.DomainName).subscribe((data) => {
-              this.floors = data;
-              if (this.Data.floorsSelected.length > 0) {
-                this.isFloorMonitor = true
-                this.floorsSelected = this.floors.filter((s) =>
-                  this.Data.floorsSelected.includes(s.id)
-                );
-              }
-            });
-            this.LocationServ.Get(this.DomainName).subscribe((data) => {
-              this.locations = data;
-              if (this.Data.locationSelected.length > 0) {
-                this.locationsSelected = this.locations.filter((s) =>
-                  this.Data.locationSelected.includes(s.id)
-                );
-              }
-            });
-            this.GradeServ.Get(this.DomainName).subscribe((data) => {
-              this.grades = data;
-              if (this.Data.gradeSelected.length > 0) {
-                this.isGradeSupervisor = true
-                this.gradeSelected = this.grades.filter((s) =>
-                  this.Data.gradeSelected.includes(s.id)
-                );
-              }
-            });
-            this.SubjectServ.Get(this.DomainName).subscribe((data) => {
-              this.subject = data;
-              if (this.Data.subjectSelected.length > 0) {
-                this.isSubjectSupervisor = true
-                this.subjectSelected = this.subject.filter((s) =>
-                  this.Data.subjectSelected.includes(s.id)
-                );
-              }
-            });
           });
-        }
-        // this.GetBusCompany();
-        // this.GetRole();
-        // this.GetFloors();
-        // this.GetLocations();
-        // this.GetGrade();
-        // this.GetSubject();
-        // this.GetEmployeeType();
-      });
-    }
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+
+          this.LocationServ.Get(this.DomainName).subscribe((data) => {
+            this.locations = data;
+            if (this.Data.locationSelected.length > 0) {
+              this.locationsSelected = this.locations.filter((s) =>
+                this.Data.locationSelected.includes(s.id)
+              );
+            }
+          });
+
+          this.GradeServ.Get(this.DomainName).subscribe((data) => {
+            this.grades = data;
+            if (this.Data.gradeSelected.length > 0) {
+              this.isGradeSupervisor = true;
+              this.gradeSelected = this.grades.filter((s) =>
+                this.Data.gradeSelected.includes(s.id)
+              );
+            }
+          });
+
+          this.SubjectServ.Get(this.DomainName).subscribe((data) => {
+            this.subject = data;
+            if (this.Data.subjectSelected.length > 0) {
+              this.isSubjectSupervisor = true;
+              this.subjectSelected = this.subject.filter((s) =>
+                this.Data.subjectSelected.includes(s.id)
+              );
+            }
+          });
+          */
+          // =====================================================
+          // نهاية التعليق المؤقت
+          // =====================================================
+        });
+      }
+
+      // =====================================================
+      // تعليق مؤقت: استدعاءات قديمة لتحميل قوائم (Bus Company, Role, Employee Type, إلخ)
+      // دي كانت مستخدمة في نموذج إضافة/تعديل موظف داخلي، مش في نموذج التقديم الخارجي
+      // =====================================================
+      /*
+      this.GetBusCompany();
+      this.GetRole();
+      this.GetFloors();
+      this.GetLocations();
+      this.GetGrade();
+      this.GetSubject();
+      this.GetEmployeeType();
+      */
+      // =====================================================
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  // دعم تغيير اللغة (RTL/LTR) - مطلوب ومفعّل
+  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+  });
+  this.isRtl = document.documentElement.dir === 'rtl';
+}
+//--
+
   ngOnDestroy(): void { 
     if (this.subscription) {
       this.subscription.unsubscribe();
@@ -344,20 +369,17 @@ goBackToFirstPart() {
     { previousExperiencePlace: '', position: '', fromDate: '', toDate: '' } // الصف الأول موجود افتراضياً
   ];
 
-  // دالة لإضافة صف جديد
   addExperience() {
     this.experiences.push({ previousExperiencePlace: '', position: '', fromDate: '', toDate: '' });
   }
 
-  // دالة لتحديث القيم (إذا لازمتك لتحديث Data بشكل مركزي)
   onInputValueChangeExp(index: number, field: string, value: any) {
     (this.experiences[index] as any)[field] = value;
   }
 
-
   isFormValid(): boolean {
   let isValid = true;
-  this.validationErrors = {}; // مسح الأخطاء السابقة
+  this.validationErrors = {}; 
 
   // قائمة كل الحقول الإلزامية في نموذج التقديم
   const requiredStringFields: (keyof Employee)[] = [
@@ -371,10 +393,10 @@ goBackToFirstPart() {
     'hobbies',
     'applicationDate',
     'positionAppliedFor',
-    'previousExperiencePlace',
-    'position',
-    'fromDate',
-    'toDate',
+    // 'previousExperiencePlace',
+    // 'position',
+    // 'fromDate',
+    // 'toDate',
     'howDidYouFindUs',
     'reasonforLeavingtheJob',
     'didYouHaveAnyRelativeHere',
@@ -389,7 +411,6 @@ goBackToFirstPart() {
     'email'   // أضفت email هنا لأنه مش موجود في القائمة السابقة
   ];
 
-  // فحص الحقول النصية (string)
   for (const field of requiredStringFields) {
    const value = this.Data[field] || '';
     if (!value || (typeof value === 'string' && value.trim() === '')) {
@@ -408,13 +429,11 @@ goBackToFirstPart() {
     }
   }
 
-  // فحص lastSalary (number) - لازم يكون أكبر من 0
   if (!this.Data.lastSalary || this.Data.lastSalary <= 0) {
     this.validationErrors['lastSalary'] = `*Last Salary is required and must be greater than 0`;
     isValid = false;
   }
 
-  // فحص authorizeInvestigation (boolean) - لازم يكون true (مختار)
   if (!this.Data.authorizeInvestigation) {
     this.validationErrors['authorizeInvestigation'] = `*You must certify and authorize the investigation`;
     isValid = false;
@@ -470,7 +489,7 @@ return isValid;
 // الانتقال للصفحة التالية
 goToNextPage() {
 
-  //  الصفحة الأولى → الثانية
+
   if (this.currentSection === 1) {
 
     const firstSectionRequired: (keyof Employee)[] = [
@@ -528,20 +547,15 @@ goToNextPage() {
       });
       return;
     }
-
-    //  لو كله تمام
     this.currentSection = 2;
     return;
   }
 
-  //  الصفحة الثانية → الثالثة
   else if (this.currentSection === 2) {
     this.currentSection = 3;
     return;
   }
 }
-
-
 
   capitalizeField(field: keyof Employee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -567,159 +581,331 @@ goToNextPage() {
     }
   }
 
-
-  // الرجوع للصفحة السابقة
  goToPreviousPage() {
   if (this.currentSection > 1) {
     this.currentSection--;
   }
 }
+  // async Save() {
+  //   // this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
+  //   // this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
+  //   // this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
+  //   // this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
+  //  // إضافة الملاحظات من الصفحة الثالثة
+  // this.Data.note = this.Data.note || '';
 
+  // // استدعاء دالة Save الموجودة بالفعل
+  // const result = await this.Save();
 
-  async Save() {
-    // this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
-    // this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
-    // this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
-    // this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
-   // إضافة الملاحظات من الصفحة الثالثة
-  this.Data.note = this.Data.note || '';
+  // if(result) {
+  //   console.log('Employee saved successfully', this.Data);
+  // }
 
-  // استدعاء دالة Save الموجودة بالفعل
-  const result = await this.Save();
+  //   if (this.isFormValid()) {
+  //     this.isLoading = true;
 
-  if(result) {
-    console.log('Employee saved successfully', this.Data);
+  //     const Swal = await import('sweetalert2').then(m => m.default);
+
+  //     const initialLength = this.Data.files.length; 
+  //     for (let i = 0; i < this.SelectedFiles.length; i++) {
+  //       this.Data.files.push(this.SelectedFiles[i]);
+  //     }
+  //     if (this.mode == 'Create') {
+  //       return this.EmpServ.Add(this.Data, this.DomainName)
+  //         .toPromise()
+  //         .then(
+  //           (data) => {
+  //             Swal.fire({
+  //               icon: 'success',
+  //               title: 'Done',
+  //               text: 'Employee Added Successfully',
+  //               confirmButtonColor: '#089B41',
+  //             });
+  //             this.moveToEmployee();
+  //             this.isLoading = false;
+  //             return true;
+  //           },
+  //           (error) => {
+  //             switch (true) {
+  //               case error.error == 'This User Name Already Exist':
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+
+  //               case error.error.errors?.Password !== undefined:
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text:
+  //                     error.error.errors.Password[0] ||
+  //                     'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+
+  //               case error.error === 'This Email Already Exist':
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+
+  //               default:
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+  //             }
+  //             this.isLoading = false;
+  //             this.Data.files.splice(initialLength);
+  //             return false;
+  //           }
+  //         );
+  //     } else if (this.mode == 'Edit') {
+  //       if (this.DeletedFiles.length > 0) {
+  //         for (const id of this.DeletedFiles) {
+  //           await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
+  //         }
+  //       }
+  //       return this.EmpServ.Edit(this.Data, this.DomainName)
+  //         .toPromise()
+  //         .then(
+  //           (data) => {
+  //             Swal.fire({
+  //               icon: 'success',
+  //               title: 'Done',
+  //               text: 'Employee Edited Successfully',
+  //               confirmButtonColor: '#089B41',
+  //             });
+  //             this.moveToEmployee();
+  //             this.isLoading = false;
+  //             return true;
+  //           },
+  //           (error) => {
+  //             this.isLoading = false;
+  //             switch (true) {
+  //               case error.error == 'This User Name Already Exist':
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+
+  //               case error.error === 'This Email Already Exist':
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+
+  //               default:
+  //                 Swal.fire({
+  //                   icon: 'error',
+  //                   title: 'Error',
+  //                   text: error.error || 'An unexpected error occurred',
+  //                   confirmButtonColor: '#089B41',
+  //                 });
+  //                 break;
+  //             }
+  //             this.Data.files.splice(initialLength);
+  //             return false;
+  //           }
+  //         );
+  //     }
+  //   }
+
+  //   return Promise.resolve(true); // Default resolve if all logic completes
+  // }
+
+showMissingFields(): string[] {
+  const missing: string[] = [];
+
+  // كل الحقول الإلزامية بالظبط زي اللي في isFormValid()
+  const requiredFields: (keyof Employee)[] = [
+    'maritalStatus',
+    'university',
+    'faculty',
+    'major',
+    'schoolYouGraduatedFrom',
+    'otherStudies',
+    'computerSkills',        // موجود في الموديل بس مش في الـ HTML؟ لو موجود في الفورم أضيفه
+    'hobbies',               // نفس الكلام
+    'applicationDate',
+    'positionAppliedFor',
+    'previousExperiencePlace',
+    'position',
+    'fromDate',
+    'toDate',
+    'howDidYouFindUs',
+    'reasonforLeavingtheJob',
+    'didYouHaveAnyRelativeHere',
+    'yourLevelInEnglish',
+    'yourLevelInFrensh',
+    'doYouSpeakAnyOtherLanguages',
+    'currentJob',
+    'fullName',
+    'enterDate',
+    'signature',
+    'en_name',
+    'email'
+  ];
+
+  requiredFields.forEach(field => {
+    const value = (this.Data as any)[field];
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      let label = field
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/_/g, ' ')
+        .trim();
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      missing.push(label);
+    }
+  });
+
+  // تحقق خاص للإيميل
+  if (this.Data.email && this.Data.email.trim() !== '' && !this.emailPattern.test(this.Data.email.trim())) {
+    missing.push('Email (صيغة غير صحيحة)');
   }
 
-    if (this.isFormValid()) {
-      this.isLoading = true;
+  // تحقق خاص للراتب
+  if (!this.Data.lastSalary || this.Data.lastSalary <= 0) {
+    missing.push('Last Salary (يجب أن يكون أكبر من 0)');
+  }
 
-      const Swal = await import('sweetalert2').then(m => m.default);
+  // تحقق خاص للـ checkbox
+  if (!this.Data.authorizeInvestigation) {
+    missing.push('موافقة على التصريح (يجب تفعيل الـ checkbox)');
+  }
 
-      const initialLength = this.Data.files.length; 
-      for (let i = 0; i < this.SelectedFiles.length; i++) {
-        this.Data.files.push(this.SelectedFiles[i]);
-      }
-      if (this.mode == 'Create') {
-        return this.EmpServ.Add(this.Data, this.DomainName)
-          .toPromise()
-          .then(
-            (data) => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Done',
-                text: 'Employee Added Successfully',
-                confirmButtonColor: '#089B41',
-              });
-              this.moveToEmployee();
-              this.isLoading = false;
-              return true;
-            },
-            (error) => {
-              switch (true) {
-                case error.error == 'This User Name Already Exist':
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
+  // تحقق من الخبرات السابقة (الصف الأول على الأقل)
+  const firstExperience = this.experiences[0];
+  if (
+    !firstExperience?.previousExperiencePlace?.trim() ||
+    !firstExperience?.position?.trim() ||
+    !firstExperience?.fromDate ||
+    !firstExperience?.toDate
+  ) {
+    missing.push('الخبرة السابقة (الصف الأول يجب ملؤه كاملاً)');
+  }
 
-                case error.error.errors?.Password !== undefined:
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text:
-                      error.error.errors.Password[0] ||
-                      'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
+  return missing;
+}
 
-                case error.error === 'This Email Already Exist':
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
+async Save() {if (!this.isFormValid()) {
+  const missingFields = this.showMissingFields();
 
-                default:
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
-              }
-              this.isLoading = false;
-              this.Data.files.splice(initialLength);
-              return false;
-            }
-          );
-      } else if (this.mode == 'Edit') {
-        if (this.DeletedFiles.length > 0) {
-          for (const id of this.DeletedFiles) {
-            await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
-          }
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  await Swal.fire({
+    icon: 'warning',
+    title: 'بيانات ناقصة!',
+    html: `
+      <p class="text-right dir-rtl">يرجى تعبئة الحقول التالية قبل الحفظ:</p>
+      <ul class="text-right dir-rtl list-disc mr-8 mt-4 space-y-1">
+        ${missingFields.map(field => `<li><strong>${field}</strong></li>`).join('')}
+      </ul>
+      ${missingFields.length === 0 ? '<p class="text-red-600 mt-4">تحقق من الكود - قد يكون هناك حقل مخفي ناقص</p>' : ''}
+    `,
+    confirmButtonColor: '#089B41',
+    confirmButtonText: 'حسنًا',
+    width: '600px'
+  });
+  return;
+}
+
+  this.isLoading = true;
+
+  
+  // دمج الخبرات السابقة في كائن Data قبل الإرسال
+
+  let allExperiences = this.experiences
+    .filter(exp => exp.previousExperiencePlace?.trim() || exp.position?.trim())
+    .map((exp, index) => 
+      `${index + 1}. المكان: ${exp.previousExperiencePlace || 'غير محدد'}\n   الوظيفة: ${exp.position || 'غير محدد'}\n   من: ${exp.fromDate || 'غير محدد'} - إلى: ${exp.toDate || 'غير محدد'}`
+    )
+    .join('\n\n');
+
+  this.Data.previousExperiencePlace = allExperiences || 'No previous experience.';
+  this.Data.position = ''; 
+  this.Data.fromDate = '';
+  this.Data.toDate = '';
+
+  // إضافة الملفات الجديدة إلى القائمة
+  const initialLength = this.Data.files.length;
+  for (let i = 0; i < this.SelectedFiles.length; i++) {
+    this.Data.files.push(this.SelectedFiles[i]);
+  }
+
+  const Swal = await import('sweetalert2').then(m => m.default);
+
+  try {
+    let response;
+    if (this.mode === 'Create') {
+      response = await this.EmpServ.Add(this.Data, this.DomainName).toPromise();
+    } else {
+      // حذف الملفات المحذوفة أولاً في وضع التعديل
+      if (this.DeletedFiles.length > 0) {
+        for (const id of this.DeletedFiles) {
+          await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
         }
-        return this.EmpServ.Edit(this.Data, this.DomainName)
-          .toPromise()
-          .then(
-            (data) => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Done',
-                text: 'Employee Edited Successfully',
-                confirmButtonColor: '#089B41',
-              });
-              this.moveToEmployee();
-              this.isLoading = false;
-              return true;
-            },
-            (error) => {
-              this.isLoading = false;
-              switch (true) {
-                case error.error == 'This User Name Already Exist':
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
-
-                case error.error === 'This Email Already Exist':
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
-
-                default:
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.error || 'An unexpected error occurred',
-                    confirmButtonColor: '#089B41',
-                  });
-                  break;
-              }
-              this.Data.files.splice(initialLength);
-              return false;
-            }
-          );
       }
+      response = await this.EmpServ.Edit(this.Data, this.DomainName).toPromise();
     }
 
-    return Promise.resolve(true); // Default resolve if all logic completes
-  }
+    // رسالة النجاح المطلوبة
+    await Swal.fire({
+      icon: 'success',
+      title: 'success',
+      html: '<strong>The data was successfully sent to the Human Resources department.</strong>',
+      confirmButtonColor: '#089B41',
+      confirmButtonText: 'Good',
+      timer: 5000,
+      timerProgressBar: true
+    });
 
+    // الانتقال إلى صفحة الموظفين 
+    this.moveToEmployee();
+
+  } catch (error: any) {
+    console.error('Error saving employee:', error);
+
+    let errorMessage = 'An unexpected error occurred during saving.';
+
+    if (error.error === 'This Email Already Exist') {
+      errorMessage = 'Email address used by.';
+    } else if (error.error === 'This User Name Already Exist') {
+      errorMessage = 'Username already in use';
+    } else if (error.error?.errors?.Password) {
+      errorMessage = error.error.errors.Password[0];
+    }
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'error',
+      text: errorMessage,
+      confirmButtonColor: '#089B41'
+    });
+
+    // إزالة الملفات المضافة مؤقتًا في حالة الفشل
+    this.Data.files.splice(initialLength);
+  } finally {
+    this.isLoading = false;
+  }
+}
+  
   moveToEmployee() {
     this.router.navigateByUrl('Employee/Employee');
   }
@@ -758,6 +944,19 @@ goToNextPage() {
       (f) => f.file?.name === file.name || f.name === file.name
     );
   }
+
+  goToSection(section: number) {
+  if (section === 2 && this.currentSection === 1) {
+    this.goToNextPage();
+    return;
+  }
+  if (section === 3 && this.currentSection < 2) {
+    return;
+  }
+
+  this.currentSection = section;
+}
+
   
   //////////////////////////////////////////////////// floor
 

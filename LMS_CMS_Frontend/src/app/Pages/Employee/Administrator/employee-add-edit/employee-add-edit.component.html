@@ -1,4 +1,78 @@
-<!-- <div *ngIf="showFirstSection"> -->
+<div class="border border-gray-300 rounded-lg px-6 py-4 bg-white">
+
+  <div class="flex items-center justify-between">
+
+    <!-- Step 1 -->
+    <div class="flex items-center cursor-pointer" (click)="goToSection(1)">
+      <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" [ngClass]="{
+          'bg-orange-500 border-orange-500': currentSection >= 1,
+          'border-gray-300 bg-white': currentSection < 1
+        }">
+        <i *ngIf="currentSection >= 1" class="fa fa-check text-orange-500 text-xs"></i>
+      </div>
+
+      <span class="ml-2 text-sm font-medium" [ngClass]="{
+          'text-orange-500': currentSection === 1,
+          'text-gray-400': currentSection !== 1
+        }">
+        Personal Info
+      </span>
+    </div>
+
+    <!-- Line -->
+    <div class="flex-1 h-[2px] mx-4" [ngClass]="{
+        'bg-orange-500': currentSection > 1,
+        'bg-gray-300': currentSection <= 1
+      }">
+    </div>
+
+    <!-- Step 2 -->
+    <div class="flex items-center cursor-pointer" (click)="goToSection(2)">
+      <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" [ngClass]="{
+          'bg-orange-500 border-orange-500': currentSection >= 2,
+          'border-gray-300 bg-white': currentSection < 2
+        }">
+        <i *ngIf="currentSection > 2" class="fa fa-check text-white text-xs"></i>
+      </div>
+
+      <span class="ml-2 text-sm font-medium" [ngClass]="{
+          'text-orange-500': currentSection === 2,
+          'text-gray-400': currentSection !== 2
+        }">
+        Experience Info
+      </span>
+    </div>
+
+    <!-- Line -->
+    <div class="flex-1 h-[2px] mx-4" [ngClass]="{
+        'bg-orange-500': currentSection > 2,
+        'bg-gray-300': currentSection <= 2
+      }">
+    </div>
+
+    <!-- Step 3 -->
+    <div class="flex items-center cursor-pointer" (click)="goToSection(3)">
+      <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" [ngClass]="{
+          'bg-orange-500 border-orange-500': currentSection >= 3,
+          'border-gray-300 bg-white': currentSection < 3
+        }">
+        <i *ngIf="currentSection > 3" class="fa fa-check text-white text-xs"></i>
+      </div>
+
+      <span class="ml-2 text-sm font-medium" [ngClass]="{
+          'text-orange-500': currentSection === 3,
+          'text-gray-400': currentSection !== 3
+        }">
+        Additional Notes
+      </span>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- <div *ngIf="!showRegistrationForm"> -->
 <div *ngIf="currentSection === 1">
   <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
@@ -15,7 +89,7 @@
     </button> -->
   </div>
 
-  <!-- <div *ngIf="!showRegistrationForm"> -->
+
 
   <div class="flex gap-6 p-6 bg-gray-100 rounded-lg mb-6">
 
@@ -236,6 +310,18 @@
       <label class="mb-2 primaryTxt" for="address"> {{ 'Address' | translate }}</label>
       <input id="address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
         placeholder="{{ 'Enter Address' | translate }}" [(ngModel)]="Data.address" />
+    </div>
+
+      <div class="flex flex-col mb-4 w-[49%]">
+      <label class="mb-2 primaryTxt" for="computerSkills"> {{ 'computer Skills' | translate }}</label>
+      <input id="computerSkills" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        placeholder="{{ 'Enter computer Skills' | translate }}" [(ngModel)]="Data.computerSkills" />
+    </div>
+
+      <div class="flex flex-col mb-4 w-[49%]">
+      <label class="mb-2 primaryTxt" for="hobbies"> {{ 'Hobbies' | translate }}</label>
+      <input id="hobbies" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        placeholder="{{ 'Enter hobbies' | translate }}" [(ngModel)]="Data.hobbies" />
     </div>
 
     <div class="flex justify-between items-start w-full">

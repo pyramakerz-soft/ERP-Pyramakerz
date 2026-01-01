@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LMS_CMS_DAL.Models.Domains.HR
+{
+    public class DeductionCategory : AuditableEntity
+    {
+        [Key]
+        public long ID { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Username cannot be longer than 100 characters.")]
+        public string EnNameDeductionCategory { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Username cannot be longer than 100 characters.")]
+        public string ArNameDeductionCategory { get; set; }
+    }
+}
