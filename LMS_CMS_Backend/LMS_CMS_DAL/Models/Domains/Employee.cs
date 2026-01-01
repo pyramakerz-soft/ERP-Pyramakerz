@@ -21,9 +21,9 @@ namespace LMS_CMS_DAL.Models.Domains
     {
         [Key]
         public long ID { get; set; }
-        [Required(ErrorMessage = "User_Name is required")]
-        [StringLength(100, ErrorMessage = "Username cannot be longer than 100 characters.")]
-        public string User_Name { get; set; }
+        //[Required(ErrorMessage = "User_Name is required")]
+        //[StringLength(100, ErrorMessage = "Username cannot be longer than 100 characters.")]
+        public string? User_Name { get; set; }
 
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
@@ -34,7 +34,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
         public DateTime GraduationYear { get; set; }
@@ -46,7 +46,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public string SchoolYouGraduatedFrom { get; set; }
         public string OtherStudies { get; set; }
         public string ComputerSkills { get; set; }
-        public string Hobbies { get; set; }
+        public string? Hobbies { get; set; }
         public DateTime ApplicationDate { get; set; }
         public string PositionAppliedFor { get; set; }
         public string PreviousExperiencePlace { get; set; }
@@ -65,7 +65,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
         public string FullName { get; set; }
         public DateTime EnterDate { get; set; }
-        public string Signature { get; set; }
+        public string? Signature { get; set; }
 
         [EmailAddress]
         public string? Email { get; set; }
@@ -94,11 +94,12 @@ namespace LMS_CMS_DAL.Models.Domains
         public bool? CanReceiveMessageFromParent { get; set; }
         public bool IsSuspended { get; set; }
         public bool IsRestrictedForLoctaion { get; set; }
+        public string? File { get; set; }
 
         [ForeignKey("Role")]
         [Required]
         public long Role_ID { get; set; }
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
 
 
         [ForeignKey("BusCompany")]
@@ -108,7 +109,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
         [ForeignKey("EmployeeType")]
         public long EmployeeTypeID { get; set; }
-        public EmployeeType EmployeeType { get; set; }
+        public EmployeeType? EmployeeType { get; set; }
 
 
         [ForeignKey("ReasonForLeavingWork")]

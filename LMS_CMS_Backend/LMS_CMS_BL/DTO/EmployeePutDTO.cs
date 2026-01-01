@@ -1,9 +1,10 @@
-﻿using LMS_CMS_DAL.Models.Domains.BusModule;
-using LMS_CMS_DAL.Models.Domains;
+﻿using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.BusModule;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,6 +53,7 @@ namespace LMS_CMS_BL.DTO
         public string CurrentJob { get; set; }
         public decimal LastSalary { get; set; }
         public bool AuthorizeInvestigation { get; set; }
+        public IFormFile? NewFile { get; set; }
 
         public string FullName { get; set; }
         public DateTime EnterDate { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace LMS_CMS_BL.DTO
     {
         [Required(ErrorMessage = "User_Name is required")]
         [StringLength(100, ErrorMessage = "Username cannot be longer than 100 characters.")]
-        public string User_Name { get; set; }
+        public string? User_Name { get; set; }
 
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
@@ -20,9 +21,9 @@ namespace LMS_CMS_BL.DTO
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string? ar_name { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
-        public string Password { get; set; }
+        //[Required(ErrorMessage = "Password is required")]
+        //[StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+        public string? Password { get; set; }
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
@@ -34,8 +35,8 @@ namespace LMS_CMS_BL.DTO
         public string Major { get; set; }
         public string SchoolYouGraduatedFrom { get; set; }
         public string OtherStudies { get; set; }
-        public string ComputerSkills { get; set; }
-        public string Hobbies { get; set; }
+        public string? ComputerSkills { get; set; }
+        public string? Hobbies { get; set; }
         public DateTime ApplicationDate { get; set; }
         public string PositionAppliedFor { get; set; }
         public string PreviousExperiencePlace { get; set; }
@@ -43,31 +44,33 @@ namespace LMS_CMS_BL.DTO
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public string HowDidYouFindUs { get; set; }
-        public string ReasonforLeavingtheJob { get; set; }
+        public string? ReasonforLeavingtheJob { get; set; }
         public string DidYouHaveAnyRelativeHere { get; set; }
         public string YourLevelInEnglish { get; set; }
         public string YourLevelInFrensh { get; set; }
         public string DoYouSpeakAnyOtherLanguages { get; set; }
-        public string CurrentJob { get; set; }
+        public string? CurrentJob { get; set; }
         public decimal LastSalary { get; set; }
         public bool AuthorizeInvestigation { get; set; }
-
+        public IFormFile? File { get; set; }
         public string FullName { get; set; }
         public DateTime EnterDate { get; set; }
-        public string Signature { get; set; }
+        public string? Signature { get; set; }
 
         public string? LicenseNumber { get; set; }
         public string? ExpireDate { get; set; }
         public string? Address { get; set; }
-        public long Role_ID { get; set; }
-        public long? BusCompanyID { get; set; }
-        public long EmployeeTypeID { get; set; }
-        public bool? CanReceiveRequest { get; set; } 
-        public bool? CanReceiveRequestFromParent { get; set; }
-        public bool? CanReceiveMessageFromParent { get; set; }
-        public bool IsRestrictedForLoctaion { get; set; }
-        public List<long>? FloorsSelected { get; set; } = new();
-        public List<long>? GradeSelected { get; set; } = new();
-        public List<long>? SubjectSelected { get; set; } = new();
+
+
+        //public long Role_ID { get; set; }
+        //public long? BusCompanyID { get; set; }
+        //public long EmployeeTypeID { get; set; }
+        //public bool? CanReceiveRequest { get; set; } 
+        //public bool? CanReceiveRequestFromParent { get; set; }
+        //public bool? CanReceiveMessageFromParent { get; set; }
+        //public bool IsRestrictedForLoctaion { get; set; }
+        //public List<long>? FloorsSelected { get; set; } = new();
+        //public List<long>? GradeSelected { get; set; } = new();
+        //public List<long>? SubjectSelected { get; set; } = new();
     }
 }

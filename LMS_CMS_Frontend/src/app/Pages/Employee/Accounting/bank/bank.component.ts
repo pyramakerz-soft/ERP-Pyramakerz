@@ -142,7 +142,6 @@ Edit(row: Bank) {
   });
 }
 
-
   IsAllowDelete(InsertedByID: number) {
     return this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
@@ -159,25 +158,6 @@ Edit(row: Bank) {
     );
   }
 
-// CreateOREdit() {
-//   if (!this.isFormValid()) return;
-
-//   this.isLoading = true;
-
-//   if (this.mode === 'Create') { 
-//     this.BankServ.Add(this.bank, this.DomainName).subscribe({
-//       next: () => this.handleSuccess(),
-//       error: (error) => this.handleError(error) 
-//     });
-//   } else if (this.mode === 'Edit') { 
-//     this.BankServ.Edit(this.bank, this.DomainName).subscribe({
-//       next: () => this.handleSuccess(),
-//       error: (error) => this.handleError(error)
-//     });
-//   }
-// }
-
-// عند الضغط على Save
 CreateOREdit() {
   if (!this.isFormValid()) return;
 
@@ -251,28 +231,6 @@ async handleError(error: any) {
   openModal() {
     this.isModalVisible = true;
   }
-
-//   isFormValid(): boolean {
-//     let isValid = true;
-//     this.validationErrors = {};
-
-//     // if (!this.bank.bankName?.trim()) {
-//     //   this.validationErrors['bankName'] = this.getRequiredErrorMessage('Bank Name');
-//     //   isValid = false;
-//     // }
-
-//     if (!this.bank.name?.trim()) {
-//   this.validationErrors['name'] = this.getRequiredErrorMessage('Bank Name');
-// }
-
-
-//     if (!this.bank.bankBranch?.trim()) {
-//       this.validationErrors['bankBranch'] = this.getRequiredErrorMessage('Bank Branch');
-//       isValid = false;
-//     }
-
-//     return isValid;
-//   }
 
 isFormValid(): boolean {
   let isValid = true;

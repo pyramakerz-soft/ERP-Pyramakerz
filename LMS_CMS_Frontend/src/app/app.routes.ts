@@ -762,7 +762,9 @@ export const routes: Routes = [
             { path: "Subject Categories", loadComponent: () => import('./Pages/Employee/LMS/subject-category/subject-category.component').then(m => m.SubjectCategoryComponent), title: "Subject Categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Subject", loadComponent: () => import('./Pages/Employee/LMS/subject/subject.component').then(m => m.SubjectComponent), title: "Subjects", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Subject/:domainName/:SubId", loadComponent: () => import('./Pages/Employee/LMS/subject-view/subject-view.component').then(m => m.SubjectViewComponent), title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            // Employee  Tran
             { path: "Employee", loadComponent: () => import('./Pages/Employee/Administrator/employee/employee.component').then(m => m.EmployeeComponent), title: "Employee", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+           // Form Master data
             { path: "Employee/Create", loadComponent: () => import('./Pages/Employee/Administrator/employee-add-edit/employee-add-edit.component').then(m => m.EmployeeAddEditComponent), title: "Employee Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
             { path: "Employee/Edit/:id", loadComponent: () => import('./Pages/Employee/Administrator/employee-add-edit/employee-add-edit.component').then(m => m.EmployeeAddEditComponent), title: "Employee Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
             { path: "Employee/:id", loadComponent: () => import('./Pages/Employee/Administrator/employee-view/employee-view.component').then(m => m.EmployeeViewComponent), title: "Employee Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
@@ -805,7 +807,12 @@ export const routes: Routes = [
             { path: "Offers", loadComponent: () => import('./Pages/Employee/Administrator/offer/offer.component').then(m => m.OfferComponent), title: "Offers", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
 
             { path: "Appointment Documents", loadComponent: () => import('./Pages/Employee/Administrator/appointment-document/appointment-document.component').then(m => m.AppointmentDocumentComponent), title: "Appointment Documents", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+               // Social Insurances
+            { path: "Social insurance Office", loadComponent: () => import('./Pages/Employee/Administrator/social-insurance/social-insurance.component').then(m => m.SocialInsuranceComponent), title: "Social insurance Office", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
 
+            { path: "Addition Category", loadComponent: () => import('./Pages/Employee/HR/bouns-category/bouns-category.component').then(m => m.BounsCategoryComponent), title: "Addition Category", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Deduction Category", loadComponent: () => import('./Pages/Employee/HR/deduction-category/deduction-category.component').then(m => m.DeductionCategoryComponent), title: "Deduction Category", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+ 
             { path: 'Department/:id',loadComponent: () => import('./Pages/Employee/Administrator/title/title/title.component').then(m => m.TitleComponent),title: 'Titles',canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Outcome", loadComponent: () => import('./Pages/Employee/Accounting/outcomes/outcomes.component').then(m => m.OutcomesComponent), title: "Outcome", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Income", loadComponent: () => import('./Pages/Employee/Accounting/incomes/incomes.component').then(m => m.IncomesComponent), title: "Income", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

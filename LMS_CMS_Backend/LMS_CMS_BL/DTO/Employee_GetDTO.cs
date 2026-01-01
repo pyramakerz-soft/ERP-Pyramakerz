@@ -78,6 +78,8 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveMessageFromParent { get; set; }
         public decimal? MonthlyLeaveRequestBalance { get; set; }
         public decimal? MonthlyLeaveRequestUsed { get; set; }
+        public string? File { get; set; }
+
         public bool IsSuspended { get; set; }
         public bool IsRestrictedForLoctaion { get; set; }
         public bool IsClockedIn { get; set; }

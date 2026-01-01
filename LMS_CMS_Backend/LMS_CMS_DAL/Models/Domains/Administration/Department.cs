@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.HR;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,5 +19,6 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
         public ICollection<Title> Titles { get; set; } = new List<Title>();
         public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+        public ICollection<CandidateSubmit> CandidateSubmits { get; set; } = new List<CandidateSubmit>();
     }
 }

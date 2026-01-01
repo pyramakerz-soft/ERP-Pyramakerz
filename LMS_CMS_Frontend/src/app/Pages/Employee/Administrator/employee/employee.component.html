@@ -1,6 +1,6 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Employee' | translate }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Employeeww' | translate }}</h1>
         <div class="flex justify-between items-center ">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
@@ -16,9 +16,9 @@
         <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'ID' | translate }}
-                    </th>
+                    </th> -->
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'User Name' | translate }}
@@ -39,17 +39,17 @@
                         {{ 'Email' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Address' | translate }}
+                        {{ 'Department' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Role Name' | translate }}
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    </th> -->
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Employee Type Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Suspended' | translate }}
-                    </th>
+                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Actions' | translate }}
                     </th>
@@ -68,20 +68,20 @@
                 <tr *ngFor="let row of TableData; let i = index"
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">{{ row.id }}</td>
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">{{ row.id }}</td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.user_Name }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.en_name }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.ar_name }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.mobile }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.phone }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.email }}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.address }}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.role_Name }}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.employeeTypeName }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.departmentName }}</td>
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.role_Name }}</td> -->
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.employeeTypeName }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <i *ngIf="row.isSuspended" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
                         <i *ngIf="!row.isSuspended" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
-                    </td>
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
                             <button (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
@@ -93,9 +93,9 @@
                             <button (click)="view(row.id)">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
-                            <button (click)="suspend(row)" title="Suspend">
+                            <!-- <button (click)="suspend(row)" title="Suspend">
                                 <i class="fa-solid fa-hand"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </td>
                 </tr>

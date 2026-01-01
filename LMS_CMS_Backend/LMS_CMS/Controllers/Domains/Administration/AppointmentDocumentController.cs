@@ -64,8 +64,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
         ///////////////////////////////////////////////////////////////////////////////// POST: api/with-domain/AppointmentDocument
         [HttpPost]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Appointment Documents" })]
-        public IActionResult Add(AppointmentDocumentAddDTO newDocumentDto)
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] {"Appointment Documents"})]
+        public IActionResult Add([FromBody] AppointmentDocumentAddDTO newDocumentDto)
         {
             if (newDocumentDto == null)
             {
@@ -107,8 +107,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         //////////////////////////////////////////////////////////////////////////////////////// PUT: api/with-domain/AppointmentDocument
        
         [HttpPut]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Appointment Documents" })]
-        public IActionResult Edit(AppointmentDocumentGetDTO updatedDocumentDto)
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] {"Appointment Documents"})]
+        public IActionResult Edit([FromBody] AppointmentDocumentEditeDTO updatedDocumentDto)
         {
             if (updatedDocumentDto == null)
             {

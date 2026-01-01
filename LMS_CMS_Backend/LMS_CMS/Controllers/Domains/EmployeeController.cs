@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -821,13 +822,13 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Email Is Not Valid");
             } 
-            if (NewEmployee.EmployeeTypeID == 2)
-            {
-                if (NewEmployee.LicenseNumber == null)
-                    return BadRequest("License Number Is Required");
-                if (NewEmployee.ExpireDate == null)
-                    return BadRequest("Expire Date Is Required");
-            }
+            //if (NewEmployee.EmployeeTypeID == 2)
+            //{
+            //    if (NewEmployee.LicenseNumber == null)
+            //        return BadRequest("License Number Is Required");
+            //    if (NewEmployee.ExpireDate == null)
+            //        return BadRequest("Expire Date Is Required");
+            //}
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.User_Name == NewEmployee.User_Name);
             if (employee != null)
@@ -839,44 +840,44 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("This Email Already Exist");
             }
-            if (NewEmployee.BusCompanyID != null && NewEmployee.BusCompanyID != 0)
-            {
-                BusCompany bus = Unit_Of_Work.busCompany_Repository.First_Or_Default(b => b.ID == NewEmployee.BusCompanyID && b.IsDeleted != true);
-                if (bus == null)
-                {
-                    return BadRequest("this bus company doesn't exist");
-                }
-            }
-            else
-            {
-                NewEmployee.BusCompanyID = null;
-            }
-            if (NewEmployee.EmployeeTypeID != 0 && NewEmployee.EmployeeTypeID != null)
-            {
-                EmployeeType empType = Unit_Of_Work.employeeType_Repository.First_Or_Default(b => b.ID == NewEmployee.EmployeeTypeID);
-                if (empType == null)
-                {
-                    return BadRequest("this Employee Type doesn't exist");
-                }
-            }
-            else
-            {
-                return BadRequest("this Employee Type cannot be null");
+            //if (NewEmployee.BusCompanyID != null && NewEmployee.BusCompanyID != 0)
+            //{
+            //    BusCompany bus = Unit_Of_Work.busCompany_Repository.First_Or_Default(b => b.ID == NewEmployee.BusCompanyID && b.IsDeleted != true);
+            //    if (bus == null)
+            //    {
+            //        return BadRequest("this bus company doesn't exist");
+            //    }
+            //}
+            //else
+            //{
+            //    NewEmployee.BusCompanyID = null;
+            //}
+            //if (NewEmployee.EmployeeTypeID != 0 && NewEmployee.EmployeeTypeID != null)
+            //{
+            //    EmployeeType empType = Unit_Of_Work.employeeType_Repository.First_Or_Default(b => b.ID == NewEmployee.EmployeeTypeID);
+            //    if (empType == null)
+            //    {
+            //        return BadRequest("this Employee Type doesn't exist");
+            //    }
+            ////}
+            //else
+            //{
+            //    return BadRequest("this Employee Type cannot be null");
 
-            }
-            if (NewEmployee.Role_ID != 0 && NewEmployee.Role_ID != null)
-            {
-                Role rolee = Unit_Of_Work.role_Repository.First_Or_Default(b => b.ID == NewEmployee.Role_ID && b.IsDeleted != true);
-                if (rolee == null)
-                {
-                    return BadRequest("this role doesn't exist");
-                }
-            }
-            else
-            {
-                return BadRequest("this role cannot be null");
+            //}
+            //if (NewEmployee.Role_ID != 0 && NewEmployee.Role_ID != null)
+            //{
+            //    Role rolee = Unit_Of_Work.role_Repository.First_Or_Default(b => b.ID == NewEmployee.Role_ID && b.IsDeleted != true);
+            //    if (rolee == null)
+            //    {
+            //        return BadRequest("this role doesn't exist");
+            //    }
+            //}
+            //else
+            //{
+            //    return BadRequest("this role cannot be null");
 
-            }
+            //}
             ///create the object 
             if (employee == null)
             {
@@ -900,65 +901,65 @@ namespace LMS_CMS_PL.Controllers.Domains
             Unit_Of_Work.employee_Repository.Add(employee);
             Unit_Of_Work.SaveChanges();
 
-            //// Create floorMonitor
-            if(NewEmployee.FloorsSelected!=null && NewEmployee.FloorsSelected.Count > 0)
-            {
-                foreach (var item in NewEmployee.FloorsSelected)
-                {
-                    Floor floor = Unit_Of_Work.floor_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
-                    if (floor!=null)
-                    {
-                        floor.FloorMonitorID = employee.ID;
-                        Unit_Of_Work.floor_Repository.Update(floor);
-                    }
-                }
-                Unit_Of_Work.SaveChanges();
-            }
+            ////// Create floorMonitor
+            //if(NewEmployee.FloorsSelected!=null && NewEmployee.FloorsSelected.Count > 0)
+            //{
+            //    foreach (var item in NewEmployee.FloorsSelected)
+            //    {
+            //        Floor floor = Unit_Of_Work.floor_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+            //        if (floor!=null)
+            //        {
+            //            floor.FloorMonitorID = employee.ID;
+            //            Unit_Of_Work.floor_Repository.Update(floor);
+            //        }
+            //    }
+            //    Unit_Of_Work.SaveChanges();
+            //}
 
             //// Create GradeSupervisor
-            if (NewEmployee.GradeSelected != null && NewEmployee.GradeSelected.Count > 0)
-            {
-                foreach (var item in NewEmployee.GradeSelected)
-                {
-                    Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
-                    if (grade != null)
-                    {
-                       GradeSupervisor gradeSupervisor = new GradeSupervisor();
-                        gradeSupervisor.GradeID = item;
-                        gradeSupervisor.EmployeeID = employee.ID;
-                        Unit_Of_Work.gradeSupervisor_Repository.Add(gradeSupervisor);
-                    }
-                }
-                Unit_Of_Work.SaveChanges();
-            }
+            //if (NewEmployee.GradeSelected != null && NewEmployee.GradeSelected.Count > 0)
+            //{
+            //    foreach (var item in NewEmployee.GradeSelected)
+            //    {
+            //        Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+            //        if (grade != null)
+            //        {
+            //           GradeSupervisor gradeSupervisor = new GradeSupervisor();
+            //            gradeSupervisor.GradeID = item;
+            //            gradeSupervisor.EmployeeID = employee.ID;
+            //            Unit_Of_Work.gradeSupervisor_Repository.Add(gradeSupervisor);
+            //        }
+            //    }
+            //    Unit_Of_Work.SaveChanges();
+            //}
 
             //// Create SubjectSupervisor
-            if (NewEmployee.SubjectSelected != null && NewEmployee.SubjectSelected.Count > 0)
-            {
-                foreach (var item in NewEmployee.SubjectSelected)
-                {
-                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
-                    if (subject != null)
-                    {
-                        SubjectSupervisor subjectSupervisor = new SubjectSupervisor();
-                        subjectSupervisor.SubjectID = item;
-                        subjectSupervisor.EmployeeID = employee.ID;
-                        Unit_Of_Work.subjectSupervisor_Repository.Add(subjectSupervisor);
-                    }
-                }
-                Unit_Of_Work.SaveChanges();
-            }
+            //if (NewEmployee.SubjectSelected != null && NewEmployee.SubjectSelected.Count > 0)
+            //{
+            //    foreach (var item in NewEmployee.SubjectSelected)
+            //    {
+            //        Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+            //        if (subject != null)
+            //        {
+            //            SubjectSupervisor subjectSupervisor = new SubjectSupervisor();
+            //            subjectSupervisor.SubjectID = item;
+            //            subjectSupervisor.EmployeeID = employee.ID;
+            //            Unit_Of_Work.subjectSupervisor_Repository.Add(subjectSupervisor);
+            //        }
+            //    }
+            //    Unit_Of_Work.SaveChanges();
+            //}
 
             //// Create EmployeeVacationType
-            List<VacationTypes> vacationTypes = Unit_Of_Work.vacationTypes_Repository.FindBy(a => a.IsDeleted != true);
-            foreach (var type in vacationTypes)
-            {
-                var annualVacation = new AnnualVacationEmployee();
-                annualVacation.EmployeeID = employee.ID;
-                annualVacation.VacationTypesID = type.ID;
-                Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
-                Unit_Of_Work.SaveChanges();
-            }
+            //List<VacationTypes> vacationTypes = Unit_Of_Work.vacationTypes_Repository.FindBy(a => a.IsDeleted != true);
+            //foreach (var type in vacationTypes)
+            //{
+            //    var annualVacation = new AnnualVacationEmployee();
+            //    annualVacation.EmployeeID = employee.ID;
+            //    annualVacation.VacationTypesID = type.ID;
+            //    Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
+            //    Unit_Of_Work.SaveChanges();
+            //}
 
 
             if (files != null && files.Any())
@@ -980,6 +981,99 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(NewEmployee);
         }
 
+        ////////////////////////////////////////////////////
+        [HttpPost]
+        public async Task<IActionResult> AddForm(
+            [FromForm] EmployeeAddDTO application,                  
+            [FromForm] List<EmployeeAttachmentAddDTO> AttachedFiles) 
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            if (application == null)
+            {
+                return BadRequest("Employee data is required.");
+            }
+
+            var employee = new Employee();
+            mapper.Map(application, employee);
+
+            // الحقول الإدارية
+            employee.User_Name = null;
+            employee.Password = null;
+            employee.Role_ID = 0;
+            employee.EmployeeTypeID = 0;
+
+            // تاريخ الإضافة
+            employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"));
+
+            // ==== رفع الصورة الشخصية (من الـ DTO مباشرة) ====
+            if (application.File != null && application.File.Length > 0)
+            {
+                // تحقق من نوع الصورة
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                var extension = Path.GetExtension(application.File.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest("صورة الملف الشخصي يجب أن تكون jpg, jpeg, png, gif أو bmp.");
+                }
+
+                // حفظ أولاً عشان نأخد الـ ID
+                Unit_Of_Work.employee_Repository.Add(employee);
+                Unit_Of_Work.SaveChanges();
+
+                string profileLink = await _fileService.UploadFileAsync(
+                    application.File,
+                    "Administration/Employee/Attachments",
+                    employee.ID,
+                    HttpContext);
+
+                employee.File = profileLink;
+                Unit_Of_Work.employee_Repository.Update(employee);
+                Unit_Of_Work.SaveChanges();
+            }
+            else
+            {
+                // لو مفيش صورة، حفظ مباشرة
+                Unit_Of_Work.employee_Repository.Add(employee);
+                Unit_Of_Work.SaveChanges();
+            }
+
+            // ==== رفع الملفات المرفقة ====
+            if (application.AttachedFiles != null && application.AttachedFiles.Any())
+            {
+                foreach (var fileDto in application.AttachedFiles)
+                {
+                    if (fileDto.file == null || fileDto.file.Length == 0) continue;
+
+                    string fileLink = await _fileService.UploadFileAsync(
+                        fileDto.file,
+                        "Administration/Employee/Attachments",
+                        employee.ID,
+                        HttpContext);
+
+                    var attachment = new EmployeeAttachment
+                    {
+                        EmployeeID = employee.ID,
+                        Link = fileLink,
+                        Name = string.IsNullOrEmpty(fileDto.Name) ? fileDto.file.FileName : fileDto.Name,
+                    };
+
+                    Unit_Of_Work.employeeAttachment_Repository.Add(attachment);
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            return Ok(new { message = "تم استلام طلب التوظيف بنجاح!", id = employee.ID });
+        }
         ////////////////////////////////////////////////////
 
         [HttpPut]

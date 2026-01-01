@@ -1,21 +1,14 @@
 
-export interface AppointmentDocument {
-  id: number;
-  appointmentDate: string; 
-  documentName: string;
-  documentStatus?: string | null;
-  submissionDate?: string | null; 
-  notes?: string | null;
-  insertedAt :number,
+export class AppointmentDocument {
+ constructor(
+  public id: number = 0,
+  public documentName: string = '',
+  public appointmentDate: string = '',   
+  public insertedByUserId :number =0,
+  ) {}
 }
 
-export interface AppointmentDocumentCreate {
-  documentName: string;
-  documentStatus?: string | null;
-  submissionDate?: string | null;
-  notes?: string | null;
+export class  AppointmentDocumentCreate {
+ public documentName: string = '';
 }
 
-export interface AppointmentDocumentUpdate extends AppointmentDocumentCreate {
-  id: number;
-}

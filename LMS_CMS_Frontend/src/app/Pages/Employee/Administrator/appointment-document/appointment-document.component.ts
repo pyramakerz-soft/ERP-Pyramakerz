@@ -42,8 +42,10 @@ export class AppointmentDocumentComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
 
   // Permissions
-  AllowDelete: boolean = false;
-  AllowDeleteForOthers: boolean = false;
+  AllowDelete: boolean = true;
+  AllowDeleteForOthers: boolean = true;
+  AllowEdit: boolean = true;
+  AllowEditForOthers: boolean = true;
 
   // Search
   keysArray: string[] = ['documentName'];
@@ -56,7 +58,7 @@ export class AppointmentDocumentComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private loadingService: LoadingService,
     private appointmentDocServ: AppointmentDocumentService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -64,10 +66,13 @@ export class AppointmentDocumentComponent implements OnInit, OnDestroy {
     this.DomainName = this.apiServ.GetHeader();
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
-      const page = this.menuService.findByPageName('appointment-document', items); // غيّر الاسم حسب اللي في الـ menu
+      const page = this.menuService.findByPageName('appointment-document', items);
       if (page) {
         this.AllowDelete = page.allow_Delete;
         this.AllowDeleteForOthers = page.allow_Delete_For_Others;
+
+        this.AllowEdit = page.allow_Edit;
+        this.AllowEditForOthers = page.allow_Edit_For_Others;
       }
     });
 
@@ -181,7 +186,30 @@ export class AppointmentDocumentComponent implements OnInit, OnDestroy {
     }
   }
 
-  IsAllowDelete(insertedById: number): boolean {
-    return this.editDeleteServ.IsAllowDelete(insertedById, this.UserID, this.AllowDeleteForOthers);
+  Edit(doc: AppointmentDocument) {
+    this.mode = 'Edit';
+    this.currentDocument = {
+      documentName: doc.documentName
+    };
+    this.openModal();
   }
+
+IsAllowDelete(InsertedByID: number): boolean {
+  const IsAllow = this.editDeleteServ.IsAllowDelete(
+    InsertedByID,
+    this.UserID,
+    this.AllowDeleteForOthers
+  );
+  return IsAllow;
+}
+
+IsAllowEdit(InsertedByID: number): boolean {
+  const IsAllow = this.editDeleteServ.IsAllowEdit(
+    InsertedByID,
+    this.UserID,
+    this.AllowEditForOthers
+  );
+  return IsAllow;
+}
+
 }

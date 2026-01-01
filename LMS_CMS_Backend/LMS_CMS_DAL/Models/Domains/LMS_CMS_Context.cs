@@ -274,9 +274,12 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Title> Titles { get; set; }
         public DbSet<Offer> Offers { get; set; }
         public DbSet<AppointmentDocument> AppointmentDocuments { get; set; }
-       
+        public DbSet<SocialInsurance> SocialInsurances { get; set; }
+        public DbSet<BounsCategory> BounsCategorys { get; set; }
+        public DbSet<DeductionCategory> DeductionCategorys { get; set; }
+        public DbSet<CandidateSubmit> CandidateSubmits { get; set; }
 
-        
+
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
             : base(options)
         {
@@ -420,6 +423,45 @@ namespace LMS_CMS_DAL.Models.Domains
 
             });
 
+            modelBuilder.Entity<SocialInsurance>(entity =>
+            {
+                entity.HasIndex(e => e.CreatedDate)
+                      .HasDatabaseName("IX_SocialInsurance_InsuranceDate");
+
+                entity.HasIndex(e => e.IsDeleted)
+                      .HasDatabaseName("IX_SocialInsurance_IsDeleted");
+
+                entity.HasIndex(e => e.InsertedByUserId)
+                      .HasDatabaseName("IX_SocialInsurance_InsertedByUserId");
+            });
+
+            // CandidateSubmit Configurations
+            modelBuilder.Entity<CandidateSubmit>(entity =>
+            {
+                entity.HasIndex(e => e.Email)
+                      .IsUnique()
+                      .HasDatabaseName("IX_CandidateSubmit_Email_Unique");
+
+                entity.HasIndex(e => e.ApplicationDate)
+                      .HasDatabaseName("IX_CandidateSubmit_ApplicationDate");
+
+                entity.HasIndex(e => e.Status)
+                      .HasDatabaseName("IX_CandidateSubmit_Status");
+
+                entity.HasIndex(e => e.DepartmentID)
+                      .HasDatabaseName("IX_CandidateSubmit_DepartmentID");
+
+                entity.HasOne(c => c.Department)
+                      .WithMany(d => d.CandidateSubmits)  
+                      .HasForeignKey(c => c.DepartmentID)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Employee عند القبول
+                entity.HasOne(c => c.Employee)
+                      .WithMany()  
+                      .HasForeignKey(c => c.EmployeeID)
+                      .OnDelete(DeleteBehavior.SetNull);  
+            });
 
             ////////////////--77
 

@@ -284,6 +284,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Title> Title_Repository;
         GenericRepo<Offer> Offer_Repository;
         GenericRepo<AppointmentDocument> AppointmentDocument_Repository;
+        GenericRepo<SocialInsurance> SocialInsurance_Repository;
+        GenericRepo<BounsCategory> BounsCategory_Repository;
+        GenericRepo<DeductionCategory> DeductionCategory_Repository;
+        GenericRepo<CandidateSubmit> CandidateSubmit_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -344,6 +348,53 @@ namespace LMS_CMS_BL.UOW
                     Offer_Repository = new GenericRepo<Offer>(db);
                 }
                 return Offer_Repository;
+            }
+        }
+
+        public GenericRepo<SocialInsurance> socialInsurance_Repository
+        {
+            get
+            {
+                if (SocialInsurance_Repository == null)
+                {
+                    SocialInsurance_Repository = new GenericRepo<SocialInsurance>(db);
+                }
+                return SocialInsurance_Repository;
+            }
+        }
+
+        public GenericRepo<BounsCategory> bounsCategory_Repository
+        {
+            get
+            {
+                if (BounsCategory_Repository == null)
+                {
+                    BounsCategory_Repository = new GenericRepo<BounsCategory>(db);
+                }
+                return BounsCategory_Repository;
+            }
+        }
+
+        public GenericRepo<DeductionCategory> deductionCategory_Repository
+        {
+            get
+            {
+                if (DeductionCategory_Repository == null)
+                {
+                    DeductionCategory_Repository = new GenericRepo<DeductionCategory>(db);
+                }
+                return DeductionCategory_Repository;
+            }
+        }
+        public GenericRepo<CandidateSubmit> candidateSubmit_Repository
+        {
+            get
+            {
+                if (CandidateSubmit_Repository == null)
+                {
+                    CandidateSubmit_Repository = new GenericRepo<CandidateSubmit>(db);
+                }
+                return CandidateSubmit_Repository;
             }
         }
 

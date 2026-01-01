@@ -97,7 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             RegistrationFormCategory registrationFormCategory = new RegistrationFormCategory();
             registrationFormCategory.RegistrationCategoryID = category.ID;
-            registrationFormCategory.RegistrationFormID = NewCategory.RegistrationFormId;
+            //registrationFormCategory.RegistrationFormID = NewCategory.RegistrationFormId;
 
             registrationFormCategory.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -321,58 +321,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //     [HttpGet("ByStoreId/{id}")]
-        //     [Authorize_Endpoint_(
-        //         allowedTypes: new[] { "octa", "employee", "student" },
-        //         pages: new[] { "Stores" }
-        //     )]
-        //     public async Task<IActionResult> GetCategoriesByStoreId(long id)
-        //     {
-        //         UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //         if (id == 0)
-        //         {
-        //             return BadRequest("Enter Store ID");
-        //         }
-
-        //         Store store = Unit_Of_Work.store_Repository.First_Or_Default(
-        //             s => s.ID == id && s.IsDeleted != true
-        //         );
-
-        //         if (store == null)
-        //         {
-        //             return NotFound("No Store found with this ID");
-        //         }
-
-        //         List<StoreCategories> storeCategories = await Unit_Of_Work.storeCategories_Repository
-        //             .Select_All_With_IncludesById<StoreCategories>(
-        //                 sc => sc.StoreID == id && sc.IsDeleted != true,
-        //                 query => query.Include(sc => sc.InventoryCategories)
-        //             );
-
-        //         if (storeCategories == null || storeCategories.Count == 0)
-        //         {
-        //             return NotFound("No categories found for this store");
-        //         }
-
-        //         // Filter out any inventory categories that are deleted
-        //         var activeCategories = storeCategories
-        //             .Where(sc => sc.InventoryCategories != null && sc.InventoryCategories.IsDeleted != true)
-        //             .Select(sc => sc.InventoryCategories)
-        //             .ToList();
-
-        //         if (activeCategories.Count == 0)
-        //         {
-        //             return NotFound("No active categories found for this store");
-        //         }
-
-        //         var categoriesDTO = mapper.Map<List<InventoryCategoriesGetDto>>(activeCategories);
-
-        //         return Ok(categoriesDTO);
-        //     }
-        // }
+       
 
     }
 }
