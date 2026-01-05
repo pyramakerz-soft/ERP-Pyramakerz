@@ -1,6 +1,6 @@
 <div class="">
   <div class="flex justify-between">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Registered Employee' | translate }} </h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Candidate Submit' | translate }} </h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
     </div>
@@ -15,25 +15,31 @@
              {{ 'ID' | translate }}
             </th> 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'Username' | translate }}
-            </th> 
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                {{ 'English Name' | translate }}
             </th> 
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                {{ 'Arabic Name' | translate }}
-            </th> 
+            </th>  -->
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                {{ 'Email' | translate }}
-            </th> 
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-               {{ 'Mobile' | translate }}
             </th> 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                {{ 'Phone' | translate }}
             </th> 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-               {{ 'Address' | translate }}
+               {{ 'Department' | translate }}
+            </th> 
+               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+               {{ 'Title' | translate }}
+            </th> 
+               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+               {{ 'Time logged' | translate }}
+            </th> 
+               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+               {{ 'Status' | translate }}
+            </th> 
+               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+               {{ 'HR Screen' | translate }}
             </th> 
           </tr>
         </thead>
@@ -53,25 +59,31 @@
               {{ row.id }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.user_Name }}
-            </td>
-            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.en_name }}
             </td>
-            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.ar_name }}
-            </td>
+            </td> -->
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.email }}
-            </td>
-            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.mobile }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.phone }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.address }}
+              {{ row.departmentName}}
+            </td>
+            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.positionAppliedFor }}
+            </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.applicationDate }}
+            </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.interviewStatus}}
+            </td>
+               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.isHRScreened}}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               <div class="flex space-x-4 rtl:space-x-reverse">

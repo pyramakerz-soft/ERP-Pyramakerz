@@ -982,53 +982,100 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ////////////////////////////////////////////////////
-        [HttpPost]
+        [HttpPost("add-form")]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Employee" }
+     )]
         public async Task<IActionResult> AddForm(
-            [FromForm] EmployeeAddDTO application,                  
-            [FromForm] List<EmployeeAttachmentAddDTO> AttachedFiles) 
+         [FromForm] EmployeeAddDTO application,
+         [FromForm] List<EmployeeAttachmentAddDTO> attachedFiles)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
                 return Unauthorized("User ID or Type claim not found.");
-            }
+
             if (application == null)
-            {
                 return BadRequest("Employee data is required.");
+
+            long.TryParse(userIdClaim, out long userId);
+            application.Password = BCrypt.Net.BCrypt.HashPassword("APPLICANT");
+
+            /* ================= Validation ================= */
+
+            // Email validation (لو موجود فقط)
+            if (!string.IsNullOrEmpty(application.Email))
+            {
+                string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+                if (!Regex.IsMatch(application.Email, pattern))
+                    return BadRequest("Email Is Not Valid");
+
+                var checkEmail = Unit_Of_Work.employee_Repository
+                    .First_Or_Default(e => e.Email == application.Email);
+                if (checkEmail != null)
+                    return BadRequest("This Email Already Exist");
             }
 
-            var employee = new Employee();
+            // Files validation
+            if (attachedFiles != null && attachedFiles.Any())
+            {
+                foreach (var file in attachedFiles)
+                {
+                    if (file.file == null) continue;
+
+                    string fileValidation =
+                        await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
+
+                    if (fileValidation != null)
+                        return BadRequest(fileValidation);
+                }
+            }
+
+            /* ================= Create Employee ================= */
+
+            Employee employee = new Employee();
             mapper.Map(application, employee);
 
-            // الحقول الإدارية
+            // ===== الحقول الإدارية (غير مطلوبة هنا) =====
             employee.User_Name = null;
             employee.Password = null;
             employee.Role_ID = 0;
             employee.EmployeeTypeID = 0;
+            employee.BusCompanyID = null;
+            employee.CanReceiveRequest = null;
+            employee.CanReceiveRequestFromParent = null;
+            employee.CanReceiveMessageFromParent = null;
+            employee.IsRestrictedForLoctaion = false;
 
-            // تاريخ الإضافة
-            employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"));
+            // ===== Inserted By =====
+            if (userTypeClaim == "octa")
+                employee.InsertedByOctaId = userId;
+            else if (userTypeClaim == "employee")
+                employee.InsertedByUserId = userId;
 
-            // ==== رفع الصورة الشخصية (من الـ DTO مباشرة) ====
+            // ===== Date =====
+            TimeZoneInfo cairoZone =
+                TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            employee.ConnectionStatusID = 1;
+
+            Unit_Of_Work.employee_Repository.Add(employee);
+            Unit_Of_Work.SaveChanges();
+
+            /* ================= Profile Image ================= */
+
             if (application.File != null && application.File.Length > 0)
             {
-                // تحقق من نوع الصورة
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
                 var extension = Path.GetExtension(application.File.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(extension))
-                {
-                    return BadRequest("صورة الملف الشخصي يجب أن تكون jpg, jpeg, png, gif أو bmp.");
-                }
 
-                // حفظ أولاً عشان نأخد الـ ID
-                Unit_Of_Work.employee_Repository.Add(employee);
-                Unit_Of_Work.SaveChanges();
+                if (!allowedExtensions.Contains(extension))
+                    return BadRequest("صورة الملف الشخصي غير مدعومة");
 
                 string profileLink = await _fileService.UploadFileAsync(
                     application.File,
@@ -1040,17 +1087,12 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Unit_Of_Work.employee_Repository.Update(employee);
                 Unit_Of_Work.SaveChanges();
             }
-            else
-            {
-                // لو مفيش صورة، حفظ مباشرة
-                Unit_Of_Work.employee_Repository.Add(employee);
-                Unit_Of_Work.SaveChanges();
-            }
 
-            // ==== رفع الملفات المرفقة ====
-            if (application.AttachedFiles != null && application.AttachedFiles.Any())
+            /* ================= Attachments ================= */
+
+            if (attachedFiles != null && attachedFiles.Any())
             {
-                foreach (var fileDto in application.AttachedFiles)
+                foreach (var fileDto in attachedFiles)
                 {
                     if (fileDto.file == null || fileDto.file.Length == 0) continue;
 
@@ -1060,20 +1102,24 @@ namespace LMS_CMS_PL.Controllers.Domains
                         employee.ID,
                         HttpContext);
 
-                    var attachment = new EmployeeAttachment
+                    EmployeeAttachment attachment = new EmployeeAttachment
                     {
                         EmployeeID = employee.ID,
                         Link = fileLink,
-                        Name = string.IsNullOrEmpty(fileDto.Name) ? fileDto.file.FileName : fileDto.Name,
+                        Name = string.IsNullOrEmpty(fileDto.Name)
+                            ? fileDto.file.FileName
+                            : fileDto.Name
                     };
 
                     Unit_Of_Work.employeeAttachment_Repository.Add(attachment);
                 }
+
                 Unit_Of_Work.SaveChanges();
             }
 
-            return Ok(new { message = "تم استلام طلب التوظيف بنجاح!", id = employee.ID });
+            return Ok(application);
         }
+
         ////////////////////////////////////////////////////
 
         [HttpPut]

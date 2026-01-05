@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.Administration;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -21,5 +22,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public long EmployeeID { get; set; }
 
         public Employee Employee { get; set; }
+        public long? RegisteredEmployeeID { get; set; }
+        [ForeignKey("RegisteredEmployeeID")]
+        public RegisteredEmployee? RegisteredEmployee { get; set; }
     }
 }
