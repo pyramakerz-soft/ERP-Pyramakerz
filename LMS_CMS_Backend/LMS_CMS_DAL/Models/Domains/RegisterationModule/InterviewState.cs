@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.Administration;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.RegisterationModule
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
         public ICollection<RegisterationFormInterview> RegisterationFormInterviews { get; set; } = new HashSet<RegisterationFormInterview>();
+        public ICollection<RegisteredEmployee> RegisteredEmployees { get; set; } = new HashSet<RegisteredEmployee>();
+
     }
 }

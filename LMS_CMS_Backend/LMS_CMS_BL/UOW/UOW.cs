@@ -287,7 +287,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SocialInsurance> SocialInsurance_Repository;
         GenericRepo<BounsCategory> BounsCategory_Repository;
         GenericRepo<DeductionCategory> DeductionCategory_Repository;
-        GenericRepo<CandidateSubmit> CandidateSubmit_Repository;
+    
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -386,18 +386,7 @@ namespace LMS_CMS_BL.UOW
                 return DeductionCategory_Repository;
             }
         }
-        public GenericRepo<CandidateSubmit> candidateSubmit_Repository
-        {
-            get
-            {
-                if (CandidateSubmit_Repository == null)
-                {
-                    CandidateSubmit_Repository = new GenericRepo<CandidateSubmit>(db);
-                }
-                return CandidateSubmit_Repository;
-            }
-        }
-
+   
         public GenericRepo<Parent> parent_Repository
         {
             get

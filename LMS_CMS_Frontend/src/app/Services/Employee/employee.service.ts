@@ -72,7 +72,6 @@ export class EmployeeService {
     formData.append('user_Name', employee.user_Name);
     formData.append('en_name', employee.en_name);
     formData.append('ar_name', employee.ar_name || '');
-    // formData.append('password', employee.password);
     formData.append('mobile', employee.mobile || '');
     formData.append('phone', employee.phone || '');
     formData.append('email', employee.email || '');
@@ -103,51 +102,12 @@ export class EmployeeService {
     formData.append('fullName', employee.fullName || '');
     formData.append('enterDate', employee.enterDate || '');
     formData.append('signature', employee.signature || '');
-    formData.append('ProfilePicture', this.ProfilePictureFile);
-    // formData.append('licenseNumber', employee.licenseNumber || '');
-    // formData.append('expireDate', employee.expireDate || '');
-    // formData.append('address', employee.address || '');
-    // formData.append('role_ID', employee.role_ID?.toString() ?? '');
-    // formData.append('busCompanyID', employee.busCompanyID?.toString() ?? '');
-    // formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
-    // formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
-    // formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
-    // formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
-    // formData.append('isRestrictedForLoctaion', employee.isRestrictedForLoctaion?.toString() ?? 'false');
-
-
-
-
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
         formData.append(`files[${index}].file`, file.file, file.file.name); // File (IFormFile)
         formData.append(`files[${index}].Name`, file.name);            // Name (string)
       });
     }
-
-    // if (employee.floorsSelected && employee.floorsSelected.length > 0) {
-    //   employee.floorsSelected.forEach((floor, index) => {
-    //     formData.append(`floorsSelected[${index}]`, floor.toString());
-    //   });
-    // }
-
-    // if (employee.gradeSelected && employee.gradeSelected.length > 0) {
-    //   employee.gradeSelected.forEach((floor, index) => {
-    //     formData.append(`gradeSelected[${index}]`, floor.toString());
-    //   });
-    // }
-
-    // if (employee.locationSelected && employee.locationSelected.length > 0) {
-    //   employee.locationSelected.forEach((floor, index) => {
-    //     formData.append(`locationSelected[${index}]`, floor.toString());
-    //   });
-    // }
-
-    // if (employee.subjectSelected && employee.subjectSelected.length > 0) {
-    //   employee.subjectSelected.forEach((floor, index) => {
-    //     formData.append(`subjectSelected[${index}]`, floor.toString());
-    //   });
-    // }
     return this.http.post<Employee>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 

@@ -32,8 +32,8 @@ namespace LMS_CMS_DAL.Models.Domains
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string? ar_name { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+        //[Required(ErrorMessage = "Password is required")]
+        //[StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
         public string? Password { get; set; }
         public string? Mobile { get; set; }
         public string? Phone { get; set; }
@@ -97,8 +97,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? File { get; set; }
 
         [ForeignKey("Role")]
-        [Required]
-        public long Role_ID { get; set; }
+        public long? Role_ID { get; set; }
         public Role? Role { get; set; }
 
 
@@ -108,7 +107,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
 
         [ForeignKey("EmployeeType")]
-        public long EmployeeTypeID { get; set; }
+        public long? EmployeeTypeID { get; set; }
         public EmployeeType? EmployeeType { get; set; }
 
 

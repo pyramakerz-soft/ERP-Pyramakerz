@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20260104091545_AddEmployeeIsNullPassword")]
+    partial class AddEmployeeIsNullPassword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2575,38 +2578,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<DateTime>("ApplicationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("AuthorizeInvestigation")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("BirthdayDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ComputerSkills")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CurrentAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CurrentJob")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("DepartmentID")
-                        .IsRequired()
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("DidYouHaveAnyRelativeHere")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DoYouSpeakAnyOtherLanguages")
+                    b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -2614,102 +2586,26 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("EnterDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("GraduationYear")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Hobbies")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HowDidYouFindUs")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("InterviewStateID")
-                        .HasColumnType("bigint");
-
                     b.Property<bool?>("IsAccepted")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsHRScreened")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("LastSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Major")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MaritalStatus")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Mobile")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("Nationality")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("OtherStudies")
+                    b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PassportAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PassportNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Position")
+                    b.Property<string>("User_Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PositionAppliedFor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PreviousExperiencePlace")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReasonforLeavingtheJob")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolYouGraduatedFrom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ToDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("University")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YourLevelInEnglish")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YourLevelInFrensh")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ar_name")
                         .IsRequired()
@@ -2721,18 +2617,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("faculty")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("ID");
-
-                    b.HasIndex("DepartmentID");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("InterviewStateID");
+                    b.HasIndex("User_Name")
+                        .IsUnique();
 
                     b.ToTable("RegisteredEmployee");
                 });
@@ -5153,7 +5044,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<long?>("EmployeeTypeID")
+                    b.Property<long>("EmployeeTypeID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("EnterDate")
@@ -5278,7 +5169,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("ResidenceNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("Role_ID")
+                    b.Property<long>("Role_ID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("SchoolYouGraduatedFrom")
@@ -5409,9 +5300,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<long?>("RegisteredEmployeeID")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -5428,8 +5316,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("EmployeeID");
 
                     b.HasIndex("InsertedByUserId");
-
-                    b.HasIndex("RegisteredEmployeeID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -5743,6 +5629,106 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("BounsCategorys");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.CandidateSubmit", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime>("ApplicationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("DepartmentID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long?>("EmployeeID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHRScreened")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PositionAppliedFor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ar_name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("en_name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ApplicationDate")
+                        .HasDatabaseName("IX_CandidateSubmit_ApplicationDate");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("DepartmentID")
+                        .HasDatabaseName("IX_CandidateSubmit_DepartmentID");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CandidateSubmit_Email_Unique");
+
+                    b.HasIndex("EmployeeID");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_CandidateSubmit_Status");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("CandidateSubmits");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.DayStatus", b =>
@@ -16828,24 +16814,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", b =>
-                {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.Department", "Department")
-                        .WithMany("RegisteredEmployees")
-                        .HasForeignKey("DepartmentID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.RegisterationModule.InterviewState", "InterviewState")
-                        .WithMany("RegisteredEmployees")
-                        .HasForeignKey("InterviewStateID")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Department");
-
-                    b.Navigation("InterviewState");
-                });
-
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.SocialInsurance", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
@@ -17962,7 +17930,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.EmployeeType", "EmployeeType")
                         .WithMany("Employees")
                         .HasForeignKey("EmployeeTypeID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
@@ -17981,7 +17950,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Role", "Role")
                         .WithMany("Employess")
                         .HasForeignKey("Role_ID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
@@ -18028,11 +17998,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", "RegisteredEmployee")
-                        .WithMany("Attachments")
-                        .HasForeignKey("RegisteredEmployeeID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -18042,8 +18007,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Employee");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("RegisteredEmployee");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -18177,6 +18140,42 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("UpdatedByUserId");
 
                     b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.HR.CandidateSubmit", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.Department", "Department")
+                        .WithMany("CandidateSubmits")
+                        .HasForeignKey("DepartmentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Employee");
 
                     b.Navigation("InsertedByEmployee");
 
@@ -23208,11 +23207,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Department", b =>
                 {
+                    b.Navigation("CandidateSubmits");
+
                     b.Navigation("Employees");
 
                     b.Navigation("Offers");
-
-                    b.Navigation("RegisteredEmployees");
 
                     b.Navigation("Titles");
                 });
@@ -23230,11 +23229,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.ReasonForLeavingWork", b =>
                 {
                     b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Title", b =>
@@ -24017,8 +24011,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RegisterationModule.InterviewState", b =>
                 {
                     b.Navigation("RegisterationFormInterviews");
-
-                    b.Navigation("RegisteredEmployees");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RegisterationModule.InterviewTime", b =>

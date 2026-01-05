@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20260104145441_AddRegisteredEmployeeRelations")]
+    partial class AddRegisteredEmployeeRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2598,8 +2601,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("DepartmentID")
-                        .IsRequired()
+                    b.Property<long>("DepartmentID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("DidYouHaveAnyRelativeHere")
@@ -2683,9 +2685,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<string>("PreviousExperiencePlace")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProfileImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReasonforLeavingtheJob")
@@ -5409,9 +5408,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<long?>("RegisteredEmployeeID")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -5428,8 +5424,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("EmployeeID");
 
                     b.HasIndex("InsertedByUserId");
-
-                    b.HasIndex("RegisteredEmployeeID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -18028,11 +18022,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", "RegisteredEmployee")
-                        .WithMany("Attachments")
-                        .HasForeignKey("RegisteredEmployeeID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -18042,8 +18031,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Employee");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("RegisteredEmployee");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -23230,11 +23217,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.ReasonForLeavingWork", b =>
                 {
                     b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Title", b =>

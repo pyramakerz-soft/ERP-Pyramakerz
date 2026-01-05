@@ -183,6 +183,13 @@ namespace LMS_CMS_BL.Config
             //   .ForMember(dest => dest.BusCompanyID, opt => opt.MapFrom(src => src.BusCompany.ID));
             //CreateMap<EmployeeAddDTO, Employee>();
 
+            CreateMap<EmployeeAddDTO, Employee>()
+                .ForMember(d => d.Password, opt => opt.Ignore())
+                .ForMember(d => d.User_Name, opt => opt.Ignore())
+                .ForMember(d => d.Role_ID, opt => opt.Ignore())
+                .ForMember(d => d.EmployeeTypeID, opt => opt.Ignore());
+
+
             CreateMap<Employee, EmployeePutDTO>()
               .ForMember(dest => dest.Role_ID, opt => opt.MapFrom(src => src.Role.ID))
               .ForMember(dest => dest.EmployeeTypeID, opt => opt.MapFrom(src => src.EmployeeType.ID))
@@ -1207,7 +1214,16 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<DiscussionRoomStudentClassroom, DiscussionRoomStudentClassroomGetDTO>();
 
-            CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
+            //CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
+            CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>()
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Mobile))
+                .ForMember(dest => dest.DepartmentName,
+                           opt => opt.MapFrom(src => src.Department.Name))
+                .ForMember(dest => dest.InterviewStatus,
+                           opt => opt.MapFrom(src => src.InterviewState.Name))
+                .ForMember(dest => dest.ApplicationDate,
+                           opt => opt.MapFrom(src => src.ApplicationDate.ToString("dd MMM yyyy")));
+
             CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
             CreateMap<RegisteredEmployeeEditDTO, RegisteredEmployee>(); 
 

@@ -47,14 +47,14 @@ export class SignUpEmployeeComponent {
     }
   }
 
-  onCaptchaResolved(token: string | null): void {
-    if (token) {
-      this.employee.recaptchaToken = token;
-      this.validationErrors['recaptchaToken'] = ''
-    } else {
-      this.employee.recaptchaToken = '';
-    }
-  }
+  // onCaptchaResolved(token: string | null): void {
+  //   if (token) {
+  //     this.employee.recaptchaToken = token;
+  //     this.validationErrors['recaptchaToken'] = ''
+  //   } else {
+  //     this.employee.recaptchaToken = '';
+  //   }
+  // }
 
   validateNumber(event: any, field: keyof RegisteredEmployee): void {
     let value = event.target.value;
@@ -74,10 +74,10 @@ export class SignUpEmployeeComponent {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof RegisteredEmployee;
         if (!this.employee[field]) {
-          if (field == "user_Name" || field == "en_name" || field == "ar_name" || field == "password" || field == "email" || field == "phone" || field == "mobile" || field == "address") {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
+          // if (field == "user_Name" || field == "en_name" || field == "ar_name" || field == "password" || field == "email" || field == "phone" || field == "mobile" || field == "address") {
+          //   this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+          //   isValid = false;
+          // }
         }
       }
     }
@@ -88,16 +88,16 @@ export class SignUpEmployeeComponent {
       isValid = false;
     }
 
-    if (this.employee.password && this.employee.password.length < 6) {
-      this.validationErrors['password'] = 'Password must be between 6 and 100 characters ';
-      isValid = false;
-    }
+    // if (this.employee.password && this.employee.password.length < 6) {
+    //   this.validationErrors['password'] = 'Password must be between 6 and 100 characters ';
+    //   isValid = false;
+    // }
 
     if (this.confirmPassword != "") {
-      if (this.employee.password != this.confirmPassword) {
-        this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
-        isValid = false;
-      }
+      // if (this.employee.password != this.confirmPassword) {
+      //   this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
+      //   isValid = false;
+      // }
     } else {
       this.IsConfimPassEmpty = true
       isValid = false;
@@ -125,10 +125,10 @@ export class SignUpEmployeeComponent {
     }
   }
 
-  onConfirmPasswordChange() {
-    this.validationErrors['password'] = '';
-    this.IsConfimPassEmpty = false
-  }
+  // onConfirmPasswordChange() {
+  //   this.validationErrors['password'] = '';
+  //   this.IsConfimPassEmpty = false
+  // }
 
   async SignUp() {
     if (this.isFormValid()) {
@@ -150,7 +150,7 @@ export class SignUpEmployeeComponent {
           // this.captchaRef.reset(); 
         },
         error => {
-          this.employee.recaptchaToken = '';
+          // this.employee.recaptchaToken = '';
           this.isLoading = false;
           // if (this.captchaRef) {
           //   this.captchaRef.reset(); 
