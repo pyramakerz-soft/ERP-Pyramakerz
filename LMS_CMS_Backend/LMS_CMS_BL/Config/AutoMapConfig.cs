@@ -1216,13 +1216,19 @@ namespace LMS_CMS_BL.Config
 
             //CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
             CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>()
-                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Mobile))
-                .ForMember(dest => dest.DepartmentName,
-                           opt => opt.MapFrom(src => src.Department.Name))
-                .ForMember(dest => dest.InterviewStatus,
-                           opt => opt.MapFrom(src => src.InterviewState.Name))
-                .ForMember(dest => dest.ApplicationDate,
-                           opt => opt.MapFrom(src => src.ApplicationDate.ToString("dd MMM yyyy")));
+      .ForMember(dest => dest.Phone,
+          opt => opt.MapFrom(src => src.Mobile))
+
+      .ForMember(dest => dest.DepartmentName,
+          opt => opt.MapFrom(src =>
+              src.Department != null ? src.Department.Name : null))
+
+      .ForMember(dest => dest.InterviewStatus,
+          opt => opt.MapFrom(src =>
+              src.InterviewState != null ? src.InterviewState.Name : "Pending"))
+
+      .ForMember(dest => dest.ApplicationDate,
+          opt => opt.MapFrom(src => src.ApplicationDate));
 
             CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
             CreateMap<RegisteredEmployeeEditDTO, RegisteredEmployee>(); 

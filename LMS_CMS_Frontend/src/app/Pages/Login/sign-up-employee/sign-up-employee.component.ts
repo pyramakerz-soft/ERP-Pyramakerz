@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RegisteredEmployee } from '../../../Models/Administrator/registered-employee';
+import { RegisteredEmployee , RegisteredEmployeeAdd } from '../../../Models/Administrator/registered-employee';
 import { RegisteredEmployeeService } from '../../../Services/Employee/Administration/registered-employee.service';
 import { ApiService } from '../../../Services/api.service';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha'; 
@@ -11,6 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+
 
 @Component({
   selector: 'app-sign-up-employee',
@@ -130,44 +131,52 @@ export class SignUpEmployeeComponent {
   //   this.IsConfimPassEmpty = false
   // }
 
-  async SignUp() {
-    if (this.isFormValid()) {
-      const Swal = await import('sweetalert2').then(m => m.default);
+async SignUp() {
+  if (this.isFormValid()) {
+    const Swal = await import('sweetalert2').then(m => m.default);
 
-      this.isLoading = true;
-      this.registeredEmployeeService.Add(this.employee, this.DomainName).subscribe(
-        data => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'You have been registered successfully, Please Wait the Admin to confirm',
-            confirmButtonColor: '#089B41',
-          });
+    this.isLoading = true;
+    
+    // 1. إنشاء كائن RegisteredEmployeeAdd من this.employee
+    const employeeAdd = {
+      ...new RegisteredEmployeeAdd(),
+      ...this.employee
+    } as RegisteredEmployeeAdd;
 
-          this.employee = new RegisteredEmployee()
-          this.confirmPassword = ''
-          this.isLoading = false;
-          // this.captchaRef.reset(); 
-        },
-        error => {
-          // this.employee.recaptchaToken = '';
-          this.isLoading = false;
-          // if (this.captchaRef) {
-          //   this.captchaRef.reset(); 
-          // }
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            confirmButtonText: 'Okay',
-            customClass: {
-              confirmButton: 'secondaryBg'
-            }
-          });
-        }
-      )
-    }
+    // 2. استخدام الكائن الجديد بدلاً من this.employee
+    this.registeredEmployeeService.Add(employeeAdd, this.DomainName).subscribe(
+      data => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'You have been registered successfully, Please Wait the Admin to confirm',
+          confirmButtonColor: '#089B41',
+        });
+
+        this.employee = new RegisteredEmployee()
+        this.confirmPassword = ''
+        this.isLoading = false;
+        // this.captchaRef.reset(); 
+      },
+      error => {
+        // this.employee.recaptchaToken = '';
+        this.isLoading = false;
+        // if (this.captchaRef) {
+        //   this.captchaRef.reset(); 
+        // }
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.error,
+          confirmButtonText: 'Okay',
+          customClass: {
+            confirmButton: 'secondaryBg'
+          }
+        });
+      }
+    )
   }
+}
 
   login() {
     sessionStorage.setItem('fromEmployeeSignup', 'true');

@@ -22,7 +22,7 @@ export class RegisteredEmployeeAdd {
     public ar_name: string = '',
     public email: string = '',
     public mobile: string = '',
-    public departmentID: number | null = null,
+    // public departmentID: number | null = null,
     public positionAppliedFor: string = '',
     public applicationDate: string = '', 
     public gender: string | null = null,
