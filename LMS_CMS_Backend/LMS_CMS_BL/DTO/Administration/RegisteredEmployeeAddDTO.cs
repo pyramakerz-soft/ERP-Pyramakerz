@@ -24,7 +24,7 @@ namespace LMS_CMS_BL.DTO.Administration
         [Required(ErrorMessage = "رقم الموبايل مطلوب")]
         public string Mobile { get; set; }
 
-        public long? DepartmentID { get; set; }  // optional عند الإضافة
+        //public long? DepartmentID { get; set; } 
         [Required(ErrorMessage = "الوظيفة المتقدم لها مطلوبة")]
         public string PositionAppliedFor { get; set; }
 
@@ -41,7 +41,7 @@ namespace LMS_CMS_BL.DTO.Administration
         public string? CurrentAddress { get; set; }
 
         public string University { get; set; }
-        public DateTime GraduationYear { get; set; }  
+        public DateTime? GraduationYear { get; set; }  //
 
         public string faculty { get; set; }
 
@@ -58,9 +58,9 @@ namespace LMS_CMS_BL.DTO.Administration
         public string PreviousExperiencePlace { get; set; }
 
         public string Position { get; set; }
-        public DateTime FromDate { get; set; }  
+        public DateTime? FromDate { get; set; }  //
 
-        public DateTime ToDate { get; set; }
+        public DateTime? ToDate { get; set; }      //
 
         public string HowDidYouFindUs { get; set; }
 

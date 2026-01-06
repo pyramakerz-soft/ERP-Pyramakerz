@@ -142,10 +142,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         //}
 
         //////////////////////////////////////////////////////////////////////////////////////////
+        
         [HttpPost]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Registered Employee" }
+       )]
         public async Task<IActionResult> Add(
-            [FromForm] RegisteredEmployeeAddDTO dto,
-            [FromForm] List<EmployeeAttachmentAddDTO> files)
+          RegisteredEmployeeAddDTO dto,
+            List<EmployeeAttachmentAddDTO> files)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -167,8 +172,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             if (string.IsNullOrWhiteSpace(dto.Email) || !Regex.IsMatch(dto.Email, pattern))
             {
-                return BadRequest("This Email Already Exist");
+                return BadRequest("Invalid Email Format");
             }
+
 
             RegisteredEmployee CheckEmailFromRegistered = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.Email == dto.Email);
             if (CheckEmailFromRegistered != null)
@@ -176,7 +182,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 return BadRequest("This Email Already Exist");
             }
 
-            if (files == null || files.Count == 0)
+            if  (files != null && files.Count > 0)
             {
                 return BadRequest("At least one file must be uploaded (such as a CV).");
             }
@@ -195,7 +201,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 }
             }
 
-            // === Mapping وإضافة المتقدم ===
             RegisteredEmployee registeredEmployee = mapper.Map<RegisteredEmployee>(dto);
 
             registeredEmployee.ApplicationDate = DateTime.Now;
@@ -216,7 +221,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
                 string profileImagePath = await _fileService.UploadFileAsync(
                     dto.ProfileImage,
-                    "Administration/RegisteredEmployee/ProfileImages",  // مسار الصور
+                    "Administration/RegisteredEmployee/ProfileImages",  
                     registeredEmployee.ID,
                     HttpContext);
 
@@ -231,7 +236,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 Unit_Of_Work.employeeAttachment_Repository.Add(profileAttachment);
             }
 
-            // === رفع الملفات الأخرى (إجباري) ===
             foreach (var file in files)
             {
                 string filePath = await _fileService.UploadFileAsync(
