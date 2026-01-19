@@ -5,6 +5,7 @@ env:
     NUGET_PACKAGES: "/root/.nuget/packages"
     npm_config_cache: "/root/.cache/npm"
     NG_BUILD_CACHE_PATH: "/root/.cache/angular"
+    DOTNET_ROOT: "/root/.dotnet"
     DOTNET_CLI_TELEMETRY_OPTOUT: "1"
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
     DOTNET_NOLOGO: "1"
@@ -20,12 +21,15 @@ phases:
       nodejs: 20
     commands:
       - 'echo ---- INSTALL PHASE ----'
+      - 'if ! dotnet --list-sdks | grep -q "^9\\."; then curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh; chmod +x dotnet-install.sh; ./dotnet-install.sh --version 9.0.302 --install-dir $DOTNET_ROOT; fi'
+      - 'export PATH="$DOTNET_ROOT:$PATH:/root/.dotnet/tools"'
+      - 'dotnet --version'
       - 'dotnet tool install --global dotnet-ef --version 9.0.10 --verbosity quiet || dotnet tool update --global dotnet-ef --version 9.0.10 --verbosity quiet'
-      - 'export PATH="$PATH:/root/.dotnet/tools"'
       - 'cd LMS_CMS_Frontend && npm ci --legacy-peer-deps --no-audit --no-fund --prefer-offline && cd ..'
 
   pre_build:
     commands:
+      - 'export PATH="$DOTNET_ROOT:$PATH:/root/.dotnet/tools"'
       - 'echo ---- PRE_BUILD: FRONTEND ----'
       - 'cd LMS_CMS_Frontend && npm run build --prod --silent && cd ..'
       - 'echo ---- PRE_BUILD: BACKEND PUBLISH ----'
