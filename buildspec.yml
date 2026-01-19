@@ -11,6 +11,7 @@ env:
     NUGET_XMLDOC_MODE: "skip"
     NODE_OPTIONS: "--max-old-space-size=4096"
     MSBUILD_TREAT_WARNINGS_AS_MESSAGES: "true"
+    MSBUILDDISABLENODEREUSE: "1"
 
 phases:
   install:
@@ -30,7 +31,7 @@ phases:
       - 'echo ---- PRE_BUILD: BACKEND PUBLISH ----'
       - 'mkdir -p LMS_CMS_Backend/LMS_CMS/wwwroot'
       - 'cp -r LMS_CMS_Frontend/dist/lms-cms-frontend/browser/* LMS_CMS_Backend/LMS_CMS/wwwroot/ || true'
-      - 'dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj -c Release -o final --verbosity minimal --nologo'
+      - 'dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj -c Release -o final --verbosity minimal --nologo -m:1 -p:BuildInParallel=false'
       - 'dotnet ef database update --project LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj --context Octa_DbContext --configuration Release --no-build'
   post_build:
     commands:
