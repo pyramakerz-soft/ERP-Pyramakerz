@@ -35,7 +35,6 @@ phases:
     post_build:
   commands:
     - 'echo ---- DONE ----'
-
 artifacts:
   base-directory: final
   files:
