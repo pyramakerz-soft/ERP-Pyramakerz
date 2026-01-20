@@ -22,7 +22,7 @@ phases:
 
   pre_build:
     commands:
-      - echo "---- FRONTEND BUILD ----"
+      - echo "---- FRONTEND BUILD -----"
       - cd LMS_CMS_Frontend
       - npm ci --legacy-peer-deps --no-audit --no-fund
       - npm run build --prod
