@@ -2,16 +2,11 @@ version: 0.2
 
 env:
   variables:
-    NUGET_PACKAGES: "/root/.nuget/packages"
-    npm_config_cache: "/root/.cache/npm"
-    NG_BUILD_CACHE_PATH: "/root/.cache/angular"
-    DOTNET_ROOT: "/root/.dotnet"
     DOTNET_CLI_TELEMETRY_OPTOUT: "1"
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
     DOTNET_NOLOGO: "1"
     NUGET_XMLDOC_MODE: "skip"
-    NODE_OPTIONS: "--max-old-space-size=4096"
-    MSBUILD_TREAT_WARNINGS_AS_MESSAGES: "true"
+    NODE_OPTIONS: "--max-old-space-size=6144"
     MSBUILDDISABLENODEREUSE: "1"
 
 phases:
@@ -20,26 +15,52 @@ phases:
       dotnet: 8.0
       nodejs: 20
     commands:
-      - 'echo ---- INSTALL PHASE ----'
-      - 'if ! dotnet --list-sdks | grep -q "^9\\."; then curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh; chmod +x dotnet-install.sh; ./dotnet-install.sh --version 9.0.302 --install-dir $DOTNET_ROOT; fi'
-      - 'export PATH="$DOTNET_ROOT:$PATH:/root/.dotnet/tools"'
-      - 'dotnet --version'
-      - 'dotnet tool install --global dotnet-ef --version 9.0.10 --verbosity quiet || dotnet tool update --global dotnet-ef --version 9.0.10 --verbosity quiet'
-      - 'cd LMS_CMS_Frontend && npm ci --legacy-peer-deps --no-audit --no-fund --prefer-offline && cd ..'
+      - echo "---- INSTALL ----"
+      - dotnet --info
+      - node --version
+      - npm --version
 
   pre_build:
     commands:
-      - 'export PATH="$DOTNET_ROOT:$PATH:/root/.dotnet/tools"'
-      - 'echo ---- PRE_BUILD: FRONTEND ----'
-      - 'cd LMS_CMS_Frontend && npm run build --prod --silent && cd ..'
-      - 'echo ---- PRE_BUILD: BACKEND PUBLISH ----'
-      - 'mkdir -p LMS_CMS_Backend/LMS_CMS/wwwroot'
-      - 'cp -r LMS_CMS_Frontend/dist/lms-cms-frontend/browser/* LMS_CMS_Backend/LMS_CMS/wwwroot/ || true'
-      - 'dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj -c Release -o final --verbosity minimal --nologo -m:1 -p:BuildInParallel=false'
-      - 'dotnet ef database update --project LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj --context Octa_DbContext --configuration Release --no-build'
+      - echo "---- FRONTEND BUILD ----"
+      - cd LMS_CMS_Frontend
+      - npm ci --legacy-peer-deps --no-audit --no-fund
+      - npm run build --prod
+      - cd ..
+
+      - echo "---- COPY FRONTEND TO BACKEND ----"
+      - mkdir -p LMS_CMS_Backend/LMS_CMS/wwwroot
+      - rm -rf LMS_CMS_Backend/LMS_CMS/wwwroot/*
+      - cp -r LMS_CMS_Frontend/dist/lms-cms-frontend/browser/* LMS_CMS_Backend/LMS_CMS/wwwroot/
+
+      - echo "---- BACKEND RESTORE ----"
+      - dotnet restore LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj
+
+  build:
+    commands:
+      - echo "---- BACKEND PUBLISH ----"
+      - dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj \
+          -c Release \
+          -o final \
+          --no-restore \
+          --verbosity minimal \
+          -p:UseSharedCompilation=false \
+          -p:PublishReadyToRun=false \
+          -p:DebugType=None \
+          -p:GenerateDocumentationFile=false
+
+      - echo "---- EF MIGRATION ----"
+      - dotnet ef database update \
+          --project LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj \
+          --context Octa_DbContext \
+          --configuration Release \
+          --no-build \
+          --verbosity quiet
+
   post_build:
     commands:
-      - 'echo ---- DONE ----'
+      - echo "---- BUILD SUCCESS ----"
+
 artifacts:
   base-directory: final
   files:
@@ -48,6 +69,4 @@ artifacts:
 cache:
   paths:
     - '/root/.nuget/packages/**/*'
-    - '/root/.dotnet/tools/**/*'
-    - '/root/.cache/npm/**/*'
-    - '/root/.cache/angular/**/*'  
+    - '/root/.npm/**/*'
