@@ -39,23 +39,10 @@ phases:
   build:
     commands:
       - echo "---- BACKEND PUBLISH ----"
-      - dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj \
-          -c Release \
-          -o final \
-          --no-restore \
-          --verbosity minimal \
-          -p:UseSharedCompilation=false \
-          -p:PublishReadyToRun=false \
-          -p:DebugType=None \
-          -p:GenerateDocumentationFile=false
+      - dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj  -c Release -o final --no-restore --verbosity minimal -p:UseSharedCompilation=false  -p:PublishReadyToRun=false  -p:DebugType=None -p:GenerateDocumentationFile=false
 
       - echo "---- EF MIGRATION ----"
-      - dotnet ef database update \
-          --project LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj \
-          --context Octa_DbContext \
-          --configuration Release \
-          --no-build \
-          --verbosity quiet
+      - dotnet ef database update  --project LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj  --context Octa_DbContext --configuration Release --no-build --verbosity quiet
 
   post_build:
     commands:
