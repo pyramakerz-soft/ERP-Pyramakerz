@@ -39,6 +39,8 @@ phases:
   build:
     commands:
       - echo "---- BACKEND PUBLISH ----"
+      - mkdir -p final
+      - rm -rf final/*
       - dotnet publish LMS_CMS_Backend/LMS_CMS/LMS_CMS_PL.csproj  -c Release -o final --no-restore --verbosity minimal -p:UseSharedCompilation=false  -p:PublishReadyToRun=false  -p:DebugType=None -p:GenerateDocumentationFile=false
 
       - echo "---- EF MIGRATION ----"
