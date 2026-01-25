@@ -11,11 +11,10 @@ namespace LMS_CMS_BL.DTO.Administration
     {
         public long ID { get; set; } 
         public string en_name { get; set; } // CandidateName
-        public string ar_name { get; set; } 
         public string Email { get; set; }
         public string Phone { get; set; }
         public string DepartmentName { get; set; }
-        public string PositionAppliedFor { get; set; }  // title
+        public string TitleName { get; set; }   //  PositionAppliedFor
         public DateTime ApplicationDate { get; set; } = DateTime.Now;
         public string InterviewStatus { get; set; }
         public bool IsHRScreened { get; set; }  

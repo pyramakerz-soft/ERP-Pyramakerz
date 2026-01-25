@@ -53,6 +53,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             List<RegisteredEmployee> registeredEmployees = await Unit_Of_Work.registeredEmployee_Repository.Select_All_With_IncludesById<RegisteredEmployee>(
                sem => sem.IsHRScreened == false,
                query => query.Include(emp => emp.Department),
+                query => query.Include(emp => emp.Title),
                query => query.Include(emp => emp.InterviewState));
 
 
@@ -68,18 +69,49 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
+        //[HttpGet("{id}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Registered Employee" }
+        //)]
+        //[Authorize]
+        //public IActionResult GetByID(long id)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    RegisteredEmployee registeredEmployee = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(
+        //            f => f.IsHRScreened == false && f.ID == id);
+
+        //    if (registeredEmployee == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    RegisteredEmployeeGetDTO registeredEmployeeGetDTO = mapper.Map<RegisteredEmployeeGetDTO>(registeredEmployee);
+
+        //    return Ok(registeredEmployeeGetDTO);
+        //}
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Registered Employee" }
         )]
         [Authorize]
-        public IActionResult GetByID(long id)
+        public async Task<IActionResult> GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            RegisteredEmployee registeredEmployee = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(
-                    f => f.IsHRScreened == false && f.ID == id);
+            List<RegisteredEmployee> registeredEmployees =
+                await Unit_Of_Work.registeredEmployee_Repository
+                .Select_All_With_IncludesById<RegisteredEmployee>(
+                    sem => sem.IsHRScreened == false && sem.ID == id,
+                    query => query.Include(emp => emp.Department),
+                      query => query.Include(emp => emp.Title),
+                    query => query.Include(emp => emp.InterviewState)
+                );
+
+            RegisteredEmployee registeredEmployee = registeredEmployees.FirstOrDefault();
 
             if (registeredEmployee == null)
             {
@@ -90,6 +122,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             return Ok(registeredEmployeeGetDTO);
         }
+
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,11 +175,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         //}
 
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpPost]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Registered Employee" }
+         pages: new[] { "Registered Employee " , "Applicant registration form" }
        )]
         public async Task<IActionResult> Add(
           RegisteredEmployeeAddDTO dto,
@@ -205,7 +238,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             registeredEmployee.ApplicationDate = DateTime.Now;
             registeredEmployee.EnterDate = DateTime.Now;
-            registeredEmployee.IsHRScreened = false;
+            registeredEmployee.IsHRScreened = true;
             registeredEmployee.IsAccepted = null;
 
             Unit_Of_Work.registeredEmployee_Repository.Add(registeredEmployee);
@@ -228,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 var profileAttachment = new EmployeeAttachment
                 {
                     RegisteredEmployeeID = registeredEmployee.ID,
-                    Name = "الصورة الشخصية",
+                    Name = "Personal photo",
                     Link = profileImagePath,
                    
                 };

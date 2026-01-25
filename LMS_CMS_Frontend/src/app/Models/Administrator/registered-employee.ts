@@ -4,11 +4,10 @@ export class RegisteredEmployee {
     constructor(
         public id: number = 0,
         public en_name: string = '',
-        public ar_name: string = '',
         public email: string = '',
         public phone: string = '',           
         public departmentName: string = '',  
-        public positionAppliedFor: string = '', 
+        public titleName: string = '', 
         public applicationDate: string = '', 
         public interviewStatus: string = '',
         public isHRScreened: boolean = false
@@ -22,8 +21,9 @@ export class RegisteredEmployeeAdd {
     public ar_name: string = '',
     public email: string = '',
     public mobile: string = '',
-    // public departmentID: number | null = null,
     public positionAppliedFor: string = '',
+    public titleID: number | null = null,
+
     public applicationDate: string = '', 
     public gender: string | null = null,
     public birthdayDate: string | null = null,

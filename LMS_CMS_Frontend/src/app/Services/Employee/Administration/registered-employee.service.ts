@@ -72,8 +72,8 @@ Add(registeredEmployee: RegisteredEmployeeAdd, DomainName?: string) {
   formData.append('ar_name', registeredEmployee.ar_name || '');
   formData.append('email', registeredEmployee.email || '');
   formData.append('mobile', registeredEmployee.mobile || '');
-  // formData.append('departmentID', registeredEmployee.departmentID?.toString() || '');
   formData.append('positionAppliedFor', registeredEmployee.positionAppliedFor || '');
+  formData.append('titleID', registeredEmployee.titleID?.toString() || '');
   formData.append('gender', registeredEmployee.gender || '');
   formData.append('birthdayDate', registeredEmployee.birthdayDate || '');
   formData.append('passportNumber', registeredEmployee.passportNumber || '');

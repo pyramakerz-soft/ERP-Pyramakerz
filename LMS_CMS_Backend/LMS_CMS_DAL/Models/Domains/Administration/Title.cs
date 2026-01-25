@@ -24,5 +24,6 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [ForeignKey("DepartmentID")]
         public Department Department { get; set; }
         public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+        public ICollection<RegisteredEmployee> RegisteredEmployees { get; set; }= new List<RegisteredEmployee>();
     }  
 }

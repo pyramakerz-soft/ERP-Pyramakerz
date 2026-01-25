@@ -14,7 +14,7 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [Key]
         public long ID { get; set; }
         public DateTime ApplicationDate { get; set; } = DateTime.Now;
-        public string PositionAppliedFor { get; set; }  // Title
+        //public string PositionAppliedFor { get; set; }  // Title
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string en_name { get; set; }
@@ -73,6 +73,12 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [ForeignKey("Department")]
         public long? DepartmentID { get; set; }
         public Department Department { get; set; }
+
+        public long? TitleID { get; set; }
+
+        [ForeignKey("TitleID")]
+        public Title? Title { get; set; }
+
 
         public long? InterviewStateID { get; set; }
   

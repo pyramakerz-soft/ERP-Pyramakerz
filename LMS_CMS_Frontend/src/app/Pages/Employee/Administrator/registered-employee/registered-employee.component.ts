@@ -34,7 +34,7 @@ export class RegisteredEmployeeComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'user_Name', 'en_name', 'ar_name', 'email', 'mobile', 'phone', 'address'];
+  keysArray: string[] = ['id', 'en_name', 'email', 'phone', 'departmentName', 'titleName','positionAppliedFor', 'applicationDate', 'interviewStatus'];
  isRtl: boolean = false;
   subscription!: Subscription;
   constructor(
@@ -92,6 +92,8 @@ export class RegisteredEmployeeComponent {
       }
     }); 
   }
+
+// Navigate to View Registered Employee Details
 
   View(id: number){
     this.router.navigateByUrl(`Employee/Registered Employee/${id}`);

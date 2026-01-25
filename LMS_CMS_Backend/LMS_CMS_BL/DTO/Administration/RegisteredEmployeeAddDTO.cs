@@ -21,16 +21,16 @@ namespace LMS_CMS_BL.DTO.Administration
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "رقم الموبايل مطلوب")]
+        [Required(ErrorMessage = "Mobile number is required")]
         public string Mobile { get; set; }
 
         //public long? DepartmentID { get; set; } 
-        [Required(ErrorMessage = "الوظيفة المتقدم لها مطلوبة")]
-        public string PositionAppliedFor { get; set; }
+        [Required(ErrorMessage = "Job title required")]
+        public long? TitleID { get; set; }
 
         public string? Gender { get; set; }
 
-        public string? BirthdayDate { get; set; }  // string عشان ييجي من الـ date picker
+        public string? BirthdayDate { get; set; }  
 
         public string? PassportNumber { get; set; }
 
@@ -76,7 +76,7 @@ namespace LMS_CMS_BL.DTO.Administration
 
         public string CurrentJob { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "الراتب يجب أن يكون رقم موجب")]
+        [Range(0, double.MaxValue, ErrorMessage = "The salary must be a positive number.")]
         public decimal LastSalary { get; set; }
 
         public bool AuthorizeInvestigation { get; set; }
