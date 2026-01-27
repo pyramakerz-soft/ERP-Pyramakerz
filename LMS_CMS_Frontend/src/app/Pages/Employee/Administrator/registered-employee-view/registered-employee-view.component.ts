@@ -1,3 +1,4 @@
+import { TitleService } from './../../../../Services/Employee/Administration/title.service';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +18,12 @@ import { RegisteredEmployeeAdd } from '../../../../Models/Administrator/register
 import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
 import { DepartmentService } from '../../../../Services/Employee/Administration/department.service';
 import { Department } from '../../../../Models/Administrator/department';
+import { Title } from '../../../../Models/Administrator/title';
+import { Gender } from '../../../../Models/gender';
+import { GenderService } from '../../../../Services/Employee/Inventory/gender.service';
+import { Nationality } from '../../../../Models/nationality';
+import { NationalityService } from '../../../../Services/Octa/nationality.service';
+
 
 @Component({
   selector: 'app-registered-employee-view',
@@ -34,12 +41,14 @@ export class RegisteredEmployeeViewComponent {
   path: string = '';
   isRtl: boolean = false;
   subscription!: Subscription;
-
+  titles: Title[] = [];
   Data: RegisteredEmployeeAdd = new RegisteredEmployeeAdd();
   departments: Department[] = [];
   mode: string = '';
   EmpId: number = 0;
-
+  nationalities: Nationality[] = [];
+  Gender: Gender[] = [];
+  
   validationErrors: { [key: string]: string } = {};
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -75,70 +84,49 @@ export class RegisteredEmployeeViewComponent {
     private router: Router,
     public RegisteredEmployeeServ: RegisteredEmployeeService,
     public DepartmentServ: DepartmentService,
+    public registeredEmployeeService: RegisteredEmployeeService,
+    public TitleService: TitleService,
     private languageService: LanguageService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    public NationalityServ: NationalityService,
+    public GenderServ: GenderService,
+
   ) { }
 
-  // ngOnInit() {
-  //   this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-  //   this.UserID = this.User_Data_After_Login.id;
 
-  //   if (this.User_Data_After_Login.type === 'employee') {
-  //     this.DomainName = this.ApiServ.GetHeader();
-
-  //     this.loadDepartments();
-
-  //     this.activeRoute.url.subscribe((url) => {
-  //       this.path = url.map(segment => segment.path).join('/');
-
-  //       if (this.path.endsWith("RegisteredEmployee/Create")) {
-  //         this.mode = 'Create';
-  //       } else {
-  //         this.mode = 'View';
-  //         this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-
-  //         // this.RegisteredEmployeeServ.GetById(this.EmpId, this.DomainName).subscribe(async (data) => {
-  //         //   this.Data = data;
-  //         //   this.Data.editedFiles = [];
-  //         //   if (data.files == null) {
-  //         //     this.Data.files = [];
-  //         //   }
-  //         //   this.Data.id = this.EmpId;
-  //         // });
-  //       }
-  //     });
-  //   }
-
-  //   this.subscription = this.languageService.language$.subscribe(direction => {
-  //     this.isRtl = direction === 'rtl';
-  //   });
-  //   this.isRtl = document.documentElement.dir === 'rtl';
-  // }
 
 ngOnInit() {
-  // جلب بيانات المستخدم بعد تسجيل الدخول
   this.User_Data_After_Login = this.account.Get_Data_Form_Token();
   this.UserID = this.User_Data_After_Login.id;
 
-  // تعيين الدومين وتهيئة البيانات الأساسية
   this.DomainName = this.ApiServ.GetHeader();
+  this.loadTitles();
 
-  // تحميل قائمة الأقسام
   this.loadDepartments();
-
-  // وضع المكون في وضع Create دائمًا
+  this.getNationalities();
+  this.getGenders();
   this.mode = 'Create';
 
-  // الاشتراك لتحديث اتجاه اللغة
   this.subscription = this.languageService.language$.subscribe(direction => {
     this.isRtl = direction === 'rtl';
   });
 
-  // ضبط RTL على حسب HTML
   this.isRtl = document.documentElement.dir === 'rtl';
 }
 
 
+ getGenders() {
+    this.GenderServ.Get(this.DomainName).subscribe((data) => {
+      this.Gender = data;
+    });
+  }
+
+
+  getNationalities() {
+    this.NationalityServ.Get().subscribe((data) => {
+      this.nationalities = data;
+    });
+  }
 
   ngOnDestroy(): void {
     if (this.subscription) {
@@ -161,8 +149,27 @@ ngOnInit() {
     this.router.navigateByUrl('Employee/Employee');
   }
 
+loadTitles() {
+  this.TitleService.Get(this.DomainName).subscribe((res: Title[]) => {
+    this.titles = res;
+  });
+}
 
-  
+
+onTitleSelected(event: Event) {
+  const selectElement = event.target as HTMLSelectElement | null;
+  if (!selectElement) return; // تحقق من وجود العنصر
+
+  const selectedId = Number(selectElement.value);
+  const selectedTitle = this.titles.find(t => t.id === selectedId);
+  if (selectedTitle) {
+    this.Data.titleID = selectedTitle.id;
+    this.Data.positionAppliedFor = selectedTitle.name;
+  }
+}
+
+
+
   async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
 
@@ -361,243 +368,156 @@ ngOnInit() {
     }
   }
 
-  // async Save() {
-  //   const missingFields = this.getMissingFields();
+  async Save() {
+    const missingFields = this.getMissingFields();
 
-  //   if (missingFields.length > 0) {
-  //     const Swal = await import('sweetalert2').then(m => m.default);
-  //     await Swal.fire({
-  //       icon: 'warning',
-  //       title: 'Missing Data!',
-  //       html: `
-  //       <p>Please fill the following required fields:</p>
-  //       <ul class="text-right list-disc mr-8 mt-4 space-y-1">
-  //         ${missingFields.map(field => `<li><strong>${field}</strong></li>`).join('')}
-  //       </ul>
-  //     `,
-  //       confirmButtonColor: '#089B41',
-  //       confirmButtonText: 'OK',
-  //       width: '600px'
-  //     });
-  //     return;
-  //   }
-
-  //   this.isLoading = true;
-
-  //   try { 
-  //     if (this.experiences && this.experiences.length > 0) {
-  //       const validExperiences = this.experiences.filter(exp =>
-  //         exp.previousExperiencePlace?.trim() &&
-  //         exp.position?.trim() &&
-  //         exp.fromDate &&
-  //         exp.toDate
-  //       );
-
-  //       this.Data.previousExperiencePlace =
-  //         validExperiences.length > 0
-  //           ? JSON.stringify(validExperiences)
-  //           : '';
-
-  //       this.Data.position = '';
-  //       this.Data.fromDate = '';
-  //       this.Data.toDate = '';
-  //     }
-
-  //     if (!this.Data.files) {
-  //       this.Data.files = [];
-  //     }
-
-  //     const initialLength = this.Data.files.length;
-  //     for (let i = 0; i < this.SelectedFiles.length; i++) {
-  //       this.Data.files.push(this.SelectedFiles[i]);
-  //     }
-
-  //     console.log('Data being sent to backend:', {
-  //       basicInfo: {
-  //         name: this.Data.en_name,
-  //         email: this.Data.email,
-  //         mobile: this.Data.mobile
-  //       },
-  //       hasFiles: this.Data.files.length > 0,
-  //       hasProfileImage: this.Data.profileImage !== null,
-  //       experiences: this.experiences.length
-  //     });
-
-  //     const Swal = await import('sweetalert2').then(m => m.default);
-
-  //     console.log(this.mode)
-  //     if (this.mode === 'Create') {
-  //       this.RegisteredEmployeeServ.Add(this.Data, this.DomainName).subscribe({
-  //         next: (response) => {
-  //           console.log('Backend response:', response);
-
-  //           Swal.fire({
-  //             icon: 'success',
-  //             title: 'Success',
-  //             html: '<strong>Application submitted successfully!</strong>',
-  //             confirmButtonColor: '#089B41',
-  //             confirmButtonText: 'OK',
-  //             timer: 5000,
-  //             timerProgressBar: true
-  //           });
-
-  //           this.moveToRegisteredEmployees();
-  //         },
-  //         error: (error) => {
-  //           console.error('Error from backend:', error);
-
-  //           let errorMessage = 'An unexpected error occurred.';
-  //           if (error.error) {
-  //             errorMessage = typeof error.error === 'string'
-  //               ? error.error
-  //               : JSON.stringify(error.error);
-  //           } else if (error.message) {
-  //             errorMessage = error.message;
-  //           }
-
-  //           Swal.fire({
-  //             icon: 'error',
-  //             title: 'Error',
-  //             text: errorMessage,
-  //             confirmButtonColor: '#089B41'
-  //           });
-
-  //           this.Data.files.splice(initialLength);
-  //         },
-  //         complete: () => {
-  //           this.isLoading = false;
-  //         }
-  //       });
-  //     } else {
-  //       this.isLoading = false;
-  //     }
-
-  //   } catch (error: any) {
-  //     console.error('Unexpected error in Save():', error);
-  //     this.isLoading = false;
-
-  //     const Swal = await import('sweetalert2').then(m => m.default);
-  //     await Swal.fire({
-  //       icon: 'error',
-  //       title: 'Unexpected Error',
-  //       text: error.message || 'Something went wrong',
-  //       confirmButtonColor: '#089B41'
-  //     });
-  //   }
-  // }
-
-async Save() {
-  // 1️⃣ تحقق من الحقول المطلوبة
-  const missingFields = this.getMissingFields();
-  if (missingFields.length > 0) {
-    const Swal = await import('sweetalert2').then(m => m.default);
-    await Swal.fire({
-      icon: 'warning',
-      title: 'Missing Data!',
-      html: `
+    if (missingFields.length > 0) {
+      const Swal = await import('sweetalert2').then(m => m.default);
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Missing Data!',
+        html: `
         <p>Please fill the following required fields:</p>
         <ul class="text-right list-disc mr-8 mt-4 space-y-1">
           ${missingFields.map(field => `<li><strong>${field}</strong></li>`).join('')}
         </ul>
       `,
-      confirmButtonColor: '#089B41'
-    });
-    return;
-  }
-
-  // 2️⃣ تحقق من الملفات
-  if (this.SelectedFiles.length === 0) {
-    const Swal = await import('sweetalert2').then(m => m.default);
-    await Swal.fire({
-      icon: 'warning',
-      title: 'Missing File',
-      text: 'Please upload at least one file (e.g., CV).',
-      confirmButtonColor: '#089B41'
-    });
-    return;
-  }
-
-  // 3️⃣ جهز البيانات لإرسالها
-  this.isLoading = true;
-
-  try {
-    // دمج الخبرات السابقة في Data
-    if (this.experiences && this.experiences.length > 0) {
-      const validExperiences = this.experiences.filter(exp =>
-        exp.previousExperiencePlace?.trim() &&
-        exp.position?.trim() &&
-        exp.fromDate &&
-        exp.toDate
-      );
-
-      this.Data.previousExperiencePlace =
-        validExperiences.length > 0
-          ? JSON.stringify(validExperiences)
-          : '';
-
-      this.Data.position = '';
-      this.Data.fromDate = '';
-      this.Data.toDate = '';
+        confirmButtonColor: '#089B41',
+        confirmButtonText: 'OK',
+        width: '600px'
+      });
+      return;
     }
 
-    // إضافة الملفات المحددة
-    if (!this.Data.files) this.Data.files = [];
-    this.SelectedFiles.forEach(f => this.Data.files.push(f));
+    this.isLoading = true;
 
-    // 4️⃣ اطبع البيانات قبل الإرسال
-    console.log('📤 البيانات المرسلة للباكند:', this.Data);
-    console.log('📤 عدد الملفات:', this.Data.files.length);
-    console.log('📤 صورة الملف الشخصي موجودة؟', !!this.Data.profileImage);
+    try { 
+      if (this.experiences && this.experiences.length > 0) {
+        const validExperiences = this.experiences.filter(exp =>
+          exp.previousExperiencePlace?.trim() &&
+          exp.position?.trim() &&
+          exp.fromDate &&
+          exp.toDate
+        );
 
-    // 5️⃣ استدعاء خدمة الباكند
-    this.RegisteredEmployeeServ.Add(this.Data, this.DomainName).subscribe({
-      next: async (response) => {
-        console.log('✅ استجابة الباكند:', response);
+        this.Data.previousExperiencePlace =
+          validExperiences.length > 0
+            ? JSON.stringify(validExperiences)
+            : '';
 
-        const Swal = await import('sweetalert2').then(m => m.default);
-        await Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          html: '<strong>Application submitted successfully!</strong>',
-          confirmButtonColor: '#089B41'
-        });
+        this.Data.position = '';
+        this.Data.fromDate = '';
+        this.Data.toDate = '';
+      }
 
-        this.moveToRegisteredEmployees();
-      },
-      error: async (err) => {
-        console.error('❌ خطأ من الباكند:', err);
+      if (!this.Data.files) {
+        this.Data.files = [];
+      }
 
-        const Swal = await import('sweetalert2').then(m => m.default);
-        await Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          html: `<pre>${JSON.stringify(err.error || err.message || err, null, 2)}</pre>`,
-          confirmButtonColor: '#089B41'
-        });
-      },
-      complete: () => {
+      const initialLength = this.Data.files.length;
+      for (let i = 0; i < this.SelectedFiles.length; i++) {
+        this.Data.files.push(this.SelectedFiles[i]);
+      }
+
+      console.log('Data being sent to backend:', {
+        basicInfo: {
+          name: this.Data.en_name,
+          email: this.Data.email,
+          mobile: this.Data.mobile
+        },
+        hasFiles: this.Data.files.length > 0,
+        hasProfileImage: this.Data.profileImage !== null,
+        experiences: this.experiences.length
+      });
+
+      const Swal = await import('sweetalert2').then(m => m.default);
+
+      console.log(this.mode)
+      if (this.mode === 'Create') {
+        this.RegisteredEmployeeServ.Add(this.Data, this.DomainName).subscribe({
+          next: (response) => {
+            console.log('Backend response:', response);
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              html: '<strong>Application submitted successfully!</strong>',
+              confirmButtonColor: '#089B41',
+              confirmButtonText: 'OK',
+              timer: 5000,
+              timerProgressBar: true
+            });
+          },
+          error: (error) => {
+            this.isLoading = false
+            console.error('Error from backend:', error);
+
+            let errorMessage = 'An unexpected error occurred.';
+            if (error.error) {
+              errorMessage = typeof error.error === 'string'
+                ? error.error
+                : JSON.stringify(error.error);
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+
+            Swal.fire({
+              icon: 'error',
+              title: 'Error', 
+              text: errorMessage,
+              confirmButtonColor: '#089B41'
+            });
+
+            this.Data.files.splice(initialLength);
+          },
+          complete: () => {
+            this.isLoading = false;
+          }
+        });  
+      } else {
         this.isLoading = false;
       }
-    });
 
-  } catch (error: any) {
-    console.error('❌ خطأ غير متوقع:', error);
+    } catch (error: any) {
+      console.error('Unexpected error in Save():', error);
+      this.isLoading = false;
 
-    const Swal = await import('sweetalert2').then(m => m.default);
-    await Swal.fire({
-      icon: 'error',
-      title: 'Unexpected Error',
-      text: error.message || 'Something went wrong',
-      confirmButtonColor: '#089B41'
-    });
+      const Swal = await import('sweetalert2').then(m => m.default);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Unexpected Error',
+        text: error.message || 'Something went wrong',
+        confirmButtonColor: '#089B41'
+      });
+    }
+  }
 
-    this.isLoading = false;
+
+async onProfileImageSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!allowedExtensions.includes(fileExtension)) {
+      alert('Invalid file type. Allowed: jpg, jpeg, png, gif');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size exceeds 5 MB.');
+      return;
+    }
+
+    this.Data.profileImage = file;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.Data.profileImage = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 }
 
-  moveToRegisteredEmployees() {
-    this.router.navigateByUrl('Administration/RegisteredEmployee');
-  }
 
   changeFileName(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;

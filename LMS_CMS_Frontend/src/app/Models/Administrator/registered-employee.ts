@@ -1,3 +1,4 @@
+import { Title } from './title';
 import { EmployeeAttachment } from "../Employee/employee-attachment";
 
 export class RegisteredEmployee {
@@ -25,7 +26,7 @@ export class RegisteredEmployeeAdd {
     public titleID: number | null = null,
 
     public applicationDate: string = '', 
-    public gender: string | null = null,
+    public gender: boolean | null = null,
     public birthdayDate: string | null = null,
     public passportNumber: string | null = null,
     public maritalStatus: string | null = null,
@@ -59,7 +60,7 @@ export class RegisteredEmployeeAdd {
     public fullName: string = '',
     public EnterDate: string = '',
     public comment: string | null = null,
-    public nationality: number | null = null,
+    public nationality: string | null = '',
 
     public files: EmployeeAttachment[] = [],
     public editedFiles: EmployeeAttachment[] = [],

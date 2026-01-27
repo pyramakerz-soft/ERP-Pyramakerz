@@ -192,7 +192,7 @@ namespace LMS_CMS_PL.Services.S3
             }
         }
 
-        public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long entityId, HttpContext httpContext)
+        public async Task<bool> DeleteFileAsync(string? filePath, string basePath, long? entityId, HttpContext httpContext)
         {
             if (string.IsNullOrEmpty(filePath))
                 return false;

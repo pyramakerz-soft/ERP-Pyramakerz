@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.Administration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,5 +20,7 @@ namespace LMS_CMS_DAL.Models.Octa
         [ForeignKey("Country")]
         public long CountryID { get; set; }
         public Country Country { get; set; }
+        public ICollection<RegisteredEmployee> RegisteredEmployees { get; set; } = new HashSet<RegisteredEmployee>();
+
     }
 }

@@ -28,7 +28,7 @@ namespace LMS_CMS_BL.DTO.Administration
         [Required(ErrorMessage = "Job title required")]
         public long? TitleID { get; set; }
 
-        public string? Gender { get; set; }
+        public bool? Gender { get; set; }
 
         public string? BirthdayDate { get; set; }  
 
@@ -85,7 +85,7 @@ namespace LMS_CMS_BL.DTO.Administration
         public DateTime EnterDate { get; set; }
         public string? Comment { get; set; }
 
-        public long? Nationality { get; set; }
+        public string? Nationality { get; set; }
         public IFormFile? ProfileImage { get; set; }
 
     }

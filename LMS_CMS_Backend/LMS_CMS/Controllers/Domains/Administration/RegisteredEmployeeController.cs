@@ -36,6 +36,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _iamNotRobotService = iamNotRobotService;
+            _fileValidationService = fileValidationService;
+            _fileService = fileService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +45,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Registered Employee" }
+            pages: new[] { "Registered Employee", "Candidate Submit" }
         )]
         [Authorize]
         public async Task<IActionResult> Get()
@@ -122,68 +124,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             return Ok(registeredEmployeeGetDTO);
         }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-
-        //[HttpPost] 
-        //public async Task<IActionResult> Add([FromForm] RegisteredEmployeeAddDTO dto,[FromForm] List<EmployeeAttachmentAddDTO> files)
-        //{
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var userClaims = HttpContext.User.Claims;
-        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        //    long.TryParse(userIdClaim, out long userId);
-        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-        //    if (userIdClaim == null || userTypeClaim == null)
-        //    {
-        //        return Unauthorized("User ID or Type claim not found.");
-        //    }
-        //    if (dto == null)
-        //    {
-        //        return BadRequest("Employee data is required.");
-        //    }
-
-        //    string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        //    if (!Regex.IsMatch(dto.Email, pattern))
-        //    {
-        //        return BadRequest("Email Is Not Valid");
-        //    }
-
-
-        //    RegisteredEmployee CheckEmailFromRegistered = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.Email == dto.Email);
-        //    if (CheckEmailFromRegistered != null)
-        //    {
-        //        return BadRequest("This Email Already Exist");
-        //    }
-
-
-        //    Employee CheckEmail = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.Email == dto.Email);
-        //    if (CheckEmail != null)
-        //    {
-        //        return BadRequest("This Email Already Exist");
-        //    }
-
-        //    RegisteredEmployee employee = mapper.Map<RegisteredEmployee>(dto);
-
-
-        //    Unit_Of_Work.registeredEmployee_Repository.Add(employee);
-        //    Unit_Of_Work.SaveChanges();
-
-        //    return Ok();
-        //}
-
-        //////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////--77
 
         [HttpPost]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Registered Employee " , "Applicant registration form" }
+         pages: new[] { "Registered Employee ", "Applicant registration form" }
        )]
         public async Task<IActionResult> Add(
-          RegisteredEmployeeAddDTO dto,
-            List<EmployeeAttachmentAddDTO> files)
+        [FromForm] RegisteredEmployeeAddDTO dto,
+        [FromForm] List<EmployeeAttachmentAddDTO> files)
+
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -209,16 +160,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             }
 
 
-            RegisteredEmployee CheckEmailFromRegistered = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.Email == dto.Email);
+            var CheckEmailFromRegistered = Unit_Of_Work.registeredEmployee_Repository.Select_All().Where(e => e.Email != null && e.Email == dto.Email)
+            .FirstOrDefault();
+
             if (CheckEmailFromRegistered != null)
             {
                 return BadRequest("This Email Already Exist");
             }
 
-            if  (files != null && files.Count > 0)
+            if (files == null || files.Count == 0)
             {
-                return BadRequest("At least one file must be uploaded (such as a CV).");
+                return BadRequest("At least one file must be uploaded ppp(such as a CV).");
             }
+
 
             foreach (var file in files)
             {
@@ -227,12 +181,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                     return BadRequest($"file '{file.Name}' empty.");
                 }
 
-                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
-                if (returnFileInput != null)
-                {
-                    return BadRequest(returnFileInput);
-                }
+                //string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file.file);
+                //if (returnFileInput != null)
+                //{
+                //    return BadRequest(returnFileInput);
+                //}
             }
+
+
+            if (dto == null)
+                return BadRequest("Employee data is required.");
+
+            if (files == null)
+                files = new List<EmployeeAttachmentAddDTO>();
+
+            if (dto.TitleID == null)
+                return BadRequest("TitleID is required");
+
 
             RegisteredEmployee registeredEmployee = mapper.Map<RegisteredEmployee>(dto);
 
@@ -242,8 +207,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             registeredEmployee.IsAccepted = null;
 
             Unit_Of_Work.registeredEmployee_Repository.Add(registeredEmployee);
-            await Unit_Of_Work.SaveChangesAsync(); 
-      
+            await Unit_Of_Work.SaveChangesAsync();
+
             if (dto.ProfileImage != null && dto.ProfileImage.Length > 0)
             {
                 string validationResult = await _fileValidationService.ValidateFileWithTimeoutAsync(dto.ProfileImage);
@@ -254,44 +219,173 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
                 string profileImagePath = await _fileService.UploadFileAsync(
                     dto.ProfileImage,
-                    "Administration/RegisteredEmployee/ProfileImages",  
-                    registeredEmployee.ID,
-                    HttpContext);
+                    "Administration/RegisteredEmployee/ProfileImages", registeredEmployee.ID,HttpContext);
 
                 var profileAttachment = new EmployeeAttachment
                 {
                     RegisteredEmployeeID = registeredEmployee.ID,
                     Name = "Personal photo",
                     Link = profileImagePath,
-                   
+
                 };
 
                 Unit_Of_Work.employeeAttachment_Repository.Add(profileAttachment);
             }
 
+           
             foreach (var file in files)
             {
+                if (file?.file == null || file.file.Length == 0)
+                    continue; 
+
                 string filePath = await _fileService.UploadFileAsync(
                     file.file,
-                    "Administration/RegisteredEmployee/Attachments",  
+                    "Administration/RegisteredEmployee/Attachments",
                     registeredEmployee.ID,
                     HttpContext);
 
-                var attachment = new EmployeeAttachment
+                if (string.IsNullOrEmpty(filePath))
+                    continue; 
+
+                EmployeeAttachment? attachment = new EmployeeAttachment
                 {
                     RegisteredEmployeeID = registeredEmployee.ID,
                     Name = file.Name ?? file.file.FileName,
                     Link = filePath,
+
+
                 };
 
                 Unit_Of_Work.employeeAttachment_Repository.Add(attachment);
             }
+
 
             await Unit_Of_Work.SaveChangesAsync();
 
             return Ok(new { Message = "The applicant has been successfully added with the attachments.", ID = registeredEmployee.ID });
         }
         //////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+        //[HttpPost]
+        //[Authorize_Endpoint_(
+        // allowedTypes: new[] { "octa", "employee" },
+        // pages: new[] { "Registered Employee ", "Applicant registration form" }
+        //)]
+        //public async Task<IActionResult> Add(
+        //    [FromForm] RegisteredEmployeeAddDTO dto,
+        //    [FromForm] List<EmployeeAttachmentAddDTO> files)
+        //{
+        //    if (dto == null)
+        //        return BadRequest("Employee data is required.");
+
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    if (string.IsNullOrWhiteSpace(userIdClaim) || string.IsNullOrWhiteSpace(userTypeClaim))
+        //        return Unauthorized("User ID or Type claim not found.");
+
+        //    long.TryParse(userIdClaim, out long userId);
+
+        //    // فحص عنوان الوظيفة
+        //    if (dto.TitleID == null)
+        //        return BadRequest("Job title (TitleID) is required.");
+
+        //    // فحص الإيميل
+        //    string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        //    if (string.IsNullOrWhiteSpace(dto.Email) || !Regex.IsMatch(dto.Email, pattern))
+        //        return BadRequest("Invalid Email Format");
+
+        //    // التحقق من وجود الإيميل مسبقاً
+        //    var checkEmail = Unit_Of_Work.registeredEmployee_Repository.First_Or_Default(e => e.Email == dto.Email);
+        //    if (checkEmail != null)
+        //        return BadRequest("This Email Already Exist");
+
+        //    // فحص الملفات
+        //    files ??= new List<EmployeeAttachmentAddDTO>();
+        //    foreach (var file in files)
+        //    {
+        //        if (file?.file == null || file.file.Length == 0)
+        //            return BadRequest($"File '{file?.Name}' is empty.");
+
+        //        files ??= new List<EmployeeAttachmentAddDTO>();
+
+        //        foreach (var fileDto in files)
+        //        {
+        //            if (fileDto?.file == null || fileDto.file.Length == 0)
+        //                return BadRequest($"File '{fileDto?.Name ?? "Unknown"}' is empty or missing.");
+
+        //            var validateResult = await _fileValidationService.ValidateFileWithTimeoutAsync(fileDto.file);
+        //            if (!string.IsNullOrEmpty(validateResult))
+        //                return BadRequest(validateResult);
+        //        }
+
+
+        //    }
+
+        //    // إنشاء الكائن
+        //    var registeredEmployee = mapper.Map<RegisteredEmployee>(dto);
+        //    registeredEmployee.ApplicationDate = DateTime.Now;
+        //    registeredEmployee.EnterDate = DateTime.Now;
+        //    registeredEmployee.IsHRScreened = true;
+        //    registeredEmployee.IsAccepted = null;
+
+        //    Unit_Of_Work.registeredEmployee_Repository.Add(registeredEmployee);
+        //    await Unit_Of_Work.SaveChangesAsync();
+
+        //    // رفع صورة الملف الشخصي
+        //    if (dto.ProfileImage != null && dto.ProfileImage.Length > 0)
+        //    {
+        //        var validationResult = await _fileValidationService.ValidateFileWithTimeoutAsync(dto.ProfileImage);
+        //        if (!string.IsNullOrEmpty(validationResult))
+        //            return BadRequest($"Error in profile picture: {validationResult}");
+
+        //        var profileImagePath = await _fileService.UploadFileAsync(dto.ProfileImage,
+        //            "Administration/RegisteredEmployee/ProfileImages",
+        //            registeredEmployee.ID, HttpContext);
+
+        //        Unit_Of_Work.employeeAttachment_Repository.Add(new EmployeeAttachment
+        //        {
+        //            RegisteredEmployeeID = registeredEmployee.ID,
+        //            Name = "Personal photo",
+        //            Link = profileImagePath
+        //        });
+        //    }
+
+        //    // رفع الملفات المرفقة
+        //    for (int i = 0; i < files.Count; i++)
+        //    {
+        //        var file = files[i];
+        //        if (file?.file != null && file.file.Length > 0)
+        //        {
+        //            var filePath = await _fileService.UploadFileAsync(file.file,
+        //                "Administration/RegisteredEmployee/Attachments",
+        //                registeredEmployee.ID, HttpContext);
+
+        //            Unit_Of_Work.employeeAttachment_Repository.Add(new EmployeeAttachment
+        //            {
+        //                RegisteredEmployeeID = registeredEmployee.ID,
+        //                Name = file.Name ?? file.file.FileName,
+        //                Link = filePath
+        //            });
+        //        }
+        //    }
+
+        //    await Unit_Of_Work.SaveChangesAsync();
+
+        //    return Ok(new
+        //    {
+        //        Message = "The applicant has been successfully added with the attachments.",
+        //        ID = registeredEmployee.ID
+        //    });
+        //}
+
+
+
+        ////////////////////////////////////////////////////////////////////////////////
+
 
         [HttpPut]
         [Authorize_Endpoint_(

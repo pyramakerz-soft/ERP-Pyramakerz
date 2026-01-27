@@ -18,10 +18,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public string Name { get; set; }
         public string Link { get; set; }
 
-        [ForeignKey("Employee")]
-        public long EmployeeID { get; set; }
+        [ForeignKey(nameof(Employee))]
+        public long? EmployeeID { get; set; }   
+        public Employee? Employee { get; set; } 
 
-        public Employee Employee { get; set; }
         public long? RegisteredEmployeeID { get; set; }
         [ForeignKey("RegisteredEmployeeID")]
         public RegisteredEmployee? RegisteredEmployee { get; set; }

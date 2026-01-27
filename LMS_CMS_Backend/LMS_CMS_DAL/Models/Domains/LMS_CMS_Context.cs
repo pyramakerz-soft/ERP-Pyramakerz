@@ -914,11 +914,19 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(f => f.FloorMonitorID) 
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //modelBuilder.Entity<Employee>()
+            //    .HasMany(e => e.EmployeeAttachments)
+            //    .WithOne(ea => ea.Employee)
+            //    .HasForeignKey(ea => ea.EmployeeID)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Employee>()
                 .HasMany(e => e.EmployeeAttachments)
                 .WithOne(ea => ea.Employee)
                 .HasForeignKey(ea => ea.EmployeeID)
+                .IsRequired(false) 
                 .OnDelete(DeleteBehavior.Restrict);
+
 
             modelBuilder.Entity<RegisterationFormTest>()
                 .HasOne(p => p.RegisterationFormParent)
