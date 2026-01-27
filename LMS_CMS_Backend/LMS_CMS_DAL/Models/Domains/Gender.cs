@@ -1,4 +1,5 @@
-﻿using LMS_CMS_DAL.Models.Domains.Inventory;
+﻿using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace LMS_CMS_DAL.Models.Domains
 
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<Student> Students { get; set; } = new HashSet<Student>();
+        public ICollection<RegisteredEmployee> RegisteredEmployees { get; set; } = new HashSet<RegisteredEmployee>();
 
     }
 }

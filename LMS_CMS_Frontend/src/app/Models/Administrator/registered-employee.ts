@@ -1,14 +1,14 @@
+import { Title } from './title';
 import { EmployeeAttachment } from "../Employee/employee-attachment";
 
 export class RegisteredEmployee {
     constructor(
         public id: number = 0,
         public en_name: string = '',
-        public ar_name: string = '',
         public email: string = '',
         public phone: string = '',           
         public departmentName: string = '',  
-        public positionAppliedFor: string = '', 
+        public titleName: string = '', 
         public applicationDate: string = '', 
         public interviewStatus: string = '',
         public isHRScreened: boolean = false
@@ -22,10 +22,11 @@ export class RegisteredEmployeeAdd {
     public ar_name: string = '',
     public email: string = '',
     public mobile: string = '',
-    // public departmentID: number | null = null,
     public positionAppliedFor: string = '',
+    public titleID: number | null = null,
+
     public applicationDate: string = '', 
-    public gender: string | null = null,
+    public gender: boolean | null = null,
     public birthdayDate: string | null = null,
     public passportNumber: string | null = null,
     public maritalStatus: string | null = null,
@@ -59,7 +60,7 @@ export class RegisteredEmployeeAdd {
     public fullName: string = '',
     public EnterDate: string = '',
     public comment: string | null = null,
-    public nationality: number | null = null,
+    public nationality: string | null = '',
 
     public files: EmployeeAttachment[] = [],
     public editedFiles: EmployeeAttachment[] = [],

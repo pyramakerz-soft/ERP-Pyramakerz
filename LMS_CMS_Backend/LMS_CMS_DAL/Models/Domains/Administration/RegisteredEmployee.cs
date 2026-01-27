@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Octa;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +15,7 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [Key]
         public long ID { get; set; }
         public DateTime ApplicationDate { get; set; } = DateTime.Now;
-        public string PositionAppliedFor { get; set; }  // Title
+        //public string PositionAppliedFor { get; set; }  // Title
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string en_name { get; set; }
@@ -22,8 +23,6 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string ar_name { get; set; }
 
-        public long? Nationality { get; set; }
-        public string? Gender { get; set; }
         public string? BirthdayDate { get; set; }
         public string? PassportNumber { get; set; }
         public string? MaritalStatus { get; set; }
@@ -69,10 +68,24 @@ namespace LMS_CMS_DAL.Models.Domains.Administration
 
         public bool? IsAccepted { get; set; }
 
-        [Required]
+        public long? NationalityID { get; set; }
+
+        [ForeignKey(nameof(NationalityID))]
+        public Nationality Nationality { get; set; }
+
+        public long? GenderID { get; set; }
+
+        [ForeignKey(nameof(GenderID))]
+        public Gender Gender { get; set; }
+
         [ForeignKey("Department")]
         public long? DepartmentID { get; set; }
-        public Department Department { get; set; }
+        public Department? Department { get; set; }
+
+        public long? TitleID { get; set; }
+
+        [ForeignKey("TitleID")]
+        public Title? Title { get; set; }
 
         public long? InterviewStateID { get; set; }
   

@@ -1,3 +1,4 @@
+import { TitleService } from './../../../../Services/Employee/Administration/title.service';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +18,12 @@ import { RegisteredEmployeeAdd } from '../../../../Models/Administrator/register
 import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
 import { DepartmentService } from '../../../../Services/Employee/Administration/department.service';
 import { Department } from '../../../../Models/Administrator/department';
+import { Title } from '../../../../Models/Administrator/title';
+import { Gender } from '../../../../Models/gender';
+import { GenderService } from '../../../../Services/Employee/Inventory/gender.service';
+import { Nationality } from '../../../../Models/nationality';
+import { NationalityService } from '../../../../Services/Octa/nationality.service';
+
 
 @Component({
   selector: 'app-registered-employee-view',
@@ -34,12 +41,14 @@ export class RegisteredEmployeeViewComponent {
   path: string = '';
   isRtl: boolean = false;
   subscription!: Subscription;
-
+  titles: Title[] = [];
   Data: RegisteredEmployeeAdd = new RegisteredEmployeeAdd();
   departments: Department[] = [];
   mode: string = '';
   EmpId: number = 0;
-
+  nationalities: Nationality[] = [];
+  Gender: Gender[] = [];
+  
   validationErrors: { [key: string]: string } = {};
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -75,44 +84,48 @@ export class RegisteredEmployeeViewComponent {
     private router: Router,
     public RegisteredEmployeeServ: RegisteredEmployeeService,
     public DepartmentServ: DepartmentService,
+    public registeredEmployeeService: RegisteredEmployeeService,
+    public TitleService: TitleService,
     private languageService: LanguageService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    public NationalityServ: NationalityService,
+    public GenderServ: GenderService,
+
   ) { }
 
-  ngOnInit() {
-    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-    this.UserID = this.User_Data_After_Login.id;
 
-    if (this.User_Data_After_Login.type === 'employee') {
-      this.DomainName = this.ApiServ.GetHeader();
 
-      this.loadDepartments();
+ngOnInit() {
+  this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+  this.UserID = this.User_Data_After_Login.id;
 
-      this.activeRoute.url.subscribe((url) => {
-        this.path = url.map(segment => segment.path).join('/');
+  this.DomainName = this.ApiServ.GetHeader();
+  this.loadTitles();
 
-        if (this.path.endsWith("RegisteredEmployee/Create")) {
-          this.mode = 'Create';
-        } else {
-          this.mode = 'View';
-          this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+  this.loadDepartments();
+  this.getNationalities();
+  this.getGenders();
+  this.mode = 'Create';
 
-          // this.RegisteredEmployeeServ.GetById(this.EmpId, this.DomainName).subscribe(async (data) => {
-          //   this.Data = data;
-          //   this.Data.editedFiles = [];
-          //   if (data.files == null) {
-          //     this.Data.files = [];
-          //   }
-          //   this.Data.id = this.EmpId;
-          // });
-        }
-      });
-    }
+  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+  });
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+  this.isRtl = document.documentElement.dir === 'rtl';
+}
+
+
+ getGenders() {
+    this.GenderServ.Get(this.DomainName).subscribe((data) => {
+      this.Gender = data;
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+  getNationalities() {
+    this.NationalityServ.Get().subscribe((data) => {
+      this.nationalities = data;
+    });
   }
 
   ngOnDestroy(): void {
@@ -135,6 +148,27 @@ export class RegisteredEmployeeViewComponent {
   moveToEmployee() {
     this.router.navigateByUrl('Employee/Employee');
   }
+
+loadTitles() {
+  this.TitleService.Get(this.DomainName).subscribe((res: Title[]) => {
+    this.titles = res;
+  });
+}
+
+
+onTitleSelected(event: Event) {
+  const selectElement = event.target as HTMLSelectElement | null;
+  if (!selectElement) return; // تحقق من وجود العنصر
+
+  const selectedId = Number(selectElement.value);
+  const selectedTitle = this.titles.find(t => t.id === selectedId);
+  if (selectedTitle) {
+    this.Data.titleID = selectedTitle.id;
+    this.Data.positionAppliedFor = selectedTitle.name;
+  }
+}
+
+
 
   async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -413,10 +447,9 @@ export class RegisteredEmployeeViewComponent {
               timer: 5000,
               timerProgressBar: true
             });
-
-            this.moveToRegisteredEmployees();
           },
           error: (error) => {
+            this.isLoading = false
             console.error('Error from backend:', error);
 
             let errorMessage = 'An unexpected error occurred.';
@@ -430,7 +463,7 @@ export class RegisteredEmployeeViewComponent {
 
             Swal.fire({
               icon: 'error',
-              title: 'Error',
+              title: 'Error', 
               text: errorMessage,
               confirmButtonColor: '#089B41'
             });
@@ -440,7 +473,7 @@ export class RegisteredEmployeeViewComponent {
           complete: () => {
             this.isLoading = false;
           }
-        });
+        });  
       } else {
         this.isLoading = false;
       }
@@ -460,12 +493,31 @@ export class RegisteredEmployeeViewComponent {
   }
 
 
+async onProfileImageSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
 
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!allowedExtensions.includes(fileExtension)) {
+      alert('Invalid file type. Allowed: jpg, jpeg, png, gif');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size exceeds 5 MB.');
+      return;
+    }
 
-
-  moveToRegisteredEmployees() {
-    this.router.navigateByUrl('Administration/RegisteredEmployee');
+    this.Data.profileImage = file;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.Data.profileImage = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
+}
+
 
   changeFileName(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;

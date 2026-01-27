@@ -28,12 +28,12 @@
                     <span *ngIf="validationErrors['en_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['en_name'] }}</span>
                 </div>
 
-                <div class="mb-2 w-[49%]">
+                <!-- <div class="mb-2 w-[49%]">
                     <label for="ar_name" class="py-6">{{ 'Name In Arabic' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="ar_name" type="text" (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"
                         placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}" [(ngModel)]="employee.ar_name" />
                     <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_name'] }}</span>
-                </div>
+                </div> -->
 
                 <!-- <div class="mb-2 w-[49%]">
                     <label for="password" class="py-6">{{ 'Password' | translate }}:</label>

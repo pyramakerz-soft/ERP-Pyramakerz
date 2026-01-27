@@ -1213,8 +1213,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<DiscussionRoomPutDTO, DiscussionRoom>();
 
             CreateMap<DiscussionRoomStudentClassroom, DiscussionRoomStudentClassroomGetDTO>();
-
-            //CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
+        
             CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>()
       .ForMember(dest => dest.Phone,
           opt => opt.MapFrom(src => src.Mobile))
@@ -1222,6 +1221,8 @@ namespace LMS_CMS_BL.Config
       .ForMember(dest => dest.DepartmentName,
           opt => opt.MapFrom(src =>
               src.Department != null ? src.Department.Name : null))
+        .ForMember(d => d.TitleName,
+        o => o.MapFrom(s => s.Title.Name))
 
       .ForMember(dest => dest.InterviewStatus,
           opt => opt.MapFrom(src =>

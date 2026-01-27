@@ -39,22 +39,6 @@ export class RegisteredEmployeeService {
       .set('Content-Type', 'application/json');
     return this.http.get<RegisteredEmployee>(`${this.baseUrl}/RegisteredEmployee/${id}`, { headers })
   } 
- 
-  // Add(registeredEmployee: RegisteredEmployee, DomainName: string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`)
-  //     .set('Content-Type', 'application/json');
-
-  //   return this.http.post<any>(`${this.baseUrl}/RegisteredEmployee`, registeredEmployee, {
-  //     headers: headers,
-  //     responseType: 'text' as 'json'
-  //   });
-  // } 
 
 Add(registeredEmployee: RegisteredEmployeeAdd, DomainName?: string) {
   if (DomainName != null) {
@@ -70,11 +54,13 @@ Add(registeredEmployee: RegisteredEmployeeAdd, DomainName?: string) {
 
   formData.append('en_name', registeredEmployee.en_name || '');
   formData.append('ar_name', registeredEmployee.ar_name || '');
-  formData.append('email', registeredEmployee.email || '');
+  // formData.append('email', registeredEmployee.email || '');
+  formData.append('Email', registeredEmployee.email || '');
   formData.append('mobile', registeredEmployee.mobile || '');
-  // formData.append('departmentID', registeredEmployee.departmentID?.toString() || '');
-  formData.append('positionAppliedFor', registeredEmployee.positionAppliedFor || '');
-  formData.append('gender', registeredEmployee.gender || '');
+  // formData.append('positionAppliedFor', registeredEmployee.positionAppliedFor || '');
+  formData.append('Position', registeredEmployee.positionAppliedFor || '');
+  formData.append('TitleID', registeredEmployee.titleID?.toString() || '');
+  formData.append('gender', registeredEmployee.gender !== null ? registeredEmployee.gender.toString() : '')
   formData.append('birthdayDate', registeredEmployee.birthdayDate || '');
   formData.append('passportNumber', registeredEmployee.passportNumber || '');
   formData.append('maritalStatus', registeredEmployee.maritalStatus || '');
@@ -99,11 +85,11 @@ Add(registeredEmployee: RegisteredEmployeeAdd, DomainName?: string) {
   formData.append('yourLevelInFrensh', registeredEmployee.yourLevelInFrensh || '');
   formData.append('doYouSpeakAnyOtherLanguages', registeredEmployee.doYouSpeakAnyOtherLanguages || '');
   formData.append('currentJob', registeredEmployee.currentJob || '');
-  formData.append('lastSalary', registeredEmployee.lastSalary?.toString() || '0');
+  formData.append('lastSalary', registeredEmployee.lastSalary?.toString() || '');
   formData.append('authorizeInvestigation', registeredEmployee.authorizeInvestigation?.toString() || 'false');
   formData.append('fullName', registeredEmployee.fullName || '');
   formData.append('comment', registeredEmployee.comment || '');
-  formData.append('nationality', registeredEmployee.nationality?.toString() || '');
+  formData.append('nationality', registeredEmployee.nationality || '');
 
   // 1. إضافة صورة الملف الشخصي (ProfileImage) إذا موجودة
   if (registeredEmployee.profileImage && registeredEmployee.profileImage instanceof File) {
@@ -111,26 +97,30 @@ Add(registeredEmployee: RegisteredEmployeeAdd, DomainName?: string) {
   }
 
   // 2. إضافة الملفات المرفقة (files) إذا موجودة
-  if (registeredEmployee.files && registeredEmployee.files.length > 0) {
-    let uploadIndex = 0;
-    registeredEmployee.files.forEach((attachment) => {
-      if (attachment.file && attachment.file instanceof File && attachment.file.size > 0) {
-        // إضافة الملف نفسه
-        formData.append(`files[${uploadIndex}].file`, attachment.file, attachment.file.name);
-        
-        // إضافة البيانات الأخرى للملف
-        formData.append(`files[${uploadIndex}].name`, attachment.name || '');
-        formData.append(`files[${uploadIndex}].fileName`, attachment.fileName || attachment.file.name);
-        formData.append(`files[${uploadIndex}].type`, attachment.type || attachment.file.type);
-        formData.append(`files[${uploadIndex}].size`, attachment.size?.toString() || attachment.file.size.toString());
-        
-        uploadIndex++;
-      }
-    });
-  }
+if (registeredEmployee.files && registeredEmployee.files.length > 0) {
+  let uploadIndex = 0;
 
-  // 3. في حالة الإضافة، لا نحتاج عادةً إلى editedFiles
-  // ولكن إذا كان الباكند يتوقعها، يمكنك إضافة البيانات الأساسية
+  registeredEmployee.files.forEach((attachment) => {
+    if (attachment.file instanceof File && attachment.file.size > 0) {
+
+      // الملف نفسه → IFormFile file
+      formData.append(
+        `files[${uploadIndex}].file`,
+        attachment.file,
+        attachment.file.name
+      );
+
+      formData.append(
+        `files[${uploadIndex}].Name`,
+        attachment.name || attachment.file.name
+      );
+
+      uploadIndex++;
+    }
+  });
+}
+
+
   if (registeredEmployee.editedFiles && registeredEmployee.editedFiles.length > 0) {
     registeredEmployee.editedFiles.forEach((file, index) => {
       formData.append(`editedFiles[${index}].id`, file.id.toString());
